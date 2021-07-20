@@ -119,7 +119,6 @@ You must have node version 14.0.0.
 
 1. Git clone `git@github.com:nylas/components.git`
 2. Run `yarn install`
-3. Run `yarn install-components`
 
 ### Storybook
 

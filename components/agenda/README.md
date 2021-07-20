@@ -18,7 +18,7 @@ In your JavaScript application, you can install Nylas Agenda with:
 - npm `npm i @nylas/components-agenda`
 - Yarn `yarn add npm i @nylas/components-agenda`
 
-Alternatively, on an html page, you can load the Agena using a script tag:
+Alternatively, on an html page, you can load the Agenda using a script tag:
 
 ```
    <head>
@@ -50,31 +50,33 @@ During the setup process, you'll be prompted to provide a list of [allowed domai
 
 ### Passing in your own data
 
-Nylas Agenda can be used as a UI on top of any event data that you provide. Events should follow the [Nylas events object standard](https://developer.nylas.com/docs/api/#tag--Events--events-object). 
+Nylas Agenda can be used as a UI on top of any event data that you provide. Events should follow the [Nylas events object standard](https://developer.nylas.com/docs/api/#tag--Events--events-object).
 
-> :bell: Events `when` Subobject
-> 
-> Make sure to review the events `when` subobject since that determines where your Agenda events will appear. 
-
+> :bell:
+>
+> Events `when` Subobject
+>
+> Make sure to review the events `when` subobject since that determines where your Agenda events will appear.
 
 The property to use for this is `events`. You can pass in an JSON array of events.
 
 ```json
   const staticEvents = [
     {
-      title: "Some event that I am manipulating outside of the context of Nylas",
-      description: "Passed in from HTML!",
-      participants: [],
-      when: { end_time: 1600444800, object: "timespan", start_time: 1600438500 }
+      "title": "Some event that I am manipulating outside of the context of Nylas",
+      "description": "Passed in from HTML!",
+      "participants": [],
+      "when": { "end_time": 1600444800, "object": "timespan", "start_time": 1600438500 }
     },
     {
-      title: "Some I got from elsewhere",
-      description: "Passed in from HTML!",
-      participants: [],
-      when: { end_time: 1600449999, object: "timespan", start_time: 1600448500 }
+      "title": "Some I got from elsewhere",
+      "description": "Passed in from HTML!",
+      "participants": [],
+      "when": { "end_time": 1600449999, "object": "timespan", "start_time": 1600448500 }
     }
   ]
 ```
+
 Then pass the array into your component using any JavaScript.
 
 ```js
@@ -84,7 +86,7 @@ Then pass the array into your component using any JavaScript.
 You can also use plain JavaScript as an attribute.
 
 ```js
-document.querySelector("nylas-availability").events = staticEvents
+document.querySelector("nylas-agenda").events = staticEvents;
 ```
 
 ### Properties
@@ -93,12 +95,14 @@ Nylas Agenda allows for several properties that affect the layout and functional
 
 ### Events and Callbacks
 
-You can listen to certain user events from your application by adding an event listener to the action.
+You can listen to certain user events from your application by adding an event listener to your component.
 
 For example, you can listen for a `dateChange` event with the following code:
 
 ```js
-  document.querySelector("nylas-agenda").addEventListener("dateChange", (newDate) => {
+document
+  .querySelector("nylas-agenda")
+  .addEventListener("dateChange", (event) => {
     let { detail } = event;
     console.log("date changed", detail);
   });
@@ -112,8 +116,7 @@ Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information abo
 
 1. Git clone `git@github.com:nylas/components.git`
 2. Run `yarn install`
-3. Run `yarn install-components`
-4. Run `yarn start`; your browser will load `http://localhost:8000` and show you a list of available running components
+3. Run `yarn start`; your browser will load `http://localhost:8000` and show you a list of available running components
 
 ### Testing
 

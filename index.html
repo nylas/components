@@ -7,20 +7,116 @@
     <link rel="shortcut icon " href="data:;base64,=" />
   </head>
 
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0.5rem;
+    }
+
+    h2,
+    ul,
+    li {
+      margin: 0;
+      padding: 0;
+    }
+
+    h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    ul {
+      margin-bottom: 3rem;
+    }
+
+    li {
+      font-size: 1.2rem;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      margin-bottom: 1rem;
+      margin-left: 1rem;
+      width: max-content;
+    }
+    li footer a {
+      font-size: 0.8rem;
+      display: inline-block;
+    }
+  </style>
+
   <body>
+    <h2>Released Components</h2>
     <ul>
-      <li><a href="components/agenda/src/index.html">Agenda</a></li>
-      <li><a href="components/composer/src/index.html">Composer</a></li>
-      <li><a href="components/contact-list/src/index.html">Contact-list</a></li>
       <li>
-        <a href="components/contacts-search/src/contacts-search.html"
-          >Contacts-search</a
-        >
+        <header>
+          <a href="components/agenda/src/index.html">Agenda</a>
+        </header>
+        <footer>
+          <a
+            href="https://github.com/nylas/components/tree/main/components/agenda"
+            target="_blank"
+            >Source Code</a
+          >
+          <a
+            href="https://www.npmjs.com/package/@nylas/components-agenda"
+            target="_blank"
+            >NPM</a
+          >
+          <a
+            href="https://developer.nylas.com/docs/user-experience/components/agenda-component/"
+            target="_blank"
+            >Documentation</a
+          >
+        </footer>
       </li>
+      <li>
+        <header>
+          <a href="components/composer/src/index.html">Composer</a>
+        </header>
+        <footer>
+          <a
+            href="https://github.com/nylas/components/tree/main/components/composer"
+            target="_blank"
+            >Source Code</a
+          >
+          <a
+            href="https://www.npmjs.com/package/@nylas/components-composer"
+            target="_blank"
+            >NPM</a
+          >
+          <a
+            href="https://developer.nylas.com/docs/user-experience/components/composer-component/"
+            target="_blank"
+            >Documentation</a
+          >
+        </footer>
+      </li>
+      <li>
+        <header>
+          <a href="components/contact-list/src/index.html">Contact List</a>
+        </header>
+        <footer>
+          <a
+            href="https://github.com/nylas/components/tree/main/components/contact-list"
+            target="_blank"
+            >Source Code</a
+          >
+          <a
+            href="https://www.npmjs.com/package/@nylas/components-contact-list"
+            target="_blank"
+            >NPM</a
+          >
+          <a
+            href="https://developer.nylas.com/docs/user-experience/components/contact-list-component/"
+            target="_blank"
+            >Documentation</a
+          >
+        </footer>
+      </li>
+    </ul>
+
+    <h2>In Development</h2>
+    <ul>
       <li><a href="components/conversation/src/index.html">Conversation</a></li>
-      <li>
-        <a href="components/datepicker/src/datepicker.html">Datepicker</a>
-      </li>
       <li><a href="components/day/src/index.html">Day</a></li>
       <li><a href="components/email/src/index.html">Email</a></li>
       <li><a href="components/mailbox/src/index.html">Mailbox</a></li>
