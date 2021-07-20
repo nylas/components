@@ -1,6 +1,11 @@
 {
   "name": "@nylas/components-datepicker",
   "version": "0.0.40",
+  "repository": {
+    "type": "git",
+    "url": "github:nylas/components.git",
+    "directory": "components/datepicker"
+  },
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",

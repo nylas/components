@@ -1,6 +1,11 @@
 {
   "name": "@nylas/components-contact-list",
   "version": "0.0.40",
+  "repository": {
+    "type": "git",
+    "url": "github:nylas/components.git",
+    "directory": "components/contact-list"
+  },
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
