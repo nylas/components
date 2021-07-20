@@ -103,7 +103,7 @@ This project is licensed under the terms of the MIT open source license. Please 
 
 Ensure that any new middleware requests can optionally accept an `access_token` to pass through to the middleware.
 
-### Dir Structure
+### Directory Structure
 
 The repo contains the source code for Components, along with a [Storybook](storybook.js.org) for Components.
 
