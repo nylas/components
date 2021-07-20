@@ -124,7 +124,7 @@ Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information abo
 
 ### Testing
 
-`yarn run cypress:open` will launch our end-to-end tests in a browser
+`yarn run cy:open` will launch our end-to-end tests in a browser
 tests will automatically be run on push from push.yaml
 snapshot (visual) diff tests are fun using Percy by running `yarn run snapshot`
 
