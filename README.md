@@ -116,7 +116,7 @@ You must have node version 14.0.0.
 
 ### Storybook
 
-After installing, run `yarn run storybook`, go to `http://localhost:6006` in your browser
+After installing, run `yarn storybook`, go to `http://localhost:6006` in your browser
 
 ### Local Development
 
@@ -124,7 +124,7 @@ After installing, run `yarn start`, go to `http://localhost:8000` in your browse
 
 ### Testing
 
-`yarn run cypress:open` will launch our end-to-end tests in a browser
+`yarn cy:open` will launch our end-to-end tests in a browser
 tests will automatically be run on push from push.yaml
 snapshot (visual) diff tests are fun using Percy by running `yarn run snapshot`
 
