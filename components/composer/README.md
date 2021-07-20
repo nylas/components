@@ -1,80 +1,93 @@
-# Composer
+# Nylas Composer
 
-> This document is still work in progress!
+Nylas Composer (`<nylas-composer>`) is part of the Nylas Components library that lets you build email-send functionality into your application in minutes. Use Nylas Composer with your Nylas account or by passing in your own JSON data.
 
-Composer component is used for sending emails.
+![Nylas Composer example](https://nylas-static-assets.s3-us-west-2.amazonaws.com/public-documentation/composer_gif_1.gif)
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Using It in Your App](#using-it-in-your-app)
+- [Contributing](#contributing)
+- [Additional Documentation](#additional-documentation)
 
 ## Installation
 
-You can use composer in two ways:
+In your JavaScript application, you can install Nylas Composer with:
 
-- via CDN
-- install using `yarn`
+- npm `npm i @nylas/components-composer`
+- Yarn `yarn add npm i @nylas/components-composer`
 
-## Props
+Alternatively, on an html page, you can load the Composer using a script tag:
 
-Component accepts next props:
+```
+   <head>
+      <!-- Import the script from CDN -->
+      <script src="https://unpkg.com/@nylas/components-composer"></script>
+    </head>
+```
 
-Methods:
+For both installation options, in the body of your page, you can instantiate the composer with `<nylas-composer></nylas-composer>`.
 
-- open()
-- close()
+## Using It in Your App
 
-**Data:**
+All Nylas components have two ways of dislaying data to your end-user:
 
-- id
-- change
-- options
-- from
-- to
-- cc
-- bcc
-- value
-- send
+1. [Fetching data directly from Nylas](#fetching-data-directly-from-nylas)
+2. [Passing in your own data](#passing-in-your-own-data)
 
-**Hooks:**
+### Fetching data directly from Nylas
 
-- Send:
+#### Setup
 
-  - send (implementation)
-  - beforeSend
-  - onSend
-  - onSendError
-  - afterSend
+If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Composer component.
 
-- File uploads (attachments):
+You'll be guided through the component setup and be given the option to tie your component to your calendar account. Review the [Composer Documentation](https://developer.nylas.com/docs/user-experience/components/composer-component/).
 
-  - fileUpload (implementation)
-  - beforeAttachmentUpload
-  - onAttachmentUpload
-  - onAttachmentUploadError
-  - afterAttachmentUpload
+#### Allowed domains
 
-- onFromChange (use onchange with additional argument)
-- onToChange (use onchange with additional argument)
-- onCcChange (use onchange with additional argument)
-- onBccChange (use onchange with additional argument)
-- onSubjectChange
-- onBodyChange
-- onFilesChanged
+During the setup process, you'll be prompted to provide a list of [allowed domains](https://developer.nylas.com/docs/user-experience/components/composer-component/#allowed-domains). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
 
-**UI**:
+### Passing in your own data
 
-- popup
-- visible
-- showSubject
-- showHeaders
+Nylas Composer can be used as a UI on top of your own send hooks. Use [Custom Callbacks](https://developer.nylas.com/docs/user-experience/components/composer-component/#custom-callbacks) to determine **send** and other functionality.
 
-## Events:
+### Properties
 
-- {action: 'subject-changed' }
-- body-changed
-- attachment-added
-- attachment-removed
-- {event: 'from-changed', action: 'add'}
-- {event: 'from-changed', action: 'remove'}
+Nylas Composer allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Composer](https://developer.nylas.com/docs/user-experience/components/composer-component/#customization)
 
-## Styling
+### Events and Hooks
 
-- Composer can be styled by choosing theme or
-- Providing a stylesheet with css variables
+You can listen to certain user events from your application by adding an event listener to your component.
+
+For example, you can listen for a `composerMinimized` event with the following code:
+
+```js
+document
+  .querySelector("nylas-composer")
+  .addEventListener("composerMinimized", (event) => {
+    let { detail } = event;
+    console.log("composer minimized", detail);
+  });
+```
+
+You can also pass in custom hooks that allow you to add functionality in response to certain end-user events. Read more about [Composer Custom Hooks](https://developer.nylas.com/docs/user-experience/components/composer-component/#custom-hooks) or [Try our custom hooks demo app](https://codesandbox.io/s/nylas-composer-custom-callbacks-ommji?file=/index.html)
+
+## Contributing
+
+Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
+
+1. Git clone `git@github.com:nylas/components.git`
+2. Run `yarn install`
+3. Run `yarn start`; your browser will load `http://localhost:8000` and show you a list of available running components
+
+### Testing
+
+`yarn run cy:open` will launch our end-to-end tests in a browser
+tests will automatically be run on push from push.yaml
+snapshot (visual) diff tests are fun using Percy by running `yarn run snapshot`
+
+## Additional Documentation
+
+- [Nylas Composer on NPM](https://www.npmjs.com/package/@nylas/components-composer)
+- [Nylas Docs: Composer Component](https://developer.nylas.com/docs/user-experience/components/composer-component/)

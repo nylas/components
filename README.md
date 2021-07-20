@@ -8,11 +8,11 @@ Front-end UIs can often be time-consuming to build, even for simple functionalit
 
 The Nylas Components include:
 
-- [Agenda](https://docs.nylas.com/docs/agenda-component) -Display a day, week, or month view of all events from one or more users or calendars.
-- [Composer](https://docs.nylas.com/docs/composer) - Draft and send emails.
-- [Contact List](https://docs.nylas.com/docs/contact-list-component) - Display a list of selectable contacts from a user’s contacts book.
+- [Agenda](./components/agenda): Display a day, week, or month view of all events from one or more users or calendars.
+- [Contact List](./components/contact-list): Display a list of selectable contacts from a user’s contacts book.
+- [Composer](./components/composer): Draft and send emails.
 
-The Components repository is for people who want to modify the code and build it from the source. Visit our [documentation](https://docs.nylas.com/docs/nylas-components) if you are looking for the easiest way to get started with Nylas Components.
+The Components repository is for people who want to modify the code and build it from the source. Visit our [documentation](https://developer.nylas.com/docs/user-experience/components/) if you are looking for the easiest way to get started with Nylas Components.
 
 If you want to report a bug, create a feature request, or contribute code, take a look at the [Contributing Guidelines](CONTRIBUTE.md).
 
@@ -38,7 +38,7 @@ OR
 
 Each Component can be used with a Nylas account or by passing in a JSON object. To get a component ID, create a [Nylas account](https://dashboard.nylas.com/register), then click Components. From there you'll be able to create a new component and get an ID.
 
-To see an example of each, check out the [documentation](https://docs.nylas.com/docs/nylas-components).
+To see an example of each, check out the [documentation](https://developer.nylas.com/docs/user-experience/components/).
 
 ### Agenda Nylas Account
 
@@ -89,12 +89,6 @@ export default function App() {
 </main>
 ```
 
-## Documentation
-
-- [Agenda](https://docs.nylas.com/docs/agenda-component)
-- [Contact List](https://docs.nylas.com/docs/contact-list-component)
-- [Composer](https://docs.nylas.com/docs/composer)
-
 ## Contribute
 
 Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
@@ -119,7 +113,6 @@ You must have node version 14.0.0.
 
 1. Git clone `git@github.com:nylas/components.git`
 2. Run `yarn install`
-3. Run `yarn install-components`
 
 ### Storybook
 
