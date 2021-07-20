@@ -61,7 +61,7 @@
     "babel-register": "6.26.0",
     "concurrently": "6.0.0",
     "core-js": "^3.9.0",
-    "cypress": "7.7.0",
+    "cypress": "8.0.0",
     "cypress-file-upload": "5.0.8",
     "date-fns": "2.18.0",
     "dotenv": "^8.2.0",

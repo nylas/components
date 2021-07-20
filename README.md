@@ -103,7 +103,7 @@ This project is licensed under the terms of the MIT open source license. Please 
 
 Ensure that any new middleware requests can optionally accept an `access_token` to pass through to the middleware.
 
-### Dir Structure
+### Directory Structure
 
 The repo contains the source code for Components, along with a [Storybook](storybook.js.org) for Components.
 
@@ -116,7 +116,7 @@ You must have node version 14.0.0.
 
 ### Storybook
 
-After installing, run `yarn run storybook`, go to `http://localhost:6006` in your browser
+After installing, run `yarn storybook`, go to `http://localhost:6006` in your browser
 
 ### Local Development
 
@@ -124,9 +124,9 @@ After installing, run `yarn start`, go to `http://localhost:8000` in your browse
 
 ### Testing
 
-`yarn run cypress:open` will launch our end-to-end tests in a browser
+`yarn cy:open` will launch our end-to-end tests in a browser
 tests will automatically be run on push from push.yaml
-snapshot (visual) diff tests are fun using Percy by running `yarn run snapshot`
+snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 
 ### Push some Code
 

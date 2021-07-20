@@ -6,10 +6,19 @@ Nylas Composer (`<nylas-composer>`) is part of the Nylas Components library that
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Using It in Your App](#using-it-in-your-app)
-- [Contributing](#contributing)
-- [Additional Documentation](#additional-documentation)
+- [Nylas Composer](#nylas-composer)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Using It in Your App](#using-it-in-your-app)
+    - [Fetching data directly from Nylas](#fetching-data-directly-from-nylas)
+      - [Setup](#setup)
+      - [Allowed domains](#allowed-domains)
+    - [Passing in your own data](#passing-in-your-own-data)
+    - [Properties](#properties)
+    - [Events and Hooks](#events-and-hooks)
+  - [Contributing](#contributing)
+    - [Testing](#testing)
+  - [Additional Documentation](#additional-documentation)
 
 ## Installation
 
@@ -83,9 +92,9 @@ Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information abo
 
 ### Testing
 
-`yarn run cy:open` will launch our end-to-end tests in a browser
+`yarn cy:open` will launch our end-to-end tests in a browser
 tests will automatically be run on push from push.yaml
-snapshot (visual) diff tests are fun using Percy by running `yarn run snapshot`
+snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 
 ## Additional Documentation
 
