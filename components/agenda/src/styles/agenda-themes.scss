@@ -1,0 +1,54 @@
+$themeColours: var(--primaryAndMainCalendar), var(--secondaryCalendar),
+  var(--thirdCalendar), var(--calendarColour4), var(--calendarColour5),
+  var(--calendarColour6), var(--calendarColour7), var(--calendarColour8),
+  var(--calendarColour9), var(--calendarColour10);
+$numberOfCalendarsToSupport: list.length($themeColours);
+
+.events {
+  &.diff-by-event {
+    @for $i from 1 through $numberOfCalendarsToSupport - 1 {
+      $colour: #{list.nth($themeColours, $i % list.length($themeColours))};
+      .event:nth-of-type(#{list.length($themeColours)}n
+          + #{$i}):not(.event-detail),
+      .event:nth-of-type(#{list.length($themeColours)}n
+          + #{$i}).event-detail.status-yes
+        .header,
+      .event:nth-of-type(#{list.length($themeColours)}n
+          + #{$i}).event-detail.status-undefined
+        .header {
+        background-color: $colour;
+
+        &:not(.status-maybe):not(.status-noreply)::before {
+          content: "";
+          background: $colour;
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 0px;
+          filter: brightness(70%);
+        }
+      }
+    }
+  }
+
+  &.diff-by-calendar {
+    @for $i from 0 through $numberOfCalendarsToSupport {
+      $colour: #{list.nth($themeColours, $i % list.length($themeColours) + 1)};
+      .event[data-calendar-id="#{$i}"]:not(.event-detail),
+      .event[data-calendar-id="#{$i}"].event-detail.status-yes .header,
+      .event[data-calendar-id="#{$i}"].event-detail.status-undefined .header {
+        background-color: $colour;
+      }
+      .event[data-calendar-id="#{$i}"].status-noreply,
+      .event[data-calendar-id="#{$i}"].status-noreply.event-detail .header,
+      .event[data-calendar-id="#{$i}"].status-noreply.event-detail .details,
+      .event[data-calendar-id="#{$i}"].status-maybe,
+      .event[data-calendar-id="#{$i}"].status-maybe.event-detail .header,
+      .event[data-calendar-id="#{$i}"].status-maybe.event-detail .details {
+        border-color: $colour;
+        color: $colour;
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@nylas/components-day",
+  "version": "0.0.40",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js",
+  "gitHead": "85943c305ebb44cfe2b8623776e2e4d5eabc9f2f",
+  "dependencies": {
+    "d3": "^6.5.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^6.3.0"
+  }
+}

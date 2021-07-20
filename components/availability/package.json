@@ -1,0 +1,17 @@
+{
+  "name": "@nylas/components-availability",
+  "version": "0.0.40",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "d3": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.0.0"
+  }
+}

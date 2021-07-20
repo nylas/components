@@ -1,0 +1,158 @@
+# Nylas Components
+
+Nylas Components are a suite of UI building blocks that let you build user-facing email, calendar, and contacts functionality in minutes. Use Nylas Components with your Nylas account or by adding standard JSON data.
+
+## Background
+
+Front-end UIs can often be time-consuming to build, even for simple functionality. The Nylas Components are designed to help developers more quickly add communications and scheduling functionality into their app.
+
+The Nylas Components include:
+
+- [Agenda](https://docs.nylas.com/docs/agenda-component) -Display a day, week, or month view of all events from one or more users or calendars.
+- [Composer](https://docs.nylas.com/docs/composer) - Draft and send emails.
+- [Contact List](https://docs.nylas.com/docs/contact-list-component) - Display a list of selectable contacts from a user’s contacts book.
+
+The Components repository is for people who want to modify the code and build it from the source. Visit our [documentation](https://docs.nylas.com/docs/nylas-components) if you are looking for the easiest way to get started with Nylas Components.
+
+If you want to report a bug, create a feature request, or contribute code, take a look at the [Contributing Guidelines](CONTRIBUTE.md).
+
+## Install
+
+### Agenda
+
+`npm i @nylas/components-agenda`
+
+### Composer
+
+`npm i @nylas/components-composer`
+
+OR
+
+`<script src="https://unpkg.com/@nylas/components-composer"></script>`
+
+### Contact List
+
+`npm i @nylas/components-contact-list`
+
+## Usage
+
+Each Component can be used with a Nylas account or by passing in a JSON object. To get a component ID, create a [Nylas account](https://dashboard.nylas.com/register), then click Components. From there you'll be able to create a new component and get an ID.
+
+To see an example of each, check out the [documentation](https://docs.nylas.com/docs/nylas-components).
+
+### Agenda Nylas Account
+
+```js
+import React from "react";
+import "@nylas/components-agenda";
+import "./styles.css";
+
+export default function App() {
+  return (
+    <div className="App">
+      <h1>Nylas Agenda</h1>
+      <nylas-agenda id="c307b6e9-5da4-4efb-8095-08176ed8f361"></nylas-agenda>
+    </div>
+  );
+}
+```
+
+### Agenda JSON Object
+
+```js
+  import Agenda from "@nylas/components-agenda";
+  const staticEvents = [
+    {
+      title: "Some event that I am manipulating outside of the context of Nylas",
+      description: "Passed in from HTML!",
+      participants: [],
+      when: { end_time: 1600444800, object: "timespan", start_time: 1600438500 }
+    },
+    {
+      title: "Some I got from elsewhere",
+      description: "Passed in from HTML!",
+      participants: [],
+      when: { end_time: 1600449999, object: "timespan", start_time: 1600448500 }
+    },
+    {
+      title: "A third event of the day",
+      description: "Passed in from HTML!",
+      participants: [],
+      when: { end_time: 1600468500, object: "timespan", start_time: 1600458500 }
+    }
+  ];
+</script>
+
+<main>
+  <h1>Nylas Agenda</h1>
+  <nylas-agenda events={staticEvents}/>
+</main>
+```
+
+## Documentation
+
+- [Agenda](https://docs.nylas.com/docs/agenda-component)
+- [Contact List](https://docs.nylas.com/docs/contact-list-component)
+- [Composer](https://docs.nylas.com/docs/composer)
+
+## Contribute
+
+Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
+
+## License
+
+This project is licensed under the terms of the MIT open source license. Please refer to [LICENSE](LICENSE) for the full terms.
+
+---
+
+## Build From Source
+
+Ensure that any new middleware requests can optionally accept an `access_token` to pass through to the middleware.
+
+### Dir Structure
+
+The repo contains the source code for Components, along with a [Storybook](storybook.js.org) for Components.
+
+### Installation
+
+You must have node version 14.0.0.
+
+1. Git clone `git@github.com:nylas/components.git`
+2. Run `yarn install`
+3. Run `yarn install-components`
+
+### Storybook
+
+After installing, run `yarn run storybook`, go to `http://localhost:6006` in your browser
+
+### Local Development
+
+After installing, run `yarn start`, go to `http://localhost:8000` in your browser
+
+### Testing
+
+`yarn run cypress:open` will launch our end-to-end tests in a browser
+tests will automatically be run on push from push.yaml
+snapshot (visual) diff tests are fun using Percy by running `yarn run snapshot`
+
+### Push some Code
+
+We rebase and squash our commits here. Here's how to rebase your branch:
+
+1. Run `git checkout main`
+
+2. Run `git pull`
+
+3. Run `git checkout -` (this will take you back to the branch you were on before checking out main)
+
+4. Run `git rebase -i main`. This will open up Vim on your command line 🙀
+
+5. Hit `esc`, press `w` (for write), then hit the `enter` key. You may need to type a couple of random characters to see that you're able to write
+
+6. Leave the first commit at the top of the file as `pick`.
+
+7. Write `s` or `squash` beside the commits you want to squash
+
+8. When you're done hit `esc`, press `qw` (for quit + write), then hit the `enter` key. You should be back on the command line.
+
+9. Run `git push` to push changes to your remote branch. Your branch now has your changes and the most recent commits.

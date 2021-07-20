@@ -1,0 +1,11 @@
+{
+  "name": "@nylas/components-contacts-search",
+  "version": "0.0.40",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check --compiler-warnings \"missing-custom-element-compile-options:ignore\"",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js"
+}

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js"
+}

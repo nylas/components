@@ -1,0 +1,11 @@
+{
+  "name": "@nylas/components-theming",
+  "version": "0.0.40",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Nothing to build'",
+    "dev": "yarn run build",
+    "tscheck": "echo 'Nothing to check'",
+    "start": "echo 'Nothing to start'"
+  }
+}

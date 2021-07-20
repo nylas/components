@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Composer Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
+    />
+
+    <script src="../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const composer = document.querySelector("nylas-composer");
+        composer.addEventListener("composerMinimized", function (event) {
+          console.log("Composer Minimized", event.detail);
+        });
+        composer.addEventListener("composerMaximized", function (event) {
+          console.log("Composer Maximized", event.detail);
+        });
+        composer.addEventListener("composerClosed", function (event) {
+          console.log("Composer Closed", event.detail);
+          setTimeout((x) => {
+            composer.open();
+          }, 3000);
+        });
+        composer.addEventListener("composerOpened", function (event) {
+          console.log("Composer Opened", event.detail);
+        });
+      });
+    </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        border: 10px solid red;
+        width: calc(100vw - 20px);
+        height: calc(100vh - 20px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <nylas-composer
+      id="demo-composer"
+      theme="dark"
+      replace_fields='[{"from": "[hi]", "to": "hello"}]'
+      template="Hey what up!<br/>
+      <br/>
+      <br/>
+      Thanks,
+      -Phil"
+    ></nylas-composer>
+  </body>
+</html>

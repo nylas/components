@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Availability Demo</title>
+    <script src="../index.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const component = document.querySelector("nylas-availability");
+        const startTimeInput = document.querySelector("input#start-time");
+        const endTimeInput = document.querySelector("input#end-time");
+        const daysInput = document.querySelector("input#days-to-show");
+
+        component.addEventListener("timeSlotChosen", (event) => {
+          console.log(event.detail.timeslot);
+        });
+
+        startTimeInput.addEventListener("input", (event) => {
+          component.start_hour = parseInt(event.target.value);
+        });
+
+        endTimeInput.addEventListener("input", (event) => {
+          component.end_hour = parseInt(event.target.value);
+        });
+
+        daysInput.addEventListener("input", (event) => {
+          component.dates_to_show = parseInt(event.target.value);
+        });
+
+        document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
+          elem.addEventListener("change", function (event) {
+            component.slot_size = event.target.value;
+          });
+        });
+
+        document
+          .querySelectorAll('input[name="click-action"]')
+          .forEach((elem) => {
+            elem.addEventListener("change", function (event) {
+              component.click_action = event.target.value;
+            });
+          });
+      });
+    </script>
+  </head>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+      height: 100vh;
+    }
+
+    aside {
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      right: 0;
+      width: 250px;
+      background: #333;
+      padding: 0.5rem;
+      color: white;
+    }
+
+    aside label {
+      display: block;
+    }
+  </style>
+  <body>
+    <aside class="controls">
+      <label>
+        <strong>Days to show</strong>
+        <input
+          id="days-to-show"
+          class="days"
+          type="range"
+          min="1"
+          max="7"
+          step="1"
+          value="1"
+        />
+        <span class="days"></span>
+      </label>
+
+      <label>
+        <strong>Start Time</strong>
+        <input
+          id="start-time"
+          class="start"
+          type="range"
+          min="0"
+          max="24"
+          step="1"
+          value="0"
+        />
+        <span class="start"></span>
+      </label>
+      <label>
+        <strong>End Time</strong>
+        <input
+          id="end-time"
+          class="end"
+          type="range"
+          min="0"
+          max="24"
+          step="1"
+          value="24"
+        />
+        <span class="end"></span>
+      </label>
+      <hr />
+      <strong>Timeslot size</strong>
+      <label>
+        <input checked type="radio" name="slot-size" value="15" />
+        <strong>15 minutes</strong>
+      </label>
+      <label>
+        <input type="radio" name="slot-size" value="30" />
+        <strong>30 minutes</strong>
+      </label>
+      <label>
+        <input type="radio" name="slot-size" value="60" />
+        <strong>60 minutes</strong>
+      </label>
+      <strong>Click action</strong>
+      <label>
+        <input checked type="radio" name="click-action" value="choose" />
+        <strong>Choose</strong>
+      </label>
+      <label>
+        <input type="radio" name="click-action" value="verify" />
+        <strong>Verify</strong>
+      </label>
+    </aside>
+
+    <main>
+      <nylas-availability id="demo-availability"></nylas-availability>
+    </main>
+  </body>
+</html>

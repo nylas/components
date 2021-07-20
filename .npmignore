@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+components/**/src
+node_modules
+tsconfig.json
+rollup.config.js
+**/*.stories.*
+**/*.spec.*
+**/*.html

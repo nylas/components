@@ -1,0 +1,92 @@
+.events {
+  &.theme-1 {
+    @for $i from 1 through list.length($colorbrewerq12) {
+      .event:nth-of-type(#{list.length($colorbrewerq12)}n + #{$i}) {
+        color: black;
+        background-color: #{list.nth($colorbrewerq12, $i)};
+      }
+    }
+  }
+  &.theme-2 {
+    @for $i from 1 through list.length($tableau10) {
+      .event:nth-of-type(#{list.length($tableau10)}n + #{$i}) {
+        background-color: #{list.nth($tableau10, $i)};
+      }
+    }
+  }
+  &.theme-3 {
+    @for $i from 1 through list.length($numbers6) {
+      .event:nth-of-type(#{list.length($numbers6)}n + #{$i}) {
+        background-color: #{list.nth($numbers6, $i)};
+      }
+    }
+  }
+  &.gmail {
+    @for $i from 1 through list.length($gmail) {
+      .event:nth-of-type(#{list.length($gmail)}n + #{$i}) {
+        background-color: #{list.nth($gmail, $i)};
+      }
+    }
+  }
+  &.ellsworth-kelly {
+    @for $i from 1 through list.length($ellsworth-kelly) {
+      .event:nth-of-type(#{list.length($ellsworth-kelly)}n + #{$i}) {
+        background-color: #{list.nth($ellsworth-kelly, $i)};
+      }
+    }
+  }
+}
+
+.messages {
+  &.theme-1 {
+    @for $i from 1 through list.length($colorbrewerq12) {
+      .message.member-#{$i} {
+        color: black;
+        border-color: #{list.nth($colorbrewerq12, $i)};
+        .avatar {
+          background-color: #{list.nth($colorbrewerq12, $i)};
+        }
+      }
+    }
+  }
+  &.theme-2 {
+    @for $i from 1 through list.length($tableau10) {
+      .message.member-#{$i} {
+        border-color: #{list.nth($tableau10, $i)};
+        .avatar {
+          background-color: #{list.nth($tableau10, $i)};
+        }
+      }
+    }
+  }
+  &.theme-3 {
+    @for $i from 1 through list.length($numbers6) {
+      .message.member-#{$i} {
+        border-color: #{list.nth($numbers6, $i)};
+        .avatar {
+          background-color: #{list.nth($numbers6, $i)};
+        }
+      }
+    }
+  }
+  &.gmail {
+    @for $i from 1 through list.length($gmail) {
+      .message.member-#{$i} {
+        border-color: #{list.nth($gmail, $i)};
+        .avatar {
+          background-color: #{list.nth($gmail, $i)};
+        }
+      }
+    }
+  }
+  &.ellsworth-kelly {
+    @for $i from 1 through list.length($ellsworth-kelly) {
+      .message.member-#{$i} {
+        border-color: #{list.nth($ellsworth-kelly, $i)};
+        .avatar {
+          background-color: #{list.nth($ellsworth-kelly, $i)};
+        }
+      }
+    }
+  }
+}

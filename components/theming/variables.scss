@@ -1,0 +1,29 @@
+// http://vis.stanford.edu/color-names/analyzer/
+
+$colorbrewerq12: #8dd3c7, #ffffb3, #bebada, #fb8072, #80b1d3, #fdb462, #b3de69,
+  #fccde5, #d9d9d9, #bc80bd, #ccebc5, #ffed6f;
+$tableau10: #1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #8c564b, #e377c2,
+  #7f7f7f, #bcbd22, #17becf;
+$numbers6: #2d588a, #58954c, #e9a044, #c12f32, #723e77, #7d807f;
+$gmail: #4285f4, #0b8043, #d81b60, #b39ddb, #e4c441, #a79b8e;
+$ellsworth-kelly: #f8b800, #4db930, #00a14d, #008874, #0758bb, #093cb3, #58266e,
+  #ab2049, #de032c, #f52324, #fa540e;
+
+// Responsive Vars
+$desktop: "(min-width: 640px)";
+
+// Colours
+main {
+  --black: #161717;
+  --black-90: #2c2e2e;
+  --grey-dark: #454954;
+  --grey: #6a7285;
+  --grey-light: #8d94a5;
+  --grey-lighter: #e3e8ee;
+  --grey-lightest: #f7f7f8;
+  --grey-warm: #cbcbcb;
+  --white: #ffffff;
+
+  --blue: #002db4;
+  --blue-lighter: #e3e9ee;
+}

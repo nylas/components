@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Datepicker Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+  </head>
+
+  <body>
+    <script src="../index.js"></script>
+
+    <nylas-datepicker></nylas-datepicker>
+    <script>
+      const el = document.querySelector("nylas-datepicker");
+      el.min = new Date();
+      el.timepicker = true;
+      el.change = (value) => {
+        console.log(value);
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contacts Search Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+  </head>
+
+  <body>
+    <script src="../index.js"></script>
+
+    <nylas-contacts-search></nylas-contacts-search>
+    <script>
+      const el = document.querySelector("nylas-contacts-search");
+      el.onChange = () => {
+        console.log("change handler");
+      };
+      el.contacts = [{ email: "luka@nylas.com" }, { email: "dan@nylas.com" }];
+    </script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Mailbox Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+    <script src="../index.js"></script>
+    <script type="module">
+      import { thread1, thread2 } from "./test-data.js";
+      document.addEventListener("DOMContentLoaded", function () {
+        const mailbox = document.querySelector("nylas-mailbox");
+
+        // enable `header="string"` and click refresh button
+        // mailbox.addEventListener("refreshClicked", function (event) {
+        //   mailbox.all_threads = [...mailbox.all_threads, thread2];
+        // });
+
+        // mailbox.all_threads = [thread1]; // enable to overwrite thread_id fetching
+        mailbox.actionsBar = ["selectall", "star", "delete", "unread"];
+      });
+    </script>
+  </head>
+
+  <body>
+    <nylas-mailbox
+      id="demo-mailbox"
+      thread_id="ak2q46em0srqkh7vri8f8vuqj"
+      header="Mailbox"
+      show_star="true"
+    />
+  </body>
+</html>

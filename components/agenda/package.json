@@ -1,0 +1,12 @@
+{
+  "name": "@nylas/components-agenda",
+  "version": "0.0.40",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js"
+}

@@ -1,0 +1,35 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "lib": ["esnext", "dom", "dom.Iterable"],
+    "target": "esnext",
+    "importsNotUsedAsValues": "error",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": false,
+    "checkJs": false,
+    "noEmit": true,
+    "types": ["svelte", "jest", "dom", "cypress"],
+    "baseUrl": ".",
+    "rootDirs": ["components", ".storybook", "commons"],
+    "paths": {
+      "@nylas/components-*": ["./components/*/src"],
+      "@commons*": ["./commons/src/*"],
+      "@commons": ["./commons/src/"]
+    },
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": ["commons/**/*", "components/**/*", "tests", "mocks"],
+  "exclude": [
+    "node_modules/**/*",
+    "**/node_modules/**/*",
+    "**/public",
+    "**/storybook-static",
+    "**/rollup*.config.js",
+    "**/vue-composer-demo/**/*"
+  ]
+}

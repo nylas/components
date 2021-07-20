@@ -1,0 +1,18 @@
+.nylas-composer {
+  --background: #fff;
+  --background-muted: #fff;
+  --text: #00000;
+  --text-light: #6e6e7a;
+  --text-secondary: #ffffff;
+  --font: lato, sans-serif;
+  --font-size: 14px;
+  --font-size-small: 12px;
+
+  --border: #f4f4f4;
+  --primary: #012cb4;
+  --primary-light: #0037e5;
+  --icons: #a5a6b9;
+  --header-background: var(--background);
+  --danger: #ff0000;
+  --danger-light: #ffdddd;
+}

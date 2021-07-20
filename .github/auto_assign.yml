@@ -1,0 +1,12 @@
+# Assigns the author of a PR to the PR
+addAssignees: author
+
+# Add reviewers
+addReviewers: true
+numberOfReviewers: 2
+reviewers:
+  - nylas/wonka
+
+# A list of keywords to be skipped the process that add reviewers if pull requests include it
+skipKeywords:
+  - wip

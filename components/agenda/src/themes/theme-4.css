@@ -1,0 +1,22 @@
+main.theme-4 {
+  --mainTextAndDeclinedEvents: #ffffff;
+  --calendarEventText: #ffffff;
+  --secondaryText: #8b8e98;
+  --linesAndIcons: #414247;
+  --monthsOnMobileDropdown: #f1f1f1;
+  --primaryAndMainCalendar: #1951fa;
+  --secondaryCalendar: #002db4;
+  --thirdCalendar: #078351;
+  --timeLine: #7ae1c7;
+  --declinedEvent: #636671;
+  --alertWarningDeclined: #ba1722;
+  --headerBackground: #414247;
+
+  --calendarColour4: #466edb;
+  --calendarColour5: #26af65;
+  --calendarColour6: #6a95de;
+  --calendarColour7: #335695;
+  --calendarColour8: #60cbae;
+  --calendarColour9: #308157;
+  --calendarColour10: #54afda;
+}

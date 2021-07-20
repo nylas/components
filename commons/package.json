@@ -1,0 +1,13 @@
+{
+  "name": "@nylas/components-commons",
+  "version": "0.0.22-alpha.0",
+  "private": "true",
+  "scripts": {
+    "build": "echo 'Nothing to build'",
+    "dev": "echo 'Nothing to build'",
+    "tscheck": "echo 'Nothing to check'",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js",
+  "gitHead": "85943c305ebb44cfe2b8623776e2e4d5eabc9f2f"
+}

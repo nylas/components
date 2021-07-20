@@ -1,0 +1,158 @@
+name: Build & Test
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
+env:
+  LIGHTHOUSE_CHECK_GITHUB_ACCESS_TOKEN: ${{secrets.LIGHTHOUSE_CHECK_GITHUB_ACCESS_TOKEN}}
+  API_GATEWAY: ${{secrets.API_GATEWAY}}
+  CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
+  PERCY_TOKEN: ${{secrets.PERCY_TOKEN}}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Install dependencies
+        run: npm install
+      - name: Build Components
+        run: npm run build
+      - name: Cache build
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-build
+        id: cache-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Cache cypress
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-cypress
+        id: cache-cypress
+        with:
+          path: /home/runner/.cache/Cypress/*
+          key: ${{ github.sha }}
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    needs: build
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Run linter
+        run: npm run lint:ci
+
+  test-unit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    needs: build
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Run unit tests
+        run: npm run test
+
+  test-percy-snapshot:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    needs: build
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Run percy snapshots
+        run: npm run snapshot
+
+  test-cypress:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    needs: build
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - uses: actions/cache@v2
+        id: restore-cypress
+        with:
+          path: /home/runner/.cache/Cypress/*
+          key: ${{ github.sha }}
+      - name: Run cypress tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: .
+          record: true
+          install: false # disable npm install because we are already running it in previous step
+          start: npm run start:ci
+          wait-on: http://localhost:8000
+          wait-on-timeout: 30
+
+  test-lighthouse:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    needs: [build, test-cypress]
+    if: github.ref != 'refs/heads/main'
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Run server
+        run: npm run start:ci &
+      - name: Run lighthouse
+        uses: foo-software/lighthouse-check-action@master
+        with:
+          accessToken: ${{ secrets.LIGHTHOUSE_CHECK_GITHUB_ACCESS_TOKEN }}
+          author: ${{ github.actor }}
+          branch: ${{ github.ref }}
+          outputDirectory: .
+          urls: "http://localhost:8000/components/agenda/src/index.html,http://localhost:8000/components/composer/src/index.html"
+          sha: ${{ github.sha }}
+          prCommentEnabled: true
+          prCommentSaveOld: false
+          verbose: true

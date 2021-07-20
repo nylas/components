@@ -1,0 +1,10 @@
+rollup.config.js
+svelte.config.js
+.vscode
+.github
+.idea
+static
+node_modules
+**/public/build/
+**/storybook-static
+**/public/**/*
