@@ -1,21 +1,11 @@
-# What you did:
-
-- <!-- explain what you did in bullet points -->
-
-[Clubhouse Story](https://app.clubhouse.io/nylas/story/STORY_NUMBER_HERE)
-
----
-
-# Screenshots
-
-| Before (if avail.) | After |
-| ------------------ | ----- |
-|                    |       |
-|                    |       |
-
----
+<!-- Add information about your PR here -->
 
 # Readiness checklist
 
-- [x] tests?
-- [x] checked with our design team?
+- [] Cypress tests passing?
+- [] New cypress tests added?
+- [] Included before/after screenshots, if the change is visual
+
+# License
+
+I confirm that this contribution is made under the terms of the MIT license and that I have the authority necessary to make this contribution on behalf of its copyright owner.
