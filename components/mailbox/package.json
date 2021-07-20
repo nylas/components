@@ -1,6 +1,6 @@
 {
   "name": "@nylas/components-mailbox",
-  "version": "0.0.40",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "github:nylas/components.git",
