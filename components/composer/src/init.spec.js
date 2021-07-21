@@ -418,6 +418,55 @@ describe("Composer html", () => {
           cy.get(".nylas-composer").should("not.exist");
         });
     });
+
+    it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
+      element.value.body = `[hi] what up!<br />
+      <br />
+      <br />
+      Thanks,
+      -Phil`;
+      cy.get("nylas-composer")
+        .as("composer")
+        .then((el) => {
+          const component = el[0];
+          component.setAttribute(
+            "replace_fields",
+            '[{"from": "[hi]", "to": "Hello"}]',
+          );
+          console.log(component);
+          cy.get(".html-editor[contenteditable=true]")
+            .invoke("prop", "innerHTML")
+            .then((html) => {
+              console.log(html);
+              expect(html).to.equal(
+                "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+              );
+            });
+        });
+    });
+
+    it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
+      element.value.body = `[hi] what up!<br />
+      <br />
+      <br />
+      Thanks,
+      -Phil`;
+      cy.get("nylas-composer")
+        .as("composer")
+        .then((el) => {
+          const component = el[0];
+          component.replace_fields = [{ from: "[hi]", to: "Hello" }];
+          console.log(component);
+          cy.get(".html-editor[contenteditable=true]")
+            .invoke("prop", "innerHTML")
+            .then((html) => {
+              console.log(html);
+              expect(html).to.include(
+                "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+              );
+            });
+        });
+    });
   });
 
   describe("File upload", () => {
