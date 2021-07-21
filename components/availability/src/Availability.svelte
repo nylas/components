@@ -130,7 +130,6 @@
       display: grid;
       grid-auto-flow: column;
       grid-auto-columns: auto;
-      // height: 100vh;
     }
 
     .day {
@@ -154,8 +153,6 @@
         .slot {
           border: 1px solid #fff;
           background: #eee;
-          // display: flex;
-          // flex-direction: column;
           position: relative;
           align-items: center;
           justify-content: center;
@@ -193,20 +190,23 @@
         <header>
           <h2>{new Date(day.timestamp).toLocaleDateString()}</h2>
         </header>
-        <ul class="slots">
+        <div class="slots">
           {#each day.slots as slot}
-            <li
+            <button
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
+              on:mouseover={() =>
+                console.log(
+                  "TODO: temp; ",
+                  new Date(slot.start_time).toLocaleString(),
+                )}
               on:click={() => {
                 slot.selectionStatus = handleTimeSlotClick(slot);
               }}
-              on:mouseover={() =>
-                console.log(new Date(slot.start_time).toLocaleString())}
             />
           {/each}
-        </ul>
+        </div>
       </div>
     {/each}
   </div>
