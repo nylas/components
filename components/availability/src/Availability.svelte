@@ -18,10 +18,8 @@
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
-  let timeslot: {
-    start_time: string;
-    end_time: string;
-  };
+  export let available_times: Availability.TimeSlot[] = [];
+
   //#endregion props
 
   //#region mount
@@ -37,7 +35,7 @@
 
   //#region layout
   let main: Element;
-  let slotSelection: any[] = [];
+  let slotSelection: Availability.TimeSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = d3.timeDay(new Date().setDate(start_date.getDate()));
@@ -47,23 +45,39 @@
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
+
+  $: generateDaySlots = function (timestamp, start_hour, end_hour) {
+    const dayStart = d3.timeHour(new Date(timestamp).setHours(start_hour));
+    const dayEnd = d3.timeHour(new Date(timestamp).setHours(end_hour));
+    return d3
+      .scaleTime()
+      .domain([dayStart, dayEnd])
+      .ticks(d3.timeMinute.every(slot_size))
+      .map((time) => {
+        const endTime = d3.timeMinute.offset(time, slot_size);
+
+        let slotIsAvailable = true; // default
+        if (available_times.length) {
+          slotIsAvailable = available_times.some((slot) => {
+            return time > slot.start_time && endTime < slot.end_time;
+          });
+        }
+
+        return {
+          selectionStatus: "unselected",
+          availability: slotIsAvailable ? "available" : "unavailable",
+          start_time: time,
+          end_time: endTime,
+        };
+      });
+  };
+
   $: days = d3
     .scaleTime()
     .domain([startDay, endDay])
     .ticks(d3.timeDay)
     .map((timestamp) => {
-      let dayStart = d3.timeHour(new Date(timestamp).setHours(start_hour));
-      let dayEnd = d3.timeHour(new Date(timestamp).setHours(end_hour));
-      let slots = d3
-        .scaleTime()
-        .domain([dayStart, dayEnd])
-        .ticks(d3.timeMinute.every(slot_size))
-        .map((time) => {
-          return {
-            status: "unselected",
-            time,
-          };
-        });
+      let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
         slots,
         timestamp,
@@ -71,14 +85,8 @@
     });
   //#endregion layout
 
-  function getEndTime(start_time: Date): Date {
-    let end_time = new Date(start_time.valueOf());
-    end_time.setMinutes(end_time.getMinutes() + slot_size);
-    return end_time;
-  }
-
   function handleTimeSlotClick(selectedSlot: any): string {
-    if (selectedSlot.status === "unselected") {
+    if (selectedSlot.selectionStatus === "unselected") {
       if (click_action === "choose") {
         sendTimeSlot(selectedSlot);
       }
@@ -93,23 +101,30 @@
     }
   }
 
-  function sendTimeSlot(selectedSlot: any) {
-    let start_time = new Date(selectedSlot.time);
-    let end_time = getEndTime(start_time);
-    timeslot = {
-      start_time: start_time.toLocaleTimeString(),
-      end_time: end_time.toLocaleTimeString(),
+  function sendTimeSlot(selectedSlot: Availability.TimeSlot) {
+    let start_time = new Date(selectedSlot.start_time);
+    let end_time = new Date(selectedSlot.end_time);
+    const timeslot: Availability.TimeSlot = {
+      start_time,
+      end_time,
     };
     dispatchEvent("timeSlotChosen", {
-      timeslot: timeslot,
+      timeslot,
     });
   }
 </script>
 
 <style lang="scss">
   main {
-    display: grid;
     height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    .days {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: auto;
+    }
 
     .day {
       display: grid;
@@ -128,24 +143,27 @@
         list-style-type: none;
         margin: 0;
         padding: 0;
+
         .slot {
           border: 1px solid #fff;
           background: #eee;
-          display: flex;
-          flex-direction: column;
+          position: relative;
           align-items: center;
           justify-content: center;
           align-content: center;
+          font-family: sans-serif;
+          font-size: 0.8rem;
 
           &.selected {
             background-color: yellow;
           }
-          span {
-            width: 100%;
-            height: 100%;
-            display: grid;
-            justify-content: center;
-            align-content: center;
+
+          &.available {
+            border: 1px solid green;
+          }
+          &.unavailable {
+            border: 1px solid red;
+            opacity: 0.3;
           }
         }
       }
@@ -160,27 +178,35 @@
 
 <nylas-error {id} />
 <main bind:this={main}>
-  {#each days as day}
-    <div class="day">
-      <header>
-        <h2>{new Date(day.timestamp).toLocaleDateString()}</h2>
-      </header>
-      <ul class="slots">
-        {#each day.slots as slot}
-          <li
-            class="slot {slot.status}"
-            on:click={() => {
-              slot.status = handleTimeSlotClick(slot);
-            }}
-            on:mouseover={() =>
-              console.log(new Date(slot.time).toLocaleTimeString())}
-          >
-            <span>{new Date(slot.time).toLocaleString()}</span>
-          </li>
-        {/each}
-      </ul>
-    </div>
-  {/each}
+  <div class="days">
+    {#each days as day}
+      <div class="day">
+        <header>
+          <h2>{new Date(day.timestamp).toLocaleDateString()}</h2>
+        </header>
+        <div class="slots">
+          {#each day.slots as slot}
+            <button
+              aria-label="{new Date(
+                slot.start_time,
+              ).toLocaleString()} - {new Date(slot.end_time).toLocaleString()}}"
+              class="slot {slot.selectionStatus} {slot.availability}"
+              data-start-time={new Date(slot.start_time).toLocaleString()}
+              data-end-time={new Date(slot.end_time).toLocaleString()}
+              on:mouseover={() =>
+                console.log(
+                  "TODO: temp; ",
+                  new Date(slot.start_time).toLocaleString(),
+                )}
+              on:click={() => {
+                slot.selectionStatus = handleTimeSlotClick(slot);
+              }}
+            />
+          {/each}
+        </div>
+      </div>
+    {/each}
+  </div>
   {#if click_action === "verify"}
     <footer class="confirmation">
       Confirm time?
@@ -189,7 +215,7 @@
         on:click={() => {
           slotSelection.forEach((selectedSlot) => {
             sendTimeSlot(selectedSlot);
-            selectedSlot.status = "unselected";
+            selectedSlot.selectionStatus = "unselected";
             slotSelection = [];
           });
         }}

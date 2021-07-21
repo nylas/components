@@ -13,8 +13,21 @@
         const endTimeInput = document.querySelector("input#end-time");
         const daysInput = document.querySelector("input#days-to-show");
 
+        const available_times = [
+          {
+            start_time: new Date(new Date().setHours(3)),
+            end_time: new Date(new Date().setHours(6)),
+          },
+          {
+            start_time: new Date(new Date().setHours(9)),
+            end_time: new Date(new Date().setHours(15)),
+          },
+        ];
+
+        component.available_times = available_times;
+
         component.addEventListener("timeSlotChosen", (event) => {
-          console.log(event.detail.timeslot);
+          console.log(event.detail);
         });
 
         startTimeInput.addEventListener("input", (event) => {
