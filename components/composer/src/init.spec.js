@@ -438,7 +438,7 @@ describe("Composer html", () => {
             .invoke("prop", "innerHTML")
             .then((html) => {
               console.log(html);
-              expect(html).to.include(
+              expect(html).to.equal(
                 "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
               );
             });
