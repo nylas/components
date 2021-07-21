@@ -84,7 +84,7 @@ You can also pass in custom hooks that allow you to add functionality in respons
 
 ## Contributing
 
-Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
+Please refer to our [Contributing Guidelines](CONTRIBUTING.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
 
 1. Git clone `git@github.com:nylas/components.git`
 2. Run `yarn install`
