@@ -27,7 +27,7 @@
         component.available_times = available_times;
 
         component.addEventListener("timeSlotChosen", (event) => {
-          console.log(event.detail.timeslot);
+          console.log(event.detail);
         });
 
         startTimeInput.addEventListener("input", (event) => {

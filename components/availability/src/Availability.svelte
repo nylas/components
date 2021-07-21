@@ -35,7 +35,7 @@
 
   //#region layout
   let main: Element;
-  let slotSelection: any[] = [];
+  let slotSelection: Availability.TimeSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = d3.timeDay(new Date().setDate(start_date.getDate()));
@@ -85,12 +85,6 @@
     });
   //#endregion layout
 
-  function getEndTime(start_time: Date): Date {
-    let end_time = new Date(start_time.valueOf());
-    end_time.setMinutes(end_time.getMinutes() + slot_size);
-    return end_time;
-  }
-
   function handleTimeSlotClick(selectedSlot: any): string {
     if (selectedSlot.selectionStatus === "unselected") {
       if (click_action === "choose") {
@@ -107,15 +101,15 @@
     }
   }
 
-  function sendTimeSlot(selectedSlot: any) {
-    let start_time = new Date(selectedSlot.time);
-    let end_time = getEndTime(start_time);
+  function sendTimeSlot(selectedSlot: Availability.TimeSlot) {
+    let start_time = new Date(selectedSlot.start_time);
+    let end_time = new Date(selectedSlot.end_time);
     const timeslot: Availability.TimeSlot = {
-      start_time: start_time.toLocaleTimeString(),
-      end_time: end_time.toLocaleTimeString(),
+      start_time,
+      end_time,
     };
     dispatchEvent("timeSlotChosen", {
-      timeslot: timeslot,
+      timeslot,
     });
   }
 </script>
@@ -193,6 +187,9 @@
         <div class="slots">
           {#each day.slots as slot}
             <button
+              aria-label="{new Date(
+                slot.start_time,
+              ).toLocaleString()} - {new Date(slot.end_time).toLocaleString()}}"
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
