@@ -108,8 +108,16 @@
 
 <style lang="scss">
   main {
-    display: grid;
     height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    .days {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: auto;
+      // height: 100vh;
+    }
 
     .day {
       display: grid;
@@ -128,11 +136,13 @@
         list-style-type: none;
         margin: 0;
         padding: 0;
+
         .slot {
           border: 1px solid #fff;
           background: #eee;
-          display: flex;
-          flex-direction: column;
+          // display: flex;
+          // flex-direction: column;
+          position: relative;
           align-items: center;
           justify-content: center;
           align-content: center;
@@ -141,6 +151,7 @@
             background-color: yellow;
           }
           span {
+            position: absolute;
             width: 100%;
             height: 100%;
             display: grid;
@@ -160,27 +171,29 @@
 
 <nylas-error {id} />
 <main bind:this={main}>
-  {#each days as day}
-    <div class="day">
-      <header>
-        <h2>{new Date(day.timestamp).toLocaleDateString()}</h2>
-      </header>
-      <ul class="slots">
-        {#each day.slots as slot}
-          <li
-            class="slot {slot.status}"
-            on:click={() => {
-              slot.status = handleTimeSlotClick(slot);
-            }}
-            on:mouseover={() =>
-              console.log(new Date(slot.time).toLocaleTimeString())}
-          >
-            <span>{new Date(slot.time).toLocaleString()}</span>
-          </li>
-        {/each}
-      </ul>
-    </div>
-  {/each}
+  <div class="days">
+    {#each days as day}
+      <div class="day">
+        <header>
+          <h2>{new Date(day.timestamp).toLocaleDateString()}</h2>
+        </header>
+        <ul class="slots">
+          {#each day.slots as slot}
+            <li
+              class="slot {slot.status}"
+              on:click={() => {
+                slot.status = handleTimeSlotClick(slot);
+              }}
+              on:mouseover={() =>
+                console.log(new Date(slot.time).toLocaleTimeString())}
+            >
+              <span>{new Date(slot.time).toLocaleString()}</span>
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {/each}
+  </div>
   {#if click_action === "verify"}
     <footer class="confirmation">
       Confirm time?
