@@ -174,14 +174,6 @@
             border: 1px solid red;
             opacity: 0.3;
           }
-          span {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: grid;
-            justify-content: center;
-            align-content: center;
-          }
         }
       }
     }
@@ -205,14 +197,14 @@
           {#each day.slots as slot}
             <li
               class="slot {slot.selectionStatus} {slot.availability}"
+              data-start-time={new Date(slot.start_time).toLocaleString()}
+              data-end-time={new Date(slot.end_time).toLocaleString()}
               on:click={() => {
                 slot.selectionStatus = handleTimeSlotClick(slot);
               }}
               on:mouseover={() =>
-                console.log(new Date(slot.start_time).toLocaleTimeString())}
-            >
-              <span>{new Date(slot.start_time).toLocaleString()}</span>
-            </li>
+                console.log(new Date(slot.start_time).toLocaleString())}
+            />
           {/each}
         </ul>
       </div>

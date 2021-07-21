@@ -11,8 +11,14 @@ describe("availability component", () => {
       const tomorrow = new Date();
       tomorrow.setHours(0, 0, 0);
       tomorrow.setDate(today.getDate() + 1);
-      cy.get(".slot").first().contains(today.toLocaleString());
-      cy.get(".slot").last().contains(tomorrow.toLocaleString());
+      cy.get(".slot")
+        .first()
+        .invoke("attr", "data-start-time")
+        .should("eq", today.toLocaleString());
+      cy.get(".slot")
+        .last()
+        .invoke("attr", "data-start-time")
+        .should("eq", tomorrow.toLocaleString());
     });
 
     it("Updates start_hour via component prop", () => {
@@ -24,7 +30,10 @@ describe("availability component", () => {
           const start_time = new Date();
           start_time.setHours(component.start_hour, 0, 0);
           cy.get(".slot").should("have.length", 65);
-          cy.get(".slot").first().contains(start_time.toLocaleString());
+          cy.get(".slot")
+            .first()
+            .invoke("attr", "data-start-time")
+            .should("eq", start_time.toLocaleString());
         });
     });
 
@@ -37,7 +46,10 @@ describe("availability component", () => {
           const end_time = new Date();
           end_time.setHours(component.end_hour, 0, 0);
           cy.get(".slot").should("have.length", 33);
-          cy.get(".slot").last().contains(end_time.toLocaleString());
+          cy.get(".slot")
+            .last()
+            .invoke("attr", "data-start-time")
+            .should("eq", end_time.toLocaleString());
         });
     });
   });
