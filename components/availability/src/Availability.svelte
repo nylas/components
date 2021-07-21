@@ -5,16 +5,17 @@
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
-  import * as d3 from "d3";
+  import { timeDay, timeHour, TimeInterval, timeMinute } from "d3-time";
+  import { scaleTime } from "d3-scale";
 
   const { ManifestStore } = store;
 
   //#region props
   export let id: string = "";
   export let access_token: string = "";
-  export let start_hour: number | string = 0;
-  export let end_hour: number | string = 24;
-  export let slot_size: number | string = 15; // in minutes
+  export let start_hour: number = 0;
+  export let end_hour: number = 24;
+  export let slot_size: number = 15; // in minutes
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
@@ -35,26 +36,31 @@
 
   //#region layout
   let main: Element;
-  let slotSelection: Availability.TimeSlot[] = [];
+  let slotSelection: Availability.SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
-  $: startDay = d3.timeDay(new Date().setDate(start_date.getDate()));
-  $: endDay = d3.timeDay(
-    new Date().setDate(start_date.getDate() + dates_to_show - 1),
+  $: startDay = timeDay(new Date(new Date().setDate(start_date.getDate())));
+  $: endDay = timeDay(
+    new Date(new Date().setDate(start_date.getDate() + dates_to_show - 1)),
   );
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
 
-  $: generateDaySlots = function (timestamp, start_hour, end_hour) {
-    const dayStart = d3.timeHour(new Date(timestamp).setHours(start_hour));
-    const dayEnd = d3.timeHour(new Date(timestamp).setHours(end_hour));
-    return d3
-      .scaleTime()
+  $: generateDaySlots = function (
+    timestamp: Date,
+    start_hour: number,
+    end_hour: number,
+  ) {
+    const dayStart = timeHour(
+      new Date(new Date(timestamp).setHours(start_hour)),
+    );
+    const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
+    return scaleTime()
       .domain([dayStart, dayEnd])
-      .ticks(d3.timeMinute.every(slot_size))
+      .ticks(timeMinute.every(slot_size) as TimeInterval)
       .map((time) => {
-        const endTime = d3.timeMinute.offset(time, slot_size);
+        const endTime = timeMinute.offset(time, slot_size);
 
         let slotIsAvailable = true; // default
         if (available_times.length) {
@@ -72,10 +78,9 @@
       });
   };
 
-  $: days = d3
-    .scaleTime()
+  $: days = scaleTime()
     .domain([startDay, endDay])
-    .ticks(d3.timeDay)
+    .ticks(timeDay)
     .map((timestamp) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {

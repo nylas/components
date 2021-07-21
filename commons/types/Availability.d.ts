@@ -12,4 +12,8 @@ declare namespace Availability {
     start_time: Date;
     end_time: Date;
   }
+
+  interface SelectableSlot extends TimeSlot {
+    selectionStatus: "unselected" | "selected";
+  }
 }
