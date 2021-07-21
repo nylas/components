@@ -18,10 +18,8 @@
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
-  let timeslot: {
-    start_time: string;
-    end_time: string;
-  };
+  export let available_times: Availability.TimeSlot[] = [];
+
   //#endregion props
 
   //#region mount
@@ -47,23 +45,39 @@
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
+
+  $: generateDaySlots = function (timestamp, start_hour, end_hour) {
+    const dayStart = d3.timeHour(new Date(timestamp).setHours(start_hour));
+    const dayEnd = d3.timeHour(new Date(timestamp).setHours(end_hour));
+    return d3
+      .scaleTime()
+      .domain([dayStart, dayEnd])
+      .ticks(d3.timeMinute.every(slot_size))
+      .map((time) => {
+        const endTime = d3.timeMinute.offset(time, slot_size);
+
+        let slotIsAvailable = true; // default
+        if (available_times.length) {
+          slotIsAvailable = available_times.some((slot) => {
+            return time > slot.start_time && endTime < slot.end_time;
+          });
+        }
+
+        return {
+          selectionStatus: "unselected",
+          availability: slotIsAvailable ? "available" : "unavailable",
+          start_time: time,
+          end_time: endTime,
+        };
+      });
+  };
+
   $: days = d3
     .scaleTime()
     .domain([startDay, endDay])
     .ticks(d3.timeDay)
     .map((timestamp) => {
-      let dayStart = d3.timeHour(new Date(timestamp).setHours(start_hour));
-      let dayEnd = d3.timeHour(new Date(timestamp).setHours(end_hour));
-      let slots = d3
-        .scaleTime()
-        .domain([dayStart, dayEnd])
-        .ticks(d3.timeMinute.every(slot_size))
-        .map((time) => {
-          return {
-            status: "unselected",
-            time,
-          };
-        });
+      let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
         slots,
         timestamp,
@@ -78,7 +92,7 @@
   }
 
   function handleTimeSlotClick(selectedSlot: any): string {
-    if (selectedSlot.status === "unselected") {
+    if (selectedSlot.selectionStatus === "unselected") {
       if (click_action === "choose") {
         sendTimeSlot(selectedSlot);
       }
@@ -96,7 +110,7 @@
   function sendTimeSlot(selectedSlot: any) {
     let start_time = new Date(selectedSlot.time);
     let end_time = getEndTime(start_time);
-    timeslot = {
+    const timeslot: Availability.TimeSlot = {
       start_time: start_time.toLocaleTimeString(),
       end_time: end_time.toLocaleTimeString(),
     };
@@ -146,9 +160,19 @@
           align-items: center;
           justify-content: center;
           align-content: center;
+          font-family: sans-serif;
+          font-size: 0.8rem;
 
           &.selected {
             background-color: yellow;
+          }
+
+          &.available {
+            border: 1px solid green;
+          }
+          &.unavailable {
+            border: 1px solid red;
+            opacity: 0.3;
           }
           span {
             position: absolute;
@@ -180,14 +204,14 @@
         <ul class="slots">
           {#each day.slots as slot}
             <li
-              class="slot {slot.status}"
+              class="slot {slot.selectionStatus} {slot.availability}"
               on:click={() => {
-                slot.status = handleTimeSlotClick(slot);
+                slot.selectionStatus = handleTimeSlotClick(slot);
               }}
               on:mouseover={() =>
-                console.log(new Date(slot.time).toLocaleTimeString())}
+                console.log(new Date(slot.start_time).toLocaleTimeString())}
             >
-              <span>{new Date(slot.time).toLocaleString()}</span>
+              <span>{new Date(slot.start_time).toLocaleString()}</span>
             </li>
           {/each}
         </ul>
@@ -202,7 +226,7 @@
         on:click={() => {
           slotSelection.forEach((selectedSlot) => {
             sendTimeSlot(selectedSlot);
-            selectedSlot.status = "unselected";
+            selectedSlot.selectionStatus = "unselected";
             slotSelection = [];
           });
         }}
