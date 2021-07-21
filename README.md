@@ -14,7 +14,7 @@ The Nylas Components include:
 
 The Components repository is for people who want to modify the code and build it from the source. Visit our [documentation](https://developer.nylas.com/docs/user-experience/components/) if you are looking for the easiest way to get started with Nylas Components.
 
-If you want to report a bug, create a feature request, or contribute code, take a look at the [Contributing Guidelines](CONTRIBUTE.md).
+If you want to report a bug, create a feature request, or contribute code, take a look at the [Contributing Guidelines](CONTRIBUTING.md).
 
 ## Install
 
@@ -91,7 +91,7 @@ export default function App() {
 
 ## Contribute
 
-Please refer to our [Contributing Guidelines](CONTRIBUTE.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
+Please refer to our [Contributing Guidelines](CONTRIBUTING.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
 
 ## License
 

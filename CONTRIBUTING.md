@@ -7,7 +7,7 @@ First, thanks for taking the time to contribute to our project! This guide will 
 We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
 
-By participating in this project, you agree to abide by the [Nylas Code of Conduct](CODE-OF-CONDUCT.md). If you feel there is a conduct issue related to this project, please raise it per the outlined process, and we will address it.
+By participating in this project, you agree to abide by the [Nylas Code of Conduct](CODE_OF_CONDUCT.md). If you feel there is a conduct issue related to this project, please raise it per the outlined process, and we will address it.
 How to Ask a Question
 If you have a question that needs an answer, create an issue, and label it as a question.
 
