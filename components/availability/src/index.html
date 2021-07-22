@@ -92,40 +92,39 @@
           });
       });
     </script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
+      aside {
+        position: fixed;
+        z-index: 2;
+        top: 0;
+        right: 0;
+        width: 250px;
+        background: #333;
+        padding: 0.5rem;
+        color: white;
+      }
+
+      aside label {
+        display: block;
+      }
+
+      .demo-box {
+        width: 80vw;
+        margin-left: 10vw;
+        height: 80vh;
+        margin-top: 10vh;
+      }
+    </style>
   </head>
-  <style>
-    body {
-      padding: 0;
-      margin: 0;
-    }
-
-    aside {
-      position: fixed;
-      z-index: 2;
-      top: 0;
-      right: 0;
-      width: 250px;
-      background: #333;
-      padding: 0.5rem;
-      color: white;
-    }
-
-    aside label {
-      display: block;
-    }
-
-    .demo-box {
-      width: 80vw;
-      margin-left: 10vw;
-      height: 80vh;
-      margin-top: 10vh;
-    }
-  </style>
-
   <body>
     <aside class="controls">
       <label>
-        <strong>Days to show</strong>
+        Days to show
         <input
           id="days-to-show"
           class="days"
@@ -139,7 +138,7 @@
       </label>
 
       <label>
-        <strong>Start Time</strong>
+        Start Time
         <input
           id="start-time"
           class="start"
@@ -152,7 +151,7 @@
         <span class="start"></span>
       </label>
       <label>
-        <strong>End Time</strong>
+        End Time
         <input
           id="end-time"
           class="end"
@@ -164,38 +163,58 @@
         />
         <span class="end"></span>
       </label>
-      <hr />
-      <strong>Timeslot size</strong>
-      <label>
-        <input checked type="radio" name="slot-size" value="15" />
-        <strong>15 minutes</strong>
-      </label>
-      <label>
-        <input type="radio" name="slot-size" value="30" />
-        <strong>30 minutes</strong>
-      </label>
-      <label>
-        <input type="radio" name="slot-size" value="60" />
-        <strong>60 minutes</strong>
-      </label>
-      <strong>Click action</strong>
-      <label>
-        <input checked type="radio" name="click-action" value="choose" />
-        <strong>Choose</strong>
-      </label>
-      <label>
-        <input type="radio" name="click-action" value="verify" />
-        <strong>Verify</strong>
-      </label>
-      <strong>Show Ticks</strong>
-      <label>
-        <input checked type="radio" name="show-ticks" value="true" />
-        <strong>True</strong>
-      </label>
-      <label>
-        <input type="radio" name="show-ticks" value="false" />
-        <strong>False</strong>
-      </label>
+
+      <fieldset>
+        <legend>Timeslot size</legend>
+        <label>
+          <input checked type="radio" name="slot-size" value="15" />
+          15 minutes
+        </label>
+        <label>
+          <input type="radio" name="slot-size" value="30" />
+          30 minutes
+        </label>
+        <label>
+          <input type="radio" name="slot-size" value="60" />
+          60 minutes
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Click action</legend>
+        <label>
+          <input checked type="radio" name="click-action" value="choose" />
+          Choose
+        </label>
+        <label>
+          <input type="radio" name="click-action" value="verify" />
+          Verify
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Show Tickets</legend>
+        <label>
+          <input checked type="radio" name="show-ticks" value="true" />
+          True
+        </label>
+        <label>
+          <input type="radio" name="show-ticks" value="false" />
+          False
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Allow Booking</legend>
+        <label>
+          <input type="radio" name="allow-booking" value="true" />
+          True
+        </label>
+        <label>
+          <input checked type="radio" name="allow-booking" value="false" />
+          False
+        </label>
+      </fieldset>
     </aside>
 
     <main>
