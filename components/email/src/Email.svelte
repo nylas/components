@@ -9,7 +9,6 @@
     updateThread,
     fetchMessage,
     fetchEmail,
-    ErrorStore,
   } from "@commons";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
