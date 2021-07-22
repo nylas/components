@@ -13,6 +13,7 @@ declare namespace Availability {
     dates_to_show: number;
     show_ticks: boolean;
     calendars: Calendar[];
+    allow_booking: boolean;
   }
 
   interface Calendar {

@@ -20,6 +20,8 @@
   export let click_action: "choose" | "verify" = "choose";
   export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
+  export let allow_booking: boolean = false;
+
   //#endregion props
 
   //#region mount
@@ -164,6 +166,9 @@
     });
   //#endregion layout
 
+  let eventOrganizer: string = "";
+  let eventParticipant: array = []; // email, name, status
+
   function handleTimeSlotClick(selectedSlot: any): string {
     if (selectedSlot.selectionStatus === "unselected") {
       if (click_action === "choose") {
@@ -190,6 +195,29 @@
     dispatchEvent("timeSlotChosen", {
       timeslot,
     });
+  }
+
+  // If the slot_size * num of slots is equal to end_time of last slot, create consecutive event
+  function createEventFromSlots() {
+    const event = {};
+    const totalSelectedSlots = selectedSlots.length;
+    const lastSelectedSlotIndex = selectedSlots.length - 1;
+    if (
+      selectedSlots[lastSelectedSlotIndex].end_time ===
+      slot_size * totalSelectedSlots
+    ) {
+      event.start_time = new Date(selectedSlot[0].start_time);
+      event.end_time = new Date(lastSelectedSlotIndex.end_time);
+    }
+    console.log({ event });
+    return event;
+  }
+
+  function createEvent() {
+    createEventFromSlots(selectedSlots);
+    // eventOrganizer --> owner string
+    // eventParticipant --> participants: [{}] array
+    // owner	string	The owner of the event, usually specified with their email or name and email.
   }
 </script>
 
@@ -279,11 +307,11 @@
           &.busy {
             border: 1px solid red;
             opacity: 0.3;
+            cursor: not-allowed;
           }
         }
       }
     }
-
     footer.confirmation {
       text-align: center;
       padding: 1rem;
@@ -317,11 +345,7 @@
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
-              on:mouseover={() =>
-                console.log(
-                  "TODO: temp; ",
-                  new Date(slot.start_time).toLocaleString(),
-                )}
+              disabled={slot.availability === "unavailable"}
               on:click={() => {
                 slot.selectionStatus = handleTimeSlotClick(slot);
               }}
@@ -332,11 +356,16 @@
     {/each}
   </div>
   {#if click_action === "verify"}
-    <footer class="confirmation">
+    <form class="confirmation">
       Confirm time?
+      <label>
+        <input type="email" bind:value={eventOrganizer}/>
+        Your email address
+      </label>
       <button
         disabled={!slotSelection.length}
         on:click={() => {
+          console.log({ slotSelection });
           slotSelection.forEach((selectedSlot) => {
             sendTimeSlot(selectedSlot);
             selectedSlot.selectionStatus = "unselected";
@@ -345,6 +374,6 @@
         }}
         class="confirm-btn">Yes</button
       >
-    </footer>
+    </form>
   {/if}
 </main>
