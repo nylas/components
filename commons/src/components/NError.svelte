@@ -2,9 +2,8 @@
 
 <script lang="ts">
   import { NErrorExplanationMap } from "./NErrorMapping";
-  import { store } from "../index";
+  import { ErrorStore } from "../index";
 
-  const { ErrorStore } = store;
   export let id; // component id
 
   $: error = $ErrorStore[id] || { name: "" };

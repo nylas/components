@@ -1,15 +1,22 @@
 <svelte:options tag="nylas-conversation" />
 
 <script lang="ts">
-  import { store, connections } from "../../../commons/src";
+  import {
+    ConversationStore,
+    ManifestStore,
+    fetchContactImage,
+    sendMessage,
+    fetchContactsByQuery,
+    fetchThread,
+    fetchAccount,
+    fetchCleanConversations,
+    sendCleanConversationFeedback,
+  } from "@commons";
   import { afterUpdate } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
 
-  const { ConversationStore, ManifestStore } = store;
-
   import FeedbackIcon from "./feedback.svg";
-  import NError from "../../../commons/src/components/NError.svelte";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -82,20 +89,18 @@
     participants
       .filter((participant) => participant.contact === undefined) // only the ones that aren't yet hydrated
       .forEach((participant) => {
-        connections
-          .fetchContactsByQuery({
-            component_id: id,
-            // contact_id: participant.id
-            query: `?email=${participant.email}`,
-            access_token,
-          })
-          .then((contacts) => {
-            if (contacts.length) {
-              participant.contact = contacts[0];
-            } else {
-              participant.contact = null;
-            }
-          });
+        fetchContactsByQuery({
+          component_id: id,
+          // contact_id: participant.id
+          query: `?email=${participant.email}`,
+          access_token,
+        }).then((contacts) => {
+          if (contacts.length) {
+            participant.contact = contacts[0];
+          } else {
+            participant.contact = null;
+          }
+        });
       });
   }
 
@@ -104,7 +109,7 @@
   function setConversation() {
     if (query.component_id && query.thread_id) {
       status = "loading";
-      connections.fetchThread(query).then(() => {
+      fetchThread(query).then(() => {
         conversation = $ConversationStore[queryKey];
         status = "loaded";
       });
@@ -167,47 +172,43 @@
 
   let you: Partial<Nylas.Account> = { name: "" };
   $: if (id && !you.id)
-    connections
-      .fetchAccount({ component_id: query.component_id })
-      .then((account: Nylas.Account) => {
+    fetchAccount({ component_id: query.component_id }).then(
+      (account: Nylas.Account) => {
         you = account;
-      });
+      },
+    );
 
   const CONVERSATION_ENDPOINT_MAX_MESSAGES = 20;
 
   //#region Clean Conversation
   function cleanConversation() {
-    connections
-      .fetchCleanConversations({
-        component_id: id,
-        message_id: messages
-          .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)
-          .map((message) => message.id),
-      })
-      .then((results) => {
-        results.forEach((msg: Nylas.Message) => {
-          let existingMessage = messages.find(
-            (message) => message.id === msg.id,
-          );
-          if (existingMessage) {
-            existingMessage.conversation = msg.conversation;
-            existingMessage.body = msg.body;
-          }
-        });
-        messages = messages;
+    fetchCleanConversations({
+      component_id: id,
+      message_id: messages
+        .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)
+        .map((message) => message.id),
+    }).then((results) => {
+      results.forEach((msg: Nylas.Message) => {
+        let existingMessage = messages.find((message) => message.id === msg.id);
+        if (existingMessage) {
+          existingMessage.conversation = msg.conversation;
+          existingMessage.body = msg.body;
+        }
       });
+      messages = messages;
+    });
     return true;
   }
 
   let feedbackSubmittedMessages: string[] = [];
 
   function sendFeedback(message_id: string) {
-    connections
-      .sendCleanConversationFeedback({ component_id: id, message_id })
-      .then((results) => {
+    sendCleanConversationFeedback({ component_id: id, message_id }).then(
+      (results) => {
         feedbackSubmittedMessages.push(message_id);
         feedbackSubmittedMessages = [...feedbackSubmittedMessages];
-      });
+      },
+    );
   }
 
   //#endregion Clean Conversation
@@ -485,11 +486,11 @@
                           {:else if contact.picture_url}
                             {#if !hideAvatars}
                               {(contact.picture = "loading")}
-                              {connections
-                                .fetchContactImage(query, contact.id)
-                                .then((image) => {
+                              {fetchContactImage(query, contact.id).then(
+                                (image) => {
                                   contact.picture = image;
-                                })}
+                                },
+                              )}
                             {/if}
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
@@ -541,21 +542,19 @@
                 if (!conversation) {
                   return;
                 }
-                connections
-                  .sendMessage(id, {
-                    from: reply.from,
-                    to: reply.to,
-                    body: `${replyBody} <br /><br /> --Sent with Nylas`,
-                    subject: conversation.subject,
-                    cc: reply.cc,
-                    reply_to_message_id: lastMessage.id,
-                    bcc: [],
-                  })
-                  .then(() => {
-                    setConversation();
-                    replyStatus = "";
-                    replyBody = "";
-                  });
+                sendMessage(id, {
+                  from: reply.from,
+                  to: reply.to,
+                  body: `${replyBody} <br /><br /> --Sent with Nylas`,
+                  subject: conversation.subject,
+                  cc: reply.cc,
+                  reply_to_message_id: lastMessage.id,
+                  bcc: [],
+                }).then(() => {
+                  setConversation();
+                  replyStatus = "";
+                  replyBody = "";
+                });
               }
             }}
           >

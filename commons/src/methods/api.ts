@@ -1,6 +1,8 @@
 import { ErrorStore } from "../store/error";
 
-async function handleResponse<T = unknown>(response: Response): Promise<T> {
+export async function handleResponse<T = unknown>(
+  response: Response,
+): Promise<T> {
   if (!response.ok) {
     const passedError = await response
       .json()
@@ -21,7 +23,7 @@ type FetchOptions = {
   access_token?: string;
 };
 
-function getFetchConfig(
+export function getFetchConfig(
   opts: FetchOptions = { component_id: "" },
 ): RequestInit {
   return {
@@ -36,7 +38,7 @@ function getFetchConfig(
   };
 }
 
-function handleError<T = any>(id: string, error: Nylas.Manifest["error"]): T {
+export function handleError(id: string, error: Nylas.Manifest["error"]): never {
   if (process.env.NODE_ENV !== "production") console.error(error);
   ErrorStore.update((errorMap) => ({ ...errorMap, [id]: error }));
   throw error;
@@ -48,7 +50,7 @@ const REGION_MAPPING: Record<string, string> = {
   "003": "canada-", // Canada
 };
 
-function getMiddlewareApiUrl(id: string): string {
+export function getMiddlewareApiUrl(id: string): string {
   let region = "";
   if (id.substring(3, 4) === "-") {
     const code = id.substring(0, 3);
@@ -59,5 +61,3 @@ function getMiddlewareApiUrl(id: string): string {
   const API_GATEWAY = `https://${region}${process.env.API_GATEWAY}`;
   return API_GATEWAY;
 }
-
-export { handleResponse, getFetchConfig, handleError, getMiddlewareApiUrl };

@@ -1,11 +1,14 @@
 <svelte:options tag="nylas-day" />
 
 <script lang="ts">
-  import { store, connections } from "../../../commons/src";
+  import {
+    EventStore,
+    MessageStore,
+    ManifestStore,
+    fetchMessages,
+  } from "../../../commons/src";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
-
-  const { EventStore, MessageStore, ManifestStore } = store;
 
   import {
     arc,
@@ -105,7 +108,6 @@
   const getEvents = async () => {
     if (!events && !$EventStore[JSON.stringify(eventsQuery)]) {
       eventStatus = "loading";
-      // await connections.fetchEvents(eventsQuery);
       events = (await EventStore.getEvents(eventsQuery)) || [];
     }
     eventStatus = "loaded";
@@ -115,7 +117,7 @@
   const getMessages = async () => {
     if (!messages && !$MessageStore[JSON.stringify(messagesQuery)]) {
       messageStatus = "loading";
-      await connections.fetchMessages(messagesQuery, 0, 100);
+      await fetchMessages(messagesQuery, 0, 100);
     }
     messageStatus = "loaded";
     return $MessageStore[JSON.stringify(messagesQuery)];

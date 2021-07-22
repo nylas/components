@@ -7,21 +7,19 @@
   import "./components/DatepickerModal.svelte";
   import "../../contacts-search/src/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
-  import { store, connections } from "@commons";
+  import {
+    ManifestStore,
+    sendMessage,
+    fetchAccount,
+    uploadFile as nylasUploadFile,
+  } from "@commons";
   import {
     buildInternalProps,
     getPropertyValue,
     getEventDispatcher,
   } from "@commons/methods/component";
   import { onMount, tick, get_current_component } from "svelte/internal";
-  import SendLaterIcon from "./assets/send-later.svg";
   import pkg from "../package.json";
-
-  const {
-    sendMessage,
-    fetchAccount,
-    uploadFile: nylasUploadFile,
-  } = connections;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -43,7 +41,6 @@
   import AttachmentIcon from "./assets/attachment.svg";
   import ExpandIcon from "./assets/expand.svg";
 
-  const { ManifestStore } = store;
   let fileSelector: HTMLInputElement;
 
   type ContactSearchCallback =
