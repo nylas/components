@@ -6,6 +6,7 @@ declare namespace Availability {
     start_date: Date;
     dates_to_show: number;
     available_times: TimeSlot[];
+    show_ticks: boolean;
   }
 
   interface TimeSlot {

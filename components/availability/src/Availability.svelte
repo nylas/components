@@ -5,7 +5,8 @@
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
-  import { timeDay, timeHour, TimeInterval, timeMinute } from "d3-time";
+  import type { TimeInterval } from "d3-time";
+  import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
 
   //#region props
@@ -18,6 +19,7 @@
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
   export let available_times: Availability.TimeSlot[] = [];
+  export let show_ticks: boolean = true;
 
   //#endregion props
 
@@ -118,26 +120,59 @@
 </script>
 
 <style lang="scss">
+  $headerHeight: 50px;
   main {
     height: 100vh;
     overflow: hidden;
     display: grid;
     grid-template-rows: 1fr auto;
+
+    &.ticked {
+      grid-template-columns: auto 1fr;
+    }
+
     .days {
       display: grid;
       grid-auto-flow: column;
       grid-auto-columns: auto;
     }
 
+    .ticks {
+      display: grid;
+      grid-auto-flow: row;
+      grid-auto-rows: auto;
+      height: calc(100% - #{$headerHeight});
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      padding-top: $headerHeight;
+      font-size: 0.6rem;
+      font-family: sans-serif;
+      // text-align: right;
+
+      li {
+        display: block;
+        position: relative;
+        height: auto;
+        overflow: hidden;
+        padding: 0.25rem;
+        display: grid;
+        align-content: center;
+        justify-content: right;
+      }
+    }
+
     .day {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: $headerHeight 1fr;
 
       h2 {
         margin: 0;
         padding: 0;
         text-align: center;
       }
+
       .slots {
         display: grid;
         grid-auto-flow: row;
@@ -175,12 +210,20 @@
     footer.confirmation {
       text-align: center;
       padding: 1rem;
+      grid-column: -1 / 1;
     }
   }
 </style>
 
 <nylas-error {id} />
-<main bind:this={main}>
+<main bind:this={main} class:ticked={show_ticks}>
+  {#if show_ticks}
+    <ul class="ticks">
+      {#each days[0].slots as slot}
+        <li class="tick">{new Date(slot.start_time).toLocaleTimeString()}</li>
+      {/each}
+    </ul>
+  {/if}
   <div class="days">
     {#each days as day}
       <div class="day">
