@@ -1,14 +1,12 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  import { store } from "../../../commons/src";
+  import { ManifestStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
   import { timeDay, timeHour, TimeInterval, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
-
-  const { ManifestStore } = store;
 
   //#region props
   export let id: string = "";

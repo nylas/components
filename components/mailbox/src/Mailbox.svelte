@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-mailbox" />
 
 <script lang="ts">
-  import { store } from "@commons";
+  import { ManifestStore } from "@commons";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -14,8 +14,6 @@
   import { AccountStore } from "@commons/store/accounts";
   import { fetchMessage } from "@commons/connections/messages";
   import LoadingIcon from "./assets/loading.svg";
-
-  const { ManifestStore } = store;
 
   let manifest: Partial<Nylas.EmailProperties> = {};
 
@@ -31,10 +29,8 @@
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
   export let actionsBar: string[];
-  export let onSelectThread: (
-    event: Event,
-    t: Nylas.Thread,
-  ) => void = onSelectOne;
+  export let onSelectThread: (event: Event, t: Nylas.Thread) => void =
+    onSelectOne;
 
   let queryParams: Nylas.ThreadsQuery;
 

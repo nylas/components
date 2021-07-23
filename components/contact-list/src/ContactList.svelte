@@ -2,7 +2,12 @@
 
 <script lang="ts">
   import formatDistanceStrict from "date-fns/formatDistanceStrict";
-  import { connections, methods, store } from "@commons";
+  import {
+    fetchContactImage,
+    fetchContacts,
+    ContactStore,
+    ManifestStore,
+  } from "@commons";
   import { get_current_component, onMount } from "svelte/internal";
   import { tick } from "svelte";
   import { debounce } from "@commons/methods/component";
@@ -11,8 +16,6 @@
     getPropertyValue,
     getEventDispatcher,
   } from "@commons/methods/component";
-
-  const { ContactStore, ManifestStore } = store;
 
   export let id: string = "";
   export let access_token: string = "";
@@ -117,15 +120,15 @@
   */
   function setContacts() {
     status = "loading";
-    connections
-      .fetchContacts(query, offset, contacts_to_load)
-      .then((results: Contacts.Contact[]) => {
+    fetchContacts(query, offset, contacts_to_load).then(
+      (results: Contacts.Contact[]) => {
         if (results.length > 0) {
           hydratedContacts = $ContactStore[queryKey];
           offset += contacts_to_load;
         }
         status = "loaded";
-      });
+      },
+    );
   }
 
   /*
@@ -511,9 +514,7 @@
                 />
               {/if}
             {:else if contact.picture_url}
-              {#await connections
-                .fetchContactImage(query, contact.id)
-                .then((image) => (contact.picture = image))}
+              {#await fetchContactImage(query, contact.id).then((image) => (contact.picture = image))}
                 {(contact.picture = "Loading")}
               {/await}
             {:else if contact.default_picture}

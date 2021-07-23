@@ -4,7 +4,7 @@
   import { tick } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
   import { spring } from "svelte/motion";
-  import { store } from "@commons";
+  import { CalendarStore, EventStore, ManifestStore } from "@commons";
   import {
     buildInternalProps,
     getPropertyValue,
@@ -13,8 +13,6 @@
   import type { EventPosition } from "./methods/position";
   import { populatePositionMap, updateEventPosition } from "./methods/position";
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
-
-  const { CalendarStore, EventStore, ManifestStore } = store;
 
   // #region props
   const INTERNAL_EVENT_PROPS = Object.freeze([
@@ -1508,17 +1506,12 @@
                 class:expanded={expandedEventId === event.id}
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs.indexOf(event.calendar_id) + 1}
-                style="top: {event.relativeStartTime *
-                  100}%; height: 
+                style="top: {event.relativeStartTime * 100}%; height: 
               {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
-                  : `calc(${
-                      event.relativeRunTime * 100
-                    }%  - 4px)`};
-              left: {event.relativeOverlapOffset *
-                  100}%; 
-              width: calc({event.relativeOverlapWidth *
-                  100}% - 4px)"
+                  : `calc(${event.relativeRunTime * 100}%  - 4px)`};
+              left: {event.relativeOverlapOffset * 100}%; 
+              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
               >
                 <div
                   class="inner"

@@ -1,15 +1,21 @@
 <svelte:options tag="nylas-email" />
 
 <script lang="ts">
-  import { store, connections } from "@commons";
+  import {
+    MailboxStore,
+    Threads,
+    ManifestStore,
+    fetchAccount,
+    updateThread,
+    fetchMessage,
+    fetchEmail,
+  } from "@commons";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
     getEventDispatcher,
     getPropertyValue,
   } from "@commons/methods/component";
-
-  const { MailboxStore, Threads, ManifestStore } = store;
 
   let manifest: Partial<Nylas.EmailProperties> = {};
 
@@ -44,6 +50,7 @@
 
   // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
   // TODO - Find a way to improve this
+  let internalProps;
   $: internalProps = buildInternalProps($$props, manifest);
 
   $: theme = getPropertyValue(internalProps.theme, theme, "theme-1");
@@ -109,21 +116,21 @@
     });
   }
   // #endregion thread intake and set
-
+  let emailManuallyPassed;
   $: emailManuallyPassed = !!thread;
 
   $: if (id && !you.id) {
-    connections
-      .fetchAccount({ component_id: query.component_id })
-      .then((account: Nylas.Account) => {
+    fetchAccount({ component_id: query.component_id }).then(
+      (account: Nylas.Account) => {
         you = account;
-      });
+      },
+    );
   }
 
   function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && thread_id) {
-      connections.updateThread(query, activeThread).then((thread) => {
+      updateThread(query, activeThread).then((thread) => {
         $MailboxStore[queryKey] = [thread];
       });
     }
@@ -139,9 +146,8 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
-        lastMsgIndex
-      ].expanded;
+      activeThread.messages[lastMsgIndex].expanded =
+        !activeThread.messages[lastMsgIndex].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
@@ -202,9 +208,8 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(e);
     } else {
-      activeThread.messages[msgIndex].expanded = !activeThread.messages[
-        msgIndex
-      ].expanded;
+      activeThread.messages[msgIndex].expanded =
+        !activeThread.messages[msgIndex].expanded;
       dispatchEvent("messageClicked", {
         event: e,
         message: activeThread.messages[msgIndex],
@@ -222,9 +227,8 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(e);
       } else {
-        activeThread.messages[msgIndex].expanded = !activeThread.messages[
-          msgIndex
-        ].expanded;
+        activeThread.messages[msgIndex].expanded =
+          !activeThread.messages[msgIndex].expanded;
       }
     }
   }
@@ -233,7 +237,7 @@
     const messageID = activeThread.messages[msgIndex].id;
 
     messageLoadStatus[msgIndex] = "loading";
-    connections.fetchMessage(query, messageID).then((json) => {
+    fetchMessage(query, messageID).then((json) => {
       activeThread.messages[msgIndex].body = json.body;
       messageLoadStatus[msgIndex] = "loaded";
     });
@@ -245,12 +249,10 @@
 
   // For cases when someone wants to show just a single email message, rather than the full thread.
   function fetchOneMessage() {
-    connections
-      .fetchEmail({ component_id: id, message_id: message_id })
-      .then((json) => {
-        message = json;
-        messageLoadStatus[0] = "loaded";
-      });
+    fetchEmail({ component_id: id, message_id: message_id }).then((json) => {
+      message = json;
+      messageLoadStatus[0] = "loaded";
+    });
   }
 </script>
 
@@ -500,7 +502,7 @@
                                 to&colon;&nbsp;{to.email === you.email_address
                                   ? "me"
                                   : to.name || to.email}
-                                {#if i != message.to.length - 1}
+                                {#if i !== message.to.length - 1}
                                   &nbsp;&comma;
                                 {/if}
                               {/if}
@@ -618,7 +620,7 @@
                       to&colon;&nbsp;{to.email === you.email_address
                         ? "me"
                         : to.name || to.email}
-                      {#if i != message.to.length - 1}
+                      {#if i !== message.to.length - 1}
                         &nbsp;&comma;
                       {/if}
                     {/if}
