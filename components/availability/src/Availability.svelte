@@ -27,6 +27,7 @@
   let manifest: Partial<Availability.Manifest> = {};
   onMount(async () => {
     await tick();
+    clientHeight = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
   });
@@ -36,6 +37,8 @@
 
   //#region layout
   let main: Element;
+  let clientHeight: number;
+
   let slotSelection: Availability.SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
@@ -46,7 +49,6 @@
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
-
   $: generateDaySlots = function (
     timestamp: Date,
     start_hour: number,
@@ -59,6 +61,7 @@
     return scaleTime()
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
+      .slice(0, -1) // dont show the 25th hour
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
 
@@ -77,6 +80,55 @@
         };
       });
   };
+
+  let ticks = [];
+
+  // We don't want to show all 96 15-minute intervals unless the user has a real tall screen.
+  // So let's be smart about it and filter on mod.
+  const generateTicks = (skipIntervals: number = 1) => {
+    console.log("generating ticks when", ticks.length, skipIntervals);
+    ticks = ticks.filter((time, iter) => !(iter % skipIntervals));
+    let averageTickHeight = clientHeight / ticks.length;
+    if (averageTickHeight < 40 && skipIntervals < 4) {
+      console.log(
+        "You done goofed on",
+        skipIntervals,
+        "because averageTickHeight is",
+        averageTickHeight,
+        "and now ticks are",
+        ticks.length,
+      );
+      // debugger;
+      generateTicks(skipIntervals + 1);
+    }
+  };
+
+  // $: if (averageTickHeight && days[0].slots.length) generateTicks();
+  $: {
+    console.log("first looper");
+    if (days[0].slots.length && clientHeight) {
+      ticks = days[0].slots.map((s) => s.start_time);
+      generateTicks();
+    }
+  }
+  // let numberOfTicksToShow:number = 24;
+  // $: {
+  //   if (slot_size === 60) {
+  //     numberOfTicksToShow = 24;
+  //   }
+  //   numberOfTicksToShow = clientHeight / days[0].slots.length;
+  // }
+  // $: {
+  //   const dayStart = timeHour(
+  //     new Date(new Date(start_date).setHours(start_hour)),
+  //   );
+  //   const dayEnd = timeHour(new Date(new Date(start_date).setHours(end_hour-1)));
+  //   let numberOfTicksToShow = (end_hour - start_hour) / (slot_size / 60) + 1;
+  //   console.log({numberOfTicksToShow});
+  //   ticks = scaleTime().domain([dayStart, dayEnd]).ticks(numberOfTicksToShow);
+  // }
+
+  // $: console.log({slots_shown: days[0].slots.length}, {ticks}, {clientHeight})
 
   $: days = scaleTime()
     .domain([startDay, endDay])
@@ -122,7 +174,7 @@
 <style lang="scss">
   $headerHeight: 50px;
   main {
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
     display: grid;
     grid-template-rows: 1fr auto;
@@ -156,9 +208,9 @@
         position: relative;
         height: auto;
         overflow: hidden;
-        padding: 0.25rem;
+        padding: 0 0.25rem;
         display: grid;
-        align-content: center;
+        // align-content: center;
         justify-content: right;
       }
     }
@@ -216,11 +268,12 @@
 </style>
 
 <nylas-error {id} />
-<main bind:this={main} class:ticked={show_ticks}>
+{console.log("TICKS HERE", ticks.length)}
+<main bind:this={main} bind:clientHeight class:ticked={show_ticks}>
   {#if show_ticks}
     <ul class="ticks">
-      {#each days[0].slots as slot}
-        <li class="tick">{new Date(slot.start_time).toLocaleTimeString()}</li>
+      {#each ticks as tick}
+        <li class="tick">{tick.toLocaleTimeString()}</li>
       {/each}
     </ul>
   {/if}

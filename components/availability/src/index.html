@@ -55,6 +55,15 @@
               component.click_action = event.target.value;
             });
           });
+
+        document
+          .querySelectorAll('input[name="show-ticks"]')
+          .forEach((elem) => {
+            elem.addEventListener("change", function (event) {
+              console.log("ya", event);
+              component.show_ticks = JSON.parse(event.target.value);
+            });
+          });
       });
     </script>
   </head>
@@ -78,6 +87,14 @@
 
     aside label {
       display: block;
+    }
+
+    .demo-box {
+      width: 80vw;
+      margin-left: 10vw;
+      border: 1px solid #f00;
+      height: 80vh;
+      margin-top: 10vh;
     }
   </style>
   <body>
@@ -145,10 +162,21 @@
         <input type="radio" name="click-action" value="verify" />
         <strong>Verify</strong>
       </label>
+      <strong>Show Ticks</strong>
+      <label>
+        <input checked type="radio" name="show-ticks" value="true" />
+        <strong>True</strong>
+      </label>
+      <label>
+        <input type="radio" name="show-ticks" value="false" />
+        <strong>False</strong>
+      </label>
     </aside>
 
     <main>
-      <nylas-availability id="demo-availability"></nylas-availability>
+      <div class="demo-box">
+        <nylas-availability id="demo-availability"></nylas-availability>
+      </div>
     </main>
   </body>
 </html>
