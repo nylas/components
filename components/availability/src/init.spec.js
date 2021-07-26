@@ -4,6 +4,87 @@ describe("availability component", () => {
     cy.get("nylas-availability").should("exist");
   });
 
+  describe("available times", () => {
+    it("observes available times", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.available_times = [];
+          cy.get(".slot.unavailable").should("not.exist");
+        });
+
+      const available_times = [
+        {
+          start_time: new Date(new Date().setHours(1, 0, 0, 0)),
+          end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+        },
+        {
+          start_time: new Date(new Date().setHours(8, 0, 0, 0)),
+          end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+        },
+      ];
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.available_times = available_times;
+          cy.get(".slot.unavailable").should("exist");
+          cy.get(".slot.available").should("have.length", 40);
+        });
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.slot_size = 30;
+          cy.get(".slot.available").should("have.length", 20);
+        });
+    });
+  });
+
+  describe("unavailable times", () => {
+    it("observes unavailable times", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.available_times = [];
+          component.unavailable_times = [];
+          cy.get(".slot.unavailable").should("not.exist");
+        });
+
+      const unavailable_times = [
+        {
+          start_time: new Date(new Date().setHours(1, 0, 0, 0)),
+          end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+        },
+        {
+          start_time: new Date(new Date().setHours(8, 0, 0, 0)),
+          end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+        },
+      ];
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.unavailable_times = unavailable_times;
+          cy.get(".slot.unavailable").should("exist");
+          cy.get(".slot.available").should("have.length", 56);
+        });
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.slot_size = 30;
+          cy.get(".slot.available").should("have.length", 28);
+        });
+    });
+  });
+
   describe("start and ending hour props", () => {
     it("Shows timeslots from 12AM to the next day's 12AM by default", () => {
       const today = new Date();

@@ -19,6 +19,7 @@
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
   export let available_times: Availability.TimeSlot[] = [];
+  export let unavailable_times: Availability.TimeSlot[] = [];
   export let show_ticks: boolean = true;
 
   //#endregion props
@@ -65,9 +66,16 @@
         const endTime = timeMinute.offset(time, slot_size);
 
         let slotIsAvailable = true; // default
+
+        // available_times and unavailable_times are mutually exclusive props: if you use one, don't use the other.
+        // If you have both available_times and unavailable_times, for some reason, available_times will be observed and unavailable_times will be ignored.
         if (available_times.length) {
           slotIsAvailable = available_times.some((slot) => {
             return time >= slot.start_time && endTime <= slot.end_time;
+          });
+        } else if (unavailable_times.length) {
+          slotIsAvailable = unavailable_times.every((slot) => {
+            return !(time >= slot.start_time && endTime <= slot.end_time);
           });
         }
 
