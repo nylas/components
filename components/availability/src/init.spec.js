@@ -17,7 +17,7 @@ describe("availability component", () => {
         .should("eq", today.toLocaleString());
       cy.get(".slot")
         .last()
-        .invoke("attr", "data-start-time")
+        .invoke("attr", "data-end-time")
         .should("eq", tomorrow.toLocaleString());
     });
 
@@ -29,7 +29,7 @@ describe("availability component", () => {
           component.start_hour = 8;
           const start_time = new Date();
           start_time.setHours(component.start_hour, 0, 0);
-          cy.get(".slot").should("have.length", 65);
+          cy.get(".slot").should("have.length", 64);
           cy.get(".slot")
             .first()
             .invoke("attr", "data-start-time")
@@ -45,10 +45,10 @@ describe("availability component", () => {
           component.end_hour = 8;
           const end_time = new Date();
           end_time.setHours(component.end_hour, 0, 0);
-          cy.get(".slot").should("have.length", 33);
+          cy.get(".slot").should("have.length", 32);
           cy.get(".slot")
             .last()
-            .invoke("attr", "data-start-time")
+            .invoke("attr", "data-end-time")
             .should("eq", end_time.toLocaleString());
         });
     });
@@ -56,7 +56,7 @@ describe("availability component", () => {
 
   describe("slot_size prop", () => {
     it("Shows 15 minute time slots as default", () => {
-      cy.get(".slot").should("have.length", 97);
+      cy.get(".slot").should("have.length", 96);
     });
 
     it("Updates slot_size via component prop", () => {
@@ -65,7 +65,7 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.slot_size = 60;
-          cy.get(".slot").should("have.length", 25);
+          cy.get(".slot").should("have.length", 24);
         });
     });
   });
@@ -135,6 +135,47 @@ describe("availability component", () => {
           cy.get(".slot").last().click();
           cy.get(".slot").first().should("have.class", "unselected");
         });
+    });
+  });
+
+  describe("axis ticks", () => {
+    it("shows ticks by default", () => {
+      cy.get("ul.ticks").should("exist");
+    });
+
+    it("allows you to disable ticks column", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.show_ticks = false;
+          cy.get("ul.ticks").should("not.exist");
+        });
+    });
+
+    it("dynamically skips ticks depending on screen size and number of slots", () => {
+      cy.viewport(550, 1500);
+      cy.get("li.tick").should("have.length", 24);
+      cy.viewport(550, 750);
+      cy.get("li.tick").should("have.length", 8);
+      cy.viewport(550, 150);
+      cy.get("li.tick").should("have.length", 4);
+      cy.viewport(550, 2500);
+      cy.get("li.tick").should("have.length", 48);
+      cy.viewport(550, 4000);
+      cy.get("li.tick").should("have.length", 96);
+
+      cy.get("nylas-availability").invoke("attr", "slot_size", 60);
+      cy.get("li.tick").should("have.length", 24);
+
+      cy.get("nylas-availability").invoke("attr", "slot_size", 30);
+      cy.get("li.tick").should("have.length", 48);
+
+      cy.get("nylas-availability").invoke("attr", "slot_size", 15);
+      cy.get("nylas-availability").invoke("attr", "end_hour", 8);
+
+      cy.viewport(550, 1500);
+      cy.get("li.tick").should("have.length", 32);
     });
   });
 });

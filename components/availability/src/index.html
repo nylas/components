@@ -15,12 +15,12 @@
 
         const available_times = [
           {
-            start_time: new Date(new Date().setHours(3)),
-            end_time: new Date(new Date().setHours(6)),
+            start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
           },
           {
-            start_time: new Date(new Date().setHours(9)),
-            end_time: new Date(new Date().setHours(15)),
+            start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(15, 0, 0, 0)),
           },
         ];
 
@@ -55,6 +55,14 @@
               component.click_action = event.target.value;
             });
           });
+
+        document
+          .querySelectorAll('input[name="show-ticks"]')
+          .forEach((elem) => {
+            elem.addEventListener("change", function (event) {
+              component.show_ticks = JSON.parse(event.target.value);
+            });
+          });
       });
     </script>
   </head>
@@ -62,7 +70,6 @@
     body {
       padding: 0;
       margin: 0;
-      height: 100vh;
     }
 
     aside {
@@ -78,6 +85,13 @@
 
     aside label {
       display: block;
+    }
+
+    .demo-box {
+      width: 80vw;
+      margin-left: 10vw;
+      height: 80vh;
+      margin-top: 10vh;
     }
   </style>
   <body>
@@ -145,10 +159,21 @@
         <input type="radio" name="click-action" value="verify" />
         <strong>Verify</strong>
       </label>
+      <strong>Show Ticks</strong>
+      <label>
+        <input checked type="radio" name="show-ticks" value="true" />
+        <strong>True</strong>
+      </label>
+      <label>
+        <input type="radio" name="show-ticks" value="false" />
+        <strong>False</strong>
+      </label>
     </aside>
 
     <main>
-      <nylas-availability id="demo-availability"></nylas-availability>
+      <div class="demo-box">
+        <nylas-availability id="demo-availability"></nylas-availability>
+      </div>
     </main>
   </body>
 </html>

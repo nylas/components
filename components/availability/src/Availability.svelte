@@ -5,7 +5,8 @@
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
-  import { timeDay, timeHour, TimeInterval, timeMinute } from "d3-time";
+  import type { TimeInterval } from "d3-time";
+  import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
 
   //#region props
@@ -18,6 +19,7 @@
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
   export let available_times: Availability.TimeSlot[] = [];
+  export let show_ticks: boolean = true;
 
   //#endregion props
 
@@ -25,6 +27,7 @@
   let manifest: Partial<Availability.Manifest> = {};
   onMount(async () => {
     await tick();
+    clientHeight = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
   });
@@ -34,17 +37,17 @@
 
   //#region layout
   let main: Element;
+  let clientHeight: number;
+
   let slotSelection: Availability.SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
-  $: startDay = timeDay(new Date(new Date().setDate(start_date.getDate())));
-  $: endDay = timeDay(
-    new Date(new Date().setDate(start_date.getDate() + dates_to_show - 1)),
-  );
+  $: console.log({ start_date }, { startDay }, timeDay.floor(start_date));
+  $: startDay = timeDay.floor(start_date);
+  $: endDay = timeDay.offset(start_date, dates_to_show - 1);
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
-
   $: generateDaySlots = function (
     timestamp: Date,
     start_hour: number,
@@ -57,13 +60,14 @@
     return scaleTime()
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
+      .slice(0, -1) // dont show the 25th hour
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
 
         let slotIsAvailable = true; // default
         if (available_times.length) {
           slotIsAvailable = available_times.some((slot) => {
-            return time > slot.start_time && endTime < slot.end_time;
+            return time >= slot.start_time && endTime <= slot.end_time;
           });
         }
 
@@ -76,10 +80,57 @@
       });
   };
 
+  let ticks: Date[] = [];
+
+  const minimumTickHeight = 30; // minimum pixels between ticks, vertically
+  const slotSizes = [15, 30, 60, 180, 360]; // we only want to show ticks in intervals of 15 mins, 30 mins, 60 mins, 3 hours, or 6 hours.
+
+  $: ticks = generateTicks(
+    clientHeight,
+    days[0].slots.map((s) => s.start_time),
+  );
+
+  // We don't want to show all 96 15-minute intervals unless the user has a real tall screen.
+  // So let's be smart about it and filter on modification of start_time, end_time, slot_size, or clientHeight
+  // generateTicks() is a recursive func that retries if a minimumTickHeight threshold is not met
+  // Calculation goal of < 5ms -- console.timers kept in place for future development testing.
+  const generateTicks = (
+    height: number,
+    ticks: Date[],
+    intervalCounter: number = 0,
+  ): Date[] => {
+    // console.time('ticks')
+    const tickIters = slotSizes[intervalCounter];
+
+    // ternary here because timeMinute.every(120) doesnt work, but timeHour.every(2) does.
+    let timeInterval =
+      tickIters > 60
+        ? timeHour.every(tickIters / 60)
+        : timeMinute.every(tickIters);
+
+    ticks = scaleTime()
+      .domain(ticks)
+      .ticks(timeInterval as TimeInterval);
+
+    const averageTickHeight = height / ticks.length;
+
+    if (
+      tickIters < slot_size || // dont show 15-min ticks if slot size is hourly
+      (averageTickHeight < minimumTickHeight && // make sure ticks're at least yea-pixels tall
+        intervalCounter < slotSizes.length) // don't try to keep going if youve reached every 6 hours. Subdividing a day into fewer than 4 parts doesn't yield a nice result.
+    ) {
+      return generateTicks(height, ticks, intervalCounter + 1);
+    } else {
+      // console.timeEnd('ticks')
+      return ticks;
+    }
+  };
+
   $: days = scaleTime()
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
+      console.log("timestamp here", timestamp);
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
         slots,
@@ -118,26 +169,59 @@
 </script>
 
 <style lang="scss">
+  $headerHeight: 50px;
   main {
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
     display: grid;
     grid-template-rows: 1fr auto;
+
+    &.ticked {
+      grid-template-columns: auto 1fr;
+    }
+
     .days {
       display: grid;
       grid-auto-flow: column;
       grid-auto-columns: auto;
     }
 
+    .ticks {
+      display: grid;
+      grid-auto-flow: row;
+      grid-auto-rows: auto;
+      height: calc(100% - #{$headerHeight});
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      padding-top: $headerHeight;
+      font-size: 0.6rem;
+      font-family: sans-serif;
+      // text-align: right;
+
+      li {
+        display: block;
+        position: relative;
+        height: auto;
+        overflow: hidden;
+        padding: 0 0.25rem;
+        display: grid;
+        // align-content: center;
+        justify-content: right;
+      }
+    }
+
     .day {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: $headerHeight 1fr;
 
       h2 {
         margin: 0;
         padding: 0;
         text-align: center;
       }
+
       .slots {
         display: grid;
         grid-auto-flow: row;
@@ -175,12 +259,20 @@
     footer.confirmation {
       text-align: center;
       padding: 1rem;
+      grid-column: -1 / 1;
     }
   }
 </style>
 
 <nylas-error {id} />
-<main bind:this={main}>
+<main bind:this={main} bind:clientHeight class:ticked={show_ticks}>
+  {#if show_ticks}
+    <ul class="ticks">
+      {#each ticks as tick}
+        <li class="tick">{tick.toLocaleTimeString()}</li>
+      {/each}
+    </ul>
+  {/if}
   <div class="days">
     {#each days as day}
       <div class="day">
