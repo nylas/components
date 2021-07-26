@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  import { ManifestStore } from "../../../commons/src";
+  import { ManifestStore, CalendarStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
@@ -169,6 +169,30 @@
     });
   //#endregion layout
 
+  // Accept either comma-separated string, or array.
+  $: calendarIDs = (() => {
+    let IDList = calendar_ids;
+    if (typeof calendar_ids === "string" && calendar_ids.length) {
+      IDList = IDList?.split(",").map((id: string) => id.trim());
+    } else if (calendar_id) {
+      IDList = [calendar_id];
+    }
+    return IDList;
+  })();
+
+  let calendars: Events.Calendar[] = [];
+  $: (async () => {
+    if (id && calendarIDs.length) {
+      const calendarQuery: Events.CalendarQuery = {
+        access_token,
+        component_id: id,
+        calendarIDs,
+      };
+      calendars = await CalendarStore.getCalendars(calendarQuery);
+    }
+  })();
+
+  $: console.log(calendarIDs, "calendars: ", calendars);
   function handleTimeSlotClick(selectedSlot: any): string {
     if (selectedSlot.selectionStatus === "unselected") {
       if (click_action === "choose") {
