@@ -83,7 +83,8 @@
 
   let ticks: Date[] = [];
 
-  const minimumTickHeight = 30;
+  const minimumTickHeight = 30; // minimum pixels between ticks, vertically
+  const slotSizes = [15, 30, 60, 180, 360]; // we only want to show ticks in intervals of 15 mins, 30 mins, 60 mins, 3 hours, or 6 hours.
 
   $: ticks = generateTicks(
     clientHeight,
@@ -100,8 +101,7 @@
     intervalCounter: number = 0,
   ): Date[] => {
     // console.time('ticks')
-    let slotSizes = [15, 30, 60, 180, 360]; // we only want to show ticks in intervals of 15 mins, 30 mins, 60 mins, 3 hours, or 6 hours.
-    let tickIters = slotSizes[intervalCounter];
+    const tickIters = slotSizes[intervalCounter];
 
     // ternary here because timeMinute.every(120) doesnt work, but timeHour.every(2) does.
     let timeInterval =
@@ -110,10 +110,10 @@
         : timeMinute.every(tickIters);
 
     ticks = scaleTime()
-      .domain([ticks[0], ticks[ticks.length - 1]])
+      .domain(ticks)
       .ticks(timeInterval as TimeInterval);
 
-    let averageTickHeight = height / ticks.length;
+    const averageTickHeight = height / ticks.length;
 
     if (
       tickIters < slot_size || // dont show 15-min ticks if slot size is hourly
