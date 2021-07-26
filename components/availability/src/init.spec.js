@@ -137,4 +137,45 @@ describe("availability component", () => {
         });
     });
   });
+
+  describe("axis ticks", () => {
+    it("shows ticks by default", () => {
+      cy.get("ul.ticks").should("exist");
+    });
+
+    it("allows you to disable ticks column", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.show_ticks = false;
+          cy.get("ul.ticks").should("not.exist");
+        });
+    });
+
+    it("dynamically skips ticks depending on screen size and number of slots", () => {
+      cy.viewport(550, 1500);
+      cy.get("li.tick").should("have.length", 24);
+      cy.viewport(550, 750);
+      cy.get("li.tick").should("have.length", 8);
+      cy.viewport(550, 150);
+      cy.get("li.tick").should("have.length", 4);
+      cy.viewport(550, 2500);
+      cy.get("li.tick").should("have.length", 48);
+      cy.viewport(550, 4000);
+      cy.get("li.tick").should("have.length", 96);
+
+      cy.get("nylas-availability").invoke("attr", "slot_size", 60);
+      cy.get("li.tick").should("have.length", 24);
+
+      cy.get("nylas-availability").invoke("attr", "slot_size", 30);
+      cy.get("li.tick").should("have.length", 48);
+
+      cy.get("nylas-availability").invoke("attr", "slot_size", 15);
+      cy.get("nylas-availability").invoke("attr", "end_hour", 8);
+
+      cy.viewport(550, 1500);
+      cy.get("li.tick").should("have.length", 32);
+    });
+  });
 });
