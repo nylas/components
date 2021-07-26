@@ -43,9 +43,15 @@
   let slotSelection: Availability.SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
-  $: console.log({ start_date }, { startDay }, timeDay.floor(start_date));
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
+
+  // available_times can be a single user's array of TimeSlot objects, or it can be an array of multiple users' TimeSlot objects.
+  // Design decision: should we have differing properties for this, or allow it to handle both?
+  $: multipleAvailabilitySets =
+    available_times.length && Array.isArray(available_times[0]);
+  $: multipleUnavailabilitySets =
+    unavailable_times.length && Array.isArray(unavailable_times[0]);
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -66,13 +72,29 @@
         const endTime = timeMinute.offset(time, slot_size);
 
         let slotIsAvailable = true; // default
+        let slotIsPartial = false;
 
         // available_times and unavailable_times are mutually exclusive props: if you use one, don't use the other.
         // If you have both available_times and unavailable_times, for some reason, available_times will be observed and unavailable_times will be ignored.
         if (available_times.length) {
-          slotIsAvailable = available_times.some((slot) => {
-            return time >= slot.start_time && endTime <= slot.end_time;
-          });
+          if (multipleAvailabilitySets) {
+            slotIsAvailable = available_times.every((user) => {
+              return user.some((slot) => {
+                return time >= slot.start_time && endTime <= slot.end_time;
+              });
+            });
+            if (!slotIsAvailable) {
+              slotIsPartial = available_times.some((user) => {
+                return user.some((slot) => {
+                  return time >= slot.start_time && endTime <= slot.end_time;
+                });
+              });
+            }
+          } else {
+            slotIsAvailable = available_times.some((slot) => {
+              return time >= slot.start_time && endTime <= slot.end_time;
+            });
+          }
         } else if (unavailable_times.length) {
           slotIsAvailable = unavailable_times.every((slot) => {
             return !(time >= slot.start_time && endTime <= slot.end_time);
@@ -81,7 +103,11 @@
 
         return {
           selectionStatus: "unselected",
-          availability: slotIsAvailable ? "available" : "unavailable",
+          availability: slotIsAvailable
+            ? "available"
+            : slotIsPartial
+            ? "partial"
+            : "unavailable",
           start_time: time,
           end_time: endTime,
         };
@@ -138,7 +164,6 @@
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
-      console.log("timestamp here", timestamp);
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
         slots,
@@ -255,6 +280,9 @@
 
           &.available {
             border: 1px solid green;
+          }
+          &.partial {
+            border: 1px solid lightblue;
           }
           &.unavailable {
             border: 1px solid red;
