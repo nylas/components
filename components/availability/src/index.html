@@ -60,7 +60,6 @@
           .querySelectorAll('input[name="show-ticks"]')
           .forEach((elem) => {
             elem.addEventListener("change", function (event) {
-              console.log("ya", event);
               component.show_ticks = JSON.parse(event.target.value);
             });
           });
@@ -92,7 +91,8 @@
     .demo-box {
       width: 80vw;
       margin-left: 10vw;
-      border: 1px solid #f00;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+      padding: 2rem;
       height: 80vh;
       margin-top: 10vh;
     }
