@@ -42,10 +42,9 @@
   let slotSelection: Availability.SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
-  $: startDay = timeDay(new Date(new Date().setDate(start_date.getDate())));
-  $: endDay = timeDay(
-    new Date(new Date().setDate(start_date.getDate() + dates_to_show - 1)),
-  );
+  $: console.log({ start_date }, { startDay }, timeDay.floor(start_date));
+  $: startDay = timeDay.floor(start_date);
+  $: endDay = timeDay.offset(start_date, dates_to_show - 1);
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -131,6 +130,7 @@
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
+      console.log("timestamp here", timestamp);
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
         slots,

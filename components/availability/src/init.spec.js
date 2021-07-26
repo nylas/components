@@ -17,7 +17,7 @@ describe("availability component", () => {
         .should("eq", today.toLocaleString());
       cy.get(".slot")
         .last()
-        .invoke("attr", "data-start-time")
+        .invoke("attr", "data-end-time")
         .should("eq", tomorrow.toLocaleString());
     });
 
@@ -29,7 +29,7 @@ describe("availability component", () => {
           component.start_hour = 8;
           const start_time = new Date();
           start_time.setHours(component.start_hour, 0, 0);
-          cy.get(".slot").should("have.length", 65);
+          cy.get(".slot").should("have.length", 64);
           cy.get(".slot")
             .first()
             .invoke("attr", "data-start-time")
@@ -45,10 +45,10 @@ describe("availability component", () => {
           component.end_hour = 8;
           const end_time = new Date();
           end_time.setHours(component.end_hour, 0, 0);
-          cy.get(".slot").should("have.length", 33);
+          cy.get(".slot").should("have.length", 32);
           cy.get(".slot")
             .last()
-            .invoke("attr", "data-start-time")
+            .invoke("attr", "data-end-time")
             .should("eq", end_time.toLocaleString());
         });
     });
@@ -56,7 +56,7 @@ describe("availability component", () => {
 
   describe("slot_size prop", () => {
     it("Shows 15 minute time slots as default", () => {
-      cy.get(".slot").should("have.length", 97);
+      cy.get(".slot").should("have.length", 96);
     });
 
     it("Updates slot_size via component prop", () => {
@@ -65,7 +65,7 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.slot_size = 60;
-          cy.get(".slot").should("have.length", 25);
+          cy.get(".slot").should("have.length", 24);
         });
     });
   });
