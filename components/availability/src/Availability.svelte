@@ -85,26 +85,24 @@
 
   const minimumTickHeight = 30;
 
-  // New attempt: IIFE that depends on a few things
-  $: ticks = generateTicks({
-    height: clientHeight,
-    ticks: days[0].slots.map((s) => s.start_time),
-  });
-  // $: ticks = (() => {
-  //   console.time('ticks');
-  //   console.log('whatre ticks', clientHeight, slotsShown);
-  //   let averageTickheight =
-  //   let ticks = days[0].slots.map((s) => s.start_time);
-  //   console.timeEnd('ticks');
-  //   return ticks;
-  // })();
+  $: ticks = generateTicks(
+    clientHeight,
+    days[0].slots.map((s) => s.start_time),
+  );
 
   // We don't want to show all 96 15-minute intervals unless the user has a real tall screen.
-  // So let's be smart about it and filter on mod.
-  const generateTicks = (params) => {
-    let { intervalCounter = 0, height, ticks } = params;
-    let reasonableSlots = [15, 30, 60, 180, 360];
-    let tickIters = reasonableSlots[intervalCounter];
+  // So let's be smart about it and filter on modification of start_time, end_time, slot_size, or clientHeight
+  // generateTicks() is a recursive func that retries if a minimumTickHeight threshold is not met
+  // Calculation goal of < 5ms -- console.timers kept in place for future development testing.
+  const generateTicks = (
+    height: number,
+    ticks: Date[],
+    intervalCounter: number = 0,
+  ): Date[] => {
+    // console.time('ticks')
+    let slotSizes = [15, 30, 60, 180, 360]; // we only want to show ticks in intervals of 15 mins, 30 mins, 60 mins, 3 hours, or 6 hours.
+    let tickIters = slotSizes[intervalCounter];
+
     // ternary here because timeMinute.every(120) doesnt work, but timeHour.every(2) does.
     let timeInterval =
       tickIters > 60
@@ -116,61 +114,18 @@
       .ticks(timeInterval as TimeInterval);
 
     let averageTickHeight = height / ticks.length;
-    console.log(
-      "reasonableness check",
-      { tickIters },
-      { slot_size },
-      tickIters < slot_size,
-    );
 
     if (
-      tickIters < slot_size ||
-      (averageTickHeight < minimumTickHeight &&
-        intervalCounter < reasonableSlots.length)
+      tickIters < slot_size || // dont show 15-min ticks if slot size is hourly
+      (averageTickHeight < minimumTickHeight && // make sure ticks're at least yea-pixels tall
+        intervalCounter < slotSizes.length) // don't try to keep going if youve reached every 6 hours. Subdividing a day into fewer than 4 parts doesn't yield a nice result.
     ) {
-      console.log(
-        `need to try again; we have ${ticks.length} ticks, showing every ${tickIters}, so average height is ${averageTickHeight}`,
-      );
-      return generateTicks({
-        intervalCounter: intervalCounter + 1,
-        height,
-        ticks,
-      });
+      return generateTicks(height, ticks, intervalCounter + 1);
     } else {
-      console.log(
-        `gonna return ${ticks.length} ticks because now average height is ${averageTickHeight}`,
-      );
+      // console.timeEnd('ticks')
       return ticks;
     }
   };
-
-  // $: if (averageTickHeight && days[0].slots.length) generateTicks();
-  // $: {
-  //   console.log("first looper");
-  //   if (days[0].slots.length && clientHeight) {
-  //     ticks = days[0].slots.map((s) => s.start_time);
-  //     generateTicks();
-  //   }
-  // }
-
-  // let numberOfTicksToShow:number = 24;
-  // $: {
-  //   if (slot_size === 60) {
-  //     numberOfTicksToShow = 24;
-  //   }
-  //   numberOfTicksToShow = clientHeight / days[0].slots.length;
-  // }
-  // $: {
-  //   const dayStart = timeHour(
-  //     new Date(new Date(start_date).setHours(start_hour)),
-  //   );
-  //   const dayEnd = timeHour(new Date(new Date(start_date).setHours(end_hour-1)));
-  //   let numberOfTicksToShow = (end_hour - start_hour) / (slot_size / 60) + 1;
-  //   console.log({numberOfTicksToShow});
-  //   ticks = scaleTime().domain([dayStart, dayEnd]).ticks(numberOfTicksToShow);
-  // }
-
-  // $: console.log({slots_shown: days[0].slots.length}, {ticks}, {clientHeight})
 
   $: days = scaleTime()
     .domain([startDay, endDay])
