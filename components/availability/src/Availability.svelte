@@ -68,7 +68,7 @@
         let slotIsAvailable = true; // default
         if (available_times.length) {
           slotIsAvailable = available_times.some((slot) => {
-            return time > slot.start_time && endTime < slot.end_time;
+            return time >= slot.start_time && endTime <= slot.end_time;
           });
         }
 
