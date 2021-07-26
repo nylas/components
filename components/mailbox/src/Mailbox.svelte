@@ -205,6 +205,7 @@
     overflow: auto;
     position: relative;
     display: grid;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
     $border-style: 1px solid var(--grey-lighter);
     @mixin barStyle {

@@ -254,6 +254,63 @@
       messageLoadStatus[0] = "loaded";
     });
   }
+
+  const weekdays = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  function formatPreviewDate(date: Date): string {
+    const today = new Date();
+    const lastWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 6,
+    );
+
+    if (date >= lastWeek) {
+      return weekdays[date.getDay()];
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+
+  function formatExpandedDate(date: Date): string {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return (
+      date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "long",
+        day: "numeric",
+      }) +
+      ", " +
+      date.toLocaleTimeString("en-US", {
+        hour12: true,
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    );
+    // return `${weekdays[date.getDay()].slice(0, 3)}, ${
+    //   months[date.getMonth()]
+    // } ${date.getDate()}, ${date.getTime()}`;
+  }
 </script>
 
 <style lang="scss">
@@ -262,7 +319,7 @@
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
 
-  $border-style: 1px solid var(--grey-lighter);
+  $border-style: 1px solid #ebebeb;
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
   $spacing-s: 0.5rem;
@@ -273,6 +330,7 @@
     width: 100%;
     overflow: auto;
     position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
       display: grid;
       grid-column-gap: $spacing-m;
@@ -291,11 +349,20 @@
         &.show_star {
           grid-template-columns: 25px 200px auto;
         }
+
+        .thread-message-count {
+          margin-left: 1rem;
+          color: var(--grey-light);
+        }
         &.unread {
           background: var(--nylas-email-background, white);
           .from-participants,
           .date {
             font-weight: bold;
+
+            .thread-message-count {
+              color: var(--blue);
+            }
           }
         }
         div.starred {
@@ -329,7 +396,7 @@
       }
       &.expanded {
         overflow-y: scroll;
-        background: rgba(211, 211, 211, 0.302);
+        background: var(--white);
         div.individual-message {
           display: grid;
           padding: 1rem 0;
@@ -511,10 +578,10 @@
                         </div>
                       </div>
                       <div class="message-date">
-                        <span
-                          >{new Date(
-                            message.date * 1000,
-                          ).toLocaleDateString()}</span
+                        <span>
+                          {formatExpandedDate(
+                            new Date(message.date * 1000),
+                          )}</span
                         >
                       </div>
                     </div>
@@ -576,7 +643,9 @@
                       .from[0].email}</span
                 >
                 {#if show_number_of_messages}
-                  <span>{", " + activeThread.messages.length}</span>
+                  <span class="thread-message-count"
+                    >{activeThread.messages.length}</span
+                  >
                 {/if}
               {/if}
             </div>
@@ -591,9 +660,9 @@
               {#if show_received_timestamp}
                 <div class="date">
                   <span>
-                    {new Date(
-                      thread.last_message_timestamp * 1000,
-                    ).toLocaleDateString()}
+                    {formatPreviewDate(
+                      new Date(thread.last_message_timestamp * 1000),
+                    )}
                   </span>
                 </div>
               {/if}

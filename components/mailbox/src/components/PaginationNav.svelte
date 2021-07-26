@@ -24,7 +24,7 @@
 <style lang="scss">
   .pagination-nav {
     --disabled-text: ##454954;
-    --font: "SF Pro Display", Arial; // need to import font
+    --font: -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     align-items: center;
   }
