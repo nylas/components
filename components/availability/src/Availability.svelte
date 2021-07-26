@@ -81,36 +81,78 @@
       });
   };
 
-  let ticks = [];
+  let ticks: Date[] = [];
+
+  const minimumTickHeight = 30;
+
+  // New attempt: IIFE that depends on a few things
+  $: ticks = generateTicks({
+    height: clientHeight,
+    ticks: days[0].slots.map((s) => s.start_time),
+  });
+  // $: ticks = (() => {
+  //   console.time('ticks');
+  //   console.log('whatre ticks', clientHeight, slotsShown);
+  //   let averageTickheight =
+  //   let ticks = days[0].slots.map((s) => s.start_time);
+  //   console.timeEnd('ticks');
+  //   return ticks;
+  // })();
 
   // We don't want to show all 96 15-minute intervals unless the user has a real tall screen.
   // So let's be smart about it and filter on mod.
-  const generateTicks = (skipIntervals: number = 1) => {
-    console.log("generating ticks when", ticks.length, skipIntervals);
-    ticks = ticks.filter((time, iter) => !(iter % skipIntervals));
-    let averageTickHeight = clientHeight / ticks.length;
-    if (averageTickHeight < 40 && skipIntervals < 4) {
+  const generateTicks = (params) => {
+    let { intervalCounter = 0, height, ticks } = params;
+    let reasonableSlots = [15, 30, 60, 180, 360];
+    let tickIters = reasonableSlots[intervalCounter];
+    // ternary here because timeMinute.every(120) doesnt work, but timeHour.every(2) does.
+    let timeInterval =
+      tickIters > 60
+        ? timeHour.every(tickIters / 60)
+        : timeMinute.every(tickIters);
+
+    ticks = scaleTime()
+      .domain([ticks[0], ticks[ticks.length - 1]])
+      .ticks(timeInterval as TimeInterval);
+
+    let averageTickHeight = height / ticks.length;
+    console.log(
+      "reasonableness check",
+      { tickIters },
+      { slot_size },
+      tickIters < slot_size,
+    );
+
+    if (
+      tickIters < slot_size ||
+      (averageTickHeight < minimumTickHeight &&
+        intervalCounter < reasonableSlots.length)
+    ) {
       console.log(
-        "You done goofed on",
-        skipIntervals,
-        "because averageTickHeight is",
-        averageTickHeight,
-        "and now ticks are",
-        ticks.length,
+        `need to try again; we have ${ticks.length} ticks, showing every ${tickIters}, so average height is ${averageTickHeight}`,
       );
-      // debugger;
-      generateTicks(skipIntervals + 1);
+      return generateTicks({
+        intervalCounter: intervalCounter + 1,
+        height,
+        ticks,
+      });
+    } else {
+      console.log(
+        `gonna return ${ticks.length} ticks because now average height is ${averageTickHeight}`,
+      );
+      return ticks;
     }
   };
 
   // $: if (averageTickHeight && days[0].slots.length) generateTicks();
-  $: {
-    console.log("first looper");
-    if (days[0].slots.length && clientHeight) {
-      ticks = days[0].slots.map((s) => s.start_time);
-      generateTicks();
-    }
-  }
+  // $: {
+  //   console.log("first looper");
+  //   if (days[0].slots.length && clientHeight) {
+  //     ticks = days[0].slots.map((s) => s.start_time);
+  //     generateTicks();
+  //   }
+  // }
+
   // let numberOfTicksToShow:number = 24;
   // $: {
   //   if (slot_size === 60) {
@@ -268,7 +310,6 @@
 </style>
 
 <nylas-error {id} />
-{console.log("TICKS HERE", ticks.length)}
 <main bind:this={main} bind:clientHeight class:ticked={show_ticks}>
   {#if show_ticks}
     <ul class="ticks">
