@@ -30,3 +30,12 @@ declare namespace Availability {
     availability: AvailabilityStatus;
   }
 }
+
+interface EventQuery {
+  calendarIDs?: string[]; // making this optional until calendarIDs story is done
+  participants?: obj[];
+  title?: string;
+  location?: string;
+  access_token?: string;
+  component_id?: string;
+}

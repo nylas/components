@@ -53,6 +53,7 @@
 
   let slotSelection: SelectableSlot[] = [];
 
+  $: setSlotsSelectedStatus(slotSelection);
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
@@ -225,40 +226,88 @@
     }
     return freeBusyCalendars;
   }
+  //#region event query
+  let query: Availability.EventQuery;
+  $: query = {
+    component_id: id,
+    access_token: access_token,
+    calendarIDs: calendarIDs,
+  };
+  //#region event query
 
-  function sendTimeSlot(selectedSlot: TimeSlot) {
-    let start_time = new Date(selectedSlot.start_time);
-    let end_time = new Date(selectedSlot.end_time);
-    const timeslot: TimeSlot = {
-      start_time,
-      end_time,
-    };
+  function sendTimeSlot(timeSlot: Availability.TimeSlot) {
     dispatchEvent("timeSlotChosen", {
-      timeslot,
+      timeSlot: setTimeSlot(slotSelection),
     });
   }
 
-  // If the slot_size * num of slots is equal to end_time of last slot, create consecutive event
-  function createEventFromSlots() {
-    const event = {};
-    const totalSelectedSlots = selectedSlots.length;
-    const lastSelectedSlotIndex = selectedSlots.length - 1;
-    if (
-      selectedSlots[lastSelectedSlotIndex].end_time ===
-      slot_size * totalSelectedSlots
-    ) {
-      event.start_time = new Date(selectedSlot[0].start_time);
-      event.end_time = new Date(lastSelectedSlotIndex.end_time);
-    }
-    console.log({ event });
-    return event;
+  function setTimeSlot(slots: obj[]): Availability.TimeSlot {
+    return hasConsecutiveSlots(slots)
+      ? {
+          start_time: new Date(slots[0].start_time),
+          end_time: qetConsecutiveSlotsEndTime(slots),
+        }
+      : {
+          start_time: slots[0].start_time,
+          end_time: slots[0].end_time,
+        };
   }
 
-  function createEvent() {
-    createEventFromSlots(selectedSlots);
-    // eventOrganizer --> owner string
-    // eventParticipant --> participants: [{}] array
-    // owner	string	The owner of the event, usually specified with their email or name and email.
+  function getSlotsDuration(slots: obj[]): number {
+    return slot_size * slots.length;
+  }
+
+  function qetConsecutiveSlotsEndTime(slots: obj[]): Date {
+    slots.sort((a, b) => a.start_time - b.start_time);
+    const firstSlot = slots[0];
+    const slotsDuration = getSlotsDuration(slots);
+    return new Date(
+      firstSlot.end_time.setMinutes(
+        firstSlot.start_time.getMinutes() + slotsDuration,
+      ),
+    );
+  }
+
+  function hasConsecutiveSlots(slots: obj[]): boolean {
+    return slots[slots.length - 1].end_time ===
+      qetConsecutiveSlotsEndTime(slots)
+      ? true
+      : false;
+  }
+
+  function setSlotsSelectedStatus(slots: obj[]) {
+    slots.forEach((slot) => (slot.selectionStatus = "selected"));
+  }
+
+  function resetSlotSelection(slots: obj[]): [] {
+    return (slots = []);
+  }
+
+  function createEventFromTimeSlot(
+    event: Availability.TimeSlot,
+    query: Availability.eventQuery,
+  ) {
+    EventStore.createEvent(event, query, "availability");
+  }
+
+  function setSelectedTimeSlots(selectedSlot: obj): obj[] {
+    return (slotSelection =
+      selectedSlot.selectionStatus === "selected"
+        ? [...slotSelection, selectedSlot]
+        : slotSelection.filter((slot) => slot != selectedSlot));
+  }
+
+  function sortTimeSlots(slots: obj[]): obj[] {
+    return slots.sort((a, b) => a.start_time - b.start_time);
+  }
+
+  function sortAndSetEvent() {
+    const event = setTimeSlot(slotSelection);
+    console.log({ setTimeSlot(slotSelection); }, { query });
+    sortTimeSlots(slotSelection);
+    createEventFromTimeSlot(event, query);
+    sendTimeSlot(event);
+    resetSlotSelection(slotSelection);
   }
 </script>
 
@@ -347,12 +396,13 @@
           }
           &.busy {
             border: 1px solid red;
-            opacity: 0.3;
             cursor: not-allowed;
+            opacity: 0.3;
           }
         }
       }
     }
+
     footer.confirmation {
       text-align: center;
       padding: 1rem;
@@ -388,7 +438,11 @@
               data-end-time={new Date(slot.end_time).toLocaleString()}
               disabled={slot.availability === "unavailable"}
               on:click={() => {
-                slot.selectionStatus = handleTimeSlotClick(slot);
+                slot.selectionStatus =
+                  slot.selectionStatus === "selected"
+                    ? "unselected"
+                    : "selected";
+                setSelectedTimeSlots(slot);
               }}
             />
           {/each}
@@ -397,24 +451,13 @@
     {/each}
   </div>
   {#if click_action === "verify"}
-    <form class="confirmation">
+    <footer class="confirmation">
       Confirm time?
-      <label>
-        <input type="email" />
-        Your email address
-      </label>
       <button
         disabled={!slotSelection.length}
-        on:click={() => {
-          console.log({ slotSelection });
-          slotSelection.forEach((selectedSlot) => {
-            sendTimeSlot(selectedSlot);
-            selectedSlot.selectionStatus = SelectionStatus.UNSELECTED;
-            slotSelection = [];
-          });
-        }}
+        on:click={sortAndSetEvent}
         class="confirm-btn">Yes</button
       >
-    </form>
+    </footer>
   {/if}
 </main>
