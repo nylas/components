@@ -85,6 +85,48 @@ describe("availability component", () => {
     });
   });
 
+  describe("multiple availability sets", () => {
+    it("observes multiple availabilites", () => {
+      const available_times = [
+        [
+          {
+            start_time: new Date(new Date().setHours(0, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+          },
+          {
+            start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+          },
+        ],
+        [
+          {
+            start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+          },
+        ],
+        [
+          {
+            start_time: new Date(new Date().setHours(5, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+          },
+          {
+            start_time: new Date(new Date().setHours(21, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(23, 0, 0, 0)),
+          },
+        ],
+      ];
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.available_times = available_times;
+          cy.get(".slot.partial").should("exist");
+          cy.get(".slot.partial").should("have.length", 56);
+        });
+    });
+  });
+
   describe("start and ending hour props", () => {
     it("Shows timeslots from 12AM to the next day's 12AM by default", () => {
       const today = new Date();

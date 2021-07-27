@@ -18,8 +18,12 @@
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
-  export let available_times: Availability.TimeSlot[] = [];
-  export let unavailable_times: Availability.TimeSlot[] = [];
+  export let available_times:
+    | Availability.TimeSlot[]
+    | Availability.TimeSlot[][] = [];
+  export let unavailable_times:
+    | Availability.TimeSlot[]
+    | Availability.TimeSlot[][] = [];
   export let show_ticks: boolean = true;
 
   //#endregion props
@@ -71,43 +75,59 @@
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
 
-        let slotIsAvailable = true; // default
-        let slotIsPartial = false;
+        let availability = "available"; // default
 
         // available_times and unavailable_times are mutually exclusive props: if you use one, don't use the other.
         // If you have both available_times and unavailable_times, for some reason, available_times will be observed and unavailable_times will be ignored.
         if (available_times.length) {
           if (multipleAvailabilitySets) {
-            slotIsAvailable = available_times.every((user) => {
-              return user.some((slot) => {
-                return time >= slot.start_time && endTime <= slot.end_time;
-              });
+            let setsWithSlotAvailable = available_times.filter((user) => {
+              return user.some(
+                (slot: Availability.TimeSlot) =>
+                  time >= slot.start_time && endTime <= slot.end_time,
+              );
             });
-            if (!slotIsAvailable) {
-              slotIsPartial = available_times.some((user) => {
-                return user.some((slot) => {
-                  return time >= slot.start_time && endTime <= slot.end_time;
-                });
-              });
+            if (setsWithSlotAvailable.length === 0) {
+              availability = "unavailable";
+            } else if (
+              setsWithSlotAvailable.length !== available_times.length
+            ) {
+              availability = "partial";
             }
           } else {
-            slotIsAvailable = available_times.some((slot) => {
+            availability = available_times.some((slot) => {
               return time >= slot.start_time && endTime <= slot.end_time;
-            });
+            })
+              ? "available"
+              : "unavailable";
           }
         } else if (unavailable_times.length) {
-          slotIsAvailable = unavailable_times.every((slot) => {
-            return !(time >= slot.start_time && endTime <= slot.end_time);
-          });
+          if (multipleUnavailabilitySets) {
+            let setsWithSlotAvailable = unavailable_times.filter((user) => {
+              return user.every(
+                (slot: Availability.TimeSlot) =>
+                  !(time >= slot.start_time && endTime <= slot.end_time),
+              );
+            });
+            if (setsWithSlotAvailable.length === 0) {
+              availability = "unavailable";
+            } else if (
+              setsWithSlotAvailable.length !== unavailable_times.length
+            ) {
+              availability = "partial";
+            }
+          } else {
+            availability = unavailable_times.every((slot) => {
+              return !(time >= slot.start_time && endTime <= slot.end_time);
+            })
+              ? "available"
+              : "unavailable";
+          }
         }
 
         return {
           selectionStatus: "unselected",
-          availability: slotIsAvailable
-            ? "available"
-            : slotIsPartial
-            ? "partial"
-            : "unavailable",
+          availability,
           start_time: time,
           end_time: endTime,
         };
@@ -282,7 +302,7 @@
             border: 1px solid green;
           }
           &.partial {
-            border: 1px solid lightblue;
+            border: 1px solid #ccc;
           }
           &.unavailable {
             border: 1px solid red;
