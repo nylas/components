@@ -18,6 +18,15 @@
   } from "@commons/methods/component";
 
   let manifest: Partial<Nylas.EmailProperties> = {};
+  let viewportWidth: number;
+  let isViewingOnMobile: boolean;
+  $: {
+    viewportWidth = Math.max(
+      document.documentElement.clientWidth || 0,
+      window.innerWidth || 0,
+    );
+    isViewingOnMobile = viewportWidth <= 639;
+  }
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -50,7 +59,7 @@
 
   // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
   // TODO - Find a way to improve this
-  let internalProps;
+  let internalProps: SvelteAllProps;
   $: internalProps = buildInternalProps($$props, manifest);
 
   $: theme = getPropertyValue(internalProps.theme, theme, "theme-1");
@@ -116,7 +125,7 @@
     });
   }
   // #endregion thread intake and set
-  let emailManuallyPassed;
+  let emailManuallyPassed: boolean;
   $: emailManuallyPassed = !!thread;
 
   $: if (id && !you.id) {
@@ -280,20 +289,6 @@
   }
 
   function formatExpandedDate(date: Date): string {
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
     return (
       date.toLocaleDateString("en-US", {
         weekday: "short",
@@ -307,9 +302,6 @@
         minute: "2-digit",
       })
     );
-    // return `${weekdays[date.getDay()].slice(0, 3)}, ${
-    //   months[date.getMonth()]
-    // } ${date.getDate()}, ${date.getTime()}`;
   }
 </script>
 
@@ -322,6 +314,7 @@
   $border-style: 1px solid #ebebeb;
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
+  $mobile-collapsed-height: fit-content;
   $spacing-s: 0.5rem;
   $spacing-m: 1rem;
 
@@ -332,8 +325,7 @@
     position: relative;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
-      display: grid;
-      grid-column-gap: $spacing-m;
+      display: flex;
       padding: $spacing-s;
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
@@ -342,17 +334,52 @@
         font-weight: 700;
       }
       &.condensed {
-        height: $collapsed-height;
-        padding: 0 $spacing-m;
-        grid-template-columns: 200px auto;
+        height: $mobile-collapsed-height;
+        padding: $spacing-m;
+        padding-left: $spacing-s;
+        //display: flex;
+        justify-content: space-between;
         align-items: center;
-        &.show_star {
-          grid-template-columns: 25px 200px auto;
+        flex-wrap: wrap;
+
+        .from-star {
+          display: grid;
+          grid-template-columns: 25px auto;
+          column-gap: $spacing-s;
+        }
+
+        .mobile-subject-snippet {
+          display: block;
+          font-size: 14px;
+          margin-top: $spacing-m;
+          flex-basis: 100%;
+
+          .subject {
+            font-weight: bold;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: 80vw;
+            display: block;
+            word-break: keep-all;
+          }
+
+          .snippet {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            display: block;
+            max-width: 80vw;
+            color: var(--grey);
+            margin-top: 4px;
+          }
         }
 
         .thread-message-count {
           margin-left: 1rem;
           color: var(--grey-light);
+          font-size: 12px;
+          align-self: center;
         }
         &.unread {
           background: var(--nylas-email-background, white);
@@ -377,7 +404,7 @@
             &:before {
               content: "\2605";
               display: inline-block;
-              font-size: 1.5em;
+              font-size: 1em;
               color: #ccc;
               -webkit-user-select: none;
               -moz-user-select: none;
@@ -480,6 +507,7 @@
         display: grid;
         grid-template-columns: auto auto auto;
         justify-content: flex-start;
+        margin-right: $spacing-s;
         .from-sub-section {
           overflow: hidden;
           text-overflow: ellipsis;
@@ -487,9 +515,13 @@
         }
       }
       .subject-snippet-date {
-        display: grid;
-        grid-template-columns: 1fr 70px;
-        gap: 1rem;
+        //display: grid;
+        //grid-template-columns: 1fr 70px;
+        //gap: 1rem;
+
+        .desktop-subject-snippet {
+          display: none;
+        }
         div {
           overflow: hidden;
           text-overflow: ellipsis;
@@ -500,7 +532,8 @@
           &.date {
             display: flex;
             justify-content: flex-end;
-            width: min-content;
+            width: 100%;
+            font-size: 14px;
           }
         }
       }
@@ -520,6 +553,39 @@
   }
 
   @media #{$desktop} {
+    main {
+      .email-row {
+        display: grid;
+        column-gap: $spacing-m;
+        &.condensed {
+          height: $collapsed-height;
+          grid-template-columns: 200px auto;
+          align-items: center;
+          justify-content: initial;
+
+          .mobile-subject-snippet {
+            display: none;
+          }
+        }
+
+        .subject-snippet-date {
+          display: grid;
+          grid-template-columns: 1fr 70px;
+          gap: 1rem;
+          .desktop-subject-snippet {
+            display: block;
+
+            .subject {
+              margin-right: $spacing-s;
+            }
+          }
+
+          .date {
+            text-align: right;
+          }
+        }
+      }
+    }
   }
 </style>
 
@@ -614,47 +680,53 @@
             class:show_star
             class:unread={unread !== null ? unread : activeThread.unread}
           >
-            {#if show_star}
-              <div class="starred">
-                <button
-                  id={`thread-star-${thread_id}`}
-                  class={activeThread.starred ? "starred" : ""}
-                  value={thread_id}
-                  role="switch"
-                  aria-checked={activeThread.starred}
-                  on:click|preventDefault={handleThreadStarClick}
-                  aria-label={`Star button for thread ${thread_id}`}
-                />
-              </div>
-            {/if}
-            <div class="from-participants">
-              {#if activeThread.messages.length >= 1 && activeThread.messages[0].from.length}
-                <span class="from-sub-section"
-                  >{activeThread.messages[0].from[0].name ||
-                    activeThread.messages[0].from[0].email}</span
-                >
+            <div class="from{show_star ? '-star' : ''}">
+              {#if show_star}
+                <div class="starred">
+                  <button
+                    id={`thread-star-${thread_id}`}
+                    class={activeThread.starred ? "starred" : ""}
+                    value={thread_id}
+                    role="switch"
+                    aria-checked={activeThread.starred}
+                    on:click|preventDefault={handleThreadStarClick}
+                    aria-label={`Star button for thread ${thread_id}`}
+                  />
+                </div>
               {/if}
-              {#if activeThread.messages.length > 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
-                <span class="from-sub-section">
-                  {", " +
-                    activeThread.messages[activeThread.messages.length - 1]
-                      .from[0].name ||
-                    activeThread.messages[activeThread.messages.length - 1]
-                      .from[0].email}</span
-                >
-                {#if show_number_of_messages}
-                  <span class="thread-message-count"
-                    >{activeThread.messages.length}</span
+              <div class="from-participants">
+                {#if activeThread.messages.length >= 1 && activeThread.messages[0].from.length}
+                  <span class="from-sub-section"
+                    >{activeThread.messages[0].from[0].name ||
+                      activeThread.messages[0].from[0].email}</span
                   >
                 {/if}
-              {/if}
+                {#if activeThread.messages.length > 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
+                  <span class="from-sub-section">
+                    {#if isViewingOnMobile}
+                      &nbsp;{"+" + (activeThread.participants.length - 1)}
+                    {:else}
+                      {", " +
+                        activeThread.messages[activeThread.messages.length - 1]
+                          .from[0].name ||
+                        activeThread.messages[activeThread.messages.length - 1]
+                          .from[0].email}
+                    {/if}
+                  </span>
+                  {#if show_number_of_messages}
+                    <span class="thread-message-count"
+                      >{activeThread.messages.length}</span
+                    >
+                  {/if}
+                {/if}
+              </div>
             </div>
             <div class="subject-snippet-date">
-              <div>
+              <div class="desktop-subject-snippet">
                 <span class="subject">{thread.subject}</span><span
                   class="snippet"
                 >
-                  &#45; {thread.snippet}</span
+                  {thread.snippet}</span
                 >
               </div>
               {#if show_received_timestamp}
@@ -666,6 +738,14 @@
                   </span>
                 </div>
               {/if}
+            </div>
+
+            <div class="mobile-subject-snippet">
+              <span class="subject">{thread.subject}</span><span
+                class="snippet"
+              >
+                {thread.snippet}</span
+              >
             </div>
           </div>
         {/if}

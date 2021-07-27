@@ -199,6 +199,9 @@
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
   @import "../../../commons/src/components/checkbox.scss";
+
+  $spacing-s: 0.5rem;
+  $spacing-m: 1rem;
   main {
     height: 100%;
     width: 100%;
@@ -248,7 +251,8 @@
       justify-content: left;
 
       .checkbox-container.thread-checkbox {
-        padding-left: 16px;
+        padding: 1rem 0 0 1rem;
+        align-self: baseline; // mobile; TODO: set for desktop
       }
 
       &:hover {
