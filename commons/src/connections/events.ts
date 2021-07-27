@@ -66,9 +66,10 @@ export const fetchCalendars = async (
 export async function createEvent(
   event: Events.Event,
   query: Events.EventQuery,
+  component: "agenda" | "availability" = "agenda",
 ): Promise<Events.Event> {
   return fetch(
-    `${getMiddlewareApiUrl(query.component_id || "")}/agenda/events`,
+    `${getMiddlewareApiUrl(query.component_id || "")}/${component}/events`,
     getFetchConfig({
       method: "POST",
       component_id: query.component_id,
