@@ -234,6 +234,7 @@
   };
   //#region event query
 
+  //#region book consecutive slots as one event
   function sendTimeSlot(timeSlot: Availability.TimeSlot) {
     dispatchEvent("timeSlotChosen", { timeSlot });
   }
@@ -267,7 +268,9 @@
       return lastSlotEndTime == lastConsecutiveSlotEndTime ? true : false;
     }
   }
+  //#endregion book consecutive slots as one event
 
+  //#region booking event logic for single time slot or consecutive time slots
   function setSlotsSelectedStatus(slots: obj[]) {
     slots.forEach((slot) => (slot.selectionStatus = "selected"));
   }
@@ -305,6 +308,7 @@
       sortAndSetEvent([slot]);
     }
   }
+  //#region booking event logic for single time slot or consecutive time slots
 </script>
 
 <style lang="scss">
