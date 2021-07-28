@@ -272,7 +272,7 @@
   $headerHeight: 50px;
   main {
     height: 100%;
-    // overflow: hidden;
+    overflow: hidden;
     display: grid;
     grid-template-rows: 1fr auto;
 
@@ -415,7 +415,7 @@
         Your email address
       </label>
       <button
-        disabled={!eventOrganizer.length ? true : false}
+        disabled={!eventOrganizer.length}
         on:click={() => {
           sortAndSetEvent(sortedSlots);
         }}
