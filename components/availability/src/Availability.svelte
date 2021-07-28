@@ -259,7 +259,7 @@
   }
 
   function toggleClickAction(slot: obj) {
-    if (click_action === "verify") {
+    if (click_action === "verify" && allow_booking) {
       setSelectedTimeSlots(slot);
     } else {
       sortAndSetEvent([slot]);
@@ -407,7 +407,7 @@
       </div>
     {/each}
   </div>
-  {#if click_action === "verify"}
+  {#if click_action === "verify" && allow_booking && slotSelection.length}
     <footer class="confirmation">
       Confirm time?
       <label>
@@ -415,12 +415,11 @@
         Your email address
       </label>
       <button
-        disabled={!slotSelection.length && !eventOrganizer.length
-          ? true
-          : false}
+        disabled={!eventOrganizer.length ? true : false}
         on:click={() => {
           sortAndSetEvent(sortedSlots);
         }}
+        type="button"
         class="confirm-btn">Yes</button
       >
     </footer>

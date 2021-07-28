@@ -89,6 +89,14 @@
               component.show_ticks = JSON.parse(event.target.value);
             });
           });
+
+        document
+          .querySelectorAll('input[name="allow-booking"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.allow_booking = event.target.value;
+            });
+          });
       });
     </script>
     <style>
@@ -192,7 +200,7 @@
       </fieldset>
 
       <fieldset>
-        <legend>Show Tickets</legend>
+        <legend>Show Ticks</legend>
         <label>
           <input checked type="radio" name="show-ticks" value="true" />
           True
