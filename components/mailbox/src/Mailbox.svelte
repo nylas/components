@@ -298,6 +298,7 @@
   }
 
   .mailbox-loader {
+    width: calc(100vw - 16px);
     height: 100vh;
     display: flex;
     flex-direction: column;

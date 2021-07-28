@@ -82,12 +82,12 @@
       click_action,
       "default",
     );
-    console.log({ click_action });
   }
 
   let participants: Nylas.Participant[] = [];
-  $: participants = activeThread ? activeThread.participants : [];
-
+  $: {
+    participants = activeThread ? activeThread.participants : [];
+  }
   let query: Nylas.ConversationQuery;
   $: query = {
     component_id: id,
@@ -214,6 +214,8 @@
       activeThread.starred = !activeThread.starred;
       saveActiveThread();
     }
+
+    console.log({ activeThread });
     //#endregion starred/unstarred
   }
 
@@ -281,16 +283,39 @@
   ];
   function formatPreviewDate(date: Date): string {
     const today = new Date();
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1,
+    );
     const lastWeek = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate() - 6,
     );
+    const thisYear = new Date(today.getFullYear(), 0, 1);
 
-    if (date >= lastWeek) {
+    if (date >= today) {
+      return date.toLocaleTimeString("en-US", {
+        hour12: true,
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    } else if (date >= yesterday) {
+      return "Yesterday";
+    } else if (date >= lastWeek) {
       return weekdays[date.getDay()];
+    } else if (date >= thisYear) {
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+      });
     } else {
-      return date.toLocaleDateString();
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
     }
   }
 
@@ -388,7 +413,7 @@
         }
         &.unread {
           background: var(--nylas-email-background, white);
-          .from-participants,
+          .from-message-count,
           .date {
             font-weight: 600;
             color: var(--black);
@@ -536,15 +561,17 @@
         );
         cursor: pointer;
       }
-      .from-participants {
+      .from-message-count {
         display: grid;
         grid-template-columns: auto auto auto;
         justify-content: flex-start;
         margin-right: $spacing-s;
-        .from-sub-section {
+
+        .from-participants {
           overflow: hidden;
-          text-overflow: ellipsis;
+          max-width: 120px;
           white-space: nowrap;
+          text-overflow: ellipsis;
         }
       }
       .subject-snippet-date {
@@ -624,7 +651,7 @@
 
         .subject-snippet-date {
           display: grid;
-          grid-template-columns: 1fr 70px;
+          grid-template-columns: auto 120px;
           gap: 1rem;
           .desktop-subject-snippet {
             display: block;
@@ -773,30 +800,27 @@
                   />
                 </div>
               {/if}
-              <div class="from-participants">
-                {#if activeThread.messages.length >= 1 && activeThread.messages[0].from.length}
-                  <span class="from-sub-section"
-                    >{activeThread.messages[0].from[0].name ||
-                      activeThread.messages[0].from[0].email}</span
-                  >
-                {/if}
-                {#if activeThread.messages.length > 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
-                  <span class="from-sub-section">
-                    {#if isViewingOnMobile}
-                      &nbsp;{"+" + (activeThread.participants.length - 1)}
-                    {:else}
-                      {", " +
+              <div class="from-message-count">
+                <div class="from-participants">
+                  {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
+                    <span class="from-sub-section"
+                      >{activeThread.messages[activeThread.messages.length - 1]
+                        .from[0].name ||
                         activeThread.messages[activeThread.messages.length - 1]
-                          .from[0].name ||
-                        activeThread.messages[activeThread.messages.length - 1]
-                          .from[0].email}
-                    {/if}
-                  </span>
-                  {#if show_number_of_messages}
-                    <span class="thread-message-count"
-                      >{activeThread.messages.length}</span
+                          .from[0].email}</span
                     >
                   {/if}
+                  {#if activeThread.messages.length > 1 && activeThread.messages[0].from.length && activeThread.messages[0].from[0].email !== activeThread.messages[activeThread.messages.length - 1].from[0].email}
+                    <span class="from-sub-section"
+                      >, {activeThread.messages[0].from[0].name ||
+                        activeThread.messages[0].from[0].email}</span
+                    >
+                  {/if}
+                </div>
+                {#if activeThread.messages.length > 1 && show_number_of_messages}
+                  <span class="thread-message-count"
+                    >{activeThread.messages.length}</span
+                  >
                 {/if}
               </div>
             </div>
