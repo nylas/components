@@ -19,6 +19,8 @@
     AvailabilityQuery,
   } from "@commons/types/Availability";
 
+  import { ManifestStore, EventStore } from "../../../commons/src";
+
   //#region props
   export let id: string = "";
   export let access_token: string = "";
@@ -51,9 +53,8 @@
   let main: Element;
   let clientHeight: number;
 
-  let slotSelection: SelectableSlot[] = [];
+  let slotSelection: Availability.TimeSlot = [];
 
-  $: setSlotsSelectedStatus(slotSelection);
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
@@ -174,7 +175,6 @@
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
-      console.time("day");
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       console.timeEnd("day");
       return {
@@ -236,16 +236,20 @@
   //#region event query
 
   function sendTimeSlot(timeSlot: Availability.TimeSlot) {
-    dispatchEvent("timeSlotChosen", {
-      timeSlot: setTimeSlot(slotSelection),
-    });
+    dispatchEvent("timeSlotChosen", { timeSlot });
   }
 
   function setTimeSlot(slots: obj[]): Availability.TimeSlot {
-    return hasConsecutiveSlots(slots)
+    console.log("setTimeSlot called");
+    console.log({ firstSlot: slots[0] });
+    const consecutiveSlots = hasConsecutiveSlots(slots);
+    console.log({ consecutiveSlots });
+    const consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(slots);
+    console.log({ consecutiveSlotsEndTime });
+    return consecutiveSlots
       ? {
           start_time: new Date(slots[0].start_time),
-          end_time: qetConsecutiveSlotsEndTime(slots),
+          end_time: consecutiveSlotsEndTime,
         }
       : {
           start_time: slots[0].start_time,
@@ -258,21 +262,21 @@
   }
 
   function qetConsecutiveSlotsEndTime(slots: obj[]): Date {
-    slots.sort((a, b) => a.start_time - b.start_time);
     const firstSlot = slots[0];
+    console.log({ firstSlot });
     const slotsDuration = getSlotsDuration(slots);
+    console.log({ slotsDuration });
     return new Date(
-      firstSlot.end_time.setMinutes(
+      firstSlot.start_time.setMinutes(
         firstSlot.start_time.getMinutes() + slotsDuration,
       ),
     );
   }
 
   function hasConsecutiveSlots(slots: obj[]): boolean {
-    return slots[slots.length - 1].end_time ===
-      qetConsecutiveSlotsEndTime(slots)
-      ? true
-      : false;
+    const allSlotsEndTime = slots[slots.length - 1].end_time.valueOf();
+    const consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(slots).valueOf();
+    return allSlotsEndTime == consecutiveSlotsEndTime ? true : false;
   }
 
   function setSlotsSelectedStatus(slots: obj[]) {
@@ -297,17 +301,15 @@
         : slotSelection.filter((slot) => slot != selectedSlot));
   }
 
-  function sortTimeSlots(slots: obj[]): obj[] {
-    return slots.sort((a, b) => a.start_time - b.start_time);
-  }
-
-  function sortAndSetEvent() {
-    const event = setTimeSlot(slotSelection);
-    console.log({ setTimeSlot(slotSelection); }, { query });
-    sortTimeSlots(slotSelection);
-    createEventFromTimeSlot(event, query);
-    sendTimeSlot(event);
-    resetSlotSelection(slotSelection);
+  function sortAndSetEvent(slots: obj[]) {
+    console.log("sortAndSetEvent called");
+    const sortedSlots = [...slots.sort((a, b) => a.start_time - b.start_time)];
+    console.log({ sortedSlots });
+    const event = setTimeSlot(sortedSlots);
+    console.log({ event }, { query });
+    // createEventFromTimeSlot(event, query);
+    // sendTimeSlot(event);
+    // resetSlotSelection(slotSelection);
   }
 </script>
 
@@ -442,7 +444,7 @@
                   slot.selectionStatus === "selected"
                     ? "unselected"
                     : "selected";
-                setSelectedTimeSlots(slot);
+                // setSelectedTimeSlots(slot);
               }}
             />
           {/each}
@@ -455,7 +457,10 @@
       Confirm time?
       <button
         disabled={!slotSelection.length}
-        on:click={sortAndSetEvent}
+        on:click={() => {
+          console.log("inside of button: ", { slotSelection });
+          sortAndSetEvent(slotSelection);
+        }}
         class="confirm-btn">Yes</button
       >
     </footer>
