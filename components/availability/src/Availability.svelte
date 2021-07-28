@@ -49,7 +49,7 @@
     slotSelection.length > 1
       ? [...slotSelection.sort((a, b) => a.start_time - b.start_time)]
       : slotSelection;
-  // slots.filter by selected stat
+
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
@@ -191,6 +191,7 @@
   };
   //#region event query
 
+  //#region book consecutive slots as one event
   function sendTimeSlot(timeSlot: Availability.TimeSlot) {
     dispatchEvent("timeSlotChosen", { timeSlot });
   }
@@ -224,7 +225,9 @@
       return lastSlotEndTime == lastConsecutiveSlotEndTime ? true : false;
     }
   }
+  //#endregion book consecutive slots as one event
 
+  //#region booking event logic for single time slot or consecutive time slots
   function setSlotsSelectedStatus(slots: obj[]) {
     slots.forEach((slot) => (slot.selectionStatus = "selected"));
   }
@@ -262,6 +265,7 @@
       sortAndSetEvent([slot]);
     }
   }
+  //#region booking event logic for single time slot or consecutive time slots
 </script>
 
 <style lang="scss">
