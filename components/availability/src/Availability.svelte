@@ -197,34 +197,40 @@
   })();
   $: calendarEmails = calendars.map((_calendar) => _calendar.name);
   let availabilityQuery: Availability.AvailabilityQuery;
-  $: (async () => {
-    if (calendarEmails) {
-      availabilityQuery = {
-        body: {
-          emails: calendarEmails,
-          free_busy: [],
-          open_hours: [],
-          duration_minutes: slot_size,
-          start_time:
-            new Date(new Date(start_date).setHours(start_hour)).getTime() /
-            1000,
-          end_time:
-            new Date(new Date(start_date).setHours(end_hour)).getTime() / 1000,
-          interval_minutes,
-        },
-        component_id: id,
-      };
-      const avail = await AvailabilityStore.getAvailability(availabilityQuery);
-      if (avail?.time_slots.length) {
-        available_times = avail.time_slots.map((a) => ({
-          start_time: new Date(a.start * 1000),
-          end_time: new Date(a.end * 1000),
-          object: a.object,
-          status: a.status,
-        }));
-      }
+  $: if (calendarEmails) {
+    updateAvailability();
+  }
+  $: if (slot_size) {
+    updateAvailability();
+  }
+
+  async function updateAvailability() {
+    availabilityQuery = {
+      body: {
+        emails: calendarEmails,
+        free_busy: [],
+        open_hours: [],
+        duration_minutes:
+          typeof slot_size === "string" ? parseInt(slot_size) : slot_size,
+        start_time:
+          new Date(new Date(start_date).setHours(start_hour)).getTime() / 1000,
+        end_time:
+          new Date(new Date(start_date).setHours(end_hour)).getTime() / 1000,
+        interval_minutes,
+      },
+      component_id: id,
+    };
+    const avail = await AvailabilityStore.getAvailability(availabilityQuery);
+    if (avail?.time_slots.length) {
+      available_times = avail.time_slots.map((a) => ({
+        start_time: new Date(a.start * 1000),
+        end_time: new Date(a.end * 1000),
+        object: a.object,
+        status: a.status,
+      }));
     }
-  })();
+  }
+
   function handleTimeSlotClick(selectedSlot: any): string {
     if (selectedSlot.selectionStatus === "unselected") {
       if (click_action === "choose") {
