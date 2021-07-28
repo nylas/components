@@ -34,7 +34,6 @@
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
   export let allow_booking: boolean = false;
-
   //#endregion props
 
   //#region mount
@@ -231,7 +230,7 @@
   $: query = {
     component_id: id,
     access_token: access_token,
-    calendarIDs: calendarIDs,
+    calendarIDs: [],
   };
   //#region event query
 
@@ -240,43 +239,33 @@
   }
 
   function setTimeSlot(slots: obj[]): Availability.TimeSlot {
-    console.log("setTimeSlot called");
-    console.log({ firstSlot: slots[0] });
     const consecutiveSlots = hasConsecutiveSlots(slots);
-    console.log({ consecutiveSlots });
-    const consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(slots);
-    console.log({ consecutiveSlotsEndTime });
-    return consecutiveSlots
-      ? {
-          start_time: new Date(slots[0].start_time),
-          end_time: consecutiveSlotsEndTime,
-        }
-      : {
-          start_time: slots[0].start_time,
-          end_time: slots[0].end_time,
-        };
+    return {
+      start_time: slots[0].start_time,
+      end_time: consecutiveSlots ? consecutiveSlotsEndTime : slots[0].end_time,
+    };
   }
 
   function getSlotsDuration(slots: obj[]): number {
     return slot_size * slots.length;
   }
 
-  function qetConsecutiveSlotsEndTime(slots: obj[]): Date {
-    const firstSlot = slots[0];
-    console.log({ firstSlot });
+  function qetConsecutiveSlotsEndTime(slots: obj[]) {
+    const startTime = new Date(slots[0].start_time);
     const slotsDuration = getSlotsDuration(slots);
-    console.log({ slotsDuration });
     return new Date(
-      firstSlot.start_time.setMinutes(
-        firstSlot.start_time.getMinutes() + slotsDuration,
-      ),
+      startTime.setMinutes(startTime.getMinutes() + slotsDuration),
     );
   }
 
   function hasConsecutiveSlots(slots: obj[]): boolean {
-    const allSlotsEndTime = slots[slots.length - 1].end_time.valueOf();
-    const consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(slots).valueOf();
-    return allSlotsEndTime == consecutiveSlotsEndTime ? true : false;
+    if (slots.length <= 1) {
+      return false;
+    } else {
+      const lastSlotEndTime = slots[slots.length - 1].end_time.valueOf();
+      const lastConsecutiveSlotEndTime = consecutiveSlotsEndTime.valueOf();
+      return lastSlotEndTime == lastConsecutiveSlotEndTime ? true : false;
+    }
   }
 
   function setSlotsSelectedStatus(slots: obj[]) {
@@ -302,14 +291,19 @@
   }
 
   function sortAndSetEvent(slots: obj[]) {
-    console.log("sortAndSetEvent called");
-    const sortedSlots = [...slots.sort((a, b) => a.start_time - b.start_time)];
-    console.log({ sortedSlots });
-    const event = setTimeSlot(sortedSlots);
-    console.log({ event }, { query });
-    // createEventFromTimeSlot(event, query);
-    // sendTimeSlot(event);
-    // resetSlotSelection(slotSelection);
+    const slotsCopy = [...slots];
+    const event = setTimeSlot(slotsCopy);
+    createEventFromTimeSlot(event, query);
+    sendTimeSlot(event);
+    resetSlotSelection(slotSelection);
+  }
+
+  function toggleClickAction(slot: obj) {
+    if (click_action === "verify") {
+      setSelectedTimeSlots(slot);
+    } else {
+      sortAndSetEvent([slot]);
+    }
   }
 </script>
 
@@ -317,7 +311,7 @@
   $headerHeight: 50px;
   main {
     height: 100%;
-    overflow: hidden;
+    // overflow: hidden;
     display: grid;
     grid-template-rows: 1fr auto;
 
@@ -444,7 +438,7 @@
                   slot.selectionStatus === "selected"
                     ? "unselected"
                     : "selected";
-                // setSelectedTimeSlots(slot);
+                toggleClickAction(slot);
               }}
             />
           {/each}
@@ -455,11 +449,16 @@
   {#if click_action === "verify"}
     <footer class="confirmation">
       Confirm time?
+      <label>
+        <input type="email" required bind:value={eventOrganizer} />
+        Your email address
+      </label>
       <button
-        disabled={!slotSelection.length}
+        disabled={!slotSelection.length && !eventOrganizer.length
+          ? true
+          : false}
         on:click={() => {
-          console.log("inside of button: ", { slotSelection });
-          sortAndSetEvent(slotSelection);
+          sortAndSetEvent(sortedSlots);
         }}
         class="confirm-btn">Yes</button
       >
