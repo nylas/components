@@ -25,11 +25,7 @@ function initializeEvents() {
         return await eventsMap[queryKey];
       }
     },
-    createEvent: (
-      event: Events.Event,
-      query: Events.EventQuery,
-      component: "agenda" | "availability" = "agenda",
-    ) => {
+    createEvent: (event: Events.Event, query: Events.EventQuery) => {
       const queryKey = JSON.stringify(query);
       if (!!eventsMap[queryKey]) {
         eventsMap[queryKey] = Promise.all([
@@ -39,11 +35,9 @@ function initializeEvents() {
           return events.flat();
         });
       } else {
-        eventsMap[queryKey] = createEvent(event, query, component).then(
-          (event) => {
-            return [event];
-          },
-        );
+        eventsMap[queryKey] = createEvent(event, query).then((event) => {
+          return [event];
+        });
       }
 
       update((events) => {

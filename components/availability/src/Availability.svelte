@@ -283,7 +283,7 @@
     event: Availability.TimeSlot,
     query: Availability.eventQuery,
   ) {
-    EventStore.createEvent(event, query, "availability");
+    EventStore.createEvent(event, query);
   }
 
   function setSelectedTimeSlots(selectedSlot: obj): obj[] {
