@@ -1,7 +1,6 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  // import { ManifestStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
@@ -23,7 +22,10 @@
   export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
   export let allow_booking: boolean = false;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 332be97 (Everything working expect the POST to /availability/events)
   //#endregion props
 
   //#region mount
@@ -42,8 +44,12 @@
   let main: Element;
   let clientHeight: number;
 
-  let slotSelection: Availability.TimeSlot = [];
-  $: console.log({ slotSelection });
+  let slotSelection: Availability.SelectableSlot[] = [];
+  $: sortedSlots =
+    slotSelection.length > 1
+      ? [...slotSelection.sort((a, b) => a.start_time - b.start_time)]
+      : slotSelection;
+  // slots.filter by selected stat
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
@@ -169,28 +175,19 @@
 
   let eventOrganizer: string = "";
   let eventParticipant: array = []; // email, name, status
+  let consecutiveSlotsEndTime: Date;
+  $: consecutiveSlotsEndTime;
 
-  // function handleTimeSlotClick(selectedSlot: any): string {
-  //   if (selectedSlot.selectionStatus === "unselected") {
-  //     if (click_action === "choose") {
-  //       sendTimeSlot(selectedSlot);
-  //     }
-  //     slotSelection = [...slotSelection, selectedSlot];
-  //     return "selected";
-  //   } else {
-  //     slotSelection = slotSelection.filter(
-  //       (chosenSlot) => chosenSlot != selectedSlot,
-  //     );
+  $: if (sortedSlots.length > 1) {
+    consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(sortedSlots);
+  }
 
-  //     return "unselected";
-  //   }
-  // }
   //#region event query
   let query: Availability.EventQuery;
   $: query = {
     component_id: id,
     access_token: access_token,
-    calendarIDs: calendarIDs,
+    calendarIDs: [],
   };
   //#region event query
 
@@ -199,43 +196,33 @@
   }
 
   function setTimeSlot(slots: obj[]): Availability.TimeSlot {
-    console.log("setTimeSlot called");
-    console.log({ firstSlot: slots[0] });
     const consecutiveSlots = hasConsecutiveSlots(slots);
-    console.log({ consecutiveSlots });
-    const consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(slots);
-    console.log({ consecutiveSlotsEndTime });
-    return consecutiveSlots
-      ? {
-          start_time: new Date(slots[0].start_time),
-          end_time: consecutiveSlotsEndTime,
-        }
-      : {
-          start_time: slots[0].start_time,
-          end_time: slots[0].end_time,
-        };
+    return {
+      start_time: slots[0].start_time,
+      end_time: consecutiveSlots ? consecutiveSlotsEndTime : slots[0].end_time,
+    };
   }
 
   function getSlotsDuration(slots: obj[]): number {
     return slot_size * slots.length;
   }
 
-  function qetConsecutiveSlotsEndTime(slots: obj[]): Date {
-    const firstSlot = slots[0];
-    console.log({ firstSlot });
+  function qetConsecutiveSlotsEndTime(slots: obj[]) {
+    const startTime = new Date(slots[0].start_time);
     const slotsDuration = getSlotsDuration(slots);
-    console.log({ slotsDuration });
     return new Date(
-      firstSlot.start_time.setMinutes(
-        firstSlot.start_time.getMinutes() + slotsDuration,
-      ),
+      startTime.setMinutes(startTime.getMinutes() + slotsDuration),
     );
   }
 
   function hasConsecutiveSlots(slots: obj[]): boolean {
-    const allSlotsEndTime = slots[slots.length - 1].end_time.valueOf();
-    const consecutiveSlotsEndTime = qetConsecutiveSlotsEndTime(slots).valueOf();
-    return allSlotsEndTime == consecutiveSlotsEndTime ? true : false;
+    if (slots.length <= 1) {
+      return false;
+    } else {
+      const lastSlotEndTime = slots[slots.length - 1].end_time.valueOf();
+      const lastConsecutiveSlotEndTime = consecutiveSlotsEndTime.valueOf();
+      return lastSlotEndTime == lastConsecutiveSlotEndTime ? true : false;
+    }
   }
 
   function setSlotsSelectedStatus(slots: obj[]) {
@@ -261,14 +248,19 @@
   }
 
   function sortAndSetEvent(slots: obj[]) {
-    console.log("sortAndSetEvent called");
-    const sortedSlots = [...slots.sort((a, b) => a.start_time - b.start_time)];
-    console.log({ sortedSlots });
-    const event = setTimeSlot(sortedSlots);
-    console.log({ event }, { query });
-    // createEventFromTimeSlot(event, query);
-    // sendTimeSlot(event);
-    // resetSlotSelection(slotSelection);
+    const slotsCopy = [...slots];
+    const event = setTimeSlot(slotsCopy);
+    createEventFromTimeSlot(event, query);
+    sendTimeSlot(event);
+    resetSlotSelection(slotSelection);
+  }
+
+  function toggleClickAction(slot: obj) {
+    if (click_action === "verify") {
+      setSelectedTimeSlots(slot);
+    } else {
+      sortAndSetEvent([slot]);
+    }
   }
 </script>
 
@@ -276,7 +268,7 @@
   $headerHeight: 50px;
   main {
     height: 100%;
-    overflow: hidden;
+    // overflow: hidden;
     display: grid;
     grid-template-rows: 1fr auto;
 
@@ -403,7 +395,7 @@
                   slot.selectionStatus === "selected"
                     ? "unselected"
                     : "selected";
-                // setSelectedTimeSlots(slot);
+                toggleClickAction(slot);
               }}
             />
           {/each}
@@ -414,11 +406,16 @@
   {#if click_action === "verify"}
     <footer class="confirmation">
       Confirm time?
+      <label>
+        <input type="email" required bind:value={eventOrganizer} />
+        Your email address
+      </label>
       <button
-        disabled={!slotSelection.length}
+        disabled={!slotSelection.length && !eventOrganizer.length
+          ? true
+          : false}
         on:click={() => {
-          console.log("inside of button: ", { slotSelection });
-          sortAndSetEvent(slotSelection);
+          sortAndSetEvent(sortedSlots);
         }}
         class="confirm-btn">Yes</button
       >
