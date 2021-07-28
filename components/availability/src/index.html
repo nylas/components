@@ -54,9 +54,11 @@
       component.calendars = calendars;
 
       component.available_times = available_times;
-      // component.calendar_ids = ["2ewecs13x79ujq2o1hnebstcn", "a3rt31hjm433ai64tf89jc2te", "bpbn78cpuei9ztm9xqk7lezp1"];
-      component.calendar_ids =
-        "2ewecs13x79ujq2o1hnebstcn,a3rt31hjm433ai64tf89jc2te,bpbn78cpuei9ztm9xqk7lezgh";
+      component.email_ids = [
+        "pooja.g@nylas.com",
+        "phil.r@nylas.com",
+        "pooja169usp@gmail.com",
+      ];
       component.addEventListener("timeSlotChosen", (event) => {
         console.log(event.detail.timeslot);
       });

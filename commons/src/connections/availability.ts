@@ -7,9 +7,9 @@ import {
 
 export const fetchAvailability = (
   query: Availability.AvailabilityQuery,
-): Promise<Availability.AvailabilityResponse> => {
+): Promise<Availability.AvailabilityResponse[]> => {
   return fetch(
-    `${getMiddlewareApiUrl(query.component_id)}/calendars/availability`,
+    `${getMiddlewareApiUrl(query.component_id)}/calendars/free-busy`,
     getFetchConfig({
       method: "POST",
       component_id: query.component_id,
@@ -18,7 +18,7 @@ export const fetchAvailability = (
   )
     .then(async (apiResponse) => {
       const json = await handleResponse<
-        Nylas.MiddlewareResponse<Availability.AvailabilityResponse>
+        Nylas.MiddlewareResponse<Availability.AvailabilityResponse[]>
       >(apiResponse);
       return json.response;
     })

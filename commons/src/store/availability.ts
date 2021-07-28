@@ -3,11 +3,11 @@ import { fetchAvailability } from "../connections/availability";
 
 function initializeAvailability() {
   const { subscribe, update, set } = writable<
-    Record<string, Promise<Availability.AvailabilityResponse>>
+    Record<string, Promise<Availability.AvailabilityResponse[]>>
   >({});
   let availabilityMap: Record<
     string,
-    Promise<Availability.AvailabilityResponse>
+    Promise<Availability.AvailabilityResponse[]>
   > = {};
 
   return {

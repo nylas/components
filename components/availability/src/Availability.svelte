@@ -24,6 +24,8 @@
   export let click_action: "choose" | "verify" = "choose";
   export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
+  export let email_ids: string[] = [];
+  export let interval_minutes: number = 10;
   //#endregion props
 
   //#region mount
@@ -173,61 +175,56 @@
     });
   //#endregion layout
 
-  // Accept either comma-separated string, or array.
-  $: calendarIDs = (() => {
-    let IDList = calendar_ids;
-    if (typeof calendar_ids === "string" && calendar_ids.length) {
-      IDList = IDList?.split(",").map((id: string) => id.trim());
-    } else if (calendar_id) {
-      IDList = [calendar_id];
-    }
-    return IDList;
-  })();
-
-  let calendars: Events.Calendar[] = [];
-  $: (async () => {
-    if (id && calendarIDs.length) {
-      const calendarQuery: Events.CalendarQuery = {
-        access_token,
-        component_id: id,
-        calendarIDs,
-      };
-      calendars = await CalendarStore.getCalendars(calendarQuery);
-    }
-  })();
-  $: calendarEmails = calendars.map((_calendar) => _calendar.name);
   let availabilityQuery: Availability.AvailabilityQuery;
-  $: if (calendarEmails) {
+  $: if (email_ids?.length) {
     updateAvailability();
   }
-  $: if (slot_size) {
+  // When dates_to_show is updated, update availability
+  $: if (dates_to_show) {
     updateAvailability();
   }
 
   async function updateAvailability() {
-    availabilityQuery = {
-      body: {
-        emails: calendarEmails,
-        free_busy: [],
-        open_hours: [],
-        duration_minutes:
-          typeof slot_size === "string" ? parseInt(slot_size) : slot_size,
-        start_time:
-          new Date(new Date(start_date).setHours(start_hour)).getTime() / 1000,
-        end_time:
-          new Date(new Date(start_date).setHours(end_hour)).getTime() / 1000,
-        interval_minutes,
-      },
-      component_id: id,
-    };
-    const avail = await AvailabilityStore.getAvailability(availabilityQuery);
-    if (avail?.time_slots.length) {
-      available_times = avail.time_slots.map((a) => ({
-        start_time: new Date(a.start * 1000),
-        end_time: new Date(a.end * 1000),
-        object: a.object,
-        status: a.status,
-      }));
+    let newCalendarTimeslotsForGivenDays = [];
+    for (let i = 0; i < dates_to_show; i++) {
+      const availability_date = new Date(
+        new Date().setDate(new Date().getDate() + i),
+      );
+      availabilityQuery = {
+        body: {
+          emails: email_ids,
+          start_time:
+            new Date(
+              new Date(availability_date).setHours(start_hour),
+            ).getTime() / 1000,
+          end_time:
+            new Date(new Date(availability_date).setHours(end_hour)).getTime() /
+            1000,
+        },
+        component_id: id,
+      };
+      // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
+      const consolidatedAvailabilityForGivenDay =
+        await AvailabilityStore.getAvailability(availabilityQuery);
+      if (consolidatedAvailabilityForGivenDay?.length) {
+        let freeBusyCalendars: any = [];
+        consolidatedAvailabilityForGivenDay.forEach((user) => {
+          freeBusyCalendars.push({
+            email_address: user.email,
+            availability: "busy",
+            time_slots: user.time_slots.map((_slot) => ({
+              start_time: _slot.start_time,
+              end_time: _slot.end_time,
+            })),
+          });
+        });
+        newCalendarTimeslotsForGivenDays.push(...freeBusyCalendars);
+        console.log(
+          "freeBusyCalendars: ",
+          freeBusyCalendars,
+          newCalendarTimeslotsForGivenDays,
+        );
+      }
     }
   }
 
@@ -406,7 +403,8 @@
         on:click={() => {
           slotSelection.forEach((selectedSlot) => {
             sendTimeSlot(selectedSlot);
-            selectedSlot.selectionStatus = "unselected";
+            selectedSlot.selectionStatus =
+              Availability.SelectionStatus.UNSELECTED;
             slotSelection = [];
           });
         }}
