@@ -37,8 +37,8 @@ export const fetchEvents = async (
 
 export const fetchCalendars = async (
   query: Events.CalendarQuery,
-): Promise<Events.Calendar[]> => {
-  return Promise.all(
+): Promise<unknown> => {
+  return Promise.allSettled(
     query.calendarIDs.map((calendar: unknown) => {
       return fetch(
         `${getMiddlewareApiUrl(
@@ -58,7 +58,10 @@ export const fetchCalendars = async (
     }),
   )
     .then((responses) => {
-      return responses.flat();
+      const filteredResponses = responses
+        .filter((calendar) => calendar.status === "fulfilled")
+        .map((cal) => cal.value);
+      return filteredResponses.flat();
     })
     .catch((error) => handleError(query.component_id || "unknown", error));
 };

@@ -20,6 +20,7 @@ export {
   sendCleanConversationFeedback,
 } from "./connections/neural";
 
+export { AvailabilityStore } from "./store/availability";
 export { CalendarStore } from "./store/calendars";
 export { ContactStore } from "./store/contacts";
 export { ConversationStore } from "./store/conversations";
