@@ -220,10 +220,10 @@ describe("Email component", () => {
         cy.get(component).find(".message-body").should("contain", "Bye!");
         cy.get(component).find(".name").should("exist");
         cy.get(component).find(".name").should("contain", "Test User");
-        cy.get(component).find(".email").should("exist");
+        cy.get(component).find(".email-tooltip").should("exist");
         cy.get(component)
-          .find(".email")
-          .should("contain", "<nylascypresstest@gmail.com>");
+          .find(".email-tooltip")
+          .should("contain", "nylascypresstest@gmail.com");
         cy.get(component).find(".message-date span").should("exist");
         cy.get(component)
           .find(".message-date span")
