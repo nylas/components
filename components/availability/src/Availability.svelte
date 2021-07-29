@@ -75,7 +75,7 @@
               }
             } else if (c.availability === "free" || !c.availability) {
               // if they pass in a calendar, but don't have availability, assume the timeslots are available.
-              if (availabilityavailabilityExistsInSlotExistsInSlot) {
+              if (availabilityExistsInSlot) {
                 freeCalendars.push(c.emailAddress);
               }
             }
