@@ -60,28 +60,23 @@
       .slice(0, -1) // dont show the 25th hour
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
-        let freeCalendars = [];
+        const freeCalendars: string[] = [];
 
         let availability = "available"; // default
 
         if (calendars.length) {
           calendars.forEach((c) => {
+            let availabilityExistsInSlot = c.timeslots.some(
+              (slot) => time >= slot.start_time && endTime <= slot.end_time,
+            );
             if (c.availability === "busy") {
-              if (
-                !c.timeslots.some(
-                  (slot) => time >= slot.start_time && endTime <= slot.end_time,
-                )
-              ) {
-                freeCalendars.push(c.email_address);
+              if (!availabilityExistsInSlot) {
+                freeCalendars.push(c.emailAddress);
               }
             } else if (c.availability === "free" || !c.availability) {
               // if they pass in a calendar, but don't have availability, assume the timeslots are available.
-              if (
-                c.timeslots.some(
-                  (slot) => time >= slot.start_time && endTime <= slot.end_time,
-                )
-              ) {
-                freeCalendars.push(c.email_address);
+              if (availabilityavailabilityExistsInSlotExistsInSlot) {
+                freeCalendars.push(c.emailAddress);
               }
             }
           });

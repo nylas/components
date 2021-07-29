@@ -1,4 +1,10 @@
 declare namespace Availability {
+  enum AvailabilityStatus {
+    Free = "free",
+    Busy = "busy",
+    Partial = "partial",
+  }
+
   interface Manifest extends Nylas.Manifest {
     start_hour: number;
     end_hour: number;
@@ -10,8 +16,8 @@ declare namespace Availability {
   }
 
   interface Calendar {
-    email_address: string;
-    availability: "free" | "busy";
+    emailAddress: string;
+    availability: AvailabilityStatus.Free | AvailabilityStatus.Busy;
     timeslots: TimeSlot[];
   }
   interface TimeSlot {
@@ -20,6 +26,6 @@ declare namespace Availability {
   }
   interface SelectableSlot extends TimeSlot {
     selectionStatus: "unselected" | "selected";
-    availability: "available" | "unavailable" | "partial";
+    availability: AvailabilityStatus;
   }
 }
