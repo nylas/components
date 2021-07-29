@@ -355,7 +355,6 @@
     position: relative;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
-      padding: $spacing-s;
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
       header {
@@ -364,7 +363,7 @@
       }
       &.condensed {
         height: $mobile-collapsed-height;
-        padding: $spacing-m;
+        padding-right: $spacing-m;
         padding-left: $spacing-s;
         display: flex;
         justify-content: space-between;
@@ -650,7 +649,22 @@
           flex-direction: column;
           align-items: center;
           div.individual-message {
-            max-width: 570px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            div.message-head,
+            div.message-body {
+              width: 100%;
+              max-width: 570px;
+            }
+
+            &.condensed {
+              div.snippet {
+                width: 100%;
+                max-width: 570px;
+              }
+            }
 
             div.message-date {
               font-size: 14px;
@@ -795,13 +809,6 @@
                       </div>
                     </div>
                     <div class="snippet">
-                      {#if click_action !== "mailbox"}
-                        <span
-                          class={messageLoadStatus[msgIndex] === "loading"
-                            ? "loading"
-                            : "initial"}>Expanding your message...</span
-                        >
-                      {/if}
                       {message.snippet}
                     </div>
                   {/if}
@@ -842,8 +849,9 @@
                     >
                   {/if}
                   {#if activeThread.messages.length > 1 && activeThread.messages[0].from.length && activeThread.messages[0].from[0].email !== activeThread.messages[activeThread.messages.length - 1].from[0].email}
+                    ,
                     <span class="from-sub-section"
-                      >, {activeThread.messages[0].from[0].name ||
+                      >{activeThread.messages[0].from[0].name ||
                         activeThread.messages[0].from[0].email}</span
                     >
                   {/if}
