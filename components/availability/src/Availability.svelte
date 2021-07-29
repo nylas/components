@@ -22,10 +22,6 @@
   export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
   export let allow_booking: boolean = false;
-<<<<<<< HEAD
-
-=======
->>>>>>> 332be97 (Everything working expect the POST to /availability/events)
   //#endregion props
 
   //#region mount
@@ -187,7 +183,8 @@
   $: query = {
     component_id: id,
     access_token: access_token,
-    calendarIDs: [],
+    calendarID: "",
+    participants: [{ email_address: eventOrganizer }],
   };
   //#region event query
 
@@ -228,7 +225,6 @@
   //#endregion book consecutive slots as one event
 
   //#region booking event logic for single time slot or consecutive time slots
-
   function resetSlotSelection(slots: obj[]): [] {
     return (slots = []);
   }
@@ -250,7 +246,7 @@
   function sortAndSetEvent(slots: obj[]) {
     const slotsCopy = [...slots];
     const event = setTimeSlot(slotsCopy);
-    createEventFromTimeSlot(event, query);
+    createEventFromTimeSlot(event, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
     sendTimeSlot(event);
     resetSlotSelection(slotSelection);
   }
@@ -263,6 +259,16 @@
     }
   }
   //#region booking event logic for single time slot or consecutive time slots
+
+  // detect when slots are consecutive (could be more than one cluster of slots)
+  // check if current time slot end_time + slot_size (make into a variable) in minutes === next time slot end_time --> this needs to be done using .valueOf() method
+  // if so, return new obj with start_time = current_slot start_time and end_time = current time slot end_time + slot_size
+  // repeat this for next time slot
+  // if not, return start_time and end_time obj
+  // this will be a new array, which gets dispatched to parent
+
+  // only have one click action
+  // bubble consecutive slot(s) and single time slots to parent
 </script>
 
 <style lang="scss">
@@ -356,12 +362,6 @@
         }
       }
     }
-
-    footer.confirmation {
-      text-align: center;
-      padding: 1rem;
-      grid-column: -1 / 1;
-    }
   }
 </style>
 
@@ -404,20 +404,4 @@
       </div>
     {/each}
   </div>
-  {#if click_action === "verify" && allow_booking && slotSelection.length}
-    <footer class="confirmation">
-      <label>
-        Your email address
-        <input type="email" required bind:value={eventOrganizer} />
-      </label>
-      <button
-        disabled={!eventOrganizer.length}
-        on:click={() => {
-          sortAndSetEvent(sortedSlots);
-        }}
-        type="button"
-        class="confirm-btn">Confirm time</button
-      >
-    </footer>
-  {/if}
 </main>
