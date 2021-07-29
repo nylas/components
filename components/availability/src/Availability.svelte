@@ -19,14 +19,7 @@
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
   export let calendars: Availability.Calendar[] = [];
-  // export let available_times:
-  //   | Availability.TimeSlot[]
-  //   | Availability.TimeSlot[][] = [];
-  // export let unavailable_times:
-  //   | Availability.TimeSlot[]
-  //   | Availability.TimeSlot[][] = [];
   export let show_ticks: boolean = true;
-
   //#endregion props
 
   //#region mount
