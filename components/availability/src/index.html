@@ -1,191 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Availability Demo</title>
+    <script src="../index.js"></script>
 
-<head>
-  <meta content="width=device-width,initial-scale=1" name="viewport" />
-  <meta charset="UTF-8" />
-  <title>Availability Demo</title>
-  <script src="../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const component = document.querySelector("nylas-availability");
+        const startTimeInput = document.querySelector("input#start-time");
+        const endTimeInput = document.querySelector("input#end-time");
+        const daysInput = document.querySelector("input#days-to-show");
+        const calendars = [
+          {
+            email_address: "person@name.com",
+            availability: "busy",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+              },
+            ],
+          },
+          {
+            email_address: "thelonious@nylas.com",
+            availability: "busy",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+              },
+            ],
+          },
+          {
+            email_address: "booker@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(10, 30, 0, 0)),
+                end_time: new Date(new Date().setHours(23, 0, 0, 0)),
+              },
+            ],
+          },
+        ];
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const component = document.querySelector("nylas-availability");
-      const startTimeInput = document.querySelector("input#start-time");
-      const endTimeInput = document.querySelector("input#end-time");
-      const daysInput = document.querySelector("input#days-to-show");
+        component.calendars = calendars;
 
-      const calendars = [
-        {
-          email_address: "person@name.com",
-          availability: "busy",
-          timeslots: [
-            {
-              start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(6, 0, 0, 0)),
-            },
-            {
-              start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(15, 0, 0, 0)),
-            },
-          ],
-        },
-        {
-          email_address: "thelonious@nylas.com",
-          availability: "busy",
-          timeslots: [
-            {
-              start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-            },
-          ],
-        },
-        {
-          email_address: "booker@nylas.com",
-          availability: "free",
-          timeslots: [
-            {
-              start_time: new Date(new Date().setHours(5, 30, 0, 0)),
-              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
-            },
-          ],
-        },
-      ];
-
-      component.calendars = calendars;
-
-      component.available_times = available_times;
-      component.email_ids = [
-        "pooja.g@nylas.com",
-        "phil.r@nylas.com",
-        "pooja169usp@gmail.com",
-      ];
-      component.addEventListener("timeSlotChosen", (event) => {
-        console.log(event.detail.timeslot);
-      });
-
-      startTimeInput.addEventListener("input", (event) => {
-        component.start_hour = parseInt(event.target.value);
-      });
-
-      endTimeInput.addEventListener("input", (event) => {
-        component.end_hour = parseInt(event.target.value);
-      });
-
-      daysInput.addEventListener("input", (event) => {
-        component.dates_to_show = parseInt(event.target.value);
-      });
-
-      document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
-        elem.addEventListener("change", function (event) {
-          component.slot_size = event.target.value;
+        component.email_ids = ["pooja.g@nylas.com", "phil.r@nylas.com"];
+        component.addEventListener("timeSlotChosen", (event) => {
+          console.log(event.detail.timeslot);
         });
-      });
 
-      document
-        .querySelectorAll('input[name="click-action"]')
-        .forEach((elem) => {
+        startTimeInput.addEventListener("input", (event) => {
+          component.start_hour = parseInt(event.target.value);
+        });
+
+        endTimeInput.addEventListener("input", (event) => {
+          component.end_hour = parseInt(event.target.value);
+        });
+
+        daysInput.addEventListener("input", (event) => {
+          component.dates_to_show = parseInt(event.target.value);
+        });
+
+        document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
           elem.addEventListener("change", function (event) {
-            component.click_action = event.target.value;
+            component.slot_size = event.target.value;
           });
         });
 
-      document
-        .querySelectorAll('input[name="show-ticks"]')
-        .forEach((elem) => {
-          elem.addEventListener("change", function (event) {
-            component.show_ticks = JSON.parse(event.target.value);
+        document
+          .querySelectorAll('input[name="click-action"]')
+          .forEach((elem) => {
+            elem.addEventListener("change", function (event) {
+              component.click_action = event.target.value;
+            });
           });
-        });
-    });
-  </script>
-</head>
-<style>
-  body {
-    padding: 0;
-    margin: 0;
-  }
 
-  aside {
-    position: fixed;
-    z-index: 2;
-    top: 0;
-    right: 0;
-    width: 250px;
-    background: #333;
-    padding: 0.5rem;
-    color: white;
-  }
+        document
+          .querySelectorAll('input[name="show-ticks"]')
+          .forEach((elem) => {
+            elem.addEventListener("change", function (event) {
+              component.show_ticks = JSON.parse(event.target.value);
+            });
+          });
+      });
+    </script>
+  </head>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
 
-  aside label {
-    display: block;
-  }
+    aside {
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      right: 0;
+      width: 250px;
+      background: #333;
+      padding: 0.5rem;
+      color: white;
+    }
 
-  .demo-box {
-    width: 80vw;
-    margin-left: 10vw;
-    height: 80vh;
-    margin-top: 10vh;
-  }
-</style>
+    aside label {
+      display: block;
+    }
 
-<body>
-  <aside class="controls">
-    <label>
-      <strong>Days to show</strong>
-      <input id="days-to-show" class="days" type="range" min="1" max="7" step="1" value="1" />
-      <span class="days"></span>
-    </label>
+    .demo-box {
+      width: 80vw;
+      margin-left: 10vw;
+      height: 80vh;
+      margin-top: 10vh;
+    }
+  </style>
 
-    <label>
-      <strong>Start Time</strong>
-      <input id="start-time" class="start" type="range" min="0" max="24" step="1" value="0" />
-      <span class="start"></span>
-    </label>
-    <label>
-      <strong>End Time</strong>
-      <input id="end-time" class="end" type="range" min="0" max="24" step="1" value="24" />
-      <span class="end"></span>
-    </label>
-    <hr />
-    <strong>Timeslot size</strong>
-    <label>
-      <input checked type="radio" name="slot-size" value="15" />
-      <strong>15 minutes</strong>
-    </label>
-    <label>
-      <input type="radio" name="slot-size" value="30" />
-      <strong>30 minutes</strong>
-    </label>
-    <label>
-      <input type="radio" name="slot-size" value="60" />
-      <strong>60 minutes</strong>
-    </label>
-    <strong>Click action</strong>
-    <label>
-      <input checked type="radio" name="click-action" value="choose" />
-      <strong>Choose</strong>
-    </label>
-    <label>
-      <input type="radio" name="click-action" value="verify" />
-      <strong>Verify</strong>
-    </label>
-    <strong>Show Ticks</strong>
-    <label>
-      <input checked type="radio" name="show-ticks" value="true" />
-      <strong>True</strong>
-    </label>
-    <label>
-      <input type="radio" name="show-ticks" value="false" />
-      <strong>False</strong>
-    </label>
-  </aside>
+  <body>
+    <aside class="controls">
+      <label>
+        <strong>Days to show</strong>
+        <input
+          id="days-to-show"
+          class="days"
+          type="range"
+          min="1"
+          max="7"
+          step="1"
+          value="1"
+        />
+        <span class="days"></span>
+      </label>
 
-  <main>
-    <div class="demo-box">
-      <nylas-availability id="356408b7-da81-47d2-83cc-95d9f27abd4a">
-      </nylas-availability>
-    </div>
-  </main>
-</body>
+      <label>
+        <strong>Start Time</strong>
+        <input
+          id="start-time"
+          class="start"
+          type="range"
+          min="0"
+          max="24"
+          step="1"
+          value="0"
+        />
+        <span class="start"></span>
+      </label>
+      <label>
+        <strong>End Time</strong>
+        <input
+          id="end-time"
+          class="end"
+          type="range"
+          min="0"
+          max="24"
+          step="1"
+          value="24"
+        />
+        <span class="end"></span>
+      </label>
+      <hr />
+      <strong>Timeslot size</strong>
+      <label>
+        <input checked type="radio" name="slot-size" value="15" />
+        <strong>15 minutes</strong>
+      </label>
+      <label>
+        <input type="radio" name="slot-size" value="30" />
+        <strong>30 minutes</strong>
+      </label>
+      <label>
+        <input type="radio" name="slot-size" value="60" />
+        <strong>60 minutes</strong>
+      </label>
+      <strong>Click action</strong>
+      <label>
+        <input checked type="radio" name="click-action" value="choose" />
+        <strong>Choose</strong>
+      </label>
+      <label>
+        <input type="radio" name="click-action" value="verify" />
+        <strong>Verify</strong>
+      </label>
+      <strong>Show Ticks</strong>
+      <label>
+        <input checked type="radio" name="show-ticks" value="true" />
+        <strong>True</strong>
+      </label>
+      <label>
+        <input type="radio" name="show-ticks" value="false" />
+        <strong>False</strong>
+      </label>
+    </aside>
 
+    <main>
+      <div class="demo-box">
+        <nylas-availability id="356408b7-da81-47d2-83cc-95d9f27abd4a">
+        </nylas-availability>
+      </div>
+    </main>
+  </body>
 </html>

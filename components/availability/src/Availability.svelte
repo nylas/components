@@ -1,11 +1,7 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  import {
-    ManifestStore,
-    CalendarStore,
-    AvailabilityStore,
-  } from "../../../commons/src";
+  import { ManifestStore, AvailabilityStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
@@ -25,7 +21,6 @@
   export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
-  export let interval_minutes: number = 10;
   //#endregion props
 
   //#region mount
@@ -66,12 +61,15 @@
       .slice(0, -1) // dont show the 25th hour
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
-        let freeCalendars = [];
+        let freeCalendars: any = [];
 
-        let availability = "available"; // default
-
-        if (calendars.length) {
-          calendars.forEach((c) => {
+        let availability = "free"; // default
+        let allCalendars = [
+          ...calendars,
+          ...newCalendarTimeslotsForGivenEmails,
+        ];
+        if (allCalendars.length) {
+          allCalendars.forEach((c) => {
             if (c.availability === "busy") {
               if (
                 !c.timeslots.some(
@@ -93,9 +91,9 @@
           });
         }
 
-        if (calendars.length) {
+        if (allCalendars.length) {
           if (freeCalendars.length) {
-            if (freeCalendars.length === calendars.length) {
+            if (freeCalendars.length === allCalendars.length) {
               availability = "free";
             } else {
               availability = "partial";
@@ -175,57 +173,46 @@
     });
   //#endregion layout
 
+  $: newCalendarTimeslotsForGivenEmails = [];
   let availabilityQuery: Availability.AvailabilityQuery;
-  $: if (email_ids?.length) {
-    updateAvailability();
-  }
-  // When dates_to_show is updated, update availability
-  $: if (dates_to_show) {
-    updateAvailability();
-  }
-
-  async function updateAvailability() {
-    let newCalendarTimeslotsForGivenDays = [];
-    for (let i = 0; i < dates_to_show; i++) {
-      const availability_date = new Date(
-        new Date().setDate(new Date().getDate() + i),
-      );
-      availabilityQuery = {
-        body: {
-          emails: email_ids,
-          start_time:
-            new Date(
-              new Date(availability_date).setHours(start_hour),
-            ).getTime() / 1000,
-          end_time:
-            new Date(new Date(availability_date).setHours(end_hour)).getTime() /
-            1000,
-        },
-        component_id: id,
-      };
-      // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-      const consolidatedAvailabilityForGivenDay =
-        await AvailabilityStore.getAvailability(availabilityQuery);
-      if (consolidatedAvailabilityForGivenDay?.length) {
-        let freeBusyCalendars: any = [];
-        consolidatedAvailabilityForGivenDay.forEach((user) => {
-          freeBusyCalendars.push({
-            email_address: user.email,
-            availability: "busy",
-            time_slots: user.time_slots.map((_slot) => ({
-              start_time: _slot.start_time,
-              end_time: _slot.end_time,
-            })),
-          });
-        });
-        newCalendarTimeslotsForGivenDays.push(...freeBusyCalendars);
-        console.log(
-          "freeBusyCalendars: ",
-          freeBusyCalendars,
-          newCalendarTimeslotsForGivenDays,
-        );
-      }
+  $: (async () => {
+    if (email_ids?.length) {
+      newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
+    // When dates_to_show is updated, update availability
+    if (dates_to_show) {
+      newCalendarTimeslotsForGivenEmails = await getAvailability();
+    }
+  })();
+
+  async function getAvailability() {
+    let freeBusyCalendars: any = [];
+    availabilityQuery = {
+      body: {
+        emails: email_ids,
+        start_time:
+          new Date(new Date(startDay).setHours(start_hour)).getTime() / 1000,
+        end_time:
+          new Date(new Date(endDay).setHours(end_hour)).getTime() / 1000,
+      },
+      component_id: id,
+    };
+    // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
+    const consolidatedAvailabilityForGivenDay =
+      await AvailabilityStore.getAvailability(availabilityQuery);
+    if (consolidatedAvailabilityForGivenDay?.length) {
+      consolidatedAvailabilityForGivenDay.forEach((user) => {
+        freeBusyCalendars.push({
+          email_address: user.email,
+          availability: "busy",
+          timeslots: user.time_slots.map((_slot) => ({
+            start_time: new Date(_slot.start_time * 1000),
+            end_time: new Date(_slot.end_time * 1000),
+          })),
+        });
+      });
+    }
+    return freeBusyCalendars;
   }
 
   function handleTimeSlotClick(selectedSlot: any): string {

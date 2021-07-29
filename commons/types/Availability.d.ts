@@ -19,14 +19,17 @@ declare namespace Availability {
     end_time: Date;
   }
   interface SelectableSlot extends TimeSlot {
-    availability: AvailabilityStatus.AVAILABLE | AvailabilityStatus.UNAVAILABLE | AvailabilityStatus.PARTIAL;
+    availability:
+      | AvailabilityStatus.AVAILABLE
+      | AvailabilityStatus.UNAVAILABLE
+      | AvailabilityStatus.PARTIAL;
     selectionStatus: SelectionStatus.UNSELECTED | SelectionStatus.SELECTED;
   }
 
   enum AvailabilityStatus {
     AVAILABLE = "available",
     UNAVAILABLE = "unavailable",
-    PARTIAL = "partial"
+    PARTIAL = "partial",
   }
 
   enum SelectionStatus {
@@ -46,7 +49,10 @@ declare namespace Availability {
 
   interface AvailabilityResponse {
     object: "free_busy";
-    time_slots: TimeSlot[];
+    time_slots: {
+      start_time: number;
+      end_time: number;
+    }[];
     email: string;
   }
 }
