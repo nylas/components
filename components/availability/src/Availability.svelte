@@ -251,7 +251,7 @@
     return slot_size * slots.length;
   }
 
-  function qetConsecutiveSlotsEndTime(slots: obj[]) {
+  function getConsecutiveSlotsEndTime(slots: obj[]) {
     const startTime = new Date(slots[0].start_time);
     const slotsDuration = getSlotsDuration(slots);
     return new Date(
@@ -271,9 +271,6 @@
   //#endregion book consecutive slots as one event
 
   //#region booking event logic for single time slot or consecutive time slots
-  function setSlotsSelectedStatus(slots: obj[]) {
-    slots.forEach((slot) => (slot.selectionStatus = "selected"));
-  }
 
   function resetSlotSelection(slots: obj[]): [] {
     return (slots = []);
@@ -452,10 +449,9 @@
   </div>
   {#if click_action === "verify" && allow_booking && slotSelection.length}
     <footer class="confirmation">
-      Confirm time?
       <label>
-        <input type="email" required bind:value={eventOrganizer} />
         Your email address
+        <input type="email" required bind:value={eventOrganizer} />
       </label>
       <button
         disabled={!eventOrganizer.length}
@@ -463,7 +459,7 @@
           sortAndSetEvent(sortedSlots);
         }}
         type="button"
-        class="confirm-btn">Yes</button
+        class="confirm-btn">Confirm time</button
       >
     </footer>
   {/if}
