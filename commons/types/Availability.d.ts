@@ -32,7 +32,7 @@ declare namespace Availability {
 }
 
 interface EventQuery {
-  calendarIDs?: string[]; // making this optional until calendarIDs story is done
+  calendar_id?: string; // making this optional until calendar ID story is done
   participants?: obj[];
   title?: string;
   location?: string;

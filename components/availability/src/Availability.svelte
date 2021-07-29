@@ -230,7 +230,7 @@
   $: query = {
     component_id: id,
     access_token: access_token,
-    calendarID: "",
+    calendar_id: "",
     participants: [{ email_address: eventOrganizer }],
   };
   //#region event query
