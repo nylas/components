@@ -18,12 +18,13 @@
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
-  export let available_times:
-    | Availability.TimeSlot[]
-    | Availability.TimeSlot[][] = [];
-  export let unavailable_times:
-    | Availability.TimeSlot[]
-    | Availability.TimeSlot[][] = [];
+  export let calendars: Availability.Calendar[] = [];
+  // export let available_times:
+  //   | Availability.TimeSlot[]
+  //   | Availability.TimeSlot[][] = [];
+  // export let unavailable_times:
+  //   | Availability.TimeSlot[]
+  //   | Availability.TimeSlot[][] = [];
   export let show_ticks: boolean = true;
 
   //#endregion props
@@ -49,14 +50,6 @@
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
-
-  // available_times can be a single user's array of TimeSlot objects, or it can be an array of multiple users' TimeSlot objects.
-  // Design decision: should we have differing properties for this, or allow it to handle both?
-  $: multipleAvailabilitySets =
-    available_times.length && Array.isArray(available_times[0]);
-  $: multipleUnavailabilitySets =
-    unavailable_times.length && Array.isArray(unavailable_times[0]);
-
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
   $: generateDaySlots = function (
@@ -74,60 +67,49 @@
       .slice(0, -1) // dont show the 25th hour
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
+        let freeCalendars = [];
 
         let availability = "available"; // default
 
-        // available_times and unavailable_times are mutually exclusive props: if you use one, don't use the other.
-        // If you have both available_times and unavailable_times, for some reason, available_times will be observed and unavailable_times will be ignored.
-        if (available_times.length) {
-          if (multipleAvailabilitySets) {
-            let setsWithSlotAvailable = available_times.filter((user) => {
-              return user.some(
-                (slot: Availability.TimeSlot) =>
-                  time >= slot.start_time && endTime <= slot.end_time,
-              );
-            });
-            if (setsWithSlotAvailable.length === 0) {
-              availability = "unavailable";
-            } else if (
-              setsWithSlotAvailable.length !== available_times.length
-            ) {
+        if (calendars.length) {
+          calendars.forEach((c) => {
+            if (c.availability === "busy") {
+              if (
+                !c.timeslots.some(
+                  (slot) => time >= slot.start_time && endTime <= slot.end_time,
+                )
+              ) {
+                freeCalendars.push(c.email_address);
+              }
+            } else if (c.availability === "free" || !c.availability) {
+              // if they pass in a calendar, but don't have availability, assume the timeslots are available.
+              if (
+                c.timeslots.some(
+                  (slot) => time >= slot.start_time && endTime <= slot.end_time,
+                )
+              ) {
+                freeCalendars.push(c.email_address);
+              }
+            }
+          });
+        }
+
+        if (calendars.length) {
+          if (freeCalendars.length) {
+            if (freeCalendars.length === calendars.length) {
+              availability = "free";
+            } else {
               availability = "partial";
             }
           } else {
-            availability = available_times.some((slot) => {
-              return time >= slot.start_time && endTime <= slot.end_time;
-            })
-              ? "available"
-              : "unavailable";
-          }
-        } else if (unavailable_times.length) {
-          if (multipleUnavailabilitySets) {
-            let setsWithSlotAvailable = unavailable_times.filter((user) => {
-              return user.every(
-                (slot: Availability.TimeSlot) =>
-                  !(time >= slot.start_time && endTime <= slot.end_time),
-              );
-            });
-            if (setsWithSlotAvailable.length === 0) {
-              availability = "unavailable";
-            } else if (
-              setsWithSlotAvailable.length !== unavailable_times.length
-            ) {
-              availability = "partial";
-            }
-          } else {
-            availability = unavailable_times.every((slot) => {
-              return !(time >= slot.start_time && endTime <= slot.end_time);
-            })
-              ? "available"
-              : "unavailable";
+            availability = "busy";
           }
         }
 
         return {
           selectionStatus: "unselected",
-          availability,
+          availability: availability,
+          available_calendars: freeCalendars,
           start_time: time,
           end_time: endTime,
         };
@@ -184,7 +166,9 @@
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
+      console.time("day");
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
+      console.timeEnd("day");
       return {
         slots,
         timestamp,
@@ -298,13 +282,13 @@
             background-color: yellow;
           }
 
-          &.available {
+          &.free {
             border: 1px solid green;
           }
           &.partial {
             border: 1px solid #ccc;
           }
-          &.unavailable {
+          &.busy {
             border: 1px solid red;
             opacity: 0.3;
           }
@@ -338,6 +322,7 @@
         <div class="slots">
           {#each day.slots as slot}
             <button
+              data-available-calendars={slot.available_calendars.toString()}
               aria-label="{new Date(
                 slot.start_time,
               ).toLocaleString()} - {new Date(slot.end_time).toLocaleString()}}"

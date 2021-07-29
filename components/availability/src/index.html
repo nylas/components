@@ -13,36 +13,44 @@
         const endTimeInput = document.querySelector("input#end-time");
         const daysInput = document.querySelector("input#days-to-show");
 
-        const available_times = [
-          [
-            {
-              start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(6, 0, 0, 0)),
-            },
-            {
-              start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(15, 0, 0, 0)),
-            },
-          ],
-          [
-            {
-              start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-            },
-          ],
-          [
-            {
-              start_time: new Date(new Date().setHours(5, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-            },
-            {
-              start_time: new Date(new Date().setHours(21, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(23, 0, 0, 0)),
-            },
-          ],
+        const calendars = [
+          {
+            email_address: "person@name.com",
+            availability: "busy",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+              },
+            ],
+          },
+          {
+            email_address: "thelonious@nylas.com",
+            availability: "busy",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+              },
+            ],
+          },
+          {
+            email_address: "booker@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(5, 30, 0, 0)),
+                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              },
+            ],
+          },
         ];
 
-        component.available_times = available_times;
+        component.calendars = calendars;
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeslot);
@@ -121,7 +129,7 @@
           class="days"
           type="range"
           min="1"
-          max="7"
+          max="14"
           step="1"
           value="1"
         />

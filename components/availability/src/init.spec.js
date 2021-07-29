@@ -10,18 +10,23 @@ describe("availability component", () => {
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.available_times = [];
-          cy.get(".slot.unavailable").should("not.exist");
+          component.calendars = [];
+          cy.get(".slot.busy").should("not.exist");
         });
 
-      const available_times = [
+      const calendars = [
         {
-          start_time: new Date(new Date().setHours(1, 0, 0, 0)),
-          end_time: new Date(new Date().setHours(3, 0, 0, 0)),
-        },
-        {
-          start_time: new Date(new Date().setHours(8, 0, 0, 0)),
-          end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+          availability: "free",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(1, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+            },
+            {
+              start_time: new Date(new Date().setHours(8, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+            },
+          ],
         },
       ];
 
@@ -29,9 +34,9 @@ describe("availability component", () => {
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.available_times = available_times;
-          cy.get(".slot.unavailable").should("exist");
-          cy.get(".slot.available").should("have.length", 40);
+          component.calendars = calendars;
+          cy.get(".slot.busy").should("exist");
+          cy.get(".slot.free").should("have.length", 40);
         });
 
       cy.get("nylas-availability")
@@ -39,7 +44,7 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.slot_size = 30;
-          cy.get(".slot.available").should("have.length", 20);
+          cy.get(".slot.free").should("have.length", 20);
         });
     });
   });
@@ -50,19 +55,23 @@ describe("availability component", () => {
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.available_times = [];
-          component.unavailable_times = [];
-          cy.get(".slot.unavailable").should("not.exist");
+          component.calendars = [];
+          cy.get(".slot.busy").should("not.exist");
         });
 
-      const unavailable_times = [
+      const calendars = [
         {
-          start_time: new Date(new Date().setHours(1, 0, 0, 0)),
-          end_time: new Date(new Date().setHours(3, 0, 0, 0)),
-        },
-        {
-          start_time: new Date(new Date().setHours(8, 0, 0, 0)),
-          end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+          availability: "busy",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(1, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+            },
+            {
+              start_time: new Date(new Date().setHours(8, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+            },
+          ],
         },
       ];
 
@@ -70,9 +79,9 @@ describe("availability component", () => {
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.unavailable_times = unavailable_times;
-          cy.get(".slot.unavailable").should("exist");
-          cy.get(".slot.available").should("have.length", 56);
+          component.calendars = calendars;
+          cy.get(".slot.busy").should("exist");
+          cy.get(".slot.free").should("have.length", 56);
         });
 
       cy.get("nylas-availability")
@@ -80,49 +89,59 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.slot_size = 30;
-          cy.get(".slot.available").should("have.length", 28);
+          cy.get(".slot.free").should("have.length", 28);
         });
     });
   });
 
   describe("multiple availability sets", () => {
     it("observes multiple availabilites", () => {
-      const available_times = [
-        [
-          {
-            start_time: new Date(new Date().setHours(0, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
-          },
-          {
-            start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(15, 0, 0, 0)),
-          },
-        ],
-        [
-          {
-            start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-          },
-        ],
-        [
-          {
-            start_time: new Date(new Date().setHours(5, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-          },
-          {
-            start_time: new Date(new Date().setHours(21, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(23, 0, 0, 0)),
-          },
-        ],
+      const calendars = [
+        {
+          email_address: "person@name.com",
+          availability: "busy",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+            },
+            {
+              start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+            },
+          ],
+        },
+        {
+          email_address: "thelonious@nylas.com",
+          availability: "busy",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+            },
+          ],
+        },
+        {
+          email_address: "booker@nylas.com",
+          availability: "busy",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(5, 30, 0, 0)),
+              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+            },
+          ],
+        },
       ];
 
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.available_times = available_times;
+          component.calendars = calendars;
           cy.get(".slot.partial").should("exist");
-          cy.get(".slot.partial").should("have.length", 56);
+          cy.get(".slot.partial").should("have.length", 42);
+          cy.get(".slot.busy").should("have.length", 10);
+          cy.get(".slot.free").should("have.length", 44);
         });
     });
   });
