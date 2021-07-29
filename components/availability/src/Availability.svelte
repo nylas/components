@@ -18,9 +18,8 @@
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
   export let click_action: "choose" | "verify" = "choose";
-  export let available_times: Availability.TimeSlot[] = [];
+  export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
-
   //#endregion props
 
   //#region mount
@@ -42,10 +41,8 @@
   let slotSelection: Availability.SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
-  $: console.log({ start_date }, { startDay }, timeDay.floor(start_date));
   $: startDay = timeDay.floor(start_date);
   $: endDay = timeDay.offset(start_date, dates_to_show - 1);
-
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
   $: generateDaySlots = function (
@@ -63,17 +60,44 @@
       .slice(0, -1) // dont show the 25th hour
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
+        const freeCalendars: string[] = [];
 
-        let slotIsAvailable = true; // default
-        if (available_times.length) {
-          slotIsAvailable = available_times.some((slot) => {
-            return time >= slot.start_time && endTime <= slot.end_time;
+        let availability = "available"; // default
+
+        if (calendars.length) {
+          calendars.forEach((c) => {
+            let availabilityExistsInSlot = c.timeslots.some(
+              (slot) => time >= slot.start_time && endTime <= slot.end_time,
+            );
+            if (c.availability === "busy") {
+              if (!availabilityExistsInSlot) {
+                freeCalendars.push(c.emailAddress);
+              }
+            } else if (c.availability === "free" || !c.availability) {
+              // if they pass in a calendar, but don't have availability, assume the timeslots are available.
+              if (availabilityExistsInSlot) {
+                freeCalendars.push(c.emailAddress);
+              }
+            }
           });
+        }
+
+        if (calendars.length) {
+          if (freeCalendars.length) {
+            if (freeCalendars.length === calendars.length) {
+              availability = "free";
+            } else {
+              availability = "partial";
+            }
+          } else {
+            availability = "busy";
+          }
         }
 
         return {
           selectionStatus: "unselected",
-          availability: slotIsAvailable ? "available" : "unavailable",
+          availability: availability,
+          available_calendars: freeCalendars,
           start_time: time,
           end_time: endTime,
         };
@@ -130,8 +154,9 @@
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
-      console.log("timestamp here", timestamp);
+      console.time("day");
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
+      console.timeEnd("day");
       return {
         slots,
         timestamp,
@@ -245,10 +270,13 @@
             background-color: yellow;
           }
 
-          &.available {
+          &.free {
             border: 1px solid green;
           }
-          &.unavailable {
+          &.partial {
+            border: 1px solid #ccc;
+          }
+          &.busy {
             border: 1px solid red;
             opacity: 0.3;
           }
@@ -282,6 +310,7 @@
         <div class="slots">
           {#each day.slots as slot}
             <button
+              data-available-calendars={slot.available_calendars.toString()}
               aria-label="{new Date(
                 slot.start_time,
               ).toLocaleString()} - {new Date(slot.end_time).toLocaleString()}}"
