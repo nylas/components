@@ -16,6 +16,7 @@
     getEventDispatcher,
     getPropertyValue,
   } from "@commons/methods/component";
+  import DropdownSymbol from "./assets/chevron-down.svg";
 
   let manifest: Partial<Nylas.EmailProperties> = {};
   let viewportWidth: number;
@@ -214,8 +215,6 @@
       activeThread.starred = !activeThread.starred;
       saveActiveThread();
     }
-
-    console.log({ activeThread });
     //#endregion starred/unstarred
   }
 
@@ -385,7 +384,6 @@
           flex-basis: 100%;
 
           .subject {
-            font-weight: 600;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
@@ -414,7 +412,8 @@
         &.unread {
           background: var(--nylas-email-background, white);
           .from-message-count,
-          .date {
+          .date,
+          .subject {
             font-weight: 600;
             color: var(--black);
 
@@ -466,6 +465,31 @@
           width: 100%;
           padding: 1rem 0;
 
+          button.email-tooltip-btn {
+            position: relative;
+            display: inline-block;
+            background: transparent;
+
+            span.email-tooltip {
+              position: absolute;
+              visibility: hidden;
+              width: min-content;
+              z-index: 1;
+              top: 125%;
+              background: var(--grey-lightest);
+              color: var(--grey-dark);
+              padding: $spacing-s;
+              box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
+              border-radius: 2px;
+            }
+
+            &:hover {
+              span.email-tooltip {
+                visibility: visible;
+              }
+            }
+          }
+
           &.condensed {
             div.snippet {
               text-overflow: ellipsis;
@@ -491,11 +515,11 @@
           div.message-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
           }
           div.message-date {
             display: flex;
             color: gray;
+            font-size: 12px;
           }
 
           div.message-from {
@@ -504,9 +528,6 @@
               &.name {
                 font-weight: 600;
                 margin-right: 0.5rem;
-              }
-              &.email {
-                color: gray;
               }
             }
           }
@@ -528,7 +549,6 @@
             }
           }
           &.condensed {
-            //grid-template-columns: 100px auto;
             gap: 1rem;
             box-shadow: inset 0 -1px 0 0 rgb(100 121 143 / 12%);
             &:hover,
@@ -575,10 +595,6 @@
         }
       }
       .subject-snippet-date {
-        //display: grid;
-        //grid-template-columns: 1fr 70px;
-        //gap: 1rem;
-
         .desktop-subject-snippet {
           display: none;
         }
@@ -634,7 +650,12 @@
           flex-direction: column;
           align-items: center;
           div.individual-message {
-            width: 570px;
+            max-width: 570px;
+
+            div.message-date {
+              font-size: 14px;
+              align-self: center;
+            }
             &.expanded {
               div.message-head {
                 div.message-from-to {
@@ -713,10 +734,11 @@
                           <span class="name"
                             >{message.from[0].name ||
                               message.from[0].email}</span
+                          ><button class="email-tooltip-btn"
+                            ><DropdownSymbol /><span class="email-tooltip"
+                              >{message.from[0].email}</span
+                            ></button
                           >
-                          <!--span class="email"
-                            >&lt;{message.from[0].email}&gt;</span
-                          -->
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
@@ -727,7 +749,11 @@
                                   : to.name || to.email}
                                 {#if i !== message.to.length - 1}
                                   &nbsp;&comma;
-                                {/if}
+                                {/if}<button class="email-tooltip-btn"
+                                  ><DropdownSymbol /><span class="email-tooltip"
+                                    >{message.to[0].email}</span
+                                  ></button
+                                >
                               {/if}
                             </span>
                           {/each}
@@ -753,6 +779,11 @@
                       <div class="message-from">
                         <span class="name"
                           >{message.from[0].name || message.from[0].email}</span
+                        ><button class="email-tooltip-btn"
+                          ><DropdownSymbol />
+                          <span class="email-tooltip"
+                            >{message.from[0].email}</span
+                          ></button
                         >
                       </div>
                       <div class="message-date">
@@ -862,8 +893,14 @@
           <div class="message-head">
             <div class="message-from-to">
               <div class="message-from">
-                <span class="name">{message.from[0].name}</span>
-                <span class="email">&lt;{message.from[0].email}&gt;</span>
+                <span class="name"
+                  >{message.from[0].name || message.from[0].email}</span
+                >
+                <button class="email-tooltip-btn"
+                  ><DropdownSymbol />
+                  <span class="email-tooltip">{message.from[0].email}</span
+                  ></button
+                >
               </div>
               <div class="message-to">
                 {#each message.to as to, i}
@@ -875,6 +912,11 @@
                       {#if i !== message.to.length - 1}
                         &nbsp;&comma;
                       {/if}
+                      <button class="email-tooltip-btn"
+                        ><DropdownSymbol />
+                        <span class="email-tooltip">{message.to[0].email}</span
+                        ></button
+                      >
                     {/if}
                   </span>
                 {/each}
