@@ -252,34 +252,6 @@ describe("availability component", () => {
     });
   });
 
-  describe("click_action prop", () => {
-    it('Handles click_action="choose"', () => {
-      cy.get(".slot").first().should("have.class", "unselected");
-      cy.get(".slot").first().click();
-      cy.get(".slot").first().should("have.class", "selected");
-      cy.get("footer.confirmation").should("not.exist");
-    });
-
-    it('Handles click_action="verify"', () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.click_action = "verify";
-          cy.get("footer.confirmation").should("exist");
-          cy.get(".slot").first().should("have.class", "unselected");
-          cy.get(".confirm-btn").should("be.disabled");
-          cy.get(".slot").first().click();
-          cy.get(".slot").first().should("have.class", "selected");
-          cy.get(".confirm-btn").should("not.be.disabled");
-
-          cy.get(".confirm-btn").click();
-          cy.get(".slot").last().click();
-          cy.get(".slot").first().should("have.class", "unselected");
-        });
-    });
-  });
-
   describe("axis ticks", () => {
     it("shows ticks by default", () => {
       cy.get("ul.ticks").should("exist");

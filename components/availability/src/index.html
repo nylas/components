@@ -76,14 +76,6 @@
         });
 
         document
-          .querySelectorAll('input[name="click-action"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.click_action = event.target.value;
-            });
-          });
-
-        document
           .querySelectorAll('input[name="show-ticks"]')
           .forEach((elem) => {
             elem.addEventListener("change", function (event) {
@@ -185,18 +177,6 @@
         <label>
           <input type="radio" name="slot-size" value="60" />
           60 minutes
-        </label>
-      </fieldset>
-
-      <fieldset>
-        <legend>Click action</legend>
-        <label>
-          <input checked type="radio" name="click-action" value="choose" />
-          Choose
-        </label>
-        <label>
-          <input type="radio" name="click-action" value="verify" />
-          Verify
         </label>
       </fieldset>
 
