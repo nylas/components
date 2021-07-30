@@ -170,12 +170,13 @@
 
   $: newCalendarTimeslotsForGivenEmails = [];
   let availabilityQuery: Availability.AvailabilityQuery;
+
   $: (async () => {
     if (email_ids?.length) {
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
     // When dates_to_show is updated, update availability
-    if (dates_to_show) {
+    if (email_ids?.length && dates_to_show) {
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
   })();
