@@ -148,7 +148,6 @@
       );
       threads = await MailboxStore.hydrateMessageInThread(message, query);
     }
-    console.log(openedEmailData);
   }
 
   async function refreshClicked(event: CustomEvent) {
