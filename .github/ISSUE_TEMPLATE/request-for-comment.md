@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Summary
-Explain the difference between whee we're at now and where we need to get to in a sentence or two.
+Explain the difference between where we're at now and where we need to get to in a sentence or two.
 
 ## Motivation
 Talk about why this change makes sense, from your personal perspective.
