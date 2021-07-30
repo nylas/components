@@ -8,7 +8,16 @@
   import type { TimeInterval } from "d3-time";
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
-  import * as Availability from "@commons/types/Availability";
+  import {
+    ClickAction,
+    Calendar,
+    Manifest,
+    SelectionStatus,
+    TimeSlot,
+    SelectableSlot,
+    AvailabilityStatus,
+    AvailabilityQuery,
+  } from "@commons/types/Availability";
 
   //#region props
   export let id: string = "";
@@ -18,15 +27,14 @@
   export let slot_size: number = 15; // in minutes
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
-  export let click_action: Availability.ClickAction =
-    Availability.ClickAction.CHOOSE;
-  export let calendars: Availability.Calendar[] = [];
+  export let click_action: ClickAction = ClickAction.CHOOSE;
+  export let calendars: Calendar[] = [];
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
   //#endregion props
 
   //#region mount
-  let manifest: Partial<Availability.Manifest> = {};
+  let manifest: Partial<Manifest> = {};
   onMount(async () => {
     await tick();
     clientHeight = main?.getBoundingClientRect().height;
@@ -41,7 +49,7 @@
   let main: Element;
   let clientHeight: number;
 
-  let slotSelection: Availability.SelectableSlot[] = [];
+  let slotSelection: SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
@@ -65,7 +73,7 @@
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
 
-        let availability = Availability.AvailabilityStatus.FREE; // default
+        let availability = AvailabilityStatus.FREE; // default
         let allCalendars = [
           ...calendars,
           ...newCalendarTimeslotsForGivenEmails,
@@ -75,12 +83,12 @@
             let availabilityExistsInSlot = c.timeslots.some(
               (slot) => time >= slot.start_time && endTime <= slot.end_time,
             );
-            if (c.availability === Availability.AvailabilityStatus.BUSY) {
+            if (c.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(c.emailAddress);
               }
             } else if (
-              c.availability === Availability.AvailabilityStatus.FREE ||
+              c.availability === AvailabilityStatus.FREE ||
               !c.availability
             ) {
               // if they pass in a calendar, but don't have availability, assume the timeslots are available.
@@ -94,17 +102,17 @@
         if (allCalendars.length) {
           if (freeCalendars.length) {
             if (freeCalendars.length === allCalendars.length) {
-              availability = Availability.AvailabilityStatus.FREE;
+              availability = AvailabilityStatus.FREE;
             } else {
-              availability = Availability.AvailabilityStatus.PARTIAL;
+              availability = AvailabilityStatus.PARTIAL;
             }
           } else {
-            availability = Availability.AvailabilityStatus.BUSY;
+            availability = AvailabilityStatus.BUSY;
           }
         }
 
         return {
-          selectionStatus: Availability.SelectionStatus.UNSELECTED,
+          selectionStatus: SelectionStatus.UNSELECTED,
           availability: availability,
           available_calendars: freeCalendars,
           start_time: time,
@@ -174,7 +182,7 @@
   //#endregion layout
 
   $: newCalendarTimeslotsForGivenEmails = [];
-  let availabilityQuery: Availability.AvailabilityQuery;
+  let availabilityQuery: AvailabilityQuery;
 
   $: (async () => {
     if (email_ids?.length) {
@@ -204,8 +212,8 @@
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
-          email_address: user.email,
-          availability: Availability.AvailabilityStatus.BUSY,
+          emailAddress: user.email,
+          availability: AvailabilityStatus.BUSY,
           timeslots: user.time_slots.map((_slot) => ({
             start_time: new Date(_slot.start_time * 1000),
             end_time: new Date(_slot.end_time * 1000),
@@ -216,30 +224,26 @@
     return freeBusyCalendars;
   }
 
-  function handleTimeSlotClick(
-    selectedSlot: any,
-  ): Availability.SelectionStatus {
-    if (
-      selectedSlot.selectionStatus === Availability.SelectionStatus.UNSELECTED
-    ) {
-      if (click_action === Availability.ClickAction.CHOOSE) {
+  function handleTimeSlotClick(selectedSlot: any): SelectionStatus {
+    if (selectedSlot.selectionStatus === SelectionStatus.UNSELECTED) {
+      if (click_action === ClickAction.CHOOSE) {
         sendTimeSlot(selectedSlot);
       }
       slotSelection = [...slotSelection, selectedSlot];
-      return Availability.SelectionStatus.SELECTED;
+      return SelectionStatus.SELECTED;
     } else {
       slotSelection = slotSelection.filter(
         (chosenSlot) => chosenSlot != selectedSlot,
       );
 
-      return Availability.SelectionStatus.UNSELECTED;
+      return SelectionStatus.UNSELECTED;
     }
   }
 
-  function sendTimeSlot(selectedSlot: Availability.TimeSlot) {
+  function sendTimeSlot(selectedSlot: TimeSlot) {
     let start_time = new Date(selectedSlot.start_time);
     let end_time = new Date(selectedSlot.end_time);
-    const timeslot: Availability.TimeSlot = {
+    const timeslot: TimeSlot = {
       start_time,
       end_time,
     };
@@ -387,7 +391,7 @@
       </div>
     {/each}
   </div>
-  {#if click_action === Availability.ClickAction.VERIFY}
+  {#if click_action === ClickAction.VERIFY}
     <footer class="confirmation">
       Confirm time?
       <button
@@ -395,8 +399,7 @@
         on:click={() => {
           slotSelection.forEach((selectedSlot) => {
             sendTimeSlot(selectedSlot);
-            selectedSlot.selectionStatus =
-              Availability.SelectionStatus.UNSELECTED;
+            selectedSlot.selectionStatus = SelectionStatus.UNSELECTED;
             slotSelection = [];
           });
         }}
