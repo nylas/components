@@ -16,8 +16,10 @@
     getEventDispatcher,
     getPropertyValue,
   } from "@commons/methods/component";
+  import DropdownSymbol from "./assets/chevron-down.svg";
 
   let manifest: Partial<Nylas.EmailProperties> = {};
+  let viewportWidth: number;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -32,7 +34,7 @@
   export let show_number_of_messages: boolean;
   export let thread: Nylas.Thread | null;
   export let message: Nylas.Message | null;
-  export let click_action: "default" | "custom" = "default";
+  export let click_action: "default" | "mailbox" | "custom" = "default";
   export let show_star: boolean;
   export let unread: boolean | null = null;
   export let you: Partial<Nylas.Account> = {};
@@ -50,7 +52,7 @@
 
   // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
   // TODO - Find a way to improve this
-  let internalProps;
+  let internalProps: SvelteAllProps;
   $: internalProps = buildInternalProps($$props, manifest);
 
   $: theme = getPropertyValue(internalProps.theme, theme, "theme-1");
@@ -68,11 +70,17 @@
     );
     show_star = getPropertyValue(internalProps.show_star, show_star, false);
     unread = getPropertyValue(internalProps.unread, unread, null);
+    click_action = getPropertyValue(
+      internalProps.click_action,
+      click_action,
+      "default",
+    );
   }
 
   let participants: Nylas.Participant[] = [];
-  $: participants = activeThread ? activeThread.participants : [];
-
+  $: {
+    participants = activeThread ? activeThread.participants : [];
+  }
   let query: Nylas.ConversationQuery;
   $: query = {
     component_id: id,
@@ -116,7 +124,7 @@
     });
   }
   // #endregion thread intake and set
-  let emailManuallyPassed;
+  let emailManuallyPassed: boolean;
   $: emailManuallyPassed = !!thread;
 
   $: if (id && !you.id) {
@@ -137,7 +145,7 @@
   }
 
   function handleThread(e: MouseEvent | KeyboardEvent) {
-    if (click_action === "default") {
+    if (click_action === "default" || click_action === "mailbox") {
       //#region read/unread
       if (activeThread && activeThread.unread) {
         activeThread.unread = false;
@@ -160,7 +168,7 @@
 
       activeThread.expanded = !activeThread.expanded;
       // Upon expansion / lastMessage existing, scroll to it
-      if (activeThread.expanded) {
+      if (activeThread.expanded && click_action === "default") {
         // Timeout here is to ensure the element is available before trying
         // to scroll it into view
         setTimeout(() => {
@@ -254,6 +262,69 @@
       messageLoadStatus[0] = "loaded";
     });
   }
+
+  const weekdays = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  function formatPreviewDate(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1,
+    );
+    const lastWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 6,
+    );
+    const thisYear = new Date(today.getFullYear(), 0, 1);
+
+    if (date >= today) {
+      return date.toLocaleTimeString("en-US", {
+        hour12: true,
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    } else if (date >= yesterday) {
+      return "Yesterday";
+    } else if (date >= lastWeek) {
+      return weekdays[date.getDay()];
+    } else if (date >= thisYear) {
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+      });
+    } else {
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+  }
+
+  function formatExpandedDate(date: Date): string {
+    return (
+      date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "long",
+        day: "numeric",
+      }) +
+      ", " +
+      date.toLocaleTimeString("en-US", {
+        hour12: true,
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    );
+  }
 </script>
 
 <style lang="scss">
@@ -262,40 +333,85 @@
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
 
-  $border-style: 1px solid var(--grey-lighter);
+  $border-style: 1px solid #ebebeb;
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
+  $mobile-collapsed-height: fit-content;
   $spacing-s: 0.5rem;
   $spacing-m: 1rem;
+  $spacing-l: 1.5rem;
 
   main {
     height: 100%;
     width: 100%;
-    overflow: auto;
     position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
-      display: grid;
-      grid-column-gap: $spacing-m;
-      padding: $spacing-s;
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
       header {
         font-size: 1.2rem;
         font-weight: 700;
+        padding: $spacing-s;
+        padding-bottom: 0;
       }
       &.condensed {
-        height: $collapsed-height;
-        padding: 0 $spacing-m;
-        grid-template-columns: 200px auto;
+        height: $mobile-collapsed-height;
+        padding: $spacing-s;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        &.show_star {
-          grid-template-columns: 25px 200px auto;
+        flex-wrap: wrap;
+
+        .from-star {
+          display: grid;
+          grid-template-columns: 25px auto;
+          column-gap: $spacing-s;
+        }
+
+        .mobile-subject-snippet {
+          display: block;
+          font-size: 14px;
+          margin-top: $spacing-s;
+          flex-basis: 100%;
+
+          .subject {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: 80vw;
+            display: block;
+            word-break: keep-all;
+          }
+
+          .snippet {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            display: block;
+            max-width: 80vw;
+            color: var(--grey);
+            margin-top: 4px;
+          }
+        }
+
+        .thread-message-count {
+          margin-left: 1rem;
+          color: var(--grey-light);
+          font-size: 12px;
+          align-self: center;
         }
         &.unread {
           background: var(--nylas-email-background, white);
-          .from-participants,
-          .date {
-            font-weight: bold;
+          .from-message-count,
+          .date,
+          .subject {
+            font-weight: 600;
+            color: var(--black);
+
+            .thread-message-count {
+              color: var(--blue);
+            }
           }
         }
         div.starred {
@@ -310,7 +426,7 @@
             &:before {
               content: "\2605";
               display: inline-block;
-              font-size: 1.5em;
+              font-size: 1em;
               color: #ccc;
               -webkit-user-select: none;
               -moz-user-select: none;
@@ -328,11 +444,57 @@
         }
       }
       &.expanded {
-        overflow-y: scroll;
-        background: rgba(211, 211, 211, 0.302);
+        background: var(--white);
+        padding: 0;
+
+        &.expanded-mailbox-thread {
+          .message-from {
+            .name {
+              font-weight: 600;
+            }
+          }
+        }
         div.individual-message {
-          display: grid;
-          padding: 1rem 0;
+          width: 100%;
+          box-sizing: border-box;
+          padding: $spacing-s;
+
+          button.email-tooltip-btn {
+            position: relative;
+            display: inline-block;
+            background: transparent;
+
+            span.email-tooltip {
+              position: absolute;
+              visibility: hidden;
+              width: min-content;
+              z-index: 1;
+              top: 125%;
+              background: var(--grey-lightest);
+              color: var(--grey-dark);
+              padding: $spacing-s;
+              box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
+              border-radius: 2px;
+            }
+
+            &:hover {
+              span.email-tooltip {
+                visibility: visible;
+              }
+            }
+          }
+
+          &.condensed {
+            div.snippet {
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+              display: block;
+              max-width: 90vw;
+              color: var(--grey);
+              margin-top: $spacing-m;
+            }
+          }
           &:not(:last-of-type) {
             border-bottom: 1px solid #eee;
           }
@@ -343,33 +505,37 @@
               }
             }
           }
-          &.expanded {
-            div.message-head {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              div.message-from-to {
-                margin: 0.5rem 0;
-                div.message-from {
-                  display: flex;
-                  span {
-                    &.name {
-                      font-weight: 600;
-                      margin-right: 0.5rem;
-                    }
-                    &.email {
-                      color: gray;
-                    }
-                  }
-                }
-                div.message-to {
-                  display: flex;
-                  color: gray;
-                }
+
+          div.message-head {
+            display: flex;
+            justify-content: space-between;
+          }
+          div.message-date {
+            display: flex;
+            color: gray;
+            font-size: 12px;
+          }
+
+          div.message-from {
+            display: flex;
+            span {
+              &.name {
+                font-weight: 600;
+                margin-right: 0.5rem;
               }
-              div.message-date {
-                display: flex;
+            }
+          }
+        }
+        &.expanded {
+          div.message-head {
+            div.message-from-to {
+              margin: 0.5rem 0;
+              div.message-to {
                 color: gray;
+                max-width: 150px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
               }
             }
             &:hover {
@@ -377,7 +543,6 @@
             }
           }
           &.condensed {
-            grid-template-columns: 100px auto;
             gap: 1rem;
             box-shadow: inset 0 -1px 0 0 rgb(100 121 143 / 12%);
             &:hover,
@@ -392,6 +557,7 @@
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
+              color: var(--grey);
               span.initial {
                 display: none;
               }
@@ -409,20 +575,23 @@
         );
         cursor: pointer;
       }
-      .from-participants {
+      .from-message-count {
         display: grid;
         grid-template-columns: auto auto auto;
         justify-content: flex-start;
-        .from-sub-section {
+        margin-right: $spacing-s;
+
+        .from-participants {
           overflow: hidden;
-          text-overflow: ellipsis;
+          max-width: 120px;
           white-space: nowrap;
+          text-overflow: ellipsis;
         }
       }
       .subject-snippet-date {
-        display: grid;
-        grid-template-columns: 1fr 70px;
-        gap: 1rem;
+        .desktop-subject-snippet {
+          display: none;
+        }
         div {
           overflow: hidden;
           text-overflow: ellipsis;
@@ -433,7 +602,9 @@
           &.date {
             display: flex;
             justify-content: flex-end;
-            width: min-content;
+            width: 100%;
+            font-size: 14px;
+            color: var(--grey);
           }
         }
       }
@@ -453,6 +624,94 @@
   }
 
   @media #{$desktop} {
+    main {
+      .email-row {
+        header {
+          padding: $spacing-m $spacing-l 0;
+        }
+
+        &.expanded.singular {
+          .individual-message.expanded {
+            padding-top: $spacing-s;
+          }
+        }
+        &.condensed {
+          padding: 0 $spacing-s;
+          display: grid;
+          column-gap: $spacing-m;
+          height: $collapsed-height;
+          grid-template-columns: 200px auto;
+          justify-content: initial;
+
+          .mobile-subject-snippet {
+            display: none;
+          }
+        }
+
+        &.expanded {
+          display: flex;
+          flex-direction: column;
+          box-sizing: border-box;
+          width: 100%;
+          div.individual-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: $spacing-m 0;
+
+            div.message-head,
+            div.message-body {
+              width: 100%;
+              box-sizing: border-box;
+              padding: 0 $spacing-l;
+            }
+
+            &.condensed {
+              div.snippet {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 0 $spacing-l;
+                max-width: 95vw;
+                align-self: flex-start;
+              }
+            }
+
+            div.message-date {
+              font-size: 14px;
+              align-self: center;
+            }
+            &.expanded {
+              div.message-head {
+                div.message-from-to {
+                  margin: $spacing-s 0;
+                  div.message-to {
+                    max-width: unset;
+                    overflow: inherit;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .subject-snippet-date {
+          display: grid;
+          grid-template-columns: auto 120px;
+          gap: 1rem;
+          .desktop-subject-snippet {
+            display: block;
+
+            .subject {
+              margin-right: $spacing-s;
+            }
+          }
+
+          .date {
+            text-align: right;
+          }
+        }
+      }
+    }
   }
 </style>
 
@@ -469,8 +728,14 @@
     {:then thread}
       {#if thread && activeThread}
         {#if thread.expanded}
-          <div class="email-row expanded">
-            <header>{thread.subject}</header>
+          <div
+            class="email-row expanded {click_action === 'mailbox'
+              ? 'expanded-mailbox-thread'
+              : ''}"
+          >
+            {#if click_action !== "mailbox"}
+              <header>{thread.subject}</header>
+            {/if}
             {#if activeThread.messages.length}
               {#each activeThread.messages as message, msgIndex}
                 <div
@@ -490,9 +755,13 @@
                     <div class="message-head">
                       <div class="message-from-to">
                         <div class="message-from">
-                          <span class="name">{message.from[0].name}</span>
-                          <span class="email"
-                            >&lt;{message.from[0].email}&gt;</span
+                          <span class="name"
+                            >{message.from[0].name ||
+                              message.from[0].email}</span
+                          ><button class="email-tooltip-btn"
+                            ><DropdownSymbol /><span class="email-tooltip"
+                              >{message.from[0].email}</span
+                            ></button
                           >
                         </div>
                         <div class="message-to">
@@ -504,17 +773,21 @@
                                   : to.name || to.email}
                                 {#if i !== message.to.length - 1}
                                   &nbsp;&comma;
-                                {/if}
+                                {/if}<button class="email-tooltip-btn"
+                                  ><DropdownSymbol /><span class="email-tooltip"
+                                    >{message.to[0].email}</span
+                                  ></button
+                                >
                               {/if}
                             </span>
                           {/each}
                         </div>
                       </div>
                       <div class="message-date">
-                        <span
-                          >{new Date(
-                            message.date * 1000,
-                          ).toLocaleDateString()}</span
+                        <span>
+                          {formatExpandedDate(
+                            new Date(message.date * 1000),
+                          )}</span
                         >
                       </div>
                     </div>
@@ -526,14 +799,28 @@
                       {/if}
                     </div>
                   {:else}
-                    <span>{message.from[0].name || message.from[0].email}</span>
-                    <span class="snippet">
-                      <span
-                        class={messageLoadStatus[msgIndex] === "loading"
-                          ? "loading"
-                          : "initial"}>Expanding your message...</span
-                      >{message.snippet}</span
-                    >
+                    <div class="message-head">
+                      <div class="message-from">
+                        <span class="name"
+                          >{message.from[0].name || message.from[0].email}</span
+                        ><button class="email-tooltip-btn"
+                          ><DropdownSymbol />
+                          <span class="email-tooltip"
+                            >{message.from[0].email}</span
+                          ></button
+                        >
+                      </div>
+                      <div class="message-date">
+                        <span>
+                          {formatExpandedDate(
+                            new Date(message.date * 1000),
+                          )}</span
+                        >
+                      </div>
+                    </div>
+                    <div class="snippet">
+                      {message.snippet}
+                    </div>
                   {/if}
                 </div>
               {/each}
@@ -547,56 +834,70 @@
             class:show_star
             class:unread={unread !== null ? unread : activeThread.unread}
           >
-            {#if show_star}
-              <div class="starred">
-                <button
-                  id={`thread-star-${thread_id}`}
-                  class={activeThread.starred ? "starred" : ""}
-                  value={thread_id}
-                  role="switch"
-                  aria-checked={activeThread.starred}
-                  on:click|preventDefault={handleThreadStarClick}
-                  aria-label={`Star button for thread ${thread_id}`}
-                />
-              </div>
-            {/if}
-            <div class="from-participants">
-              {#if activeThread.messages.length >= 1 && activeThread.messages[0].from.length}
-                <span class="from-sub-section"
-                  >{activeThread.messages[0].from[0].name ||
-                    activeThread.messages[0].from[0].email}</span
-                >
+            <div class="from{show_star ? '-star' : ''}">
+              {#if show_star}
+                <div class="starred">
+                  <button
+                    id={`thread-star-${thread_id}`}
+                    class={activeThread.starred ? "starred" : ""}
+                    value={thread_id}
+                    role="switch"
+                    aria-checked={activeThread.starred}
+                    on:click|preventDefault={handleThreadStarClick}
+                    aria-label={`Star button for thread ${thread_id}`}
+                  />
+                </div>
               {/if}
-              {#if activeThread.messages.length > 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
-                <span class="from-sub-section">
-                  {", " +
-                    activeThread.messages[activeThread.messages.length - 1]
-                      .from[0].name ||
-                    activeThread.messages[activeThread.messages.length - 1]
-                      .from[0].email}</span
-                >
-                {#if show_number_of_messages}
-                  <span>{", " + activeThread.messages.length}</span>
+              <div class="from-message-count">
+                <div class="from-participants">
+                  {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
+                    <span class="from-sub-section"
+                      >{activeThread.messages[activeThread.messages.length - 1]
+                        .from[0].name ||
+                        activeThread.messages[activeThread.messages.length - 1]
+                          .from[0].email}</span
+                    >
+                  {/if}
+                  {#if activeThread.messages.length > 1 && activeThread.messages[0].from.length && activeThread.messages[0].from[0].email !== activeThread.messages[activeThread.messages.length - 1].from[0].email}
+                    ,
+                    <span class="from-sub-section"
+                      >{activeThread.messages[0].from[0].name ||
+                        activeThread.messages[0].from[0].email}</span
+                    >
+                  {/if}
+                </div>
+                {#if activeThread.messages.length > 1 && show_number_of_messages}
+                  <span class="thread-message-count"
+                    >{activeThread.messages.length}</span
+                  >
                 {/if}
-              {/if}
+              </div>
             </div>
             <div class="subject-snippet-date">
-              <div>
+              <div class="desktop-subject-snippet">
                 <span class="subject">{thread.subject}</span><span
                   class="snippet"
                 >
-                  &#45; {thread.snippet}</span
+                  {thread.snippet}</span
                 >
               </div>
               {#if show_received_timestamp}
                 <div class="date">
                   <span>
-                    {new Date(
-                      thread.last_message_timestamp * 1000,
-                    ).toLocaleDateString()}
+                    {formatPreviewDate(
+                      new Date(thread.last_message_timestamp * 1000),
+                    )}
                   </span>
                 </div>
               {/if}
+            </div>
+
+            <div class="mobile-subject-snippet">
+              <span class="subject">{thread.subject}</span><span
+                class="snippet"
+              >
+                {thread.snippet}</span
+              >
             </div>
           </div>
         {/if}
@@ -610,8 +911,14 @@
           <div class="message-head">
             <div class="message-from-to">
               <div class="message-from">
-                <span class="name">{message.from[0].name}</span>
-                <span class="email">&lt;{message.from[0].email}&gt;</span>
+                <span class="name"
+                  >{message.from[0].name || message.from[0].email}</span
+                >
+                <button class="email-tooltip-btn"
+                  ><DropdownSymbol />
+                  <span class="email-tooltip">{message.from[0].email}</span
+                  ></button
+                >
               </div>
               <div class="message-to">
                 {#each message.to as to, i}
@@ -623,13 +930,18 @@
                       {#if i !== message.to.length - 1}
                         &nbsp;&comma;
                       {/if}
+                      <button class="email-tooltip-btn"
+                        ><DropdownSymbol />
+                        <span class="email-tooltip">{message.to[0].email}</span
+                        ></button
+                      >
                     {/if}
                   </span>
                 {/each}
               </div>
             </div>
             <div class="message-date">
-              <span>{new Date(message.date * 1000).toLocaleDateString()}</span>
+              <span> {formatPreviewDate(new Date(message.date * 1000))}</span>
             </div>
           </div>
           <div class="message-body">

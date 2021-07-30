@@ -14,6 +14,7 @@
   import { AccountStore } from "@commons/store/accounts";
   import { fetchMessage } from "@commons/connections/messages";
   import LoadingIcon from "./assets/loading.svg";
+  import LeftArrowLineIcon from "./assets/arrow-line.svg";
 
   let manifest: Partial<Nylas.EmailProperties> = {};
 
@@ -33,6 +34,7 @@
     onSelectOne;
 
   let queryParams: Nylas.ThreadsQuery;
+  let openedEmailData: Nylas.Thread | null;
 
   // paginations vars
   let paginatedThreads: Nylas.Thread[] = [];
@@ -140,6 +142,7 @@
   async function threadClicked(event: CustomEvent) {
     // console.debug('thread clicked from mailbox', event.detail);
     if (event.detail.thread?.expanded) {
+      openedEmailData = event.detail.thread;
       let message = await fetchIndividualMessage(
         event.detail.thread.messages[event.detail.thread.messages.length - 1],
       );
@@ -199,12 +202,15 @@
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
   @import "../../../commons/src/components/checkbox.scss";
+
+  $spacing-s: 0.5rem;
+  $spacing-m: 1rem;
   main {
     height: 100%;
     width: 100%;
-    overflow: auto;
     position: relative;
     display: grid;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
     $border-style: 1px solid var(--grey-lighter);
     @mixin barStyle {
@@ -213,6 +219,10 @@
       align-items: center;
       padding: 24px 16px;
       gap: 8px;
+    }
+
+    .email-container {
+      padding-right: 0.5rem;
     }
 
     header {
@@ -247,7 +257,8 @@
       justify-content: left;
 
       .checkbox-container.thread-checkbox {
-        padding-left: 16px;
+        padding: 1rem 0 0 1rem;
+        align-self: baseline;
       }
 
       &:hover {
@@ -289,6 +300,7 @@
   }
 
   .mailbox-loader {
+    width: calc(100vw - 16px);
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -302,83 +314,121 @@
       transform: rotate(360deg);
     }
   }
+
+  @media #{$desktop} {
+    main {
+      #mailboxlist li {
+        .checkbox-container.thread-checkbox {
+          padding: 0 0 0 $spacing-m;
+          align-self: center;
+        }
+      }
+    }
+  }
 </style>
 
 <main bind:this={main}>
-  {#if header}
-    <header>
-      <button on:click={refreshClicked}>
-        <svg width="16" height="16" viewBox="0 0 16 16">
-          <path
-            d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
-          />
-        </svg>
+  {#if openedEmailData}
+    <header class="subject-title">
+      <button
+        on:click={() => {
+          openedEmailData.expanded = false;
+          openedEmailData = null;
+        }}
+      >
+        <LeftArrowLineIcon />
       </button>
-      <h1>{header}</h1>
+      <h1>{openedEmailData.subject}</h1>
     </header>
-  {/if}
-  {#if show_mailbox_toolbar}
-    <div role="toolbar" aria-label="Bulk actions" aria-controls="mailboxlist">
-      {#if show_thread_checkbox}<div class="thread-checkbox">
-          {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
-            <input
-              title={selectAllTitle}
-              aria-label={selectAllTitle}
-              type="checkbox"
-              checked={areAllSelected}
-              on:click={(e) => onSelectAll(e)}
-            />
-          {/each}
-        </div>{/if}
-    </div>
-  {/if}
-  <ul id="mailboxlist">
-    {#each paginatedThreads as thread}
-      {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
-        <li
-          class:unread={thread.unread}
-          class:checked={selectedThreads.has(thread)}
-        >
-          {#if show_thread_checkbox}<div
-              class="checkbox-container thread-checkbox"
-            >
-              <input
-                title={selectTitle}
-                aria-label={selectTitle}
-                type="checkbox"
-                checked={selectedThreads.has(thread)}
-                on:click={(e) => onSelectOne(e, thread)}
-              />
-            </div>{/if}
-          <div class="email-container">
-            <nylas-email
-              is_clean_conversation_enabled={false}
-              {thread}
-              {you}
-              {show_star}
-              unread={readStatusOutputs[unread_status]}
-              on:threadClicked={threadClicked}
-              on:messageClicked={messageClicked}
-            />
-          </div>
-        </li>
-      {/each}
-    {:else}
-      <div class="mailbox-loader">
-        <LoadingIcon
-          class="spinner"
-          style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
-        />
-        Loading component...
-      </div>
-    {/each}
-    {#if threads.length > 0 && paginatedThreads}
-      <pagination-nav
-        current_page={currentPage}
-        last_page={lastPage}
-        visible={true}
-        on:changePage={changePage}
+    <div class="email-container">
+      <nylas-email
+        is_clean_conversation_enabled={false}
+        thread={openedEmailData}
+        {you}
+        {show_star}
+        click_action="mailbox"
+        unread={readStatusOutputs[unread_status]}
+        on:threadClicked={threadClicked}
+        on:messageClicked={messageClicked}
       />
+    </div>
+  {:else}
+    {#if header}
+      <header>
+        <button on:click={refreshClicked}>
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path
+              d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
+            />
+          </svg>
+        </button>
+        <h1>{header}</h1>
+      </header>
     {/if}
-  </ul>
+    {#if show_mailbox_toolbar}
+      <div role="toolbar" aria-label="Bulk actions" aria-controls="mailboxlist">
+        {#if show_thread_checkbox}<div class="thread-checkbox">
+            {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
+              <input
+                title={selectAllTitle}
+                aria-label={selectAllTitle}
+                type="checkbox"
+                checked={areAllSelected}
+                on:click={(e) => onSelectAll(e)}
+              />
+            {/each}
+          </div>{/if}
+      </div>
+    {/if}
+    <ul id="mailboxlist">
+      {#each paginatedThreads as thread}
+        {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
+          <li
+            class:unread={thread.unread}
+            class:checked={selectedThreads.has(thread)}
+          >
+            {#if show_thread_checkbox}<div
+                class="checkbox-container thread-checkbox"
+              >
+                <input
+                  title={selectTitle}
+                  aria-label={selectTitle}
+                  type="checkbox"
+                  checked={selectedThreads.has(thread)}
+                  on:click={(e) => onSelectOne(e, thread)}
+                />
+              </div>{/if}
+            <div class="email-container">
+              <nylas-email
+                is_clean_conversation_enabled={false}
+                {thread}
+                {you}
+                {show_star}
+                click_action="mailbox"
+                unread={readStatusOutputs[unread_status]}
+                on:threadClicked={threadClicked}
+                on:messageClicked={messageClicked}
+              />
+            </div>
+          </li>
+        {/each}
+      {:else}
+        <div class="mailbox-loader">
+          <LoadingIcon
+            class="spinner"
+            style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
+          />
+          Loading component...
+        </div>
+      {/each}
+      {#if threads.length > 0 && paginatedThreads}
+        <pagination-nav
+          current_page={currentPage}
+          last_page={lastPage}
+          visible={true}
+          on:changePage={changePage}
+        />
+      {/if}
+    </ul>
+  {/if}
 </main>
