@@ -329,7 +329,7 @@
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
-              disabled={slot.availability === "unavailable"}
+              disabled={slot.availability === "busy"}
               on:click={() => {
                 slot.selectionStatus =
                   slot.selectionStatus === "selected"
