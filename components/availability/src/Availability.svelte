@@ -8,6 +8,7 @@
   import type { TimeInterval } from "d3-time";
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
+  import * as Availability from "@commons/types/Availability";
 
   //#region props
   export let id: string = "";
@@ -64,7 +65,7 @@
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
 
-        let availability = "free"; // default
+        let availability = Availability.AvailabilityStatus.FREE; // default
         let allCalendars = [
           ...calendars,
           ...newCalendarTimeslotsForGivenEmails,
@@ -74,11 +75,14 @@
             let availabilityExistsInSlot = c.timeslots.some(
               (slot) => time >= slot.start_time && endTime <= slot.end_time,
             );
-            if (c.availability === "busy") {
+            if (c.availability === Availability.AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(c.emailAddress);
               }
-            } else if (c.availability === "free" || !c.availability) {
+            } else if (
+              c.availability === Availability.AvailabilityStatus.FREE ||
+              !c.availability
+            ) {
               // if they pass in a calendar, but don't have availability, assume the timeslots are available.
               if (availabilityExistsInSlot) {
                 freeCalendars.push(c.emailAddress);
@@ -90,12 +94,12 @@
         if (allCalendars.length) {
           if (freeCalendars.length) {
             if (freeCalendars.length === allCalendars.length) {
-              availability = "free";
+              availability = Availability.AvailabilityStatus.FREE;
             } else {
-              availability = "partial";
+              availability = Availability.AvailabilityStatus.PARTIAL;
             }
           } else {
-            availability = "busy";
+            availability = Availability.AvailabilityStatus.BUSY;
           }
         }
 
@@ -201,7 +205,7 @@
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
           email_address: user.email,
-          availability: "busy",
+          availability: Availability.AvailabilityStatus.BUSY,
           timeslots: user.time_slots.map((_slot) => ({
             start_time: new Date(_slot.start_time * 1000),
             end_time: new Date(_slot.end_time * 1000),

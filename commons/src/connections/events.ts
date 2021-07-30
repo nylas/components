@@ -37,7 +37,7 @@ export const fetchEvents = async (
 
 export const fetchCalendars = async (
   query: Events.CalendarQuery,
-): Promise<unknown> => {
+): Promise<Events.Calendar[]> => {
   return Promise.allSettled(
     query.calendarIDs.map((calendar: unknown) => {
       return fetch(

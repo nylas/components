@@ -1,18 +1,19 @@
 import { writable } from "svelte/store";
 import { fetchAvailability } from "../connections/availability";
+import type {
+  AvailabilityQuery,
+  AvailabilityResponse,
+} from "@commons/types/Availability";
 
 function initializeAvailability() {
   const { subscribe, update, set } = writable<
-    Record<string, Promise<Availability.AvailabilityResponse[]>>
+    Record<string, Promise<AvailabilityResponse[]>>
   >({});
-  let availabilityMap: Record<
-    string,
-    Promise<Availability.AvailabilityResponse[]>
-  > = {};
+  let availabilityMap: Record<string, Promise<AvailabilityResponse[]>> = {};
 
   return {
     subscribe,
-    getAvailability: async (query: Availability.AvailabilityQuery) => {
+    getAvailability: async (query: AvailabilityQuery) => {
       const queryKey = JSON.stringify(query);
       if (
         !availabilityMap[queryKey] &&

@@ -4,10 +4,14 @@ import {
   handleResponse,
   getMiddlewareApiUrl,
 } from "../methods/api";
+import type {
+  AvailabilityQuery,
+  AvailabilityResponse,
+} from "@commons/types/Availability";
 
-export const fetchAvailability = (
-  query: Availability.AvailabilityQuery,
-): Promise<Availability.AvailabilityResponse[]> => {
+export const fetchAvailability = async (
+  query: AvailabilityQuery,
+): Promise<AvailabilityResponse[]> => {
   return fetch(
     `${getMiddlewareApiUrl(query.component_id)}/calendars/free-busy`,
     getFetchConfig({
@@ -18,7 +22,7 @@ export const fetchAvailability = (
   )
     .then(async (apiResponse) => {
       const json = await handleResponse<
-        Nylas.MiddlewareResponse<Availability.AvailabilityResponse[]>
+        Nylas.MiddlewareResponse<AvailabilityResponse[]>
       >(apiResponse);
       return json.response;
     })
