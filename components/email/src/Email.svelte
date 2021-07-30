@@ -20,14 +20,6 @@
 
   let manifest: Partial<Nylas.EmailProperties> = {};
   let viewportWidth: number;
-  let isViewingOnMobile: boolean;
-  $: {
-    viewportWidth = Math.max(
-      document.documentElement.clientWidth || 0,
-      window.innerWidth || 0,
-    );
-    isViewingOnMobile = viewportWidth <= 639;
-  }
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -347,11 +339,11 @@
   $mobile-collapsed-height: fit-content;
   $spacing-s: 0.5rem;
   $spacing-m: 1rem;
+  $spacing-l: 1.5rem;
 
   main {
     height: 100%;
     width: 100%;
-    overflow: auto;
     position: relative;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
@@ -360,11 +352,12 @@
       header {
         font-size: 1.2rem;
         font-weight: 700;
+        padding: $spacing-s;
+        padding-bottom: 0;
       }
       &.condensed {
         height: $mobile-collapsed-height;
-        padding-right: $spacing-m;
-        padding-left: $spacing-s;
+        padding: $spacing-s;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -379,7 +372,7 @@
         .mobile-subject-snippet {
           display: block;
           font-size: 14px;
-          margin-top: $spacing-m;
+          margin-top: $spacing-s;
           flex-basis: 100%;
 
           .subject {
@@ -452,6 +445,7 @@
       }
       &.expanded {
         background: var(--white);
+        padding: 0;
 
         &.expanded-mailbox-thread {
           .message-from {
@@ -462,7 +456,8 @@
         }
         div.individual-message {
           width: 100%;
-          padding: 1rem 0;
+          box-sizing: border-box;
+          padding: $spacing-s;
 
           button.email-tooltip-btn {
             position: relative;
@@ -631,12 +626,20 @@
   @media #{$desktop} {
     main {
       .email-row {
+        header {
+          padding: $spacing-m $spacing-l 0;
+        }
+
+        &.expanded.singular {
+          .individual-message.expanded {
+            padding-top: $spacing-s;
+          }
+        }
         &.condensed {
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
           grid-template-columns: 200px auto;
-          align-items: center;
           justify-content: initial;
 
           .mobile-subject-snippet {
@@ -647,22 +650,28 @@
         &.expanded {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          box-sizing: border-box;
+          width: 100%;
           div.individual-message {
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: $spacing-m 0;
 
             div.message-head,
             div.message-body {
               width: 100%;
-              max-width: 570px;
+              box-sizing: border-box;
+              padding: 0 $spacing-l;
             }
 
             &.condensed {
               div.snippet {
                 width: 100%;
-                max-width: 570px;
+                box-sizing: border-box;
+                padding: 0 $spacing-l;
+                max-width: 95vw;
+                align-self: flex-start;
               }
             }
 
@@ -673,7 +682,7 @@
             &.expanded {
               div.message-head {
                 div.message-from-to {
-                  margin: 0.5rem 0;
+                  margin: $spacing-s 0;
                   div.message-to {
                     max-width: unset;
                     overflow: inherit;
@@ -931,7 +940,7 @@
               </div>
             </div>
             <div class="message-date">
-              <span>{new Date(message.date * 1000).toLocaleDateString()}</span>
+              <span> {formatPreviewDate(new Date(message.date * 1000))}</span>
             </div>
           </div>
           <div class="message-body">

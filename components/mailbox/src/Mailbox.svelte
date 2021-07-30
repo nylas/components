@@ -209,7 +209,6 @@
   main {
     height: 100%;
     width: 100%;
-    overflow: auto;
     position: relative;
     display: grid;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -221,6 +220,10 @@
       align-items: center;
       padding: 24px 16px;
       gap: 8px;
+    }
+
+    .email-container {
+      padding-right: 0.5rem;
     }
 
     header {
