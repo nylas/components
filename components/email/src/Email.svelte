@@ -636,6 +636,7 @@
           }
         }
         &.condensed {
+          padding: 0 $spacing-s;
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;

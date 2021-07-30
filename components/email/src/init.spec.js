@@ -227,7 +227,7 @@ describe("Email component", () => {
         cy.get(component).find(".message-date span").should("exist");
         cy.get(component)
           .find(".message-date span")
-          .should("contain", "7/7/2021");
+          .should("contain", "July 7");
         cy.get(component).find(".message-to span").should("exist");
         cy.get(component)
           .find(".message-to span")
