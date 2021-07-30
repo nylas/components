@@ -231,59 +231,30 @@
     component_id: id,
     access_token: access_token,
     calendar_id: "",
-    participants: [{ email_address: eventOrganizer }],
+    participants: [{ email_address: "" }],
   };
   //#region event query
 
-  //#region book consecutive slots as one event
-  function sendTimeSlot(timeSlot: Availability.TimeSlot) {
-    dispatchEvent("timeSlotChosen", { timeSlot });
-  }
-
-  function setTimeSlot(slots: obj[]): Availability.TimeSlot {
-    const consecutiveSlots = hasConsecutiveSlots(slots);
-    return {
-      start_time: slots[0].start_time,
-      end_time: consecutiveSlots ? consecutiveSlotsEndTime : slots[0].end_time,
-    };
-  }
-
-  function getSlotsDuration(slots: obj[]): number {
-    return slot_size * slots.length;
-  }
-
-  function getConsecutiveSlotsEndTime(slots: obj[]) {
-    const startTime = new Date(slots[0].start_time);
-    const slotsDuration = getSlotsDuration(slots);
-    return new Date(
-      startTime.setMinutes(startTime.getMinutes() + slotsDuration),
-    );
-  }
-
-  function hasConsecutiveSlots(slots: obj[]): boolean {
-    if (slots.length <= 1) {
-      return false;
+  //#region booking event logic for single time slot and consecutive time slots
+  $: sortedSlots = [
+    ...slotSelection.sort((a, b) => a.start_time > b.start_time),
+  ].reduce((events, currentTimeSlot, i) => {
+    if (i === 0) {
+      events = [currentTimeSlot];
     } else {
-      const lastSlotEndTime = slots[slots.length - 1].end_time.valueOf();
-      const lastConsecutiveSlotEndTime = consecutiveSlotsEndTime.valueOf();
-      return lastSlotEndTime == lastConsecutiveSlotEndTime ? true : false;
+      let lastMergedSlot = events[events.length - 1];
+      if (currentTimeSlot.start_time <= lastMergedSlot.end_time) {
+        lastMergedSlot.end_time = new Date(
+          Math.max(lastMergedSlot.end_time, currentTimeSlot.end_time),
+        );
+      } else {
+        events = [...events, currentTimeSlot];
+      }
     }
-  }
-  //#endregion book consecutive slots as one event
+    return events;
+  }, []);
 
-  //#region booking event logic for single time slot or consecutive time slots
-  function resetSlotSelection(slots: obj[]): [] {
-    return (slots = []);
-  }
-
-  function createEventFromTimeSlot(
-    event: Availability.TimeSlot,
-    query: Availability.eventQuery,
-  ) {
-    EventStore.createEvent(event, query);
-  }
-
-  function setSelectedTimeSlots(selectedSlot: obj): obj[] {
+  function toggleSelectedTimeSlots(selectedSlot: obj): obj[] {
     return (slotSelection =
       selectedSlot.selectionStatus === "selected"
         ? [...slotSelection, selectedSlot]
@@ -291,31 +262,13 @@
   }
 
   function sortAndSetEvent(slots: obj[]) {
-    const slotsCopy = [...slots];
-    const event = setTimeSlot(slotsCopy);
-    createEventFromTimeSlot(event, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
-    sendTimeSlot(event);
-    resetSlotSelection(slotSelection);
-  }
-
-  function toggleClickAction(slot: obj) {
-    if (click_action === "verify" && allow_booking) {
-      setSelectedTimeSlots(slot);
-    } else {
-      sortAndSetEvent([slot]);
+    dispatchEvent("timeSlotChosen", { timeSlots: [...slots] });
+    if (allow_booking) {
+      EventStore.createEvent(slots, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
     }
+    slotSelection = [];
   }
   //#region booking event logic for single time slot or consecutive time slots
-
-  // detect when slots are consecutive (could be more than one cluster of slots)
-  // check if current time slot end_time + slot_size (make into a variable) in minutes === next time slot end_time --> this needs to be done using .valueOf() method
-  // if so, return new obj with start_time = current_slot start_time and end_time = current time slot end_time + slot_size
-  // repeat this for next time slot
-  // if not, return start_time and end_time obj
-  // this will be a new array, which gets dispatched to parent
-
-  // only have one click action
-  // bubble consecutive slot(s) and single time slots to parent
 </script>
 
 <style lang="scss">
@@ -443,7 +396,10 @@
                   slot.selectionStatus === "selected"
                     ? "unselected"
                     : "selected";
-                toggleClickAction(slot);
+                toggleSelectedTimeSlots(slot);
+                if (!allow_booking) {
+                  dispatchEvent("timeSlotChosen", { timeSlots: slot });
+                }
               }}
             />
           {/each}
@@ -451,4 +407,9 @@
       </div>
     {/each}
   </div>
+  {#if slotSelection.length && allow_booking}
+    <button type="button" on:click={() => sortAndSetEvent(sortedSlots)}
+      >{`Confirm Time slot${slotSelection.length > 1 ? "s" : ""}`}</button
+    >
+  {/if}
 </main>
