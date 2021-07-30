@@ -40,6 +40,11 @@ declare namespace Availability {
     SELECTED = "selected",
   }
 
+  enum ClickAction {
+    VERIFY = "verify",
+    CHOOSE = "choose",
+  }
+
   interface AvailabilityQuery {
     body: {
       emails: string[];

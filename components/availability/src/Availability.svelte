@@ -17,7 +17,8 @@
   export let slot_size: number = 15; // in minutes
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
-  export let click_action: "choose" | "verify" = "choose";
+  export let click_action: Availability.ClickAction =
+    Availability.ClickAction.CHOOSE;
   export let calendars: Availability.Calendar[] = [];
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
@@ -99,7 +100,7 @@
         }
 
         return {
-          selectionStatus: "unselected",
+          selectionStatus: Availability.SelectionStatus.UNSELECTED,
           availability: availability,
           available_calendars: freeCalendars,
           start_time: time,
@@ -211,19 +212,23 @@
     return freeBusyCalendars;
   }
 
-  function handleTimeSlotClick(selectedSlot: any): string {
-    if (selectedSlot.selectionStatus === "unselected") {
-      if (click_action === "choose") {
+  function handleTimeSlotClick(
+    selectedSlot: any,
+  ): Availability.SelectionStatus {
+    if (
+      selectedSlot.selectionStatus === Availability.SelectionStatus.UNSELECTED
+    ) {
+      if (click_action === Availability.ClickAction.CHOOSE) {
         sendTimeSlot(selectedSlot);
       }
       slotSelection = [...slotSelection, selectedSlot];
-      return "selected";
+      return Availability.SelectionStatus.SELECTED;
     } else {
       slotSelection = slotSelection.filter(
         (chosenSlot) => chosenSlot != selectedSlot,
       );
 
-      return "unselected";
+      return Availability.SelectionStatus.UNSELECTED;
     }
   }
 
@@ -378,7 +383,7 @@
       </div>
     {/each}
   </div>
-  {#if click_action === "verify"}
+  {#if click_action === Availability.ClickAction.VERIFY}
     <footer class="confirmation">
       Confirm time?
       <button
