@@ -158,6 +158,8 @@
   }
   let selectedThreads = new Set();
   $: areAllSelected = selectedThreads.size >= threads.length;
+  let starredThreads = new Set();
+  $: areAllStarred = starredThreads.size >= threads.length;
 
   function onSelectOne(event, thread: Nylas.Thread) {
     dispatchEvent("onSelectOneClicked", { event, thread });
@@ -177,6 +179,20 @@
       threads.forEach((t) => selectedThreads.add(t));
     }
     return (selectedThreads = selectedThreads);
+  }
+
+  function onStarAll(event) {
+    dispatchEvent("onStarAllClicked", { event });
+    if (areAllStarred) {
+      starredThreads.clear();
+      threads.forEach((t) => (t.starred = false));
+    } else {
+      threads.forEach((t) => {
+        starredThreads.add(t);
+        threads.forEach((t) => (t.starred = true));
+      });
+    }
+    return (starredThreads = starredThreads);
   }
   //#endregion actions
 
@@ -348,6 +364,7 @@
         {show_star}
         click_action="mailbox"
         unread={readStatusOutputs[unread_status]}
+        is_starred={areAllStarred}
         on:threadClicked={threadClicked}
         on:messageClicked={messageClicked}
       />
@@ -378,6 +395,17 @@
               />
             {/each}
           </div>{/if}
+        <div class="bulk-star">
+          {#each [areAllStarred ? "Unstar all" : "Star all"] as starAllTitle}
+            <input
+              title={starAllTitle}
+              aria-label={starAllTitle}
+              type="checkbox"
+              checked={areAllStarred}
+              on:click={(e) => onStarAll(e)}
+            />
+          {/each}
+        </div>
       </div>
     {/if}
     <ul id="mailboxlist">
@@ -408,6 +436,7 @@
                 unread={readStatusOutputs[unread_status]}
                 on:threadClicked={threadClicked}
                 on:messageClicked={messageClicked}
+                is_starred={areAllStarred}
               />
             </div>
           </li>

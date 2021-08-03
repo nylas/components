@@ -19,7 +19,6 @@
   import DropdownSymbol from "./assets/chevron-down.svg";
 
   let manifest: Partial<Nylas.EmailProperties> = {};
-  let viewportWidth: number;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -38,6 +37,7 @@
   export let show_star: boolean;
   export let unread: boolean | null = null;
   export let you: Partial<Nylas.Account> = {};
+  export let is_starred: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -75,6 +75,12 @@
       click_action,
       "default",
     );
+    is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
+    if (activeThread) {
+      activeThread.starred = is_starred;
+      saveActiveThread();
+      console.log({ activeStar: activeThread.starred });
+    }
   }
 
   let participants: Nylas.Participant[] = [];
@@ -95,6 +101,11 @@
   $: if (!thread_id && !thread && id && message_id) {
     fetchOneMessage();
   }
+
+  // $: if (activeThread && activeThread.starred !== thread?.starred) {
+  //   activeThread.starred = thread?.starred || !activeThread.starred;
+  //   console.log({ thread });
+  // }
 
   // #region thread intake and set
   // The trick is to always ensure that activeThread is in the store; that way if we need to do fetches to update its messages, it too will be updated for free.
@@ -205,6 +216,8 @@
     //#region starred/unstarred
     if (activeThread) {
       activeThread.starred = !activeThread.starred;
+      is_starred = !is_starred;
+      console.log({ activeThread: activeThread.starred, is_starred });
       saveActiveThread();
     }
     //#endregion starred/unstarred
