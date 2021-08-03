@@ -60,6 +60,7 @@
   export let afterSendSuccess: Function | null = null;
   export let afterSendError: Function | null = null;
   export let template: string = "";
+  export let tracking: Composer.Tracking | null = null;
 
   // Attributes
   export let minimized: Composer.Attribute;
@@ -126,6 +127,11 @@
         show_from = false;
       }
     }
+    if (tracking) {
+      // Set tracking on message object
+      update("tracking", tracking);
+    }
+
     isLoading = false;
     themeLoaded = true;
   });
@@ -292,7 +298,7 @@
         });
     } else if (id) {
       // Middleware
-      sendMessage(id, msg, access_token)
+      sendMessage(id, msg, tracking, access_token)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
           if (reset_after_send) resetAfterSend($message.from);
