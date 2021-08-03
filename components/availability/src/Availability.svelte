@@ -251,9 +251,9 @@
     return events;
   }, []);
 
-  function toggleSelectedTimeSlots(selectedSlot: obj): obj[] {
+  function toggleSelectedTimeSlots(selectedSlot: obj) {
     return (slotSelection =
-      selectedSlot.selectionStatus === "selected"
+      selectedSlot.selectionStatus === SelectionStatus.SELECTED
         ? [...slotSelection, selectedSlot]
         : slotSelection.filter((slot) => slot != selectedSlot));
   }
@@ -390,12 +390,12 @@
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
-              disabled={slot.availability === "busy"}
+              disabled={slot.availability === AvailabilityStatus.BUSY}
               on:click={() => {
                 slot.selectionStatus =
-                  slot.selectionStatus === "selected"
-                    ? "unselected"
-                    : "selected";
+                  slot.selectionStatus === SelectionStatus.SELECTED
+                    ? SelectionStatus.UNSELECTED
+                    : SelectionStatus.SELECTED;
                 toggleSelectedTimeSlots(slot);
                 if (!allow_booking) {
                   dispatchEvent("timeSlotChosen", { timeSlots: slot });
