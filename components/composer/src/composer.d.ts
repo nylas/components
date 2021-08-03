@@ -48,6 +48,13 @@ declare namespace Composer {
 
   type Attribute = string | boolean | void;
 
+  interface Tracking {
+    links: boolean;
+    opens: boolean;
+    thread_replies: boolean;
+    payload: string;
+  }
+
   interface Attachment {
     filename: string;
     size: number;

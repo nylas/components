@@ -13,6 +13,15 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const composer = document.querySelector("nylas-composer");
+        /* to enable tracking, uncomment the following */
+        /*
+        composer.tracking = {
+          links: true,
+          opens: true,
+          thread_replies: true,
+          payload: "Testing from Composer demo"
+        }
+        */
         composer.replace_fields = [{ from: "[hi]", to: "hello" }];
         // This is same as setting below, attribute with strigified value
         // composer.setAttribute("replace_fields", JSON.stringify([{ "from": "[hi]", "to": "hello" }]));
