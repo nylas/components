@@ -298,7 +298,7 @@
         });
     } else if (id) {
       // Middleware
-      sendMessage(id, msg, tracking, access_token)
+      sendMessage(id, msg, access_token)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
           if (reset_after_send) resetAfterSend($message.from);
