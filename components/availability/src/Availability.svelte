@@ -16,9 +16,8 @@
     SelectableSlot,
     AvailabilityStatus,
     AvailabilityQuery,
+    EventQuery,
   } from "@commons/types/Availability";
-
-  import { ManifestStore, EventStore } from "../../../commons/src";
 
   //#region props
   export let id: string = "";
