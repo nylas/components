@@ -1,7 +1,11 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  import { ManifestStore, AvailabilityStore } from "../../../commons/src";
+  import {
+    ManifestStore,
+    AvailabilityStore,
+    CalendarStore,
+  } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
