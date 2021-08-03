@@ -47,6 +47,21 @@ describe("availability component", () => {
           cy.get(".slot.free").should("have.length", 20);
         });
     });
+
+    it("available time slot toggles (un)selected class", () => {
+      cy.get(".slot.free").first().should("have.class", "unselected");
+      cy.get(".slot.free").first().click();
+      cy.get(".slot.free").first().should("have.class", "selected");
+    });
+
+    it("should not show confirm button when multiple time slots are selected", () => {
+      cy.get(".slot.free").each((slot, index) => {
+        if (index === 0 || index === 1 || index === 3) {
+          cy.get(slot).click();
+        }
+      });
+      cy.get("button.confirm").should("not.exist");
+    });
   });
 
   describe("unavailable times", () => {
@@ -91,6 +106,10 @@ describe("availability component", () => {
           component.slot_size = 30;
           cy.get(".slot.free").should("have.length", 28);
         });
+    });
+
+    it("busy time slot is disabled", () => {
+      cy.get(".slot.busy").should("be.disabled");
     });
   });
 
@@ -252,34 +271,6 @@ describe("availability component", () => {
     });
   });
 
-  describe("click_action prop", () => {
-    it('Handles click_action="choose"', () => {
-      cy.get(".slot").first().should("have.class", "unselected");
-      cy.get(".slot").first().click();
-      cy.get(".slot").first().should("have.class", "selected");
-      cy.get("footer.confirmation").should("not.exist");
-    });
-
-    it('Handles click_action="verify"', () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.click_action = "verify";
-          cy.get("footer.confirmation").should("exist");
-          cy.get(".slot").first().should("have.class", "unselected");
-          cy.get(".confirm-btn").should("be.disabled");
-          cy.get(".slot").first().click();
-          cy.get(".slot").first().should("have.class", "selected");
-          cy.get(".confirm-btn").should("not.be.disabled");
-
-          cy.get(".confirm-btn").click();
-          cy.get(".slot").last().click();
-          cy.get(".slot").first().should("have.class", "unselected");
-        });
-    });
-  });
-
   describe("axis ticks", () => {
     it("shows ticks by default", () => {
       cy.get("ul.ticks").should("exist");
@@ -318,6 +309,92 @@ describe("availability component", () => {
 
       cy.viewport(550, 1500);
       cy.get("li.tick").should("have.length", 32);
+    });
+  });
+
+  describe("selecting avaialble time slots", () => {
+    const consecutiveSlotEndTime = new Date(
+      `${new Date().toLocaleDateString()} 15:30:00`,
+    ).toISOString();
+    const singularSlotStartTime = new Date(
+      `${new Date().toLocaleDateString()} 15:45:00`,
+    ).toISOString();
+    const singularSlotEndTime = new Date(
+      `${new Date().toLocaleDateString()} 16:00:00`,
+    ).toISOString();
+
+    it("should combine consecutive time slots", (done) => {
+      cy.get("nylas-availability").then((element) => {
+        const component = element[0];
+        component.allow_booking = true;
+        component.calendars = [
+          {
+            emailAddress: "person@name.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(15, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+              },
+            ],
+          },
+          {
+            emailAddress: "thelonious@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(15, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+              },
+            ],
+          },
+          {
+            emailAddress: "booker@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(15, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+              },
+            ],
+          },
+        ];
+
+        component.addEventListener("timeSlotChosen", (event) => {
+          expect(event.detail).to.have.ownProperty("timeSlots");
+          expect(event.detail.timeSlots).to.have.lengthOf(2);
+          expect(event.detail.timeSlots[0].end_time.toISOString()).eq(
+            consecutiveSlotEndTime,
+          );
+          expect(event.detail.timeSlots[1].start_time.toISOString()).eq(
+            singularSlotStartTime,
+          );
+          expect(event.detail.timeSlots[1].end_time.toISOString()).eq(
+            singularSlotEndTime,
+          );
+          done();
+        });
+      });
+
+      cy.get(".slot.free").each((slot, index) => {
+        if (index === 0 || index === 1 || index === 3) {
+          cy.get(slot).click();
+        }
+      });
+      cy.get("button.confirm").should("exist");
+      cy.get("button.confirm").click();
     });
   });
 });

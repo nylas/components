@@ -9,11 +9,6 @@ export enum SelectionStatus {
   SELECTED = "selected",
 }
 
-export enum ClickAction {
-  VERIFY = "verify",
-  CHOOSE = "choose",
-}
-
 export interface Manifest extends Nylas.Manifest {
   start_hour: number;
   end_hour: number;
@@ -57,4 +52,12 @@ export interface AvailabilityResponse {
     end_time: number;
   }[];
   email: string;
+}
+
+export interface EventQuery {
+  participants?: [];
+  title?: string;
+  location?: string;
+  access_token?: string;
+  component_id?: string;
 }
