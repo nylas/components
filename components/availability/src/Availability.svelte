@@ -20,7 +20,7 @@
     TimeSlot,
     SelectableSlot,
     AvailabilityQuery,
-    EventQuery,
+    EventQuery
   } from "@commons/types/Availability";
 
   //#region props
@@ -171,14 +171,43 @@
     }
   };
 
+  const generateEpochs = (slots: SelectableSlot[]) => {
+    console.log("slots", slots);
+    //console.time('test');
+    let epochs = slots
+      .reduce((m, n) => {
+        if (
+          m[m.length - 1] &&
+          JSON.stringify(m[m.length - 1][0].available_calendars) ===
+            JSON.stringify(n.available_calendars)
+        ) {
+          m[m.length - 1].push(n);
+        } else {
+          m.push([n]);
+        }
+        return m;
+      }, [])
+      .map((epoch) => {
+        return {
+          start_time: epoch[0].start_time,
+          end_time: epoch[epoch.length - 1].end_time,
+          available_calendars: epoch[0].available_calendars,
+        };
+      });
+    //console.timeEnd('test')
+    return epochs;
+  };
+
   $: days = scaleTime()
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
+      let epochs = generateEpochs(slots);
       console.timeEnd("day");
       return {
         slots,
+        epochs,
         timestamp,
       };
     });
@@ -198,6 +227,7 @@
   })();
 
   async function getAvailability() {
+    console.log("getAv");
     let freeBusyCalendars: any = [];
     availabilityQuery = {
       body: {
@@ -277,12 +307,15 @@
 </script>
 
 <style lang="scss">
+  @import "../../theming/variables.scss";
   $headerHeight: 50px;
   main {
     height: 100%;
     overflow: hidden;
     display: grid;
+    gap: 1rem;
     grid-template-rows: 1fr auto;
+    font-family: Arial, Helvetica, sans-serif;
 
     &.ticked {
       grid-template-columns: auto 1fr;
@@ -290,8 +323,9 @@
 
     .days {
       display: grid;
+      gap: 0;
       grid-auto-flow: column;
-      grid-auto-columns: auto;
+      grid-auto-columns: 1fr;
     }
 
     .ticks {
@@ -304,7 +338,7 @@
       padding: 0;
       overflow: hidden;
       padding-top: $headerHeight;
-      font-size: 0.6rem;
+      font-size: 0.8rem;
       font-family: sans-serif;
       // text-align: right;
 
@@ -327,7 +361,25 @@
       h2 {
         margin: 0;
         padding: 0;
-        text-align: center;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem;
+        height: 30px;
+        line-height: 30px;
+        font-size: 1rem;
+        font-weight: 300;
+
+        .date {
+          border-radius: 50px;
+          background: var(--blue);
+          color: white;
+          font-weight: bold;
+          display: block;
+          width: 30px;
+          height: 30px;
+          line-height: 30px;
+          text-align: center;
+        }
       }
 
       .slots {
@@ -347,7 +399,6 @@
           justify-content: center;
           align-content: center;
           font-family: sans-serif;
-          font-size: 0.8rem;
 
           &.selected {
             background-color: yellow;
@@ -378,7 +429,12 @@
   {#if show_ticks}
     <ul class="ticks">
       {#each ticks as tick}
-        <li class="tick">{tick.toLocaleTimeString()}</li>
+        <li class="tick">
+          {tick.toLocaleTimeString("default", {
+            hour: "numeric",
+            minute: "numeric",
+          })}
+        </li>
       {/each}
     </ul>
   {/if}
@@ -386,7 +442,18 @@
     {#each days as day}
       <div class="day">
         <header>
-          <h2>{new Date(day.timestamp).toLocaleDateString()}</h2>
+          <h2>
+            <span class="date"
+              >{new Date(day.timestamp).toLocaleString("default", {
+                day: "numeric",
+              })}</span
+            >
+            <span class="weekday"
+              >{new Date(day.timestamp).toLocaleString("default", {
+                weekday: "long",
+              })}</span
+            >
+          </h2>
         </header>
         <div class="slots">
           {#each day.slots as slot}
