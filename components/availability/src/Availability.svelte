@@ -1,13 +1,23 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  import { ManifestStore } from "../../../commons/src";
+  import { ManifestStore, AvailabilityStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
+  import {
+    ClickAction,
+    Calendar,
+    Manifest,
+    SelectionStatus,
+    TimeSlot,
+    SelectableSlot,
+    AvailabilityStatus,
+    AvailabilityQuery,
+  } from "@commons/types/Availability";
 
   //#region props
   export let id: string = "";
@@ -17,13 +27,14 @@
   export let slot_size: number = 15; // in minutes
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
-  export let click_action: "choose" | "verify" = "choose";
-  export let calendars: Availability.Calendar[] = [];
+  export let click_action: ClickAction = ClickAction.CHOOSE;
+  export let calendars: Calendar[] = [];
   export let show_ticks: boolean = true;
+  export let email_ids: string[] = [];
   //#endregion props
 
   //#region mount
-  let manifest: Partial<Availability.Manifest> = {};
+  let manifest: Partial<Manifest> = {};
   onMount(async () => {
     await tick();
     clientHeight = main?.getBoundingClientRect().height;
@@ -38,7 +49,7 @@
   let main: Element;
   let clientHeight: number;
 
-  let slotSelection: Availability.SelectableSlot[] = [];
+  let slotSelection: SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
@@ -62,18 +73,24 @@
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
 
-        let availability = "available"; // default
-
-        if (calendars.length) {
-          calendars.forEach((c) => {
+        let availability = AvailabilityStatus.FREE; // default
+        let allCalendars = [
+          ...calendars,
+          ...newCalendarTimeslotsForGivenEmails,
+        ];
+        if (allCalendars.length) {
+          allCalendars.forEach((c) => {
             let availabilityExistsInSlot = c.timeslots.some(
               (slot) => time >= slot.start_time && endTime <= slot.end_time,
             );
-            if (c.availability === "busy") {
+            if (c.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(c.emailAddress);
               }
-            } else if (c.availability === "free" || !c.availability) {
+            } else if (
+              c.availability === AvailabilityStatus.FREE ||
+              !c.availability
+            ) {
               // if they pass in a calendar, but don't have availability, assume the timeslots are available.
               if (availabilityExistsInSlot) {
                 freeCalendars.push(c.emailAddress);
@@ -82,20 +99,20 @@
           });
         }
 
-        if (calendars.length) {
+        if (allCalendars.length) {
           if (freeCalendars.length) {
-            if (freeCalendars.length === calendars.length) {
-              availability = "free";
+            if (freeCalendars.length === allCalendars.length) {
+              availability = AvailabilityStatus.FREE;
             } else {
-              availability = "partial";
+              availability = AvailabilityStatus.PARTIAL;
             }
           } else {
-            availability = "busy";
+            availability = AvailabilityStatus.BUSY;
           }
         }
 
         return {
-          selectionStatus: "unselected",
+          selectionStatus: SelectionStatus.UNSELECTED,
           availability: availability,
           available_calendars: freeCalendars,
           start_time: time,
@@ -164,26 +181,69 @@
     });
   //#endregion layout
 
-  function handleTimeSlotClick(selectedSlot: any): string {
-    if (selectedSlot.selectionStatus === "unselected") {
-      if (click_action === "choose") {
+  $: newCalendarTimeslotsForGivenEmails = [];
+  let availabilityQuery: AvailabilityQuery;
+
+  $: (async () => {
+    if (email_ids?.length) {
+      newCalendarTimeslotsForGivenEmails = await getAvailability();
+    }
+    // When dates_to_show is updated, update availability
+    if (email_ids?.length && dates_to_show) {
+      newCalendarTimeslotsForGivenEmails = await getAvailability();
+    }
+  })();
+
+  async function getAvailability() {
+    let freeBusyCalendars: any = [];
+    availabilityQuery = {
+      body: {
+        emails: email_ids,
+        start_time:
+          new Date(new Date(startDay).setHours(start_hour)).getTime() / 1000,
+        end_time:
+          new Date(new Date(endDay).setHours(end_hour)).getTime() / 1000,
+      },
+      component_id: id,
+    };
+    // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
+    const consolidatedAvailabilityForGivenDay =
+      await AvailabilityStore.getAvailability(availabilityQuery);
+    if (consolidatedAvailabilityForGivenDay?.length) {
+      consolidatedAvailabilityForGivenDay.forEach((user) => {
+        freeBusyCalendars.push({
+          emailAddress: user.email,
+          availability: AvailabilityStatus.BUSY,
+          timeslots: user.time_slots.map((_slot) => ({
+            start_time: new Date(_slot.start_time * 1000),
+            end_time: new Date(_slot.end_time * 1000),
+          })),
+        });
+      });
+    }
+    return freeBusyCalendars;
+  }
+
+  function handleTimeSlotClick(selectedSlot: any): SelectionStatus {
+    if (selectedSlot.selectionStatus === SelectionStatus.UNSELECTED) {
+      if (click_action === ClickAction.CHOOSE) {
         sendTimeSlot(selectedSlot);
       }
       slotSelection = [...slotSelection, selectedSlot];
-      return "selected";
+      return SelectionStatus.SELECTED;
     } else {
       slotSelection = slotSelection.filter(
         (chosenSlot) => chosenSlot != selectedSlot,
       );
 
-      return "unselected";
+      return SelectionStatus.UNSELECTED;
     }
   }
 
-  function sendTimeSlot(selectedSlot: Availability.TimeSlot) {
+  function sendTimeSlot(selectedSlot: TimeSlot) {
     let start_time = new Date(selectedSlot.start_time);
     let end_time = new Date(selectedSlot.end_time);
-    const timeslot: Availability.TimeSlot = {
+    const timeslot: TimeSlot = {
       start_time,
       end_time,
     };
@@ -331,7 +391,7 @@
       </div>
     {/each}
   </div>
-  {#if click_action === "verify"}
+  {#if click_action === ClickAction.VERIFY}
     <footer class="confirmation">
       Confirm time?
       <button
@@ -339,7 +399,7 @@
         on:click={() => {
           slotSelection.forEach((selectedSlot) => {
             sendTimeSlot(selectedSlot);
-            selectedSlot.selectionStatus = "unselected";
+            selectedSlot.selectionStatus = SelectionStatus.UNSELECTED;
             slotSelection = [];
           });
         }}
