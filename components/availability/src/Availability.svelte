@@ -9,7 +9,6 @@
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
   import {
-    ClickAction,
     Calendar,
     Manifest,
     SelectionStatus,
@@ -29,7 +28,6 @@
   export let slot_size: number = 15; // in minutes
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
-  export let click_action: ClickAction = ClickAction.CHOOSE;
   export let calendars: Calendar[] = [];
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
@@ -264,7 +262,7 @@
   function sortAndSetEvent(slots: obj[]) {
     dispatchEvent("timeSlotChosen", { timeSlots: [...slots] });
     if (allow_booking) {
-      EventStore.createEvent(slots, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
+      // EventStore.createEvent(slots, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
     }
     slotSelection = [];
   }
@@ -362,6 +360,9 @@
         }
       }
     }
+    button.confirm {
+      grid-column: -1 / 1;
+    }
   }
 </style>
 
@@ -408,7 +409,10 @@
     {/each}
   </div>
   {#if slotSelection.length && allow_booking}
-    <button type="button" on:click={() => sortAndSetEvent(sortedSlots)}
+    <button
+      class="confirm"
+      type="button"
+      on:click={() => sortAndSetEvent(sortedSlots)}
       >{`Confirm Time slot${slotSelection.length > 1 ? "s" : ""}`}</button
     >
   {/if}
