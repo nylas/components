@@ -78,10 +78,6 @@
         const freeCalendars: string[] = [];
 
         let availability = AvailabilityStatus.FREE; // default
-        let allCalendars = [
-          ...calendars,
-          ...newCalendarTimeslotsForGivenEmails,
-        ];
         if (allCalendars.length) {
           allCalendars.forEach((c) => {
             let availabilityExistsInSlot = c.timeslots.some(
@@ -173,13 +169,10 @@
 
   // Consecutive same-availability periods of time, from earliest start_time to latest end_time.
   const generateEpochs = (slots: SelectableSlot[]) => {
-    console.log("slots", slots);
-    console.time("test");
     let scale = scaleTime().domain([
       slots[0].start_time,
       slots[slots.length - 1].end_time,
     ]);
-    console.log("scaler", scale);
     let epochs = slots
       .reduce((m, n) => {
         if (
@@ -196,10 +189,11 @@
       .map((epoch) => {
         return {
           start_time: epoch[0].start_time,
-          offset: scale(epoch[0].start_time),
+          offset: scale(epoch[0].start_time) * 100,
           height:
-            scale(epoch[epoch.length - 1].end_time) -
-            scale(epoch[0].start_time),
+            (scale(epoch[epoch.length - 1].end_time) -
+              scale(epoch[0].start_time)) *
+            100,
           end_time: epoch[epoch.length - 1].end_time,
           slots: epoch.length,
           available_calendars: epoch[0].available_calendars,
@@ -224,6 +218,13 @@
   //#endregion layout
 
   $: newCalendarTimeslotsForGivenEmails = [];
+
+  $: allCalendars = [
+    // TODO: consider merging these 2 into just calendars
+    ...calendars,
+    ...newCalendarTimeslotsForGivenEmails,
+  ];
+
   let availabilityQuery: AvailabilityQuery;
 
   $: (async () => {
@@ -237,7 +238,6 @@
   })();
 
   async function getAvailability() {
-    console.log("getAv");
     let freeBusyCalendars: any = [];
     availabilityQuery = {
       body: {
@@ -314,12 +314,14 @@
     slotSelection = [];
   }
   //#region booking event logic for single time slot or consecutive time slots
-  $: console.log({ days });
 </script>
 
 <style lang="scss">
   @import "../../theming/variables.scss";
   $headerHeight: 50px;
+  $color-free: rgba(54, 210, 173, 0.4);
+  $color-busy: rgba(255, 100, 117, 0.4);
+  $color-partial: rgba(255, 255, 117, 0.4);
   main {
     height: 100%;
     overflow: hidden;
@@ -327,6 +329,8 @@
     gap: 1rem;
     grid-template-rows: 1fr auto;
     font-family: Arial, Helvetica, sans-serif;
+    position: relative;
+    z-index: 1;
 
     &.ticked {
       grid-template-columns: auto 1fr;
@@ -368,6 +372,7 @@
     .day {
       display: grid;
       grid-template-rows: $headerHeight 1fr;
+      position: relative;
 
       h2 {
         margin: 0;
@@ -393,6 +398,60 @@
         }
       }
 
+      .epochs {
+        position: absolute;
+        top: 50px;
+        width: 100%;
+        height: calc(100% - 50px);
+        background: rgba(255, 255, 255, 0);
+        .epoch {
+          position: absolute;
+          width: 100%;
+
+          .inner {
+            margin: 0.25rem;
+            height: calc(100% - 1rem);
+            overflow: hidden;
+            border-radius: 4px;
+            padding: 0.25rem;
+          }
+
+          &.busy .inner {
+            background-color: $color-busy;
+          }
+          &.partial .inner {
+            background-color: $color-partial;
+          }
+
+          &.free .inner {
+            background-color: $color-free;
+          }
+
+          .available-calendars {
+            position: relative;
+            z-index: 2;
+            span {
+              background: rgba(0, 0, 0, 0.5);
+              display: inline-block;
+              margin: 0.25rem;
+              padding: 0.25rem;
+              border-radius: 4px;
+              font-size: 0.7rem;
+              color: white;
+
+              &.calendar {
+                display: none;
+              }
+            }
+          }
+          &:hover {
+            .available-calendars span.calendar {
+              display: inline-block;
+            }
+          }
+        }
+      }
+
       .slots {
         display: grid;
         grid-auto-flow: row;
@@ -401,10 +460,13 @@
         list-style-type: none;
         margin: 0;
         padding: 0;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-bottom: none;
 
         .slot {
-          border: 1px solid #fff;
-          background: #eee;
+          border: none;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          background: transparent;
           position: relative;
           align-items: center;
           justify-content: center;
@@ -412,19 +474,14 @@
           font-family: sans-serif;
 
           &.selected {
-            background-color: yellow;
+            background-color: purple;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+            border-radius: 4px;
+            margin: 0 0.25rem;
           }
 
-          &.free {
-            border: 1px solid green;
-          }
-          &.partial {
-            border: 1px solid #ccc;
-          }
           &.busy {
-            border: 1px solid red;
             cursor: not-allowed;
-            opacity: 0.3;
           }
         }
       }
@@ -466,6 +523,33 @@
             >
           </h2>
         </header>
+        <div class="epochs">
+          {#each day.epochs as epoch}
+            <div
+              class:busy={epoch.available_calendars.length === 0}
+              class:partial={epoch.available_calendars.length !==
+                allCalendars.length && epoch.available_calendars.length !== 0}
+              class:free={epoch.available_calendars.length ===
+                allCalendars.length}
+              class="epoch"
+              style="height: {epoch.height}%; top: {epoch.offset}%;"
+              data-available-calendars={epoch.available_calendars.toString()}
+              data-start-time={new Date(epoch.start_time).toLocaleString()}
+              data-end-time={new Date(epoch.end_time).toLocaleString()}
+            >
+              <div class="inner">
+                <span class="available-calendars">
+                  <span
+                    >{epoch.available_calendars.length} of {allCalendars.length}</span
+                  >
+                  {#each epoch.available_calendars as calendar}<span
+                      class="calendar">{calendar}</span
+                    >{/each}
+                </span>
+              </div>
+            </div>
+          {/each}
+        </div>
         <div class="slots">
           {#each day.slots as slot}
             <button
@@ -478,26 +562,16 @@
               data-end-time={new Date(slot.end_time).toLocaleString()}
               disabled={slot.availability === AvailabilityStatus.BUSY}
               on:click={() => {
-                slot.selectionStatus =
-                  slot.selectionStatus === SelectionStatus.SELECTED
-                    ? SelectionStatus.UNSELECTED
-                    : SelectionStatus.SELECTED;
-                toggleSelectedTimeSlots(slot);
-                if (!allow_booking) {
+                if (allow_booking) {
+                  slot.selectionStatus =
+                    slot.selectionStatus === SelectionStatus.SELECTED
+                      ? SelectionStatus.UNSELECTED
+                      : SelectionStatus.SELECTED;
+                  toggleSelectedTimeSlots(slot);
+                } else {
                   dispatchEvent("timeSlotChosen", { timeSlots: slot });
                 }
               }}
-            />
-          {/each}
-        </div>
-        <div class="epochs">
-          {#each day.epochs as epoch}
-            <div
-              class="epoch"
-              style="height: {epoch.height}%; top: ${epoch.offset}px;"
-              data-available-calendars={epoch.available_calendars.toString()}
-              data-start-time={new Date(epoch.start_time).toLocaleString()}
-              data-end-time={new Date(epoch.end_time).toLocaleString()}
             />
           {/each}
         </div>
