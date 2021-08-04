@@ -25,7 +25,6 @@
   export let access_token: string = "";
   export let all_threads: Nylas.Thread[];
   export let show_star: boolean;
-  export let show_mailbox_toolbar: boolean = true;
   export let show_thread_checkbox: boolean = true;
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
@@ -150,6 +149,15 @@
     }
   }
 
+  async function threadStarred(event: CustomEvent) {
+    if (starredThreads.has(event.detail.thread)) {
+      starredThreads.delete(event.detail.thread);
+    } else {
+      starredThreads.add(event.detail.thread);
+    }
+    return (starredThreads = starredThreads);
+  }
+
   async function refreshClicked(event: CustomEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
@@ -161,7 +169,7 @@
   let starredThreads = new Set();
   $: areAllStarred = starredThreads.size >= threads.length;
 
-  function onSelectOne(event, thread: Nylas.Thread) {
+  function onSelectOne(event: CustomEvent, thread: Nylas.Thread) {
     dispatchEvent("onSelectOneClicked", { event, thread });
     if (selectedThreads.has(thread)) {
       selectedThreads.delete(thread);
@@ -171,7 +179,7 @@
     return (selectedThreads = selectedThreads);
   }
 
-  function onSelectAll(event) {
+  function onSelectAll(event: CustomEvent) {
     dispatchEvent("onSelectAllClicked", { event });
     if (areAllSelected) {
       selectedThreads.clear();
@@ -181,7 +189,7 @@
     return (selectedThreads = selectedThreads);
   }
 
-  function onStarAll(event) {
+  function onStarAll(event: CustomEvent) {
     dispatchEvent("onStarAllClicked", { event });
     if (areAllStarred) {
       starredThreads.clear();
@@ -255,7 +263,8 @@
 
     [role="toolbar"] {
       @include barStyle;
-      padding: 8px 16px;
+      padding: $spacing-s $spacing-m;
+      gap: $spacing-m;
       border-top-width: 0;
     }
 
@@ -263,6 +272,34 @@
     .thread-checkbox {
       input {
         @include checkbox;
+      }
+    }
+
+    div.bulk-star {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      button {
+        background-color: transparent;
+        cursor: pointer;
+        &:before {
+          content: "\2605";
+          display: inline-block;
+          font-size: 1em;
+          color: #ccc;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          user-select: none;
+        }
+
+        &.starred:before {
+          color: #ffc107;
+        }
+
+        &:hover:before {
+          color: #ffc107;
+        }
       }
     }
 
@@ -364,9 +401,10 @@
         {show_star}
         click_action="mailbox"
         unread={readStatusOutputs[unread_status]}
-        is_starred={areAllStarred}
         on:threadClicked={threadClicked}
         on:messageClicked={messageClicked}
+        on:threadStarred={threadStarred}
+        is_starred={starredThreads.has(openedEmailData)}
       />
     </div>
   {:else}
@@ -382,9 +420,11 @@
         <h1>{header}</h1>
       </header>
     {/if}
-    {#if show_mailbox_toolbar}
+    {#if actionsBar.length}
       <div role="toolbar" aria-label="Bulk actions" aria-controls="mailboxlist">
-        {#if show_thread_checkbox}<div class="thread-checkbox">
+        {#if show_thread_checkbox && actionsBar.includes("selectall")}<div
+            class="thread-checkbox"
+          >
             {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
               <input
                 title={selectAllTitle}
@@ -395,17 +435,22 @@
               />
             {/each}
           </div>{/if}
-        <div class="bulk-star">
-          {#each [areAllStarred ? "Unstar all" : "Star all"] as starAllTitle}
-            <input
-              title={starAllTitle}
-              aria-label={starAllTitle}
-              type="checkbox"
-              checked={areAllStarred}
-              on:click={(e) => onStarAll(e)}
-            />
-          {/each}
-        </div>
+        {#if show_star && actionsBar.includes("star")}
+          <div class="bulk-star">
+            {#each [areAllStarred ? "Unstar all" : "Star all"] as starAllTitle}<div
+                class="bulk-star"
+              >
+                <button
+                  class={areAllStarred ? "starred" : ""}
+                  title={starAllTitle}
+                  aria-label={starAllTitle}
+                  role="switch"
+                  aria-checked={areAllStarred}
+                  on:click={(e) => onStarAll(e)}
+                />
+              </div>
+            {/each}
+          </div>{/if}
       </div>
     {/if}
     <ul id="mailboxlist">
@@ -436,7 +481,8 @@
                 unread={readStatusOutputs[unread_status]}
                 on:threadClicked={threadClicked}
                 on:messageClicked={messageClicked}
-                is_starred={areAllStarred}
+                on:threadStarred={threadStarred}
+                is_starred={starredThreads.has(thread)}
               />
             </div>
           </li>
