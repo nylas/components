@@ -8,6 +8,7 @@
 
   $: error = $ErrorStore[id] || { name: "" };
   $: explanation = NErrorExplanationMap[error.name]();
+  const isDevEnv = window.location.href.includes("localhost");
 </script>
 
 <style>
@@ -29,7 +30,7 @@
   }
 </style>
 
-{#if error.name}
+{#if error.name && isDevEnv}
   <div class="message-container">
     <h3>
       {@html explanation.title}
