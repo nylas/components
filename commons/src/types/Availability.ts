@@ -55,9 +55,13 @@ export interface AvailabilityResponse {
 }
 
 export interface EventQuery {
-  participants?: [];
+  participants?: EventParticipant[];
   title?: string;
   location?: string;
   access_token?: string;
   component_id?: string;
+}
+
+export interface EventParticipant {
+  email_address: string;
 }
