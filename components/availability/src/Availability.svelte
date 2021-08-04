@@ -12,7 +12,7 @@
   import {
     SelectionStatus,
     AvailabilityStatus,
-  } from "@commons/types/Availability";
+  } from "@commons/enums/Availability";
 
   import type {
     Calendar,
@@ -210,9 +210,8 @@
       component_id: id,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
-      availabilityQuery,
-    );
+    const consolidatedAvailabilityForGivenDay =
+      await AvailabilityStore.getAvailability(availabilityQuery);
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({

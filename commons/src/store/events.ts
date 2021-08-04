@@ -1,15 +1,16 @@
 import { writable } from "svelte/store";
 import { createEvent, fetchEvents } from "../connections/events";
+import type { EventQuery, Event } from "@commons/types/Events";
 
 function initializeEvents() {
-  const { subscribe, update, set } = writable<
-    Record<string, Promise<Events.Event[]>>
-  >({});
-  let eventsMap: Record<string, Promise<Events.Event[]>> = {};
+  const { subscribe, update, set } = writable<Record<string, Promise<Event[]>>>(
+    {},
+  );
+  let eventsMap: Record<string, Promise<Event[]>> = {};
 
   return {
     subscribe,
-    getEvents: async (query: Events.EventQuery) => {
+    getEvents: async (query: EventQuery) => {
       if (Array.isArray(query.calendarIDs) && query.calendarIDs.length > 0) {
         const queryKey = JSON.stringify(query);
         if (
@@ -25,9 +26,9 @@ function initializeEvents() {
         return await eventsMap[queryKey];
       }
     },
-    createEvent: (event: Events.Event, query: Events.EventQuery) => {
+    createEvent: (event: Event, query: EventQuery) => {
       const queryKey = JSON.stringify(query);
-      if (!!eventsMap[queryKey]) {
+      if (eventsMap[queryKey]) {
         eventsMap[queryKey] = Promise.all([
           eventsMap[queryKey],
           createEvent(event, query),

@@ -4,6 +4,7 @@ import {
   populatePositionMap,
   updateEventPosition,
 } from "../../../components/agenda/src/methods/position";
+import type { TimespanEvent } from "@commons/types/Events";
 
 describe("Event positioning", () => {
   it("should correctly populate a position map based on a list of events", () => {
@@ -54,10 +55,10 @@ describe("Event positioning", () => {
 
   it("should update the offset of overlapping events based on the event's width", () => {
     const clonedOverlaps = [
-      <Events.TimespanEvent>{
+      <TimespanEvent>{
         ...mockEvents.find((event) => event.id === "abc123"),
       },
-      <Events.TimespanEvent>{
+      <TimespanEvent>{
         ...mockEvents.find((event) => event.id === "def456"),
       },
     ];
@@ -67,18 +68,14 @@ describe("Event positioning", () => {
         leftNeighbour: null,
         offset: 0,
         overlaps: [
-          <Events.TimespanEvent>(
-            mockEvents.find((event) => event.id === "ghi789")
-          ),
+          <TimespanEvent>mockEvents.find((event) => event.id === "ghi789"),
         ],
       },
       def456: {
         leftNeighbour: null,
         offset: 0,
         overlaps: [
-          <Events.TimespanEvent>(
-            mockEvents.find((event) => event.id === "ghi789")
-          ),
+          <TimespanEvent>mockEvents.find((event) => event.id === "ghi789"),
         ],
       },
       ghi789: {
@@ -100,10 +97,10 @@ describe("Event positioning", () => {
 
   it("should size the right-most events to take up the remaining width", () => {
     const clonedOverlaps = [
-      <Events.TimespanEvent>{
+      <TimespanEvent>{
         ...mockEvents.find((event) => event.id === "abc123"),
       },
-      <Events.TimespanEvent>{
+      <TimespanEvent>{
         ...mockEvents.find((event) => event.id === "def456"),
       },
     ];
@@ -113,18 +110,14 @@ describe("Event positioning", () => {
         leftNeighbour: null,
         offset: 0,
         overlaps: [
-          <Events.TimespanEvent>(
-            mockEvents.find((event) => event.id === "ghi789")
-          ),
+          <TimespanEvent>mockEvents.find((event) => event.id === "ghi789"),
         ],
       },
       def456: {
         leftNeighbour: null,
         offset: 0,
         overlaps: [
-          <Events.TimespanEvent>(
-            mockEvents.find((event) => event.id === "ghi789")
-          ),
+          <TimespanEvent>mockEvents.find((event) => event.id === "ghi789"),
         ],
       },
       ghi789: {

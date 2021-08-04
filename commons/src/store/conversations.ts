@@ -1,18 +1,21 @@
 import { writable } from "svelte/store";
+import type {
+  Conversation,
+  StoredConversation,
+  StoredMessage,
+} from "@commons/types/Nylas";
 
 function initializeConversations() {
-  const { subscribe, set, update } = writable<
-    Record<string, Nylas.Conversation>
-  >({});
+  const { subscribe, set, update } = writable<Record<string, Conversation>>({});
   return {
     subscribe,
-    addThread: (incomingThread: Nylas.StoredConversation) => {
+    addThread: (incomingThread: StoredConversation) => {
       update((thread) => {
         thread[incomingThread.queryKey] = incomingThread.data;
         return { ...thread };
       });
     },
-    updateThread: (incomingThread: Nylas.StoredConversation) => {
+    updateThread: (incomingThread: StoredConversation) => {
       update((thread) => {
         thread[incomingThread.queryKey] = {
           ...thread[incomingThread.queryKey],
@@ -21,7 +24,7 @@ function initializeConversations() {
         return { ...thread };
       });
     },
-    addMessageToThread: (incomingMessage: Nylas.StoredMessage) => {
+    addMessageToThread: (incomingMessage: StoredMessage) => {
       update((thread) => {
         thread[incomingMessage.queryKey].messages = thread[
           incomingMessage.queryKey

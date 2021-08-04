@@ -3,9 +3,10 @@
 <script lang="ts">
   import CloseIcon from "../assets/close.svg";
   import LoadingIcon from "../assets/loading.svg";
+  import type { Attachment } from "@commons/types/Composer";
 
-  export let attachment: Composer.Attachment;
-  export let remove: (attachment: Composer.Attachment) => void;
+  export let attachment: Attachment;
+  export let remove: (attachment: Attachment) => void;
 
   // Creates human-readable size
   const prettySize = (size: number): string => {

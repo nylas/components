@@ -3,24 +3,27 @@
 <script lang="ts">
   import { debounce, isValidEmail } from "../lib/utils";
   import { tick } from "svelte";
+  import type { Participant } from "@commons/types/Nylas";
+  import type {
+    FetchContactsCallback,
+    ChangeCallback,
+    BlurOptions,
+  } from "@commons/types/ContactsSearch";
+  export let contacts: Participant[] | FetchContactsCallback;
 
-  export let contacts:
-    | Nylas.Participant[]
-    | ContactsSearch.FetchContactsCallback;
-
-  export let value: Nylas.Participant[] = [];
+  export let value: Participant[] = [];
   // export let componentId: any = null;
   export let placeholder: string = "To";
   export let single: boolean = false;
-  export let change: ContactsSearch.ChangeCallback | void;
+  export let change: ChangeCallback | void;
 
-  let selectedContacts: Nylas.Participant[] = [];
+  let selectedContacts: Participant[] = [];
   let term: string = ""; // TODO: rename to "term"
   let currentContactIndex = 0;
   let loading = false;
   let searchField: HTMLInputElement;
   let dropdown: HTMLInputElement;
-  let contactsList: Nylas.Participant[] = [];
+  let contactsList: Participant[] = [];
   let isOpen = false;
 
   // Initial state setup
@@ -60,7 +63,7 @@
     selectedContacts = selectedContacts.filter((c) => c.email !== email);
     focusSearch();
   };
-  const selectContact = (contact: Nylas.Participant) => {
+  const selectContact = (contact: Participant) => {
     if (single && selectedContacts.length === 1) {
       selectedContacts = [contact];
       isOpen = false;
@@ -85,7 +88,7 @@
     searchField.removeAttribute("tabindex");
   }
 
-  const blurSearch = (options: ContactsSearch.BlurOptions) => {
+  const blurSearch = (options: BlurOptions) => {
     setTimeout(() => {
       if (options.addContact && !filteredContacts.length && term) {
         handleSubmit();

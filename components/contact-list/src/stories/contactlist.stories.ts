@@ -1,5 +1,6 @@
 import type { SvelteComponent } from "svelte";
 import ContactList from "../ContactList.svelte";
+import type { HydratedContact } from "@commons/types/Contacts";
 
 export default {
   title: "Contactlist",
@@ -33,7 +34,7 @@ interface ContactListProps {
   Component: typeof SvelteComponent;
   props: {
     id?: string;
-    contacts?: Contacts.HydratedContact[] | null;
+    contacts?: HydratedContact[] | null;
     theme?: string;
     click_action?: "email" | "select";
     sort_by?: "last_emailed" | "name";

@@ -1,15 +1,9 @@
-export enum AvailabilityStatus {
-  FREE = "free",
-  BUSY = "busy",
-  PARTIAL = "partial",
-}
-
-export enum SelectionStatus {
-  UNSELECTED = "unselected",
-  SELECTED = "selected",
-}
-
-export interface Manifest extends Nylas.Manifest {
+import type {
+  SelectionStatus,
+  AvailabilityStatus,
+} from "@commons/enums/Availability";
+import type { Manifest as NylasManifest } from "@commons/types/Nylas";
+export interface Manifest extends NylasManifest {
   start_hour: number;
   end_hour: number;
   slot_size: 15 | 30 | 60;

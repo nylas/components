@@ -1,3 +1,5 @@
+import type { Manifest } from "@commons/types/Nylas";
+
 export function getEventDispatcher(component: {
   dispatchEvent?: (e: Event) => boolean;
 }) {
@@ -27,12 +29,12 @@ export function debounce(
   };
 }
 
-export function buildInternalProps<T extends Nylas.Manifest>(
-  properties: T,
-  manifest: Nylas.Manifest,
+export function buildInternalProps<T extends Manifest>(
+  properties: any,
+  manifest: Manifest,
 ): T {
   return new Proxy(properties, {
-    get: (properties, name: keyof Nylas.Manifest) => {
+    get: (properties, name: keyof Manifest) => {
       if (name in properties) {
         return properties[name];
       } else if (manifest && name in manifest) {

@@ -16,10 +16,16 @@
     getPropertyValue,
     getEventDispatcher,
   } from "@commons/methods/component";
+  import type {
+    HydratedContact,
+    Contact,
+    ContactsQuery,
+  } from "@commons/types/Contacts";
+  import type { ContactListProperties } from "@commons/types/Nylas";
 
   export let id: string = "";
   export let access_token: string = "";
-  export let contacts: Contacts.HydratedContact[] | null = null;
+  export let contacts: HydratedContact[] | null = null;
   export let theme: string = "theme-1";
   export let click_action: "email" | "select";
   export let sort_by: "last_emailed" | "name";
@@ -30,7 +36,7 @@
 
   let filterValue: string = "";
   const filterPredicates = {
-    byEmail: (contact: Contacts.Contact) =>
+    byEmail: (contact: Contact) =>
       contact.emails[0].email.includes(filterValue),
   };
   let selectedFilterType: keyof typeof filterPredicates = "byEmail";
@@ -40,14 +46,14 @@
 
   import { sortingPredicates } from "../lib/sorting";
 
-  let internalProps: Partial<Nylas.ContactListProperties> = {};
-  let manifest: Partial<Nylas.ContactListProperties> = {};
+  let internalProps: Partial<ContactListProperties> = {};
+  let manifest: Partial<ContactListProperties> = {};
   let main: Element;
   let clientHeight: number = 0;
   let clientWidth: number = 0;
   let offset = 0;
   let lastNumContactsLoaded = 0;
-  let hydratedContacts: Contacts.HydratedContact[] = [];
+  let hydratedContacts: HydratedContact[] = [];
   let status: "loading" | "loaded" | "error" = "loading";
 
   onMount(async () => {
@@ -57,10 +63,10 @@
 
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as Nylas.ContactListProperties;
+    ]) || {}) as ContactListProperties;
 
     if (contacts) {
-      hydratedContacts = contacts as Contacts.HydratedContact[];
+      hydratedContacts = contacts as HydratedContact[];
       status = "loaded";
     } else {
       if ($ContactStore[queryKey]) {
@@ -105,7 +111,7 @@
     Math.max(Math.min(contacts_to_load, 1000), 1);
   }
 
-  let query: Contacts.ContactsQuery;
+  let query: ContactsQuery;
   $: query = {
     component_id: id,
     access_token,
@@ -121,7 +127,7 @@
   function setContacts() {
     status = "loading";
     fetchContacts(query, offset, contacts_to_load).then(
-      (results: Contacts.Contact[]) => {
+      (results: Contact[]) => {
         if (results.length > 0) {
           hydratedContacts = $ContactStore[queryKey];
           offset += contacts_to_load;
@@ -147,24 +153,22 @@
   // Set time_ago on hydratedContacts
   $: {
     if (hydratedContacts.length) {
-      hydratedContacts = hydratedContacts.map(
-        (contact: Contacts.HydratedContact) => {
-          if (contact.last_contacted_date) {
-            contact.time_ago = `Emailed ${formatDistanceStrict(
-              today,
-              new Date(contact.last_contacted_date * 1000),
-              { addSuffix: false },
-            )} ago`;
-          } else {
-            contact.time_ago = `No recent activity`;
-          }
-          return contact;
-        },
-      );
+      hydratedContacts = hydratedContacts.map((contact: HydratedContact) => {
+        if (contact.last_contacted_date) {
+          contact.time_ago = `Emailed ${formatDistanceStrict(
+            today,
+            new Date(contact.last_contacted_date * 1000),
+            { addSuffix: false },
+          )} ago`;
+        } else {
+          contact.time_ago = `No recent activity`;
+        }
+        return contact;
+      });
     }
   }
 
-  let displayedContacts: Contacts.HydratedContact[] = [];
+  let displayedContacts: HydratedContact[] = [];
   $: {
     // filter/sort
     filterValue;
@@ -175,7 +179,7 @@
 
     // noinspection UnnecessaryLocalVariableJS
     const deduplicatedContacts = Object.values(
-      sortedFiltered.reduce<Record<string, Contacts.HydratedContact>>(
+      sortedFiltered.reduce<Record<string, HydratedContact>>(
         (mem, c) => Object.assign(mem, { [c.emails[0].email]: c }),
         {},
       ),
@@ -195,7 +199,7 @@
 
   function contactClicked(
     event: MouseEvent | KeyboardEvent,
-    contact: Contacts.HydratedContact,
+    contact: HydratedContact,
   ) {
     if (click_action === "email") {
       window.location.href = `mailto:${contact.emails[0].email}`;

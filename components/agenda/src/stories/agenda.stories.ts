@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SvelteComponent } from "svelte";
 import Agenda from "../Agenda.svelte";
+import type { Event } from "@commons/types/Events";
 
 export default {
   title: "Agenda",
@@ -51,7 +52,7 @@ const componentID = "883b9ef6-417b-47fd-b6e3-c7135184c920"; // web@components.co
 export interface AgendaProps {
   Component: typeof SvelteComponent;
   props: {
-    events?: Partial<Events.Event>[] | null;
+    events?: Partial<Event>[] | null;
     calendar_id?: string;
     calendar_ids?: string[];
     click_action?: any;
@@ -83,7 +84,7 @@ interface AgendaArgs {
   condensed_view: boolean;
 }
 
-const staticEvents: Partial<Events.Event>[] = [
+const staticEvents: Partial<Event>[] = [
   {
     title: "Some event that I am manipulating outside of the context of Nylas",
     description: "Passed in from HTML!",

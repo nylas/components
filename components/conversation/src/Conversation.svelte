@@ -15,13 +15,21 @@
   import { afterUpdate } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
+  import type {
+    Participant,
+    ConversationProperties,
+    ConversationQuery,
+    Message,
+    Conversation,
+    Account,
+  } from "@commons/types/Nylas";
 
   import FeedbackIcon from "./feedback.svg";
 
   export let id: string = "";
   export let access_token: string = "";
   export let thread_id: string = "";
-  export let messages: Nylas.Message[] = [];
+  export let messages: Message[] = [];
   export let theme: string;
   export let show_avatars: boolean | string;
   export let show_reply: boolean | string;
@@ -34,12 +42,12 @@
 
   $: messages = conversation?.messages || [];
 
-  let participants: Nylas.Participant[] = [];
+  let participants: Participant[] = [];
   $: participants = conversation ? conversation.participants : [];
 
   let main: Element;
 
-  $: getPropertyValue = (name: keyof Nylas.ConversationProperties) => {
+  $: getPropertyValue = (name: keyof ConversationProperties) => {
     if ($$props.hasOwnProperty(name)) {
       return $$props[name];
     } else if (manifest?.hasOwnProperty(name)) {
@@ -53,7 +61,7 @@
 
   $: hideAvatars = show_avatars === false || show_avatars === "false"; // can be boolean or string, for developer experience reasons. Awkward for us, better for them.
 
-  let query: Nylas.ConversationQuery;
+  let query: ConversationQuery;
 
   $: query = {
     component_id: id,
@@ -63,7 +71,7 @@
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
 
-  let conversation: Nylas.Conversation | null = null;
+  let conversation: Conversation | null = null;
   let status: "loading" | "loaded" | "error" = "loading";
 
   $: {
@@ -85,7 +93,7 @@
     }
   }
 
-  function setContacts(participants: Nylas.Participant[]) {
+  function setContacts(participants: Participant[]) {
     participants
       .filter((participant) => participant.contact === undefined) // only the ones that aren't yet hydrated
       .forEach((participant) => {
@@ -118,9 +126,9 @@
 
   //#region Reply
   interface Reply {
-    to: Nylas.Participant[];
-    from: Nylas.Participant[];
-    cc: Nylas.Participant[];
+    to: Participant[];
+    from: Participant[];
+    cc: Participant[];
   }
 
   let reply: Reply = {
@@ -170,10 +178,10 @@
 
   //#endregion Reply
 
-  let you: Partial<Nylas.Account> = { name: "" };
+  let you: Partial<Account> = { name: "" };
   $: if (id && !you.id)
     fetchAccount({ component_id: query.component_id }).then(
-      (account: Nylas.Account) => {
+      (account: Account) => {
         you = account;
       },
     );
@@ -188,7 +196,7 @@
         .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)
         .map((message) => message.id),
     }).then((results) => {
-      results.forEach((msg: Nylas.Message) => {
+      results.forEach((msg: Message) => {
         let existingMessage = messages.find((message) => message.id === msg.id);
         if (existingMessage) {
           existingMessage.conversation = msg.conversation;

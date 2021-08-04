@@ -1,7 +1,9 @@
+import type { CallbackDebounceFunction } from "@commons/types/ContactsSearch";
+
 export const debounce = (
-  func: ContactsSearch.CallbackDebounceFunction,
+  func: CallbackDebounceFunction,
   wait: number,
-): ContactsSearch.CallbackDebounceFunction => {
+): CallbackDebounceFunction => {
   let timeout: ReturnType<typeof setTimeout>;
 
   return function executedFunction(...args: unknown[]): void {

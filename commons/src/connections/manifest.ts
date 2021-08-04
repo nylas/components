@@ -4,11 +4,12 @@ import {
   handleResponse,
   getMiddlewareApiUrl,
 } from "../methods/api";
+import type { Manifest, MiddlewareResponse } from "@commons/types/Nylas";
 
 export const fetchManifest = async (
   id: string,
   access_token?: string,
-): Promise<Nylas.Manifest> => {
+): Promise<Manifest> => {
   return await fetch(
     `${getMiddlewareApiUrl(id)}/manifest`,
     getFetchConfig({
@@ -16,7 +17,7 @@ export const fetchManifest = async (
       component_id: id,
     }),
   )
-    .then<Nylas.MiddlewareResponse>(handleResponse)
+    .then<MiddlewareResponse>(handleResponse)
     .then((response) => response.component.theming)
     .catch((error) => handleError(id, error));
 };

@@ -8,13 +8,14 @@ import JustifyRightIcon from "../assets/aligned-right.svg";
 import JustifyCenterIcon from "../assets/centered.svg";
 import JustifyIcon from "../assets/justified.svg";
 import LinkIcon from "../assets/link.svg";
+import type { ToolbarItem } from "@commons/types/Composer";
 
 const queryCommandState = (command: string): boolean =>
   document.queryCommandState(command);
 export const exec = (command: string, value?: string): boolean =>
   document.execCommand(command, false, value);
 
-export const defaultActions: Composer.ToolbarItem[] = [
+export const defaultActions: ToolbarItem[] = [
   {
     title: "Bold",
     state: (): boolean => queryCommandState("bold"),
@@ -70,7 +71,7 @@ export const defaultActions: Composer.ToolbarItem[] = [
   {
     title: "Link",
     result: (): boolean => {
-      let url = prompt("Enter a URL:", "http://");
+      const url = prompt("Enter a URL:", "http://");
       return exec("createLink", url || "");
     },
     icon: LinkIcon,

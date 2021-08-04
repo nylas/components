@@ -4,10 +4,15 @@ import {
   handleResponse,
   getMiddlewareApiUrl,
 } from "../methods/api";
+import type { MiddlewareResponse } from "@commons/types/Nylas";
+import type {
+  EventQuery,
+  Event,
+  CalendarQuery,
+  Calendar,
+} from "@commons/types/Events";
 
-export const fetchEvents = async (
-  query: Events.EventQuery,
-): Promise<Events.Event[]> => {
+export const fetchEvents = async (query: EventQuery): Promise<Event[]> => {
   return Promise.all(
     query.calendarIDs.map((calendar) => {
       return fetch(
@@ -22,7 +27,7 @@ export const fetchEvents = async (
         }),
       )
         .then((response) =>
-          handleResponse<Nylas.MiddlewareResponse<Events.Event[]>>(response),
+          handleResponse<MiddlewareResponse<Event[]>>(response),
         )
         .then((json) => {
           return json.response;
@@ -36,8 +41,8 @@ export const fetchEvents = async (
 };
 
 export const fetchCalendars = async (
-  query: Events.CalendarQuery,
-): Promise<Events.Calendar[]> => {
+  query: CalendarQuery,
+): Promise<Calendar[]> => {
   return Promise.allSettled(
     query.calendarIDs.map((calendar: unknown) => {
       return fetch(
@@ -50,7 +55,7 @@ export const fetchCalendars = async (
         }),
       )
         .then((response) =>
-          handleResponse<Nylas.MiddlewareResponse<Events.Calendar[]>>(response),
+          handleResponse<MiddlewareResponse<Calendar[]>>(response),
         )
         .then((json) => {
           return json.response;
@@ -67,9 +72,9 @@ export const fetchCalendars = async (
 };
 
 export async function createEvent(
-  event: Events.Event,
-  query: Events.EventQuery,
-): Promise<Events.Event> {
+  event: Event,
+  query: EventQuery,
+): Promise<Event> {
   return fetch(
     `${getMiddlewareApiUrl(query.component_id || "")}/agenda/events`,
     getFetchConfig({
@@ -79,9 +84,7 @@ export async function createEvent(
       body: event,
     }),
   )
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Events.Event>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<Event>>(response))
     .then((json) => {
       return json.response;
     });

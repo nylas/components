@@ -27,8 +27,15 @@
   import type { EventPosition } from "../../agenda/src/methods/position";
   import type { Arc, ScaleOrdinal } from "d3";
   import { onMount, tick } from "svelte";
+  import type {
+    DayProperties,
+    Message,
+    MessagesQuery,
+    RadialMessage,
+  } from "@commons/types/Nylas";
+  import type { Event, TimespanEvent, EventQuery } from "@commons/types/Events";
 
-  let manifest: Partial<Nylas.DayProperties> = {};
+  let manifest: Partial<DayProperties> = {};
   let main: Element;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
@@ -38,11 +45,11 @@
   export let access_token: string = "";
   export let theme: string;
   export let day: Date;
-  export let events: Events.Event[] | null = null;
-  export let messages: Nylas.Message[] | null = null;
+  export let events: Event[] | null = null;
+  export let messages: Message[] | null = null;
   export let calendar_ids: any = "";
 
-  function getPropertyValue(name: keyof Nylas.DayProperties, def?: unknown) {
+  function getPropertyValue(name: keyof DayProperties, def?: unknown) {
     if ($$props.hasOwnProperty(name)) {
       return $$props[name];
     } else if (manifest?.hasOwnProperty(name)) {
@@ -73,8 +80,8 @@
   })();
 
   //#region queries
-  let eventsQuery: Events.EventQuery;
-  let messagesQuery: Nylas.MessagesQuery;
+  let eventsQuery: EventQuery;
+  let messagesQuery: MessagesQuery;
   $: {
     eventsQuery = {
       component_id: id,
@@ -124,15 +131,12 @@
   };
   //#endregion queries
 
-  let dayEvents: Events.TimespanEvent[] = [];
+  let dayEvents: TimespanEvent[] = [];
   $: {
     if (events?.length) {
       dayEvents =
         events
-          .filter(
-            (event): event is Events.TimespanEvent =>
-              "start_time" in event.when,
-          )
+          .filter((event): event is TimespanEvent => "start_time" in event.when)
           .map((event) => {
             event.when.start_moment =
               new Date(event.when.start_time * 1000).getMinutes() / 15 +
@@ -159,10 +163,10 @@
       .forEach((event) => updateEventPosition(event, positionMap));
   }
 
-  let dayMessages: Nylas.RadialMessage[] = [];
+  let dayMessages: RadialMessage[] = [];
   $: {
     dayMessages =
-      $MessageStore[JSON.stringify(messagesQuery)]?.map((message) => {
+      $MessageStore[JSON.stringify(messagesQuery)]?.map((message: any) => {
         return {
           ...message,
           received_moment: Math.floor(
@@ -205,36 +209,36 @@
   $: innerRadius = minBoundary / 3;
   $: outerRadius = minBoundary;
   let svg: SVGElement;
-  let eventArc: Arc<any, Events.TimespanEvent> = arc<Events.TimespanEvent>();
+  let eventArc: Arc<any, TimespanEvent> = arc<TimespanEvent>();
 
-  $: eventArc = arc<Events.TimespanEvent>()
-    .outerRadius((d: Events.TimespanEvent) => {
+  $: eventArc = arc<TimespanEvent>()
+    .outerRadius((d: TimespanEvent) => {
       return eventY(d.relativeOverlapOffset);
     })
-    .innerRadius((d: Events.TimespanEvent) =>
+    .innerRadius((d: TimespanEvent) =>
       eventY(d.relativeOverlapOffset + d.relativeOverlapWidth),
     )
     .padAngle(0.01)
     .padRadius(innerRadius)
-    .startAngle((d: Events.TimespanEvent) => {
+    .startAngle((d: TimespanEvent) => {
       return eventX(d.when.start_moment + "") as number;
     })
-    .endAngle((d: Events.TimespanEvent) => {
+    .endAngle((d: TimespanEvent) => {
       return eventX(d.when.end_moment + "") as number;
     });
 
-  let messageArc: Arc<any, Nylas.RadialMessage> = arc<Nylas.RadialMessage>();
-  $: messageArc = arc<Nylas.RadialMessage>()
-    .innerRadius((d: Nylas.RadialMessage) => {
+  let messageArc: Arc<any, RadialMessage> = arc<RadialMessage>();
+  $: messageArc = arc<RadialMessage>()
+    .innerRadius((d: RadialMessage) => {
       return messageY(d.offset);
     })
-    .outerRadius((d: Nylas.RadialMessage) => messageY(d.offset + 1))
+    .outerRadius((d: RadialMessage) => messageY(d.offset + 1))
     .padAngle(0.01)
     .padRadius(innerRadius)
-    .startAngle((d: Nylas.RadialMessage) => {
+    .startAngle((d: RadialMessage) => {
       return messageX(d.received_moment + "") as number;
     })
-    .endAngle((d: Nylas.RadialMessage) => {
+    .endAngle((d: RadialMessage) => {
       return (
         (messageX(d.received_moment + "") as number) + messageX.bandwidth()
       );
@@ -313,7 +317,7 @@
     clientWidth = main?.getBoundingClientRect().width;
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as Nylas.DayProperties;
+    ]) || {}) as DayProperties;
   });
 
   $: dispatchEvent("manifestLoaded", manifest);
