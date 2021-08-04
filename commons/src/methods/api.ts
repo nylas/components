@@ -1,4 +1,5 @@
 import { ErrorStore } from "../store/error";
+import type { Manifest } from "@commons/types/Nylas";
 
 export async function handleResponse<T = unknown>(
   response: Response,
@@ -38,7 +39,7 @@ export function getFetchConfig(
   };
 }
 
-export function handleError(id: string, error: Nylas.Manifest["error"]): never {
+export function handleError(id: string, error: Manifest["error"]): never {
   if (process.env.NODE_ENV !== "production") console.error(error);
   ErrorStore.update((errorMap) => ({ ...errorMap, [id]: error }));
   throw error;

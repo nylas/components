@@ -40,45 +40,60 @@
   import MinimizeIcon from "./assets/dash.svg";
   import AttachmentIcon from "./assets/attachment.svg";
   import ExpandIcon from "./assets/expand.svg";
+  import type {
+    Message,
+    SendCallback,
+    FetchContactsCallback,
+    Tracking,
+    Attribute,
+    ReplaceFields,
+    Attachment,
+  } from "@commons/types/Composer";
+  import type {
+    ComposerProperties,
+    Account,
+    Participant,
+  } from "@commons/types/Nylas";
+  import type { FetchContactsCallback as ContactsSearchFetchContactsCallback } from "@commons/types/ContactsSearch";
 
   let fileSelector: HTMLInputElement;
 
   type ContactSearchCallback =
-    | Nylas.Participant[]
-    | ContactsSearch.FetchContactsCallback;
+    | Participant[]
+    | ContactsSearchFetchContactsCallback;
 
   export let id: string | void;
   export let access_token: string = "";
-  export let value: Composer.Message | void;
+  export let value: Message | void;
   export let to: ContactSearchCallback = [];
   export let from: ContactSearchCallback = [];
   export let cc: ContactSearchCallback = [];
   export let bcc: ContactSearchCallback = [];
-  export let send: Composer.SendCallback;
-  export let change: Composer.FetchContactsCallback | null = null;
-  export let beforeSend: (msg: Composer.Message) => Composer.Message | void;
+  export let send: SendCallback;
+  export let change: FetchContactsCallback | null = null;
+  export let beforeSend: (msg: Message) => Message | void;
   export let afterSendSuccess: Function | null = null;
   export let afterSendError: Function | null = null;
   export let template: string = "";
-  export let tracking: Composer.Tracking | null = null;
+  export let tracking: Tracking | null = null;
 
   // Attributes
-  export let minimized: Composer.Attribute;
-  export let reset_after_send: Composer.Attribute;
-  export let show_from: Composer.Attribute;
-  export let show_to: Composer.Attribute;
-  export let show_header: Composer.Attribute;
-  export let show_subject: Composer.Attribute;
-  export let show_close_button: Composer.Attribute;
-  export let show_minimize_button: Composer.Attribute;
-  export let show_cc: Composer.Attribute;
-  export let show_bcc: Composer.Attribute;
-  export let show_cc_button: Composer.Attribute;
-  export let show_bcc_button: Composer.Attribute;
-  export let show_attachment_button: Composer.Attribute;
-  export let show_editor_toolbar: Composer.Attribute;
+  export let minimized: Attribute;
+  export let reset_after_send: Attribute;
+  export let show_from: Attribute;
+  export let show_to: Attribute;
+  export let show_header: Attribute;
+  export let show_subject: Attribute;
+  export let show_close_button: Attribute;
+  export let show_minimize_button: Attribute;
+  export let show_cc: Attribute;
+  export let show_bcc: Attribute;
+  export let show_cc_button: Attribute;
+  export let show_bcc_button: Attribute;
+  export let show_attachment_button: Attribute;
+  export let show_editor_toolbar: Attribute;
   export let theme: string | void;
-  export let replace_fields: Composer.ReplaceFields[] | null = null;
+  export let replace_fields: ReplaceFields[] | null = null;
   export let beforeFileUpload: Function | null = null;
   export let afterFileUploadSuccess: Function | null = null;
   export let afterFileUploadError: Function | null = null;
@@ -98,8 +113,8 @@
   };
 
   let isLoading = false;
-  let internalProps: Partial<Nylas.ComposerProperties> = {};
-  let manifest: Partial<Nylas.ComposerProperties>;
+  let internalProps: Partial<ComposerProperties> = {};
+  let manifest: Partial<ComposerProperties>;
   let showDatepicker = false;
   let themeLoaded = false;
   let visible = true;
@@ -117,7 +132,7 @@
       mergeMessage(value);
     }
     if (manifest && id) {
-      const account: Nylas.Account = await fetchAccount({
+      const account: Account = await fetchAccount({
         component_id: id,
         access_token,
       });
@@ -202,7 +217,7 @@
 
   const handleBodyChange = (html: string) => update("body", html);
 
-  const handleContactsChange = (field: string) => (data: Nylas.Participant[]) =>
+  const handleContactsChange = (field: string) => (data: Participant[]) =>
     update(field, data);
   const schedule = (data: Date) => {
     showDatepicker = false;
@@ -248,7 +263,7 @@
     }
   };
 
-  const handleRemoveFile = (attachment: Composer.Attachment) => {
+  const handleRemoveFile = (attachment: Attachment) => {
     if (beforeFileRemove) beforeFileRemove(attachment);
     removeAttachments(attachment);
     if (attachment.id) {

@@ -3,13 +3,15 @@
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
   import { get_current_component } from "svelte/internal";
+  import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
+
   export let onchange = (_html: string) => Promise.resolve({});
   export let html = "";
   export let show_editor_toolbar = true;
-  export let replace_fields: Composer.ReplaceFields[] | null = null;
+  export let replace_fields: ReplaceFields[] | null = null;
 
   let container: HTMLElement;
-  let toolbar: Composer.ToolbarItem[] = defaultActions;
+  let toolbar: ToolbarItem[] = defaultActions;
 
   $: if (html) {
     const selection = get_current_component().shadowRoot.getSelection();
@@ -71,14 +73,14 @@
     selection?.addRange(range);
   }
 
-  const handleAction = (item: Composer.ToolbarItem) => () => {
+  const handleAction = (item: ToolbarItem) => () => {
     if (item.result) item.result();
     updateToolbarUI();
   };
 
   // This function updates the toolbar UI state when you select text (eg. select bold text)
   function updateToolbarUI() {
-    toolbar = toolbar.map((item: Composer.ToolbarItem) => {
+    toolbar = toolbar.map((item: ToolbarItem) => {
       if (item.state) {
         item.active = item.state();
       }
@@ -173,6 +175,9 @@
 
       Note: While the CSS gets added in the final bundle, none of the HTML is generated.
   -->
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <!-- svelte-ignore a11y-missing-attribute -->
+    <!-- svelte-ignore a11y-missing-content -->
     <a />
   {/if}
 

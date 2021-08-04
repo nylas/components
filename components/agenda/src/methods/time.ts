@@ -1,6 +1,6 @@
-// Would very much like for this to be a .ts file, but https://github.com/pyoner/svelte-typescript/issues/15
+import type { Event } from "@commons/types/Events";
 
-function getDynamicStartTime(event: Events.Event) {
+function getDynamicStartTime(event: Event): number {
   if (!("start_time" in event.when && "end_time" in event.when)) {
     return 0;
   }
@@ -13,7 +13,7 @@ function getDynamicStartTime(event: Events.Event) {
   return start / 60000; // in minutes
 }
 
-function getDynamicEndTime(event: Events.Event) {
+function getDynamicEndTime(event: Event): number {
   if (!("start_time" in event.when && "end_time" in event.when)) {
     return 0;
   }

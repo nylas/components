@@ -1,15 +1,14 @@
 import { writable } from "svelte/store";
 import { fetchAccount } from "../connections/accounts";
+import type { Account, AccountQuery } from "@commons/types/Nylas";
 
 function initializeAccounts() {
-  const { subscribe, set, update } = writable<Record<string, Nylas.Account>>(
-    {},
-  );
-  let AccountsMap: Record<string, Nylas.Account> = {};
+  const { subscribe, set, update } = writable<Record<string, Account>>({});
+  let AccountsMap: Record<string, Account> = {};
 
   return {
     subscribe,
-    getAccount: async (query: Nylas.AccountQuery) => {
+    getAccount: async (query: AccountQuery) => {
       const queryKey = JSON.stringify(query);
       if (
         !AccountsMap[queryKey] &&

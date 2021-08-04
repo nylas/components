@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import type { Attachment, AttachmentUpdate } from "@commons/types/Composer";
 
 const messageInitialState = {
   from: [],
@@ -14,7 +15,7 @@ export const message = writable(
   JSON.parse(JSON.stringify(messageInitialState)),
 );
 
-const attachmentsInitialState: Composer.Attachment[] = [];
+const attachmentsInitialState: Attachment[] = [];
 export const attachments = writable(
   JSON.parse(JSON.stringify(attachmentsInitialState)),
 );
@@ -33,25 +34,23 @@ export const mergeMessage = (update: Record<string, unknown>): void => {
   return message.update((s) => ({ ...s, ...update }));
 };
 
-export const addAttachments = (update: Composer.Attachment): void => {
-  return attachments.update((s: Composer.Attachment[]) => {
-    if (
-      !s.map((a: Composer.Attachment) => a.filename).includes(update.filename)
-    ) {
+export const addAttachments = (update: Attachment): void => {
+  return attachments.update((s: Attachment[]) => {
+    if (!s.map((a: Attachment) => a.filename).includes(update.filename)) {
       return [...s, update];
     }
     return s;
   });
 };
-export const updateAttachments = (update: Composer.Attachment): void => {
+export const updateAttachments = (update: Attachment): void => {
   return attachments.update((s) => [...s, update]);
 };
 
 export const updateAttachment = (
   filename: string,
-  update: Composer.AttachmentUpdate,
+  update: AttachmentUpdate,
 ): void => {
-  return attachments.update((s: Composer.Attachment[]) =>
+  return attachments.update((s: Attachment[]) =>
     s.map((attachment) => {
       return attachment.filename === filename
         ? { ...attachment, ...update }
@@ -60,8 +59,8 @@ export const updateAttachment = (
   );
 };
 
-export const removeAttachments = (item: Composer.Attachment): void => {
-  return attachments.update((s: Composer.Attachment[]) => [
+export const removeAttachments = (item: Attachment): void => {
+  return attachments.update((s: Attachment[]) => [
     ...s.filter((a) => a.filename !== item.filename),
   ]);
 };

@@ -1,16 +1,20 @@
 import { derived, writable } from "svelte/store";
 import { fetchThread, fetchThreads } from "../connections/threads";
+import type {
+  Thread,
+  MailboxQuery,
+  ConversationQuery,
+  Message,
+} from "@commons/types/Nylas";
 
 function initializeThreads() {
-  const { subscribe, set, update } = writable<Record<string, Nylas.Thread[]>>(
-    {},
-  );
-  let threadsMap: Record<string, Nylas.Thread[]> = {};
+  const { subscribe, set, update } = writable<Record<string, Thread[]>>({});
+  let threadsMap: Record<string, Thread[]> = {};
 
   return {
     subscribe,
     set,
-    getThreads: async (query: Nylas.MailboxQuery, forceRefresh = false) => {
+    getThreads: async (query: MailboxQuery, forceRefresh = false) => {
       const queryKey = JSON.stringify(query);
       if (
         (!threadsMap[queryKey] || forceRefresh) &&
@@ -28,7 +32,7 @@ function initializeThreads() {
       return threadsMap[queryKey];
     },
 
-    getThread: async (query: Nylas.ConversationQuery) => {
+    getThread: async (query: ConversationQuery) => {
       const queryKey = JSON.stringify(query);
       if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {
         threadsMap[queryKey] = [await fetchThread(query)];
@@ -45,30 +49,32 @@ function initializeThreads() {
       set({});
     },
 
-    // addThreads: (incomingThreads: Nylas.StoredThreads) => {
+    // addThreads: (incomingThreads: StoredThreads) => {
     //   update((threads) => {
     //     threads[incomingThreads.queryKey] = incomingThreads.data;
     //     return { ...threads };
     //   });
     // },
 
-    hydrateMessageInThread: (
-      incomingMessage: Nylas.Message,
-      query: Nylas.MailboxQuery,
-    ) => {
+    hydrateMessageInThread: (incomingMessage: Message, query: MailboxQuery) => {
       const queryKey = JSON.stringify(query);
       const foundThread = threadsMap[queryKey].find(
         (thread) => thread.id === incomingMessage.thread_id,
       );
       if (foundThread) {
-        foundThread.messages.find(
+        const foundMessage = foundThread?.messages?.find(
           (message) => message.id === incomingMessage.id,
-        ).body = incomingMessage.body;
+        );
+        if (foundMessage) {
+          foundMessage.body = incomingMessage.body;
+        }
       }
       update((threads) => {
-        threads[incomingMessage.thread_id] = JSON.parse(
-          JSON.stringify(foundThread),
-        );
+        if (incomingMessage.thread_id) {
+          threads[incomingMessage.thread_id] = JSON.parse(
+            JSON.stringify(foundThread),
+          );
+        }
         return { ...threads };
       });
       return threadsMap[JSON.stringify(query)];

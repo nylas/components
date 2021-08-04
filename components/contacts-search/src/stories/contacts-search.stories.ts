@@ -1,4 +1,5 @@
 import ContactsSearch from "./View.svelte";
+import type { Participant } from "@commons/types/Nylas";
 
 export default {
   title: "ContactsSearch",
@@ -12,7 +13,7 @@ export default {
 };
 
 type SearchProps = {
-  contacts?: Nylas.Participant[];
+  contacts?: Participant[];
 };
 
 export const ContactList = ({ ...args }: SearchProps) => ({

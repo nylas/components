@@ -4,10 +4,15 @@ import {
   handleResponse,
   getMiddlewareApiUrl,
 } from "../methods/api";
+import type {
+  MailboxQuery,
+  Thread,
+  ConversationQuery,
+  Conversation,
+  MiddlewareResponse,
+} from "@commons/types/Nylas";
 
-export const fetchThreads = async (
-  query: Nylas.MailboxQuery,
-): Promise<Nylas.Thread[]> => {
+export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
   )}/threads?view=expanded`;
@@ -17,9 +22,7 @@ export const fetchThreads = async (
     );
   }
   return await fetch(queryString, getFetchConfig(query))
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Thread[]>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then((json) => {
       return json.response;
     })
@@ -27,8 +30,8 @@ export const fetchThreads = async (
 };
 
 export const fetchThread = async (
-  query: Nylas.ConversationQuery,
-): Promise<Nylas.Conversation> => {
+  query: ConversationQuery,
+): Promise<Conversation> => {
   const thread = await fetch(
     `${getMiddlewareApiUrl(query.component_id)}/threads/${
       query.thread_id
@@ -39,7 +42,7 @@ export const fetchThread = async (
     }),
   )
     .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Conversation>>(response),
+      handleResponse<MiddlewareResponse<Conversation>>(response),
     )
     .then((json) => {
       return json.response;
@@ -50,9 +53,9 @@ export const fetchThread = async (
 };
 
 export const updateThread = async (
-  query: Nylas.ConversationQuery,
-  updatedThread: Nylas.Conversation,
-): Promise<Nylas.Conversation> => {
+  query: ConversationQuery,
+  updatedThread: Conversation,
+): Promise<Conversation> => {
   // accepts unread, starred, folder_id + label_ids. developer.nylas.com/docs/api/#put/threads/id
   return fetch(
     `${getMiddlewareApiUrl(query.component_id)}/threads/${updatedThread.id}`,
@@ -66,7 +69,7 @@ export const updateThread = async (
     }),
   )
     .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Conversation>>(response),
+      handleResponse<MiddlewareResponse<Conversation>>(response),
     )
     .then((json) => {
       return json.response;

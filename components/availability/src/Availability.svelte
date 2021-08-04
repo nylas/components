@@ -8,15 +8,19 @@
   import type { TimeInterval } from "d3-time";
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
+
   import {
-    ClickAction,
+    SelectionStatus,
+    AvailabilityStatus,
+  } from "@commons/enums/Availability";
+
+  import type {
     Calendar,
     Manifest,
-    SelectionStatus,
     TimeSlot,
     SelectableSlot,
-    AvailabilityStatus,
     AvailabilityQuery,
+    EventQuery,
   } from "@commons/types/Availability";
 
   //#region props
@@ -27,10 +31,10 @@
   export let slot_size: number = 15; // in minutes
   export let start_date: Date = new Date();
   export let dates_to_show: number = 1;
-  export let click_action: ClickAction = ClickAction.CHOOSE;
   export let calendars: Calendar[] = [];
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
+  export let allow_booking: boolean = false;
   //#endregion props
 
   //#region mount
@@ -171,7 +175,6 @@
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
-      console.time("day");
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       console.timeEnd("day");
       return {
@@ -223,34 +226,53 @@
     }
     return freeBusyCalendars;
   }
+  //#region event query
+  let query: EventQuery;
+  $: query = {
+    component_id: id,
+    access_token: access_token,
+    calendar_id: "",
+    participants: [{ email_address: "" }],
+  };
+  //#region event query
 
-  function handleTimeSlotClick(selectedSlot: any): SelectionStatus {
-    if (selectedSlot.selectionStatus === SelectionStatus.UNSELECTED) {
-      if (click_action === ClickAction.CHOOSE) {
-        sendTimeSlot(selectedSlot);
-      }
-      slotSelection = [...slotSelection, selectedSlot];
-      return SelectionStatus.SELECTED;
+  //#region booking event logic for single time slot and consecutive time slots
+  $: sortedSlots = [
+    ...slotSelection.sort((a, b) => (a.start_time > b.start_time ? 1 : 0)),
+  ].reduce((events, currentTimeSlot, i) => {
+    if (i === 0) {
+      events = [currentTimeSlot];
     } else {
-      slotSelection = slotSelection.filter(
-        (chosenSlot) => chosenSlot != selectedSlot,
-      );
-
-      return SelectionStatus.UNSELECTED;
+      let lastMergedSlot = events[events.length - 1];
+      if (currentTimeSlot.start_time <= lastMergedSlot.end_time) {
+        lastMergedSlot.end_time = new Date(
+          Math.max(
+            lastMergedSlot.end_time.getTime(),
+            currentTimeSlot.end_time.getTime(),
+          ),
+        );
+      } else {
+        events = [...events, currentTimeSlot];
+      }
     }
+    return events;
+  }, [] as TimeSlot[]);
+
+  function toggleSelectedTimeSlots(selectedSlot: SelectableSlot) {
+    return (slotSelection =
+      selectedSlot.selectionStatus === SelectionStatus.SELECTED
+        ? [...slotSelection, selectedSlot]
+        : slotSelection.filter((slot) => slot != selectedSlot));
   }
 
-  function sendTimeSlot(selectedSlot: TimeSlot) {
-    let start_time = new Date(selectedSlot.start_time);
-    let end_time = new Date(selectedSlot.end_time);
-    const timeslot: TimeSlot = {
-      start_time,
-      end_time,
-    };
-    dispatchEvent("timeSlotChosen", {
-      timeslot,
-    });
+  function sortAndSetEvent(slots: TimeSlot[]) {
+    dispatchEvent("timeSlotChosen", { timeSlots: [...slots] });
+    if (allow_booking) {
+      // EventStore.createEvent(slots, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
+    }
+    slotSelection = [];
   }
+  //#region booking event logic for single time slot or consecutive time slots
 </script>
 
 <style lang="scss">
@@ -338,15 +360,13 @@
           }
           &.busy {
             border: 1px solid red;
+            cursor: not-allowed;
             opacity: 0.3;
           }
         }
       }
     }
-
-    footer.confirmation {
-      text-align: center;
-      padding: 1rem;
+    button.confirm {
       grid-column: -1 / 1;
     }
   }
@@ -377,13 +397,16 @@
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
-              on:mouseover={() =>
-                console.log(
-                  "TODO: temp; ",
-                  new Date(slot.start_time).toLocaleString(),
-                )}
+              disabled={slot.availability === AvailabilityStatus.BUSY}
               on:click={() => {
-                slot.selectionStatus = handleTimeSlotClick(slot);
+                slot.selectionStatus =
+                  slot.selectionStatus === SelectionStatus.SELECTED
+                    ? SelectionStatus.UNSELECTED
+                    : SelectionStatus.SELECTED;
+                toggleSelectedTimeSlots(slot);
+                if (!allow_booking) {
+                  dispatchEvent("timeSlotChosen", { timeSlots: slot });
+                }
               }}
             />
           {/each}
@@ -391,20 +414,12 @@
       </div>
     {/each}
   </div>
-  {#if click_action === ClickAction.VERIFY}
-    <footer class="confirmation">
-      Confirm time?
-      <button
-        disabled={!slotSelection.length}
-        on:click={() => {
-          slotSelection.forEach((selectedSlot) => {
-            sendTimeSlot(selectedSlot);
-            selectedSlot.selectionStatus = SelectionStatus.UNSELECTED;
-            slotSelection = [];
-          });
-        }}
-        class="confirm-btn">Yes</button
-      >
-    </footer>
+  {#if slotSelection.length && allow_booking}
+    <button
+      class="confirm"
+      type="button"
+      on:click={() => sortAndSetEvent(sortedSlots)}
+      >{`Confirm Time slot${slotSelection.length > 1 ? "s" : ""}`}</button
+    >
   {/if}
 </main>

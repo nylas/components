@@ -1,14 +1,15 @@
 import { fetchManifest } from "../connections/manifest";
 import { Writable, writable } from "svelte/store";
+import type { Manifest } from "@commons/types/Nylas";
 
 type ManifestAccessor = { component_id: string; access_token?: string };
-type ManifestStore = Record<string, Promise<Nylas.Manifest>>;
+type ManifestStore = Record<string, Promise<Manifest>>;
 
 function initialize(): Writable<ManifestStore> {
   const get = (
     target: ManifestStore,
     key: string,
-  ): Promise<Nylas.Manifest> | void => {
+  ): Promise<Manifest> | void => {
     const accessor: ManifestAccessor = JSON.parse(key);
 
     if (!accessor.component_id) return;

@@ -1,20 +1,9 @@
-export enum AvailabilityStatus {
-  FREE = "free",
-  BUSY = "busy",
-  PARTIAL = "partial",
-}
-
-export enum SelectionStatus {
-  UNSELECTED = "unselected",
-  SELECTED = "selected",
-}
-
-export enum ClickAction {
-  VERIFY = "verify",
-  CHOOSE = "choose",
-}
-
-export interface Manifest extends Nylas.Manifest {
+import type {
+  SelectionStatus,
+  AvailabilityStatus,
+} from "@commons/enums/Availability";
+import type { Manifest as NylasManifest } from "@commons/types/Nylas";
+export interface Manifest extends NylasManifest {
   start_hour: number;
   end_hour: number;
   slot_size: 15 | 30 | 60;
@@ -57,4 +46,16 @@ export interface AvailabilityResponse {
     end_time: number;
   }[];
   email: string;
+}
+
+export interface EventQuery {
+  participants?: EventParticipant[];
+  title?: string;
+  location?: string;
+  access_token?: string;
+  component_id?: string;
+}
+
+export interface EventParticipant {
+  email_address: string;
 }

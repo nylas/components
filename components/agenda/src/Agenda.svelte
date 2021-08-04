@@ -13,6 +13,16 @@
   import type { EventPosition } from "./methods/position";
   import { populatePositionMap, updateEventPosition } from "./methods/position";
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
+  import type { AgendaProperties } from "@commons/types/Nylas";
+
+  import type {
+    EventQuery,
+    Event,
+    CalendarQuery,
+    Calendar,
+    TimespanEvent,
+    DateEvent,
+  } from "@commons/types/Events";
 
   // #region props
   const INTERNAL_EVENT_PROPS = Object.freeze([
@@ -22,7 +32,7 @@
     "relativeRunTime",
     "relativeStartTime",
   ]);
-  let manifest: Partial<Nylas.AgendaProperties> = {};
+  let manifest: Partial<AgendaProperties> = {};
 
   export let id: string = "";
   export let access_token: string = "";
@@ -31,22 +41,22 @@
   export let allow_event_creation: boolean;
   export let allowed_dates: Date[] | string = [];
   export let auto_time_box: boolean;
-  export let events: Events.Event[] | null = null;
+  export let events: Event[] | null = null;
   export let calendar_id: string = "";
   export let calendar_ids: any = "";
   export let click_action: (
     event: MouseEvent | KeyboardEvent,
-    calendarEvent: Events.Event,
+    calendarEvent: Event,
   ) => any;
   export let color_by: string;
   export let condensed_view: boolean | string;
   export let eagerly_fetch_events: boolean;
   export let event_snap_interval: number;
   export let event_created: (
-    event: Events.Event,
-    confirm: (event: Events.TimespanEvent) => void,
+    event: Event,
+    confirm: (event: TimespanEvent) => void,
     cancel: () => void,
-    updateEvent: (event: Events.TimespanEvent) => void,
+    updateEvent: (event: TimespanEvent) => void,
   ) => any;
   export let header_type: "full" | "day" | "none";
   export let hide_all_day_events: boolean;
@@ -57,7 +67,7 @@
   export let show_no_events_message: boolean;
   export let theme: string;
 
-  let internalProps: Partial<Nylas.AgendaProperties> = {};
+  let internalProps: Partial<AgendaProperties> = {};
   let now = new Date().getTime();
 
   onMount(async () => {
@@ -65,7 +75,7 @@
     clientHeight = agendaElement?.getBoundingClientRect().height;
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as Nylas.AgendaProperties;
+    ]) || {}) as AgendaProperties;
 
     setInterval(() => {
       now = new Date().getTime();
@@ -263,7 +273,7 @@
     return IDList;
   })();
 
-  let query: Events.EventQuery;
+  let query: EventQuery;
   $: {
     query = {
       component_id: id,
@@ -276,7 +286,7 @@
 
   // Sibling Queries: eagerly fetch the events on the previous and next days,
   // so when the user clicks them, the loading will seem instantaneous.
-  let siblingQueries: [Events.EventQuery, Events.EventQuery] | [] = [];
+  let siblingQueries: [EventQuery, EventQuery] | [] = [];
   $: if (allow_date_change && eagerly_fetch_events && query) {
     let previousDate;
     let nextDate;
@@ -320,10 +330,10 @@
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
 
-  let calendars: Events.Calendar[] = [];
+  let calendars: Calendar[] = [];
   $: (async () => {
     if (id && calendarIDs.length) {
-      const calendarQuery: Events.CalendarQuery = {
+      const calendarQuery: CalendarQuery = {
         access_token,
         component_id: id,
         calendarIDs,
@@ -333,11 +343,11 @@
   })();
 
   // Try getting events from 3 sources: first, directly passed in, then, from our store; finally, by way of a fetch
-  let calendarEvents: Events.Event[] = [];
+  let calendarEvents: Event[] = [];
   $: {
     (async () => {
       if (events) {
-        calendarEvents = events as Events.Event[];
+        calendarEvents = events as Event[];
       } else {
         calendarEvents = (await EventStore.getEvents(query)) || [];
         if (siblingQueries.length) {
@@ -350,14 +360,12 @@
   }
 
   $: allDayEvents = calendarEvents
-    ?.filter((event): event is Events.DateEvent => "date" in event.when)
+    ?.filter((event): event is DateEvent => "date" in event.when)
     ?.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   $: timespanEvents = calendarEvents
-    ?.filter(
-      (event): event is Events.TimespanEvent => "start_time" in event.when,
-    )
-    ?.map((event: Events.TimespanEvent) => {
+    ?.filter((event): event is TimespanEvent => "start_time" in event.when)
+    ?.map((event: TimespanEvent) => {
       let attendee = calendars.find((cal) => cal.id === event.calendar_id);
       event.attendeeStatus = event.participants?.find(
         (p) => p.email === attendee?.name,
@@ -385,7 +393,7 @@
   }
   $: minEventHeightPercent = minEventHeight / clientHeight;
 
-  let eventSource: Events.Event[];
+  let eventSource: Event[];
   $: eventSource =
     Array.isArray(calendarEvents) && calendarEvents.length > 0
       ? calendarEvents
@@ -393,15 +401,15 @@
   // calendarEvents, but with presentational changes made to content.
   // (figure out how far down the page an event needs to be positioned, render links as links, etc.)
   // Goal timing: 0.02ms per event or less
-  let hydratedEvents: Events.Event[] = [];
+  let hydratedEvents: Event[] = [];
   $: {
     if (events || (timespanEvents && calendars?.length)) {
       hydratedEvents = eventSource
         .filter(
-          (event: Events.Event): event is Events.TimespanEvent =>
+          (event: Event): event is TimespanEvent =>
             event.status !== "cancelled" && "start_time" in event.when,
         )
-        .map((event: Events.TimespanEvent, iter) => {
+        .map((event: TimespanEvent, iter) => {
           if (condensed) {
             event.relativeStartTime =
               (100 / timespanEvents.length / 100) * iter;
@@ -436,8 +444,8 @@
           return event;
         });
 
-      const hydratedTimespans: Events.TimespanEvent[] = hydratedEvents.filter(
-        (event): event is Events.TimespanEvent =>
+      const hydratedTimespans: TimespanEvent[] = hydratedEvents.filter(
+        (event): event is TimespanEvent =>
           "start_time" in event.when && "end_time" in event.when,
       );
 
@@ -630,7 +638,7 @@
 
   function eventClicked(
     event: MouseEvent | KeyboardEvent,
-    calendarEvent: Events.Event,
+    calendarEvent: Event,
   ) {
     if (typeof click_action === "function") {
       const clonedEvent = JSON.parse(JSON.stringify(calendarEvent));
@@ -735,7 +743,7 @@
     return snappedRunTime / timeSpan;
   }
 
-  let newEvent: Events.TimespanEvent | null;
+  let newEvent: TimespanEvent | null;
   let isCreatingNewEvent = false;
   function agendaMouseDown(event: PointerEvent) {
     if (
@@ -825,7 +833,7 @@
       ) {
         newEvent.calendar_id = calendarIDs[0];
         event_created(
-          newEvent as Events.TimespanEvent,
+          newEvent as TimespanEvent,
           saveEvent,
           cancelEvent,
           updateEvent,
@@ -841,7 +849,7 @@
     dragState = { held: false, x: 0, y: 0 };
   }
 
-  function updateEvent(event: Events.TimespanEvent) {
+  function updateEvent(event: TimespanEvent) {
     if (typeof event.when.start_time === "object") {
       event.when.start_time = Math.floor(
         (<Date>event.when.start_time).getTime() / 1000,
@@ -877,7 +885,7 @@
     eventSource = [...eventSource];
   }
 
-  function saveEvent(event: Events.TimespanEvent) {
+  function saveEvent(event: TimespanEvent) {
     if (typeof event !== "object") {
       console.warn("Invalid event object provided.");
       return;

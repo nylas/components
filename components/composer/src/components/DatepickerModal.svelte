@@ -3,10 +3,14 @@
 <script type="ts">
   import "../../../datepicker/src/Datepicker.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
   import CloseIcon from "../assets/close.svg";
+  import type {
+    DatepickerCallback,
+    DatepickerCloseCallback,
+  } from "@commons/types/Composer";
 
   let selectedDate: Date;
-  export let schedule: Composer.DatepickerCallback;
-  export let close: Composer.DatepickerCloseCallback;
+  export let schedule: DatepickerCallback;
+  export let close: DatepickerCloseCallback;
   const change = (date: Date) => {
     selectedDate = date;
   };
