@@ -28,6 +28,7 @@ export interface Calendar {
 export interface TimeSlot {
   start_time: Date;
   end_time: Date;
+  available_calendars: string[];
 }
 
 export interface SelectableSlot extends TimeSlot {

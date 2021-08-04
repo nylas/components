@@ -20,7 +20,7 @@
     TimeSlot,
     SelectableSlot,
     AvailabilityQuery,
-    EventQuery
+    EventQuery,
   } from "@commons/types/Availability";
 
   //#region props
@@ -171,9 +171,15 @@
     }
   };
 
+  // Consecutive same-availability periods of time, from earliest start_time to latest end_time.
   const generateEpochs = (slots: SelectableSlot[]) => {
     console.log("slots", slots);
-    //console.time('test');
+    console.time("test");
+    let scale = scaleTime().domain([
+      slots[0].start_time,
+      slots[slots.length - 1].end_time,
+    ]);
+    console.log("scaler", scale);
     let epochs = slots
       .reduce((m, n) => {
         if (
@@ -186,15 +192,20 @@
           m.push([n]);
         }
         return m;
-      }, [])
+      }, [] as TimeSlot[][])
       .map((epoch) => {
         return {
           start_time: epoch[0].start_time,
+          offset: scale(epoch[0].start_time),
+          height:
+            scale(epoch[epoch.length - 1].end_time) -
+            scale(epoch[0].start_time),
           end_time: epoch[epoch.length - 1].end_time,
+          slots: epoch.length,
           available_calendars: epoch[0].available_calendars,
         };
       });
-    //console.timeEnd('test')
+    console.timeEnd("test");
     return epochs;
   };
 
@@ -204,7 +215,6 @@
     .map((timestamp) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       let epochs = generateEpochs(slots);
-      console.timeEnd("day");
       return {
         slots,
         epochs,
@@ -304,6 +314,7 @@
     slotSelection = [];
   }
   //#region booking event logic for single time slot or consecutive time slots
+  $: console.log({ days });
 </script>
 
 <style lang="scss">
@@ -476,6 +487,17 @@
                   dispatchEvent("timeSlotChosen", { timeSlots: slot });
                 }
               }}
+            />
+          {/each}
+        </div>
+        <div class="epochs">
+          {#each day.epochs as epoch}
+            <div
+              class="epoch"
+              style="height: {epoch.height}%; top: ${epoch.offset}px;"
+              data-available-calendars={epoch.available_calendars.toString()}
+              data-start-time={new Date(epoch.start_time).toLocaleString()}
+              data-end-time={new Date(epoch.end_time).toLocaleString()}
             />
           {/each}
         </div>
