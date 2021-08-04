@@ -5,12 +5,19 @@ import {
   handleResponse,
   getMiddlewareApiUrl,
 } from "../methods/api";
+import type {
+  ContactsQuery,
+  Contact,
+  ContactEmail,
+  ContactSearchQuery,
+} from "@commons/types/Contacts";
+import type { MiddlewareResponse, Thread } from "@commons/types/Nylas";
 
 export const fetchContacts = async (
-  query: Contacts.ContactsQuery,
+  query: ContactsQuery,
   offset: number,
   limit: number,
-): Promise<Contacts.Contact[]> => {
+): Promise<Contact[]> => {
   const contacts = await fetch(
     `${getMiddlewareApiUrl(
       query.component_id,
@@ -20,9 +27,7 @@ export const fetchContacts = async (
       access_token: query.access_token,
     }),
   )
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Contacts.Contact[]>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<Contact[]>>(response))
     .then((json) => {
       return json.response;
     })
@@ -46,7 +51,7 @@ export const fetchContacts = async (
       .map((contact) => {
         // Ensure each contact has at least one "email" to load
         if (!Array.isArray(contact.emails) || contact.emails.length === 0) {
-          contact.emails = [{ email: "" } as Contacts.ContactEmail];
+          contact.emails = [{ email: "" } as ContactEmail];
         }
 
         return contact;
@@ -58,8 +63,8 @@ export const fetchContacts = async (
 
 // query.query should be a queryString as defined at https://docs.nylas.com/reference#contacts-1
 export const fetchContactsByQuery = async (
-  query: Contacts.ContactSearchQuery,
-): Promise<Contacts.Contact[]> => {
+  query: ContactSearchQuery,
+): Promise<Contact[]> => {
   const contacts = await fetch(
     `${getMiddlewareApiUrl(query.component_id)}/contacts${query.query}`,
     getFetchConfig({
@@ -67,9 +72,7 @@ export const fetchContactsByQuery = async (
       access_token: query.access_token,
     }),
   )
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Contacts.Contact[]>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<Contact[]>>(response))
     .then((json) => {
       return json.response;
     })
@@ -88,7 +91,7 @@ export const fetchContactsByQuery = async (
       .map((contact) => {
         // Ensure each contact has at least one "email" to load
         if (!Array.isArray(contact.emails) || contact.emails.length === 0) {
-          contact.emails = [{ email: "" } as Contacts.ContactEmail];
+          contact.emails = [{ email: "" } as ContactEmail];
         }
         return contact;
       }),
@@ -98,7 +101,7 @@ export const fetchContactsByQuery = async (
 };
 
 export const fetchContactImage = async (
-  query: Contacts.ContactsQuery,
+  query: ContactsQuery,
   id: string,
 ): Promise<string> => {
   return await fetch(
@@ -108,9 +111,7 @@ export const fetchContactImage = async (
       access_token: query.access_token,
     }),
   )
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<string>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<string>>(response))
     .then((json) => {
       return json.response;
     })
@@ -118,19 +119,17 @@ export const fetchContactImage = async (
 };
 
 export const fetchContactThreads = async (
-  query: Contacts.ContactsQuery,
+  query: ContactsQuery,
   offset: number,
   limit: number,
-): Promise<Nylas.Thread[]> => {
+): Promise<Thread[]> => {
   return await fetch(
     `${getMiddlewareApiUrl(
       query.component_id,
     )}/threads?offset=${offset}&limit=${limit}`,
     getFetchConfig(query),
   )
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Thread[]>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then((json) => {
       return json.response;
     })

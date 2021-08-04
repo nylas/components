@@ -5,18 +5,27 @@ import {
   handleResponse,
   getMiddlewareApiUrl,
 } from "../methods/api";
+import type {
+  SingularEmail,
+  CommonQuery,
+  MessagesQuery,
+  File as NylasFile,
+  Message as NylasMessage,
+  MiddlewareResponse,
+} from "@commons/types/Nylas";
+import type { Message } from "@commons/types/Composer";
 
 export const sendMessage = async (
   component_id: string,
-  msg: Composer.Message,
+  msg: Message,
   access_token?: string,
-): Promise<Nylas.Message> => {
+): Promise<NylasMessage> => {
   return await fetch(
     `${getMiddlewareApiUrl(component_id)}/send`,
     getFetchConfig({ method: "POST", component_id, access_token, body: msg }),
   )
     .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Message>>(response),
+      handleResponse<MiddlewareResponse<NylasMessage>>(response),
     )
     .then((json) => {
       return json.response;
@@ -28,7 +37,7 @@ export const uploadFile = async (
   component_id: string,
   file: File,
   access_token?: string,
-): Promise<Nylas.File> => {
+): Promise<NylasFile> => {
   const fetchConfig: RequestInit = getFetchConfig({
     method: "POST",
     component_id,
@@ -44,9 +53,7 @@ export const uploadFile = async (
   }
   fetchConfig.body = form;
   return await fetch(`${getMiddlewareApiUrl(component_id)}/files`, fetchConfig)
-    .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.File>>(response),
-    )
+    .then((response) => handleResponse<MiddlewareResponse<NylasFile>>(response))
     .then((json) => {
       return Array.isArray(json.response) ? json.response[0] : json.response;
     })
@@ -54,10 +61,10 @@ export const uploadFile = async (
 };
 
 export const fetchMessages = async (
-  query: Nylas.MessagesQuery,
+  query: MessagesQuery,
   offset: number,
   limit: number,
-): Promise<Nylas.Message[]> => {
+): Promise<NylasMessage[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
   )}/messages?offset=${offset}&limit=${limit}`;
@@ -69,7 +76,7 @@ export const fetchMessages = async (
   }
   return await fetch(queryString, getFetchConfig(query))
     .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Message[]>>(response),
+      handleResponse<MiddlewareResponse<NylasMessage[]>>(response),
     )
     .then((json) => {
       MessageStore.addMessages({
@@ -82,15 +89,15 @@ export const fetchMessages = async (
 };
 
 export const fetchMessage = async (
-  query: Nylas.CommonQuery,
+  query: CommonQuery,
   messageID: string,
-): Promise<Nylas.Message> => {
+): Promise<NylasMessage> => {
   const queryString = `${getMiddlewareApiUrl(
     query.component_id,
   )}/messages/${messageID}`;
   return await fetch(queryString, getFetchConfig(query))
     .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Message>>(response),
+      handleResponse<MiddlewareResponse<NylasMessage>>(response),
     )
     .then((json) => {
       return json.response;
@@ -100,14 +107,14 @@ export const fetchMessage = async (
 
 // For cases when someone wants to show just a single email message, rather than the full thread and w/o passing a thread id
 export const fetchEmail = async (
-  query: Nylas.SingularEmail,
-): Promise<Nylas.Message> => {
+  query: SingularEmail,
+): Promise<NylasMessage> => {
   const queryString = `${getMiddlewareApiUrl(query.component_id)}/messages/${
     query.message_id
   }`;
   return await fetch(queryString, getFetchConfig(query))
     .then((response) =>
-      handleResponse<Nylas.MiddlewareResponse<Nylas.Message>>(response),
+      handleResponse<MiddlewareResponse<NylasMessage>>(response),
     )
     .then((json) => {
       return json.response;

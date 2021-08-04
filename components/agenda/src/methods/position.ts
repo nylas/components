@@ -1,7 +1,9 @@
+import type { TimespanEvent } from "@commons/types/Events";
+
 export interface EventPosition {
-  overlaps: Events.TimespanEvent[];
+  overlaps: TimespanEvent[];
   offset: number;
-  leftNeighbour: Events.TimespanEvent | null;
+  leftNeighbour: TimespanEvent | null;
   widthOverride?: number;
 }
 
@@ -10,13 +12,13 @@ export interface EventPosition {
 const EVENT_OVERLAP_GRANULARITY = 10;
 
 export function populatePositionMap(
-  events: Events.TimespanEvent[],
+  events: TimespanEvent[],
   positionMap: Record<string, EventPosition>,
-) {
+): void {
   // Populate the position map with each event's overlaps
   events.forEach((event) => {
     positionMap[event.id] = {
-      overlaps: events.filter((other: Events.TimespanEvent) => {
+      overlaps: events.filter((other: TimespanEvent) => {
         return (
           event.id !== other.id &&
           other.when.start_time < event.when.end_time &&
@@ -30,9 +32,9 @@ export function populatePositionMap(
 }
 
 export function updateEventPosition(
-  event: Events.TimespanEvent,
+  event: TimespanEvent,
   positionMap: Record<string, EventPosition>,
-) {
+): void {
   const overlappingEvents = positionMap[event.id].overlaps;
 
   // Events without overlaps can be placed without extra logic
@@ -89,8 +91,8 @@ export function updateEventPosition(
 }
 
 function calculateEventWidth(
-  event: Events.TimespanEvent,
-  overlappingEvents: Events.TimespanEvent[],
+  event: TimespanEvent,
+  overlappingEvents: TimespanEvent[],
 ): number {
   const eventTimeMinutes = Math.ceil(
     (event.when.end_time - event.when.start_time) /

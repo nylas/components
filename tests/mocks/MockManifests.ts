@@ -1,6 +1,7 @@
 import { mockAgendaCalendar } from "./MockCalendars";
+import type { AgendaProperties } from "@commons/types/Nylas";
 
-export const mockAgendaManifest: Nylas.AgendaProperties = {
+export const mockAgendaManifest: Partial<AgendaProperties> = {
   allow_date_change: true,
   auto_time_box: false,
   calendar_ids: mockAgendaCalendar[0].id,

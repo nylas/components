@@ -17,8 +17,17 @@
     getPropertyValue,
   } from "@commons/methods/component";
   import DropdownSymbol from "./assets/chevron-down.svg";
+  import type {
+    EmailProperties,
+    Participant,
+    ConversationQuery,
+    Conversation,
+    Thread,
+    Message,
+    Account,
+  } from "@commons/types/Nylas";
 
-  let manifest: Partial<Nylas.EmailProperties> = {};
+  let manifest: Partial<EmailProperties> = {};
   let viewportWidth: number;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
@@ -27,23 +36,23 @@
   export let id: string = "";
   export let access_token: string = "";
   export let thread_id: string = "";
-  // export let messages: Nylas.Message[] = [];
+  // export let messages: Message[] = [];
   export let message_id: string = "";
   export let theme: string;
   export let show_received_timestamp: boolean;
   export let show_number_of_messages: boolean;
-  export let thread: Nylas.Thread | null;
-  export let message: Nylas.Message | null;
+  export let thread: Thread | null;
+  export let message: Message | null;
   export let click_action: "default" | "mailbox" | "custom" = "default";
   export let show_star: boolean;
   export let unread: boolean | null = null;
-  export let you: Partial<Nylas.Account> = {};
+  export let you: Partial<Account> = {};
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as Nylas.EmailProperties;
+    ]) || {}) as EmailProperties;
   });
 
   let main: Element;
@@ -77,11 +86,11 @@
     );
   }
 
-  let participants: Nylas.Participant[] = [];
+  let participants: Participant[] = [];
   $: {
     participants = activeThread ? activeThread.participants : [];
   }
-  let query: Nylas.ConversationQuery;
+  let query: ConversationQuery;
   $: query = {
     component_id: id,
     thread_id: thread_id,
@@ -90,7 +99,7 @@
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
 
-  let activeThread: Nylas.Conversation;
+  let activeThread: Conversation;
 
   $: if (!thread_id && !thread && id && message_id) {
     fetchOneMessage();
@@ -104,10 +113,10 @@
     // Is it in the store already? (via <nylas-mailbox>, for example)
     let foundThread = $Threads.find(
       (storedThread) => storedThread.id === thread?.id,
-    ) as Nylas.Conversation;
+    ) as Conversation;
     if (!foundThread) {
       // Thread does not exist in the store, assume it was passed in
-      activeThread = thread as Nylas.Conversation;
+      activeThread = thread as Conversation;
     } else {
       // It's already in the store! Great.
       activeThread = foundThread;
@@ -117,7 +126,7 @@
     MailboxStore.getThread(query).then(() => {
       let foundThread = $Threads.find(
         (storedThread) => storedThread.id === thread_id,
-      ) as Nylas.Conversation;
+      ) as Conversation;
       if (foundThread) {
         activeThread = foundThread;
       }
@@ -129,7 +138,7 @@
 
   $: if (id && !you.id) {
     fetchAccount({ component_id: query.component_id }).then(
-      (account: Nylas.Account) => {
+      (account: Account) => {
         you = account;
       },
     );

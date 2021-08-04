@@ -1,4 +1,6 @@
-export const mockAgendaCalendar: Events.Calendar[] = [
+import type { Calendar } from "@commons/types/Events";
+
+export const mockAgendaCalendar: Calendar[] = [
   {
     account_id: "mockAccountId",
     description: "this is a mock calendar used for testing",

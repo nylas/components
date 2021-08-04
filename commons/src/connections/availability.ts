@@ -8,6 +8,7 @@ import type {
   AvailabilityQuery,
   AvailabilityResponse,
 } from "@commons/types/Availability";
+import type { MiddlewareResponse } from "@commons/types/Nylas";
 
 export const fetchAvailability = async (
   query: AvailabilityQuery,
@@ -22,7 +23,7 @@ export const fetchAvailability = async (
   )
     .then(async (apiResponse) => {
       const json = await handleResponse<
-        Nylas.MiddlewareResponse<AvailabilityResponse[]>
+        MiddlewareResponse<AvailabilityResponse[]>
       >(apiResponse);
       return json.response;
     })

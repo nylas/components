@@ -1,4 +1,6 @@
-export const mockEvents = <Partial<Events.TimespanEvent>[]>[
+import type { TimespanEvent } from "@commons/types/Events";
+
+export const mockEvents = <Partial<TimespanEvent>[]>[
   {
     id: "abc123",
     title: "Brush teeth",

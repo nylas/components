@@ -1,6 +1,7 @@
 import { sortingPredicates } from "../../../components/contact-list/lib/sorting";
+import type { HydratedContact } from "@commons/types/Contacts";
 
-const chad: Contacts.HydratedContact = {
+const chad: HydratedContact = {
   emails: [
     {
       email: "chad.edwards@nylas.com",
@@ -30,7 +31,7 @@ const chad: Contacts.HydratedContact = {
   web_pages: [],
   groups: [],
 };
-const jenifer: Contacts.HydratedContact = {
+const jenifer: HydratedContact = {
   emails: [
     {
       email: "jenifer.v@nylas.com",
@@ -60,7 +61,7 @@ const jenifer: Contacts.HydratedContact = {
   web_pages: [],
   groups: [],
 };
-const adam: Contacts.HydratedContact = {
+const adam: HydratedContact = {
   emails: [
     {
       email: "adam.maes@nylas.com",
@@ -95,8 +96,8 @@ describe("sortingPredicates", () => {
   it("sort_by is last_emailed", () => {
     const sort_by = "last_emailed";
 
-    const unsortedList: Contacts.HydratedContact[] = [chad, jenifer, adam];
-    const sortedList: Contacts.HydratedContact[] = [adam, chad, jenifer];
+    const unsortedList: HydratedContact[] = [chad, jenifer, adam];
+    const sortedList: HydratedContact[] = [adam, chad, jenifer];
     unsortedList.sort(sortingPredicates[sort_by]);
     expect(unsortedList).toEqual(sortedList);
   });
@@ -104,8 +105,8 @@ describe("sortingPredicates", () => {
   it("sort_by is name", () => {
     const sort_by = "name";
 
-    const unsortedList: Contacts.HydratedContact[] = [chad, jenifer, adam];
-    const sortedList: Contacts.HydratedContact[] = [
+    const unsortedList: HydratedContact[] = [chad, jenifer, adam];
+    const sortedList: HydratedContact[] = [
       adam, // Jan 19 10:24 AM
       chad, // Jan 19 11:14 AM
       jenifer, // Jan 19 11:30 AM

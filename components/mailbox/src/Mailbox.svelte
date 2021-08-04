@@ -15,29 +15,36 @@
   import { fetchMessage } from "@commons/connections/messages";
   import LoadingIcon from "./assets/loading.svg";
   import LeftArrowLineIcon from "./assets/arrow-line.svg";
+  import type {
+    EmailProperties,
+    Thread,
+    ThreadsQuery,
+    MailboxQuery,
+    Message,
+    Account,
+  } from "@commons/types/Nylas";
 
-  let manifest: Partial<Nylas.EmailProperties> = {};
+  let manifest: Partial<EmailProperties> = {};
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
   export let id: string = "";
   export let access_token: string = "";
-  export let all_threads: Nylas.Thread[];
+  export let all_threads: Thread[];
   export let show_star: boolean;
   export let show_mailbox_toolbar: boolean = true;
   export let show_thread_checkbox: boolean = true;
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
   export let actionsBar: string[];
-  export let onSelectThread: (event: Event, t: Nylas.Thread) => void =
-    onSelectOne;
+  export let onSelectThread: (event: Event, t: Thread) => void = onSelectOne;
 
-  let queryParams: Nylas.ThreadsQuery;
-  let openedEmailData: Nylas.Thread | null;
+  let queryParams: ThreadsQuery;
+  let openedEmailData: Thread | null;
 
   // paginations vars
-  let paginatedThreads: Nylas.Thread[] = [];
+  let paginatedThreads: Thread[] = [];
   let currentPage: number = 1;
   let lastPage: number = 1;
   export let items_per_page: number = 13;
@@ -50,12 +57,12 @@
 
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as Nylas.EmailProperties;
+    ]) || {}) as EmailProperties;
 
     you = await AccountStore.getAccount(query);
 
     if (all_threads) {
-      threads = all_threads as Nylas.Thread[];
+      threads = all_threads as Thread[];
     } else {
       threads = (await MailboxStore.getThreads(query)) || [];
     }
@@ -89,12 +96,12 @@
 
   // Reactive statement to continuously fetch all_threads
   $: if (all_threads) {
-    threads = all_threads as Nylas.Thread[];
+    threads = all_threads as Thread[];
   }
 
   let main: Element;
 
-  let query: Nylas.MailboxQuery;
+  let query: MailboxQuery;
   $: query = {
     component_id: id,
     access_token,
@@ -105,12 +112,12 @@
   $: queryKey = JSON.stringify(query);
 
   // Try getting events from 3 sources: first, directly passed in, then, from our store; finally, by way of a fetch
-  let threads: Nylas.Thread[] = [];
+  let threads: Thread[] = [];
 
-  // let conversation: Nylas.Conversation | null = null;
+  // let conversation: Conversation | null = null;
   let status: "loading" | "loaded" | "error" = "loading";
 
-  let you: Partial<Nylas.Account> = {};
+  let you: Partial<Account> = {};
 
   const readStatusOutputs = {
     unread: true,
@@ -119,7 +126,7 @@
   };
 
   //#region methods
-  function fetchIndividualMessage(message: Nylas.Message) {
+  function fetchIndividualMessage(message: Message) {
     // messageLoadStatus[msgIndex] = "loading";
     return fetchMessage(query, message.id).then((json) => {
       console.log("message back?", json);
@@ -159,7 +166,7 @@
   let selectedThreads = new Set();
   $: areAllSelected = selectedThreads.size >= threads.length;
 
-  function onSelectOne(event, thread: Nylas.Thread) {
+  function onSelectOne(event, thread: Thread) {
     dispatchEvent("onSelectOneClicked", { event, thread });
     if (selectedThreads.has(thread)) {
       selectedThreads.delete(thread);
@@ -182,10 +189,10 @@
 
   // pagination
   function paginate(
-    items: Nylas.Thread[],
+    items: Thread[],
     activePage: number,
     pageSize: number,
-  ): Nylas.Thread[] {
+  ): Thread[] {
     let start: number = (activePage - 1) * pageSize;
     let end: number = start + pageSize;
     return items.slice(start, end);
