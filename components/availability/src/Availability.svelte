@@ -8,13 +8,17 @@
   import type { TimeInterval } from "d3-time";
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
+
   import {
+    SelectionStatus,
+    AvailabilityStatus,
+  } from "@commons/types/Availability";
+
+  import type {
     Calendar,
     Manifest,
-    SelectionStatus,
     TimeSlot,
     SelectableSlot,
-    AvailabilityStatus,
     AvailabilityQuery,
     EventQuery,
   } from "@commons/types/Availability";
@@ -49,7 +53,7 @@
   let main: Element;
   let clientHeight: number;
 
-  let slotSelection: Availability.TimeSlot = [];
+  let slotSelection: SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
   $: startDay = timeDay.floor(start_date);
@@ -206,8 +210,9 @@
       component_id: id,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay =
-      await AvailabilityStore.getAvailability(availabilityQuery);
+    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
+      availabilityQuery,
+    );
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
@@ -223,7 +228,7 @@
     return freeBusyCalendars;
   }
   //#region event query
-  let query: Availability.EventQuery;
+  let query: EventQuery;
   $: query = {
     component_id: id,
     access_token: access_token,
@@ -234,7 +239,7 @@
 
   //#region booking event logic for single time slot and consecutive time slots
   $: sortedSlots = [
-    ...slotSelection.sort((a, b) => a.start_time > b.start_time),
+    ...slotSelection.sort((a, b) => (a.start_time > b.start_time ? 1 : 0)),
   ].reduce((events, currentTimeSlot, i) => {
     if (i === 0) {
       events = [currentTimeSlot];
@@ -242,23 +247,26 @@
       let lastMergedSlot = events[events.length - 1];
       if (currentTimeSlot.start_time <= lastMergedSlot.end_time) {
         lastMergedSlot.end_time = new Date(
-          Math.max(lastMergedSlot.end_time, currentTimeSlot.end_time),
+          Math.max(
+            lastMergedSlot.end_time.getTime(),
+            currentTimeSlot.end_time.getTime(),
+          ),
         );
       } else {
         events = [...events, currentTimeSlot];
       }
     }
     return events;
-  }, []);
+  }, [] as TimeSlot[]);
 
-  function toggleSelectedTimeSlots(selectedSlot: obj) {
+  function toggleSelectedTimeSlots(selectedSlot: SelectableSlot) {
     return (slotSelection =
       selectedSlot.selectionStatus === SelectionStatus.SELECTED
         ? [...slotSelection, selectedSlot]
         : slotSelection.filter((slot) => slot != selectedSlot));
   }
 
-  function sortAndSetEvent(slots: obj[]) {
+  function sortAndSetEvent(slots: TimeSlot[]) {
     dispatchEvent("timeSlotChosen", { timeSlots: [...slots] });
     if (allow_booking) {
       // EventStore.createEvent(slots, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
