@@ -17,8 +17,6 @@
     getPropertyValue,
   } from "@commons/methods/component";
   import DropdownSymbol from "./assets/chevron-down.svg";
-
-  let manifest: Partial<Nylas.EmailProperties> = {};
   import type {
     EmailProperties,
     Participant,
@@ -50,7 +48,6 @@
   export let unread: boolean | null = null;
   export let you: Partial<Nylas.Account> = {};
   export let is_starred: boolean;
-  export let you: Partial<Account> = {};
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227

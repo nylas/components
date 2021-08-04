@@ -15,6 +15,9 @@
   import { fetchMessage } from "@commons/connections/messages";
   import LoadingIcon from "./assets/loading.svg";
   import LeftArrowLineIcon from "./assets/arrow-line.svg";
+  import TrashIcon from "./assets/trash-alt.svg";
+  import MarkReadIcon from "./assets/envelope-open-text.svg";
+  import MarkUnreadIcon from "./assets/envelope.svg";
   import type {
     EmailProperties,
     Thread,
@@ -37,7 +40,8 @@
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
   export let actionsBar: string[];
-  export let onSelectThread: (event: Event, t: Thread) => void = onSelectOne;
+  export let onSelectThread: (event: CustomEvent, t: Thread) => void =
+    onSelectOne;
 
   let queryParams: ThreadsQuery;
   let openedEmailData: Thread | null;
@@ -74,6 +78,7 @@
 
   // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
   // TODO - Find a way to improve this
+  let internalProps: SvelteAllProps;
   $: internalProps = buildInternalProps($$props, manifest);
 
   // Reactive statements to continuously set manifest, prop and default values
@@ -165,18 +170,40 @@
     return (starredThreads = starredThreads);
   }
 
-  async function refreshClicked(event: CustomEvent) {
+  function starExpandedThread(event: MouseEvent) {
+    if (starredThreads.has(openedEmailData)) {
+      starredThreads.delete(openedEmailData);
+      openedEmailData.starred = false;
+    } else {
+      starredThreads.add(openedEmailData);
+      openedEmailData.starred = true;
+    }
+  }
+
+  async function refreshClicked(event: MouseEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
       threads = (await MailboxStore.getThreads(query, true)) || [];
     }
   }
-  let selectedThreads = new Set();
+  let selectedThreads = new Set<Thread>();
   $: areAllSelected = selectedThreads.size >= threads.length;
-  let starredThreads = new Set();
-  $: areAllStarred = starredThreads.size >= threads.length;
+  let starredThreads = new Set<Thread>();
+  $: areAllSelectedStarred = compareSets(selectedThreads, starredThreads);
 
-  function onSelectOne(event: CustomEvent, thread: Nylas.Thread) {
+  function compareSets(set1: Set<Thread>, set2: Set<Thread>): boolean {
+    if (set1.size > set2.size || set1.size === 0 || set2.size === 0) {
+      return false;
+    }
+    for (let setThread of set1) {
+      if (!set2.has(setThread)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function onSelectOne(event: MouseEvent, thread: Nylas.Thread) {
     dispatchEvent("onSelectOneClicked", { event, thread });
     if (selectedThreads.has(thread)) {
       selectedThreads.delete(thread);
@@ -186,7 +213,7 @@
     return (selectedThreads = selectedThreads);
   }
 
-  function onSelectAll(event: CustomEvent) {
+  function onSelectAll(event: MouseEvent) {
     dispatchEvent("onSelectAllClicked", { event });
     if (areAllSelected) {
       selectedThreads.clear();
@@ -196,15 +223,17 @@
     return (selectedThreads = selectedThreads);
   }
 
-  function onStarAll(event: CustomEvent) {
-    dispatchEvent("onStarAllClicked", { event });
-    if (areAllStarred) {
-      starredThreads.clear();
-      threads.forEach((t) => (t.starred = false));
+  function onStarSelected(event: MouseEvent) {
+    dispatchEvent("onStarSelected", { event });
+    if (areAllSelectedStarred) {
+      selectedThreads.forEach((t) => {
+        starredThreads.delete(t);
+        t.starred = false;
+      });
     } else {
-      threads.forEach((t) => {
+      selectedThreads.forEach((t) => {
         starredThreads.add(t);
-        threads.forEach((t) => (t.starred = true));
+        t.starred = true;
       });
     }
     return (starredThreads = starredThreads);
@@ -252,10 +281,6 @@
       gap: 8px;
     }
 
-    .email-container {
-      padding-right: 0.5rem;
-    }
-
     header {
       @include barStyle;
       border-radius: 4px 4px 0 0;
@@ -275,6 +300,18 @@
       border-top-width: 0;
     }
 
+    .subject-title {
+      justify-content: space-between;
+      & > div {
+        display: flex;
+        align-items: center;
+        gap: $spacing-m;
+      }
+      [role="toolbar"] {
+        border: none;
+      }
+    }
+
     // Toggle select-all checkbox and thread checkbox from CSS Var
     .thread-checkbox {
       input {
@@ -282,7 +319,7 @@
       }
     }
 
-    div.bulk-star {
+    div.starred {
       position: relative;
       display: flex;
       justify-content: center;
@@ -390,15 +427,34 @@
 <main bind:this={main}>
   {#if openedEmailData}
     <header class="subject-title">
-      <button
-        on:click={() => {
-          openedEmailData.expanded = false;
-          openedEmailData = null;
-        }}
-      >
-        <LeftArrowLineIcon />
-      </button>
-      <h1>{openedEmailData.subject}</h1>
+      <div>
+        <button
+          on:click={() => {
+            openedEmailData.expanded = false;
+            openedEmailData = null;
+          }}
+        >
+          <LeftArrowLineIcon />
+        </button>
+        <h1>{openedEmailData.subject}</h1>
+      </div>
+      <div role="toolbar">
+        {#if show_star}
+          <div class="starred">
+            <button
+              class={starredThreads.has(openedEmailData) ? "starred" : ""}
+              title={starredThreads.has(openedEmailData)
+                ? "Unstar thread"
+                : "Star thread"}
+              aria-label={starredThreads.has(openedEmailData)
+                ? "Unstar thread"
+                : "Star thread"}
+              role="switch"
+              aria-checked={starredThreads.has(openedEmailData)}
+              on:click={(e) => starExpandedThread(e)}
+            />
+          </div>{/if}
+      </div>
     </header>
     <div class="email-container">
       <nylas-email
@@ -441,23 +497,47 @@
                 on:click={(e) => onSelectAll(e)}
               />
             {/each}
-          </div>{/if}
+          </div>
+        {/if}
+        {#if actionsBar.includes("delete")}
+          <div class="delete">
+            <button
+              title="Delete selected email(s)"
+              aria-label="Delete selected email(s)"><TrashIcon /></button
+            >
+          </div>
+        {/if}
         {#if show_star && actionsBar.includes("star")}
-          <div class="bulk-star">
-            {#each [areAllStarred ? "Unstar all" : "Star all"] as starAllTitle}<div
-                class="bulk-star"
-              >
-                <button
-                  class={areAllStarred ? "starred" : ""}
-                  title={starAllTitle}
-                  aria-label={starAllTitle}
-                  role="switch"
-                  aria-checked={areAllStarred}
-                  on:click={(e) => onStarAll(e)}
-                />
-              </div>
+          <div class="starred">
+            {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
+              <button
+                class={areAllSelectedStarred ? "starred" : ""}
+                title={starAllTitle}
+                aria-label={starAllTitle}
+                role="switch"
+                aria-checked={areAllSelectedStarred}
+                on:click={(e) => onStarSelected(e)}
+              />
             {/each}
           </div>{/if}
+        {#if actionsBar.includes("read")}
+          <div class="mark-read">
+            <button
+              title="Mark selected email(s) as read"
+              aria-label="Mark selected email(s) as read"
+              ><MarkReadIcon /></button
+            >
+          </div>
+        {/if}
+        {#if actionsBar.includes("unread")}
+          <div class="mark-unread">
+            <button
+              title="Mark selected email(s) as unread"
+              aria-label="Mark selected email(s) as unread"
+              ><MarkUnreadIcon /></button
+            >
+          </div>
+        {/if}
       </div>
     {/if}
     <ul id="mailboxlist">
