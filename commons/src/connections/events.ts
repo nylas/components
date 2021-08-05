@@ -18,8 +18,7 @@ export const fetchEvents = async (query: EventQuery): Promise<Event[]> => {
       return fetch(
         `${getMiddlewareApiUrl(
           query.component_id || "",
-        )}/agenda/events?calendar_id=${calendar}&starts_after=${
-          query.starts_after - 1
+        )}/agenda/events?calendar_id=${calendar}&starts_after=${query.starts_after - 1
         }&ends_before=${query.ends_before}&expand_recurring=true`,
         getFetchConfig({
           component_id: query.component_id,
@@ -43,35 +42,53 @@ export const fetchEvents = async (query: EventQuery): Promise<Event[]> => {
 export const fetchCalendars = async (
   query: CalendarQuery,
 ): Promise<Calendar[]> => {
-  return Promise.allSettled(
-    query.calendarIDs.map((calendar: unknown) => {
-      return fetch(
-        `${getMiddlewareApiUrl(
-          query.component_id || "",
-        )}/calendars/${calendar}`,
-        getFetchConfig({
-          component_id: query.component_id,
-          access_token: query.access_token,
-        }),
+  if (query.calendarIDs.length) {
+    return Promise.allSettled(
+      query.calendarIDs.map((calendar: unknown) => {
+        return fetch(
+          `${getMiddlewareApiUrl(
+            query.component_id || "",
+          )}/calendars/${calendar}`,
+          getFetchConfig({
+            component_id: query.component_id,
+            access_token: query.access_token,
+          }),
+        )
+          .then((response) =>
+            handleResponse<MiddlewareResponse<Calendar[]>>(
+              response,
+            ),
+          )
+          .then((json) => {
+            return json.response;
+          });
+      }),
+    )
+      .then((responses) => {
+        const filteredResponses = responses
+          .filter(
+            (response): response is PromiseFulfilledResult<Calendar[]> =>
+              response.status === "fulfilled",
+          )
+          .map((cal) => cal.value);
+        return filteredResponses.flat();
+      })
+      .catch((error) => handleError(query.component_id || "unknown", error));
+  } else {
+    return fetch(
+      `${getMiddlewareApiUrl(query.component_id || "")}/calendars`,
+      getFetchConfig({
+        component_id: query.component_id,
+        access_token: query.access_token,
+      }),
+    )
+      .then((response) =>
+        handleResponse<MiddlewareResponse<Calendar[]>>(response),
       )
-        .then((response) =>
-          handleResponse<MiddlewareResponse<Calendar[]>>(response),
-        )
-        .then((json) => {
-          return json.response;
-        });
-    }),
-  )
-    .then((responses) => {
-      const filteredResponses = responses
-        .filter(
-          (calendar): calendar is PromiseFulfilledResult<Calendar[]> =>
-            calendar.status === "fulfilled",
-        )
-        .map((cal) => cal.value);
-      return filteredResponses.flat();
-    })
-    .catch((error) => handleError(query.component_id || "unknown", error));
+      .then((json) => {
+        return json.response;
+      });
+  }
 };
 
 export async function createEvent(

@@ -1,13 +1,18 @@
 <svelte:options tag="nylas-availability" />
 
 <script lang="ts">
-  import { ManifestStore, AvailabilityStore } from "../../../commons/src";
+  import {
+    ManifestStore,
+    AvailabilityStore,
+    CalendarStore,
+  } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
   import { timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
+  import type { CalendarQuery } from "@commons/types/Events";
 
   import {
     SelectionStatus,
@@ -39,11 +44,20 @@
 
   //#region mount
   let manifest: Partial<Manifest> = {};
+  $: calendarID = "";
   onMount(async () => {
     await tick();
     clientHeight = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
+    const calendarQuery: CalendarQuery = {
+      access_token,
+      component_id: id,
+      calendarIDs: [], // empty array will fetch all calendars
+    };
+    const calendarsList = await CalendarStore.getCalendars(calendarQuery);
+    calendarID = calendarsList.find((cal) => cal.is_primary)?.id || "";
+    console.log(calendarID);
   });
   //#endregion mount
 
