@@ -225,6 +225,7 @@ export interface Thread {
   unread: boolean;
   version: number;
   expanded?: boolean;
+  folders?: string[];
 }
 export interface Conversation extends Thread {
   messages: Message[];
