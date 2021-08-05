@@ -72,9 +72,7 @@
       threads = (await MailboxStore.getThreads(query)) || [];
     }
 
-    inboxThreads = threads.filter(
-      (thread) => !thread.folders?.includes("trash"),
-    );
+    inboxThreads = threads; // TODO: filter out threads in trash folder
     starredThreads = new Set(inboxThreads.filter((thread) => thread.starred));
     if (unread_status === "unread") {
       unreadThreads = new Set(inboxThreads);
@@ -88,9 +86,9 @@
 
   let inboxThreads: Thread[]; // threads currently in the inbox
   $: {
-    inboxThreads = threads.filter(
-      (thread) => !thread.folders?.includes("trash"),
-    );
+    if (!inboxThreads) {
+      inboxThreads = threads;
+    } // TODO: filter out threads in trash folder
     lastPage = Math.ceil(inboxThreads.length / items_per_page);
     if (currentPage > lastPage && lastPage !== 0) {
       currentPage = lastPage;
@@ -315,15 +313,21 @@
     dispatchEvent("onDeleteSelected", { event });
     if (openedEmailData) {
       openedEmailData.expanded = false;
-      openedEmailData.folders = ["trash"];
+      // "delete" thread by hiding; TODO: change to add thread to trash folder
+      inboxThreads = inboxThreads.filter(
+        (thread) => thread !== openedEmailData,
+      );
       starredThreads.delete(openedEmailData);
       selectedThreads.delete(openedEmailData);
       openedEmailData = null;
     } else {
       selectedThreads.forEach((thread) => {
-        thread.folders = ["trash"];
         starredThreads.delete(thread);
       });
+      // "delete" thread by hiding; TODO: change to add thread to trash folder
+      inboxThreads = inboxThreads.filter(
+        (thread) => !selectedThreads.has(thread),
+      );
       selectedThreads.clear();
     }
     return (inboxThreads = inboxThreads), (selectedThreads = selectedThreads);
