@@ -64,7 +64,10 @@ export const fetchCalendars = async (
   )
     .then((responses) => {
       const filteredResponses = responses
-        .filter((calendar) => calendar.status === "fulfilled")
+        .filter(
+          (calendar): calendar is PromiseFulfilledResult<Calendar[]> =>
+            calendar.status === "fulfilled",
+        )
         .map((cal) => cal.value);
       return filteredResponses.flat();
     })

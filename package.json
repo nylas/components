@@ -32,7 +32,8 @@
     "storybook:ci": "yarn run storybook -- --ci",
     "test": "jest --no-cache --verbose --run-in-band",
     "test-coverage": "yarn test --coverage",
-    "tscheck": "lerna run --parallel tscheck"
+    "tscheck": "lerna run --parallel tscheck",
+    "tsc": "tsc"
   },
   "peerDependencies": {
     "webpack": "4.46.0"
