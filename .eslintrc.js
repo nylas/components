@@ -38,16 +38,8 @@ module.exports = {
   },
   rules: {
     "func-style": ["error", "declaration", { allowArrowFunctions: true }],
-    "no-unused-vars": [
-      "error",
-      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-    ],
     "no-console": ["error", { allow: ["warn", "error", "time"] }],
     "@typescript-eslint/no-var-requires": 0,
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-    ],
     "@typescript-eslint/no-empty-function": 0,
   },
 };
