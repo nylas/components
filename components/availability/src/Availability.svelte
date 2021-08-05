@@ -35,6 +35,8 @@
   export let show_ticks: boolean = true;
   export let email_ids: string[] = [];
   export let allow_booking: boolean = false;
+  export let max_bookable_slots: number = 1;
+  export let participant_threshold: number = 1;
   //#endregion props
 
   //#region mount
@@ -111,6 +113,14 @@
           }
         }
 
+        if (
+          availability === AvailabilityStatus.PARTIAL &&
+          freeCalendars.length <
+            allCalendars.length * (participant_threshold / 100)
+        ) {
+          availability = AvailabilityStatus.BUSY;
+        }
+
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           availability: availability,
@@ -168,7 +178,10 @@
   };
 
   // Consecutive same-availability periods of time, from earliest start_time to latest end_time.
-  const generateEpochs = (slots: SelectableSlot[]) => {
+  const generateEpochs = (
+    slots: SelectableSlot[],
+    participant_threshold: number,
+  ) => {
     let scale = scaleTime().domain([
       slots[0].start_time,
       slots[slots.length - 1].end_time,
@@ -187,9 +200,24 @@
         return m;
       }, [] as TimeSlot[][])
       .map((epoch) => {
+        let status = "free";
+        if (
+          epoch[0].available_calendars.length === 0 ||
+          (epoch[0].available_calendars.length !== allCalendars.length &&
+            epoch[0].available_calendars.length <
+              allCalendars.length * (participant_threshold / 100))
+        ) {
+          status = "busy";
+        } else if (
+          epoch[0].available_calendars.length > 0 &&
+          epoch[0].available_calendars.length !== allCalendars.length
+        ) {
+          status = "partial";
+        }
         return {
           start_time: epoch[0].start_time,
           offset: scale(epoch[0].start_time) * 100,
+          status,
           height:
             (scale(epoch[epoch.length - 1].end_time) -
               scale(epoch[0].start_time)) *
@@ -199,7 +227,6 @@
           available_calendars: epoch[0].available_calendars,
         };
       });
-    console.timeEnd("test");
     return epochs;
   };
 
@@ -208,7 +235,7 @@
     .ticks(timeDay)
     .map((timestamp) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
-      let epochs = generateEpochs(slots);
+      let epochs = generateEpochs(slots, participant_threshold);
       return {
         slots,
         epochs,
@@ -318,7 +345,7 @@
 
 <style lang="scss">
   @import "../../theming/variables.scss";
-  $headerHeight: 50px;
+  $headerHeight: 40px;
   $color-free: rgba(54, 210, 173, 0.4);
   $color-busy: rgba(255, 100, 117, 0.4);
   $color-partial: rgba(255, 255, 117, 0.4);
@@ -338,7 +365,7 @@
 
     .days {
       display: grid;
-      gap: 0;
+      gap: 0.25rem;
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
     }
@@ -386,7 +413,7 @@
         font-weight: 300;
 
         .date {
-          border-radius: 50px;
+          border-radius: 15px;
           background: var(--blue);
           color: white;
           font-weight: bold;
@@ -400,19 +427,18 @@
 
       .epochs {
         position: absolute;
-        top: 50px;
+        top: $headerHeight;
         width: 100%;
-        height: calc(100% - 50px);
+        height: calc(100% - #{$headerHeight});
         background: rgba(255, 255, 255, 0);
         .epoch {
           position: absolute;
           width: 100%;
 
           .inner {
-            margin: 0.25rem;
-            height: calc(100% - 1rem);
+            margin: 0rem;
+            height: calc(100% - 0.5rem);
             overflow: hidden;
-            border-radius: 4px;
             padding: 0.25rem;
           }
 
@@ -435,7 +461,6 @@
               display: inline-block;
               margin: 0.25rem;
               padding: 0.25rem;
-              border-radius: 4px;
               font-size: 0.7rem;
               color: white;
 
@@ -476,8 +501,6 @@
           &.selected {
             background-color: purple;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-            border-radius: 4px;
-            margin: 0 0.25rem;
           }
 
           &.busy {
@@ -489,11 +512,23 @@
     button.confirm {
       grid-column: -1 / 1;
     }
+
+    &.allow_booking {
+      .slot:not(.busy):hover {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+      }
+    }
   }
 </style>
 
 <nylas-error {id} />
-<main bind:this={main} bind:clientHeight class:ticked={show_ticks}>
+<main
+  bind:this={main}
+  bind:clientHeight
+  class:ticked={show_ticks}
+  class:allow_booking
+>
   {#if show_ticks}
     <ul class="ticks">
       {#each ticks as tick}
@@ -526,12 +561,7 @@
         <div class="epochs">
           {#each day.epochs as epoch}
             <div
-              class:busy={epoch.available_calendars.length === 0}
-              class:partial={epoch.available_calendars.length !==
-                allCalendars.length && epoch.available_calendars.length !== 0}
-              class:free={epoch.available_calendars.length ===
-                allCalendars.length}
-              class="epoch"
+              class="epoch {epoch.status}"
               style="height: {epoch.height}%; top: {epoch.offset}%;"
               data-available-calendars={epoch.available_calendars.toString()}
               data-start-time={new Date(epoch.start_time).toLocaleString()}
@@ -566,7 +596,9 @@
                   slot.selectionStatus =
                     slot.selectionStatus === SelectionStatus.SELECTED
                       ? SelectionStatus.UNSELECTED
-                      : SelectionStatus.SELECTED;
+                      : slotSelection.length < max_bookable_slots
+                      ? SelectionStatus.SELECTED
+                      : SelectionStatus.UNSELECTED;
                   toggleSelectedTimeSlots(slot);
                 } else {
                   dispatchEvent("timeSlotChosen", { timeSlots: slot });

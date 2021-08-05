@@ -43,7 +43,7 @@
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(new Date().setHours(5, 30, 0, 0)),
+                start_time: new Date(new Date().setHours(5, 15, 0, 0)),
                 end_time: new Date(new Date().setHours(16, 0, 0, 0)),
               },
             ],
@@ -51,12 +51,14 @@
         ];
 
         //component.calendars = calendars;
+        //component.email_ids = ["phil.r@nylas.com"];
 
         component.email_ids = [
-          "hazik.a@nylas.com",
           "phil.r@nylas.com",
-          "mike@nylas.com",
-          "david@nylas.com",
+          "david.t@nylas.com",
+          "hazik.a@nylas.com",
+          "chantal.l@nylas.com",
+          "shashaank.s@nylas.com",
         ];
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
@@ -92,9 +94,23 @@
           .querySelectorAll('input[name="allow-booking"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
-              component.allow_booking = event.target.value;
+              component.allow_booking = JSON.parse(event.target.value);
             });
           });
+
+        document
+          .querySelectorAll('input[id="participant-threshold"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.participant_threshold = JSON.parse(event.target.value);
+            });
+          });
+
+        document.querySelectorAll('input[name="max-slots"]').forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.max_bookable_slots = JSON.parse(event.target.value);
+          });
+        });
       });
     </script>
     <style>
@@ -119,7 +135,7 @@
       }
 
       .demo-box {
-        width: 80vw;
+        width: calc(80vw - 250px);
         margin-left: 10vw;
         height: 80vh;
         margin-top: 10vh;
@@ -207,6 +223,26 @@
           <input checked type="radio" name="allow-booking" value="false" />
           False
         </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Max Bookable Slots</legend>
+        <label>
+          <input type="number" name="max-slots" value="1" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Participant Threshold</legend>
+        <input
+          id="participant-threshold"
+          class="end"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="1"
+        />
       </fieldset>
     </aside>
 
