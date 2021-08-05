@@ -327,12 +327,6 @@
   }, [] as TimeSlot[]);
 
   function toggleSelectedTimeSlots(selectedSlot: SelectableSlot) {
-    selectedSlot.selectionStatus =
-      selectedSlot.selectionStatus === SelectionStatus.SELECTED
-        ? SelectionStatus.UNSELECTED
-        : slotSelection.length < max_bookable_slots
-        ? SelectionStatus.SELECTED
-        : SelectionStatus.UNSELECTED;
     return (slotSelection =
       selectedSlot.selectionStatus === SelectionStatus.SELECTED
         ? [...slotSelection, selectedSlot]
@@ -605,6 +599,13 @@
               disabled={slot.availability === AvailabilityStatus.BUSY}
               on:click={() => {
                 if (allow_booking) {
+                  slot.selectionStatus =
+                    slot.selectionStatus === SelectionStatus.SELECTED
+                      ? SelectionStatus.UNSELECTED
+                      : slotSelection.length < max_bookable_slots
+                      ? SelectionStatus.SELECTED
+                      : SelectionStatus.UNSELECTED;
+
                   toggleSelectedTimeSlots(slot);
                 } else {
                   dispatchEvent("timeSlotChosen", { timeSlots: slot });
