@@ -11,6 +11,10 @@ export interface Manifest extends NylasManifest {
   dates_to_show: number;
   show_ticks: boolean;
   calendars: Calendar[];
+  email_ids: string[];
+  allow_booking: boolean;
+  max_bookable_slots: number;
+  partial_bookable_ratio: number;
 }
 
 export interface Calendar {
@@ -22,6 +26,7 @@ export interface Calendar {
 export interface TimeSlot {
   start_time: Date;
   end_time: Date;
+  available_calendars: string[];
 }
 
 export interface SelectableSlot extends TimeSlot {
