@@ -391,10 +391,6 @@
         &.starred:before {
           color: #ffc107;
         }
-
-        &:hover:before {
-          color: #ffc107;
-        }
       }
     }
 
@@ -469,6 +465,14 @@
         .checkbox-container.thread-checkbox {
           padding: 0 0 0 $spacing-m;
           align-self: center;
+        }
+      }
+
+      div.starred {
+        button {
+          &:hover:before {
+            color: #ffc107;
+          }
         }
       }
     }

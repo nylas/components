@@ -455,10 +455,6 @@
             &.starred:before {
               color: #ffc107;
             }
-
-            &:hover:before {
-              color: #ffc107;
-            }
           }
         }
       }
@@ -661,6 +657,14 @@
           height: $collapsed-height;
           grid-template-columns: 200px auto;
           justify-content: initial;
+
+          div.starred {
+            button {
+              &:hover:before {
+                color: #ffc107;
+              }
+            }
+          }
 
           .mobile-subject-snippet {
             display: none;
