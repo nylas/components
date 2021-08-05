@@ -72,7 +72,15 @@
       threads = (await MailboxStore.getThreads(query)) || [];
     }
 
-    inboxThreads = threads;
+    inboxThreads = threads.filter(
+      (thread) => !thread.folders?.includes("trash"),
+    );
+    starredThreads = new Set(inboxThreads.filter((thread) => thread.starred));
+    if (unread_status === "unread") {
+      unreadThreads = new Set(inboxThreads);
+    } else if (unread_status === "default") {
+      unreadThreads = new Set(inboxThreads.filter((thread) => thread.unread));
+    }
     paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
     lastPage = Math.ceil(inboxThreads.length / items_per_page);
     hasComponentLoaded = true;
@@ -85,7 +93,6 @@
     );
     lastPage = Math.ceil(inboxThreads.length / items_per_page);
     if (currentPage > lastPage && lastPage !== 0) {
-      console.log({ currentPage, lastPage });
       currentPage = lastPage;
     }
   }
@@ -161,8 +168,15 @@
   let selectedThreads = new Set<Thread>();
   $: areAllSelected = selectedThreads.size >= inboxThreads.length;
   let starredThreads = new Set<Thread>();
-  $: areAllSelectedStarred = checkIfAllStarred(selectedThreads, starredThreads);
-  $: areAllSelectedUnread = checkIfSelectionIsUnread(selectedThreads);
+  $: areAllSelectedStarred = checkIfSelectionBelongsToSet(
+    selectedThreads,
+    starredThreads,
+  );
+  let unreadThreads = new Set<Thread>();
+  $: areAllSelectedUnread = checkIfSelectionBelongsToSet(
+    selectedThreads,
+    unreadThreads,
+  );
 
   async function messageClicked(event: CustomEvent) {
     // console.debug("message clicked from mailbox", event.detail);
@@ -219,25 +233,6 @@
     return (starredThreads = starredThreads);
   }
 
-  function checkIfAllStarred(
-    selection: Set<Thread>,
-    currentStarredThreads: Set<Thread>,
-  ): boolean {
-    if (
-      selection.size > currentStarredThreads.size ||
-      selection.size === 0 ||
-      currentStarredThreads.size === 0
-    ) {
-      return false;
-    }
-    for (let setThread of selection) {
-      if (!currentStarredThreads.has(setThread)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   function starOpenedThread() {
     if (openedEmailData !== null) {
       if (starredThreads.has(openedEmailData)) {
@@ -266,9 +261,19 @@
     return (starredThreads = starredThreads);
   }
 
-  function checkIfSelectionIsUnread(selectedSet: Set<Thread>): boolean {
-    for (let setThread of selectedSet) {
-      if (!setThread.unread) {
+  function checkIfSelectionBelongsToSet(
+    selection: Set<Thread>,
+    superset: Set<Thread>,
+  ): boolean {
+    if (
+      selection.size > superset.size ||
+      selection.size === 0 ||
+      superset.size === 0
+    ) {
+      return false;
+    }
+    for (let setThread of selection) {
+      if (!superset.has(setThread)) {
         return false;
       }
     }
@@ -279,26 +284,35 @@
     dispatchEvent("onChangeSelectedReadStatus", { event });
     if (areAllSelectedUnread) {
       selectedThreads.forEach((t) => {
+        unreadThreads.delete(t);
         t.unread = false;
       });
     } else {
       selectedThreads.forEach((t) => {
+        unreadThreads.add(t);
         t.unread = true;
       });
     }
-    return (selectedThreads = selectedThreads);
+    return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
   }
 
-  function markOpenedThreadUnread() {
-    if (openedEmailData !== null) {
+  function returnToMailbox(isThreadUnread: boolean) {
+    if (openedEmailData) {
+      openedEmailData.unread = isThreadUnread;
       openedEmailData.expanded = false;
-      openedEmailData.unread = true;
+
+      if (isThreadUnread) {
+        unreadThreads.add(openedEmailData);
+      } else {
+        unreadThreads.delete(openedEmailData);
+      }
       openedEmailData = null;
     }
-    return (selectedThreads = selectedThreads);
+    return (unreadThreads = unreadThreads);
   }
 
   async function onDeleteSelected(event: MouseEvent) {
+    dispatchEvent("onDeleteSelected", { event });
     if (openedEmailData) {
       openedEmailData.expanded = false;
       openedEmailData.folders = ["trash"];
@@ -306,7 +320,6 @@
       selectedThreads.delete(openedEmailData);
       openedEmailData = null;
     } else {
-      dispatchEvent("onDeleteSelected", { event });
       selectedThreads.forEach((thread) => {
         thread.folders = ["trash"];
         starredThreads.delete(thread);
@@ -513,9 +526,10 @@
       <header class="subject-title">
         <div>
           <button
+            title="Return to Mailbox"
+            aria-label="Return to Mailbox"
             on:click={() => {
-              openedEmailData.expanded = false;
-              openedEmailData = null;
+              returnToMailbox(false);
             }}
           >
             <LeftArrowLineIcon />
@@ -550,7 +564,7 @@
               title="Mark thread as unread"
               aria-label="Mark thread as unread"
               on:click={(e) => {
-                markOpenedThreadUnread();
+                returnToMailbox(true);
               }}><MarkUnreadIcon /></button
             >
           </div>
@@ -563,7 +577,7 @@
           {you}
           {show_star}
           click_action="mailbox"
-          unread={readStatusOutputs[unread_status]}
+          unread={unreadThreads.has(openedEmailData)}
           on:threadClicked={threadClicked}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
@@ -672,7 +686,7 @@
                   {you}
                   {show_star}
                   click_action="mailbox"
-                  unread={readStatusOutputs[unread_status]}
+                  unread={unreadThreads.has(thread)}
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
                   on:threadStarred={threadStarred}

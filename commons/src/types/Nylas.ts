@@ -205,6 +205,12 @@ export interface DayProperties extends Manifest {
   day: number;
   calendar_ids?: string;
 }
+export interface Folder {
+  object?: "folder";
+  display_name: string;
+  id: string;
+  name: string;
+}
 export interface Thread {
   account_id: string;
   draft_ids: string[];
@@ -225,7 +231,7 @@ export interface Thread {
   unread: boolean;
   version: number;
   expanded?: boolean;
-  folders?: string[];
+  folders?: string[]; //to be changed to Folder[];
 }
 export interface Conversation extends Thread {
   messages: Message[];
