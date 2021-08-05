@@ -408,7 +408,7 @@
         grid-template-columns: auto 1fr;
         gap: 0.5rem;
         height: 30px;
-        line-height: 1.875rem;
+        line-height: 1.875;
         font-size: 1rem;
         font-weight: 300;
 
@@ -420,7 +420,7 @@
           display: block;
           width: 30px;
           height: 30px;
-          line-height: 1.875rem;
+          line-height: 1.875;
           text-align: center;
         }
       }
@@ -564,11 +564,6 @@
             <div
               class="epoch {epoch.status}"
               style="height: {epoch.height}%; top: {epoch.offset}%;"
-              aria-label="{new Date(
-                epoch.start_time,
-              ).toLocaleString()} to {new Date(
-                epoch.end_time,
-              ).toLocaleString()}; Free calendars: {epoch.available_calendars.toString()}"
               data-available-calendars={epoch.available_calendars.toString()}
               data-start-time={new Date(epoch.start_time).toLocaleString()}
               data-end-time={new Date(epoch.end_time).toLocaleString()}
@@ -592,7 +587,9 @@
               data-available-calendars={slot.available_calendars.toString()}
               aria-label="{new Date(
                 slot.start_time,
-              ).toLocaleString()} - {new Date(slot.end_time).toLocaleString()}}"
+              ).toLocaleString()} to {new Date(
+                slot.end_time,
+              ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
               class="slot {slot.selectionStatus} {slot.availability}"
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
