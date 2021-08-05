@@ -122,6 +122,7 @@
   // Reactive statement to continuously fetch all_threads
   $: if (all_threads) {
     threads = all_threads as Thread[];
+    inboxThreads = threads;
   }
 
   let main: Element;
