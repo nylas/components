@@ -50,16 +50,8 @@
           },
         ];
 
-        //component.calendars = calendars;
-        //component.email_ids = ["phil.r@nylas.com"];
+        component.calendars = calendars;
 
-        component.email_ids = [
-          "phil.r@nylas.com",
-          "david.t@nylas.com",
-          "hazik.a@nylas.com",
-          "chantal.l@nylas.com",
-          "shashaank.s@nylas.com",
-        ];
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
         });
@@ -248,7 +240,7 @@
 
     <main>
       <div class="demo-box">
-        <nylas-availability id="phils-availability"></nylas-availability>
+        <nylas-availability id="demo-availability"></nylas-availability>
       </div>
     </main>
   </body>

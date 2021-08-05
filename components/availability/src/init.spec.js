@@ -49,9 +49,15 @@ describe("availability component", () => {
     });
 
     it("available time slot toggles (un)selected class", () => {
-      cy.get(".slot.free").first().should("have.class", "unselected");
-      cy.get(".slot.free").first().click();
-      cy.get(".slot.free").first().should("have.class", "selected");
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_booking = true;
+          cy.get(".slot.free").first().should("have.class", "unselected");
+          cy.get(".slot.free").first().click();
+          cy.get(".slot.free").first().should("have.class", "selected");
+        });
     });
 
     it("should not show confirm button when multiple time slots are selected", () => {
@@ -236,7 +242,11 @@ describe("availability component", () => {
       cy.get("div.day")
         .first()
         .get("header h2")
-        .contains(new Date().toLocaleDateString());
+        .contains(
+          new Date().toLocaleString("default", {
+            day: "numeric",
+          }),
+        );
     });
 
     it("Updates start_date via component prop", () => {
@@ -250,7 +260,11 @@ describe("availability component", () => {
           cy.get("div.day")
             .first()
             .get("header h2")
-            .contains(nextWeek.toLocaleDateString());
+            .contains(
+              nextWeek.toLocaleString("default", {
+                day: "numeric",
+              }),
+            );
         });
     });
   });
@@ -327,6 +341,7 @@ describe("availability component", () => {
       cy.get("nylas-availability").then((element) => {
         const component = element[0];
         component.allow_booking = true;
+        component.max_bookable_slots = 5;
         component.calendars = [
           {
             emailAddress: "person@name.com",
