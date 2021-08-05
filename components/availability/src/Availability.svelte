@@ -36,7 +36,7 @@
   export let email_ids: string[] = [];
   export let allow_booking: boolean = false;
   export let max_bookable_slots: number = 1;
-  export let participant_threshold: number = 1;
+  export let partial_bookable_ratio: number = 0;
   //#endregion props
 
   //#region mount
@@ -115,8 +115,7 @@
 
         if (
           availability === AvailabilityStatus.PARTIAL &&
-          freeCalendars.length <
-            allCalendars.length * (participant_threshold / 100)
+          freeCalendars.length < allCalendars.length * partial_bookable_ratio
         ) {
           availability = AvailabilityStatus.BUSY;
         }
@@ -178,49 +177,51 @@
   };
 
   // Consecutive same-availability periods of time, from earliest start_time to latest end_time.
-  const generateEpochs = (
+  function generateEpochs(
     slots: SelectableSlot[],
-    participant_threshold: number,
-  ) => {
-    let scale = scaleTime().domain([
+    partial_bookable_ratio: number,
+  ) {
+    const epochScale = scaleTime().domain([
       slots[0].start_time,
       slots[slots.length - 1].end_time,
     ]);
     let epochs = slots
-      .reduce((m, n) => {
+      .reduce((epochList, slot) => {
+        const prevEpoch = epochList[epochList.length - 1];
+        // Edge case note: available_calendars is doing a stringified array compare, which means if they're differently ordered but otherwise teh same, this will fail.
         if (
-          m[m.length - 1] &&
-          JSON.stringify(m[m.length - 1][0].available_calendars) ===
-            JSON.stringify(n.available_calendars)
+          prevEpoch &&
+          JSON.stringify(prevEpoch[0].available_calendars) ===
+            JSON.stringify(slot.available_calendars)
         ) {
-          m[m.length - 1].push(n);
+          prevEpoch.push(slot);
         } else {
-          m.push([n]);
+          epochList.push([slot]);
         }
-        return m;
+        return epochList;
       }, [] as TimeSlot[][])
       .map((epoch) => {
         let status = "free";
+        const numFreeCalendars = epoch[0].available_calendars.length;
         if (
-          epoch[0].available_calendars.length === 0 ||
-          (epoch[0].available_calendars.length !== allCalendars.length &&
-            epoch[0].available_calendars.length <
-              allCalendars.length * (participant_threshold / 100))
+          numFreeCalendars === 0 ||
+          (numFreeCalendars !== allCalendars.length &&
+            numFreeCalendars < allCalendars.length * partial_bookable_ratio)
         ) {
           status = "busy";
         } else if (
-          epoch[0].available_calendars.length > 0 &&
-          epoch[0].available_calendars.length !== allCalendars.length
+          numFreeCalendars > 0 &&
+          numFreeCalendars !== allCalendars.length
         ) {
           status = "partial";
         }
         return {
           start_time: epoch[0].start_time,
-          offset: scale(epoch[0].start_time) * 100,
+          offset: epochScale(epoch[0].start_time) * 100,
           status,
           height:
-            (scale(epoch[epoch.length - 1].end_time) -
-              scale(epoch[0].start_time)) *
+            (epochScale(epoch[epoch.length - 1].end_time) -
+              epochScale(epoch[0].start_time)) *
             100,
           end_time: epoch[epoch.length - 1].end_time,
           slots: epoch.length,
@@ -228,17 +229,16 @@
         };
       });
     return epochs;
-  };
+  }
 
   $: days = scaleTime()
     .domain([startDay, endDay])
     .ticks(timeDay)
     .map((timestamp) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
-      let epochs = generateEpochs(slots, participant_threshold);
       return {
         slots,
-        epochs,
+        epochs: generateEpochs(slots, partial_bookable_ratio),
         timestamp,
       };
     });
@@ -327,6 +327,12 @@
   }, [] as TimeSlot[]);
 
   function toggleSelectedTimeSlots(selectedSlot: SelectableSlot) {
+    selectedSlot.selectionStatus =
+      selectedSlot.selectionStatus === SelectionStatus.SELECTED
+        ? SelectionStatus.UNSELECTED
+        : slotSelection.length < max_bookable_slots
+        ? SelectionStatus.SELECTED
+        : SelectionStatus.UNSELECTED;
     return (slotSelection =
       selectedSlot.selectionStatus === SelectionStatus.SELECTED
         ? [...slotSelection, selectedSlot]
@@ -408,7 +414,7 @@
         grid-template-columns: auto 1fr;
         gap: 0.5rem;
         height: 30px;
-        line-height: 30px;
+        line-height: 1.875rem;
         font-size: 1rem;
         font-weight: 300;
 
@@ -420,7 +426,7 @@
           display: block;
           width: 30px;
           height: 30px;
-          line-height: 30px;
+          line-height: 1.875rem;
           text-align: center;
         }
       }
@@ -514,7 +520,8 @@
     }
 
     &.allow_booking {
-      .slot:not(.busy):hover {
+      .slot:not(.busy):hover,
+      .slot:not(.busy):focus {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
         cursor: pointer;
       }
@@ -551,7 +558,7 @@
                 day: "numeric",
               })}</span
             >
-            <span class="weekday"
+            <span
               >{new Date(day.timestamp).toLocaleString("default", {
                 weekday: "long",
               })}</span
@@ -563,6 +570,11 @@
             <div
               class="epoch {epoch.status}"
               style="height: {epoch.height}%; top: {epoch.offset}%;"
+              aria-label="{new Date(
+                epoch.start_time,
+              ).toLocaleString()} to {new Date(
+                epoch.end_time,
+              ).toLocaleString()}; Free calendars: {epoch.available_calendars.toString()}"
               data-available-calendars={epoch.available_calendars.toString()}
               data-start-time={new Date(epoch.start_time).toLocaleString()}
               data-end-time={new Date(epoch.end_time).toLocaleString()}
@@ -593,12 +605,6 @@
               disabled={slot.availability === AvailabilityStatus.BUSY}
               on:click={() => {
                 if (allow_booking) {
-                  slot.selectionStatus =
-                    slot.selectionStatus === SelectionStatus.SELECTED
-                      ? SelectionStatus.UNSELECTED
-                      : slotSelection.length < max_bookable_slots
-                      ? SelectionStatus.SELECTED
-                      : SelectionStatus.UNSELECTED;
                   toggleSelectedTimeSlots(slot);
                 } else {
                   dispatchEvent("timeSlotChosen", { timeSlots: slot });

@@ -341,7 +341,7 @@ describe("availability component", () => {
       cy.get("nylas-availability").then((element) => {
         const component = element[0];
         component.allow_booking = true;
-        component.max_bookable_slots = 5;
+        component.max_bookable_slots = 3;
         component.calendars = [
           {
             emailAddress: "person@name.com",

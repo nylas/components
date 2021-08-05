@@ -91,10 +91,10 @@
           });
 
         document
-          .querySelectorAll('input[id="participant-threshold"]')
+          .querySelectorAll('input[id="partial_bookable_ratio"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
-              component.participant_threshold = JSON.parse(event.target.value);
+              component.partial_bookable_ratio = JSON.parse(event.target.value);
             });
           });
 
@@ -218,23 +218,25 @@
       </fieldset>
 
       <fieldset>
-        <legend>Max Bookable Slots</legend>
         <label>
-          <input type="number" name="max-slots" value="1" />
+          Max Bookable Slots
+          <input type="number" name="max-slots" min="1" value="1" />
         </label>
       </fieldset>
 
       <fieldset>
-        <legend>Participant Threshold</legend>
-        <input
-          id="participant-threshold"
-          class="end"
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          value="1"
-        />
+        <label>
+          Participant Threshold
+          <input
+            id="partial_bookable_ratio"
+            class="end"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0"
+          />
+        </label>
       </fieldset>
     </aside>
 

@@ -20,7 +20,7 @@ export interface Manifest extends Nylas.Manifest {
   email_ids: string[];
   allow_booking: boolean;
   max_bookable_slots: number;
-  participant_threshold: number;
+  partial_bookable_ratio: number;
 }
 
 export interface Calendar {
