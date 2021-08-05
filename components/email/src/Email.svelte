@@ -28,7 +28,6 @@
   } from "@commons/types/Nylas";
 
   let manifest: Partial<EmailProperties> = {};
-  let viewportWidth: number;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -46,7 +45,7 @@
   export let click_action: "default" | "mailbox" | "custom" = "default";
   export let show_star: boolean;
   export let unread: boolean | null = null;
-  export let you: Partial<Nylas.Account> = {};
+  export let you: Partial<Account> = {};
   export let is_starred: boolean;
 
   onMount(async () => {
@@ -86,7 +85,8 @@
       "default",
     );
     is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
-    if (activeThread) {
+    if (activeThread && click_action === "mailbox") {
+      // enables bulk starring action in mailbox to immediately reflect visually
       activeThread = activeThread;
     }
   }

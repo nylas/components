@@ -44,6 +44,28 @@ function initializeThreads() {
       return threadsMap[queryKey];
     },
 
+    deleteThreads: async (
+      query: MailboxQuery,
+      threadsToDelete: Set<Thread>,
+    ) => {
+      const queryKey = JSON.stringify(query);
+      if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {
+        threadsMap[queryKey] = (await fetchThreads(query)).map((thread) => {
+          thread.toString = () => thread.id;
+          return thread;
+        });
+      }
+      update((threads) => {
+        threadsToDelete.forEach((thread) => {
+          const deleteIndex = threadsMap[queryKey].indexOf(thread);
+          threadsMap[queryKey].splice(deleteIndex, deleteIndex + 1);
+        });
+        threads[queryKey] = threadsMap[queryKey];
+        return { ...threads };
+      });
+      return threadsMap[queryKey];
+    },
+
     reset: () => {
       threadsMap = {};
       set({});

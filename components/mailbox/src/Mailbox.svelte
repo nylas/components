@@ -40,7 +40,7 @@
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
   export let actionsBar: string[];
-  export let onSelectThread: (event: CustomEvent, t: Thread) => void =
+  export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
 
   let queryParams: ThreadsQuery;
@@ -142,6 +142,12 @@
   //#endregion methods
 
   //#region actions
+  let selectedThreads = new Set<Thread>();
+  $: areAllSelected = selectedThreads.size >= threads.length;
+  let starredThreads = new Set<Thread>();
+  $: areAllSelectedStarred = checkIfAllStarred(selectedThreads, starredThreads);
+  $: areAllSelectedUnread = checkIfSelectionIsUnread(selectedThreads);
+
   async function messageClicked(event: CustomEvent) {
     // console.debug("message clicked from mailbox", event.detail);
     if (event.detail.message?.expanded) {
@@ -161,49 +167,14 @@
     }
   }
 
-  async function threadStarred(event: CustomEvent) {
-    if (starredThreads.has(event.detail.thread)) {
-      starredThreads.delete(event.detail.thread);
-    } else {
-      starredThreads.add(event.detail.thread);
-    }
-    return (starredThreads = starredThreads);
-  }
-
-  function starExpandedThread(event: MouseEvent) {
-    if (starredThreads.has(openedEmailData)) {
-      starredThreads.delete(openedEmailData);
-      openedEmailData.starred = false;
-    } else {
-      starredThreads.add(openedEmailData);
-      openedEmailData.starred = true;
-    }
-  }
-
   async function refreshClicked(event: MouseEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
       threads = (await MailboxStore.getThreads(query, true)) || [];
     }
   }
-  let selectedThreads = new Set<Thread>();
-  $: areAllSelected = selectedThreads.size >= threads.length;
-  let starredThreads = new Set<Thread>();
-  $: areAllSelectedStarred = compareSets(selectedThreads, starredThreads);
 
-  function compareSets(set1: Set<Thread>, set2: Set<Thread>): boolean {
-    if (set1.size > set2.size || set1.size === 0 || set2.size === 0) {
-      return false;
-    }
-    for (let setThread of set1) {
-      if (!set2.has(setThread)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function onSelectOne(event: MouseEvent, thread: Nylas.Thread) {
+  function onSelectOne(event: MouseEvent, thread: Thread) {
     dispatchEvent("onSelectOneClicked", { event, thread });
     if (selectedThreads.has(thread)) {
       selectedThreads.delete(thread);
@@ -223,6 +194,46 @@
     return (selectedThreads = selectedThreads);
   }
 
+  async function threadStarred(event: CustomEvent) {
+    if (starredThreads.has(event.detail.thread)) {
+      starredThreads.delete(event.detail.thread);
+    } else {
+      starredThreads.add(event.detail.thread);
+    }
+    return (starredThreads = starredThreads);
+  }
+
+  function checkIfAllStarred(
+    selection: Set<Thread>,
+    currentStarredThreads: Set<Thread>,
+  ): boolean {
+    if (
+      selection.size > currentStarredThreads.size ||
+      selection.size === 0 ||
+      currentStarredThreads.size === 0
+    ) {
+      return false;
+    }
+    for (let setThread of selection) {
+      if (!currentStarredThreads.has(setThread)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function starOpenedThread() {
+    if (openedEmailData !== null) {
+      if (starredThreads.has(openedEmailData)) {
+        starredThreads.delete(openedEmailData);
+        openedEmailData.starred = false;
+      } else {
+        starredThreads.add(openedEmailData);
+        openedEmailData.starred = true;
+      }
+    }
+  }
+
   function onStarSelected(event: MouseEvent) {
     dispatchEvent("onStarSelected", { event });
     if (areAllSelectedStarred) {
@@ -238,9 +249,48 @@
     }
     return (starredThreads = starredThreads);
   }
+
+  function checkIfSelectionIsUnread(selectedSet: Set<Thread>): boolean {
+    for (let setThread of selectedSet) {
+      if (!setThread.unread) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function onChangeSelectedReadStatus(event: MouseEvent) {
+    dispatchEvent("onChangeSelectedReadStatus", { event });
+    if (areAllSelectedUnread) {
+      selectedThreads.forEach((t) => {
+        t.unread = false;
+      });
+    } else {
+      selectedThreads.forEach((t) => {
+        t.unread = true;
+      });
+    }
+    return (selectedThreads = selectedThreads);
+  }
+
+  function markOpenedThreadUnread() {
+    if (openedEmailData !== null) {
+      openedEmailData.expanded = false;
+      openedEmailData.unread = true;
+      openedEmailData = null;
+    }
+    return (selectedThreads = selectedThreads);
+  }
+
+  async function onDeleteSelected(event: MouseEvent) {
+    dispatchEvent("onDeleteSelected", { event });
+    // only for when all_threads is not filled in
+    threads = await MailboxStore.deleteThreads(query, selectedThreads);
+    return (threads = threads);
+  }
   //#endregion actions
 
-  // pagination
+  //#region pagination
   function paginate(
     items: Thread[],
     activePage: number,
@@ -254,6 +304,7 @@
   function changePage(event: CustomEvent) {
     currentPage = event.detail.newPage;
   }
+  //#endregion pagination
 </script>
 
 <style lang="scss">
@@ -439,6 +490,14 @@
         <h1>{openedEmailData.subject}</h1>
       </div>
       <div role="toolbar">
+        <!--
+          <div class="delete">
+            <button
+              title="Delete thread"
+              aria-label="Delete thread"
+              on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
+            >
+          </div>-->
         {#if show_star}
           <div class="starred">
             <button
@@ -451,9 +510,18 @@
                 : "Star thread"}
               role="switch"
               aria-checked={starredThreads.has(openedEmailData)}
-              on:click={(e) => starExpandedThread(e)}
+              on:click={starOpenedThread}
             />
           </div>{/if}
+        <div class="read-status">
+          <button
+            title="Mark thread as unread"
+            aria-label="Mark thread as unread"
+            on:click={(e) => {
+              markOpenedThreadUnread();
+            }}><MarkUnreadIcon /></button
+          >
+        </div>
       </div>
     </header>
     <div class="email-container">
@@ -499,14 +567,15 @@
             {/each}
           </div>
         {/if}
-        {#if actionsBar.includes("delete")}
+        <!--{#if actionsBar.includes("delete")}
           <div class="delete">
             <button
               title="Delete selected email(s)"
-              aria-label="Delete selected email(s)"><TrashIcon /></button
+              aria-label="Delete selected email(s)"
+              on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
             >
           </div>
-        {/if}
+        {/if}-->
         {#if show_star && actionsBar.includes("star")}
           <div class="starred">
             {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
@@ -520,22 +589,23 @@
               />
             {/each}
           </div>{/if}
-        {#if actionsBar.includes("read")}
-          <div class="mark-read">
-            <button
-              title="Mark selected email(s) as read"
-              aria-label="Mark selected email(s) as read"
-              ><MarkReadIcon /></button
-            >
-          </div>
-        {/if}
         {#if actionsBar.includes("unread")}
-          <div class="mark-unread">
-            <button
-              title="Mark selected email(s) as unread"
-              aria-label="Mark selected email(s) as unread"
-              ><MarkUnreadIcon /></button
-            >
+          <div class="read-status">
+            {#if areAllSelectedUnread}
+              <button
+                title="Mark selected email(s) as read"
+                aria-label="Mark selected email(s) as read"
+                on:click={(e) => onChangeSelectedReadStatus(e)}
+                ><MarkReadIcon /></button
+              >
+            {:else}
+              <button
+                title="Mark selected email(s) as unread"
+                aria-label="Mark selected email(s) as unread"
+                on:click={(e) => onChangeSelectedReadStatus(e)}
+                ><MarkUnreadIcon /></button
+              >
+            {/if}
           </div>
         {/if}
       </div>
