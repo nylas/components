@@ -10,7 +10,14 @@
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
-  import { timeDay, timeHour, timeMinute } from "d3-time";
+  import {
+    timeSaturday,
+    timeSunday,
+    timeWeek,
+    timeDay,
+    timeHour,
+    timeMinute,
+  } from "d3-time";
   import { scaleTime } from "d3-scale";
   import type { CalendarQuery } from "@commons/types/Events";
 
@@ -42,6 +49,8 @@
   export let allow_booking: boolean = false;
   export let max_bookable_slots: number = 1;
   export let partial_bookable_ratio: number = 0;
+  export let show_as_week: boolean = false;
+  export let show_weekends: boolean = true;
   //#endregion props
 
   //#region mount
@@ -72,8 +81,16 @@
   let slotSelection: SelectableSlot[] = [];
 
   // You can have as few as 1, and as many as 7, days shown
-  $: startDay = timeDay.floor(start_date);
-  $: endDay = timeDay.offset(start_date, dates_to_show - 1);
+  // start_date dates_to_show gets overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
+  let startDay: Date;
+  let endDay: Date;
+  $: startDay = show_as_week
+    ? timeWeek.floor(start_date)
+    : timeDay.floor(start_date);
+  $: endDay = show_as_week
+    ? timeDay.offset(startDay, 6)
+    : timeDay.offset(start_date, dates_to_show - 1);
+
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
   $: generateDaySlots = function (
@@ -248,6 +265,16 @@
   $: days = scaleTime()
     .domain([startDay, endDay])
     .ticks(timeDay)
+    .filter((timestamp) => {
+      if (show_weekends) {
+        return true;
+      } else {
+        return (
+          timestamp.toString() !== timeSaturday(timestamp).toString() &&
+          timestamp.toString() !== timeSunday(timestamp).toString()
+        );
+      }
+    })
     .map((timestamp) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
@@ -273,7 +300,7 @@
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
     // When dates_to_show is updated, update availability
-    if (email_ids?.length && dates_to_show) {
+    if (email_ids?.length && dates_to_show && show_as_week !== undefined) {
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
   })();
@@ -291,8 +318,9 @@
       component_id: id,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay =
-      await AvailabilityStore.getAvailability(availabilityQuery);
+    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
+      availabilityQuery,
+    );
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
