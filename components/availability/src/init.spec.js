@@ -412,4 +412,59 @@ describe("availability component", () => {
       cy.get("button.confirm").click();
     });
   });
+
+  describe("weeks and weekends", () => {
+    it("Handles week_view false", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.start_date = new Date("2021-04-06 00:00");
+          component.show_as_week = false;
+          cy.get("div.day:eq(0) header h2").contains("Tuesday");
+          cy.get("div.day:eq(2)").should("not.exist");
+        });
+    });
+
+    it("Handles week_view true", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.start_date = new Date("2021-04-06 00:00");
+          component.show_as_week = true;
+          cy.get("div.day:eq(0) header h2").contains("Sunday");
+          cy.get("div.day:eq(6) header h2").contains("Saturday");
+        });
+    });
+
+    it("Drops weekends like a bad habit: today view", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.start_date = new Date("2021-04-06 00:00");
+          component.dates_to_show = 7;
+          component.show_as_week = false;
+          component.show_weekends = false;
+          cy.get("div.day:eq(0) header h2").contains("Tuesday");
+          cy.get("div.day:eq(4) header h2").contains("Monday");
+          cy.get("div.day:eq(5) header h2").should("not.exist");
+        });
+    });
+
+    it("Drops weekends like a bad habit: week view", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.start_date = new Date("2021-04-06 00:00");
+          component.show_as_week = true;
+          component.show_weekends = false;
+          cy.get("div.day:eq(0) header h2").contains("Monday");
+          cy.get("div.day:eq(4) header h2").contains("Friday");
+          cy.get("div.day:eq(5) header h2").should("not.exist");
+        });
+    });
+  });
 });
