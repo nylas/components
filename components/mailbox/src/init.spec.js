@@ -135,15 +135,13 @@ describe("MailBox  component", () => {
     });
 
     it("Shows and hides Mailbox actions bar", () => {
-      const toolbar = cy.get("nylas-mailbox").find("div[role='toolbar']");
-
-      toolbar.should("exist");
-
-      toolbar.find("> *").should("have.length.at.least", 1);
+      cy.get("nylas-mailbox").then(([el]) => {
+        el.actionsBar = ["selectall", "star", "delete", "unread"];
+        cy.get(el).find("div[role='toolbar']").should("exist");
+      });
 
       cy.get("nylas-mailbox").then(([el]) => {
-        el.show_mailbox_toolbar = false;
-
+        el.actionsBar = [];
         cy.get(el).find("div[role='toolbar']").should("not.exist");
       });
     });

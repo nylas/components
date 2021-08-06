@@ -15,6 +15,9 @@
   import { fetchMessage } from "@commons/connections/messages";
   import LoadingIcon from "./assets/loading.svg";
   import LeftArrowLineIcon from "./assets/arrow-line.svg";
+  import TrashIcon from "./assets/trash-alt.svg";
+  import MarkReadIcon from "./assets/envelope-open-text.svg";
+  import MarkUnreadIcon from "./assets/envelope.svg";
   import type {
     EmailProperties,
     Thread,
@@ -23,6 +26,7 @@
     Message,
     Account,
   } from "@commons/types/Nylas";
+  type MailboxActions = "selectall" | "delete" | "star" | "unread";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -33,15 +37,16 @@
   export let access_token: string = "";
   export let all_threads: Thread[];
   export let show_star: boolean;
-  export let show_mailbox_toolbar: boolean = true;
   export let show_thread_checkbox: boolean = true;
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
-  export let actionsBar: string[];
-  export let onSelectThread: (event: Event, t: Thread) => void = onSelectOne;
+  export let actionsBar: MailboxActions[];
+  export let onSelectThread: (event: MouseEvent, t: Thread) => void =
+    onSelectOne;
 
   let queryParams: ThreadsQuery;
   let openedEmailData: Thread | null;
+  let hasComponentLoaded = false;
 
   // paginations vars
   let paginatedThreads: Thread[] = [];
@@ -67,14 +72,34 @@
       threads = (await MailboxStore.getThreads(query)) || [];
     }
 
-    paginatedThreads = paginate(threads, currentPage, items_per_page);
-    lastPage = Math.ceil(threads.length / items_per_page);
+    inboxThreads = threads; // TODO: filter out threads in trash folder
+    starredThreads = new Set(inboxThreads.filter((thread) => thread.starred));
+    if (unread_status === "unread") {
+      unreadThreads = new Set(inboxThreads);
+    } else if (unread_status === "default") {
+      unreadThreads = new Set(inboxThreads.filter((thread) => thread.unread));
+    }
+    paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
+    lastPage = Math.ceil(inboxThreads.length / items_per_page);
+    hasComponentLoaded = true;
   });
 
-  $: paginatedThreads = paginate(threads, currentPage, items_per_page);
+  let inboxThreads: Thread[]; // threads currently in the inbox
+  $: {
+    if (!inboxThreads) {
+      inboxThreads = threads;
+    } // TODO: filter out threads in trash folder
+    lastPage = Math.ceil(inboxThreads.length / items_per_page);
+    if (currentPage > lastPage && lastPage !== 0) {
+      currentPage = lastPage;
+    }
+  }
+
+  $: paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
 
   // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
   // TODO - Find a way to improve this
+  let internalProps: SvelteAllProps;
   $: internalProps = buildInternalProps($$props, manifest);
 
   // Reactive statements to continuously set manifest, prop and default values
@@ -97,6 +122,7 @@
   // Reactive statement to continuously fetch all_threads
   $: if (all_threads) {
     threads = all_threads as Thread[];
+    inboxThreads = threads;
   }
 
   let main: Element;
@@ -138,6 +164,19 @@
   //#endregion methods
 
   //#region actions
+  let selectedThreads = new Set<Thread>();
+  $: areAllSelected = selectedThreads.size >= inboxThreads.length;
+  let starredThreads = new Set<Thread>();
+  $: areAllSelectedStarred = checkIfSelectionBelongsToSet(
+    selectedThreads,
+    starredThreads,
+  );
+  let unreadThreads = new Set<Thread>();
+  $: areAllSelectedUnread = checkIfSelectionBelongsToSet(
+    selectedThreads,
+    unreadThreads,
+  );
+
   async function messageClicked(event: CustomEvent) {
     // console.debug("message clicked from mailbox", event.detail);
     if (event.detail.message?.expanded) {
@@ -157,16 +196,14 @@
     }
   }
 
-  async function refreshClicked(event: CustomEvent) {
+  async function refreshClicked(event: MouseEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
       threads = (await MailboxStore.getThreads(query, true)) || [];
     }
   }
-  let selectedThreads = new Set();
-  $: areAllSelected = selectedThreads.size >= threads.length;
 
-  function onSelectOne(event, thread: Thread) {
+  function onSelectOne(event: MouseEvent, thread: Thread) {
     dispatchEvent("onSelectOneClicked", { event, thread });
     if (selectedThreads.has(thread)) {
       selectedThreads.delete(thread);
@@ -176,7 +213,7 @@
     return (selectedThreads = selectedThreads);
   }
 
-  function onSelectAll(event) {
+  function onSelectAll(event: MouseEvent) {
     dispatchEvent("onSelectAllClicked", { event });
     if (areAllSelected) {
       selectedThreads.clear();
@@ -185,9 +222,120 @@
     }
     return (selectedThreads = selectedThreads);
   }
+
+  async function threadStarred(event: CustomEvent) {
+    if (starredThreads.has(event.detail.thread)) {
+      starredThreads.delete(event.detail.thread);
+    } else {
+      starredThreads.add(event.detail.thread);
+    }
+    return (starredThreads = starredThreads);
+  }
+
+  function starOpenedThread() {
+    if (openedEmailData !== null) {
+      if (starredThreads.has(openedEmailData)) {
+        starredThreads.delete(openedEmailData);
+        openedEmailData.starred = false;
+      } else {
+        starredThreads.add(openedEmailData);
+        openedEmailData.starred = true;
+      }
+    }
+  }
+
+  function onStarSelected(event: MouseEvent) {
+    dispatchEvent("onStarSelected", { event });
+    if (areAllSelectedStarred) {
+      selectedThreads.forEach((t) => {
+        starredThreads.delete(t);
+        t.starred = false;
+      });
+    } else {
+      selectedThreads.forEach((t) => {
+        starredThreads.add(t);
+        t.starred = true;
+      });
+    }
+    return (starredThreads = starredThreads);
+  }
+
+  function checkIfSelectionBelongsToSet(
+    selection: Set<Thread>,
+    superset: Set<Thread>,
+  ): boolean {
+    if (
+      selection.size > superset.size ||
+      selection.size === 0 ||
+      superset.size === 0
+    ) {
+      return false;
+    }
+    for (let setThread of selection) {
+      if (!superset.has(setThread)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function onChangeSelectedReadStatus(event: MouseEvent) {
+    dispatchEvent("onChangeSelectedReadStatus", { event });
+    if (areAllSelectedUnread) {
+      selectedThreads.forEach((t) => {
+        unreadThreads.delete(t);
+        t.unread = false;
+      });
+    } else {
+      selectedThreads.forEach((t) => {
+        unreadThreads.add(t);
+        t.unread = true;
+      });
+    }
+    return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
+  }
+
+  function returnToMailbox(isThreadUnread: boolean) {
+    if (openedEmailData) {
+      openedEmailData.unread = isThreadUnread;
+      openedEmailData.expanded = false;
+
+      if (isThreadUnread) {
+        unreadThreads.add(openedEmailData);
+      } else {
+        unreadThreads.delete(openedEmailData);
+      }
+      openedEmailData = null;
+    }
+    return (unreadThreads = unreadThreads);
+  }
+
+  async function onDeleteSelected(event: MouseEvent) {
+    dispatchEvent("onDeleteSelected", { event });
+    if (openedEmailData) {
+      openedEmailData.expanded = false;
+      // "delete" thread by hiding; TODO: change to add thread to trash folder
+      inboxThreads = inboxThreads.filter(
+        (thread) => thread !== openedEmailData,
+      );
+      starredThreads.delete(openedEmailData);
+      selectedThreads.delete(openedEmailData);
+      openedEmailData = null;
+    } else {
+      selectedThreads.forEach((thread) => {
+        starredThreads.delete(thread);
+      });
+      // "delete" thread by hiding; TODO: change to add thread to trash folder
+      inboxThreads = inboxThreads.filter(
+        (thread) => !selectedThreads.has(thread),
+      );
+      selectedThreads.clear();
+    }
+    return (inboxThreads = inboxThreads), (selectedThreads = selectedThreads);
+  }
   //#endregion actions
 
-  // pagination
+  //#region pagination
   function paginate(
     items: Thread[],
     activePage: number,
@@ -201,6 +349,7 @@
   function changePage(event: CustomEvent) {
     currentPage = event.detail.newPage;
   }
+  //#endregion pagination
 </script>
 
 <style lang="scss">
@@ -228,10 +377,6 @@
       gap: 8px;
     }
 
-    .email-container {
-      padding-right: 0.5rem;
-    }
-
     header {
       @include barStyle;
       border-radius: 4px 4px 0 0;
@@ -246,14 +391,51 @@
 
     [role="toolbar"] {
       @include barStyle;
-      padding: 8px 16px;
+      padding: $spacing-s $spacing-m;
+      gap: $spacing-m;
       border-top-width: 0;
+    }
+
+    .subject-title {
+      justify-content: space-between;
+      & > div {
+        display: flex;
+        align-items: center;
+        gap: $spacing-m;
+      }
+      [role="toolbar"] {
+        border: none;
+      }
     }
 
     // Toggle select-all checkbox and thread checkbox from CSS Var
     .thread-checkbox {
       input {
         @include checkbox;
+      }
+    }
+
+    div.starred {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      button {
+        background-color: transparent;
+        cursor: pointer;
+        &:before {
+          content: "\2605";
+          display: inline-block;
+          font-size: 1em;
+          color: #ccc;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          user-select: none;
+        }
+
+        &.starred:before {
+          color: #ffc107;
+        }
       }
     }
 
@@ -306,7 +488,8 @@
     padding: 4px;
   }
 
-  .mailbox-loader {
+  .mailbox-loader,
+  .mailbox-empty {
     width: calc(100vw - 16px);
     height: 100vh;
     display: flex;
@@ -330,112 +513,219 @@
           align-self: center;
         }
       }
+
+      div.starred {
+        button {
+          &:hover:before {
+            color: #ffc107;
+          }
+        }
+      }
     }
   }
 </style>
 
 <main bind:this={main}>
-  {#if openedEmailData}
-    <header class="subject-title">
-      <button
-        on:click={() => {
-          openedEmailData.expanded = false;
-          openedEmailData = null;
-        }}
-      >
-        <LeftArrowLineIcon />
-      </button>
-      <h1>{openedEmailData.subject}</h1>
-    </header>
-    <div class="email-container">
-      <nylas-email
-        is_clean_conversation_enabled={false}
-        thread={openedEmailData}
-        {you}
-        {show_star}
-        click_action="mailbox"
-        unread={readStatusOutputs[unread_status]}
-        on:threadClicked={threadClicked}
-        on:messageClicked={messageClicked}
-      />
-    </div>
-  {:else}
-    {#if header}
-      <header>
-        <button on:click={refreshClicked}>
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <path
-              d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
-            />
-          </svg>
-        </button>
-        <h1>{header}</h1>
-      </header>
-    {/if}
-    {#if show_mailbox_toolbar}
-      <div role="toolbar" aria-label="Bulk actions" aria-controls="mailboxlist">
-        {#if show_thread_checkbox}<div class="thread-checkbox">
-            {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
-              <input
-                title={selectAllTitle}
-                aria-label={selectAllTitle}
-                type="checkbox"
-                checked={areAllSelected}
-                on:click={(e) => onSelectAll(e)}
-              />
-            {/each}
-          </div>{/if}
-      </div>
-    {/if}
-    <ul id="mailboxlist">
-      {#each paginatedThreads as thread}
-        {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
-          <li
-            class:unread={thread.unread}
-            class:checked={selectedThreads.has(thread)}
+  {#if hasComponentLoaded}
+    {#if openedEmailData}
+      <header class="subject-title">
+        <div>
+          <button
+            title="Return to Mailbox"
+            aria-label="Return to Mailbox"
+            on:click={() => {
+              returnToMailbox(false);
+            }}
           >
-            {#if show_thread_checkbox}<div
-                class="checkbox-container thread-checkbox"
-              >
-                <input
-                  title={selectTitle}
-                  aria-label={selectTitle}
-                  type="checkbox"
-                  checked={selectedThreads.has(thread)}
-                  on:click={(e) => onSelectOne(e, thread)}
-                />
-              </div>{/if}
-            <div class="email-container">
-              <nylas-email
-                is_clean_conversation_enabled={false}
-                {thread}
-                {you}
-                {show_star}
-                click_action="mailbox"
-                unread={readStatusOutputs[unread_status]}
-                on:threadClicked={threadClicked}
-                on:messageClicked={messageClicked}
-              />
-            </div>
-          </li>
-        {/each}
-      {:else}
-        <div class="mailbox-loader">
-          <LoadingIcon
-            class="spinner"
-            style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
-          />
-          Loading component...
+            <LeftArrowLineIcon />
+          </button>
+          <h1>{openedEmailData.subject}</h1>
         </div>
-      {/each}
-      {#if threads.length > 0 && paginatedThreads}
-        <pagination-nav
-          current_page={currentPage}
-          last_page={lastPage}
-          visible={true}
-          on:changePage={changePage}
+        <div role="toolbar">
+          <div class="delete">
+            <button
+              title="Delete thread"
+              aria-label="Delete thread"
+              on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
+            >
+          </div>
+          {#if show_star}
+            <div class="starred">
+              <button
+                class={starredThreads.has(openedEmailData) ? "starred" : ""}
+                title={starredThreads.has(openedEmailData)
+                  ? "Unstar thread"
+                  : "Star thread"}
+                aria-label={starredThreads.has(openedEmailData)
+                  ? "Unstar thread"
+                  : "Star thread"}
+                role="switch"
+                aria-checked={starredThreads.has(openedEmailData)}
+                on:click={starOpenedThread}
+              />
+            </div>{/if}
+          <div class="read-status">
+            <button
+              title="Mark thread as unread"
+              aria-label="Mark thread as unread"
+              on:click={(e) => {
+                returnToMailbox(true);
+              }}><MarkUnreadIcon /></button
+            >
+          </div>
+        </div>
+      </header>
+      <div class="email-container">
+        <nylas-email
+          is_clean_conversation_enabled={false}
+          thread={openedEmailData}
+          {you}
+          {show_star}
+          click_action="mailbox"
+          unread={unreadThreads.has(openedEmailData)}
+          on:threadClicked={threadClicked}
+          on:messageClicked={messageClicked}
+          on:threadStarred={threadStarred}
+          is_starred={starredThreads.has(openedEmailData)}
         />
+      </div>
+    {:else}
+      {#if header}
+        <header>
+          <button on:click={refreshClicked}>
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <path
+                d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
+              />
+            </svg>
+          </button>
+          <h1>{header}</h1>
+        </header>
       {/if}
-    </ul>
+      {#if actionsBar.length}
+        <div
+          role="toolbar"
+          aria-label="Bulk actions"
+          aria-controls="mailboxlist"
+        >
+          {#if show_thread_checkbox && actionsBar.includes("selectall")}<div
+              class="thread-checkbox"
+            >
+              {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
+                <input
+                  title={selectAllTitle}
+                  aria-label={selectAllTitle}
+                  type="checkbox"
+                  checked={areAllSelected}
+                  on:click={(e) => onSelectAll(e)}
+                />
+              {/each}
+            </div>
+          {/if}
+          {#if selectedThreads.size}
+            {#if actionsBar.includes("delete")}
+              <div class="delete">
+                <button
+                  title="Delete selected email(s)"
+                  aria-label="Delete selected email(s)"
+                  on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
+                >
+              </div>
+            {/if}
+            {#if show_star && actionsBar.includes("star")}
+              <div class="starred">
+                {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
+                  <button
+                    class={areAllSelectedStarred ? "starred" : ""}
+                    title={starAllTitle}
+                    aria-label={starAllTitle}
+                    role="switch"
+                    aria-checked={areAllSelectedStarred}
+                    on:click={(e) => onStarSelected(e)}
+                  />
+                {/each}
+              </div>{/if}
+            {#if actionsBar.includes("unread")}
+              <div class="read-status">
+                {#if areAllSelectedUnread}
+                  <button
+                    title="Mark selected email(s) as read"
+                    aria-label="Mark selected email(s) as read"
+                    on:click={(e) => onChangeSelectedReadStatus(e)}
+                    ><MarkReadIcon /></button
+                  >
+                {:else}
+                  <button
+                    title="Mark selected email(s) as unread"
+                    aria-label="Mark selected email(s) as unread"
+                    on:click={(e) => onChangeSelectedReadStatus(e)}
+                    ><MarkUnreadIcon /></button
+                  >
+                {/if}
+              </div>
+            {/if}{/if}
+        </div>
+      {/if}
+      <ul id="mailboxlist">
+        {#each paginatedThreads as thread}
+          {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
+            <li
+              class:unread={thread.unread}
+              class:checked={selectedThreads.has(thread)}
+            >
+              {#if show_thread_checkbox}<div
+                  class="checkbox-container thread-checkbox"
+                >
+                  <input
+                    title={selectTitle}
+                    aria-label={selectTitle}
+                    type="checkbox"
+                    checked={selectedThreads.has(thread)}
+                    on:click={(e) => onSelectOne(e, thread)}
+                  />
+                </div>{/if}
+              <div class="email-container">
+                <nylas-email
+                  is_clean_conversation_enabled={false}
+                  {thread}
+                  {you}
+                  {show_star}
+                  click_action="mailbox"
+                  unread={unreadThreads.has(thread)}
+                  on:threadClicked={threadClicked}
+                  on:messageClicked={messageClicked}
+                  on:threadStarred={threadStarred}
+                  is_starred={starredThreads.has(thread)}
+                />
+              </div>
+            </li>
+          {/each}
+        {:else}
+          <div class="mailbox-empty">
+            {#if header}
+              {header}
+            {:else}
+              Your Mailbox
+            {/if} is empty!
+          </div>
+        {/each}
+        {#if threads.length > 0 && paginatedThreads}
+          <pagination-nav
+            current_page={currentPage}
+            last_page={lastPage}
+            visible={true}
+            on:changePage={changePage}
+          />
+        {/if}
+      </ul>
+    {/if}
+  {:else}
+    <div class="mailbox-loader">
+      <LoadingIcon
+        class="spinner"
+        style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
+      />
+      Loading component...
+    </div>
   {/if}
 </main>

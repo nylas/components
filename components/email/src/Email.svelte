@@ -28,7 +28,6 @@
   } from "@commons/types/Nylas";
 
   let manifest: Partial<EmailProperties> = {};
-  let viewportWidth: number;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -47,6 +46,7 @@
   export let show_star: boolean;
   export let unread: boolean | null = null;
   export let you: Partial<Account> = {};
+  export let is_starred: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -84,6 +84,11 @@
       click_action,
       "default",
     );
+    is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
+    if (activeThread && click_action === "mailbox") {
+      // enables bulk starring action in mailbox to immediately reflect visually
+      activeThread = activeThread;
+    }
   }
 
   let participants: Participant[] = [];
@@ -217,6 +222,11 @@
       saveActiveThread();
     }
     //#endregion starred/unstarred
+
+    dispatchEvent("threadStarred", {
+      event: e,
+      thread: activeThread,
+    });
   }
 
   function handleEmailClick(e: MouseEvent, msgIndex: number) {
@@ -445,10 +455,6 @@
             &.starred:before {
               color: #ffc107;
             }
-
-            &:hover:before {
-              color: #ffc107;
-            }
           }
         }
       }
@@ -651,6 +657,14 @@
           height: $collapsed-height;
           grid-template-columns: 200px auto;
           justify-content: initial;
+
+          div.starred {
+            button {
+              &:hover:before {
+                color: #ffc107;
+              }
+            }
+          }
 
           .mobile-subject-snippet {
             display: none;
