@@ -50,7 +50,8 @@
           },
         ];
 
-        component.calendars = calendars;
+        //component.calendars = calendars;
+        component.email_ids = ["phil.r@nylas.com", "chantal.l@nylas.com"];
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
@@ -103,6 +104,20 @@
             component.max_bookable_slots = JSON.parse(event.target.value);
           });
         });
+
+        document.querySelectorAll('input[name="week-view"]').forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.show_as_week = JSON.parse(event.target.value);
+          });
+        });
+
+        document
+          .querySelectorAll('input[name="show-weekends"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.show_weekends = JSON.parse(event.target.value);
+            });
+          });
       });
     </script>
     <style>
@@ -239,11 +254,35 @@
           />
         </label>
       </fieldset>
+
+      <fieldset>
+        <legend>Week View</legend>
+        <label>
+          <input checked type="radio" name="week-view" value="false" />
+          Start from Today
+        </label>
+        <label>
+          <input type="radio" name="week-view" value="true" />
+          Start with Week
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Weekends</legend>
+        <label>
+          <input checked type="radio" name="show-weekends" value="true" />
+          Include weekends
+        </label>
+        <label>
+          <input type="radio" name="show-weekends" value="false" />
+          Do not include weekends
+        </label>
+      </fieldset>
     </aside>
 
     <main>
       <div class="demo-box">
-        <nylas-availability id="demo-availability"></nylas-availability>
+        <nylas-availability id="phils-availability"></nylas-availability>
       </div>
     </main>
   </body>
