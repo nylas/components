@@ -47,6 +47,7 @@
   export let unread: boolean | null = null;
   export let you: Partial<Account> = {};
   export let is_starred: boolean;
+  export let show_contact_avatar: boolean = true;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
