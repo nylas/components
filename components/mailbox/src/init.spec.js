@@ -8,7 +8,7 @@ describe("MailBox  component", () => {
     cy.visitMailbox();
   });
 
-  xit("Shows Mailbox with demo id and threads", () => {
+  it("Shows Mailbox with demo id and threads", () => {
     const nylasEmail = cy
       .get("nylas-mailbox")
       .shadow()
