@@ -609,11 +609,6 @@
               box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
               border-radius: 2px;
             }
-            span.email-tooltip.active {
-              z-index: 2;
-              border: 2px solid red;
-              visibility: visible !important;
-            }
 
             &:hover {
               span.email-tooltip {
