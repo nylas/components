@@ -910,7 +910,7 @@
                           <button
                             class="email-tooltip-btn"
                             id={`button-${msgIndex}`}
-                            aria-describedby={message.id + msgIndex}
+                            aria-describedby={message.id.slice(0, 3)}
                             aria-expanded="false"
                             aria-label="show email"
                             on:click|stopPropagation={toggleTooltip}
@@ -919,7 +919,7 @@
                               <DropdownSymbol />
                             </span>
                             <span
-                              id={message.id + msgIndex}
+                              id={message.id.slice(0, 3)}
                               role="tooltip"
                               tabindex="0"
                               class="email-tooltip"
@@ -940,7 +940,7 @@
                                 <button
                                   class="email-tooltip-btn"
                                   id={`button-${i}`}
-                                  aria-describedby={message.id + i}
+                                  aria-describedby={message.id.slice(0, 4)}
                                   aria-expanded="false"
                                   aria-label="show email"
                                   on:click|stopPropagation={toggleTooltip}
@@ -952,7 +952,7 @@
                                     <DropdownSymbol />
                                   </span>
                                   <span
-                                    id={message.id + i}
+                                    id={message.id.slice(0, 4)}
                                     role="tooltip"
                                     tabindex="0"
                                     class="email-tooltip"
@@ -989,14 +989,14 @@
                           class="email-tooltip-btn"
                           aria-expanded="false"
                           id={`button-${message.id.slice(0, 2)}`}
-                          aria-describedby={message.id}
+                          aria-describedby={message.id.slice(0, 3)}
                           aria-label="show email"
                           on:click|stopPropagation={toggleTooltip}
                           ><span class="icon-container" aria-hidden="true">
                             <DropdownSymbol />
                           </span>
                           <span
-                            id={message.id}
+                            id={message.id.slice(0, 3)}
                             role="tooltip"
                             tabindex="0"
                             class="email-tooltip">{message.from[0].email}</span
@@ -1150,7 +1150,7 @@
                         class="email-tooltip-btn"
                         aria-expanded="false"
                         id={`button-${i}`}
-                        aria-describedby={message.id}
+                        aria-describedby={message.id.slice(0, 3)}
                         aria-label="show email"
                         on:click|stopPropagation={toggleTooltip}
                       >
@@ -1158,7 +1158,7 @@
                           <DropdownSymbol />
                         </span>
                         <span
-                          id={message.id}
+                          id={message.id.slice(0, 3)}
                           role="tooltip"
                           tabindex="0"
                           class="email-tooltip">{message.to[0].email}</span
