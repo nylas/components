@@ -62,6 +62,102 @@ describe("MailBox  component", () => {
             .should("have.length", 0);
         });
     });
+
+    it("Marks emails as unread", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.unread_status = "read";
+
+          cy.get(component)
+            .find(".email-row.condensed.unread")
+            .should("have.length", 0);
+
+          cy.get(component)
+            .find("div.checkbox-container")
+            .first()
+            .find("input")
+            .check();
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-read]")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-unread]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-unread]")
+            .click();
+          cy.get(component)
+            .find(".email-row.condensed.unread")
+            .should("have.length", 1);
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-read]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-unread]")
+            .should("not.exist");
+        });
+    });
+
+    it("Marks emails as read", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.unread_status = "unread";
+
+          cy.get(component)
+            .find(".email-row.condensed.unread")
+            .should("have.length", threads.length);
+
+          cy.get(component)
+            .find("div.checkbox-container")
+            .first()
+            .find("input")
+            .check();
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-unread]")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-read]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-read]")
+            .click();
+          cy.get(component)
+            .find(".email-row.condensed.unread")
+            .should("have.length", 1);
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-unread]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status")
+            .find("button[data-cy=mark-read]")
+            .should("not.exist");
+        });
+    });
   });
 
   describe("Stars", () => {
@@ -123,7 +219,7 @@ describe("MailBox  component", () => {
           const mailbox = element[0];
           mailbox.header = "Default";
           mailbox.all_threads = [thread1];
-          mailbox.addEventListener("refreshClicked", function (_) {
+          mailbox.addEventListener("refreshClicked", function () {
             mailbox.all_threads = threads; // on click make it two threads
           });
 
@@ -200,6 +296,199 @@ describe("MailBox  component", () => {
       cy.get("pagination-nav").get(".first-btn").click();
       cy.get("pagination-nav").get(".first-btn").should("be.disabled");
       cy.get("pagination-nav").get(".back-btn").should("be.disabled");
+    });
+  });
+
+  describe("Delete action", () => {
+    // TODO: write when Folders are implemented
+    xit("Should delete selected email", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.actionsBar = ["delete"];
+          cy.get("nylas-email").should("have.length", threads.length);
+          cy.get(component)
+            .find("div.checkbox-container")
+            .first()
+            .find("input")
+            .check();
+          cy.get("div[role='toolbar']")
+            .find("div.delete")
+            .find("button")
+            .click();
+          cy.get("nylas-email").should("have.length", threads.length - 1);
+        });
+    });
+  });
+
+  describe("Bulk actions", () => {
+    it("Should only show Mailbox actions when an email is selected", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.actionsBar = ["selectall", "unread", "delete", "star"];
+          cy.get(component)
+            .get("div[role='toolbar']")
+            .find("div")
+            .should("have.length", 1);
+
+          cy.get(component)
+            .find("div.checkbox-container")
+            .first()
+            .find("input")
+            .check();
+          cy.get(component)
+            .get("div[role='toolbar']")
+            .find("div")
+            .should("have.length", 4);
+        });
+    });
+
+    it("Should mark all unread then read", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.actionsBar = ["selectall", "unread"];
+
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.thread-checkbox")
+            .find("input")
+            .check();
+          cy.get(component)
+            .find("div.checkbox-container")
+            .find("input")
+            .each((checkbox) => {
+              expect(checkbox).to.be.checked;
+            });
+
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-unread]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-unread]")
+            .click();
+          cy.get(component)
+            .find(".email-row")
+            .each((email) => {
+              cy.wrap(email).should("have.class", "unread");
+            });
+
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-unread]")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .click();
+          cy.get(component)
+            .find("nylas-email")
+            .find(".email-row.condensed.unread")
+            .should("not.exist");
+        });
+    });
+
+    it("Should star all the emails", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.actionsBar = ["selectall", "star"];
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.thread-checkbox")
+            .find("input")
+            .check();
+
+          cy.get(component)
+            .find("div.checkbox-container")
+            .find("input")
+            .each((checkbox) => {
+              expect(checkbox).to.be.checked;
+            });
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.starred button.starred")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.starred button")
+            .click();
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.starred button.starred")
+            .should("exist");
+          cy.get(component)
+            .find("nylas-email")
+            .each((email) => {
+              cy.wrap(email)
+                .find("div.starred button")
+                .should("have.class", "starred");
+            });
+
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.starred button")
+            .click();
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.starred button.starred")
+            .should("not.exist");
+          cy.get(component)
+            .find("nylas-email")
+            .find("div.starred")
+            .find("button.starred")
+            .should("not.exist");
+        });
+    });
+
+    // TODO: finish when Folders are implemented in Mailbox
+    xit("Should delete all the emails and show empty mailbox", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.actionsBar = ["selectall", "delete"];
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.thread-checkbox")
+            .find("input")
+            .check();
+
+          cy.get(component)
+            .find("div.checkbox-container")
+            .find("input")
+            .each((checkbox) => {
+              cy.wrap(checkbox).should("be.checked");
+            });
+          cy.get(component).find("nylas-email").should("not.have.length", 0);
+          cy.get(component).find("mailbox-empty").should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.delete button")
+            .click();
+          cy.get(component).find("nylas-email").should("not.exist");
+          cy.get(component).find("mailbox-empty").should("exist");
+        });
     });
   });
 });

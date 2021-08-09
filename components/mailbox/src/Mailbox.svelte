@@ -122,7 +122,7 @@
   // Reactive statement to continuously fetch all_threads
   $: if (all_threads) {
     threads = all_threads as Thread[];
-    inboxThreads = threads;
+    inboxThreads = threads; // TODO: filter out those in trash folder
   }
 
   let main: Element;
@@ -649,6 +649,7 @@
               <div class="read-status">
                 {#if areAllSelectedUnread}
                   <button
+                    data-cy="mark-read"
                     title="Mark selected email(s) as read"
                     aria-label="Mark selected email(s) as read"
                     on:click={(e) => onChangeSelectedReadStatus(e)}
@@ -656,6 +657,7 @@
                   >
                 {:else}
                   <button
+                    data-cy="mark-unread"
                     title="Mark selected email(s) as unread"
                     aria-label="Mark selected email(s) as unread"
                     on:click={(e) => onChangeSelectedReadStatus(e)}
