@@ -9,7 +9,14 @@
     updateThread,
     fetchMessage,
     fetchEmail,
+    fetchContactImage,
+    fetchContactsByQuery,
   } from "@commons";
+  import type {
+    // HydratedContact,
+    // Contact,
+    ContactsQuery,
+  } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -33,7 +40,7 @@
   $: dispatchEvent("manifestLoaded", manifest);
 
   export let id: string = "";
-  export let access_token: string = "";
+  export let access_token: string = "HArPnlBL6mvLAru5Ng3S4erkpygxPr";
   export let thread_id: string = "";
   // export let messages: Message[] = [];
   export let message_id: string = "";
@@ -165,6 +172,33 @@
     );
   }
 
+  // #region get contacts for avatars
+  let contactQuery: ContactsQuery;
+  $: contactQuery = {
+    component_id: id,
+    access_token: "uvLCbxCbfAUuCzGzhoagDVTzNY1JgR",
+  };
+
+  // let contactQueryKey: string;
+
+  // $: contactQueryKey = JSON.stringify(contactQuery)
+  /*
+  Fetches contact
+  */
+  async function getContact(email) {
+    // status = "loading";
+    contactQuery["query"] = `?email=${email}`;
+    console.log({ contactQuery });
+    fetchContactsByQuery(contactQuery).then((results) => {
+      if (results.length) {
+        // hydratedContacts = $ContactStore[queryKey];
+        console.log({ results });
+        return results;
+      }
+      // status = "loaded";
+    });
+  }
+  // #endregion get contacts for avatars
   function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && thread_id) {
@@ -864,6 +898,13 @@
                 </div>
               {/each}
             {:else}
+              <!-- // if the email matches that of the last .from array, then get contact -->
+              <!-- {#await getContact("nylascypresstest@gmail.com") then contact} -->
+              <!-- {#await getContact(thread.messages[thread.messages.length-1].from[thread.messages.from.length-1].email) then contact} -->
+              <!-- {JSON.stringify(contact)} -->
+              <!-- {#await fetchContactImage(query, contact.id).then((image) => (contact.picture = image))}
+                {(contact.picture = "Loading")}-->
+              <!-- {/await} -->
               <span class="snippet">{thread.snippet}</span>
             {/if}
           </div>
