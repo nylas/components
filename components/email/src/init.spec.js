@@ -320,4 +320,69 @@ describe("Email component", () => {
         });
     });
   });
+
+  describe("Toggle email of sender/recipient", () => {
+    it("On click", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          cy.get(component)
+            .find(".email-tooltip")
+            .first()
+            .should("not.be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().should("exist");
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component).find(".email-tooltip").first().should("be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component)
+            .find(".email-tooltip")
+            .first()
+            .should("not.be.visible");
+        });
+    });
+    it("Does not show more than one tooltip", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          cy.get(component).find(".email-tooltip-btn").last().click();
+          cy.get(component).find(".email-tooltip").last().should("be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component).find(".email-tooltip").first().should("be.visible");
+          cy.get(component)
+            .find(".email-tooltip")
+            .last()
+            .should("not.be.visible");
+        });
+    });
+    it("When clicked multiple times", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          cy.get(component)
+            .find(".email-tooltip")
+            .first()
+            .should("not.be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().should("exist");
+          // first toggle
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component).find(".email-tooltip").first().should("be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component)
+            .find(".email-tooltip")
+            .first()
+            .should("not.be.visible");
+          // second toggle
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component).find(".email-tooltip").first().should("be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component)
+            .find(".email-tooltip")
+            .first()
+            .should("not.be.visible");
+        });
+    });
+  });
 });

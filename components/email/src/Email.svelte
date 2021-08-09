@@ -417,12 +417,7 @@
   function toggleTooltip(e) {
     currentTrigger = e.target;
     currentTooltip = currentTrigger.querySelector(".email-tooltip");
-    console.log(
-      "onclick aria-expanded attr of currentTrigger: ",
-      currentTrigger.getAttribute("aria-expanded"),
-    );
-    console.log({ currentTrigger }, { currentTooltip });
-    // if tooltipTrigger is not previousTrigger then change aria-expanded and aria-label
+
     if (
       currentTooltip &&
       currentTrigger.getAttribute("aria-expanded") === "false"
@@ -430,18 +425,22 @@
       currentTrigger.setAttribute("aria-expanded", "true");
       currentTrigger.setAttribute("aria-label", "hide email");
       currentTooltip.style.visibility = "visible";
-    } else if (previousTrigger) {
-      previousTooltip = previousTrigger.querySelector(".email-tooltip");
-      previousTrigger.setAttribute("aria-expanded", "false");
-      previousTrigger.setAttribute("aria-label", "show email");
-      previousTooltip.style.visibility = "hidden";
+      if (previousTrigger && previousTrigger.id !== currentTrigger.id) {
+        previousTooltip = previousTrigger.querySelector(".email-tooltip");
+        previousTrigger.setAttribute("aria-expanded", "false");
+        previousTrigger.setAttribute("aria-label", "show email");
+        previousTooltip.style.visibility = "hidden";
+      }
+    } else if (
+      currentTooltip &&
+      currentTrigger.getAttribute("aria-expanded") === "true"
+    ) {
+      currentTooltip = currentTrigger.querySelector(".email-tooltip");
+      currentTrigger.setAttribute("aria-expanded", "false");
+      currentTrigger.setAttribute("aria-label", "show email");
+      currentTooltip.style.visibility = "hidden";
     }
     previousTrigger = currentTrigger;
-    console.log(
-      "after click aria-expanded attr of currentTrigger: ",
-      currentTrigger.getAttribute("aria-expanded"),
-    );
-    console.log({ previousTrigger });
   }
 </script>
 
