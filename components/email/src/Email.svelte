@@ -47,7 +47,7 @@
   export let unread: boolean | null = null;
   export let you: Partial<Account> = {};
   export let is_starred: boolean;
-  export let show_contact_avatar: boolean = true;
+  export let show_contact_avatar: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -96,6 +96,11 @@
       "default",
     );
     is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
+    show_contact_avatar = getPropertyValue(
+      internalProps.show_contact_avatar,
+      show_contact_avatar,
+      true,
+    );
     if (activeThread && click_action === "mailbox") {
       // enables bulk starring action in mailbox to immediately reflect visually
       activeThread = activeThread;
