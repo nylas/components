@@ -8,7 +8,12 @@
   } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
-  import { getEventDispatcher } from "@commons/methods/component";
+  import {
+    buildInternalProps,
+    getPropertyValue,
+    getEventDispatcher,
+  } from "@commons/methods/component";
+
   import type { TimeInterval } from "d3-time";
   import {
     timeSaturday,
@@ -38,19 +43,67 @@
   //#region props
   export let id: string = "";
   export let access_token: string = "";
-  export let start_hour: number = 0;
-  export let end_hour: number = 24;
-  export let slot_size: number = 15; // in minutes
-  export let start_date: Date = new Date();
-  export let dates_to_show: number = 1;
-  export let calendars: Calendar[] = [];
-  export let show_ticks: boolean = true;
-  export let email_ids: string[] = [];
-  export let allow_booking: boolean = false;
-  export let max_bookable_slots: number = 1;
-  export let partial_bookable_ratio: number = 0;
-  export let show_as_week: boolean = false;
-  export let show_weekends: boolean = true;
+  export let start_hour: number;
+  export let end_hour: number;
+  export let slot_size: number; // in minutes
+  export let start_date: Date;
+  export let dates_to_show: number;
+  export let calendars: Calendar[];
+  export let show_ticks: boolean;
+  export let email_ids: string[];
+  export let allow_booking: boolean;
+  export let max_bookable_slots: number;
+  export let partial_bookable_ratio: number;
+  export let show_as_week: boolean;
+  export let show_weekends: boolean;
+
+  // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
+  // TODO - Find a way to improve this
+  $: internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
+
+  $: {
+    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
+    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
+    slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
+    start_date = getPropertyValue(
+      internalProps.start_date,
+      start_date,
+      new Date(),
+    );
+    dates_to_show = getPropertyValue(
+      internalProps.dates_to_show,
+      dates_to_show,
+      1,
+    );
+    calendars = getPropertyValue(internalProps.calendars, calendars, []);
+    show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
+    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
+    allow_booking = getPropertyValue(
+      internalProps.allow_booking,
+      allow_booking,
+      false,
+    );
+    max_bookable_slots = getPropertyValue(
+      internalProps.max_bookable_slots,
+      max_bookable_slots,
+      1,
+    );
+    partial_bookable_ratio = getPropertyValue(
+      internalProps.partial_bookable_ratio,
+      partial_bookable_ratio,
+      0,
+    );
+    show_as_week = getPropertyValue(
+      internalProps.show_as_week,
+      show_as_week,
+      false,
+    );
+    show_weekends = getPropertyValue(
+      internalProps.show_weekends,
+      show_weekends,
+      true,
+    );
+  }
   //#endregion props
 
   //#region mount
