@@ -322,7 +322,7 @@ describe("Email component", () => {
   });
 
   describe("Toggle email of sender/recipient", () => {
-    it("On click", () => {
+    it("When tooltip trigger is clicked", () => {
       cy.get("nylas-email")
         .as("email")
         .then((element) => {
@@ -356,7 +356,7 @@ describe("Email component", () => {
             .should("not.be.visible");
         });
     });
-    it("When clicked multiple times", () => {
+    it("when tooltip trigger is clicked twice", () => {
       cy.get("nylas-email")
         .as("email")
         .then((element) => {
@@ -375,6 +375,14 @@ describe("Email component", () => {
             .first()
             .should("not.be.visible");
           // second toggle
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component).find(".email-tooltip").first().should("be.visible");
+          cy.get(component).find(".email-tooltip-btn").first().click();
+          cy.get(component)
+            .find(".email-tooltip")
+            .first()
+            .should("not.be.visible");
+          // third toggle
           cy.get(component).find(".email-tooltip-btn").first().click();
           cy.get(component).find(".email-tooltip").first().should("be.visible");
           cy.get(component).find(".email-tooltip-btn").first().click();
