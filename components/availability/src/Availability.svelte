@@ -68,7 +68,6 @@
     };
     const calendarsList = await CalendarStore.getCalendars(calendarQuery);
     calendarID = calendarsList.find((cal) => cal.is_primary)?.id || "";
-    console.log(calendarID);
   });
   //#endregion mount
 
@@ -109,12 +108,11 @@
       .map((time) => {
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
-
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           allCalendars.forEach((c) => {
             let availabilityExistsInSlot = c.timeslots.some(
-              (slot) => time >= slot.start_time && endTime <= slot.end_time,
+              (block) => time < block.end_time && block.start_time < endTime,
             );
             if (c.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
