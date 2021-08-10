@@ -418,6 +418,13 @@
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
+
+      img.avatar {
+        border-radius: 50%;
+        max-height: 32px;
+        max-width: 32px;
+        width: 100%;
+      }
       header {
         font-size: 1.2rem;
         font-weight: 700;
@@ -465,7 +472,6 @@
         }
 
         .thread-message-count {
-          margin-left: 1rem;
           color: var(--grey-light);
           font-size: 12px;
           align-self: center;
@@ -641,14 +647,16 @@
         cursor: pointer;
       }
       .from-message-count {
+        align-items: center;
         display: grid;
-        grid-template-columns: auto auto auto;
+        grid-template-columns: repeat(4, auto);
+        grid-gap: $spacing-m;
         justify-content: flex-start;
-        margin-right: $spacing-s;
+        max-width: 300px;
 
         .from-participants {
           overflow: hidden;
-          max-width: 120px;
+          max-width: 180px;
           white-space: nowrap;
           text-overflow: ellipsis;
         }
@@ -705,7 +713,7 @@
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
-          grid-template-columns: 200px auto;
+          grid-template-columns: 300px auto;
           justify-content: initial;
 
           div.starred {
@@ -898,13 +906,6 @@
                 </div>
               {/each}
             {:else}
-              <!-- // if the email matches that of the last .from array, then get contact -->
-              <!-- {#await getContact("nylascypresstest@gmail.com") then contact} -->
-              <!-- {#await getContact(thread.messages[thread.messages.length-1].from[thread.messages.from.length-1].email) then contact} -->
-              <!-- {JSON.stringify(contact)} -->
-              <!-- {#await fetchContactImage(query, contact.id).then((image) => (contact.picture = image))}
-                {(contact.picture = "Loading")}-->
-              <!-- {/await} -->
               <span class="snippet">{thread.snippet}</span>
             {/if}
           </div>
@@ -929,6 +930,13 @@
                 </div>
               {/if}
               <div class="from-message-count">
+                {#if show_contact_avatar}
+                  <img
+                    alt=""
+                    class="avatar"
+                    src="https://via.placeholder.com/32"
+                  />
+                {/if}
                 <div class="from-participants">
                   {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
                     <span class="from-sub-section"
