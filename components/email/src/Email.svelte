@@ -11,6 +11,7 @@
     fetchEmail,
     fetchContactImage,
     fetchContactsByQuery,
+    ContactStore,
   } from "@commons";
   import type {
     // HydratedContact,
@@ -40,7 +41,7 @@
   $: dispatchEvent("manifestLoaded", manifest);
 
   export let id: string = "";
-  export let access_token: string = "HArPnlBL6mvLAru5Ng3S4erkpygxPr";
+  export let access_token: string = "";
   export let thread_id: string = "";
   // export let messages: Message[] = [];
   export let message_id: string = "";
@@ -55,6 +56,8 @@
   export let you: Partial<Account> = {};
   export let is_starred: boolean;
   export let show_contact_avatar: boolean;
+  $: console.log({ thread });
+  $: console.log({ message });
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -176,12 +179,12 @@
   let contactQuery: ContactsQuery;
   $: contactQuery = {
     component_id: id,
-    access_token: "uvLCbxCbfAUuCzGzhoagDVTzNY1JgR",
+    access_token,
   };
 
-  // let contactQueryKey: string;
+  let contactQueryKey: string;
 
-  // $: contactQueryKey = JSON.stringify(contactQuery)
+  $: contactQueryKey = JSON.stringify(contactQuery);
   /*
   Fetches contact
   */
@@ -191,7 +194,7 @@
     console.log({ contactQuery });
     fetchContactsByQuery(contactQuery).then((results) => {
       if (results.length) {
-        // hydratedContacts = $ContactStore[queryKey];
+        return $ContactStore[queryKey];
         console.log({ results });
         return results;
       }
@@ -931,11 +934,14 @@
               {/if}
               <div class="from-message-count">
                 {#if show_contact_avatar}
-                  <img
-                    alt=""
-                    class="avatar"
-                    src="https://via.placeholder.com/32"
-                  />
+                  {#await getContact(activeThread.messages[activeThread.messages.length - 1].from[activeThread.messages[activeThread.messages.length - 1].from.length - 1].email) then contact}
+                    {JSON.stringify(contact)}
+                    <img
+                      alt=""
+                      class="avatar"
+                      src="https://via.placeholder.com/32"
+                    />
+                  {/await}
                 {/if}
                 <div class="from-participants">
                   {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
