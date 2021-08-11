@@ -59,10 +59,20 @@
   let messageRefs: Element[] = [];
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
 
-  // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
-  // TODO - Find a way to improve this
   let internalProps: SvelteAllProps;
-  $: internalProps = buildInternalProps($$props, manifest);
+  $: {
+    const rebuiltProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<SvelteAllProps>;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
+      internalProps = rebuiltProps;
+    }
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<SvelteAllProps>;
+  }
 
   $: theme = getPropertyValue(internalProps.theme, theme, "theme-1");
 

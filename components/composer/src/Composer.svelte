@@ -142,6 +142,10 @@
         show_from = false;
       }
     }
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<ComposerProperties>;
     if (tracking) {
       // Set tracking on message object
       update("tracking", tracking);
@@ -151,9 +155,15 @@
     themeLoaded = true;
   });
 
-  // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
-  // TODO - Find a way to improve this
-  $: internalProps = buildInternalProps($$props, manifest);
+  $: {
+    const rebuiltProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<ComposerProperties>;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
+      internalProps = rebuiltProps;
+    }
+  }
 
   $: {
     show_to = getPropertyValue(internalProps.show_to, show_to, true);

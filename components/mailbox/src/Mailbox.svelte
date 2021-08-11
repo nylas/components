@@ -63,6 +63,10 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<SvelteAllProps>;
 
     you = await AccountStore.getAccount(query);
 
@@ -97,10 +101,16 @@
 
   $: paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
 
-  // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
-  // TODO - Find a way to improve this
   let internalProps: SvelteAllProps;
-  $: internalProps = buildInternalProps($$props, manifest);
+  $: {
+    const rebuiltProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<SvelteAllProps>;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
+      internalProps = rebuiltProps;
+    }
+  }
 
   // Reactive statements to continuously set manifest, prop and default values
   $: {
