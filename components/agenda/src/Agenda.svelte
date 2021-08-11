@@ -76,6 +76,10 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as AgendaProperties;
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<AgendaProperties>;
 
     setInterval(() => {
       now = new Date().getTime();
@@ -86,9 +90,15 @@
 
   $: dispatchEvent("manifestLoaded", manifest);
 
-  // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
-  // TODO - Find a way to improve this
-  $: internalProps = buildInternalProps($$props, manifest);
+  $: {
+    const rebuiltProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<AgendaProperties>;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
+      internalProps = rebuiltProps;
+    }
+  }
 
   $: {
     allow_date_change = getPropertyValue(
