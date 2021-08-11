@@ -34,6 +34,7 @@
     Message,
     Account,
   } from "@commons/types/Nylas";
+  import ContactImage from "@commons/components/ContactImage/ContactImage.svelte";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -182,24 +183,25 @@
     access_token,
   };
 
-  let contactQueryKey: string;
-
-  $: contactQueryKey = JSON.stringify(contactQuery);
   /*
   Fetches contact
   */
-  async function getContact(email) {
-    // status = "loading";
-    contactQuery["query"] = `?email=${email}`;
-    console.log({ contactQuery });
-    fetchContactsByQuery(contactQuery).then((results) => {
-      if (results.length) {
-        return $ContactStore[queryKey];
-        console.log({ results });
-        return results;
-      }
-      // status = "loaded";
-    });
+  async function getContact(account) {
+    contactQuery["query"] = `?email=${account.email}`;
+
+    let account_id = "";
+    let avatar;
+    const contact = await fetchContactsByQuery(contactQuery)
+      .then((res) => {
+        if (res.length) {
+          return res[0];
+        } else {
+          return { name: account.name };
+        }
+      })
+      .catch((err) => ({ name: account.name }));
+
+    return contact;
   }
   // #endregion get contacts for avatars
   function saveActiveThread() {
@@ -422,11 +424,20 @@
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
 
-      img.avatar {
+      .avatar {
         border-radius: 50%;
-        max-height: 32px;
-        max-width: 32px;
-        width: 100%;
+        height: 32px;
+        width: 32px;
+        &.default {
+          background: #002db4;
+          color: #fff;
+          font-size: 1rem;
+          font-weight: bold;
+          text-transform: uppercase;
+          font-family: sans-serif;
+          text-align: center;
+          line-height: 35px;
+        }
       }
       header {
         font-size: 1.2rem;
@@ -934,14 +945,11 @@
               {/if}
               <div class="from-message-count">
                 {#if show_contact_avatar}
-                  {#await getContact(activeThread.messages[activeThread.messages.length - 1].from[activeThread.messages[activeThread.messages.length - 1].from.length - 1].email) then contact}
-                    {JSON.stringify(contact)}
-                    <img
-                      alt=""
-                      class="avatar"
-                      src="https://via.placeholder.com/32"
-                    />
-                  {/await}
+                  <div class="avatar default">
+                    {#await getContact(activeThread.messages[activeThread.messages.length - 1].from[activeThread.messages[activeThread.messages.length - 1].from.length - 1]) then contact}
+                      <ContactImage {contact} />
+                    {/await}
+                  </div>
                 {/if}
                 <div class="from-participants">
                   {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
