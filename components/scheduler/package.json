@@ -1,0 +1,11 @@
+{
+  "name": "@nylas/components-scheduler",
+  "version": "1.0.2",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js"
+}

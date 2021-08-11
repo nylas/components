@@ -67,7 +67,7 @@
       calendarIDs: [], // empty array will fetch all calendars
     };
     const calendarsList = await CalendarStore.getCalendars(calendarQuery);
-    calendarID = calendarsList.find((cal) => cal.is_primary)?.id || "";
+    calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
   //#endregion mount
 
