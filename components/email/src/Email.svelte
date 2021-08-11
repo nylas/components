@@ -53,8 +53,6 @@
   export let you: Partial<Account> = {};
   export let is_starred: boolean;
   export let show_contact_avatar: boolean;
-  $: console.log({ thread });
-  $: console.log({ message });
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -62,6 +60,26 @@
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
   });
+
+  let contact;
+  $: (async () => {
+    if (thread) {
+      contact = await getContact(
+        thread.messages[thread.messages.length - 1].from[
+          thread.messages[thread.messages.length - 1].from.length - 1
+        ],
+      );
+    } else if (activeThread) {
+      contact = await getContact(
+        activeThread.messages[activeThread.messages.length - 1].from[
+          activeThread.messages[activeThread.messages.length - 1].from.length -
+            1
+        ],
+      );
+    } else if (message) {
+      contact = await getContact(message.from[message.from.length - 1]);
+    }
+  })();
 
   let main: Element;
   let messageRefs: Element[] = [];
@@ -172,7 +190,7 @@
     );
   }
 
-  // #region get contacts for avatars
+  // #region get contact for ContactImage
   let contactQuery: ContactsQuery;
   $: contactQuery = {
     component_id: id,
@@ -180,25 +198,28 @@
   };
 
   /*
-  Fetches contact
+    Fetches contact for ContactImage component
   */
   async function getContact(account) {
     contactQuery["query"] = `?email=${account.email}`;
+    try {
+      const contact = await fetchContactsByQuery(contactQuery)
+        .then((res) => {
+          if (res.length) {
+            return res[0];
+          } else {
+            return { name: account.name };
+          }
+        })
+        .catch(() => ({ name: account.name }));
 
-    const contact = await fetchContactsByQuery(contactQuery)
-      .then((res) => {
-        if (res.length) {
-          return res[0];
-        } else {
-          return { name: account.name };
-        }
-      })
-      .catch(() => ({ name: account.name }));
-
-    console.log({ contact });
-    return contact;
+      return contact;
+    } catch (err) {
+      return { account };
+    }
   }
-  // #endregion get contacts for avatars
+  // #endregion get contact for ContactImage
+
   function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && thread_id) {
@@ -941,9 +962,7 @@
               <div class="from-message-count">
                 {#if show_contact_avatar}
                   <div class="avatar default">
-                    {#await getContact(activeThread.messages[activeThread.messages.length - 1].from[activeThread.messages[activeThread.messages.length - 1].from.length - 1]) then contact}
-                      <ContactImage {contact} height="34px" width="34px" />
-                    {/await}
+                    <ContactImage {contactQuery} {contact} />
                   </div>
                 {/if}
                 <div class="from-participants">
@@ -1006,10 +1025,12 @@
         <header>{message.subject}</header>
         <div class="individual-message expanded">
           <div class="message-head">
+            {#if show_contact_avatar}
+              <div class="avatar default">
+                <ContactImage {contactQuery} {contact} />
+              </div>
+            {/if}
             <div class="message-from-to">
-              {#await getContact(message.from[0]) then contact}
-                <ContactImage {contact} height="34px" width="34px" />
-              {/await}
               <div class="message-from">
                 <span class="name"
                   >{message.from[0].name || message.from[0].email}</span
