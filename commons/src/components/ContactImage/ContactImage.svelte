@@ -1,6 +1,6 @@
-<svelte:options tag="nylas-contact-image" immutable={true} />
+<svelte:options tag="nylas-contact-image" />
 
-<script lang="ts">
+<script>
   import { onMount } from "svelte/internal";
   import { fetchContactImage } from "@commons";
   export let contact;
@@ -10,8 +10,10 @@
   let image;
 
   onMount(async (contact) => {
-    if (contact.picture_url) {
-      image = await fetchContactImage(contactQuery, contact.id);
+    if (contact?.picture_url) {
+      return (image = await fetchContactImage(contactQuery, contact.id));
+    } else {
+      return contact;
     }
   });
 </script>
@@ -23,9 +25,9 @@
     src="data:image/jpg;base64,{image}"
   />
 {:else}
-  {contact.given_name && contact.surname
-    ? contact.given_name.charAt(0) + contact.surname.charAt(0)
-    : contact.name
-    ? contact.name.charAt(0)
+  {contact?.given_name && contact?.surname
+    ? contact?.given_name.charAt(0) + contact?.surname.charAt(0)
+    : contact?.name
+    ? contact?.name.charAt(0)
     : "?"}
 {/if}

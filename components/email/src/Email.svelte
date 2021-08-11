@@ -13,11 +13,7 @@
     fetchContactsByQuery,
     ContactStore,
   } from "@commons";
-  import type {
-    // HydratedContact,
-    // Contact,
-    ContactsQuery,
-  } from "@commons/types/Contacts";
+  import type { ContactsQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -189,8 +185,6 @@
   async function getContact(account) {
     contactQuery["query"] = `?email=${account.email}`;
 
-    let account_id = "";
-    let avatar;
     const contact = await fetchContactsByQuery(contactQuery)
       .then((res) => {
         if (res.length) {
@@ -199,8 +193,9 @@
           return { name: account.name };
         }
       })
-      .catch((err) => ({ name: account.name }));
+      .catch(() => ({ name: account.name }));
 
+    console.log({ contact });
     return contact;
   }
   // #endregion get contacts for avatars
@@ -947,7 +942,7 @@
                 {#if show_contact_avatar}
                   <div class="avatar default">
                     {#await getContact(activeThread.messages[activeThread.messages.length - 1].from[activeThread.messages[activeThread.messages.length - 1].from.length - 1]) then contact}
-                      <ContactImage {contact} />
+                      <ContactImage {contact} height="34px" width="34px" />
                     {/await}
                   </div>
                 {/if}
@@ -1012,6 +1007,9 @@
         <div class="individual-message expanded">
           <div class="message-head">
             <div class="message-from-to">
+              {#await getContact(message.from[0]) then contact}
+                <ContactImage {contact} height="34px" width="34px" />
+              {/await}
               <div class="message-from">
                 <span class="name"
                   >{message.from[0].name || message.from[0].email}</span
