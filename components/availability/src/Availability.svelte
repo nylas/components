@@ -40,15 +40,32 @@
     EventQuery,
   } from "@commons/types/Availability";
 
+  let manifest: Partial<Manifest> = {};
+  // //#region props
+  // export let id: string = "";
+  // export let access_token: string = "";
+  // export let start_hour: number;
+  // export let end_hour: number;
+  // export let slot_size: number; // in minutes
+  // export let start_date: Date;
+  // export let dates_to_show: number;
+  // export let calendars: Calendar[];
+  // export let show_ticks: boolean;
+  // export let email_ids: string[];
+  // export let allow_booking: boolean;
+  // export let max_bookable_slots: number;
+  // export let partial_bookable_ratio: number;
+  // export let show_as_week: boolean;
+  // export let show_weekends: boolean;
   //#region props
   export let id: string = "";
   export let access_token: string = "";
   export let start_hour: number;
   export let end_hour: number;
   export let slot_size: number; // in minutes
-  export let start_date: Date;
+  export let start_date: Date = new Date();
   export let dates_to_show: number;
-  export let calendars: Calendar[];
+  export let calendars: Calendar[] = [];
   export let show_ticks: boolean;
   export let email_ids: string[];
   export let allow_booking: boolean;
@@ -56,48 +73,55 @@
   export let partial_bookable_ratio: number;
   export let show_as_week: boolean;
   export let show_weekends: boolean;
-
+  //#endregion props
   // The reference to $$props is lost each time it gets updated, so we have to rebuild the proxy each time
   // TODO - Find a way to improve this
   $: internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
+  $: console.log({ internalProps });
+  $: console.log("00000", $$props);
+  $: console.log("99999", manifest);
 
   $: {
+    console.log("for some reason, redoing start_hour");
     start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
-    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
-    slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
-    start_date = getPropertyValue(
-      internalProps.start_date,
-      start_date,
-      new Date(),
-    );
-    dates_to_show = getPropertyValue(
-      internalProps.dates_to_show,
-      dates_to_show,
-      1,
-    );
-    calendars = getPropertyValue(internalProps.calendars, calendars, []);
-    show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
-    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
-    allow_booking = getPropertyValue(
-      internalProps.allow_booking,
-      allow_booking,
-      false,
-    );
-    max_bookable_slots = getPropertyValue(
-      internalProps.max_bookable_slots,
-      max_bookable_slots,
-      1,
-    );
-    partial_bookable_ratio = getPropertyValue(
-      internalProps.partial_bookable_ratio,
-      partial_bookable_ratio,
-      0,
-    );
-    show_as_week = getPropertyValue(
-      internalProps.show_as_week,
-      show_as_week,
-      false,
-    );
+  }
+  $: end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
+  $: slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
+  // $: start_date = getPropertyValue(
+  //   internalProps.start_date,
+  //   start_date,
+  //   new Date(),
+  // );
+  $: dates_to_show = getPropertyValue(
+    internalProps.dates_to_show,
+    dates_to_show,
+    1,
+  );
+  // $: calendars = getPropertyValue(internalProps.calendars, calendars, []);
+  $: show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
+  $: email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
+  $: allow_booking = getPropertyValue(
+    internalProps.allow_booking,
+    allow_booking,
+    false,
+  );
+  $: max_bookable_slots = getPropertyValue(
+    internalProps.max_bookable_slots,
+    max_bookable_slots,
+    1,
+  );
+  $: partial_bookable_ratio = getPropertyValue(
+    internalProps.partial_bookable_ratio,
+    partial_bookable_ratio,
+    0,
+  );
+  $: show_as_week = getPropertyValue(
+    internalProps.show_as_week,
+    show_as_week,
+    false,
+  );
+  $: {
+    console.log("show weekends too?");
     show_weekends = getPropertyValue(
       internalProps.show_weekends,
       show_weekends,
@@ -107,7 +131,6 @@
   //#endregion props
 
   //#region mount
-  let manifest: Partial<Manifest> = {};
   $: calendarID = "";
   onMount(async () => {
     await tick();
@@ -150,6 +173,7 @@
     start_hour: number,
     end_hour: number,
   ) {
+    console.log("33333333 generating Day Slots");
     const dayStart = timeHour(
       new Date(new Date(timestamp).setHours(start_hour)),
     );
@@ -312,37 +336,43 @@
       });
     return epochs;
   }
-
-  $: days = scaleTime()
-    .domain([startDay, endDay])
-    .ticks(timeDay)
-    .filter((timestamp) => {
-      if (show_weekends) {
-        return true;
-      } else {
-        return (
-          timestamp.toString() !== timeSaturday(timestamp).toString() &&
-          timestamp.toString() !== timeSunday(timestamp).toString()
-        );
-      }
-    })
-    .map((timestamp) => {
-      let slots = generateDaySlots(timestamp, start_hour, end_hour);
-      return {
-        slots,
-        epochs: generateEpochs(slots, partial_bookable_ratio),
-        timestamp,
-      };
-    });
+  let days = [];
+  $: {
+    console.log("11111111 setting DAYS");
+    days = scaleTime()
+      .domain([startDay, endDay])
+      .ticks(timeDay)
+      .filter((timestamp) => {
+        if (show_weekends) {
+          return true;
+        } else {
+          return (
+            timestamp.toString() !== timeSaturday(timestamp).toString() &&
+            timestamp.toString() !== timeSunday(timestamp).toString()
+          );
+        }
+      })
+      .map((timestamp) => {
+        let slots = generateDaySlots(timestamp, start_hour, end_hour);
+        return {
+          slots,
+          epochs: generateEpochs(slots, partial_bookable_ratio),
+          timestamp,
+        };
+      });
+  }
   //#endregion layout
 
   $: newCalendarTimeslotsForGivenEmails = [];
-
-  $: allCalendars = [
-    // TODO: consider merging these 2 into just calendars
-    ...calendars,
-    ...newCalendarTimeslotsForGivenEmails,
-  ];
+  let allCalendars = [];
+  $: {
+    console.log("generating allCalendars");
+    allCalendars = [
+      // TODO: consider merging these 2 into just calendars
+      ...calendars,
+      ...newCalendarTimeslotsForGivenEmails,
+    ];
+  }
 
   let availabilityQuery: AvailabilityQuery;
 
@@ -419,6 +449,7 @@
   }, [] as TimeSlot[]);
 
   function toggleSelectedTimeSlots(selectedSlot: SelectableSlot) {
+    console.log("togglin togglin", selectedSlot);
     return (slotSelection =
       selectedSlot.selectionStatus === SelectionStatus.SELECTED
         ? [...slotSelection, selectedSlot]
@@ -687,18 +718,27 @@
               data-end-time={new Date(slot.end_time).toLocaleString()}
               disabled={slot.availability === AvailabilityStatus.BUSY}
               on:click={() => {
-                if (allow_booking) {
-                  slot.selectionStatus =
-                    slot.selectionStatus === SelectionStatus.SELECTED
-                      ? SelectionStatus.UNSELECTED
-                      : slotSelection.length < max_bookable_slots
-                      ? SelectionStatus.SELECTED
-                      : SelectionStatus.UNSELECTED;
-
-                  toggleSelectedTimeSlots(slot);
-                } else {
-                  dispatchEvent("timeSlotChosen", { timeSlots: slot });
-                }
+                console.log(
+                  "clickin",
+                  allow_booking,
+                  slot.selectionStatus,
+                  max_bookable_slots,
+                  slotSelection.length,
+                  "from before",
+                );
+                slot.selectionStatus = "selected";
+                //                 if (allow_booking) {
+                //                   slot.selectionStatus =
+                //                     slot.selectionStatus === SelectionStatus.SELECTED
+                //                       ? SelectionStatus.UNSELECTED
+                //                       : slotSelection.length < max_bookable_slots
+                //                       ? SelectionStatus.SELECTED
+                //                       : SelectionStatus.UNSELECTED;
+                // console.log('and THEN', slot.selectionStatus);
+                //                   toggleSelectedTimeSlots(slot);
+                //                 } else {
+                //                   dispatchEvent("timeSlotChosen", { timeSlots: slot });
+                //                 }
               }}
             />
           {/each}

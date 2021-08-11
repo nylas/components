@@ -78,7 +78,7 @@
           .querySelectorAll('input[name="show-ticks"]')
           .forEach((elem) => {
             elem.addEventListener("change", function (event) {
-              component.show_ticks = JSON.parse(event.target.value);
+              component.show_ticks = event.target.value;
             });
           });
 
@@ -86,7 +86,7 @@
           .querySelectorAll('input[name="allow-booking"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
-              component.allow_booking = JSON.parse(event.target.value);
+              component.allow_booking = event.target.value;
             });
           });
 
@@ -94,19 +94,19 @@
           .querySelectorAll('input[id="partial_bookable_ratio"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
-              component.partial_bookable_ratio = JSON.parse(event.target.value);
+              component.partial_bookable_ratio = event.target.value;
             });
           });
 
         document.querySelectorAll('input[name="max-slots"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
-            component.max_bookable_slots = JSON.parse(event.target.value);
+            component.max_bookable_slots = event.target.value;
           });
         });
 
         document.querySelectorAll('input[name="week-view"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
-            component.show_as_week = JSON.parse(event.target.value);
+            component.show_as_week = event.target.value;
           });
         });
 
@@ -114,7 +114,7 @@
           .querySelectorAll('input[name="show-weekends"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
-              component.show_weekends = JSON.parse(event.target.value);
+              component.show_weekends = event.target.value;
             });
           });
       });

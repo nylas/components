@@ -33,6 +33,7 @@ export function buildInternalProps<T extends Manifest>(
   properties: any,
   manifest: Manifest,
 ): T {
+  console.log("2222222222 building internal props", properties, manifest);
   return new Proxy(properties, {
     get: (properties, name: keyof Manifest) => {
       if (name in properties) {
