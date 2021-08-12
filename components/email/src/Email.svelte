@@ -31,6 +31,7 @@
     Account,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
+  import Tooltip from "@commons/components/Tooltip.svelte";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -411,37 +412,6 @@
       })
     );
   }
-
-  let currentTrigger, currentTooltip, previousTrigger, previousTooltip;
-
-  function toggleTooltip(e) {
-    currentTrigger = e.target;
-    currentTooltip = currentTrigger.querySelector(".email-tooltip");
-
-    if (
-      currentTooltip &&
-      currentTrigger.getAttribute("aria-expanded") === "false"
-    ) {
-      currentTrigger.setAttribute("aria-expanded", "true");
-      currentTrigger.setAttribute("aria-label", "hide email");
-      currentTooltip.style.visibility = "visible";
-      if (previousTrigger && previousTrigger.id !== currentTrigger.id) {
-        previousTooltip = previousTrigger.querySelector(".email-tooltip");
-        previousTrigger.setAttribute("aria-expanded", "false");
-        previousTrigger.setAttribute("aria-label", "show email");
-        previousTooltip.style.visibility = "hidden";
-      }
-    } else if (
-      currentTooltip &&
-      currentTrigger.getAttribute("aria-expanded") === "true"
-    ) {
-      currentTooltip = currentTrigger.querySelector(".email-tooltip");
-      currentTrigger.setAttribute("aria-expanded", "false");
-      currentTrigger.setAttribute("aria-label", "show email");
-      currentTooltip.style.visibility = "hidden";
-    }
-    previousTrigger = currentTrigger;
-  }
 </script>
 
 <style lang="scss">
@@ -572,7 +542,10 @@
       &.expanded {
         background: var(--white);
         padding: 0;
-
+        .icon-container,
+        .icon-container > * {
+          pointer-events: none;
+        }
         &.expanded-mailbox-thread {
           .message-from {
             .name {
@@ -584,38 +557,6 @@
           width: 100%;
           box-sizing: border-box;
           padding: $spacing-s;
-
-          button.email-tooltip-btn {
-            position: relative;
-            display: inline-block;
-            background: transparent;
-            min-height: 24px;
-            min-width: 24px;
-            width: min-content;
-            .icon-container,
-            .icon-container > * {
-              pointer-events: none;
-            }
-
-            span.email-tooltip {
-              position: absolute;
-              visibility: hidden;
-              width: min-content;
-              z-index: 1;
-              top: 125%;
-              background: var(--grey-lightest);
-              color: var(--grey-dark);
-              padding: $spacing-s;
-              box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
-              border-radius: 2px;
-            }
-
-            &:hover {
-              span.email-tooltip {
-                visibility: visible;
-              }
-            }
-          }
 
           &.condensed {
             div.snippet {
@@ -902,25 +843,15 @@
                             >{message.from[0].name ||
                               message.from[0].email}</span
                           >
-                          <button
-                            class="email-tooltip-btn"
-                            id={`button-${msgIndex}`}
-                            aria-describedby={message.id.slice(0, 3)}
-                            aria-expanded="false"
-                            aria-label="show email"
-                            on:click|stopPropagation={toggleTooltip}
-                          >
-                            <span class="icon-container" aria-hidden="true">
-                              <DropdownSymbol />
+
+                          <Tooltip {message} id={message.id.slice(0, 3)}>
+                            <span slot="icon">
+                              <DropdownSymbol
+                                class="icon-container"
+                                aria-hidden="true"
+                              />
                             </span>
-                            <span
-                              id={message.id.slice(0, 3)}
-                              role="tooltip"
-                              tabindex="0"
-                              class="email-tooltip"
-                              >{message.from[0].email}</span
-                            >
-                          </button>
+                          </Tooltip>
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
@@ -932,29 +863,16 @@
                                 {#if i !== message.to.length - 1}
                                   &nbsp;&comma;
                                 {/if}
-                                <button
-                                  class="email-tooltip-btn"
-                                  id={`button-${i}`}
-                                  aria-describedby={message.id.slice(0, 4)}
-                                  aria-expanded="false"
-                                  aria-label="show email"
-                                  on:click|stopPropagation={toggleTooltip}
-                                >
-                                  <span
+                              {/if}
+
+                              <Tooltip {message} id={message.id.slice(0, 4)}>
+                                <span slot="icon">
+                                  <DropdownSymbol
                                     class="icon-container"
                                     aria-hidden="true"
-                                  >
-                                    <DropdownSymbol />
-                                  </span>
-                                  <span
-                                    id={message.id.slice(0, 4)}
-                                    role="tooltip"
-                                    tabindex="0"
-                                    class="email-tooltip"
-                                    >{message.to[0].email}</span
-                                  >
-                                </button>
-                              {/if}
+                                  />
+                                </span>
+                              </Tooltip>
                             </span>
                           {/each}
                         </div>
@@ -980,23 +898,15 @@
                         <span class="name"
                           >{message.from[0].name || message.from[0].email}</span
                         >
-                        <button
-                          class="email-tooltip-btn"
-                          aria-expanded="false"
-                          id={`button-${message.id.slice(0, 2)}`}
-                          aria-describedby={message.id.slice(0, 3)}
-                          aria-label="show email"
-                          on:click|stopPropagation={toggleTooltip}
-                          ><span class="icon-container" aria-hidden="true">
-                            <DropdownSymbol />
+
+                        <Tooltip {message} id={message.id.slice(0, 3)}>
+                          <span slot="icon">
+                            <DropdownSymbol
+                              class="icon-container"
+                              aria-hidden="true"
+                            />
                           </span>
-                          <span
-                            id={message.id.slice(0, 3)}
-                            role="tooltip"
-                            tabindex="0"
-                            class="email-tooltip">{message.from[0].email}</span
-                          >
-                        </button>
+                        </Tooltip>
                       </div>
                       <div class="message-date">
                         <span>
@@ -1112,57 +1022,34 @@
                 <span class="name"
                   >{message.from[0].name || message.from[0].email}</span
                 >
-                <button
-                  class="email-tooltip-btn"
-                  aria-expanded="false"
-                  id={`button-${message.id.slice(0, 2)}`}
-                  aria-describedby={message.id}
-                  aria-label="show email"
-                  on:click|stopPropagation={toggleTooltip}
-                >
-                  <span class="icon-container" aria-hidden="true">
-                    <DropdownSymbol />
+
+                <Tooltip {message} id={message.id}>
+                  <span slot="icon">
+                    <DropdownSymbol class="icon-container" aria-hidden="true" />
                   </span>
-                  <span
-                    id={message.id}
-                    role="tooltip"
-                    tabindex="0"
-                    class="email-tooltip">{message.from[0].email}</span
-                  >
-                </button>
+                </Tooltip>
               </div>
-              <div class="message-to">
-                {#each message.to as to, i}
-                  <span>
-                    {#if to.name || to.email || you.email_address}
-                      to&colon;&nbsp;{to.email === you.email_address
-                        ? "me"
-                        : to.name || to.email}
-                      {#if i !== message.to.length - 1}
-                        &nbsp;&comma;
-                      {/if}
-                      <button
-                        class="email-tooltip-btn"
-                        aria-expanded="false"
-                        id={`button-${i}`}
-                        aria-describedby={message.id.slice(0, 3)}
-                        aria-label="show email"
-                        on:click|stopPropagation={toggleTooltip}
-                      >
-                        <span class="icon-container" aria-hidden="true">
-                          <DropdownSymbol />
-                        </span>
-                        <span
-                          id={message.id.slice(0, 3)}
-                          role="tooltip"
-                          tabindex="0"
-                          class="email-tooltip">{message.to[0].email}</span
-                        >
-                      </button>
+              {#each message.to as to, i}
+                <span>
+                  {#if to.name || to.email || you.email_address}
+                    to&colon;&nbsp;{to.email === you.email_address
+                      ? "me"
+                      : to.name || to.email}
+                    {#if i !== message.to.length - 1}
+                      &nbsp;&comma;
                     {/if}
-                  </span>
-                {/each}
-              </div>
+
+                    <Tooltip {message} id={message.id.slice(0, 3)}>
+                      <span slot="icon">
+                        <DropdownSymbol
+                          class="icon-container"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </Tooltip>
+                  {/if}
+                </span>
+              {/each}
             </div>
             <div class="message-date">
               <span> {formatPreviewDate(new Date(message.date * 1000))}</span>
