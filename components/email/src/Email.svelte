@@ -11,7 +11,6 @@
     fetchEmail,
     fetchContactImage,
     fetchContactsByQuery,
-    ContactStore,
   } from "@commons";
   import type { ContactsQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
@@ -211,7 +210,7 @@
             return { name: account.name };
           }
         })
-        .catch(() => ({ name: account.name }));
+        .catch((err) => ({ name: account.name }));
 
       return contact;
     } catch (err) {
@@ -440,20 +439,18 @@
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
 
-      .avatar {
+      .default-avatar {
+        background: #002db4;
         border-radius: 50%;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 1rem;
+        font-weight: bold;
         height: 32px;
+        line-height: 35px;
+        text-align: center;
+        text-transform: uppercase;
         width: 32px;
-        &.default {
-          background: #002db4;
-          color: #fff;
-          font-size: 1rem;
-          font-weight: bold;
-          text-transform: uppercase;
-          font-family: sans-serif;
-          text-align: center;
-          line-height: 35px;
-        }
       }
       header {
         font-size: 1.2rem;
@@ -961,7 +958,7 @@
               {/if}
               <div class="from-message-count">
                 {#if show_contact_avatar}
-                  <div class="avatar default">
+                  <div class="default-avatar">
                     <ContactImage {contactQuery} {contact} />
                   </div>
                 {/if}
@@ -1022,14 +1019,14 @@
   {:else if message}
     {#if Object.keys(message).length > 0}
       <div class="email-row expanded singular">
+        {#if show_contact_avatar}
+          <div class="default-avatar">
+            <ContactImage {contactQuery} {contact} />
+          </div>
+        {/if}
         <header>{message.subject}</header>
         <div class="individual-message expanded">
           <div class="message-head">
-            {#if show_contact_avatar}
-              <div class="avatar default">
-                <ContactImage {contactQuery} {contact} />
-              </div>
-            {/if}
             <div class="message-from-to">
               <div class="message-from">
                 <span class="name"
