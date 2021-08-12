@@ -116,6 +116,7 @@
     "@nylas/components-mailbox": "file:components/mailbox",
     "@nylas/components-theming": "file:components/theming",
     "concurrently": "6.0.0",
-    "@nylas/components-availability": "file:components/availability"
+    "@nylas/components-availability": "file:components/availability",
+    "@nylas/components-scheduler": "file:components/scheduler"
   }
 }
