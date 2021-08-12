@@ -412,6 +412,13 @@
       })
     );
   }
+
+  $: currentTooltipID = "";
+  $: console.log("Email component: ", { currentTooltipID });
+
+  function setTooltip(e) {
+    currentTooltipID = e.detail.tooltipID;
+  }
 </script>
 
 <style lang="scss">
@@ -843,15 +850,14 @@
                             >{message.from[0].name ||
                               message.from[0].email}</span
                           >
-
-                          <Tooltip {message} id={message.id.slice(0, 3)}>
-                            <span slot="icon">
-                              <DropdownSymbol
-                                class="icon-container"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </Tooltip>
+                          <!-- tooltip component -->
+                          <nylas-tooltip
+                            on:toggleTooltip={setTooltip}
+                            {message}
+                            id={message.id.slice(0, 3)}
+                            {currentTooltipID}
+                            icon={DropdownSymbol}
+                          />
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
@@ -864,15 +870,14 @@
                                   &nbsp;&comma;
                                 {/if}
                               {/if}
-
-                              <Tooltip {message} id={message.id.slice(0, 4)}>
-                                <span slot="icon">
-                                  <DropdownSymbol
-                                    class="icon-container"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              </Tooltip>
+                              <!-- tooltip component -->
+                              <nylas-tooltip
+                                on:toggleTooltip={setTooltip}
+                                {message}
+                                id={message.id.slice(0, 4)}
+                                {currentTooltipID}
+                                icon={DropdownSymbol}
+                              />
                             </span>
                           {/each}
                         </div>
@@ -898,15 +903,14 @@
                         <span class="name"
                           >{message.from[0].name || message.from[0].email}</span
                         >
-
-                        <Tooltip {message} id={message.id.slice(0, 3)}>
-                          <span slot="icon">
-                            <DropdownSymbol
-                              class="icon-container"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        </Tooltip>
+                        <!-- tooltip component -->
+                        <nylas-tooltip
+                          on:toggleTooltip={setTooltip}
+                          {message}
+                          id={message.id.slice(0, 3)}
+                          {currentTooltipID}
+                          icon={DropdownSymbol}
+                        />
                       </div>
                       <div class="message-date">
                         <span>
@@ -1022,12 +1026,14 @@
                 <span class="name"
                   >{message.from[0].name || message.from[0].email}</span
                 >
-
-                <Tooltip {message} id={message.id}>
-                  <span slot="icon">
-                    <DropdownSymbol class="icon-container" aria-hidden="true" />
-                  </span>
-                </Tooltip>
+                <!-- tooltip component -->
+                <nylas-tooltip
+                  on:toggleTooltip={setTooltip}
+                  {message}
+                  id={message.id}
+                  {currentTooltipID}
+                  icon={DropdownSymbol}
+                />
               </div>
               {#each message.to as to, i}
                 <span>
@@ -1038,15 +1044,14 @@
                     {#if i !== message.to.length - 1}
                       &nbsp;&comma;
                     {/if}
-
-                    <Tooltip {message} id={message.id.slice(0, 3)}>
-                      <span slot="icon">
-                        <DropdownSymbol
-                          class="icon-container"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </Tooltip>
+                    <!-- tooltip component -->
+                    <nylas-tooltip
+                      on:toggleTooltip={setTooltip}
+                      {message}
+                      id={message.id.slice(0, 3)}
+                      {currentTooltipID}
+                      icon={DropdownSymbol}
+                    />
                   {/if}
                 </span>
               {/each}

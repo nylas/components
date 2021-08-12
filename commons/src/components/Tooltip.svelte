@@ -1,40 +1,28 @@
 <svelte:options tag="nylas-tooltip" />
 
 <script>
+  import { get_current_component } from "svelte/internal";
+  import { getEventDispatcher } from "@commons/methods/component";
+  const dispatchEvent = getEventDispatcher(get_current_component());
+
+  // #region tooltip props
+  export let currentTooltipID; // tooltip of currently open tooltip; this closes other tooltips
+  $: currentTooltipID; // tooltip of currently open tooltip; this closes other tooltips
   export let message;
   $: message;
   export let id;
+  $: id;
+  export let icon;
+  // #endregion tooltip props
 
-  let currentTrigger, currentTooltip, previousTrigger, previousTooltip;
-  let toggleTooltip = false;
-  // function toggleTooltip(e) {
-  //   currentTrigger = e.target;
-  //   currentTooltip = currentTrigger.querySelector(".tooltip");
+  $: isTooltipVisible =
+    currentTooltipID && currentTooltipID === id ? true : false;
 
-  //   if (
-  //     currentTooltip &&
-  //     currentTrigger.getAttribute("aria-expanded") === "false"
-  //   ) {
-  //     currentTrigger.setAttribute("aria-expanded", "true");
-  //     currentTrigger.setAttribute("aria-label", "hide email");
-  //     currentTooltip.style.visibility = "visible";
-  //     if (previousTrigger && previousTrigger.id !== currentTrigger.id) {
-  //       previousTooltip = previousTrigger.querySelector(".tooltip");
-  //       previousTrigger.setAttribute("aria-expanded", "false");
-  //       previousTrigger.setAttribute("aria-label", "show email");
-  //       previousTooltip.style.visibility = "hidden";
-  //     }
-  //   } else if (
-  //     currentTooltip &&
-  //     currentTrigger.getAttribute("aria-expanded") === "true"
-  //   ) {
-  //     currentTooltip = currentTrigger.querySelector(".tooltip");
-  //     currentTrigger.setAttribute("aria-expanded", "false");
-  //     currentTrigger.setAttribute("aria-label", "show email");
-  //     currentTooltip.style.visibility = "hidden";
-  //   }
-  //   previousTrigger = currentTrigger;
-  // }
+  function dispatchTooltip() {
+    dispatchEvent("toggleTooltip", {
+      tooltipID: id,
+    });
+  }
 </script>
 
 <style lang="scss">
@@ -42,17 +30,15 @@
   $spacing-s: 0.5rem;
 
   button.tooltip-trigger {
-    // position: relative;
-    // display: inline-block;
-    // background: transparent;
-    background: red !important;
+    position: relative;
+    display: inline-block;
+    background: transparent;
     height: 24px;
     width: 24px;
-    // width: min-content;
+    padding: 12px;
   }
   p.tooltip {
-    // position: absolute;
-    // visibility: hidden;
+    position: absolute;
     width: min-content;
     z-index: 1;
     top: 125%;
@@ -62,27 +48,21 @@
     box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
     border-radius: 2px;
   }
-
-  // &:hover {
-  //   p.tooltip {
-  //     visibility: visible;
-  //   }
-  // }
 </style>
 
 <button
   class="tooltip-trigger"
-  aria-expanded="false"
-  id={`button-${message?.id.slice(0, 2)}`}
+  aria-expanded={isTooltipVisible ? "true" : "false"}
+  id={`button-${message?.id.slice(0, 3)}`}
   aria-describedby={id}
-  aria-label="show email"
-  on:click|stopPropagation={() => {
-    toggleTooltip = !toggleTooltip;
-  }}
+  aria-label={isTooltipVisible ? "hide email" : "show email"}
+  on:click={dispatchTooltip}
 >
-  <slot name="icon" />
+  {#if icon}
+    <svelte:component this={icon} class="icon-container" aria-hidden="true" />
+  {/if}
 </button>
-{#if toggleTooltip}
+{#if isTooltipVisible}
   <p {id} role="tooltip" tabindex="0" class="tooltip">
     {message?.from[0].email}
   </p>
