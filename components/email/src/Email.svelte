@@ -63,7 +63,7 @@
 
   let contact;
   $: (async () => {
-    if (show_contact_avatar) {
+    if (!contact) {
       if (thread) {
         contact = await getContact(
           thread.messages[thread.messages.length - 1].from[
@@ -126,7 +126,7 @@
     show_contact_avatar = getPropertyValue(
       internalProps.show_contact_avatar,
       show_contact_avatar,
-      false, // setting this to false for now, so mailbox can load
+      true,
     );
     if (activeThread && click_action === "mailbox") {
       // enables bulk starring action in mailbox to immediately reflect visually
