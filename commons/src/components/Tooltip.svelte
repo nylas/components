@@ -66,7 +66,7 @@
 <button
   class="tooltip-trigger"
   aria-expanded={isTooltipVisible ? "true" : "false"}
-  id={`button-${id?.slice(0, 3)}`}
+  id={id ? `button-${id.slice(0, 3)}` : ""}
   aria-describedby={id}
   aria-label={isTooltipVisible ? "hide email" : "show email"}
   on:click|stopPropagation={(e) => toggleTooltipVisibility(e)}
