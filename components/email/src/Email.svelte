@@ -11,8 +11,9 @@
     fetchEmail,
     fetchContactImage,
     fetchContactsByQuery,
+    ContactStore,
   } from "@commons";
-  import type { ContactsQuery } from "@commons/types/Contacts";
+  import type { ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -190,7 +191,7 @@
   }
 
   // #region get contact for ContactImage
-  let contactQuery: ContactsQuery;
+  let contactQuery: ContactSearchQuery;
   $: contactQuery = {
     component_id: id,
     access_token,
@@ -201,20 +202,14 @@
   */
   async function getContact(account) {
     contactQuery["query"] = `?email=${account.email}`;
-    try {
-      const contact = await fetchContactsByQuery(contactQuery)
-        .then((res) => {
-          if (res.length) {
-            return res[0];
-          } else {
-            return { name: account.name };
-          }
-        })
-        .catch((err) => ({ name: account.name }));
-
-      return contact;
-    } catch (err) {
-      return { account };
+    if (id) {
+      let contact = $ContactStore[JSON.stringify(contactQuery)];
+      if (!contact) {
+        contact = await ContactStore.addContact(contactQuery);
+      }
+      return contact[0] ? contact[0] : { name: account.name };
+    } else {
+      return { name: account.name };
     }
   }
   // #endregion get contact for ContactImage
