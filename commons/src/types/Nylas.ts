@@ -162,6 +162,7 @@ export interface EmailProperties extends Manifest {
   is_clean_conversation_enabled: boolean;
   thread_id: string;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  show_contact_avatar: boolean;
 }
 
 export interface ComposerProperties extends Manifest {

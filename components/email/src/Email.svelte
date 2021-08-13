@@ -9,7 +9,11 @@
     updateThread,
     fetchMessage,
     fetchEmail,
+    fetchContactImage,
+    fetchContactsByQuery,
+    ContactStore,
   } from "@commons";
+  import type { ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -26,6 +30,7 @@
     Message,
     Account,
   } from "@commons/types/Nylas";
+  import "@commons/components/ContactImage/ContactImage.svelte";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -47,6 +52,7 @@
   export let unread: boolean | null = null;
   export let you: Partial<Account> = {};
   export let is_starred: boolean;
+  export let show_contact_avatar: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -54,6 +60,28 @@
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
   });
+
+  let contact;
+  $: (async () => {
+    if (!contact) {
+      if (thread) {
+        contact = await getContact(
+          thread.messages[thread.messages.length - 1].from[
+            thread.messages[thread.messages.length - 1].from.length - 1
+          ],
+        );
+      } else if (activeThread) {
+        contact = await getContact(
+          activeThread.messages[activeThread.messages.length - 1].from[
+            activeThread.messages[activeThread.messages.length - 1].from
+              .length - 1
+          ],
+        );
+      } else if (message) {
+        contact = await getContact(message.from[message.from.length - 1]);
+      }
+    }
+  })();
 
   let main: Element;
   let messageRefs: Element[] = [];
@@ -95,6 +123,11 @@
       "default",
     );
     is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
+    show_contact_avatar = getPropertyValue(
+      internalProps.show_contact_avatar,
+      show_contact_avatar,
+      true,
+    );
     if (activeThread && click_action === "mailbox") {
       // enables bulk starring action in mailbox to immediately reflect visually
       activeThread = activeThread;
@@ -158,6 +191,30 @@
       },
     );
   }
+
+  // #region get contact for ContactImage
+  let contact_query: ContactSearchQuery;
+  $: contact_query = {
+    component_id: id,
+    access_token,
+  };
+
+  /*
+    Fetches contact for ContactImage component
+  */
+  async function getContact(account) {
+    contact_query["query"] = `?email=${account.email}`;
+    if (id) {
+      let contact = $ContactStore[JSON.stringify(contact_query)];
+      if (!contact) {
+        contact = await ContactStore.addContact(contact_query);
+      }
+      return contact[0] ? contact[0] : { name: account.name };
+    } else {
+      return { name: account.name };
+    }
+  }
+  // #endregion get contact for ContactImage
 
   function saveActiveThread() {
     // if thread and if component_id (security)
@@ -378,6 +435,20 @@
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
+
+      .default-avatar {
+        background: #002db4;
+        border-radius: 50%;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 1rem;
+        font-weight: bold;
+        height: 32px;
+        line-height: 35px;
+        text-align: center;
+        text-transform: uppercase;
+        width: 32px;
+      }
       header {
         font-size: 1.2rem;
         font-weight: 700;
@@ -425,7 +496,6 @@
         }
 
         .thread-message-count {
-          margin-left: 1rem;
           color: var(--grey-light);
           font-size: 12px;
           align-self: center;
@@ -601,14 +671,16 @@
         cursor: pointer;
       }
       .from-message-count {
+        align-items: center;
         display: grid;
-        grid-template-columns: auto auto auto;
+        grid-template-columns: repeat(4, auto);
+        grid-gap: $spacing-m;
         justify-content: flex-start;
-        margin-right: $spacing-s;
+        max-width: 300px;
 
         .from-participants {
           overflow: hidden;
-          max-width: 120px;
+          max-width: 180px;
           white-space: nowrap;
           text-overflow: ellipsis;
         }
@@ -665,7 +737,7 @@
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
-          grid-template-columns: 200px auto;
+          grid-template-columns: 300px auto;
           justify-content: initial;
 
           div.starred {
@@ -882,6 +954,11 @@
                 </div>
               {/if}
               <div class="from-message-count">
+                {#if show_contact_avatar}
+                  <div class="default-avatar">
+                    <nylas-contact-image {contact_query} {contact} />
+                  </div>
+                {/if}
                 <div class="from-participants">
                   {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
                     <span class="from-sub-section"
@@ -939,6 +1016,11 @@
   {:else if message}
     {#if Object.keys(message).length > 0}
       <div class="email-row expanded singular">
+        {#if show_contact_avatar}
+          <div class="default-avatar">
+            <nylas-contact-image {contact_query} {contact} />
+          </div>
+        {/if}
         <header>{message.subject}</header>
         <div class="individual-message expanded">
           <div class="message-head">
