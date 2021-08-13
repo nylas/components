@@ -30,7 +30,7 @@
     Message,
     Account,
   } from "@commons/types/Nylas";
-  import ContactImage from "@commons/components/ContactImage/ContactImage.svelte";
+  import "@commons/components/ContactImage/ContactImage.svelte";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -63,21 +63,23 @@
 
   let contact;
   $: (async () => {
-    if (thread) {
-      contact = await getContact(
-        thread.messages[thread.messages.length - 1].from[
-          thread.messages[thread.messages.length - 1].from.length - 1
-        ],
-      );
-    } else if (activeThread) {
-      contact = await getContact(
-        activeThread.messages[activeThread.messages.length - 1].from[
-          activeThread.messages[activeThread.messages.length - 1].from.length -
-            1
-        ],
-      );
-    } else if (message) {
-      contact = await getContact(message.from[message.from.length - 1]);
+    if (show_contact_avatar) {
+      if (thread) {
+        contact = await getContact(
+          thread.messages[thread.messages.length - 1].from[
+            thread.messages[thread.messages.length - 1].from.length - 1
+          ],
+        );
+      } else if (activeThread) {
+        contact = await getContact(
+          activeThread.messages[activeThread.messages.length - 1].from[
+            activeThread.messages[activeThread.messages.length - 1].from
+              .length - 1
+          ],
+        );
+      } else if (message) {
+        contact = await getContact(message.from[message.from.length - 1]);
+      }
     }
   })();
 
@@ -191,8 +193,8 @@
   }
 
   // #region get contact for ContactImage
-  let contactQuery: ContactSearchQuery;
-  $: contactQuery = {
+  let contact_query: ContactSearchQuery;
+  $: contact_query = {
     component_id: id,
     access_token,
   };
@@ -201,11 +203,11 @@
     Fetches contact for ContactImage component
   */
   async function getContact(account) {
-    contactQuery["query"] = `?email=${account.email}`;
+    contact_query["query"] = `?email=${account.email}`;
     if (id) {
-      let contact = $ContactStore[JSON.stringify(contactQuery)];
+      let contact = $ContactStore[JSON.stringify(contact_query)];
       if (!contact) {
-        contact = await ContactStore.addContact(contactQuery);
+        contact = await ContactStore.addContact(contact_query);
       }
       return contact[0] ? contact[0] : { name: account.name };
     } else {
@@ -954,7 +956,7 @@
               <div class="from-message-count">
                 {#if show_contact_avatar}
                   <div class="default-avatar">
-                    <ContactImage {contactQuery} {contact} />
+                    <nylas-contact-image {contact_query} {contact} />
                   </div>
                 {/if}
                 <div class="from-participants">
@@ -1016,7 +1018,7 @@
       <div class="email-row expanded singular">
         {#if show_contact_avatar}
           <div class="default-avatar">
-            <ContactImage {contactQuery} {contact} />
+            <nylas-contact-image {contact_query} {contact} />
           </div>
         {/if}
         <header>{message.subject}</header>
