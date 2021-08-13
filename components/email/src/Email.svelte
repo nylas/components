@@ -266,13 +266,13 @@
       event: e,
       thread: activeThread,
     });
+    current_tooltip_id = "";
   }
 
   function handleThreadClick(e: MouseEvent) {
     if (message && (!thread_id || !thread)) return;
     e.preventDefault();
     handleThread(e);
-    current_tooltip_id = "";
   }
 
   function handleThreadKeypress(e: KeyboardEvent) {
