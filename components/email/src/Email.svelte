@@ -272,6 +272,7 @@
     if (message && (!thread_id || !thread)) return;
     e.preventDefault();
     handleThread(e);
+    current_tooltip_id = "";
   }
 
   function handleThreadKeypress(e: KeyboardEvent) {
@@ -442,18 +443,8 @@
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
 
-      .default-avatar {
-        background: #002db4;
-        border-radius: 50%;
-        color: #fff;
-        font-family: sans-serif;
-        font-size: 1rem;
-        font-weight: bold;
-        height: 32px;
-        line-height: 35px;
-        text-align: center;
-        text-transform: uppercase;
-        width: 32px;
+      nylas-tooltip {
+        position: relative;
       }
       header {
         font-size: 1.2rem;

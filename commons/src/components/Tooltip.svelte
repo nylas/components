@@ -5,8 +5,13 @@
   import { getEventDispatcher } from "@commons/methods/component";
   const dispatchEvent = getEventDispatcher(get_current_component());
 
+  /**
+   * Add this CSS to the parent component: nylas-tooltip { position: relative; }
+   * This ensures the tooltip is positioned absolutely to the tooltip component rather than the page
+   **/
+
   // #region tooltip props
-  export let current_tooltip_id; // tooltip of currently open tooltip; this toggles other tooltips
+  export let current_tooltip_id; // id of visible tooltip in parent component
   export let content;
   export let id;
   export let icon;
@@ -16,17 +21,21 @@
     current_tooltip_id && current_tooltip_id === id ? true : false;
 
   // send tooltipID to parent component, so it updates the current_tooltip_id prop
-  function dispatchTooltip() {
-    dispatchEvent("toggleTooltip", {
-      tooltipID: id,
-    });
+  function toggleTooltipVisibility() {
+    if (current_tooltip_id !== id) {
+      dispatchEvent("toggleTooltip", {
+        tooltipID: id,
+      });
+    } else {
+      // close the tooltip if user clicks tooltip button again
+      isTooltipVisible = !isTooltipVisible;
+    }
   }
 </script>
 
 <style lang="scss">
   @import "../../../components/theming/variables.scss";
   $spacing-s: 0.5rem;
-
   button.tooltip-trigger {
     background: transparent;
     border: none;
@@ -40,15 +49,17 @@
   }
 
   p.tooltip {
-    position: absolute;
-    width: min-content;
-    z-index: 1;
-    bottom: 0;
     background: var(--grey-lightest);
-    color: var(--grey-dark);
-    padding: $spacing-s;
-    box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
     border-radius: 2px;
+    color: var(--grey-dark);
+    box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
+    left: 50%;
+    padding: $spacing-s;
+    position: absolute;
+    top: 8px;
+    transform: translate(-50%, 0);
+    width: max-content;
+    z-index: 1;
   }
 </style>
 
@@ -58,7 +69,7 @@
   id={`button-${id?.slice(0, 3)}`}
   aria-describedby={id}
   aria-label={isTooltipVisible ? "hide email" : "show email"}
-  on:click|stopPropagation={(e) => dispatchTooltip(e)}
+  on:click|stopPropagation={(e) => toggleTooltipVisibility(e)}
 >
   {#if icon}
     <svelte:component this={icon} class="icon-container" aria-hidden="true" />
