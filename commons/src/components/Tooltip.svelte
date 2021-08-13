@@ -1,23 +1,21 @@
 <svelte:options tag="nylas-tooltip" />
 
-<script>
+<script lang="ts">
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";
   const dispatchEvent = getEventDispatcher(get_current_component());
 
   // #region tooltip props
-  export let currentTooltipID; // tooltip of currently open tooltip; this closes other tooltips
-  $: currentTooltipID; // tooltip of currently open tooltip; this closes other tooltips
-  export let message;
-  $: message;
+  export let current_tooltip_id; // tooltip of currently open tooltip; this toggles other tooltips
+  export let content;
   export let id;
-  $: id;
   export let icon;
   // #endregion tooltip props
 
   $: isTooltipVisible =
-    currentTooltipID && currentTooltipID === id ? true : false;
+    current_tooltip_id && current_tooltip_id === id ? true : false;
 
+  // send tooltipID to parent component, so it updates the current_tooltip_id prop
   function dispatchTooltip() {
     dispatchEvent("toggleTooltip", {
       tooltipID: id,
@@ -30,18 +28,22 @@
   $spacing-s: 0.5rem;
 
   button.tooltip-trigger {
-    position: relative;
-    display: inline-block;
     background: transparent;
+    border: none;
+    box-shadow: none;
     height: 24px;
     width: 24px;
-    padding: 12px;
   }
+
+  button.tooltip-trigger :global(svg) {
+    width: 24px;
+  }
+
   p.tooltip {
     position: absolute;
     width: min-content;
     z-index: 1;
-    top: 125%;
+    bottom: 0;
     background: var(--grey-lightest);
     color: var(--grey-dark);
     padding: $spacing-s;
@@ -53,10 +55,10 @@
 <button
   class="tooltip-trigger"
   aria-expanded={isTooltipVisible ? "true" : "false"}
-  id={`button-${message?.id.slice(0, 3)}`}
+  id={`button-${id?.slice(0, 3)}`}
   aria-describedby={id}
   aria-label={isTooltipVisible ? "hide email" : "show email"}
-  on:click={dispatchTooltip}
+  on:click|stopPropagation={(e) => dispatchTooltip(e)}
 >
   {#if icon}
     <svelte:component this={icon} class="icon-container" aria-hidden="true" />
@@ -64,6 +66,6 @@
 </button>
 {#if isTooltipVisible}
   <p {id} role="tooltip" tabindex="0" class="tooltip">
-    {message?.from[0].email}
+    {content}
   </p>
 {/if}

@@ -413,11 +413,9 @@
     );
   }
 
-  $: currentTooltipID = "";
-  $: console.log("Email component: ", { currentTooltipID });
-
+  let current_tooltip_id: string = "";
   function setTooltip(e) {
-    currentTooltipID = e.detail.tooltipID;
+    current_tooltip_id = e.detail.tooltipID;
   }
 </script>
 
@@ -853,10 +851,10 @@
                           <!-- tooltip component -->
                           <nylas-tooltip
                             on:toggleTooltip={setTooltip}
-                            {message}
                             id={message.id.slice(0, 3)}
-                            {currentTooltipID}
+                            {current_tooltip_id}
                             icon={DropdownSymbol}
+                            content={message.from[0].email}
                           />
                         </div>
                         <div class="message-to">
@@ -873,10 +871,10 @@
                               <!-- tooltip component -->
                               <nylas-tooltip
                                 on:toggleTooltip={setTooltip}
-                                {message}
                                 id={message.id.slice(0, 4)}
-                                {currentTooltipID}
+                                {current_tooltip_id}
                                 icon={DropdownSymbol}
+                                content={to.email}
                               />
                             </span>
                           {/each}
@@ -906,10 +904,10 @@
                         <!-- tooltip component -->
                         <nylas-tooltip
                           on:toggleTooltip={setTooltip}
-                          {message}
                           id={message.id.slice(0, 3)}
-                          {currentTooltipID}
+                          {current_tooltip_id}
                           icon={DropdownSymbol}
+                          content={message.from[0].email}
                         />
                       </div>
                       <div class="message-date">
@@ -1029,10 +1027,10 @@
                 <!-- tooltip component -->
                 <nylas-tooltip
                   on:toggleTooltip={setTooltip}
-                  {message}
                   id={message.id}
-                  {currentTooltipID}
+                  {current_tooltip_id}
                   icon={DropdownSymbol}
+                  content={message.from[0].email}
                 />
               </div>
               {#each message.to as to, i}
@@ -1047,10 +1045,10 @@
                     <!-- tooltip component -->
                     <nylas-tooltip
                       on:toggleTooltip={setTooltip}
-                      {message}
                       id={message.id.slice(0, 3)}
-                      {currentTooltipID}
+                      {current_tooltip_id}
                       icon={DropdownSymbol}
+                      content={to.email}
                     />
                   {/if}
                 </span>
