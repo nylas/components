@@ -31,6 +31,7 @@
     Account,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
+  import Tooltip from "@commons/components/Tooltip.svelte";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -265,6 +266,7 @@
       event: e,
       thread: activeThread,
     });
+    current_tooltip_id = "";
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -411,6 +413,11 @@
       })
     );
   }
+
+  let current_tooltip_id: string = "";
+  function setTooltip(e) {
+    current_tooltip_id = e.detail.tooltipID;
+  }
 </script>
 
 <style lang="scss">
@@ -436,6 +443,9 @@
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border, #{$border-style});
 
+      nylas-tooltip {
+        position: relative;
+      }
       .default-avatar {
         background: #002db4;
         border-radius: 50%;
@@ -541,7 +551,10 @@
       &.expanded {
         background: var(--white);
         padding: 0;
-
+        .icon-container,
+        .icon-container > * {
+          pointer-events: none;
+        }
         &.expanded-mailbox-thread {
           .message-from {
             .name {
@@ -553,31 +566,6 @@
           width: 100%;
           box-sizing: border-box;
           padding: $spacing-s;
-
-          button.email-tooltip-btn {
-            position: relative;
-            display: inline-block;
-            background: transparent;
-
-            span.email-tooltip {
-              position: absolute;
-              visibility: hidden;
-              width: min-content;
-              z-index: 1;
-              top: 125%;
-              background: var(--grey-lightest);
-              color: var(--grey-dark);
-              padding: $spacing-s;
-              box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.25);
-              border-radius: 2px;
-            }
-
-            &:hover {
-              span.email-tooltip {
-                visibility: visible;
-              }
-            }
-          }
 
           &.condensed {
             div.snippet {
@@ -863,11 +851,15 @@
                           <span class="name"
                             >{message.from[0].name ||
                               message.from[0].email}</span
-                          ><button class="email-tooltip-btn"
-                            ><DropdownSymbol /><span class="email-tooltip"
-                              >{message.from[0].email}</span
-                            ></button
                           >
+                          <!-- tooltip component -->
+                          <nylas-tooltip
+                            on:toggleTooltip={setTooltip}
+                            id={message.id.slice(0, 3)}
+                            {current_tooltip_id}
+                            icon={DropdownSymbol}
+                            content={message.from[0].email}
+                          />
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
@@ -878,11 +870,15 @@
                                   : to.name || to.email}
                                 {#if i !== message.to.length - 1}
                                   &nbsp;&comma;
-                                {/if}<button class="email-tooltip-btn"
-                                  ><DropdownSymbol /><span class="email-tooltip"
-                                    >{message.to[0].email}</span
-                                  ></button
-                                >
+                                {/if}
+                                <!-- tooltip component -->
+                                <nylas-tooltip
+                                  on:toggleTooltip={setTooltip}
+                                  id={message.id.slice(0, 4)}
+                                  {current_tooltip_id}
+                                  icon={DropdownSymbol}
+                                  content={to.email}
+                                />
                               {/if}
                             </span>
                           {/each}
@@ -908,12 +904,15 @@
                       <div class="message-from">
                         <span class="name"
                           >{message.from[0].name || message.from[0].email}</span
-                        ><button class="email-tooltip-btn"
-                          ><DropdownSymbol />
-                          <span class="email-tooltip"
-                            >{message.from[0].email}</span
-                          ></button
                         >
+                        <!-- tooltip component -->
+                        <nylas-tooltip
+                          on:toggleTooltip={setTooltip}
+                          id={message.id.slice(0, 3)}
+                          {current_tooltip_id}
+                          icon={DropdownSymbol}
+                          content={message.from[0].email}
+                        />
                       </div>
                       <div class="message-date">
                         <span>
@@ -1029,11 +1028,14 @@
                 <span class="name"
                   >{message.from[0].name || message.from[0].email}</span
                 >
-                <button class="email-tooltip-btn"
-                  ><DropdownSymbol />
-                  <span class="email-tooltip">{message.from[0].email}</span
-                  ></button
-                >
+                <!-- tooltip component -->
+                <nylas-tooltip
+                  on:toggleTooltip={setTooltip}
+                  id={message.id}
+                  {current_tooltip_id}
+                  icon={DropdownSymbol}
+                  content={message.from[0].email}
+                />
               </div>
               <div class="message-to">
                 {#each message.to as to, i}
@@ -1045,11 +1047,14 @@
                       {#if i !== message.to.length - 1}
                         &nbsp;&comma;
                       {/if}
-                      <button class="email-tooltip-btn"
-                        ><DropdownSymbol />
-                        <span class="email-tooltip">{message.to[0].email}</span
-                        ></button
-                      >
+                      <!-- tooltip component -->
+                      <nylas-tooltip
+                        on:toggleTooltip={setTooltip}
+                        id={message.id.slice(0, 3)}
+                        {current_tooltip_id}
+                        icon={DropdownSymbol}
+                        content={to.email}
+                      />
                     {/if}
                   </span>
                 {/each}

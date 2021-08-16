@@ -220,15 +220,23 @@ describe("Email component", () => {
         cy.get(component).find(".message-body").should("contain", "Bye!");
         cy.get(component).find(".name").should("exist");
         cy.get(component).find(".name").should("contain", "Test User");
-        cy.get(component).find(".email-tooltip").should("exist");
+        cy.get(component).find(".email-row.expanded.singular header").click();
         cy.get(component)
-          .find(".email-tooltip")
-          .should("contain", "nylascypresstest@gmail.com");
+          .find("nylas-tooltip")
+          .then((element) => {
+            const tooltip = element[0];
+            cy.get(tooltip).find(".tooltip-trigger").should("exist");
+            cy.get(tooltip).find(".tooltip-trigger").click();
+            cy.get(tooltip)
+              .find(".tooltip")
+              .should("contain", "nylascypresstest@gmail.com");
+            cy.get(tooltip).find(".tooltip-trigger").click();
+            cy.get(tooltip).find(".tooltip").should("not.exist");
+          });
         cy.get(component).find(".message-date span").should("exist");
         cy.get(component)
           .find(".message-date span")
           .should("contain", "July 7");
-        cy.get(component).find(".message-to span").should("exist");
         cy.get(component)
           .find(".message-to span")
           .should("contain", "Pooja Guggari");
@@ -318,6 +326,159 @@ describe("Email component", () => {
           cy.get(component).find(".email-row.expanded header").click();
           cy.get(component).find(".unread").should("not.exist");
         });
+    });
+  });
+
+  describe("Toggle email of sender/recipient", () => {
+    it("When tooltip trigger is clicked", () => {
+      cy.get("nylas-email").then((element) => {
+        const component = element[2];
+        cy.get(component)
+          .find("nylas-tooltip")
+          .then((element) => {
+            const firstTooltip = element[0];
+            cy.get(firstTooltip).find(".tooltip-trigger").should("exist");
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("exist");
+            cy.get(firstTooltip)
+              .find(".tooltip")
+              .should("contain", "nylascypresstest@gmail.com");
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("not.exist");
+          });
+      });
+    });
+    it("Does not show more than one tooltip", () => {
+      cy.get("nylas-email").then((element) => {
+        const component = element[2];
+        cy.get(component)
+          .find("nylas-tooltip")
+          .then((element) => {
+            const firstTooltip = element[0];
+            const secondTooltip = element[1];
+            cy.get(secondTooltip).find(".tooltip").should("not.exist");
+            cy.get(secondTooltip).find(".tooltip-trigger").click();
+            cy.get(secondTooltip).find(".tooltip").should("exist");
+            cy.get(secondTooltip)
+              .find(".tooltip")
+              .should("contain", "pooja.g@nylas.com");
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("exist");
+            cy.get(firstTooltip)
+              .find(".tooltip")
+              .should("contain", "nylascypresstest@gmail.com");
+            cy.get(secondTooltip).find(".tooltip").should("not.exist");
+          });
+      });
+    });
+    it("When tooltip trigger is clicked multiple times", () => {
+      cy.get("nylas-email").then((element) => {
+        const component = element[3];
+        cy.get(component)
+          .find("nylas-tooltip")
+          .then((element) => {
+            const firstTooltip = element[0];
+            cy.get(firstTooltip).find(".tooltip-trigger").should("exist");
+            // first toggle
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("exist");
+            cy.get(firstTooltip)
+              .find(".tooltip")
+              .should("contain", "notifications@github.com");
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("not.exist");
+            // second toggle
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("exist");
+            cy.get(firstTooltip)
+              .find(".tooltip")
+              .should("contain", "notifications@github.com");
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("not.exist");
+            // third toggle
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("exist");
+            cy.get(firstTooltip)
+              .find(".tooltip")
+              .should("contain", "notifications@github.com");
+            cy.get(firstTooltip).find(".tooltip-trigger").click();
+            cy.get(firstTooltip).find(".tooltip").should("not.exist");
+          });
+      });
+    });
+    it("Accessibility attributes are set by default", () => {
+      cy.get("nylas-email").then((element) => {
+        const component = element[2];
+        cy.get(component)
+          .find("nylas-tooltip")
+          .then((element) => {
+            const tooltip = element[0];
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-expanded")
+              .should("eq", "false");
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-label")
+              .should("eq", "show email");
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-describedby")
+              .should("exist");
+            cy.get(tooltip)
+              .find(".tooltip-trigger svg")
+              .invoke("attr", "aria-hidden")
+              .should("eq", "true");
+          });
+      });
+    });
+    it("Accessibility attributes change when tooltip trigger is clicked", () => {
+      cy.get("nylas-email").then((element) => {
+        const component = element[2];
+        cy.get(component)
+          .find("nylas-tooltip")
+          .then((element) => {
+            const tooltip = element[0];
+
+            cy.get(tooltip).find(".tooltip-trigger").click();
+            cy.get(tooltip)
+              .find(".tooltip")
+              .invoke("attr", "tabindex")
+              .should("eq", "0");
+            cy.get(tooltip)
+              .find(".tooltip")
+              .invoke("attr", "role")
+              .should("eq", "tooltip");
+            cy.get(tooltip)
+              .find(".tooltip")
+              .invoke("attr", "id")
+              .then(($tooltipID) => {
+                cy.get(tooltip)
+                  .find(".tooltip-trigger")
+                  .invoke("attr", "aria-describedby")
+                  .then(($ariaDescribedby) => {
+                    expect($tooltipID).to.be.equal($ariaDescribedby);
+                  });
+              });
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-expanded")
+              .should("eq", "true");
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-label")
+              .should("eq", "hide email");
+            cy.get(tooltip).find(".tooltip-trigger").click();
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-expanded")
+              .should("eq", "false");
+            cy.get(tooltip)
+              .find(".tooltip-trigger")
+              .invoke("attr", "aria-label")
+              .should("eq", "show email");
+          });
+      });
     });
   });
 });
