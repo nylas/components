@@ -177,7 +177,7 @@ jobs:
           verbose: true
 
   publish:
-    needs: [build, lint, test-unit, test-cypress]
+    needs: [build, lint, test-unit, type-check, test-cypress]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -200,6 +200,7 @@ jobs:
 
       - name: Configure Git CI User
         run: |
+          npm config set access public
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
