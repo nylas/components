@@ -446,6 +446,19 @@
       nylas-tooltip {
         position: relative;
       }
+      .default-avatar {
+        background: #002db4;
+        border-radius: 50%;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 1rem;
+        font-weight: bold;
+        height: 32px;
+        line-height: 35px;
+        text-align: center;
+        text-transform: uppercase;
+        width: 32px;
+      }
       header {
         font-size: 1.2rem;
         font-weight: 700;
