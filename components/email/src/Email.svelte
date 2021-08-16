@@ -871,15 +871,15 @@
                                 {#if i !== message.to.length - 1}
                                   &nbsp;&comma;
                                 {/if}
+                                <!-- tooltip component -->
+                                <nylas-tooltip
+                                  on:toggleTooltip={setTooltip}
+                                  id={message.id.slice(0, 4)}
+                                  {current_tooltip_id}
+                                  icon={DropdownSymbol}
+                                  content={to.email}
+                                />
                               {/if}
-                              <!-- tooltip component -->
-                              <nylas-tooltip
-                                on:toggleTooltip={setTooltip}
-                                id={message.id.slice(0, 4)}
-                                {current_tooltip_id}
-                                icon={DropdownSymbol}
-                                content={to.email}
-                              />
                             </span>
                           {/each}
                         </div>
@@ -1037,26 +1037,28 @@
                   content={message.from[0].email}
                 />
               </div>
-              {#each message.to as to, i}
-                <span>
-                  {#if to.name || to.email || you.email_address}
-                    to&colon;&nbsp;{to.email === you.email_address
-                      ? "me"
-                      : to.name || to.email}
-                    {#if i !== message.to.length - 1}
-                      &nbsp;&comma;
+              <div class="message-to">
+                {#each message.to as to, i}
+                  <span>
+                    {#if to.name || to.email || you.email_address}
+                      to&colon;&nbsp;{to.email === you.email_address
+                        ? "me"
+                        : to.name || to.email}
+                      {#if i !== message.to.length - 1}
+                        &nbsp;&comma;
+                      {/if}
+                      <!-- tooltip component -->
+                      <nylas-tooltip
+                        on:toggleTooltip={setTooltip}
+                        id={message.id.slice(0, 3)}
+                        {current_tooltip_id}
+                        icon={DropdownSymbol}
+                        content={to.email}
+                      />
                     {/if}
-                    <!-- tooltip component -->
-                    <nylas-tooltip
-                      on:toggleTooltip={setTooltip}
-                      id={message.id.slice(0, 3)}
-                      {current_tooltip_id}
-                      icon={DropdownSymbol}
-                      content={to.email}
-                    />
-                  {/if}
-                </span>
-              {/each}
+                  </span>
+                {/each}
+              </div>
             </div>
             <div class="message-date">
               <span> {formatPreviewDate(new Date(message.date * 1000))}</span>

@@ -238,7 +238,7 @@ describe("Email component", () => {
           .find(".message-date span")
           .should("contain", "July 7");
         cy.get(component)
-          .find(".message-from-to span")
+          .find(".message-to span")
           .should("contain", "Pooja Guggari");
       });
   });
