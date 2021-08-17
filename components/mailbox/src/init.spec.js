@@ -232,12 +232,12 @@ describe("MailBox  component", () => {
 
     it("Shows and hides Mailbox actions bar", () => {
       cy.get("nylas-mailbox").then(([el]) => {
-        el.actionsBar = ["selectall", "star", "delete", "unread"];
+        el.actions_bar = ["selectall", "star", "delete", "unread"];
         cy.get(el).find("div[role='toolbar']").should("exist");
       });
 
       cy.get("nylas-mailbox").then(([el]) => {
-        el.actionsBar = [];
+        el.actions_bar = [];
         cy.get(el).find("div[role='toolbar']").should("not.exist");
       });
     });
@@ -307,7 +307,7 @@ describe("MailBox  component", () => {
         .then((element) => {
           const component = element[0];
           component.all_threads = threads;
-          component.actionsBar = ["delete"];
+          component.actions_bar = ["delete"];
           cy.get("nylas-email").should("have.length", threads.length);
           cy.get(component)
             .find("div.checkbox-container")
@@ -330,7 +330,7 @@ describe("MailBox  component", () => {
         .then((element) => {
           const component = element[0];
           component.all_threads = threads;
-          component.actionsBar = ["selectall", "unread", "delete", "star"];
+          component.actions_bar = ["selectall", "unread", "delete", "star"];
           cy.get(component)
             .get("div[role='toolbar']")
             .find("div")
@@ -354,7 +354,7 @@ describe("MailBox  component", () => {
         .then((element) => {
           const component = element[0];
           component.all_threads = threads;
-          component.actionsBar = ["selectall", "unread"];
+          component.actions_bar = ["selectall", "unread"];
 
           cy.get(component)
             .find("div[role='toolbar']")
@@ -411,7 +411,7 @@ describe("MailBox  component", () => {
         .then((element) => {
           const component = element[0];
           component.all_threads = threads;
-          component.actionsBar = ["selectall", "star"];
+          component.actions_bar = ["selectall", "star"];
           cy.get(component)
             .find("div[role='toolbar']")
             .find("div.thread-checkbox")
@@ -467,7 +467,7 @@ describe("MailBox  component", () => {
         .then((element) => {
           const component = element[0];
           component.all_threads = threads;
-          component.actionsBar = ["selectall", "delete"];
+          component.actions_bar = ["selectall", "delete"];
           cy.get(component)
             .find("div[role='toolbar']")
             .find("div.thread-checkbox")
