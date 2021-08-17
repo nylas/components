@@ -18,6 +18,7 @@ export const fetchAvailability = async (
     getFetchConfig({
       method: "POST",
       component_id: query.component_id,
+      access_token: query.access_token,
       body: query.body,
     }),
   )
