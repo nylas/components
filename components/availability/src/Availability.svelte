@@ -314,6 +314,7 @@
           new Date(new Date(endDay).setHours(end_hour)).getTime() / 1000,
       },
       component_id: id,
+      access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
     const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
