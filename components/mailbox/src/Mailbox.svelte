@@ -40,7 +40,7 @@
   export let show_thread_checkbox: boolean = true;
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
-  export let actionsBar: MailboxActions[];
+  export let actions_bar: MailboxActions[];
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
 
@@ -126,7 +126,7 @@
       13,
     );
     header = getPropertyValue(internalProps.header, header, null);
-    actionsBar = getPropertyValue(internalProps.actionsBar, actionsBar, []);
+    actions_bar = getPropertyValue(internalProps.actions_bar, actions_bar, []);
   }
 
   // Reactive statement to continuously fetch all_threads
@@ -612,13 +612,13 @@
           <h1>{header}</h1>
         </header>
       {/if}
-      {#if actionsBar.length}
+      {#if actions_bar.length}
         <div
           role="toolbar"
           aria-label="Bulk actions"
           aria-controls="mailboxlist"
         >
-          {#if show_thread_checkbox && actionsBar.includes("selectall")}<div
+          {#if show_thread_checkbox && actions_bar.includes("selectall")}<div
               class="thread-checkbox"
             >
               {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
@@ -633,7 +633,7 @@
             </div>
           {/if}
           {#if selectedThreads.size}
-            {#if actionsBar.includes("delete")}
+            {#if actions_bar.includes("delete")}
               <div class="delete">
                 <button
                   title="Delete selected email(s)"
@@ -642,7 +642,7 @@
                 >
               </div>
             {/if}
-            {#if show_star && actionsBar.includes("star")}
+            {#if show_star && actions_bar.includes("star")}
               <div class="starred">
                 {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
                   <button
@@ -655,7 +655,7 @@
                   />
                 {/each}
               </div>{/if}
-            {#if actionsBar.includes("unread")}
+            {#if actions_bar.includes("unread")}
               <div class="read-status">
                 {#if areAllSelectedUnread}
                   <button
