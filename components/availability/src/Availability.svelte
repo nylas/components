@@ -8,7 +8,11 @@
   } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
-  import { getEventDispatcher } from "@commons/methods/component";
+  import {
+    getEventDispatcher,
+    getPropertyValue,
+    buildInternalProps,
+  } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
   import {
     timeSaturday,
@@ -53,7 +57,8 @@
   export let show_weekends: boolean = true;
   //#endregion props
 
-  //#region mount
+  //#region mount and prop initialization
+  let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
   $: calendarID = "";
   onMount(async () => {
@@ -61,6 +66,9 @@
     clientHeight = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
+
+    internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
+
     const calendarQuery: CalendarQuery = {
       access_token,
       component_id: id,
@@ -69,7 +77,62 @@
     const calendarsList = await CalendarStore.getCalendars(calendarQuery);
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
-  //#endregion mount
+
+  $: {
+    const rebuiltProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<Manifest>;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
+      internalProps = rebuiltProps;
+    }
+  }
+
+  $: {
+    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
+    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
+    slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
+    start_date = getPropertyValue(
+      internalProps.start_date,
+      start_date,
+      new Date(),
+    );
+    dates_to_show = getPropertyValue(
+      internalProps.dates_to_show,
+      dates_to_show,
+      1,
+    );
+    calendars = getPropertyValue(internalProps.calendars, calendars, []);
+    show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
+    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
+    allow_booking = getPropertyValue(
+      internalProps.allow_booking,
+      allow_booking,
+      false,
+    );
+    max_bookable_slots = getPropertyValue(
+      internalProps.max_bookable_slots,
+      max_bookable_slots,
+      1,
+    );
+    partial_bookable_ratio = getPropertyValue(
+      internalProps.partial_bookable_ratio,
+      partial_bookable_ratio,
+      0,
+    );
+    show_as_week = getPropertyValue(
+      internalProps.show_as_week,
+      show_as_week,
+      false,
+    );
+    show_weekends = getPropertyValue(
+      internalProps.show_weekends,
+      show_weekends,
+      false,
+    );
+  }
+
+  //#endregion mount and prop initialization
 
   const dispatchEvent = getEventDispatcher(get_current_component());
 
