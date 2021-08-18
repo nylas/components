@@ -42,19 +42,19 @@
   //#region props
   export let id: string = "";
   export let access_token: string = "";
-  export let start_hour: number = 0;
-  export let end_hour: number = 24;
-  export let slot_size: number = 15; // in minutes
-  export let start_date: Date = new Date();
-  export let dates_to_show: number = 1;
-  export let calendars: Calendar[] = [];
-  export let show_ticks: boolean = true;
-  export let email_ids: string[] = [];
-  export let allow_booking: boolean = false;
-  export let max_bookable_slots: number = 1;
-  export let partial_bookable_ratio: number = 0;
-  export let show_as_week: boolean = false;
-  export let show_weekends: boolean = true;
+  export let start_hour: number;
+  export let end_hour: number;
+  export let slot_size: number; // in minutes
+  export let start_date: Date;
+  export let dates_to_show: number;
+  export let calendars: Calendar[];
+  export let show_ticks: boolean;
+  export let email_ids: string[];
+  export let allow_booking: boolean;
+  export let max_bookable_slots: number;
+  export let partial_bookable_ratio: number;
+  export let show_as_week: boolean;
+  export let show_weekends: boolean;
   //#endregion props
 
   //#region mount and prop initialization
