@@ -128,7 +128,7 @@
     show_weekends = getPropertyValue(
       internalProps.show_weekends,
       show_weekends,
-      false,
+      true,
     );
   }
 
