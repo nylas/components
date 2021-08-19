@@ -87,6 +87,8 @@
   let main: Element;
   let messageRefs: Element[] = [];
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
+  const MAX_DESKTOP_PARTICIPANTS = 2;
+  const MAX_MOBILE_PARTICIPANTS = 1;
 
   let internalProps: SvelteAllProps;
   $: {
@@ -1042,7 +1044,7 @@
                     {#if activeThread.participants.length >= 2}
                       <span class="show-on-mobile"
                         >&nbsp; &plus; {activeThread.participants.length -
-                          1}</span
+                          MAX_MOBILE_PARTICIPANTS}</span
                       >
                     {/if}
                     <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
@@ -1051,7 +1053,7 @@
                     {#if activeThread.participants.length > 2}
                       <span class="show-on-desktop"
                         >&nbsp; &plus; {activeThread.participants.length -
-                          2}</span
+                          MAX_DESKTOP_PARTICIPANTS}</span
                       >
                     {/if}
                   </div>
