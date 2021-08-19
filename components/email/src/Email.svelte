@@ -153,7 +153,7 @@
   $: if (!thread_id && !thread && id && message_id) {
     fetchOneMessage();
   }
-  $: console.log(activeThread);
+
   // #region thread intake and set
   // The trick is to always ensure that activeThread is in the store; that way if we need to do fetches to update its messages, it too will be updated for free.
   // TODO: this feels like it could be a "$: activeThread =" reactive prop declaration instead of a conditional block. -Phil
@@ -418,6 +418,22 @@
   let current_tooltip_id: string = "";
   function setTooltip(e: any) {
     current_tooltip_id = e.detail.tooltipID;
+  }
+
+  function showFirstFromParticipant(messages: Message[]) {
+    return messages.length >= 1 && messages[messages.length - 1].from.length;
+  }
+
+  function showSecondFromParticipant(
+    messages: Message[],
+    participants: Participant[],
+  ) {
+    return (
+      messages.length > 1 &&
+      participants.length >= 2 &&
+      messages[0].from.length &&
+      participants[0].email !== messages[messages.length - 1].from[0].email
+    );
   }
 </script>
 
@@ -1004,7 +1020,7 @@
                 {/if}
                 <div class="from-participants">
                   <div class="participants-name">
-                    {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
+                    {#if showFirstFromParticipant(activeThread.messages)}
                       <span class="from-sub-section"
                         >{activeThread.messages[
                           activeThread.messages.length - 1
@@ -1014,7 +1030,7 @@
                           ].from[0].email}</span
                       >
                     {/if}
-                    {#if activeThread.messages.length > 1 && activeThread.participants.length >= 2 && activeThread.messages[0].from.length && activeThread.participants[0].email !== activeThread.messages[activeThread.messages.length - 1].from[0].email}
+                    {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
                       <span class="from-sub-section second"
                         >, {activeThread.participants[0].name ||
                           activeThread.participants[0].email}</span
