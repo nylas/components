@@ -13,7 +13,7 @@
     fetchContactsByQuery,
     ContactStore,
   } from "@commons";
-  import type { ContactSearchQuery } from "@commons/types/Contacts";
+  import type { ContactSearchQuery, Contact } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -62,10 +62,10 @@
     ]) || {}) as EmailProperties;
   });
 
-  let contact;
+  let contact: Contact | { name: any };
   $: (async () => {
     if (!contact) {
-      if (thread) {
+      if (thread && thread.messages) {
         contact = await getContact(
           thread.messages[thread.messages.length - 1].from[
             thread.messages[thread.messages.length - 1].from.length - 1
@@ -87,6 +87,8 @@
   let main: Element;
   let messageRefs: Element[] = [];
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
+  const MAX_DESKTOP_PARTICIPANTS = 2;
+  const MAX_MOBILE_PARTICIPANTS = 1;
 
   let internalProps: SvelteAllProps;
   $: {
@@ -198,12 +200,13 @@
   $: contact_query = {
     component_id: id,
     access_token,
+    query: "",
   };
 
   /*
     Fetches contact for ContactImage component
   */
-  async function getContact(account) {
+  async function getContact(account: any) {
     contact_query["query"] = `?email=${account.email}`;
     if (id) {
       let contact = $ContactStore[JSON.stringify(contact_query)];
@@ -415,8 +418,24 @@
   }
 
   let current_tooltip_id: string = "";
-  function setTooltip(e) {
+  function setTooltip(e: any) {
     current_tooltip_id = e.detail.tooltipID;
+  }
+
+  function showFirstFromParticipant(messages: Message[]) {
+    return messages.length >= 1 && messages[messages.length - 1].from.length;
+  }
+
+  function showSecondFromParticipant(
+    messages: Message[],
+    participants: Participant[],
+  ) {
+    return (
+      messages.length > 1 &&
+      participants.length >= 2 &&
+      messages[0].from.length &&
+      participants[0].email !== messages[messages.length - 1].from[0].email
+    );
   }
 </script>
 
@@ -468,15 +487,17 @@
       &.condensed {
         height: $mobile-collapsed-height;
         padding: $spacing-s;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         flex-wrap: wrap;
-
+        display: grid;
+        align-items: center;
+        grid-template-areas:
+          "from-star subject-snippet-date"
+          "mobile-subject-snippet mobile-subject-snippet";
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
           column-gap: $spacing-s;
+          grid-area: from-star;
         }
 
         .mobile-subject-snippet {
@@ -484,12 +505,12 @@
           font-size: 14px;
           margin-top: $spacing-s;
           flex-basis: 100%;
-
+          grid-area: mobile-subject-snippet;
           .subject {
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
-            max-width: 80vw;
+            max-width: 90vw;
             display: block;
             word-break: keep-all;
           }
@@ -499,7 +520,7 @@
             overflow: hidden;
             white-space: nowrap;
             display: block;
-            max-width: 80vw;
+            max-width: 90vw;
             color: var(--grey);
             margin-top: 4px;
           }
@@ -664,16 +685,29 @@
         grid-template-columns: repeat(4, auto);
         grid-gap: $spacing-m;
         justify-content: flex-start;
-        max-width: 300px;
+        max-width: 350px;
 
         .from-participants {
-          overflow: hidden;
-          max-width: 180px;
-          white-space: nowrap;
-          text-overflow: ellipsis;
+          max-width: 220px;
+          display: grid;
+          grid-template-columns: 1fr 40px;
+          .participants-name {
+            .from-sub-section.second {
+              display: none;
+            }
+          }
+          .participants-count {
+            .show-on-mobile {
+              display: inline-block;
+            }
+            .show-on-desktop {
+              display: none;
+            }
+          }
         }
       }
       .subject-snippet-date {
+        grid-area: subject-snippet-date;
         .desktop-subject-snippet {
           display: none;
         }
@@ -711,6 +745,33 @@
   @media #{$desktop} {
     main {
       .email-row {
+        .from-message-count {
+          .from-participants {
+            .participants-name {
+              overflow: hidden;
+              white-space: nowrap;
+              position: relative;
+              .from-sub-section.second {
+                display: inline-block;
+              }
+              &::after {
+                content: ".";
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                background: #fff;
+              }
+            }
+            .participants-count {
+              .show-on-mobile {
+                display: none;
+              }
+              .show-on-desktop {
+                display: inline-block;
+              }
+            }
+          }
+        }
         header {
           padding: $spacing-m $spacing-l 0;
         }
@@ -725,7 +786,8 @@
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
-          grid-template-columns: 300px auto;
+          grid-template-areas: "from-star subject-snippet-date";
+          grid-template-columns: 350px auto;
           justify-content: initial;
 
           div.starred {
@@ -959,21 +1021,42 @@
                   </div>
                 {/if}
                 <div class="from-participants">
-                  {#if activeThread.messages.length >= 1 && activeThread.messages[activeThread.messages.length - 1].from.length}
-                    <span class="from-sub-section"
-                      >{activeThread.messages[activeThread.messages.length - 1]
-                        .from[0].name ||
-                        activeThread.messages[activeThread.messages.length - 1]
-                          .from[0].email}</span
-                    >
-                  {/if}
-                  {#if activeThread.messages.length > 1 && activeThread.messages[0].from.length && activeThread.messages[0].from[0].email !== activeThread.messages[activeThread.messages.length - 1].from[0].email}
-                    ,
-                    <span class="from-sub-section"
-                      >{activeThread.messages[0].from[0].name ||
-                        activeThread.messages[0].from[0].email}</span
-                    >
-                  {/if}
+                  <div class="participants-name">
+                    {#if showFirstFromParticipant(activeThread.messages)}
+                      <span class="from-sub-section"
+                        >{activeThread.messages[
+                          activeThread.messages.length - 1
+                        ].from[0].name ||
+                          activeThread.messages[
+                            activeThread.messages.length - 1
+                          ].from[0].email}</span
+                      >
+                    {/if}
+                    {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
+                      <span class="from-sub-section second"
+                        >, {activeThread.participants[0].name ||
+                          activeThread.participants[0].email}</span
+                      >
+                    {/if}
+                  </div>
+                  <div class="participants-count">
+                    <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
+                    {#if activeThread.participants.length >= 2}
+                      <span class="show-on-mobile"
+                        >&nbsp; &plus; {activeThread.participants.length -
+                          MAX_MOBILE_PARTICIPANTS}</span
+                      >
+                    {/if}
+                    <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
+                    Note that this might not be exactly correct if the name of the first participant is too long 
+                    and occupies entire width -->
+                    {#if activeThread.participants.length > 2}
+                      <span class="show-on-desktop"
+                        >&nbsp; &plus; {activeThread.participants.length -
+                          MAX_DESKTOP_PARTICIPANTS}</span
+                      >
+                    {/if}
+                  </div>
                 </div>
                 {#if activeThread.messages.length > 1 && show_number_of_messages}
                   <span class="thread-message-count"
