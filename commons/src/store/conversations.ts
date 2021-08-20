@@ -1,14 +1,32 @@
 import { writable } from "svelte/store";
+import { fetchThread } from "../connections/threads";
 import type {
   Conversation,
   StoredConversation,
+  ConversationQuery,
   StoredMessage,
 } from "@commons/types/Nylas";
 
 function initializeConversations() {
   const { subscribe, set, update } = writable<Record<string, Conversation>>({});
+
+  let threadsMap: Record<string, Thread> = {};
+
   return {
     subscribe,
+    // getConversation: mimicking store/events' getEvents()
+    getConversation: async (query: ConversationQuery) => {
+      const queryKey = JSON.stringify(query);
+      if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {
+        threadsMap[queryKey] = fetchThread(query);
+        update((threads) => {
+          threads[queryKey] = threadsMap[queryKey];
+          return { ...threads };
+        });
+      }
+      return await threadsMap[queryKey];
+    },
+
     addThread: (incomingThread: StoredConversation) => {
       update((thread) => {
         thread[incomingThread.queryKey] = incomingThread.data;
