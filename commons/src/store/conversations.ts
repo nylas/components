@@ -10,7 +10,7 @@ import type {
 function initializeConversations() {
   const { subscribe, set, update } = writable<Record<string, Conversation>>({});
 
-  let threadsMap: Record<string, Thread> = {};
+  const threadsMap: Record<string, Conversation> = {};
 
   return {
     subscribe,
@@ -18,7 +18,7 @@ function initializeConversations() {
     getConversation: async (query: ConversationQuery) => {
       const queryKey = JSON.stringify(query);
       if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {
-        threadsMap[queryKey] = fetchThread(query);
+        threadsMap[queryKey] = await fetchThread(query);
         update((threads) => {
           threads[queryKey] = threadsMap[queryKey];
           return { ...threads };
