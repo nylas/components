@@ -7,10 +7,8 @@
     fetchContactImage,
     sendMessage,
     fetchContactsByQuery,
-    fetchThread,
     fetchAccount,
     fetchCleanConversations,
-    sendCleanConversationFeedback,
   } from "@commons";
   import { afterUpdate } from "svelte";
   import { get_current_component } from "svelte/internal";
@@ -23,8 +21,6 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
-
-  import FeedbackIcon from "./feedback.svg";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -114,13 +110,11 @@
 
   //#endregion Contacts
 
-  function setConversation() {
+  async function setConversation() {
     if (query.component_id && query.thread_id) {
       status = "loading";
-      fetchThread(query).then(() => {
-        conversation = $ConversationStore[queryKey];
-        status = "loaded";
-      });
+      conversation = await ConversationStore.getConversation(query);
+      status = "loaded";
     }
   }
 
@@ -208,17 +202,6 @@
     return true;
   }
 
-  let feedbackSubmittedMessages: string[] = [];
-
-  function sendFeedback(message_id: string) {
-    sendCleanConversationFeedback({ component_id: id, message_id }).then(
-      (results) => {
-        feedbackSubmittedMessages.push(message_id);
-        feedbackSubmittedMessages = [...feedbackSubmittedMessages];
-      },
-    );
-  }
-
   //#endregion Clean Conversation
   const scrollToBottom = () => {
     let scrollHeight;
@@ -293,9 +276,6 @@
         max-height: 50vh;
         overflow: auto;
         position: relative;
-        .submit-for-feedback {
-          display: none;
-        }
       }
       .contact {
         display: flex;
@@ -419,32 +399,6 @@
       }
     }
   }
-
-  @media #{$desktop} {
-    .messages .message .body {
-      padding-right: calc(2rem + 24px);
-      .submit-for-feedback {
-        display: block;
-        margin: 0.5rem 1rem;
-        cursor: pointer;
-        position: absolute;
-        right: 0;
-        top: 0;
-        .feedback-icon {
-          width: 24px;
-          height: 24px;
-        }
-        &.submitted {
-          color: green;
-          display: block;
-          cursor: normal;
-          font-size: 0.8rem;
-          font-style: italic;
-          background-color: transparent;
-        }
-      }
-    }
-  }
 </style>
 
 <nylas-error {id} />
@@ -521,17 +475,6 @@
                       </p>
                     {:else}
                       <p class="snippet">{message.snippet}</p>
-                    {/if}
-                    {#if !feedbackSubmittedMessages.includes(message.id)}
-                      <span
-                        on:click={() => sendFeedback(message.id)}
-                        class="submit-for-feedback"
-                        title="Message doesn't look quite right? Click here to let us know"
-                      >
-                        <FeedbackIcon class="feedback-icon" />
-                      </span>
-                    {:else}
-                      <span class="submit-for-feedback submitted">Thanks!</span>
                     {/if}
                   </div>
                 </article>
