@@ -79,7 +79,7 @@
       component_id: id,
       calendarIDs: [], // empty array will fetch all calendars
     };
-    const calendarsList = await CalendarStore.getCalendars(calendarQuery);
+    const calendarsList = await CalendarStore.getCalendars(calendarQuery); // TODO: we probably dont want to expose a list of all a users calendars to the end-user here.
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
