@@ -1,17 +1,24 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import { ManifestStore, EventStore } from "../../../commons/src";
+  import {
+    ManifestStore,
+    EventStore,
+    AvailabilityStore,
+  } from "../../../commons/src";
+  import { createEvent } from "@commons/connections/events";
+
   import { onMount, tick } from "svelte";
   import "../../availability/src/Availability.svelte";
 
   import {
-    getEventDispatcher,
     getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
 
   import type { Manifest } from "@commons/types/Scheduler";
+  import type { TimeSlot } from "@commons/types/Availability";
+  import type { TimespanEvent, EventQuery } from "@commons/types/Events";
 
   // #region props
   export let id: string = "";
@@ -52,37 +59,39 @@
   }
   // #endregion mount and prop initialization
 
-  let timeSlots = [];
-  let calendarID = "";
+  let timeSlots: TimeSlot[] = [];
+  // let calendarID = "";
 
-  function timeSlotChosen({ detail }) {
-    console.log(
-      "timeslots chosen",
-      detail.timeSlots,
-      detail.calendarID,
-      detail,
-    );
+  function timeSlotChosen({ detail }: CustomEvent) {
     timeSlots = detail.timeSlots;
-    calendarID = detail.calendarID;
+    // calendarID = detail.calendarID;
   }
 
-  function bookTimeSlots(events) {
-    events.forEach((event) => {
-      console.log("booking", event);
-      let postableEvent = {
+  async function bookTimeSlots(events: TimeSlot[]) {
+    const bookings = events.map(async (event) => {
+      let postableEvent: Partial<TimespanEvent> = {
         title: "My test event",
-        calendar_id: calendarID,
+        participants: [], // TODO: add to the participants array from availbility.event.available_calendars
+        calendar_id: event.calendar_id,
         when: {
           start_time: event.start_time.getTime() / 1000,
           end_time: event.end_time.getTime() / 1000,
         },
       };
-      EventStore.createEvent(postableEvent, {
-        component_id: id,
-        access_token,
-        calendarIDs: [calendarID],
-      });
+      return await createEvent(
+        postableEvent as TimespanEvent,
+        {
+          component_id: id,
+          access_token,
+        } as EventQuery,
+      );
     });
+    await Promise.all(bookings);
+    timeSlots = [];
+    // Reset the Availability store and force a re-render
+    // TODO: it's possible that this isn't good enough / will involve a race condition between provider sync and return. Need to test.
+    AvailabilityStore.reset();
+    availability_id = availability_id;
   }
 </script>
 

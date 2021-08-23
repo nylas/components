@@ -223,6 +223,7 @@
 
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
+          calendar_id: calendarID,
           availability: availability,
           available_calendars: freeCalendars,
           start_time: time,
@@ -389,7 +390,7 @@
     });
 
   $: if (sortedSlots.length) {
-    dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots, calendarID });
+    dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
   }
   // #endregion timeSlot selection
 
