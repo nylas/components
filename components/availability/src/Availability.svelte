@@ -373,16 +373,21 @@
       const prevSlot = slotList[slotList.length - 1];
       if (
         prevSlot &&
-        (slot.start_time.getTime() === prevSlot.end_time.getTime() ||
-          (slot.start_time.getTime() >= prevSlot.start_time.getTime() &&
-            slot.end_time.getTime() <= prevSlot.end_time.getTime()))
+        slot.start_time.getTime() ===
+          prevSlot[prevSlot.length - 1].end_time.getTime()
       ) {
-        prevSlot.end_time = slot.end_time;
+        prevSlot.push(slot);
       } else {
-        slotList.push(slot);
+        slotList.push([slot]);
       }
       return slotList;
-    }, [] as SelectableSlot[]);
+    }, [] as SelectableSlot[][])
+    .map((slotList) => {
+      return {
+        ...slotList[0],
+        end_time: slotList[slotList.length - 1].end_time,
+      };
+    });
 
   $: if (sortedSlots.length) {
     dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
@@ -423,8 +428,9 @@
       access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay =
-      await AvailabilityStore.getAvailability(availabilityQuery);
+    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
+      availabilityQuery,
+    );
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
