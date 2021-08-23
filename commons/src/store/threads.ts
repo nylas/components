@@ -1,10 +1,15 @@
 import { derived, writable } from "svelte/store";
-import { fetchThread, fetchThreads } from "../connections/threads";
+import {
+  fetchThread,
+  fetchThreads,
+  updateThread,
+} from "../connections/threads";
 import type {
   Thread,
   MailboxQuery,
   ConversationQuery,
   Message,
+  Conversation,
 } from "@commons/types/Nylas";
 
 function initializeThreads() {
@@ -31,7 +36,20 @@ function initializeThreads() {
       });
       return threadsMap[queryKey];
     },
-
+    updateThread: async (
+      threadQuery: ConversationQuery,
+      queryKey: string,
+      updatedThread: Conversation,
+    ) => {
+      await updateThread(threadQuery, updatedThread).then((thread) => {
+        threadsMap[queryKey] = threadsMap[queryKey].map((_thread) => {
+          if (_thread.id === thread.id) {
+            _thread = Object.assign(_thread, thread);
+          }
+          return _thread;
+        });
+      });
+    },
     getThread: async (query: ConversationQuery) => {
       const queryKey = JSON.stringify(query);
       if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {

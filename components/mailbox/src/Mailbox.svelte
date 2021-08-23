@@ -8,7 +8,7 @@
     getEventDispatcher,
     getPropertyValue,
   } from "@commons/methods/component";
-  import { MailboxStore, Threads } from "@commons/store/threads";
+  import { MailboxStore } from "@commons/store/threads";
   import "../../email/src/Email.svelte";
   import "./components/PaginationNav.svelte";
   import { AccountStore } from "@commons/store/accounts";
@@ -25,7 +25,9 @@
     MailboxQuery,
     Message,
     Account,
+    ConversationQuery,
   } from "@commons/types/Nylas";
+  import Conversation from "components/conversation/src/Conversation.svelte";
   type MailboxActions = "selectall" | "delete" | "star" | "unread";
 
   let manifest: Partial<EmailProperties> = {};
@@ -84,7 +86,7 @@
       unreadThreads = new Set(inboxThreads.filter((thread) => thread.unread));
     }
     paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
-    lastPage = Math.ceil(inboxThreads.length / items_per_page);
+    lastPage = Math.ceil(inboxThreads?.length / items_per_page);
     hasComponentLoaded = true;
   });
 
@@ -93,7 +95,7 @@
     if (!inboxThreads) {
       inboxThreads = threads;
     } // TODO: filter out threads in trash folder
-    lastPage = Math.ceil(inboxThreads.length / items_per_page);
+    lastPage = Math.ceil(inboxThreads?.length / items_per_page);
     if (currentPage > lastPage && lastPage !== 0) {
       currentPage = lastPage;
     }
@@ -165,7 +167,6 @@
   function fetchIndividualMessage(message: Message) {
     // messageLoadStatus[msgIndex] = "loading";
     return fetchMessage(query, message.id).then((json) => {
-      console.log("message back?", json);
       message.body = json.body;
       return message;
     });
@@ -175,7 +176,7 @@
 
   //#region actions
   let selectedThreads = new Set<Thread>();
-  $: areAllSelected = selectedThreads.size >= inboxThreads.length;
+  $: areAllSelected = selectedThreads.size >= inboxThreads?.length;
   let starredThreads = new Set<Thread>();
   $: areAllSelectedStarred = checkIfSelectionBelongsToSet(
     selectedThreads,
@@ -195,10 +196,23 @@
     }
   }
 
+  async function updateThreadUnreadStatus(updatedThread: any) {
+    if (id && updatedThread && updatedThread.id) {
+      const threadQuery = {
+        component_id: id,
+        thread_id: updatedThread.id,
+      };
+      await MailboxStore.updateThread(threadQuery, queryKey, updatedThread);
+    }
+  }
   async function threadClicked(event: CustomEvent) {
-    // console.debug('thread clicked from mailbox', event.detail);
+    console.debug("thread clicked from mailbox", event.detail);
     if (event.detail.thread?.expanded) {
       openedEmailData = event.detail.thread;
+      if (event.detail.thread.unread) {
+        event.detail.thread.unread = false;
+        updateThreadUnreadStatus(event.detail.thread);
+      }
       let message = await fetchIndividualMessage(
         event.detail.thread.messages[event.detail.thread.messages.length - 1],
       );
@@ -295,11 +309,13 @@
       selectedThreads.forEach((t) => {
         unreadThreads.delete(t);
         t.unread = false;
+        updateThreadUnreadStatus(t);
       });
     } else {
       selectedThreads.forEach((t) => {
         unreadThreads.add(t);
         t.unread = true;
+        updateThreadUnreadStatus(t);
       });
     }
     return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
@@ -703,6 +719,7 @@
                   {you}
                   {show_star}
                   click_action="mailbox"
+                  show_contact_avatar={true}
                   unread={unreadThreads.has(thread)}
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
@@ -721,7 +738,7 @@
             {/if} is empty!
           </div>
         {/each}
-        {#if threads.length > 0 && paginatedThreads}
+        {#if threads && threads.length > 0 && paginatedThreads}
           <pagination-nav
             current_page={currentPage}
             last_page={lastPage}
