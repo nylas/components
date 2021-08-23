@@ -367,27 +367,21 @@
       ),
     )
     .flat();
+
   $: sortedSlots = slotSelection
     .sort((a, b) => a.start_time.getTime() - b.start_time.getTime())
     .reduce((slotList, slot) => {
       const prevSlot = slotList[slotList.length - 1];
       if (
         prevSlot &&
-        slot.start_time.getTime() ===
-          prevSlot[prevSlot.length - 1].end_time.getTime()
+        slot.start_time.getTime() === prevSlot.end_time.getTime()
       ) {
-        prevSlot.push(slot);
+        prevSlot.end_time = slot.end_time;
       } else {
-        slotList.push([slot]);
+        slotList.push({ ...slot });
       }
       return slotList;
-    }, [] as SelectableSlot[][])
-    .map((slotList) => {
-      return {
-        ...slotList[0],
-        end_time: slotList[slotList.length - 1].end_time,
-      };
-    });
+    }, [] as SelectableSlot[]);
 
   $: if (sortedSlots.length) {
     dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
@@ -473,11 +467,13 @@
       return;
     }
 
+    console.log("allCal", allCalendars);
+
     selectedAttendees = allCalendars
       .map((calendar) => ({
         ...calendar.account,
-        given_name: calendar.account.firstName,
-        surname: calendar.account.lastName,
+        given_name: calendar.account?.firstName,
+        surname: calendar.account?.lastName,
         isAvailable: !!epoch.available_calendars.find(
           (email: string) => email === calendar?.account?.emailAddress,
         ),
