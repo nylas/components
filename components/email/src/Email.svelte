@@ -9,8 +9,6 @@
     updateThread,
     fetchMessage,
     fetchEmail,
-    fetchContactImage,
-    fetchContactsByQuery,
     ContactStore,
   } from "@commons";
   import type { ContactSearchQuery, Contact } from "@commons/types/Contacts";
