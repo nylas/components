@@ -196,7 +196,7 @@
     }
   }
 
-  async function updateThreadUnreadStatus(updatedThread: any) {
+  async function updateThreadStatus(updatedThread: any) {
     if (id && updatedThread && updatedThread.id) {
       const threadQuery = {
         component_id: id,
@@ -205,13 +205,14 @@
       await MailboxStore.updateThread(threadQuery, queryKey, updatedThread);
     }
   }
+
   async function threadClicked(event: CustomEvent) {
     console.debug("thread clicked from mailbox", event.detail);
     if (event.detail.thread?.expanded) {
       openedEmailData = event.detail.thread;
       if (event.detail.thread.unread) {
         event.detail.thread.unread = false;
-        updateThreadUnreadStatus(event.detail.thread);
+        updateThreadStatus(event.detail.thread);
       }
       let message = await fetchIndividualMessage(
         event.detail.thread.messages[event.detail.thread.messages.length - 1],
@@ -250,9 +251,12 @@
   async function threadStarred(event: CustomEvent) {
     if (starredThreads.has(event.detail.thread)) {
       starredThreads.delete(event.detail.thread);
+      event.detail.thread.starred = false;
     } else {
       starredThreads.add(event.detail.thread);
+      event.detail.thread.starred = true;
     }
+    updateThreadStatus(event.detail.thread);
     return (starredThreads = starredThreads);
   }
 
@@ -274,11 +278,13 @@
       selectedThreads.forEach((t) => {
         starredThreads.delete(t);
         t.starred = false;
+        updateThreadStatus(t);
       });
     } else {
       selectedThreads.forEach((t) => {
         starredThreads.add(t);
         t.starred = true;
+        updateThreadStatus(t);
       });
     }
     return (starredThreads = starredThreads);
@@ -309,13 +315,13 @@
       selectedThreads.forEach((t) => {
         unreadThreads.delete(t);
         t.unread = false;
-        updateThreadUnreadStatus(t);
+        updateThreadStatus(t);
       });
     } else {
       selectedThreads.forEach((t) => {
         unreadThreads.add(t);
         t.unread = true;
-        updateThreadUnreadStatus(t);
+        updateThreadStatus(t);
       });
     }
     return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
