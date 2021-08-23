@@ -344,7 +344,6 @@ describe("availability component", () => {
         component.max_bookable_slots = 3;
         component.calendars = [
           {
-            emailAddress: "person@name.com",
             availability: "free",
             timeslots: [
               {
@@ -356,6 +355,12 @@ describe("availability component", () => {
                 end_time: new Date(new Date().setHours(17, 0, 0, 0)),
               },
             ],
+            account: {
+              emailAddress: "person@name.com",
+              firstName: "Jim",
+              lastName: "Person",
+              avatarUrl: "",
+            },
           },
           {
             emailAddress: "thelonious@nylas.com",
@@ -370,6 +375,12 @@ describe("availability component", () => {
                 end_time: new Date(new Date().setHours(17, 0, 0, 0)),
               },
             ],
+            account: {
+              emailAddress: "thelonious@nylas.com",
+              firstName: "Thelonious",
+              lastName: "",
+              avatarUrl: "",
+            },
           },
           {
             emailAddress: "booker@nylas.com",
@@ -384,6 +395,12 @@ describe("availability component", () => {
                 end_time: new Date(new Date().setHours(17, 0, 0, 0)),
               },
             ],
+            account: {
+              emailAddress: "booker@nylas.com",
+              firstName: "Bill",
+              lastName: "Ooker",
+              avatarUrl: "",
+            },
           },
         ];
 

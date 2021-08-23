@@ -37,7 +37,11 @@
     SelectableSlot,
     AvailabilityQuery,
     EventQuery,
+    CalendarAccount,
   } from "@commons/types/Availability";
+  import "@commons/components/ContactImage/ContactImage.svelte";
+  import AvailableIcon from "./assets/available.svg";
+  import UnavailableIcon from "./assets/unavailable.svg";
 
   //#region props
   export let id: string = "";
@@ -55,6 +59,7 @@
   export let partial_bookable_ratio: number;
   export let show_as_week: boolean;
   export let show_weekends: boolean;
+  export let attendees_to_show: number;
   //#endregion props
 
   //#region mount and prop initialization
@@ -130,6 +135,11 @@
       show_weekends,
       true,
     );
+    attendees_to_show = getPropertyValue(
+      internalProps.attendees_to_show,
+      attendees_to_show,
+      5,
+    );
   }
 
   //#endregion mount and prop initialization
@@ -137,7 +147,8 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
 
   //#region layout
-  let main: Element;
+  let main: HTMLElement;
+  let tickContainer: HTMLElement;
   let clientHeight: number;
 
   let slotSelection: SelectableSlot[] = [];
@@ -168,29 +179,29 @@
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
-      .map((time) => {
+      .map((time: Date) => {
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
-          allCalendars.forEach((c) => {
-            let availabilityExistsInSlot = c.timeslots.some(
+          for (const calendar of allCalendars) {
+            let availabilityExistsInSlot = calendar.timeslots.some(
               (block) => time < block.end_time && block.start_time < endTime,
             );
-            if (c.availability === AvailabilityStatus.BUSY) {
+            if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
-                freeCalendars.push(c.emailAddress);
+                freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
-              c.availability === AvailabilityStatus.FREE ||
-              !c.availability
+              calendar.availability === AvailabilityStatus.FREE ||
+              !calendar.availability
             ) {
-              // if they pass in a calendar, but don't have availability, assume the timeslots are available.
+              // if a calendar is passed in without availability, assume the timeslots are available.
               if (availabilityExistsInSlot) {
-                freeCalendars.push(c.emailAddress);
+                freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             }
-          });
+          }
         }
 
         if (allCalendars.length) {
@@ -229,7 +240,7 @@
 
   $: ticks = generateTicks(
     clientHeight,
-    days[0].slots.map((s) => s.start_time),
+    days[0].slots.map((slot: TimeSlot) => slot.start_time),
   );
 
   // We don't want to show all 96 15-minute intervals unless the user has a real tall screen.
@@ -280,7 +291,8 @@
     let epochs = slots
       .reduce((epochList, slot) => {
         const prevEpoch = epochList[epochList.length - 1];
-        // Edge case note: available_calendars is doing a stringified array compare, which means if they're differently ordered but otherwise teh same, this will fail.
+        // Edge case note: available_calendars is doing a stringified array compare,
+        // which means if they're differently ordered but otherwise teh same, this will fail.
         if (
           prevEpoch &&
           JSON.stringify(prevEpoch[0].available_calendars) ===
@@ -326,7 +338,7 @@
   $: days = scaleTime()
     .domain([startDay, endDay])
     .ticks(timeDay)
-    .filter((timestamp) => {
+    .filter((timestamp: Date) => {
       if (show_weekends) {
         return true;
       } else {
@@ -336,7 +348,7 @@
         );
       }
     })
-    .map((timestamp) => {
+    .map((timestamp: Date) => {
       let slots = generateDaySlots(timestamp, start_hour, end_hour);
       return {
         slots,
@@ -380,9 +392,8 @@
       access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
-      availabilityQuery,
-    );
+    const consolidatedAvailabilityForGivenDay =
+      await AvailabilityStore.getAvailability(availabilityQuery);
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
@@ -405,7 +416,7 @@
     calendar_id: "",
     participants: [{ email_address: "" }],
   };
-  //#region event query
+  //#endregion event query
 
   //#region booking event logic for single time slot and consecutive time slots
   $: sortedSlots = [
@@ -443,7 +454,104 @@
     }
     slotSelection = [];
   }
-  //#region booking event logic for single time slot or consecutive time slots
+  //#endregion booking event logic for single time slot or consecutive time slots
+
+  //#region Attendee Overlay
+  let attendeeOverlay: HTMLElement;
+  let selectedAttendees: (CalendarAccount & { isAvailable: boolean })[] = [];
+  let displayedAttendees: (CalendarAccount & { isAvailable: boolean })[] = [];
+
+  function showOverlay(event: Event, epoch: any) {
+    const epochElement: HTMLElement | null = (<HTMLElement>(
+      event.target
+    )).closest(".epoch");
+
+    const epochContainer: HTMLElement | null = (<HTMLElement>(
+      event.target
+    )).closest(".epochs");
+
+    if (!epochElement || !epochContainer || !attendeeOverlay) {
+      return;
+    }
+
+    selectedAttendees = allCalendars
+      .map((calendar) => ({
+        ...calendar.account,
+        given_name: calendar.account.firstName,
+        surname: calendar.account.lastName,
+        isAvailable: !!epoch.available_calendars.find(
+          (email: string) => email === calendar?.account?.emailAddress,
+        ),
+      }))
+      .sort((a, b) => {
+        if (a.isAvailable === b.isAvailable) {
+          return a.emailAddress.localeCompare(b.emailAddress);
+        } else if (a.isAvailable) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+
+    // Only show up to attendees_to_show attendees
+    if (attendees_to_show > 0) {
+      displayedAttendees = selectedAttendees.slice(0, attendees_to_show);
+    }
+
+    const tickContainerDimensions = tickContainer.getBoundingClientRect(),
+      targetElemDimensions = (<HTMLElement>(
+        event.target
+      )).getBoundingClientRect();
+
+    attendeeOverlay.style.left = `${
+      targetElemDimensions.left -
+      targetElemDimensions.width / 2 -
+      (tickContainerDimensions.left + tickContainerDimensions.width)
+    }px`;
+
+    attendeeOverlay.style.top = `${
+      epochElement.offsetTop +
+      epochContainer.offsetTop +
+      (<HTMLElement>event.target).offsetHeight +
+      (<HTMLElement>event.target).offsetTop +
+      5
+    }px`;
+    attendeeOverlay.style.display = "block";
+  }
+
+  // Invert overlay position if it would overflow the bottom of the component
+  $: (async () => {
+    // Wait a tick to ensure the overlay height has been calculated correctly
+    await tick();
+    const mainDimensions = main?.getBoundingClientRect(),
+      overlayDimensions = attendeeOverlay?.getBoundingClientRect();
+
+    if (overlayDimensions?.bottom > mainDimensions?.bottom) {
+      attendeeOverlay.style.top = `${
+        attendeeOverlay.offsetTop - attendeeOverlay.offsetHeight - 30
+      }px`;
+      attendeeOverlay.classList.add("invert-y");
+    }
+  })();
+
+  function hideOverlay() {
+    if (attendeeOverlay) {
+      attendeeOverlay.style.display = "none";
+      attendeeOverlay.classList.remove("invert-y");
+    }
+  }
+
+  function getAttendeeClass(attendee: any, idx: number): string {
+    const classes = ["contact"];
+    if (!attendee.isAvailable) {
+      classes.push("unavailable");
+    }
+    if (idx !== displayedAttendees.length - 1) {
+      classes.push("divider");
+    }
+    return classes.join(" ");
+  }
+  //#endregion Attendee Overlay
 </script>
 
 <style lang="scss">
@@ -557,8 +665,10 @@
           }
 
           .available-calendars {
+            display: inline-block;
             position: relative;
             z-index: 2;
+
             span {
               background: rgba(0, 0, 0, 0.5);
               display: inline-block;
@@ -566,15 +676,6 @@
               padding: 0.25rem;
               font-size: 0.7rem;
               color: white;
-
-              &.calendar {
-                display: none;
-              }
-            }
-          }
-          &:hover {
-            .available-calendars span.calendar {
-              display: inline-block;
             }
           }
         }
@@ -623,6 +724,102 @@
         cursor: pointer;
       }
     }
+
+    .attendee-overlay {
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 4px 14px 0 black;
+      display: none;
+      font-size: 14px;
+      max-width: 12rem;
+      padding: 1.2rem 1rem;
+      position: absolute;
+      z-index: 3;
+
+      &::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid white;
+        position: absolute;
+        left: 5.5rem;
+        top: -10px;
+      }
+
+      &.invert-y {
+        &::before {
+          display: none;
+        }
+
+        &::after {
+          content: "";
+          width: 0;
+          height: 0;
+          border-left: 10px solid transparent;
+          border-right: 10px solid transparent;
+          border-top: 10px solid white;
+          position: absolute;
+          left: 5.5rem;
+          bottom: -10px;
+        }
+      }
+
+      .attendee-list {
+        .contact {
+          display: grid;
+          grid-template-columns: 40px auto;
+          padding: 0.6rem 0;
+
+          &.divider {
+            border-bottom: 1px solid #979797;
+          }
+
+          &.unavailable {
+            filter: grayscale(80%);
+            opacity: 50%;
+          }
+
+          .default-avatar {
+            background: #002db4;
+            border-radius: 50%;
+            color: #fff;
+            font-family: sans-serif;
+            font-size: 1rem;
+            font-weight: bold;
+            height: 32px;
+            line-height: 35px;
+            text-align: center;
+            text-transform: uppercase;
+            width: 32px;
+          }
+
+          .contact-details {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            .name {
+              font-weight: bold;
+              display: block;
+            }
+          }
+        }
+        .icon {
+          position: relative;
+          top: -1.3rem;
+          left: 1.2rem;
+          height: 0;
+          width: 0;
+        }
+      }
+      .more-attendees {
+        font-weight: bold;
+        display: inline-block;
+        padding-top: 1rem;
+      }
+    }
   }
 </style>
 
@@ -634,7 +831,7 @@
   class:allow_booking
 >
   {#if show_ticks}
-    <ul class="ticks">
+    <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
         <li class="tick">
           {tick.toLocaleTimeString("default", {
@@ -650,16 +847,16 @@
       <div class="day">
         <header>
           <h2>
-            <span class="date"
-              >{new Date(day.timestamp).toLocaleString("default", {
+            <span class="date">
+              {new Date(day.timestamp).toLocaleString("default", {
                 day: "numeric",
-              })}</span
-            >
-            <span
-              >{new Date(day.timestamp).toLocaleString("default", {
+              })}
+            </span>
+            <span>
+              {new Date(day.timestamp).toLocaleString("default", {
                 weekday: "long",
-              })}</span
-            >
+              })}
+            </span>
           </h2>
         </header>
         <div class="epochs">
@@ -672,14 +869,14 @@
               data-end-time={new Date(epoch.end_time).toLocaleString()}
             >
               <div class="inner">
-                <span class="available-calendars">
+                <div class="available-calendars">
                   <span
-                    >{epoch.available_calendars.length} of {allCalendars.length}</span
+                    on:mouseenter={(event) => showOverlay(event, epoch)}
+                    on:mouseleave={hideOverlay}
                   >
-                  {#each epoch.available_calendars as calendar}<span
-                      class="calendar">{calendar}</span
-                    >{/each}
-                </span>
+                    {epoch.available_calendars.length} of {allCalendars.length}
+                  </span>
+                </div>
               </div>
             </div>
           {/each}
@@ -725,4 +922,37 @@
       >{`Confirm Time slot${slotSelection.length > 1 ? "s" : ""}`}</button
     >
   {/if}
+
+  <div class="attendee-overlay" bind:this={attendeeOverlay}>
+    <span>
+      {selectedAttendees.filter((attendee) => attendee.isAvailable).length} of {allCalendars.length}
+    </span>
+    <div class="attendee-list">
+      {#each displayedAttendees as attendee, idx}
+        <div class={getAttendeeClass(attendee, idx)}>
+          <div class="default-avatar">
+            <nylas-contact-image contact={attendee} />
+          </div>
+          <div class="contact-details">
+            <span class="name">
+              {`${attendee.firstName} ${attendee.lastName}`}
+            </span>
+            <span class="email">{attendee.emailAddress}</span>
+          </div>
+        </div>
+        <div class="icon">
+          {#if attendee.isAvailable}
+            <AvailableIcon />
+          {:else}
+            <UnavailableIcon />
+          {/if}
+        </div>
+      {/each}
+      {#if selectedAttendees.length > attendees_to_show}
+        <span class="more-attendees">
+          {`+${selectedAttendees.length - attendees_to_show} more`}
+        </span>
+      {/if}
+    </div>
+  </div>
 </main>

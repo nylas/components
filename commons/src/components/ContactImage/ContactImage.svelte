@@ -3,6 +3,7 @@
 <script>
   import { beforeUpdate } from "svelte/internal";
   import { fetchContactImage } from "@commons";
+
   export let contact;
   export let contact_query;
   export let height = "32px";

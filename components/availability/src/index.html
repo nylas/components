@@ -15,7 +15,6 @@
 
         const calendars = [
           {
-            emailAddress: "person@name.com",
             availability: "busy",
             timeslots: [
               {
@@ -27,9 +26,14 @@
                 end_time: new Date(new Date().setHours(15, 0, 0, 0)),
               },
             ],
+            account: {
+              emailAddress: "person@name.com",
+              firstName: "Jim",
+              lastName: "Person",
+              avatarUrl: "",
+            },
           },
           {
-            emailAddress: "thelonious@nylas.com",
             availability: "busy",
             timeslots: [
               {
@@ -37,6 +41,12 @@
                 end_time: new Date(new Date().setHours(11, 0, 0, 0)),
               },
             ],
+            account: {
+              emailAddress: "thelonious@nylas.com",
+              firstName: "Thelonious",
+              lastName: "",
+              avatarUrl: "",
+            },
           },
           {
             emailAddress: "booker@nylas.com",
@@ -47,6 +57,12 @@
                 end_time: new Date(new Date().setHours(16, 0, 0, 0)),
               },
             ],
+            account: {
+              emailAddress: "booker@nylas.com",
+              firstName: "Bill",
+              lastName: "Ooker",
+              avatarUrl: "",
+            },
           },
         ];
 

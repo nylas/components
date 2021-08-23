@@ -17,12 +17,20 @@ export interface Manifest extends NylasManifest {
   partial_bookable_ratio: number;
   show_as_week: boolean;
   show_weekends: boolean;
+  attendees_to_show: number;
 }
 
 export interface Calendar {
-  emailAddress: string;
   availability: AvailabilityStatus.FREE | AvailabilityStatus.BUSY;
   timeslots: TimeSlot[];
+  account: CalendarAccount;
+}
+
+export interface CalendarAccount {
+  firstName: string;
+  lastName: string;
+  emailAddress: string;
+  avatarUrl: string;
 }
 
 export interface TimeSlot {
