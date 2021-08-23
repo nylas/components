@@ -151,8 +151,6 @@
   let tickContainer: HTMLElement;
   let clientHeight: number;
 
-  let slotSelection: SelectableSlot[] = [];
-
   // You can have as few as 1, and as many as 7, days shown
   // start_date dates_to_show gets overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
   let startDay: Date;
@@ -358,6 +356,43 @@
     });
   //#endregion layout
 
+  // #region timeSlot selection
+  let slotSelection: SelectableSlot[] = [];
+  let sortedSlots: SelectableSlot[] = [];
+  $: slotSelection = days
+    .map((day) =>
+      day.slots.filter(
+        (slot) => slot.selectionStatus === SelectionStatus.SELECTED,
+      ),
+    )
+    .flat();
+  $: sortedSlots = slotSelection
+    .sort((a, b) => a.start_time.getTime() - b.start_time.getTime())
+    .reduce((slotList, slot) => {
+      const prevSlot = slotList[slotList.length - 1];
+      if (
+        prevSlot &&
+        slot.start_time.getTime() ===
+          prevSlot[prevSlot.length - 1].end_time.getTime()
+      ) {
+        prevSlot.push(slot);
+      } else {
+        slotList.push([slot]);
+      }
+      return slotList;
+    }, [] as SelectableSlot[][])
+    .map((slotList) => {
+      return {
+        ...slotList[0],
+        end_time: slotList[slotList.length - 1].end_time,
+      };
+    });
+
+  $: if (sortedSlots.length) {
+    dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots, calendarID });
+  }
+  // #endregion timeSlot selection
+
   $: newCalendarTimeslotsForGivenEmails = [];
 
   $: allCalendars = [
@@ -417,44 +452,6 @@
     participants: [{ email_address: "" }],
   };
   //#endregion event query
-
-  //#region booking event logic for single time slot and consecutive time slots
-  $: sortedSlots = [
-    ...slotSelection.sort((a, b) => (a.start_time > b.start_time ? 1 : 0)),
-  ].reduce((events, currentTimeSlot, i) => {
-    if (i === 0) {
-      events = [currentTimeSlot];
-    } else {
-      let lastMergedSlot = events[events.length - 1];
-      if (currentTimeSlot.start_time <= lastMergedSlot.end_time) {
-        lastMergedSlot.end_time = new Date(
-          Math.max(
-            lastMergedSlot.end_time.getTime(),
-            currentTimeSlot.end_time.getTime(),
-          ),
-        );
-      } else {
-        events = [...events, currentTimeSlot];
-      }
-    }
-    return events;
-  }, [] as TimeSlot[]);
-
-  function toggleSelectedTimeSlots(selectedSlot: SelectableSlot) {
-    return (slotSelection =
-      selectedSlot.selectionStatus === SelectionStatus.SELECTED
-        ? [...slotSelection, selectedSlot]
-        : slotSelection.filter((slot) => slot != selectedSlot));
-  }
-
-  function sortAndSetEvent(slots: TimeSlot[]) {
-    dispatchEvent("timeSlotChosen", { timeSlots: [...slots] });
-    if (allow_booking) {
-      // EventStore.createEvent(slots, query); // currently doesnt' work as calendar ID is not avaialble (To be completed by a different story)
-    }
-    slotSelection = [];
-  }
-  //#endregion booking event logic for single time slot or consecutive time slots
 
   //#region Attendee Overlay
   let attendeeOverlay: HTMLElement;
@@ -564,8 +561,6 @@
     height: 100%;
     overflow: hidden;
     display: grid;
-    gap: 1rem;
-    grid-template-rows: 1fr auto;
     font-family: Arial, Helvetica, sans-serif;
     position: relative;
     z-index: 1;
@@ -902,10 +897,6 @@
                       : slotSelection.length < max_bookable_slots
                       ? SelectionStatus.SELECTED
                       : SelectionStatus.UNSELECTED;
-
-                  toggleSelectedTimeSlots(slot);
-                } else {
-                  dispatchEvent("timeSlotChosen", { timeSlots: slot });
                 }
               }}
             />
@@ -914,15 +905,6 @@
       </div>
     {/each}
   </div>
-  {#if slotSelection.length && allow_booking}
-    <button
-      class="confirm"
-      type="button"
-      on:click={() => sortAndSetEvent(sortedSlots)}
-      >{`Confirm Time slot${slotSelection.length > 1 ? "s" : ""}`}</button
-    >
-  {/if}
-
   <div class="attendee-overlay" bind:this={attendeeOverlay}>
     <span>
       {selectedAttendees.filter((attendee) => attendee.isAvailable).length} of {allCalendars.length}

@@ -27,6 +27,7 @@ function initializeEvents() {
       }
     },
     createEvent: (event: Event, query: EventQuery) => {
+      console.log("formatted as", event, query);
       const queryKey = JSON.stringify(query);
       if (eventsMap[queryKey]) {
         eventsMap[queryKey] = Promise.all([

@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import { ManifestStore } from "../../../commons/src";
+  import { ManifestStore, EventStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
   import "../../availability/src/Availability.svelte";
 
@@ -52,8 +52,37 @@
   }
   // #endregion mount and prop initialization
 
+  let timeSlots = [];
+  let calendarID = "";
+
   function timeSlotChosen({ detail }) {
-    console.log("timeslots chosen", detail.timeSlots);
+    console.log(
+      "timeslots chosen",
+      detail.timeSlots,
+      detail.calendarID,
+      detail,
+    );
+    timeSlots = detail.timeSlots;
+    calendarID = detail.calendarID;
+  }
+
+  function bookTimeSlots(events) {
+    events.forEach((event) => {
+      console.log("booking", event);
+      let postableEvent = {
+        title: "My test event",
+        calendar_id: calendarID,
+        when: {
+          start_time: event.start_time.getTime() / 1000,
+          end_time: event.end_time.getTime() / 1000,
+        },
+      };
+      EventStore.createEvent(postableEvent, {
+        component_id: id,
+        access_token,
+        calendarIDs: [calendarID],
+      });
+    });
   }
 </script>
 
@@ -71,10 +100,23 @@
   <nylas-availability
     show_as_week={true}
     {email_ids}
+    allow_booking={true}
+    max_bookable_slots={4}
     id={availability_id}
     on:timeSlotChosen={timeSlotChosen}
   />
   <section class="booker">
     <h2>Event-bookable details to follow here</h2>
+    {#if timeSlots.length}
+      <p>Book the following?</p>
+      <ul>
+        {#each timeSlots as timeSlot}
+          <li>
+            {timeSlot.start_time.toLocaleString()} to {timeSlot.end_time.toLocaleString()}
+          </li>
+        {/each}
+      </ul>
+      <button on:click={() => bookTimeSlots(timeSlots)}>Book em</button>
+    {/if}
   </section>
 </main>
