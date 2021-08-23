@@ -327,6 +327,8 @@ describe("availability component", () => {
   });
 
   describe("selecting avaialble time slots", () => {
+    let selectedTimeslots = [];
+
     const consecutiveSlotEndTime = new Date(
       `${new Date().toLocaleDateString()} 15:30:00`,
     ).toISOString();
@@ -406,27 +408,40 @@ describe("availability component", () => {
 
         component.addEventListener("timeSlotChosen", (event) => {
           expect(event.detail).to.have.ownProperty("timeSlots");
-          expect(event.detail.timeSlots).to.have.lengthOf(2);
-          expect(event.detail.timeSlots[0].end_time.toISOString()).eq(
+          selectedTimeslots = event.detail.timeSlots;
+        });
+      });
+
+      cy.wait(1000); // TODO: have this as a wait for render to be complete instead of a timer
+      expect(selectedTimeslots).to.have.lengthOf(0);
+      cy.get(".slot.free")
+        .eq(0)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(1);
+        });
+      cy.get(".slot.free")
+        .eq(3)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(2);
+        });
+      cy.get(".slot.free")
+        .eq(1)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(2);
+          expect(selectedTimeslots[0].end_time.toISOString()).eq(
             consecutiveSlotEndTime,
           );
-          expect(event.detail.timeSlots[1].start_time.toISOString()).eq(
+          expect(selectedTimeslots[1].start_time.toISOString()).eq(
             singularSlotStartTime,
           );
-          expect(event.detail.timeSlots[1].end_time.toISOString()).eq(
+          expect(selectedTimeslots[1].end_time.toISOString()).eq(
             singularSlotEndTime,
           );
           done();
         });
-      });
-
-      cy.get(".slot.free").each((slot, index) => {
-        if (index === 0 || index === 1 || index === 3) {
-          cy.get(slot).click();
-        }
-      });
-      cy.get("button.confirm").should("exist");
-      cy.get("button.confirm").click();
     });
   });
 
