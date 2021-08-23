@@ -32,7 +32,6 @@
   let manifest: Partial<Manifest> = {};
   onMount(async () => {
     await tick();
-    // clientHeight = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
 
@@ -60,11 +59,9 @@
   // #endregion mount and prop initialization
 
   let timeSlots: TimeSlot[] = [];
-  // let calendarID = "";
 
   function timeSlotChosen({ detail }: CustomEvent) {
     timeSlots = detail.timeSlots;
-    // calendarID = detail.calendarID;
   }
 
   async function bookTimeSlots(events: TimeSlot[]) {
