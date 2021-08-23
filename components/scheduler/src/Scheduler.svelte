@@ -81,7 +81,7 @@
           end_time: event.end_time.getTime() / 1000,
         },
       };
-      return await createEvent(
+      return createEvent(
         postableEvent as TimespanEvent,
         {
           component_id: id,
