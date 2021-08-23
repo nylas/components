@@ -212,7 +212,7 @@
       openedEmailData = event.detail.thread;
       if (event.detail.thread.unread) {
         event.detail.thread.unread = false;
-        updateThreadStatus(event.detail.thread);
+        await updateThreadStatus(event.detail.thread);
       }
       let message = await fetchIndividualMessage(
         event.detail.thread.messages[event.detail.thread.messages.length - 1],
@@ -256,7 +256,7 @@
       starredThreads.add(event.detail.thread);
       event.detail.thread.starred = true;
     }
-    updateThreadStatus(event.detail.thread);
+    await updateThreadStatus(event.detail.thread);
     return (starredThreads = starredThreads);
   }
 
@@ -272,19 +272,19 @@
     }
   }
 
-  function onStarSelected(event: MouseEvent) {
+  async function onStarSelected(event: MouseEvent) {
     dispatchEvent("onStarSelected", { event });
     if (areAllSelectedStarred) {
       selectedThreads.forEach((t) => {
         starredThreads.delete(t);
         t.starred = false;
-        updateThreadStatus(t);
+        await updateThreadStatus(t);
       });
     } else {
       selectedThreads.forEach((t) => {
         starredThreads.add(t);
         t.starred = true;
-        updateThreadStatus(t);
+        await updateThreadStatus(t);
       });
     }
     return (starredThreads = starredThreads);
@@ -309,19 +309,19 @@
     return true;
   }
 
-  function onChangeSelectedReadStatus(event: MouseEvent) {
+  async function onChangeSelectedReadStatus(event: MouseEvent) {
     dispatchEvent("onChangeSelectedReadStatus", { event });
     if (areAllSelectedUnread) {
       selectedThreads.forEach((t) => {
         unreadThreads.delete(t);
         t.unread = false;
-        updateThreadStatus(t);
+        await updateThreadStatus(t);
       });
     } else {
       selectedThreads.forEach((t) => {
         unreadThreads.add(t);
         t.unread = true;
-        updateThreadStatus(t);
+        await updateThreadStatus(t);
       });
     }
     return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
