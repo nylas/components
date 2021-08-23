@@ -373,21 +373,16 @@
       const prevSlot = slotList[slotList.length - 1];
       if (
         prevSlot &&
-        slot.start_time.getTime() ===
-          prevSlot[prevSlot.length - 1].end_time.getTime()
+        (slot.start_time.getTime() === prevSlot.end_time.getTime() ||
+          (slot.start_time.getTime() >= prevSlot.start_time.getTime() &&
+            slot.end_time.getTime() <= prevSlot.end_time.getTime()))
       ) {
-        prevSlot.push(slot);
+        prevSlot.end_time = slot.end_time;
       } else {
-        slotList.push([slot]);
+        slotList.push(slot);
       }
       return slotList;
-    }, [] as SelectableSlot[][])
-    .map((slotList) => {
-      return {
-        ...slotList[0],
-        end_time: slotList[slotList.length - 1].end_time,
-      };
-    });
+    }, [] as SelectableSlot[]);
 
   $: if (sortedSlots.length) {
     dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
