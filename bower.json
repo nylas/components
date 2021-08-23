@@ -1,0 +1,33 @@
+{
+  "name": "Nylas Components",
+  "homepage": "https://github.com/nylas/components",
+  "authors": ["Nylas"],
+  "description": "Nylas Components are prebuilt UI elements you drop into any application. Create an easy-to-use, beautiful UX with just a few lines of code.",
+  "keywords": ["web-components", "nylas", "element-collection"],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nylas/components.git"
+  },
+  "license": "https://github.com/nylas/components/blob/main/LICENSE",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "cypress",
+    "mocks",
+    "tests"
+  ],
+  "dependencies": {
+    "@nylas/components-agenda": "nylas/nylas-components/components/agenda",
+    "@nylas/components-composer": "nylas/nylas-components/components/composer",
+    "@nylas/components-contact-list": "nylas/nylas-components/components/contact-list",
+    "@nylas/components-contacts-search": "nylas/nylas-components/components/contacts-search",
+    "@nylas/components-conversation": "nylas/nylas-components/components/conversation",
+    "@nylas/components-datepicker": "nylas/nylas-components/components/datepicker",
+    "@nylas/components-email": "nylas/nylas-components/components/email",
+    "@nylas/components-mailbox": "nylas/nylas-components/components/mailbox",
+    "@nylas/components-theming": "nylas/nylas-components/components/theming",
+    "@nylas/components-availability": "nylas/nylas-components/components/availability",
+    "@nylas/components-scheduler": "nylas/nylas-components/components/scheduler"
+  }
+}
