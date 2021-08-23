@@ -77,7 +77,6 @@
         participants: [], // TODO: add to the participants array from availbility.event.available_calendars
         calendar_id: event.calendar_id,
         when: {
-          object: "timespan",
           start_time: event.start_time.getTime() / 1000,
           end_time: event.end_time.getTime() / 1000,
         },

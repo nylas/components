@@ -24,14 +24,14 @@ interface _Event {
 export interface Timespan {
   start_time: number;
   end_time: number;
-  object: "timespan";
+  object?: "timespan";
   start_moment?: number;
   end_moment?: number;
 }
 
 export interface Date {
   date: string;
-  object: "date";
+  object?: "date";
 }
 
 export interface TimespanEvent extends _Event {
