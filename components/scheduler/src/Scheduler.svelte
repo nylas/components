@@ -25,6 +25,7 @@
   export let access_token: string = "";
   export let availability_id: string;
   export let email_ids: string[];
+  export let booking_label: string;
   // #endregion props
 
   //#region mount and prop initialization
@@ -55,6 +56,11 @@
       "",
     );
     email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
+    booking_label = getPropertyValue(
+      internalProps.booking_label,
+      booking_label,
+      "Schedule",
+    );
   }
   // #endregion mount and prop initialization
 
@@ -71,6 +77,7 @@
         participants: [], // TODO: add to the participants array from availbility.event.available_calendars
         calendar_id: event.calendar_id,
         when: {
+          object: "timespan",
           start_time: event.start_time.getTime() / 1000,
           end_time: event.end_time.getTime() / 1000,
         },
@@ -122,7 +129,7 @@
           </li>
         {/each}
       </ul>
-      <button on:click={() => bookTimeSlots(timeSlots)}>Book em</button>
+      <button on:click={() => bookTimeSlots(timeSlots)}>{booking_label}</button>
     {/if}
   </section>
 </main>
