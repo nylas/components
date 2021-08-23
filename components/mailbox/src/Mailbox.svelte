@@ -719,7 +719,6 @@
                   {you}
                   {show_star}
                   click_action="mailbox"
-                  show_contact_avatar={true}
                   unread={unreadThreads.has(thread)}
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
