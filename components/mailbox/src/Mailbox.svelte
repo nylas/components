@@ -786,6 +786,8 @@
                   on:messageClicked={messageClicked}
                   on:threadStarred={threadStarred}
                   is_starred={starredThreads.has(thread)}
+                  show_thread_actions={selectedThreads.has(thread)}
+                  show_received_timestamp={!selectedThreads.has(thread)}
                 />
               </div>
             </li>
