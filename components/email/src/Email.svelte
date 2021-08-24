@@ -315,8 +315,7 @@
     if (click_action === "default" || click_action === "mailbox") {
       //#region read/unread
       if (activeThread && activeThread.unread && click_action !== "mailbox") {
-        activeThread.unread = false;
-        saveActiveThread();
+        toggleUnreadStatus();
       }
       //#endregion read/unread
 
@@ -352,6 +351,14 @@
       thread: activeThread,
     });
     current_tooltip_id = "";
+  }
+
+  function toggleUnreadStatus() {
+    if (activeThread) {
+      activeThread.unread = !!activeThread.unread || true;
+      unread = activeThread.unread;
+    }
+    saveActiveThread();
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -1257,16 +1264,14 @@
                   </div>
                   <div class="read-status">
                     <button
-                      title="Mark thread as unread"
-                      aria-label="Mark thread as unread"
-                      on:click={(e) => {
-                        // returnToMailmailbox(true);
-                      }}
+                      title={`Mark thread as ${unread ? "" : "un"}read`}
+                      aria-label={`Mark thread as ${unread ? "" : "un"}read`}
+                      on:click={toggleUnreadStatus}
                     >
                       {#if unread || activeThread.unread}
-                        <MarkUnreadIcon aria-hidden="true" />
-                      {:else}
                         <MarkReadIcon aria-hidden="true" />
+                      {:else}
+                        <MarkUnreadIcon aria-hidden="true" />
                       {/if}</button
                     >
                   </div>
