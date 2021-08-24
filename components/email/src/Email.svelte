@@ -1253,15 +1253,14 @@
                     )}
                   </span>
                 {:else if show_thread_actions}
-                  <div class="delete">
-                    <button
-                      title="Delete thread"
-                      aria-label="Delete thread"
-                      on:click={(e) => {
-                        // onDeleteSelected(e)
-                      }}><TrashIcon /></button
-                    >
-                  </div>
+                  <!-- Read: ch65594 -->
+                  {#if false}
+                    <div class="delete">
+                      <button title="Delete thread" aria-label="Delete thread">
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  {/if}
                   <div class="read-status">
                     <button
                       title={`Mark thread as ${unread ? "" : "un"}read`}

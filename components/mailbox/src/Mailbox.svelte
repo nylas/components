@@ -711,7 +711,7 @@
             </div>
           {/if}
           {#if selectedThreads.size}
-            {#if actions_bar.includes(MailboxActions.DELETE)}
+            {#if actions_bar.includes(MailboxActions.DELETE) && false}
               <div class="delete">
                 <button
                   title="Delete selected email(s)"
