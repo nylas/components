@@ -20,6 +20,9 @@
     getPropertyValue,
   } from "@commons/methods/component";
   import DropdownSymbol from "./assets/chevron-down.svg";
+  import TrashIcon from "./assets/trash-alt.svg";
+  import MarkReadIcon from "./assets/envelope-open-text.svg";
+  import MarkUnreadIcon from "./assets/envelope.svg";
   import type {
     EmailProperties,
     Participant,
@@ -55,6 +58,7 @@
   export let show_contact_avatar: boolean;
   export let clean_conversation: boolean;
   export let show_expanded_email_view_onload: boolean;
+  export let show_thread_actions: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -621,6 +625,7 @@
         }
         &.unread {
           background: var(--nylas-email-background, white);
+
           .from-message-count,
           .date,
           .subject {
@@ -831,6 +836,21 @@
             width: 100%;
             font-size: 14px;
             color: var(--grey);
+          }
+          &.action-icons {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            & > :last-child {
+              padding-right: 1rem;
+            }
+            button {
+              background: none;
+              cursor: pointer;
+              display: flex;
+            }
           }
         }
       }
@@ -1215,15 +1235,37 @@
                   {thread.snippet}</span
                 >
               </div>
-              {#if show_received_timestamp}
-                <div class="date">
+              <div
+                class:date={show_received_timestamp}
+                class:action-icons={show_thread_actions}
+              >
+                {#if show_received_timestamp}
                   <span>
                     {formatPreviewDate(
                       new Date(thread.last_message_timestamp * 1000),
                     )}
                   </span>
-                </div>
-              {/if}
+                {:else if show_thread_actions}
+                  <div class="delete">
+                    <button
+                      title="Delete thread"
+                      aria-label="Delete thread"
+                      on:click={(e) => {
+                        // onDeleteSelected(e)
+                      }}><TrashIcon /></button
+                    >
+                  </div>
+                  <div class="read-status">
+                    <button
+                      title="Mark thread as unread"
+                      aria-label="Mark thread as unread"
+                      on:click={(e) => {
+                        // returnToMailmailbox(true);
+                      }}><MarkUnreadIcon /></button
+                    >
+                  </div>
+                {/if}
+              </div>
             </div>
 
             <div class="mobile-subject-snippet">
