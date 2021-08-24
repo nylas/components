@@ -429,6 +429,9 @@
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
           emailAddress: user.email,
+          account: {
+            emailAddress: user.email, // ¯\_(ツ)_/¯
+          },
           availability: AvailabilityStatus.BUSY,
           timeslots: user.time_slots.map((_slot) => ({
             start_time: new Date(_slot.start_time * 1000),
@@ -466,8 +469,6 @@
     if (!epochElement || !epochContainer || !attendeeOverlay) {
       return;
     }
-
-    console.log("allCal", allCalendars);
 
     selectedAttendees = allCalendars
       .map((calendar) => ({
