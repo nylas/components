@@ -15,7 +15,7 @@ import type {
 export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
-  )}/threads?view=expanded`;
+  )}/threads?view=expanded&not_in=trash`;
   if (query.query) {
     Object.entries(query.query).forEach(
       (param) => (queryString = queryString.concat(`&${param[0]}=${param[1]}`)),
@@ -65,6 +65,8 @@ export const updateThread = async (
       body: {
         unread: updatedThread.unread,
         starred: updatedThread.starred,
+        folder_id: updatedThread.folder_id,
+        label_ids: updatedThread.label_ids,
       },
     }),
   )

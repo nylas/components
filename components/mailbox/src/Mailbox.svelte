@@ -25,9 +25,13 @@
     MailboxQuery,
     Message,
     Account,
-    ConversationQuery,
+    Label,
+    Folder,
   } from "@commons/types/Nylas";
-  import Conversation from "components/conversation/src/Conversation.svelte";
+  import { AccountOrganizationUnit } from "@commons/enums/Nylas";
+  import { LabelStore } from "@commons/store/labels";
+  import { FolderStore } from "@commons/store/folders";
+
   type MailboxActions = "selectall" | "delete" | "star" | "unread";
 
   let manifest: Partial<EmailProperties> = {};
@@ -71,6 +75,16 @@
     ) as Partial<SvelteAllProps>;
 
     you = await AccountStore.getAccount(query);
+    const accountOrganizationUnitQuery = {
+      component_id: id,
+      access_token,
+    };
+    // Initialize labels / folders
+    if (you.organization_unit === AccountOrganizationUnit.Label) {
+      labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
+    } else if (you.organization_unit === AccountOrganizationUnit.Folder) {
+      folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
+    }
 
     if (all_threads) {
       threads = all_threads as Thread[];
@@ -151,6 +165,16 @@
 
   // Try getting events from 3 sources: first, directly passed in, then, from our store; finally, by way of a fetch
   let threads: Thread[] = [];
+
+  let labels: Label[] = [];
+  $: trashLabelID = labels.length
+    ? labels.find((label) => label.name === "trash")?.id
+    : null;
+
+  let folders: Folder[] = [];
+  $: trashFolderID = folders.length
+    ? labels.find((folder) => folder.name === "trash")?.id
+    : null;
 
   // let conversation: Conversation | null = null;
   let status: "loading" | "loaded" | "error" = "loading";
@@ -351,11 +375,19 @@
         (thread) => thread !== openedEmailData,
       );
       starredThreads.delete(openedEmailData);
+      unreadThreads.delete(openedEmailData);
       selectedThreads.delete(openedEmailData);
       openedEmailData = null;
     } else {
-      selectedThreads.forEach((thread) => {
+      selectedThreads.forEach(async (thread) => {
         starredThreads.delete(thread);
+        unreadThreads.delete(thread);
+        if (trashLabelID) {
+          thread.label_ids = [trashLabelID];
+        } else if (trashFolderID) {
+          thread.folder_id = trashFolderID;
+        }
+        await updateThreadStatus(thread);
       });
       // "delete" thread by hiding; TODO: change to add thread to trash folder
       inboxThreads = inboxThreads.filter(
