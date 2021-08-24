@@ -5,6 +5,12 @@
     <meta charset="UTF-8" />
     <title>Scheduler Demo</title>
     <script src="../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const component = document.querySelector("nylas-scheduler");
+        component.email_ids = ["nylascypresstest@gmail.com"];
+      });
+    </script>
     <style>
       body {
         padding: 0;
@@ -21,7 +27,10 @@
   </head>
   <body>
     <main>
-      <nylas-scheduler id="demo-scheduler"></nylas-scheduler>
+      <nylas-scheduler
+        availability_id="demo-availability"
+        id="demo-scheduler"
+      ></nylas-scheduler>
     </main>
   </body>
 </html>
