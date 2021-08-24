@@ -1261,7 +1261,13 @@
                       aria-label="Mark thread as unread"
                       on:click={(e) => {
                         // returnToMailmailbox(true);
-                      }}><MarkUnreadIcon /></button
+                      }}
+                    >
+                      {#if unread || activeThread.unread}
+                        <MarkUnreadIcon aria-hidden="true" />
+                      {:else}
+                        <MarkReadIcon aria-hidden="true" />
+                      {/if}</button
                     >
                   </div>
                 {/if}
