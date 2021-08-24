@@ -272,16 +272,16 @@
     }
   }
 
-  async function onStarSelected(event: MouseEvent) {
+  function onStarSelected(event: MouseEvent) {
     dispatchEvent("onStarSelected", { event });
     if (areAllSelectedStarred) {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         starredThreads.delete(t);
         t.starred = false;
         await updateThreadStatus(t);
       });
     } else {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         starredThreads.add(t);
         t.starred = true;
         await updateThreadStatus(t);
@@ -309,16 +309,16 @@
     return true;
   }
 
-  async function onChangeSelectedReadStatus(event: MouseEvent) {
+  function onChangeSelectedReadStatus(event: MouseEvent) {
     dispatchEvent("onChangeSelectedReadStatus", { event });
     if (areAllSelectedUnread) {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         unreadThreads.delete(t);
         t.unread = false;
         await updateThreadStatus(t);
       });
     } else {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         unreadThreads.add(t);
         t.unread = true;
         await updateThreadStatus(t);
