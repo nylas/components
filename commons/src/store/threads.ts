@@ -41,13 +41,12 @@ function initializeThreads() {
       queryKey: string,
       updatedThread: Conversation,
     ) => {
-      await updateThread(threadQuery, updatedThread).then((thread) => {
-        threadsMap[queryKey] = threadsMap[queryKey].map((_thread) => {
-          if (_thread.id === thread.id) {
-            _thread = Object.assign(_thread, thread);
-          }
-          return _thread;
-        });
+      const thread = await updateThread(threadQuery, updatedThread);
+      threadsMap[queryKey] = threadsMap[queryKey].map((initialThread) => {
+        if (initialThread.id === thread.id) {
+          initialThread = Object.assign(initialThread, thread);
+        }
+        return initialThread;
       });
     },
     getThread: async (query: ConversationQuery) => {
