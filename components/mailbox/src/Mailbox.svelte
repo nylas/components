@@ -8,7 +8,7 @@
     getEventDispatcher,
     getPropertyValue,
   } from "@commons/methods/component";
-  import { MailboxStore, Threads } from "@commons/store/threads";
+  import { MailboxStore } from "@commons/store/threads";
   import "../../email/src/Email.svelte";
   import "./components/PaginationNav.svelte";
   import { AccountStore } from "@commons/store/accounts";
@@ -25,7 +25,9 @@
     MailboxQuery,
     Message,
     Account,
+    ConversationQuery,
   } from "@commons/types/Nylas";
+  import Conversation from "components/conversation/src/Conversation.svelte";
   type MailboxActions = "selectall" | "delete" | "star" | "unread";
 
   let manifest: Partial<EmailProperties> = {};
@@ -84,7 +86,7 @@
       unreadThreads = new Set(inboxThreads.filter((thread) => thread.unread));
     }
     paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
-    lastPage = Math.ceil(inboxThreads.length / items_per_page);
+    lastPage = Math.ceil(inboxThreads?.length / items_per_page);
     hasComponentLoaded = true;
   });
 
@@ -93,7 +95,7 @@
     if (!inboxThreads) {
       inboxThreads = threads;
     } // TODO: filter out threads in trash folder
-    lastPage = Math.ceil(inboxThreads.length / items_per_page);
+    lastPage = Math.ceil(inboxThreads?.length / items_per_page);
     if (currentPage > lastPage && lastPage !== 0) {
       currentPage = lastPage;
     }
@@ -165,7 +167,6 @@
   function fetchIndividualMessage(message: Message) {
     // messageLoadStatus[msgIndex] = "loading";
     return fetchMessage(query, message.id).then((json) => {
-      console.log("message back?", json);
       message.body = json.body;
       return message;
     });
@@ -175,7 +176,7 @@
 
   //#region actions
   let selectedThreads = new Set<Thread>();
-  $: areAllSelected = selectedThreads.size >= inboxThreads.length;
+  $: areAllSelected = selectedThreads.size >= inboxThreads?.length;
   let starredThreads = new Set<Thread>();
   $: areAllSelectedStarred = checkIfSelectionBelongsToSet(
     selectedThreads,
@@ -195,10 +196,24 @@
     }
   }
 
+  async function updateThreadStatus(updatedThread: any) {
+    if (id && updatedThread && updatedThread.id) {
+      const threadQuery = {
+        component_id: id,
+        thread_id: updatedThread.id,
+      };
+      await MailboxStore.updateThread(threadQuery, queryKey, updatedThread);
+    }
+  }
+
   async function threadClicked(event: CustomEvent) {
-    // console.debug('thread clicked from mailbox', event.detail);
+    console.debug("thread clicked from mailbox", event.detail);
     if (event.detail.thread?.expanded) {
       openedEmailData = event.detail.thread;
+      if (event.detail.thread.unread) {
+        event.detail.thread.unread = false;
+        await updateThreadStatus(event.detail.thread);
+      }
       let message = await fetchIndividualMessage(
         event.detail.thread.messages[event.detail.thread.messages.length - 1],
       );
@@ -236,9 +251,12 @@
   async function threadStarred(event: CustomEvent) {
     if (starredThreads.has(event.detail.thread)) {
       starredThreads.delete(event.detail.thread);
+      event.detail.thread.starred = false;
     } else {
       starredThreads.add(event.detail.thread);
+      event.detail.thread.starred = true;
     }
+    await updateThreadStatus(event.detail.thread);
     return (starredThreads = starredThreads);
   }
 
@@ -257,14 +275,16 @@
   function onStarSelected(event: MouseEvent) {
     dispatchEvent("onStarSelected", { event });
     if (areAllSelectedStarred) {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         starredThreads.delete(t);
         t.starred = false;
+        await updateThreadStatus(t);
       });
     } else {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         starredThreads.add(t);
         t.starred = true;
+        await updateThreadStatus(t);
       });
     }
     return (starredThreads = starredThreads);
@@ -292,14 +312,16 @@
   function onChangeSelectedReadStatus(event: MouseEvent) {
     dispatchEvent("onChangeSelectedReadStatus", { event });
     if (areAllSelectedUnread) {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         unreadThreads.delete(t);
         t.unread = false;
+        await updateThreadStatus(t);
       });
     } else {
-      selectedThreads.forEach((t) => {
+      selectedThreads.forEach(async (t) => {
         unreadThreads.add(t);
         t.unread = true;
+        await updateThreadStatus(t);
       });
     }
     return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
@@ -721,7 +743,7 @@
             {/if} is empty!
           </div>
         {/each}
-        {#if threads.length > 0 && paginatedThreads}
+        {#if threads && threads.length > 0 && paginatedThreads}
           <pagination-nav
             current_page={currentPage}
             last_page={lastPage}

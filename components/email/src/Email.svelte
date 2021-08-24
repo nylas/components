@@ -230,7 +230,7 @@
   function handleThread(e: MouseEvent | KeyboardEvent) {
     if (click_action === "default" || click_action === "mailbox") {
       //#region read/unread
-      if (activeThread && activeThread.unread) {
+      if (activeThread && activeThread.unread && click_action !== "mailbox") {
         activeThread.unread = false;
         saveActiveThread();
       }
@@ -688,7 +688,7 @@
         .from-participants {
           max-width: 220px;
           display: grid;
-          grid-template-columns: 1fr 40px;
+          grid-template-columns: 1fr 60px;
           .participants-name {
             .from-sub-section.second {
               display: none;
@@ -752,7 +752,7 @@
               .from-sub-section.second {
                 display: inline-block;
               }
-              &::after {
+              &.condensed::after {
                 content: ".";
                 position: absolute;
                 bottom: 0;
@@ -1019,7 +1019,13 @@
                   </div>
                 {/if}
                 <div class="from-participants">
-                  <div class="participants-name">
+                  <div
+                    class="participants-name"
+                    class:condensed={showSecondFromParticipant(
+                      activeThread.messages,
+                      activeThread.participants,
+                    )}
+                  >
                     {#if showFirstFromParticipant(activeThread.messages)}
                       <span class="from-sub-section"
                         >{activeThread.messages[
@@ -1038,21 +1044,23 @@
                     {/if}
                   </div>
                   <div class="participants-count">
-                    <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
-                    {#if activeThread.participants.length >= 2}
-                      <span class="show-on-mobile"
-                        >&nbsp; &plus; {activeThread.participants.length -
-                          MAX_MOBILE_PARTICIPANTS}</span
-                      >
-                    {/if}
-                    <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
+                    {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
+                      <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
+                      {#if activeThread.participants.length >= 2}
+                        <span class="show-on-mobile"
+                          >&nbsp;&plus;{activeThread.participants.length -
+                            MAX_MOBILE_PARTICIPANTS}</span
+                        >
+                      {/if}
+                      <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
                     Note that this might not be exactly correct if the name of the first participant is too long 
                     and occupies entire width -->
-                    {#if activeThread.participants.length > 2}
-                      <span class="show-on-desktop"
-                        >&nbsp; &plus; {activeThread.participants.length -
-                          MAX_DESKTOP_PARTICIPANTS}</span
-                      >
+                      {#if activeThread.participants.length > 2}
+                        <span class="show-on-desktop"
+                          >&nbsp; &plus; {activeThread.participants.length -
+                            MAX_DESKTOP_PARTICIPANTS}</span
+                        >
+                      {/if}
                     {/if}
                   </div>
                 </div>
