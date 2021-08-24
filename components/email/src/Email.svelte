@@ -10,6 +10,7 @@
     fetchMessage,
     fetchEmail,
     ContactStore,
+    fetchCleanConversations,
   } from "@commons";
   import type { ContactSearchQuery, Contact } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
@@ -38,7 +39,7 @@
 
   export let id: string = "";
   export let access_token: string = "";
-  export let thread_id: string = "";
+  export let thread_id: string;
   // export let messages: Message[] = [];
   export let message_id: string = "";
   export let theme: string;
@@ -52,6 +53,7 @@
   export let you: Partial<Account> = {};
   export let is_starred: boolean;
   export let show_contact_avatar: boolean;
+  export let clean_conversation: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -118,17 +120,26 @@
     );
     show_star = getPropertyValue(internalProps.show_star, show_star, false);
     unread = getPropertyValue(internalProps.unread, unread, null);
+
     click_action = getPropertyValue(
       internalProps.click_action,
       click_action,
       "default",
     );
+    thread_id = getPropertyValue(internalProps.thread_id, thread_id, "");
     is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
     show_contact_avatar = getPropertyValue(
       internalProps.show_contact_avatar,
       show_contact_avatar,
       true,
     );
+
+    clean_conversation = getPropertyValue(
+      internalProps.clean_conversation,
+      clean_conversation,
+      false,
+    );
+
     if (activeThread && click_action === "mailbox") {
       // enables bulk starring action in mailbox to immediately reflect visually
       activeThread = activeThread;
@@ -193,6 +204,42 @@
     );
   }
 
+  //#region Clean Conversation
+  // If a user sets message_body_type to "clean", expand their message to clean conversation.
+  // This requires them to have access to the Nylas Neural API.
+
+  const CONVERSATION_ENDPOINT_MAX_MESSAGES = 20;
+
+  function cleanConversation() {
+    if (activeThread) {
+      fetchCleanConversations({
+        component_id: id,
+        message_id: activeThread.messages
+          .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)
+          .map((message) => message.id),
+      }).then((results) => {
+        results.forEach((msg: Message) => {
+          let existingMessage = activeThread.messages.find(
+            (message) => message.id === msg.id,
+          );
+          if (existingMessage) {
+            existingMessage.conversation = msg.conversation;
+            existingMessage.body = msg.body;
+          }
+        });
+        activeThread.messages = activeThread.messages;
+      });
+    }
+  }
+
+  $: if (
+    clean_conversation &&
+    ((activeThread && !activeThread.messages.some((m) => m.conversation)) ||
+      (message && !message.conversation))
+  )
+    cleanConversation();
+  //#endregion Clean Conversation
+
   // #region get contact for ContactImage
   let contact_query: ContactSearchQuery;
   $: contact_query = {
@@ -237,8 +284,9 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded =
-        !activeThread.messages[lastMsgIndex].expanded;
+      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
+        lastMsgIndex
+      ].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
@@ -305,8 +353,9 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(e);
     } else {
-      activeThread.messages[msgIndex].expanded =
-        !activeThread.messages[msgIndex].expanded;
+      activeThread.messages[msgIndex].expanded = !activeThread.messages[
+        msgIndex
+      ].expanded;
       dispatchEvent("messageClicked", {
         event: e,
         message: activeThread.messages[msgIndex],
@@ -324,8 +373,9 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(e);
       } else {
-        activeThread.messages[msgIndex].expanded =
-          !activeThread.messages[msgIndex].expanded;
+        activeThread.messages[msgIndex].expanded = !activeThread.messages[
+          msgIndex
+        ].expanded;
       }
     }
   }
@@ -953,7 +1003,9 @@
                       </div>
                     </div>
                     <div class="message-body">
-                      {#if message.body}
+                      {#if clean_conversation && message.conversation}
+                        {@html message.conversation}
+                      {:else if message.body}
                         {@html message.body}
                       {:else}
                         {message.snippet}
