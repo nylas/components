@@ -224,8 +224,17 @@
           );
           if (existingMessage) {
             existingMessage.conversation = msg.conversation;
-            existingMessage.body = msg.body;
           }
+        });
+        activeThread.messages = activeThread.messages;
+      });
+    } else if (message) {
+      fetchCleanConversations({
+        component_id: id,
+        message_id: [message.id],
+      }).then((results) => {
+        results.forEach((msg: Message) => {
+          message.conversation = msg.conversation;
         });
         activeThread.messages = activeThread.messages;
       });
@@ -1206,7 +1215,11 @@
             </div>
           </div>
           <div class="message-body">
-            {@html message.body}
+            {#if clean_conversation && message.conversation}
+              {@html message.conversation}
+            {:else if message.body}
+              {@html message.body}
+            {/if}
           </div>
         </div>
       </div>
