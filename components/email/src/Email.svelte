@@ -355,10 +355,12 @@
 
   function toggleUnreadStatus() {
     if (activeThread) {
-      activeThread.unread = !!activeThread.unread || true;
+      activeThread.unread = !activeThread.unread;
       unread = activeThread.unread;
+      saveActiveThread();
+      return;
     }
-    saveActiveThread();
+    unread = !unread;
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -1265,7 +1267,7 @@
                     <button
                       title={`Mark thread as ${unread ? "" : "un"}read`}
                       aria-label={`Mark thread as ${unread ? "" : "un"}read`}
-                      on:click={toggleUnreadStatus}
+                      on:click|stopPropagation={toggleUnreadStatus}
                     >
                       {#if unread || activeThread.unread}
                         <MarkReadIcon aria-hidden="true" />
