@@ -366,35 +366,41 @@
     return (unreadThreads = unreadThreads);
   }
 
+  async function deleteThread(thread: Thread) {
+    if (trashLabelID) {
+      thread.label_ids = [trashLabelID];
+    } else if (trashFolderID) {
+      thread.folder_id = trashFolderID;
+    }
+    await updateThreadStatus(thread);
+  }
+
   async function onDeleteSelected(event: MouseEvent) {
     dispatchEvent("onDeleteSelected", { event });
-    if (openedEmailData) {
-      openedEmailData.expanded = false;
-      // "delete" thread by hiding; TODO: change to add thread to trash folder
-      inboxThreads = inboxThreads.filter(
-        (thread) => thread !== openedEmailData,
-      );
-      starredThreads.delete(openedEmailData);
-      unreadThreads.delete(openedEmailData);
-      selectedThreads.delete(openedEmailData);
-      openedEmailData = null;
-    } else {
-      selectedThreads.forEach(async (thread) => {
-        starredThreads.delete(thread);
-        unreadThreads.delete(thread);
-        if (trashLabelID) {
-          thread.label_ids = [trashLabelID];
-        } else if (trashFolderID) {
-          thread.folder_id = trashFolderID;
-        }
-        await updateThreadStatus(thread);
-      });
-      // "delete" thread by hiding; TODO: change to add thread to trash folder
-      inboxThreads = inboxThreads.filter(
-        (thread) => !selectedThreads.has(thread),
-      );
-      selectedThreads.clear();
+    if (trashLabelID || trashFolderID) {
+      if (openedEmailData) {
+        openedEmailData.expanded = false;
+        inboxThreads = inboxThreads.filter(
+          (thread) => thread !== openedEmailData,
+        );
+        starredThreads.delete(openedEmailData);
+        unreadThreads.delete(openedEmailData);
+        selectedThreads.delete(openedEmailData);
+        await deleteThread(openedEmailData);
+        openedEmailData = null;
+      } else {
+        selectedThreads.forEach(async (thread) => {
+          starredThreads.delete(thread);
+          unreadThreads.delete(thread);
+          await deleteThread(thread);
+        });
+        inboxThreads = inboxThreads.filter(
+          (thread) => !selectedThreads.has(thread),
+        );
+        selectedThreads.clear();
+      }
     }
+
     return (inboxThreads = inboxThreads), (selectedThreads = selectedThreads);
   }
   //#endregion actions
