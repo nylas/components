@@ -26,6 +26,8 @@
   export let availability_id: string;
   export let email_ids: string[];
   export let booking_label: string;
+  export let event_title: string;
+  export let event_description: string;
   // #endregion props
 
   //#region mount and prop initialization
@@ -61,6 +63,16 @@
       booking_label,
       "Schedule",
     );
+    event_title = getPropertyValue(
+      internalProps.event_title,
+      event_title,
+      "Meeting",
+    );
+    event_description = getPropertyValue(
+      internalProps.event_description,
+      event_description,
+      "",
+    );
   }
   // #endregion mount and prop initialization
 
@@ -73,8 +85,13 @@
   async function bookTimeSlots(events: TimeSlot[]) {
     const bookings = events.map(async (event) => {
       let postableEvent: Partial<TimespanEvent> = {
-        title: "My test event",
-        participants: [], // TODO: add to the participants array from availbility.event.available_calendars
+        title: event_title,
+        description: event_description,
+        participants: event.available_calendars.map((c) => {
+          return {
+            email: c,
+          };
+        }),
         calendar_id: event.calendar_id,
         when: {
           start_time: event.start_time.getTime() / 1000,
