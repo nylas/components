@@ -6,7 +6,6 @@ on:
   pull_request:
     types: [opened, synchronize]
 env:
-  LIGHTHOUSE_CHECK_GITHUB_ACCESS_TOKEN: ${{secrets.LIGHTHOUSE_CHECK_GITHUB_ACCESS_TOKEN}}
   API_GATEWAY: ${{secrets.API_GATEWAY}}
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
   PERCY_TOKEN: ${{secrets.PERCY_TOKEN}}
@@ -144,37 +143,6 @@ jobs:
           start: npm run start:ci
           wait-on: http://localhost:8000
           wait-on-timeout: 30
-
-  test-lighthouse:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-    needs: [build, test-cypress]
-    if: github.ref != 'refs/heads/main'
-    steps:
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-      - name: Run server
-        run: npm run start:ci &
-      - name: Run lighthouse
-        uses: foo-software/lighthouse-check-action@master
-        with:
-          accessToken: ${{ secrets.LIGHTHOUSE_CHECK_GITHUB_ACCESS_TOKEN }}
-          author: ${{ github.actor }}
-          branch: ${{ github.ref }}
-          outputDirectory: .
-          urls: "http://localhost:8000/components/agenda/src/index.html,http://localhost:8000/components/composer/src/index.html"
-          sha: ${{ github.sha }}
-          prCommentEnabled: true
-          prCommentSaveOld: false
-          verbose: true
 
   publish:
     needs: [build, lint, test-unit, type-check, test-cypress]
