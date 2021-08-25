@@ -163,6 +163,7 @@ export interface EmailProperties extends Manifest {
   thread_id: string;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   show_contact_avatar: boolean;
+  clean_conversation: boolean;
 }
 
 export interface ComposerProperties extends Manifest {
