@@ -244,9 +244,9 @@ describe("MailBox  component", () => {
   });
 
   describe("Pagination", () => {
-    // change these if default emails per page and total number of demo mailbox threads are changed
+    // change these if default emails per page and total number of demo mailbox threads are changed.
 
-    const demoThreadsCount = 37;
+    const demoThreadsCount = 39;
 
     it(`Shows Mailbox with ${defaultSize} emails per page as default`, () => {
       let remainingThreads = demoThreadsCount;

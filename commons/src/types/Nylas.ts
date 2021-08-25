@@ -1,5 +1,8 @@
 import type { HydratedContact } from "@commons/types/Contacts";
-
+import type {
+  AccountOrganizationUnit,
+  AccountSyncState,
+} from "@commons/enums/Nylas";
 export interface CommonQuery {
   component_id: string;
   access_token?: string;
@@ -207,19 +210,13 @@ export interface DayProperties extends Manifest {
   day: number;
   calendar_ids?: string;
 }
-export interface Folder {
-  object?: "folder";
-  display_name: string;
-  id: string;
-  name: string;
-}
 export interface Thread {
   account_id: string;
   draft_ids: string[];
   first_message_timestamp: number;
   has_attachments: boolean;
   id: string;
-  labels: unknown[];
+  labels?: Label[];
   last_message_received_timestamp: number;
   last_message_sent_timestamp: number;
   last_message_timestamp: number;
@@ -233,7 +230,9 @@ export interface Thread {
   unread: boolean;
   version: number;
   expanded?: boolean;
-  folders?: string[]; //to be changed to Folder[];
+  folders?: Folder[]; //to be changed to Folder[];
+  folder_id?: string;
+  label_ids?: string[];
 }
 export interface Conversation extends Thread {
   messages: Message[];
@@ -246,9 +245,9 @@ export interface Account {
   name?: string;
   linked_at: number;
   object: "account";
-  organization_unit: "label" | "folder";
+  organization_unit: AccountOrganizationUnit;
   provider: string;
-  sync_state: "running" | "partial" | "stopped";
+  sync_state: AccountSyncState;
 }
 
 export interface ComponentProperty<T> {
@@ -260,4 +259,30 @@ export interface ComponentProperty<T> {
   description?: string;
   type?: string;
   validation_message?: any;
+}
+
+export interface Label {
+  account_id: string;
+  display_name: string;
+  id: string;
+  name: string;
+  object: "label";
+}
+
+export interface StoredLabels {
+  queryKey: string;
+  data: Label[];
+}
+
+export interface Folder {
+  account_id: string;
+  display_name: string;
+  id: string;
+  name: string;
+  object: "folder";
+}
+
+export interface StoredFolders {
+  queryKey: string;
+  data: Folder[];
 }
