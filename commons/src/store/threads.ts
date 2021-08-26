@@ -42,6 +42,14 @@ function initializeThreads() {
       updatedThread: Conversation,
     ) => {
       const thread = await updateThread(threadQuery, updatedThread);
+      if (!threadsMap[queryKey]) {
+        threadsMap[queryKey] = (await fetchThreads(JSON.parse(queryKey))).map(
+          (thread) => {
+            thread.toString = () => thread.id;
+            return thread;
+          },
+        );
+      }
       threadsMap[queryKey] = threadsMap[queryKey].map((initialThread) => {
         if (initialThread.id === thread.id) {
           initialThread = Object.assign(initialThread, thread);
