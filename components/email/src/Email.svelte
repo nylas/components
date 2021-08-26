@@ -293,9 +293,8 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
-        lastMsgIndex
-      ].expanded;
+      activeThread.messages[lastMsgIndex].expanded =
+        !activeThread.messages[lastMsgIndex].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
@@ -362,9 +361,8 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(e);
     } else {
-      activeThread.messages[msgIndex].expanded = !activeThread.messages[
-        msgIndex
-      ].expanded;
+      activeThread.messages[msgIndex].expanded =
+        !activeThread.messages[msgIndex].expanded;
       dispatchEvent("messageClicked", {
         event: e,
         message: activeThread.messages[msgIndex],
@@ -382,9 +380,8 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(e);
       } else {
-        activeThread.messages[msgIndex].expanded = !activeThread.messages[
-          msgIndex
-        ].expanded;
+        activeThread.messages[msgIndex].expanded =
+          !activeThread.messages[msgIndex].expanded;
       }
     }
   }
@@ -421,16 +418,24 @@
     "Saturday",
   ];
   function formatPreviewDate(date: Date): string {
-    const today = new Date();
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
     const yesterday = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate() - 1,
+      0,
+      0,
+      0,
+      0,
     );
     const lastWeek = new Date(
       today.getFullYear(),
       today.getMonth(),
       today.getDate() - 6,
+      0,
+      0,
+      0,
+      0,
     );
     const thisYear = new Date(today.getFullYear(), 0, 1);
 
