@@ -29,7 +29,7 @@ var thread1 = {
       object: "message",
       reply_to: [{ email: "tips@nylas.com", name: "" }],
       snippet:
-        "Set yourself up for an integration that scales ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ Set yourself up for an i",
+        "Set yourself up for an integration that scales by avoiding common roadblocks and pitfalls. Learn how to boost revenue, accelerate your roadmap, and meet & exceed your customers’ needs with these assets.",
       starred: false,
       subject: "API Integration Pitfalls and How to Avoid Them",
       thread_id: "dlrwnv5oc3v3apxc2j0ht8vop",
@@ -43,7 +43,7 @@ var thread1 = {
     { email: "nylascypresstest+trialuser2@gmail.com", name: "" },
   ],
   snippet:
-    "Set yourself up for an integration that scales ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ Set yourself up for an i",
+    "Set yourself up for an integration that scales by avoiding common roadblocks and pitfalls. Learn how to boost revenue, accelerate your roadmap, and meet & exceed your customers’ needs with these assets.",
   starred: false,
   subject: "API Integration Pitfalls and How to Avoid Them",
   unread: true,
