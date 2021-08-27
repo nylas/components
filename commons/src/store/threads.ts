@@ -2,6 +2,7 @@ import { derived, writable } from "svelte/store";
 import {
   fetchThread,
   fetchThreads,
+  fetchThreadsWithSearchKeyword,
   updateThread,
 } from "../connections/threads";
 import type {
@@ -10,6 +11,7 @@ import type {
   ConversationQuery,
   Message,
   Conversation,
+  ThreadsWithSearchKeywordQuery,
 } from "@commons/types/Nylas";
 
 function initializeThreads() {
@@ -26,6 +28,21 @@ function initializeThreads() {
         (query.component_id || query.access_token)
       ) {
         threadsMap[queryKey] = await fetchThreads(query);
+      }
+      update((threads) => {
+        threads[queryKey] = threadsMap[queryKey];
+        return { ...threads };
+      });
+      return threadsMap[queryKey];
+    },
+    getThreadsWithSearchKeyword: async (
+      query: ThreadsWithSearchKeywordQuery,
+    ) => {
+      const queryKey = JSON.stringify(query);
+      if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {
+        threadsMap[queryKey] = (await fetchThreadsWithSearchKeyword(query)).map(
+          (thread) => thread,
+        );
       }
       update((threads) => {
         threads[queryKey] = threadsMap[queryKey];

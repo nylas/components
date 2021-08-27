@@ -42,6 +42,12 @@ export interface ThreadsQuery {
   not_in?: string;
 }
 
+export interface ThreadsWithSearchKeywordQuery {
+  component_id: string;
+  access_token?: string;
+  keyword_to_search: string;
+}
+
 export interface MessagesQuery extends CommonQuery {
   received_before?: number;
   received_after?: number;

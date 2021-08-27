@@ -47,6 +47,7 @@
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
   export let actions_bar: MailboxActions[];
+  export let keyword_to_search: string | null;
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
 
@@ -88,6 +89,11 @@
 
     if (all_threads) {
       threads = all_threads as Thread[];
+    } else if (keyword_to_search) {
+      threads = await MailboxStore.getThreadsWithSearchKeyword({
+        ...accountOrganizationUnitQuery,
+        keyword_to_search,
+      });
     } else {
       threads = (await MailboxStore.getThreads(query)) || [];
     }
@@ -105,6 +111,9 @@
   });
 
   let inboxThreads: Thread[]; // threads currently in the inbox
+  $: if (threads) {
+    inboxThreads = threads;
+  }
   $: {
     if (!inboxThreads) {
       inboxThreads = threads;
@@ -248,7 +257,16 @@
   async function refreshClicked(event: MouseEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
-      threads = (await MailboxStore.getThreads(query, true)) || [];
+      keyword_to_search = "Hey";
+      if (keyword_to_search) {
+        threads = await MailboxStore.getThreadsWithSearchKeyword({
+          component_id: query.component_id,
+          access_token: query.access_token,
+          keyword_to_search,
+        });
+      } else {
+        threads = (await MailboxStore.getThreads(query, true)) || [];
+      }
     }
   }
 
