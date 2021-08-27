@@ -34,6 +34,9 @@
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import Tooltip from "@commons/components/Tooltip.svelte";
+  import { AccountOrganizationUnit } from "@commons/enums/Nylas";
+  import { LabelStore } from "@commons/store/labels";
+  import { FolderStore } from "@commons/store/folders";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -65,6 +68,17 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
+
+    // Initialize labels / folders
+    const accountOrganizationUnitQuery = {
+      component_id: id,
+      access_token,
+    };
+    if (you.organization_unit === AccountOrganizationUnit.Label) {
+      labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
+    } else if (you.organization_unit === AccountOrganizationUnit.Folder) {
+      folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
+    }
   });
 
   let contacts: any = null;
@@ -107,6 +121,18 @@
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
   const MAX_DESKTOP_PARTICIPANTS = 2;
   const MAX_MOBILE_PARTICIPANTS = 1;
+
+  // #region initialize label and folder vars (for trash)
+  let labels: Label[] = [];
+  $: trashLabelID = labels.length
+    ? labels.find((label) => label.name === "trash")?.id
+    : null;
+
+  let folders: Folder[] = [];
+  $: trashFolderID = folders.length
+    ? labels.find((folder) => folder.name === "trash")?.id
+    : null;
+  // #endregion initialize label and folder vars (for trash)
 
   let internalProps: SvelteAllProps;
   $: {
@@ -361,6 +387,19 @@
       return;
     }
     unread = !unread;
+  }
+
+  function deleteEmail(e: MouseEvent) {
+    dispatchEvent("threadDeleted", {
+      event: e,
+      thread: activeThread,
+    });
+    if (trashLabelID) {
+      activeThread.label_ids = [trashLabelID];
+    } else if (trashFolderID) {
+      activeThread.folder_id = trashFolderID;
+    }
+    await saveActiveThread();
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -1248,21 +1287,16 @@
                 class:date={show_received_timestamp}
                 class:action-icons={show_thread_actions}
               >
-                {#if show_received_timestamp}
-                  <span>
-                    {formatPreviewDate(
-                      new Date(thread.last_message_timestamp * 1000),
-                    )}
-                  </span>
-                {:else if show_thread_actions}
-                  <!-- Read: ch65594 -->
-                  {#if false}
-                    <div class="delete">
-                      <button title="Delete thread" aria-label="Delete thread">
-                        <TrashIcon />
-                      </button>
-                    </div>
-                  {/if}
+                {#if show_thread_actions}
+                  <div class="delete">
+                    <button
+                      title="Delete thread"
+                      aria-label="Delete thread"
+                      on:click|stopPropagation={deleteEmail}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
                   <div class="read-status">
                     <button
                       title={`Mark thread as ${unread ? "" : "un"}read`}
@@ -1276,6 +1310,12 @@
                       {/if}</button
                     >
                   </div>
+                {:else if show_received_timestamp}
+                <span>
+                  {formatPreviewDate(
+                    new Date(thread.last_message_timestamp * 1000),
+                  )}
+                </span>
                 {/if}
               </div>
             </div>
