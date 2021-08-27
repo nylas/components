@@ -25,9 +25,7 @@ function initializeThreads() {
         (!threadsMap[queryKey] || forceRefresh) &&
         (query.component_id || query.access_token)
       ) {
-        threadsMap[queryKey] = (await fetchThreads(query)).map(
-          (thread) => thread,
-        );
+        threadsMap[queryKey] = await fetchThreads(query);
       }
       update((threads) => {
         threads[queryKey] = threadsMap[queryKey];
@@ -42,9 +40,7 @@ function initializeThreads() {
     ) => {
       const thread = await updateThread(threadQuery, updatedThread);
       if (!threadsMap[queryKey]) {
-        threadsMap[queryKey] = (await fetchThreads(JSON.parse(queryKey))).map(
-          (thread) => thread,
-        );
+        threadsMap[queryKey] = await fetchThreads(JSON.parse(queryKey));
       }
       threadsMap[queryKey] = threadsMap[queryKey].map((initialThread) => {
         if (initialThread.id === thread.id) {
