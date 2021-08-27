@@ -48,6 +48,7 @@
   export let header: string | null;
   export let actions_bar: MailboxActions[];
   export let keyword_to_search: string | null;
+  export let query_parameters: ThreadsQuery | null;
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
 
@@ -109,6 +110,8 @@
     lastPage = Math.ceil(inboxThreads?.length / items_per_page);
     hasComponentLoaded = true;
   });
+
+  $: queryParams = query_parameters || queryParams;
 
   let inboxThreads: Thread[]; // threads currently in the inbox
   $: if (threads) {
