@@ -35,25 +35,11 @@ export const fetchThreadsWithSearchKeyword = async (
 ): Promise<Thread[]> => {
   const queryString = `${getMiddlewareApiUrl(
     query.component_id,
-  )}/threads/search?q=${query.keyword_to_search}`;
+  )}/threads/search?q=${query.keyword_to_search}&view=expanded`;
   return await fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then(async (json) => {
-      const expandedThreads: Thread[] = [];
-      if (json.response.length) {
-        for (const thread of json.response) {
-          expandedThreads.push(
-            await fetchThread({
-              component_id: query.component_id,
-              access_token: query.access_token,
-              thread_id: thread.id,
-            }),
-          );
-        }
-        return expandedThreads;
-      } else {
-        return json.response;
-      }
+      return json.response;
     })
     .catch((error) => handleError(query.component_id, error));
 };
