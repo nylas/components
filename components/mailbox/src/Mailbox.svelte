@@ -260,7 +260,6 @@
   async function refreshClicked(event: MouseEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
-      keyword_to_search = "Hey";
       if (keyword_to_search) {
         threads = await MailboxStore.getThreadsWithSearchKeyword({
           component_id: query.component_id,
