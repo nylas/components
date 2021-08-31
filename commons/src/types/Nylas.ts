@@ -180,6 +180,7 @@ export interface EmailProperties extends Manifest {
   show_star: boolean;
   show_thread_checkbox: boolean;
   unread_status: EmailUnreadStatus;
+  show_expanded_email_view_onload: boolean;
 }
 
 export interface MailboxProperties extends Manifest {

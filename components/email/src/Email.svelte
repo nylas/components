@@ -54,6 +54,7 @@
   export let is_starred: boolean;
   export let show_contact_avatar: boolean;
   export let clean_conversation: boolean;
+  export let show_expanded_email_view_onload: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -146,7 +147,11 @@
       show_contact_avatar,
       true,
     );
-
+    show_expanded_email_view_onload = getPropertyValue(
+      internalProps.show_expanded_email_view_onload,
+      show_expanded_email_view_onload,
+      false, // default value is false
+    );
     clean_conversation = getPropertyValue(
       internalProps.clean_conversation,
       clean_conversation,
@@ -205,6 +210,15 @@
       }
     });
   }
+
+  // This is for Email component demo purpose, where we want to show expanded threads by default on load.
+  // Show expanded thread view onload if `show_expanded_email_view_onload` prop is true.
+  $: if (activeThread && show_expanded_email_view_onload) {
+    activeThread.expanded = true;
+    // Set `show_expanded_email_view_onload` to false after load
+    show_expanded_email_view_onload = false;
+  }
+
   // #endregion thread intake and set
   let emailManuallyPassed: boolean;
   $: emailManuallyPassed = !!thread;

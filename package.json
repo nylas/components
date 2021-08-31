@@ -10,7 +10,7 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "dev": "lerna run --parallel dev --concurrency 8",
-    "dev:scoped": "concurrently 'live-server . --host=localhost --port=8000' 'lerna run --parallel dev --scope=@nylas/components-{availability}'",
+    "dev:scoped": "concurrently 'live-server . --host=localhost --port=8000' 'lerna run --parallel dev --scope=@nylas/components-{email}'",
     "lerna": "lerna",
     "link": "lerna link convert",
     "lint": "eslint --ext .ts -f visualstudio .",

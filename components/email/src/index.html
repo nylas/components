@@ -222,6 +222,11 @@
         const passedThread = document.getElementsByTagName("nylas-email")[1];
         passedThread.thread = thread;
 
+        // setting show_expanded_email_view_onload to true for demo purpose
+        passedThread.show_expanded_email_view_onload = true;
+        const fetchedThread = document.getElementsByTagName("nylas-email")[0];
+        fetchedThread.show_expanded_email_view_onload = true;
+
         // TODO this but as a cypress test
         setTimeout(() => {
           console.log("Changing out the thread subject");
