@@ -860,7 +860,8 @@
           }
         }
         header {
-          padding: $spacing-m $spacing-l 0;
+          padding: $spacing-m $spacing-l;
+          border-bottom: var(--nylas-email-border, #{$border-style});
         }
 
         &.expanded.singular {
