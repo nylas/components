@@ -732,6 +732,7 @@
 
           div.message-from {
             display: flex;
+            align-items: center;
             span {
               &.name {
                 font-weight: 600;
@@ -755,7 +756,7 @@
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
-                margin-left: calc(32px + $spacing-s);
+                margin-left: calc(32px + 0.7rem);
               }
             }
           }
@@ -1141,9 +1142,9 @@
           </div>
         {:else}
           <div
-            class="email-row condensed ${click_action === 'mailbox'
-              ? 'mailbox'
-              : ''}"
+            class={`email-row condensed ${
+              click_action === "mailbox" ? "mailbox" : ""
+            }`}
             class:show_star
             class:unread={unread !== null ? unread : activeThread.unread}
           >

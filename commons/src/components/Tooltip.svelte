@@ -40,13 +40,14 @@
     background: transparent;
     border: none;
     box-shadow: none;
-    height: 24px;
-    width: 24px;
     cursor: pointer;
-  }
-
-  button.tooltip-trigger :global(svg) {
-    width: 24px;
+    padding: 0;
+    width: 1rem;
+    height: auto;
+    display: flex;
+    &.reverse-icon {
+      transform: rotate(180deg);
+    }
   }
 
   p.tooltip {
@@ -65,7 +66,7 @@
 </style>
 
 <button
-  class="tooltip-trigger"
+  class={`tooltip-trigger ${isTooltipVisible ? "reverse-icon" : ""}`}
   aria-expanded={isTooltipVisible ? "true" : "false"}
   id={id ? `button-${id.slice(0, 3)}` : ""}
   aria-describedby={id}
