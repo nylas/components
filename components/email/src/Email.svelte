@@ -757,20 +757,16 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 margin-left: calc(32px + 0.7rem);
+                span {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                }
               }
             }
           }
           &.condensed {
             gap: 1rem;
-            &:not(.mailbox) {
-              box-shadow: inset 0 -1px 0 0 rgb(100 121 143 / 12%);
-            }
-            &:not(.mailbox):hover,
-            &:not(.mailbox):focus {
-              box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0,
-                0 1px 2px 0 rgb(60 64 67 / 30%),
-                0 1px 3px 1px rgb(60 64 67 / 15%);
-            }
             &:hover,
             &:focus {
               cursor: s-resize;
@@ -1142,9 +1138,7 @@
           </div>
         {:else}
           <div
-            class={`email-row condensed ${
-              click_action === "mailbox" ? "mailbox" : ""
-            }`}
+            class="email-row condensed"
             class:show_star
             class:unread={unread !== null ? unread : activeThread.unread}
           >

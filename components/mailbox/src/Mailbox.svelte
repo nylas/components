@@ -542,9 +542,9 @@
       }
 
       &:hover {
-        $hover-outline-width: 1px;
+        $hover-outline-width: 0.5px;
+        border-top-width: 0;
         border: $hover-outline-width solid var(--grey-warm);
-        border-top-width: 0.5px;
         cursor: pointer;
       }
 
