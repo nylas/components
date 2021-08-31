@@ -19,7 +19,6 @@
   import MarkReadIcon from "./assets/envelope-open-text.svg";
   import MarkUnreadIcon from "./assets/envelope.svg";
   import type {
-    EmailProperties,
     Thread,
     ThreadsQuery,
     MailboxQuery,
@@ -27,14 +26,16 @@
     Account,
     Label,
     Folder,
+    MailboxProperties,
   } from "@commons/types/Nylas";
-  import { AccountOrganizationUnit } from "@commons/enums/Nylas";
+  import {
+    AccountOrganizationUnit,
+    MailboxActions,
+  } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
 
-  type MailboxActions = "selectall" | "delete" | "star" | "unread";
-
-  let manifest: Partial<EmailProperties> = {};
+  let manifest: Partial<MailboxProperties> = {};
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -47,6 +48,9 @@
   export let unread_status: "read" | "unread" | "default";
   export let header: string | null;
   export let actions_bar: MailboxActions[];
+  export let keyword_to_search: string | null;
+  export let query_parameters: ThreadsQuery | null; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
+  export let items_per_page: number = 13;
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
 
@@ -58,7 +62,6 @@
   let paginatedThreads: Thread[] = [];
   let currentPage: number = 1;
   let lastPage: number = 1;
-  export let items_per_page: number = 13;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -68,7 +71,7 @@
 
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as EmailProperties;
+    ]) || {}) as MailboxProperties;
     internalProps = buildInternalProps(
       $$props,
       manifest,
@@ -88,6 +91,11 @@
 
     if (all_threads) {
       threads = all_threads as Thread[];
+    } else if (keyword_to_search) {
+      threads = await MailboxStore.getThreadsWithSearchKeyword({
+        ...accountOrganizationUnitQuery,
+        keyword_to_search,
+      });
     } else {
       threads = (await MailboxStore.getThreads(query)) || [];
     }
@@ -104,7 +112,12 @@
     hasComponentLoaded = true;
   });
 
+  $: queryParams = query_parameters || queryParams;
+
   let inboxThreads: Thread[]; // threads currently in the inbox
+  $: if (threads) {
+    inboxThreads = threads;
+  }
   $: {
     if (!inboxThreads) {
       inboxThreads = threads;
@@ -122,7 +135,7 @@
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<SvelteAllProps>;
+    ) as Partial<MailboxProperties>;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
     }
@@ -248,7 +261,15 @@
   async function refreshClicked(event: MouseEvent) {
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
-      threads = (await MailboxStore.getThreads(query, true)) || [];
+      if (keyword_to_search) {
+        threads = await MailboxStore.getThreadsWithSearchKeyword({
+          component_id: query.component_id,
+          access_token: query.access_token,
+          keyword_to_search,
+        });
+      } else {
+        threads = (await MailboxStore.getThreads(query, true)) || [];
+      }
     }
   }
 
@@ -678,7 +699,7 @@
           aria-label="Bulk actions"
           aria-controls="mailboxlist"
         >
-          {#if show_thread_checkbox && actions_bar.includes("selectall")}<div
+          {#if show_thread_checkbox && actions_bar.includes(MailboxActions.SELECTALL)}<div
               class="thread-checkbox"
             >
               {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
@@ -693,7 +714,7 @@
             </div>
           {/if}
           {#if selectedThreads.size}
-            {#if actions_bar.includes("delete")}
+            {#if actions_bar.includes(MailboxActions.DELETE)}
               <div class="delete">
                 <button
                   title="Delete selected email(s)"
@@ -702,7 +723,7 @@
                 >
               </div>
             {/if}
-            {#if show_star && actions_bar.includes("star")}
+            {#if show_star && actions_bar.includes(MailboxActions.STAR)}
               <div class="starred">
                 {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
                   <button
@@ -715,7 +736,7 @@
                   />
                 {/each}
               </div>{/if}
-            {#if actions_bar.includes("unread")}
+            {#if actions_bar.includes(MailboxActions.UNREAD)}
               <div class="read-status">
                 {#if areAllSelectedUnread}
                   <button

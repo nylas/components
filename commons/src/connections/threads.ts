@@ -10,6 +10,7 @@ import type {
   ConversationQuery,
   Conversation,
   MiddlewareResponse,
+  SearchResultThreadsQuery,
 } from "@commons/types/Nylas";
 
 export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
@@ -24,6 +25,20 @@ export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
   return await fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then((json) => {
+      return json.response;
+    })
+    .catch((error) => handleError(query.component_id, error));
+};
+
+export const fetchSearchResultThreads = async (
+  query: SearchResultThreadsQuery,
+): Promise<Thread[]> => {
+  const queryString = `${getMiddlewareApiUrl(
+    query.component_id,
+  )}/threads/search?q=${query.keyword_to_search}&view=expanded`;
+  return await fetch(queryString, getFetchConfig(query))
+    .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
+    .then(async (json) => {
       return json.response;
     })
     .catch((error) => handleError(query.component_id, error));
