@@ -2,6 +2,8 @@ import type { HydratedContact } from "@commons/types/Contacts";
 import type {
   AccountOrganizationUnit,
   AccountSyncState,
+  EmailUnreadStatus,
+  MailboxActions,
 } from "@commons/enums/Nylas";
 export interface CommonQuery {
   component_id: string;
@@ -173,6 +175,23 @@ export interface EmailProperties extends Manifest {
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   show_contact_avatar: boolean;
   clean_conversation: boolean;
+  query_parameters: ThreadsQuery;
+  keyword_to_search: string;
+  show_star: boolean;
+  show_thread_checkbox: boolean;
+  unread_status: EmailUnreadStatus;
+}
+
+export interface MailboxProperties extends Manifest {
+  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  show_star: boolean;
+  show_thread_checkbox: boolean;
+  unread_status: EmailUnreadStatus;
+  actions_bar: MailboxActions[];
+  header: string;
+  keyword_to_search: string;
+  query_parameters: ThreadsQuery;
+  items_per_page: number;
 }
 
 export interface ComposerProperties extends Manifest {
