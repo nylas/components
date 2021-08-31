@@ -56,6 +56,9 @@
   export let clean_conversation: boolean;
   export let show_expanded_email_view_onload: boolean;
 
+  // Track `show_expanded_email_view_onload` value in expandThreadOnLoad.
+  // This lets us limit expanding thread once, onload
+  $: expandThreadOnLoad = show_expanded_email_view_onload || false;
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
     manifest = ((await $ManifestStore[
@@ -212,11 +215,12 @@
   }
 
   // This is for Email component demo purpose, where we want to show expanded threads by default on load.
-  // Show expanded thread view onload if `show_expanded_email_view_onload` prop is true.
-  $: if (activeThread && show_expanded_email_view_onload) {
+  // Show expanded thread view onload if `expandThreadOnLoad` prop is true.
+  $: if (activeThread && expandThreadOnLoad && !activeThread.expanded) {
+    console.log("Inside if: ", expandThreadOnLoad);
     activeThread.expanded = true;
     // Set `show_expanded_email_view_onload` to false after load
-    show_expanded_email_view_onload = false;
+    expandThreadOnLoad = false;
   }
 
   // #endregion thread intake and set
@@ -261,7 +265,9 @@
         message_id: [message.id],
       }).then((results) => {
         results.forEach((msg: Message) => {
-          message.conversation = msg.conversation;
+          if (message) {
+            message.conversation = msg.conversation;
+          }
         });
         activeThread.messages = activeThread.messages;
       });
@@ -538,9 +544,11 @@
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
   $mobile-collapsed-height: fit-content;
-  $spacing-s: 0.5rem;
+  $spacing-xs: 0.5rem;
+  $spacing-s: 0.7rem;
   $spacing-m: 1rem;
   $spacing-l: 1.5rem;
+  $spacing-xl: 2.5rem;
 
   main {
     height: 100%;
@@ -570,12 +578,12 @@
       header {
         font-size: 1.2rem;
         font-weight: 700;
-        padding: $spacing-s;
+        padding: $spacing-xs;
         padding-bottom: 0;
       }
       &.condensed {
         height: $mobile-collapsed-height;
-        padding: $spacing-s;
+        padding: $spacing-xs;
         flex-wrap: wrap;
         display: grid;
         align-items: center;
@@ -585,14 +593,14 @@
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
-          column-gap: $spacing-s;
+          column-gap: $spacing-xs;
           grid-area: from-star;
         }
 
         .mobile-subject-snippet {
           display: block;
           font-size: 14px;
-          margin-top: $spacing-s;
+          margin-top: $spacing-xs;
           flex-basis: 100%;
           grid-area: mobile-subject-snippet;
           .subject {
@@ -675,7 +683,7 @@
         div.individual-message {
           width: 100%;
           box-sizing: border-box;
-          padding: $spacing-s;
+          padding: $spacing-xs;
 
           &.condensed {
             div.snippet {
@@ -691,7 +699,7 @@
               .avatar-from {
                 display: flex;
                 align-items: center;
-                gap: 0.5rem;
+                gap: $spacing-s;
               }
             }
           }
@@ -739,7 +747,7 @@
               .avatar-from {
                 display: flex;
                 align-items: center;
-                gap: 0.5rem;
+                gap: $spacing-s;
               }
               div.message-to {
                 color: gray;
@@ -747,18 +755,23 @@
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
-                margin-left: calc(32px + 0.5rem);
+                margin-left: calc(32px + $spacing-s);
               }
             }
           }
           &.condensed {
             gap: 1rem;
-            box-shadow: inset 0 -1px 0 0 rgb(100 121 143 / 12%);
-            &:hover,
-            &:focus {
+            &:not(.mailbox) {
+              box-shadow: inset 0 -1px 0 0 rgb(100 121 143 / 12%);
+            }
+            &:not(.mailbox):hover,
+            &:not(.mailbox):focus {
               box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0,
                 0 1px 2px 0 rgb(60 64 67 / 30%),
                 0 1px 3px 1px rgb(60 64 67 / 15%);
+            }
+            &:hover,
+            &:focus {
               cursor: s-resize;
               outline: none;
             }
@@ -874,17 +887,17 @@
           }
         }
         header {
-          padding: $spacing-m $spacing-l;
+          padding: $spacing-m $spacing-xl;
           border-bottom: var(--nylas-email-border, #{$border-style});
         }
 
         &.expanded.singular {
           .individual-message.expanded {
-            padding-top: $spacing-s;
+            padding-top: $spacing-xs;
           }
         }
         &.condensed {
-          padding: 0 $spacing-s;
+          padding: 0 $spacing-xs;
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
@@ -920,14 +933,14 @@
             div.message-body {
               width: 100%;
               box-sizing: border-box;
-              padding: 0 $spacing-l;
+              padding: 0 $spacing-xl;
             }
 
             &.condensed {
               div.snippet {
                 width: 100%;
                 box-sizing: border-box;
-                padding: 0 $spacing-l;
+                padding: 0 $spacing-xl;
                 max-width: 95vw;
                 align-self: flex-start;
               }
@@ -940,7 +953,7 @@
             &.expanded {
               div.message-head {
                 div.message-from-to {
-                  margin: $spacing-s 0;
+                  margin: $spacing-xs 0;
                   div.message-to {
                     max-width: unset;
                     overflow: inherit;
@@ -959,7 +972,7 @@
             display: block;
 
             .subject {
-              margin-right: $spacing-s;
+              margin-right: $spacing-xs;
             }
           }
 
@@ -1128,7 +1141,9 @@
           </div>
         {:else}
           <div
-            class="email-row condensed"
+            class="email-row condensed ${click_action === 'mailbox'
+              ? 'mailbox'
+              : ''}"
             class:show_star
             class:unread={unread !== null ? unread : activeThread.unread}
           >
