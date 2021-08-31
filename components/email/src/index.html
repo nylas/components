@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <title>Email Demo</title>
     <link rel="shortcut icon" href="data:;base64,=" />
+    <link rel="stylesheet" href="index.css" />
     <script src="../index.js"></script>
     <script>
       const thread = {
@@ -238,25 +239,48 @@
 
   <body>
     <div id="emails"></div>
-    <h2>Demo 1: Fetched thread</h2>
-    <nylas-email
-      id="demo-email"
-      thread_id="ak2q46em0srqkh7vri8f8vuqj"
-      click_action="default"
-    ></nylas-email>
-    <hr />
-    <h2>Demo 2: Manually-passed thread; edited after 5sec</h2>
-    <nylas-email></nylas-email>
-    <hr />
-    <h2>Demo 3: Fetched single message</h2>
+    <div class="demo">
+      <p class="demo-index demo-head">Demo 1</p>
+      <h2 class="demo-head">Fetched thread</h2>
+      <p class="demo-description demo-head">
+        Fetching a single thread of emails for the passed thread_id prop
+      </p>
+      <!-- <nylas-email id="880397a7-36d0-4852-a4ae-1a0393f02755" thread_id="30iqovejbvg4y8kf1sn7bhgji" click_action="default">
+    </nylas-email> -->
+      <nylas-email
+        id="demo-email"
+        thread_id="ak2q46em0srqkh7vri8f8vuqj"
+        click_action="default"
+      ></nylas-email>
+    </div>
+    <div class="demo">
+      <p class="demo-index demo-head">Demo 2</p>
+      <h2 class="demo-head">Manually-passed thread</h2>
+      <p class="demo-description demo-head">
+        Fetching a manually passed thread of emails, that's being edited after 5
+        seconds
+      </p>
+      <nylas-email></nylas-email>
+    </div>
+    <div class="demo">
+      <p class="demo-index demo-head">Demo 3</p>
+      <h2 class="demo-head">Fetched message</h2>
+      <p class="demo-description demo-head">
+        Fetching a single message for the passed message_id prop
+      </p>
+      <nylas-email
+        id="demo-email"
+        message_id="3r5mx1zidx0a424j34jocc3no"
+      ></nylas-email>
+    </div>
 
-    <nylas-email
-      id="demo-email"
-      message_id="3r5mx1zidx0a424j34jocc3no"
-    ></nylas-email>
-
-    <hr />
-    <h2>Demo 4: Manually-passed single message</h2>
-    <nylas-email></nylas-email>
+    <div class="demo">
+      <p class="demo-index demo-head">Demo 4</p>
+      <h2 class="demo-head">Manually-passed message</h2>
+      <p class="demo-description demo-head">
+        Fetching a manually passed message, that's being edited after 5 seconds
+      </p>
+      <nylas-email></nylas-email>
+    </div>
   </body>
 </html>

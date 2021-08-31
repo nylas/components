@@ -42,6 +42,7 @@
     box-shadow: none;
     height: 24px;
     width: 24px;
+    cursor: pointer;
   }
 
   button.tooltip-trigger :global(svg) {

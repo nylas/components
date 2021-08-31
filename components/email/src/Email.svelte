@@ -62,27 +62,40 @@
     ]) || {}) as EmailProperties;
   });
 
-  let contact: Contact | { name: any };
+  let contacts: any = null;
+  $: activeThreadContact =
+    activeThread && contacts
+      ? contacts[
+          activeThread.messages[activeThread.messages.length - 1].from[0].email
+        ]
+      : null;
+  $: activeMessageContact =
+    message && contacts ? contacts[message.from[0].email] : null;
+
   $: (async () => {
-    if (!contact) {
-      if (thread && thread.messages) {
-        contact = await getContact(
-          thread.messages[thread.messages.length - 1].from[
-            thread.messages[thread.messages.length - 1].from.length - 1
-          ],
-        );
+    if (!contacts) {
+      if (thread && thread.participants) {
+        await getThreadContacts(thread);
       } else if (activeThread) {
-        contact = await getContact(
-          activeThread.messages[activeThread.messages.length - 1].from[
-            activeThread.messages[activeThread.messages.length - 1].from
-              .length - 1
-          ],
-        );
+        await getThreadContacts(activeThread);
       } else if (message) {
-        contact = await getContact(message.from[message.from.length - 1]);
+        const participant = message.from[0];
+        contacts = contacts || {};
+        contacts[participant.email] = await getContact(participant);
       }
     }
   })();
+
+  async function getThreadContacts(thread: Thread) {
+    for (const participant of thread.participants) {
+      const participantEmail = participant.email;
+      contacts = contacts || {};
+
+      if (!contacts[participantEmail] && participantEmail) {
+        contacts[participantEmail] = await getContact(participant);
+      }
+    }
+  }
 
   let main: Element;
   let messageRefs: Element[] = [];
@@ -660,6 +673,13 @@
               color: var(--grey);
               margin-top: $spacing-m;
             }
+            div.message-head {
+              .avatar-from {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              }
+            }
           }
           &:not(:last-of-type) {
             border-bottom: 1px solid #eee;
@@ -669,6 +689,12 @@
               div.message-head:hover {
                 cursor: n-resize;
               }
+            }
+          }
+          &.last-message {
+            .message-head:hover,
+            .message-body:hover {
+              cursor: default;
             }
           }
 
@@ -696,16 +722,19 @@
           div.message-head {
             div.message-from-to {
               margin: 0.5rem 0;
+              .avatar-from {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              }
               div.message-to {
                 color: gray;
                 max-width: 150px;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
+                margin-left: calc(32px + 0.5rem);
               }
-            }
-            &:hover {
-              cursor: default;
             }
           }
           &.condensed {
@@ -735,10 +764,6 @@
         }
       }
       &:hover {
-        border: var(
-          --nylas-email-border,
-          #{$hover-outline-width} solid var(--grey-warm)
-        );
         cursor: pointer;
       }
       .from-message-count {
@@ -965,25 +990,36 @@
                       : "condensed"
                   }`}
                   bind:this={messageRefs[msgIndex]}
-                  on:click={(e) => handleEmailClick(e, msgIndex)}
+                  on:click|stopPropagation={(e) =>
+                    handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
                 >
                   {#if message.expanded || msgIndex === activeThread.messages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
-                        <div class="message-from">
-                          <span class="name"
-                            >{message.from[0].name ||
-                              message.from[0].email}</span
-                          >
-                          <!-- tooltip component -->
-                          <nylas-tooltip
-                            on:toggleTooltip={setTooltip}
-                            id={message.id.slice(0, 3)}
-                            {current_tooltip_id}
-                            icon={DropdownSymbol}
-                            content={message.from[0].email}
-                          />
+                        <div class="avatar-from">
+                          {#if show_contact_avatar}
+                            <div class="default-avatar">
+                              <nylas-contact-image
+                                {contact_query}
+                                contact={contacts[message.from[0].email]}
+                              />
+                            </div>
+                          {/if}
+                          <div class="message-from">
+                            <span class="name"
+                              >{message.from[0].name ||
+                                message.from[0].email}</span
+                            >
+                            <!-- tooltip component -->
+                            <nylas-tooltip
+                              on:toggleTooltip={setTooltip}
+                              id={message.id.slice(0, 3)}
+                              {current_tooltip_id}
+                              icon={DropdownSymbol}
+                              content={message.from[0].email}
+                            />
+                          </div>
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
@@ -1027,18 +1063,35 @@
                     </div>
                   {:else}
                     <div class="message-head">
-                      <div class="message-from">
-                        <span class="name"
-                          >{message.from[0].name || message.from[0].email}</span
-                        >
-                        <!-- tooltip component -->
-                        <nylas-tooltip
-                          on:toggleTooltip={setTooltip}
-                          id={message.id.slice(0, 3)}
-                          {current_tooltip_id}
-                          icon={DropdownSymbol}
-                          content={message.from[0].email}
-                        />
+                      <div class="avatar-from">
+                        {#if show_contact_avatar}
+                          <div
+                            class="default-avatar"
+                            data-email={message.from[0].email}
+                            data-contact={JSON.stringify(
+                              contacts[message.from[0].email],
+                            )}
+                          >
+                            <nylas-contact-image
+                              {contact_query}
+                              contact={contacts[message.from[0].email]}
+                            />
+                          </div>
+                        {/if}
+                        <div class="message-from">
+                          <span class="name"
+                            >{message.from[0].name ||
+                              message.from[0].email}</span
+                          >
+                          <!-- tooltip component -->
+                          <nylas-tooltip
+                            on:toggleTooltip={setTooltip}
+                            id={message.id.slice(0, 3)}
+                            {current_tooltip_id}
+                            icon={DropdownSymbol}
+                            content={message.from[0].email}
+                          />
+                        </div>
                       </div>
                       <div class="message-date">
                         <span>
@@ -1081,7 +1134,10 @@
               <div class="from-message-count">
                 {#if show_contact_avatar}
                   <div class="default-avatar">
-                    <nylas-contact-image {contact_query} {contact} />
+                    <nylas-contact-image
+                      {contact_query}
+                      contact={activeThreadContact}
+                    />
                   </div>
                 {/if}
                 <div class="from-participants">
@@ -1170,28 +1226,34 @@
   {:else if message}
     {#if Object.keys(message).length > 0}
       <div class="email-row expanded singular">
-        {#if show_contact_avatar}
-          <div class="default-avatar">
-            <nylas-contact-image {contact_query} {contact} />
-          </div>
-        {/if}
         <header>{message.subject}</header>
         <div class="individual-message expanded">
           <div class="message-head">
             <div class="message-from-to">
-              <div class="message-from">
-                <span class="name"
-                  >{message.from[0].name || message.from[0].email}</span
-                >
-                <!-- tooltip component -->
-                <nylas-tooltip
-                  on:toggleTooltip={setTooltip}
-                  id={message.id}
-                  {current_tooltip_id}
-                  icon={DropdownSymbol}
-                  content={message.from[0].email}
-                />
+              <div class="avatar-from">
+                {#if show_contact_avatar}
+                  <div class="default-avatar">
+                    <nylas-contact-image
+                      {contact_query}
+                      contact={activeMessageContact}
+                    />
+                  </div>
+                {/if}
+                <div class="message-from">
+                  <span class="name"
+                    >{message.from[0].name || message.from[0].email}</span
+                  >
+                  <!-- tooltip component -->
+                  <nylas-tooltip
+                    on:toggleTooltip={setTooltip}
+                    id={message.id}
+                    {current_tooltip_id}
+                    icon={DropdownSymbol}
+                    content={message.from[0].email}
+                  />
+                </div>
               </div>
+
               <div class="message-to">
                 {#each message.to as to, i}
                   <span>
