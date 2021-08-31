@@ -42,7 +42,7 @@ export interface ThreadsQuery {
   not_in?: string;
 }
 
-export interface ThreadsWithSearchKeywordQuery {
+export interface SearchResultThreadsQuery {
   component_id: string;
   access_token?: string;
   keyword_to_search: string;
