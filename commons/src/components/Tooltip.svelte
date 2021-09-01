@@ -66,7 +66,8 @@
 </style>
 
 <button
-  class={`tooltip-trigger ${isTooltipVisible ? "reverse-icon" : ""}`}
+  class="tooltip-trigger"
+  class:reverse-icon={isTooltipVisible}
   aria-expanded={isTooltipVisible ? "true" : "false"}
   id={id ? `button-${id.slice(0, 3)}` : ""}
   aria-describedby={id}
