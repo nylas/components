@@ -56,9 +56,6 @@
   export let clean_conversation: boolean;
   export let show_expanded_email_view_onload: boolean;
 
-  // Track `show_expanded_email_view_onload` value in expandThreadOnLoad.
-  // This lets us limit expanding thread once, onload
-  $: expandThreadOnLoad = show_expanded_email_view_onload || false;
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
     manifest = ((await $ManifestStore[
@@ -202,6 +199,8 @@
       // It's already in the store! Great.
       activeThread = foundThread;
     }
+    // This is for Email component demo purpose, where we want to show expanded threads by default on load.
+    activeThread.expanded = show_expanded_email_view_onload;
   } else if (thread_id) {
     // We don't have a passed thread, but we do have a thread_id. Let's fetch it.
     MailboxStore.getThread(query).then(() => {
@@ -210,17 +209,9 @@
       ) as Conversation;
       if (foundThread) {
         activeThread = foundThread;
+        activeThread.expanded = show_expanded_email_view_onload;
       }
     });
-  }
-
-  // This is for Email component demo purpose, where we want to show expanded threads by default on load.
-  // Show expanded thread view onload if `expandThreadOnLoad` prop is true.
-  $: if (activeThread && expandThreadOnLoad && !activeThread.expanded) {
-    console.log("Inside if: ", expandThreadOnLoad);
-    activeThread.expanded = true;
-    // Set `show_expanded_email_view_onload` to false after load
-    expandThreadOnLoad = false;
   }
 
   // #endregion thread intake and set
