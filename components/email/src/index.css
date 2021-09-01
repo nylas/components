@@ -1,0 +1,43 @@
+* {
+  font-family: sans-serif;
+  font-style: normal;
+}
+body {
+  margin: 1.5rem;
+}
+
+.demo {
+  margin: 90px 0;
+}
+
+.demo-index,
+.demo-description {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 24px;
+  margin: 0.5rem 0;
+}
+.demo-index {
+  color: #8d94a5;
+}
+
+.demo-description {
+  color: #454954;
+  margin-bottom: 2rem;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: 32px;
+  line-height: 40px;
+  margin: 0;
+}
+
+@media (min-width: 600px) {
+  body {
+    margin: 0 10rem;
+  }
+  .demo-head {
+    margin-left: 100px;
+  }
+}

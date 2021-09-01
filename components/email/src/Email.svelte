@@ -54,6 +54,7 @@
   export let is_starred: boolean;
   export let show_contact_avatar: boolean;
   export let clean_conversation: boolean;
+  export let show_expanded_email_view_onload: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
@@ -62,27 +63,40 @@
     ]) || {}) as EmailProperties;
   });
 
-  let contact: Contact | { name: any };
+  let contacts: any = null;
+  $: activeThreadContact =
+    activeThread && contacts
+      ? contacts[
+          activeThread.messages[activeThread.messages.length - 1].from[0].email
+        ]
+      : null;
+  $: activeMessageContact =
+    message && contacts ? contacts[message.from[0].email] : null;
+
   $: (async () => {
-    if (!contact) {
-      if (thread && thread.messages) {
-        contact = await getContact(
-          thread.messages[thread.messages.length - 1].from[
-            thread.messages[thread.messages.length - 1].from.length - 1
-          ],
-        );
+    if (!contacts) {
+      if (thread && thread.participants) {
+        await getThreadContacts(thread);
       } else if (activeThread) {
-        contact = await getContact(
-          activeThread.messages[activeThread.messages.length - 1].from[
-            activeThread.messages[activeThread.messages.length - 1].from
-              .length - 1
-          ],
-        );
+        await getThreadContacts(activeThread);
       } else if (message) {
-        contact = await getContact(message.from[message.from.length - 1]);
+        const participant = message.from[0];
+        contacts = contacts || {};
+        contacts[participant.email] = await getContact(participant);
       }
     }
   })();
+
+  async function getThreadContacts(thread: Thread) {
+    for (const participant of thread.participants) {
+      const participantEmail = participant.email;
+      contacts = contacts || {};
+
+      if (!contacts[participantEmail] && participantEmail) {
+        contacts[participantEmail] = await getContact(participant);
+      }
+    }
+  }
 
   let main: Element;
   let messageRefs: Element[] = [];
@@ -133,7 +147,11 @@
       show_contact_avatar,
       true,
     );
-
+    show_expanded_email_view_onload = getPropertyValue(
+      internalProps.show_expanded_email_view_onload,
+      show_expanded_email_view_onload,
+      false, // default value is false
+    );
     clean_conversation = getPropertyValue(
       internalProps.clean_conversation,
       clean_conversation,
@@ -181,6 +199,8 @@
       // It's already in the store! Great.
       activeThread = foundThread;
     }
+    // This is for Email component demo purpose, where we want to show expanded threads by default on load.
+    activeThread.expanded = show_expanded_email_view_onload;
   } else if (thread_id) {
     // We don't have a passed thread, but we do have a thread_id. Let's fetch it.
     MailboxStore.getThread(query).then(() => {
@@ -189,9 +209,11 @@
       ) as Conversation;
       if (foundThread) {
         activeThread = foundThread;
+        activeThread.expanded = show_expanded_email_view_onload;
       }
     });
   }
+
   // #endregion thread intake and set
   let emailManuallyPassed: boolean;
   $: emailManuallyPassed = !!thread;
@@ -234,7 +256,9 @@
         message_id: [message.id],
       }).then((results) => {
         results.forEach((msg: Message) => {
-          message.conversation = msg.conversation;
+          if (message) {
+            message.conversation = msg.conversation;
+          }
         });
         activeThread.messages = activeThread.messages;
       });
@@ -511,9 +535,11 @@
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
   $mobile-collapsed-height: fit-content;
-  $spacing-s: 0.5rem;
+  $spacing-xs: 0.5rem;
+  $spacing-s: 0.7rem;
   $spacing-m: 1rem;
   $spacing-l: 1.5rem;
+  $spacing-xl: 2.5rem;
 
   main {
     height: 100%;
@@ -543,12 +569,12 @@
       header {
         font-size: 1.2rem;
         font-weight: 700;
-        padding: $spacing-s;
+        padding: $spacing-xs;
         padding-bottom: 0;
       }
       &.condensed {
         height: $mobile-collapsed-height;
-        padding: $spacing-s;
+        padding: $spacing-xs;
         flex-wrap: wrap;
         display: grid;
         align-items: center;
@@ -558,14 +584,14 @@
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
-          column-gap: $spacing-s;
+          column-gap: $spacing-xs;
           grid-area: from-star;
         }
 
         .mobile-subject-snippet {
           display: block;
           font-size: 14px;
-          margin-top: $spacing-s;
+          margin-top: $spacing-xs;
           flex-basis: 100%;
           grid-area: mobile-subject-snippet;
           .subject {
@@ -634,6 +660,11 @@
       &.expanded {
         background: var(--white);
         padding: 0;
+
+        header {
+          padding: $spacing-xs;
+          border-bottom: var(--nylas-email-border, #{$border-style});
+        }
         .icon-container,
         .icon-container > * {
           pointer-events: none;
@@ -648,7 +679,7 @@
         div.individual-message {
           width: 100%;
           box-sizing: border-box;
-          padding: $spacing-s;
+          padding: $spacing-xs;
 
           &.condensed {
             div.snippet {
@@ -660,6 +691,13 @@
               color: var(--grey);
               margin-top: $spacing-m;
             }
+            div.message-head {
+              .avatar-from {
+                display: flex;
+                align-items: center;
+                gap: $spacing-s;
+              }
+            }
           }
           &:not(:last-of-type) {
             border-bottom: 1px solid #eee;
@@ -669,6 +707,12 @@
               div.message-head:hover {
                 cursor: n-resize;
               }
+            }
+          }
+          &.last-message {
+            .message-head:hover,
+            .message-body:hover {
+              cursor: default;
             }
           }
 
@@ -684,6 +728,7 @@
 
           div.message-from {
             display: flex;
+            align-items: center;
             span {
               &.name {
                 font-weight: 600;
@@ -696,26 +741,30 @@
           div.message-head {
             div.message-from-to {
               margin: 0.5rem 0;
+              .avatar-from {
+                display: flex;
+                align-items: center;
+                gap: $spacing-s;
+              }
               div.message-to {
                 color: gray;
                 max-width: 150px;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
+                margin-left: calc(32px + 0.7rem);
+                span {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                }
               }
-            }
-            &:hover {
-              cursor: default;
             }
           }
           &.condensed {
             gap: 1rem;
-            box-shadow: inset 0 -1px 0 0 rgb(100 121 143 / 12%);
             &:hover,
             &:focus {
-              box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0,
-                0 1px 2px 0 rgb(60 64 67 / 30%),
-                0 1px 3px 1px rgb(60 64 67 / 15%);
               cursor: s-resize;
               outline: none;
             }
@@ -735,10 +784,6 @@
         }
       }
       &:hover {
-        border: var(
-          --nylas-email-border,
-          #{$hover-outline-width} solid var(--grey-warm)
-        );
         cursor: pointer;
       }
       .from-message-count {
@@ -834,17 +879,14 @@
             }
           }
         }
-        header {
-          padding: $spacing-m $spacing-l 0;
-        }
 
         &.expanded.singular {
           .individual-message.expanded {
-            padding-top: $spacing-s;
+            padding-top: $spacing-xs;
           }
         }
         &.condensed {
-          padding: 0 $spacing-s;
+          padding: 0 $spacing-xs;
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
@@ -870,6 +912,9 @@
           flex-direction: column;
           box-sizing: border-box;
           width: 100%;
+          header {
+            padding: $spacing-m $spacing-xl;
+          }
           div.individual-message {
             display: flex;
             flex-direction: column;
@@ -880,14 +925,14 @@
             div.message-body {
               width: 100%;
               box-sizing: border-box;
-              padding: 0 $spacing-l;
+              padding: 0 $spacing-xl;
             }
 
             &.condensed {
               div.snippet {
                 width: 100%;
                 box-sizing: border-box;
-                padding: 0 $spacing-l;
+                padding: 0 $spacing-xl;
                 max-width: 95vw;
                 align-self: flex-start;
               }
@@ -900,7 +945,7 @@
             &.expanded {
               div.message-head {
                 div.message-from-to {
-                  margin: $spacing-s 0;
+                  margin: $spacing-xs 0;
                   div.message-to {
                     max-width: unset;
                     overflow: inherit;
@@ -919,7 +964,7 @@
             display: block;
 
             .subject {
-              margin-right: $spacing-s;
+              margin-right: $spacing-xs;
             }
           }
 
@@ -965,25 +1010,36 @@
                       : "condensed"
                   }`}
                   bind:this={messageRefs[msgIndex]}
-                  on:click={(e) => handleEmailClick(e, msgIndex)}
+                  on:click|stopPropagation={(e) =>
+                    handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
                 >
                   {#if message.expanded || msgIndex === activeThread.messages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
-                        <div class="message-from">
-                          <span class="name"
-                            >{message.from[0].name ||
-                              message.from[0].email}</span
-                          >
-                          <!-- tooltip component -->
-                          <nylas-tooltip
-                            on:toggleTooltip={setTooltip}
-                            id={message.id.slice(0, 3)}
-                            {current_tooltip_id}
-                            icon={DropdownSymbol}
-                            content={message.from[0].email}
-                          />
+                        <div class="avatar-from">
+                          {#if show_contact_avatar}
+                            <div class="default-avatar">
+                              <nylas-contact-image
+                                {contact_query}
+                                contact={contacts[message.from[0].email]}
+                              />
+                            </div>
+                          {/if}
+                          <div class="message-from">
+                            <span class="name"
+                              >{message.from[0].name ||
+                                message.from[0].email}</span
+                            >
+                            <!-- tooltip component -->
+                            <nylas-tooltip
+                              on:toggleTooltip={setTooltip}
+                              id={message.id.slice(0, 3)}
+                              {current_tooltip_id}
+                              icon={DropdownSymbol}
+                              content={message.from[0].email}
+                            />
+                          </div>
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
@@ -1027,18 +1083,29 @@
                     </div>
                   {:else}
                     <div class="message-head">
-                      <div class="message-from">
-                        <span class="name"
-                          >{message.from[0].name || message.from[0].email}</span
-                        >
-                        <!-- tooltip component -->
-                        <nylas-tooltip
-                          on:toggleTooltip={setTooltip}
-                          id={message.id.slice(0, 3)}
-                          {current_tooltip_id}
-                          icon={DropdownSymbol}
-                          content={message.from[0].email}
-                        />
+                      <div class="avatar-from">
+                        {#if show_contact_avatar}
+                          <div class="default-avatar">
+                            <nylas-contact-image
+                              {contact_query}
+                              contact={contacts[message.from[0].email]}
+                            />
+                          </div>
+                        {/if}
+                        <div class="message-from">
+                          <span class="name"
+                            >{message.from[0].name ||
+                              message.from[0].email}</span
+                          >
+                          <!-- tooltip component -->
+                          <nylas-tooltip
+                            on:toggleTooltip={setTooltip}
+                            id={message.id.slice(0, 3)}
+                            {current_tooltip_id}
+                            icon={DropdownSymbol}
+                            content={message.from[0].email}
+                          />
+                        </div>
                       </div>
                       <div class="message-date">
                         <span>
@@ -1081,7 +1148,10 @@
               <div class="from-message-count">
                 {#if show_contact_avatar}
                   <div class="default-avatar">
-                    <nylas-contact-image {contact_query} {contact} />
+                    <nylas-contact-image
+                      {contact_query}
+                      contact={activeThreadContact}
+                    />
                   </div>
                 {/if}
                 <div class="from-participants">
@@ -1170,28 +1240,34 @@
   {:else if message}
     {#if Object.keys(message).length > 0}
       <div class="email-row expanded singular">
-        {#if show_contact_avatar}
-          <div class="default-avatar">
-            <nylas-contact-image {contact_query} {contact} />
-          </div>
-        {/if}
         <header>{message.subject}</header>
         <div class="individual-message expanded">
           <div class="message-head">
             <div class="message-from-to">
-              <div class="message-from">
-                <span class="name"
-                  >{message.from[0].name || message.from[0].email}</span
-                >
-                <!-- tooltip component -->
-                <nylas-tooltip
-                  on:toggleTooltip={setTooltip}
-                  id={message.id}
-                  {current_tooltip_id}
-                  icon={DropdownSymbol}
-                  content={message.from[0].email}
-                />
+              <div class="avatar-from">
+                {#if show_contact_avatar}
+                  <div class="default-avatar">
+                    <nylas-contact-image
+                      {contact_query}
+                      contact={activeMessageContact}
+                    />
+                  </div>
+                {/if}
+                <div class="message-from">
+                  <span class="name"
+                    >{message.from[0].name || message.from[0].email}</span
+                  >
+                  <!-- tooltip component -->
+                  <nylas-tooltip
+                    on:toggleTooltip={setTooltip}
+                    id={message.id}
+                    {current_tooltip_id}
+                    icon={DropdownSymbol}
+                    content={message.from[0].email}
+                  />
+                </div>
               </div>
+
               <div class="message-to">
                 {#each message.to as to, i}
                   <span>

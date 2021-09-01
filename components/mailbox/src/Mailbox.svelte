@@ -459,9 +459,9 @@
     display: grid;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
-    $border-style: 1px solid var(--grey-lighter);
+    $outline-style: 1px solid var(--grey-lighter);
     @mixin barStyle {
-      border: $border-style;
+      outline: $outline-style;
       display: flex;
       align-items: center;
       padding: 24px 16px;
@@ -484,7 +484,6 @@
       @include barStyle;
       padding: $spacing-s $spacing-m;
       gap: $spacing-m;
-      border-top-width: 0;
     }
 
     .subject-title {
@@ -543,15 +542,13 @@
 
       &:hover {
         $hover-outline-width: 1px;
-        border: $hover-outline-width solid var(--grey-warm);
-        border-top-width: 0;
+        outline: $hover-outline-width solid var(--grey-warm);
         cursor: pointer;
       }
 
       // #region define border styles
       --nylas-email-border: none;
-      border: $border-style;
-      border-top-width: 0;
+      outline: $outline-style;
       // #endregion define border styles
 
       // #region define background styles
