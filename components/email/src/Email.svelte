@@ -399,7 +399,7 @@
     } else if (trashFolderID) {
       activeThread.folder_id = trashFolderID;
     }
-    await saveActiveThread();
+    saveActiveThread();
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -561,7 +561,12 @@
   }
 
   function showFirstFromParticipant(messages: Message[]) {
-    return messages.length >= 1 && messages[messages.length - 1].from.length;
+    return (
+      messages &&
+      participants &&
+      messages.length >= 1 &&
+      messages[messages.length - 1].from.length
+    );
   }
 
   function showSecondFromParticipant(
@@ -569,6 +574,8 @@
     participants: Participant[],
   ) {
     return (
+      messages &&
+      participants &&
       messages.length > 1 &&
       participants.length >= 2 &&
       messages[0].from.length &&
@@ -1311,11 +1318,11 @@
                     >
                   </div>
                 {:else if show_received_timestamp}
-                <span>
-                  {formatPreviewDate(
-                    new Date(thread.last_message_timestamp * 1000),
-                  )}
-                </span>
+                  <span>
+                    {formatPreviewDate(
+                      new Date(thread.last_message_timestamp * 1000),
+                    )}
+                  </span>
                 {/if}
               </div>
             </div>
