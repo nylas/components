@@ -243,6 +243,11 @@
     }
   }
 
+  async function toggleThreadUnreadStatus(event: CustomEvent) {
+    event.detail.thread.unread = !event.detail.thread.unread;
+    await updateThreadStatus(event.detail.thread);
+  }
+
   async function threadClicked(event: CustomEvent) {
     console.debug("thread clicked from mailbox", event.detail);
     if (event.detail.thread?.expanded) {
@@ -674,6 +679,8 @@
           on:threadClicked={threadClicked}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
+          on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
+          on:threadDeleted={onDeleteSelected}
           is_starred={starredThreads.has(openedEmailData)}
         />
       </div>
@@ -785,6 +792,8 @@
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
                   on:threadStarred={threadStarred}
+                  on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
+                  on:threadDeleted={onDeleteSelected}
                   is_starred={starredThreads.has(thread)}
                   show_thread_actions={selectedThreads.has(thread)}
                 />

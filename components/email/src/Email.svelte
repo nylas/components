@@ -31,6 +31,8 @@
     Thread,
     Message,
     Account,
+    Label,
+    Folder,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import Tooltip from "@commons/components/Tooltip.svelte";
@@ -124,14 +126,16 @@
 
   // #region initialize label and folder vars (for trash)
   let labels: Label[] = [];
-  $: trashLabelID = labels.length
-    ? labels.find((label) => label.name === "trash")?.id
-    : null;
+  $: trashLabelID =
+    labels && labels.length
+      ? labels.find((label) => label.name === "trash")?.id
+      : null;
 
   let folders: Folder[] = [];
-  $: trashFolderID = folders.length
-    ? labels.find((folder) => folder.name === "trash")?.id
-    : null;
+  $: trashFolderID =
+    folders && folders.length
+      ? labels.find((folder) => folder.name === "trash")?.id
+      : null;
   // #endregion initialize label and folder vars (for trash)
 
   let internalProps: SvelteAllProps;
@@ -328,10 +332,10 @@
   }
   // #endregion get contact for ContactImage
 
-  function saveActiveThread() {
+  async function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && thread_id) {
-      updateThread(query, activeThread).then((thread) => {
+      await updateThread(query, activeThread).then((thread) => {
         $MailboxStore[queryKey] = [thread];
       });
     }
@@ -341,7 +345,7 @@
     if (click_action === "default" || click_action === "mailbox") {
       //#region read/unread
       if (activeThread && activeThread.unread && click_action !== "mailbox") {
-        toggleUnreadStatus();
+        toggleUnreadStatus(e);
       }
       //#endregion read/unread
 
@@ -379,27 +383,37 @@
     current_tooltip_id = "";
   }
 
-  function toggleUnreadStatus() {
+  async function toggleUnreadStatus(e: CustomEvent) {
     if (activeThread) {
-      activeThread.unread = !activeThread.unread;
-      unread = activeThread.unread;
-      saveActiveThread();
-      return;
+      if (click_action === "mailbox") {
+        dispatchEvent("toggleThreadUnreadStatus", {
+          event: e,
+          thread: activeThread,
+        });
+      } else {
+        activeThread.unread = !activeThread.unread;
+        unread = activeThread.unread;
+        await saveActiveThread();
+        return;
+      }
     }
     unread = !unread;
   }
 
-  function deleteEmail(e: MouseEvent) {
-    dispatchEvent("threadDeleted", {
-      event: e,
-      thread: activeThread,
-    });
-    if (trashLabelID) {
-      activeThread.label_ids = [trashLabelID];
-    } else if (trashFolderID) {
-      activeThread.folder_id = trashFolderID;
+  async function deleteEmail(e: MouseEvent) {
+    if (click_action === "mailbox") {
+      dispatchEvent("threadDeleted", {
+        event: e,
+        thread: activeThread,
+      });
+    } else {
+      if (trashLabelID) {
+        activeThread.label_ids = [trashLabelID];
+      } else if (trashFolderID) {
+        activeThread.folder_id = trashFolderID;
+      }
+      await saveActiveThread();
     }
-    saveActiveThread();
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -416,12 +430,12 @@
     }
   }
 
-  function handleThreadStarClick(e: MouseEvent) {
+  async function handleThreadStarClick(e: MouseEvent) {
     e.stopImmediatePropagation();
     //#region starred/unstarred
     if (activeThread) {
       activeThread.starred = !activeThread.starred;
-      saveActiveThread();
+      await saveActiveThread();
     }
     //#endregion starred/unstarred
 
