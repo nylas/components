@@ -1094,13 +1094,7 @@
                     <div class="message-head">
                       <div class="avatar-from">
                         {#if show_contact_avatar}
-                          <div
-                            class="default-avatar"
-                            data-email={message.from[0].email}
-                            data-contact={JSON.stringify(
-                              contacts[message.from[0].email],
-                            )}
-                          >
+                          <div class="default-avatar">
                             <nylas-contact-image
                               {contact_query}
                               contact={contacts[message.from[0].email]}
