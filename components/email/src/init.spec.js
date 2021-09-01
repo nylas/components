@@ -185,6 +185,20 @@ describe("Email component", () => {
   beforeEach(() => {
     cy.visit("/components/email/src/index.html");
     cy.get("nylas-email").should("exist");
+    cy.get("nylas-email")
+      .as("email")
+      .then((element) => {
+        const component0 = element[0];
+        component0.show_expanded_email_view_onload = false;
+        const component1 = element[1];
+        component1.show_expanded_email_view_onload = false;
+      });
+    cy.get("nylas-email")
+      .as("email")
+      .then((element) => {
+        const component1 = element[1];
+        component1.show_expanded_email_view_onload = false;
+      });
   });
 
   it("Shows Email with demo id and thread", () => {
