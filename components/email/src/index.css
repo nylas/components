@@ -2,6 +2,9 @@
   font-family: sans-serif;
   font-style: normal;
 }
+body {
+  margin: 1.5rem;
+}
 
 .demo {
   margin: 90px 0;

@@ -669,6 +669,11 @@
       &.expanded {
         background: var(--white);
         padding: 0;
+
+        header {
+          padding: $spacing-xs;
+          border-bottom: var(--nylas-email-border, #{$border-style});
+        }
         .icon-container,
         .icon-container > * {
           pointer-events: none;
@@ -883,10 +888,6 @@
             }
           }
         }
-        header {
-          padding: $spacing-m $spacing-xl;
-          border-bottom: var(--nylas-email-border, #{$border-style});
-        }
 
         &.expanded.singular {
           .individual-message.expanded {
@@ -920,6 +921,9 @@
           flex-direction: column;
           box-sizing: border-box;
           width: 100%;
+          header {
+            padding: $spacing-m $spacing-xl;
+          }
           div.individual-message {
             display: flex;
             flex-direction: column;
