@@ -346,11 +346,13 @@
     }
   }
 
-  function handleThread(e: MouseEvent | KeyboardEvent) {
+  async function handleThread(e: MouseEvent | KeyboardEvent) {
     if (click_action === "default" || click_action === "mailbox") {
       //#region read/unread
       if (activeThread && activeThread.unread && click_action !== "mailbox") {
-        toggleUnreadStatus(e);
+        activeThread.unread = !activeThread.unread;
+        unread = activeThread.unread;
+        await saveActiveThread();
       }
       //#endregion read/unread
 
@@ -390,13 +392,16 @@
 
   async function toggleUnreadStatus(e: MouseEvent | KeyboardEvent) {
     if (activeThread) {
+      if (click_action !== "mailbox") {
+        activeThread.unread = !activeThread.unread;
+        unread = activeThread.unread;
+        await saveActiveThread();
+        return;
+      }
       dispatchEvent("toggleThreadUnreadStatus", {
         event: e,
         thread: activeThread,
       });
-      activeThread.unread = !activeThread.unread;
-      unread = activeThread.unread;
-      await saveActiveThread();
       return;
     }
     unread = !unread;
@@ -407,12 +412,14 @@
       event: e,
       thread: activeThread,
     });
-    if (trashLabelID) {
-      activeThread.label_ids = [trashLabelID];
-    } else if (trashFolderID) {
-      activeThread.folder_id = trashFolderID;
+    if (click_action !== "mailbox") {
+      if (trashLabelID) {
+        activeThread.label_ids = [trashLabelID];
+      } else if (trashFolderID) {
+        activeThread.folder_id = trashFolderID;
+      }
+      await saveActiveThread();
     }
-    await saveActiveThread();
   }
 
   function handleThreadClick(e: MouseEvent) {
@@ -1168,8 +1175,12 @@
                   </div>{/if}
                 <div class="read-status">
                   <button
-                    title={`Mark thread as ${unread ? "" : "un"}read`}
-                    aria-label={`Mark thread as ${unread ? "" : "un"}read`}
+                    title={`Mark thread as ${
+                      unread || activeThread.unread ? "" : "un"
+                    }read`}
+                    aria-label={`Mark thread as ${
+                      unread || activeThread.unread ? "" : "un"
+                    }read`}
                     on:click|stopPropagation={toggleUnreadStatus}
                   >
                     {#if unread || activeThread.unread}
@@ -1312,7 +1323,7 @@
           <div
             class="email-row condensed"
             class:show_star
-            class:unread={unread !== null ? unread : activeThread.unread}
+            class:unread={unread || activeThread.unread}
           >
             <div class="from{show_star ? '-star' : ''}">
               {#if show_star}
@@ -1414,8 +1425,12 @@
                   </div>
                   <div class="read-status">
                     <button
-                      title={`Mark thread as ${unread ? "" : "un"}read`}
-                      aria-label={`Mark thread as ${unread ? "" : "un"}read`}
+                      title={`Mark thread as ${
+                        unread || activeThread.unread ? "" : "un"
+                      }read`}
+                      aria-label={`Mark thread as ${
+                        unread || activeThread.unread ? "" : "un"
+                      }read`}
                       on:click|stopPropagation={toggleUnreadStatus}
                     >
                       {#if unread || activeThread.unread}

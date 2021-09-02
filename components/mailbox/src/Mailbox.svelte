@@ -34,6 +34,7 @@
   } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
+  import { has } from "cypress/types/lodash";
 
   let manifest: Partial<MailboxProperties> = {};
 
@@ -243,9 +244,15 @@
     }
   }
 
-  async function toggleThreadUnreadStatus(event: CustomEvent) {
+  function toggleThreadUnreadStatus(event: CustomEvent) {
     event.detail.thread.unread = !event.detail.thread.unread;
-    await updateThreadStatus(event.detail.thread);
+    updateThreadStatus(event.detail.thread);
+    if (event.detail.thread.unread) {
+      unreadThreads.add(event.detail.thread);
+    } else {
+      unreadThreads.delete(event.detail.thread);
+    }
+    return (unreadThreads = unreadThreads);
   }
 
   async function threadClicked(event: CustomEvent) {
@@ -391,10 +398,7 @@
     dispatchEvent("onDeleteSelected", { event });
     if (trashLabelID || trashFolderID) {
       if (openedEmailData) {
-        openedEmailData.expanded = false;
-        inboxThreads = inboxThreads.filter(
-          (thread) => thread !== openedEmailData,
-        );
+        threads = inboxThreads.filter((thread) => thread !== openedEmailData);
         starredThreads.delete(openedEmailData);
         unreadThreads.delete(openedEmailData);
         selectedThreads.delete(openedEmailData);
@@ -406,9 +410,7 @@
           unreadThreads.delete(thread);
           await deleteThread(thread);
         });
-        inboxThreads = inboxThreads.filter(
-          (thread) => !selectedThreads.has(thread),
-        );
+        threads = inboxThreads.filter((thread) => !selectedThreads.has(thread));
         selectedThreads.clear();
       }
     }
@@ -695,7 +697,7 @@
         {#each paginatedThreads as thread}
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
-              class:unread={thread.unread}
+              class:unread={thread.unread || unreadThreads.has(thread)}
               class:checked={selectedThreads.has(thread)}
             >
               {#if show_thread_checkbox}<div
