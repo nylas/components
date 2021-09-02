@@ -310,18 +310,6 @@
     return (starredThreads = starredThreads);
   }
 
-  function starOpenedThread() {
-    if (openedEmailData !== null) {
-      if (starredThreads.has(openedEmailData)) {
-        starredThreads.delete(openedEmailData);
-        openedEmailData.starred = false;
-      } else {
-        starredThreads.add(openedEmailData);
-        openedEmailData.starred = true;
-      }
-    }
-  }
-
   function onStarSelected(event: MouseEvent) {
     dispatchEvent("onStarSelected", { event });
     if (areAllSelectedStarred) {
@@ -377,14 +365,12 @@
     return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
   }
 
-  function returnToMailbox(isThreadUnread: boolean) {
+  function returnToMailbox() {
     if (openedEmailData) {
-      openedEmailData.unread = isThreadUnread;
+      openedEmailData.unread = false;
       openedEmailData.expanded = false;
 
-      if (isThreadUnread) {
-        unreadThreads.add(openedEmailData);
-      } else {
+      if (unreadThreads.has(openedEmailData)) {
         unreadThreads.delete(openedEmailData);
       }
       openedEmailData = null;
@@ -489,18 +475,6 @@
       @include barStyle;
       padding: $spacing-s $spacing-m;
       gap: $spacing-m;
-    }
-
-    .subject-title {
-      justify-content: space-between;
-      & > div {
-        display: flex;
-        align-items: center;
-        gap: $spacing-m;
-      }
-      [role="toolbar"] {
-        border: none;
-      }
     }
 
     // Toggle select-all checkbox and thread checkbox from CSS Var
@@ -621,53 +595,6 @@
 <main bind:this={main}>
   {#if hasComponentLoaded}
     {#if openedEmailData}
-      <header class="subject-title">
-        <div>
-          <button
-            title="Return to Mailbox"
-            aria-label="Return to Mailbox"
-            on:click={() => {
-              returnToMailbox(false);
-            }}
-          >
-            <LeftArrowLineIcon />
-          </button>
-          <h1>{openedEmailData.subject}</h1>
-        </div>
-        <div role="toolbar">
-          <div class="delete">
-            <button
-              title="Delete thread"
-              aria-label="Delete thread"
-              on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
-            >
-          </div>
-          {#if show_star}
-            <div class="starred">
-              <button
-                class={starredThreads.has(openedEmailData) ? "starred" : ""}
-                title={starredThreads.has(openedEmailData)
-                  ? "Unstar thread"
-                  : "Star thread"}
-                aria-label={starredThreads.has(openedEmailData)
-                  ? "Unstar thread"
-                  : "Star thread"}
-                role="switch"
-                aria-checked={starredThreads.has(openedEmailData)}
-                on:click={starOpenedThread}
-              />
-            </div>{/if}
-          <div class="read-status">
-            <button
-              title="Mark thread as unread"
-              aria-label="Mark thread as unread"
-              on:click={(e) => {
-                returnToMailbox(true);
-              }}><MarkUnreadIcon /></button
-            >
-          </div>
-        </div>
-      </header>
       <div class="email-container">
         <nylas-email
           is_clean_conversation_enabled={false}
@@ -679,6 +606,7 @@
           on:threadClicked={threadClicked}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
+          on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
           on:threadDeleted={onDeleteSelected}
           is_starred={starredThreads.has(openedEmailData)}
@@ -792,6 +720,7 @@
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
                   on:threadStarred={threadStarred}
+                  on:returnToMailbox={returnToMailbox}
                   on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
                   on:threadDeleted={onDeleteSelected}
                   is_starred={starredThreads.has(thread)}
