@@ -56,10 +56,8 @@ describe("MailBox  component", () => {
           component.all_threads = threads;
           component.unread_status = "read";
 
-          cy.get(component).find("nylas-email").should("have.length", 2);
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", 0);
+          cy.get(component).find("li").should("have.length", 2);
+          cy.get(component).find("li.unread").should("have.length", 0);
         });
     });
 

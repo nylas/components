@@ -648,7 +648,7 @@
             </div>
           {/if}
           {#if selectedThreads.size}
-            {#if actions_bar.includes(MailboxActions.DELETE) && false}
+            {#if actions_bar.includes(MailboxActions.DELETE)}
               <div class="delete">
                 <button
                   title="Delete selected email(s)"
@@ -697,7 +697,7 @@
         {#each paginatedThreads as thread}
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
-              class:unread={thread.unread || unreadThreads.has(thread)}
+              class:unread={unreadThreads.has(thread)}
               class:checked={selectedThreads.has(thread)}
             >
               {#if show_thread_checkbox}<div
