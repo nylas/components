@@ -225,7 +225,10 @@ describe("Email component", () => {
           .find(".email-row.expanded.singular header")
           .should("contain", "Re: Demo Thread");
         cy.get(component).find(".message-body").should("exist");
-        cy.get(component).find(".message-body").should("contain", "Bye!");
+        cy.get("nylas-message-body").then((nylasMessageBody) => {
+          const messageBody = nylasMessageBody[0];
+          cy.get(messageBody).find("div").should("contain", "Bye!");
+        });
         cy.get(component).find(".name").should("exist");
         cy.get(component).find(".name").should("contain", "Test User");
         cy.get(component).find(".email-row.expanded.singular header").click();
