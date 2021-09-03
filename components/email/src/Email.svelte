@@ -36,7 +36,8 @@
     Folder,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
-  import Tooltip from "@commons/components/Tooltip.svelte";
+  import "@commons/components/MessageBody.svelte";
+  import "@commons/components/Tooltip.svelte";
   import { AccountOrganizationUnit } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
@@ -1270,7 +1271,7 @@
                       {#if clean_conversation && message.conversation}
                         {@html message.conversation}
                       {:else if message.body}
-                        {@html message.body}
+                        <nylas-message-body {message} />
                       {:else}
                         {message.snippet}
                       {/if}
@@ -1523,7 +1524,7 @@
             {#if clean_conversation && message.conversation}
               {@html message.conversation}
             {:else if message.body}
-              {@html message.body}
+              <nylas-message-body {message} />
             {/if}
           </div>
         </div>
