@@ -20,6 +20,10 @@
     getPropertyValue,
   } from "@commons/methods/component";
   import DropdownSymbol from "./assets/chevron-down.svg";
+  import TrashIcon from "./assets/trash-alt.svg";
+  import MarkReadIcon from "./assets/envelope-open-text.svg";
+  import MarkUnreadIcon from "./assets/envelope.svg";
+  import LeftArrowLineIcon from "./assets/arrow-line.svg";
   import type {
     EmailProperties,
     Participant,
@@ -28,9 +32,15 @@
     Thread,
     Message,
     Account,
+    Label,
+    Folder,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
-  import Tooltip from "@commons/components/Tooltip.svelte";
+  import "@commons/components/MessageBody.svelte";
+  import "@commons/components/Tooltip.svelte";
+  import { AccountOrganizationUnit } from "@commons/enums/Nylas";
+  import { LabelStore } from "@commons/store/labels";
+  import { FolderStore } from "@commons/store/folders";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -55,12 +65,24 @@
   export let show_contact_avatar: boolean;
   export let clean_conversation: boolean;
   export let show_expanded_email_view_onload: boolean;
+  export let show_thread_actions: boolean;
 
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
+
+    // Initialize labels / folders
+    const accountOrganizationUnitQuery = {
+      component_id: id,
+      access_token,
+    };
+    if (you.organization_unit === AccountOrganizationUnit.Label) {
+      labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
+    } else if (you.organization_unit === AccountOrganizationUnit.Folder) {
+      folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
+    }
   });
 
   let contacts: any = null;
@@ -103,6 +125,20 @@
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
   const MAX_DESKTOP_PARTICIPANTS = 2;
   const MAX_MOBILE_PARTICIPANTS = 1;
+
+  // #region initialize label and folder vars (for trash)
+  let labels: Label[] = [];
+  $: trashLabelID =
+    labels && labels.length
+      ? labels.find((label) => label.name === "trash")?.id
+      : null;
+
+  let folders: Folder[] = [];
+  $: trashFolderID =
+    folders && folders.length
+      ? labels.find((folder) => folder.name === "trash")?.id
+      : null;
+  // #endregion initialize label and folder vars (for trash)
 
   let internalProps: SvelteAllProps;
   $: {
@@ -200,7 +236,9 @@
       activeThread = foundThread;
     }
     // This is for Email component demo purpose, where we want to show expanded threads by default on load.
-    activeThread.expanded = show_expanded_email_view_onload;
+    if (show_expanded_email_view_onload) {
+      activeThread.expanded = show_expanded_email_view_onload;
+    }
   } else if (thread_id) {
     // We don't have a passed thread, but we do have a thread_id. Let's fetch it.
     MailboxStore.getThread(query).then(() => {
@@ -209,7 +247,9 @@
       ) as Conversation;
       if (foundThread) {
         activeThread = foundThread;
-        activeThread.expanded = show_expanded_email_view_onload;
+        if (show_expanded_email_view_onload) {
+          activeThread.expanded = show_expanded_email_view_onload;
+        }
       }
     });
   }
@@ -298,21 +338,22 @@
   }
   // #endregion get contact for ContactImage
 
-  function saveActiveThread() {
+  async function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && thread_id) {
-      updateThread(query, activeThread).then((thread) => {
+      await updateThread(query, activeThread).then((thread) => {
         $MailboxStore[queryKey] = [thread];
       });
     }
   }
 
-  function handleThread(e: MouseEvent | KeyboardEvent) {
+  async function handleThread(e: MouseEvent | KeyboardEvent) {
     if (click_action === "default" || click_action === "mailbox") {
       //#region read/unread
       if (activeThread && activeThread.unread && click_action !== "mailbox") {
-        activeThread.unread = false;
-        saveActiveThread();
+        activeThread.unread = !activeThread.unread;
+        unread = activeThread.unread;
+        await saveActiveThread();
       }
       //#endregion read/unread
 
@@ -350,10 +391,50 @@
     current_tooltip_id = "";
   }
 
+  async function toggleUnreadStatus(e: MouseEvent | KeyboardEvent) {
+    if (activeThread) {
+      if (click_action !== "mailbox") {
+        activeThread.unread = !activeThread.unread;
+        unread = activeThread.unread;
+        await saveActiveThread();
+        return;
+      }
+      dispatchEvent("toggleThreadUnreadStatus", {
+        event: e,
+        thread: activeThread,
+      });
+      return;
+    }
+    unread = !unread;
+  }
+
+  async function deleteEmail(e: MouseEvent) {
+    dispatchEvent("threadDeleted", {
+      event: e,
+      thread: activeThread,
+    });
+    if (click_action !== "mailbox") {
+      if (trashLabelID) {
+        activeThread.label_ids = [trashLabelID];
+      } else if (trashFolderID) {
+        activeThread.folder_id = trashFolderID;
+      }
+      await saveActiveThread();
+    }
+  }
+
   function handleThreadClick(e: MouseEvent) {
     if (message && (!thread_id || !thread)) return;
+    else if (click_action === "mailbox" && activeThread.expanded) return;
     e.preventDefault();
     handleThread(e);
+  }
+
+  function returnToMailbox(e: MouseEvent | KeyboardEvent) {
+    dispatchEvent("returnToMailbox", {
+      event: e,
+      thread: activeThread,
+    });
   }
 
   function handleThreadKeypress(e: KeyboardEvent) {
@@ -364,12 +445,12 @@
     }
   }
 
-  function handleThreadStarClick(e: MouseEvent) {
+  async function handleThreadStarClick(e: MouseEvent) {
     e.stopImmediatePropagation();
     //#region starred/unstarred
     if (activeThread) {
       activeThread.starred = !activeThread.starred;
-      saveActiveThread();
+      await saveActiveThread();
     }
     //#endregion starred/unstarred
 
@@ -509,7 +590,12 @@
   }
 
   function showFirstFromParticipant(messages: Message[]) {
-    return messages.length >= 1 && messages[messages.length - 1].from.length;
+    return (
+      messages &&
+      participants &&
+      messages.length >= 1 &&
+      messages[messages.length - 1].from.length
+    );
   }
 
   function showSecondFromParticipant(
@@ -517,6 +603,8 @@
     participants: Participant[],
   ) {
     return (
+      messages &&
+      participants &&
       messages.length > 1 &&
       participants.length >= 2 &&
       messages[0].from.length &&
@@ -621,6 +709,7 @@
         }
         &.unread {
           background: var(--nylas-email-background, white);
+
           .from-message-count,
           .date,
           .subject {
@@ -632,39 +721,76 @@
             }
           }
         }
-        div.starred {
-          position: relative;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+      }
+      div.starred {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-          button {
-            background-color: transparent;
-            cursor: pointer;
-            &:before {
-              content: "\2605";
-              display: inline-block;
-              font-size: 1em;
-              color: #ccc;
-              -webkit-user-select: none;
-              -moz-user-select: none;
-              user-select: none;
-            }
+        button {
+          background-color: transparent;
+          cursor: pointer;
+          &:before {
+            content: "\2605";
+            display: inline-block;
+            font-size: 1em;
+            color: #ccc;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+          }
 
-            &.starred:before {
-              color: #ffc107;
-            }
+          &.starred:before {
+            color: #ffc107;
           }
         }
       }
       &.expanded {
         background: var(--white);
         padding: 0;
+        $outline-style: 1px solid var(--grey-lighter);
+        @mixin barStyle {
+          outline: $outline-style;
+          display: flex;
+          align-items: center;
+          padding: 24px 16px;
+          gap: 8px;
+        }
 
         header {
-          padding: $spacing-xs;
-          border-bottom: var(--nylas-email-border, #{$border-style});
+          @include barStyle;
+          border-radius: 4px 4px 0 0;
+          font-weight: bold;
         }
+
+        [role="toolbar"] {
+          @include barStyle;
+          padding: $spacing-s $spacing-m;
+          gap: $spacing-m;
+        }
+
+        .subject-title {
+          justify-content: space-between;
+          &.mailbox {
+            cursor: default;
+          }
+          & > div {
+            display: flex;
+            align-items: center;
+            gap: $spacing-m;
+
+            button {
+              background: none;
+              display: flex;
+              cursor: pointer;
+            }
+          }
+          [role="toolbar"] {
+            outline: none;
+          }
+        }
+
         .icon-container,
         .icon-container > * {
           pointer-events: none;
@@ -832,6 +958,21 @@
             font-size: 14px;
             color: var(--grey);
           }
+          &.action-icons {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            & > :last-child {
+              padding-right: 1rem;
+            }
+            button {
+              background: none;
+              cursor: pointer;
+              display: flex;
+            }
+          }
         }
       }
       &.expanded.singular {
@@ -989,15 +1130,69 @@
       Loading Component...
     {:then thread}
       {#if thread && activeThread}
-        {#if thread.expanded}
+        {#if activeThread.expanded}
           <div
             class="email-row expanded {click_action === 'mailbox'
               ? 'expanded-mailbox-thread'
               : ''}"
           >
-            {#if click_action !== "mailbox"}
-              <header>{thread.subject}</header>
-            {/if}
+            <header
+              class="subject-title"
+              class:mailbox={click_action === "mailbox"}
+            >
+              <div>
+                {#if click_action === "mailbox"}
+                  <button
+                    title={"Return to Mailbox"}
+                    aria-label={"Return to Mailbox"}
+                    on:click|stopPropagation={returnToMailbox}
+                  >
+                    <LeftArrowLineIcon />
+                  </button>
+                {/if}
+                <h1>{thread.subject}</h1>
+              </div>
+              <div role="toolbar">
+                <div class="delete">
+                  <button
+                    title="Delete thread / Move to trash"
+                    aria-label="Delete thread (Move to trash)"
+                    on:click|stopPropagation={(e) => deleteEmail(e)}
+                    ><TrashIcon /></button
+                  >
+                </div>
+                {#if show_star}
+                  <div class="starred">
+                    <button
+                      class={thread.starred ? "starred" : ""}
+                      title={thread.starred ? "Unstar thread" : "Star thread"}
+                      aria-label={thread.starred
+                        ? "Unstar thread"
+                        : "Star thread"}
+                      role="switch"
+                      aria-checked={thread.starred}
+                      on:click|stopPropagation={handleThreadStarClick}
+                    />
+                  </div>{/if}
+                <div class="read-status">
+                  <button
+                    title={`Mark thread as ${
+                      unread || activeThread.unread ? "" : "un"
+                    }read`}
+                    aria-label={`Mark thread as ${
+                      unread || activeThread.unread ? "" : "un"
+                    }read`}
+                    on:click|stopPropagation={toggleUnreadStatus}
+                  >
+                    {#if unread || activeThread.unread}
+                      <MarkReadIcon aria-hidden="true" />
+                    {:else}
+                      <MarkUnreadIcon aria-hidden="true" />
+                    {/if}</button
+                  >
+                </div>
+              </div>
+            </header>
             {#if activeThread.messages.length}
               {#each activeThread.messages as message, msgIndex}
                 <div
@@ -1076,7 +1271,7 @@
                       {#if clean_conversation && message.conversation}
                         {@html message.conversation}
                       {:else if message.body}
-                        {@html message.body}
+                        <nylas-message-body {message} />
                       {:else}
                         {message.snippet}
                       {/if}
@@ -1129,7 +1324,7 @@
           <div
             class="email-row condensed"
             class:show_star
-            class:unread={unread !== null ? unread : activeThread.unread}
+            class:unread={unread || activeThread.unread}
           >
             <div class="from{show_star ? '-star' : ''}">
               {#if show_star}
@@ -1215,15 +1410,45 @@
                   {thread.snippet}</span
                 >
               </div>
-              {#if show_received_timestamp}
-                <div class="date">
+              <div
+                class:date={show_received_timestamp}
+                class:action-icons={show_thread_actions}
+              >
+                {#if show_thread_actions}
+                  <div class="delete">
+                    <button
+                      title="Delete thread"
+                      aria-label="Delete thread"
+                      on:click|stopPropagation={deleteEmail}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                  <div class="read-status">
+                    <button
+                      title={`Mark thread as ${
+                        unread || activeThread.unread ? "" : "un"
+                      }read`}
+                      aria-label={`Mark thread as ${
+                        unread || activeThread.unread ? "" : "un"
+                      }read`}
+                      on:click|stopPropagation={toggleUnreadStatus}
+                    >
+                      {#if unread || activeThread.unread}
+                        <MarkReadIcon aria-hidden="true" />
+                      {:else}
+                        <MarkUnreadIcon aria-hidden="true" />
+                      {/if}</button
+                    >
+                  </div>
+                {:else if show_received_timestamp}
                   <span>
                     {formatPreviewDate(
                       new Date(thread.last_message_timestamp * 1000),
                     )}
                   </span>
-                </div>
-              {/if}
+                {/if}
+              </div>
             </div>
 
             <div class="mobile-subject-snippet">
@@ -1299,7 +1524,7 @@
             {#if clean_conversation && message.conversation}
               {@html message.conversation}
             {:else if message.body}
-              {@html message.body}
+              <nylas-message-body {message} />
             {/if}
           </div>
         </div>

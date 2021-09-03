@@ -221,7 +221,7 @@
         });
         const passedThread = document.getElementsByTagName("nylas-email")[1];
         passedThread.thread = thread;
-
+        passedThread.click_action = "default";
         // setting show_expanded_email_view_onload to true for demo purpose
         passedThread.show_expanded_email_view_onload = true;
         const fetchedThread = document.getElementsByTagName("nylas-email")[0];
