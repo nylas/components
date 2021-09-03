@@ -499,4 +499,28 @@ describe("availability component", () => {
         });
     });
   });
+
+  describe.only("date changes", () => {
+    it("Shows date change header by default", () => {
+      cy.get("header.change-dates").should("exist");
+    });
+    it("Does not show date change header when date change is disallowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = false;
+          cy.get("header.change-dates").should("not.exist");
+        });
+    });
+    it("Does not show date change header when date change is allowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          cy.get("header.change-dates").should("exist");
+        });
+    });
+  });
 });

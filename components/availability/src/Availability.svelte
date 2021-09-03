@@ -60,6 +60,7 @@
   export let show_as_week: boolean;
   export let show_weekends: boolean;
   export let attendees_to_show: number;
+  export let allow_date_change: boolean;
   //#endregion props
 
   //#region mount and prop initialization
@@ -140,6 +141,11 @@
       attendees_to_show,
       5,
     );
+    allow_date_change = getPropertyValue(
+      internalProps.allow_date_change,
+      allow_date_change,
+      true,
+    );
   }
 
   //#endregion mount and prop initialization
@@ -151,6 +157,27 @@
   let tickContainer: HTMLElement;
   let clientHeight: number;
 
+  $: datesToShow = dates_to_show;
+
+  // We should always show a consistent number of date columns; if weekends are off, show the next N dates that would otherwise by shown.
+  // In practice: dates_to_show = 4 + !show_weekends + <today being thursday> will show Thurs, Fri, Mon, Tues.
+  // Without this reactive block, it would just show Thurs, Fri.
+  $: {
+    if (datesToShow && !show_weekends) {
+      let weekendDates = scaleTime()
+        .domain([startDay, timeDay.offset(start_date, datesToShow - 1)])
+        .ticks(timeDay)
+        .filter((date) => {
+          console.log("DATE", date, timeSaturday(date), timeSunday(date));
+          return (
+            date.toString() === timeSaturday(date).toString() ||
+            date.toString() === timeSunday(date).toString()
+          );
+        });
+      datesToShow = dates_to_show + weekendDates.length;
+    }
+  }
+
   // You can have as few as 1, and as many as 7, days shown
   // start_date dates_to_show gets overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
   let startDay: Date;
@@ -160,7 +187,7 @@
     : timeDay.floor(start_date);
   $: endDay = show_as_week
     ? timeDay.offset(startDay, 6)
-    : timeDay.offset(start_date, dates_to_show - 1);
+    : timeDay.offset(start_date, datesToShow - 1);
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -548,6 +575,24 @@
     return classes.join(" ");
   }
   //#endregion Attendee Overlay
+
+  // #region Date Change
+  function goToNextDate() {
+    console.log(
+      { start_date },
+      { startDay },
+      { datesToShow },
+      { show_as_week },
+    );
+    if (!show_as_week) {
+      start_date = timeDay.offset(start_date, datesToShow);
+      console.log("so start date becomes", start_date);
+    }
+  }
+  function goToPreviousDate() {
+    console.log("lol");
+  }
+  // #endregion Date Change
 </script>
 
 <style lang="scss">
@@ -566,6 +611,13 @@
 
     &.ticked {
       grid-template-columns: auto 1fr;
+    }
+
+    &.dated {
+      grid-template-rows: auto 1fr;
+      header {
+        grid-column: -1 / 1;
+      }
     }
 
     .days {
@@ -822,8 +874,15 @@
   bind:this={main}
   bind:clientHeight
   class:ticked={show_ticks}
+  class:dated={allow_date_change}
   class:allow_booking
 >
+  {#if allow_date_change}
+    <header class="change-dates">
+      <button on:click={goToPreviousDate} aria-label="Previous date">‹</button>
+      <button on:click={goToNextDate} aria-label="Next date">›</button>
+    </header>
+  {/if}
   {#if show_ticks}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}

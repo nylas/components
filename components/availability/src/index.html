@@ -66,7 +66,12 @@
           },
         ];
 
-        component.calendars = calendars;
+        //component.calendars = calendars;
+        component.email_ids = [
+          "phil.r@nylas.com",
+          "aaron.d@nylas.com",
+          "hazik.a@nylas.com",
+        ];
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
@@ -131,6 +136,14 @@
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
               component.show_weekends = JSON.parse(event.target.value);
+            });
+          });
+
+        document
+          .querySelectorAll('input[name="allow-date-change"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.allow_date_change = JSON.parse(event.target.value);
             });
           });
       });
@@ -293,11 +306,23 @@
           Do not include weekends
         </label>
       </fieldset>
+
+      <fieldset>
+        <legend>Date Change</legend>
+        <label>
+          <input checked type="radio" name="allow-date-change" value="true" />
+          Allowed
+        </label>
+        <label>
+          <input type="radio" name="allow-date-change" value="false" />
+          Not allowed
+        </label>
+      </fieldset>
     </aside>
 
     <main>
       <div class="demo-box">
-        <nylas-availability id="demo-availability"></nylas-availability>
+        <nylas-availability id="phils-availability"></nylas-availability>
       </div>
     </main>
   </body>
