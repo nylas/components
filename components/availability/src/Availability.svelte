@@ -165,18 +165,42 @@
   $: {
     if (datesToShow && !show_weekends) {
       let weekendDates = scaleTime()
-        .domain([startDay, timeDay.offset(start_date, datesToShow - 1)])
+        .domain([startDay, timeDay.offset(start_date, dates_to_show - 1)])
         .ticks(timeDay)
-        .filter((date) => {
-          console.log("DATE", date, timeSaturday(date), timeSunday(date));
-          return (
-            date.toString() === timeSaturday(date).toString() ||
-            date.toString() === timeSunday(date).toString()
-          );
-        });
-      datesToShow = dates_to_show + weekendDates.length;
+        .filter((date) => date.getDay() === 6 || date.getDay() === 0);
+
+      console.log(
+        "midway check",
+        start_date,
+        dates_to_show,
+        timeDay.offset(start_date, dates_to_show - 1),
+      );
+
+      // The above fails in the following case:
+      // dates_to_show = 1
+      // !show_weekends
+      // current date is a sturday
+      // It'll try to bump the date by 1, which is a Sunday. Let's bump it one further if that's the case.
+      if (weekendDates[weekendDates.length - 1]?.getDay() === 6) {
+        console.log("YES, the LAST DAY TO SHOW is SATURDAY");
+        datesToShow = datesToShow + weekendDates.length + 1;
+      } else {
+        console.log("NO, NOT THE CASE");
+        datesToShow = dates_to_show + weekendDates.length;
+      }
+      console.log(
+        "reactive calc",
+        dates_to_show,
+        datesToShow,
+        startDay,
+        weekendDates,
+      );
+    } else {
+      datesToShow = dates_to_show;
     }
   }
+
+  $: console.log("----", days[0].timestamp);
 
   // You can have as few as 1, and as many as 7, days shown
   // start_date dates_to_show gets overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
@@ -578,15 +602,15 @@
 
   // #region Date Change
   function goToNextDate() {
-    console.log(
-      { start_date },
-      { startDay },
-      { datesToShow },
-      { show_as_week },
-    );
+    // console.log(
+    //   { start_date },
+    //   { startDay },
+    //   { datesToShow },
+    //   { show_as_week },
+    // );
     if (!show_as_week) {
       start_date = timeDay.offset(start_date, datesToShow);
-      console.log("so start date becomes", start_date);
+      // console.log("so start date becomes", start_date);
     }
   }
   function goToPreviousDate() {
