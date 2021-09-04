@@ -169,12 +169,12 @@
         .ticks(timeDay)
         .filter((date) => date.getDay() === 6 || date.getDay() === 0);
 
-      console.log(
-        "midway check",
-        start_date,
-        dates_to_show,
-        timeDay.offset(start_date, dates_to_show - 1),
-      );
+      // console.log(
+      //   "midway check",
+      //   start_date,
+      //   dates_to_show,
+      //   timeDay.offset(start_date, dates_to_show - 1),
+      // );
 
       // The above fails in the following case:
       // dates_to_show = 1
@@ -183,16 +183,16 @@
       // It'll try to bump the date by 1, which is a Sunday. Let's bump it one further if that's the case.
       if (weekendDates[weekendDates.length - 1]?.getDay() === 6) {
         console.log("YES, the LAST DAY TO SHOW is SATURDAY");
-        datesToShow = datesToShow + weekendDates.length + 1;
+        datesToShow = dates_to_show + weekendDates.length + 1;
       } else {
         console.log("NO, NOT THE CASE");
         datesToShow = dates_to_show + weekendDates.length;
       }
       console.log(
         "reactive calc",
+        startDay,
         dates_to_show,
         datesToShow,
-        startDay,
         weekendDates,
       );
     } else {
