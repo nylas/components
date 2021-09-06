@@ -162,43 +162,43 @@
   // We should always show a consistent number of date columns; if weekends are off, show the next N dates that would otherwise by shown.
   // In practice: dates_to_show = 4 + !show_weekends + <today being thursday> will show Thurs, Fri, Mon, Tues.
   // Without this reactive block, it would just show Thurs, Fri.
-  $: {
-    if (datesToShow && !show_weekends) {
-      let weekendDates = scaleTime()
-        .domain([startDay, timeDay.offset(start_date, dates_to_show - 1)])
-        .ticks(timeDay)
-        .filter((date) => date.getDay() === 6 || date.getDay() === 0);
+  // $: {
+  //   if (datesToShow && !show_weekends) {
+  //     let weekendDates = scaleTime()
+  //       .domain([startDay, timeDay.offset(start_date, dates_to_show - 1)])
+  //       .ticks(timeDay)
+  //       .filter((date) => date.getDay() === 6 || date.getDay() === 0);
 
-      // console.log(
-      //   "midway check",
-      //   start_date,
-      //   dates_to_show,
-      //   timeDay.offset(start_date, dates_to_show - 1),
-      // );
+  //     console.log(
+  //       "midway check",
+  //       start_date,
+  //       dates_to_show,
+  //       timeDay.offset(start_date, dates_to_show - 1),
+  //     );
 
-      // The above fails in the following case:
-      // dates_to_show = 1
-      // !show_weekends
-      // current date is a sturday
-      // It'll try to bump the date by 1, which is a Sunday. Let's bump it one further if that's the case.
-      if (weekendDates[weekendDates.length - 1]?.getDay() === 6) {
-        console.log("YES, the LAST DAY TO SHOW is SATURDAY");
-        datesToShow = dates_to_show + weekendDates.length + 1;
-      } else {
-        console.log("NO, NOT THE CASE");
-        datesToShow = dates_to_show + weekendDates.length;
-      }
-      console.log(
-        "reactive calc",
-        startDay,
-        dates_to_show,
-        datesToShow,
-        weekendDates,
-      );
-    } else {
-      datesToShow = dates_to_show;
-    }
-  }
+  //     // The above fails in the following case:
+  //     // dates_to_show = 1
+  //     // !show_weekends
+  //     // current date is a sturday
+  //     // It'll try to bump the date by 1, which is a Sunday. Let's bump it one further if that's the case.
+  //     if (weekendDates[weekendDates.length - 1]?.getDay() === 6) {
+  //       console.log("YES, the LAST DAY TO SHOW is SATURDAY");
+  //       datesToShow = dates_to_show + weekendDates.length + 1;
+  //     } else {
+  //       console.log("NO, NOT THE CASE");
+  //       datesToShow = dates_to_show + weekendDates.length;
+  //     }
+  //     console.log(
+  //       "reactive calc",
+  //       dates_to_show,
+  //       datesToShow,
+  //       startDay,
+  //       weekendDates,
+  //     );
+  //   } else {
+  //     datesToShow = dates_to_show;
+  //   }
+  // }
 
   $: console.log("----", days[0].timestamp);
 
@@ -209,9 +209,13 @@
   $: startDay = show_as_week
     ? timeWeek.floor(start_date)
     : timeDay.floor(start_date);
-  $: endDay = show_as_week
-    ? timeDay.offset(startDay, 6)
-    : timeDay.offset(start_date, datesToShow - 1);
+
+  $: endDay = dayRange[dayRange.length - 1];
+  $: console.log({ dayRange });
+  // TODO: make endDay read from dayRange[last]
+  // $: endDay = show_as_week
+  //   ? timeDay.offset(startDay, 6)
+  //   : timeDay.offset(start_date, datesToShow - 1);
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -385,27 +389,55 @@
     return epochs;
   }
 
-  $: days = scaleTime()
-    .domain([startDay, endDay])
-    .ticks(timeDay)
-    .filter((timestamp: Date) => {
-      if (show_weekends) {
-        return true;
-      } else {
-        return (
-          timestamp.toString() !== timeSaturday(timestamp).toString() &&
-          timestamp.toString() !== timeSunday(timestamp).toString()
-        );
+  function generateDayRange({
+    startDay,
+    endDay,
+  }: {
+    startDay: Date;
+    endDay: Date;
+  }) {
+    let range = scaleTime()
+      .domain([startDay, endDay])
+      .ticks(timeDay)
+      .filter((timestamp: Date) => {
+        if (show_weekends) {
+          return true;
+        } else {
+          return (
+            timestamp.toString() !== timeSaturday(timestamp).toString() &&
+            timestamp.toString() !== timeSunday(timestamp).toString()
+          );
+        }
+      });
+    console.log("any weekends?");
+    if (!show_weekends) {
+      let weekdayDates = range.filter(
+        (date) => date.getDay() !== 6 || date.getDay() !== 0,
+      );
+      if (weekdayDates.length < dates_to_show) {
+        range = generateDayRange({
+          startDay,
+          endDay: timeDay.offset(endDay, 1),
+        });
       }
-    })
-    .map((timestamp: Date) => {
-      let slots = generateDaySlots(timestamp, start_hour, end_hour);
-      return {
-        slots,
-        epochs: generateEpochs(slots, partial_bookable_ratio),
-        timestamp,
-      };
-    });
+    }
+    return range;
+  }
+
+  $: dayRange = generateDayRange({
+    startDay,
+    endDay: show_as_week
+      ? timeDay.offset(startDay, 6)
+      : timeDay.offset(start_date, datesToShow - 1),
+  });
+  $: days = dayRange.map((timestamp: Date) => {
+    let slots = generateDaySlots(timestamp, start_hour, end_hour);
+    return {
+      slots,
+      epochs: generateEpochs(slots, partial_bookable_ratio),
+      timestamp,
+    };
+  });
   //#endregion layout
 
   // #region timeSlot selection
@@ -609,7 +641,8 @@
     //   { show_as_week },
     // );
     if (!show_as_week) {
-      start_date = timeDay.offset(start_date, datesToShow);
+      // start_date = timeDay.offset(start_date, datesToShow);
+      start_date = timeDay.offset(endDay, 1);
       // console.log("so start date becomes", start_date);
     }
   }
