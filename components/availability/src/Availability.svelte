@@ -139,6 +139,19 @@
       allow_date_change,
       true,
     );
+
+    if (
+      $$props.hasOwnProperty("start_date") &&
+      $$props.start_date !== startDate
+    ) {
+      startDate = getPropertyValue(
+        internalProps.start_date,
+        new Date(),
+        new Date(),
+      );
+    } else if (!startDate) {
+      startDate = start_date;
+    }
   }
 
   //#endregion mount and prop initialization
@@ -152,8 +165,9 @@
 
   // You can have as few as 1, and as many as 7, days shown
   // start_date and dates_to_show get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
-  let startDay: Date;
+  let startDay: Date; // the first day column shown; depends on show_as_week
   let endDay: Date;
+  let startDate: Date; // internally-settable start_date
 
   $: dayRange = generateDayRange(
     startDay,
@@ -163,8 +177,8 @@
   );
 
   $: startDay = show_as_week
-    ? timeWeek.floor(start_date)
-    : timeDay.floor(start_date);
+    ? timeWeek.floor(startDate)
+    : timeDay.floor(startDate);
 
   $: endDay = dayRange[dayRange.length - 1];
 
@@ -573,15 +587,21 @@
 
   // #region Date Change
   function goToNextDate() {
+    if ($$props.start_date) {
+      delete $$props.start_date;
+    }
     if (show_as_week) {
-      start_date = timeWeek.offset(endDay, 1);
+      startDate = timeWeek.offset(endDay, 1);
     } else {
-      start_date = timeDay.offset(endDay, 1);
+      startDate = timeDay.offset(endDay, 1);
     }
   }
   function goToPreviousDate() {
+    if ($$props.start_date) {
+      delete $$props.start_date;
+    }
     if (show_as_week) {
-      start_date = timeWeek.offset(startDay, -1);
+      startDate = timeWeek.offset(startDay, -1);
     } else {
       // Can't do something as simple as `start_date = timeDay.offset(startDay, -dates_to_show)` here;
       // broken case: !show_weekends, start_date = a monday, dates_to_show = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
@@ -591,7 +611,7 @@
         timeDay.offset(endDay, -dates_to_show),
         true,
       );
-      start_date = previousRange[0];
+      startDate = previousRange[0];
     }
   }
   // #endregion Date Change

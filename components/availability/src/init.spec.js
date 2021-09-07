@@ -500,7 +500,7 @@ describe("availability component", () => {
     });
   });
 
-  describe("date changes", () => {
+  describe.only("date changes", () => {
     it("Shows date change header by default", () => {
       cy.get("header.change-dates").should("exist");
     });
@@ -520,6 +520,26 @@ describe("availability component", () => {
           const component = element[0];
           component.allow_date_change = true;
           cy.get("header.change-dates").should("exist");
+        });
+    });
+    it("Moves me from Friday to Monday when weekends are disallowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          component.show_weekends = true;
+          const friday = new Date("May 14 2021");
+          component.start_date = friday;
+          cy.get("header.change-dates").should("exist");
+          cy.get(".change-dates button:eq(1)").click();
+          cy.get("header h2")
+            .contains(15)
+            .then(() => {
+              component.show_weekends = false;
+              cy.get(".change-dates button:eq(1)").click();
+              cy.get("header h2").contains(17);
+            });
         });
     });
   });
