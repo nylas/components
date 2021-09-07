@@ -500,7 +500,7 @@ describe("availability component", () => {
     });
   });
 
-  describe.only("date changes", () => {
+  describe("date changes", () => {
     it("Shows date change header by default", () => {
       cy.get("header.change-dates").should("exist");
     });

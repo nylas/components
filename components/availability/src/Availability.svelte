@@ -14,14 +14,7 @@
     buildInternalProps,
   } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
-  import {
-    timeSaturday,
-    timeSunday,
-    timeWeek,
-    timeDay,
-    timeHour,
-    timeMinute,
-  } from "d3-time";
+  import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
   import type { CalendarQuery } from "@commons/types/Events";
 
@@ -162,12 +155,12 @@
   let startDay: Date;
   let endDay: Date;
 
-  $: dayRange = generateDayRange({
+  $: dayRange = generateDayRange(
     startDay,
-    endDay: show_as_week
+    show_as_week
       ? timeDay.offset(startDay, 6)
       : timeDay.offset(startDay, dates_to_show - 1),
-  });
+  );
 
   $: startDay = show_as_week
     ? timeWeek.floor(start_date)
@@ -347,15 +340,11 @@
     return epochs;
   }
 
-  function generateDayRange({
-    startDay,
-    endDay,
-    reverse = false,
-  }: {
-    startDay: Date;
-    endDay: Date;
-    reverse?: boolean;
-  }) {
+  function generateDayRange(
+    startDay: Date,
+    endDay: Date,
+    reverse?: boolean,
+  ): Date[] {
     let range = scaleTime()
       .domain([startDay, endDay])
       .ticks(timeDay)
@@ -363,29 +352,15 @@
         if (show_weekends) {
           return true;
         } else {
-          return (
-            timestamp.toString() !== timeSaturday(timestamp).toString() &&
-            timestamp.toString() !== timeSunday(timestamp).toString()
-          );
+          return timestamp.getDay() !== 6 && timestamp.getDay() !== 0;
         }
       });
     if (!show_weekends) {
-      let weekdayDates = range.filter(
-        (date) => date.getDay() !== 6 || date.getDay() !== 0,
-      );
-      if (weekdayDates.length < dates_to_show) {
+      if (range.length < dates_to_show) {
         if (reverse) {
-          range = generateDayRange({
-            startDay: timeDay.offset(startDay, -1),
-            endDay,
-            reverse: true,
-          });
-        } else {
-          range = generateDayRange({
-            startDay,
-            endDay: timeDay.offset(endDay, 1),
-          });
+          return generateDayRange(timeDay.offset(startDay, -1), endDay, true);
         }
+        return generateDayRange(startDay, timeDay.offset(endDay, 1));
       }
     }
     return range;
@@ -611,11 +586,11 @@
       // Can't do something as simple as `start_date = timeDay.offset(startDay, -dates_to_show)` here;
       // broken case: !show_weekends, start_date = a monday, dates_to_show = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
       // Instead, we generateDayRange() with reverse=true to take advance of recursive non-weekend range-making.
-      let previousRange = generateDayRange({
-        startDay: timeDay.offset(startDay, -dates_to_show),
-        endDay: timeDay.offset(endDay, -dates_to_show),
-        reverse: true,
-      });
+      let previousRange = generateDayRange(
+        timeDay.offset(startDay, -dates_to_show),
+        timeDay.offset(endDay, -dates_to_show),
+        true,
+      );
       start_date = previousRange[0];
     }
   }
