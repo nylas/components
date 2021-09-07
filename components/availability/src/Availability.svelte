@@ -267,12 +267,6 @@
           }
         }
 
-        // if (
-        //   required_participants.length && availability === AvailabilityStatus.PARTIAL
-        // ) {
-        //   availability = AvailabilityStatus.BUSY;
-        // }
-
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           calendar_id: calendarID,
