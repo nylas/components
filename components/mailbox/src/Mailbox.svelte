@@ -713,7 +713,8 @@
         {#each paginatedThreads as thread}
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
-              class:unread={unreadThreads.has(thread) || thread.unread}
+              class:unread={unreadThreads.has(thread) ||
+                (thread.unread && unread_status === "default")}
               class:checked={selectedThreads.has(thread)}
             >
               {#if show_thread_checkbox}<div
