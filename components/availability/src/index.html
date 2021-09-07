@@ -103,7 +103,6 @@
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
               component.allow_booking = JSON.parse(event.target.value);
-              component.start_date = new Date();
             });
           });
 
