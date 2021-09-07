@@ -255,8 +255,7 @@
 
         if (
           availability === AvailabilityStatus.PARTIAL &&
-          required_participants.length &&
-          availability === AvailabilityStatus.PARTIAL
+          required_participants.length
         ) {
           if (
             !required_participants.every((participant) =>
