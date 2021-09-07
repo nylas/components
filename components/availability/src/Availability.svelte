@@ -157,65 +157,23 @@
   let tickContainer: HTMLElement;
   let clientHeight: number;
 
-  $: datesToShow = dates_to_show;
-
-  // We should always show a consistent number of date columns; if weekends are off, show the next N dates that would otherwise by shown.
-  // In practice: dates_to_show = 4 + !show_weekends + <today being thursday> will show Thurs, Fri, Mon, Tues.
-  // Without this reactive block, it would just show Thurs, Fri.
-  // $: {
-  //   if (datesToShow && !show_weekends) {
-  //     let weekendDates = scaleTime()
-  //       .domain([startDay, timeDay.offset(start_date, dates_to_show - 1)])
-  //       .ticks(timeDay)
-  //       .filter((date) => date.getDay() === 6 || date.getDay() === 0);
-
-  //     console.log(
-  //       "midway check",
-  //       start_date,
-  //       dates_to_show,
-  //       timeDay.offset(start_date, dates_to_show - 1),
-  //     );
-
-  //     // The above fails in the following case:
-  //     // dates_to_show = 1
-  //     // !show_weekends
-  //     // current date is a sturday
-  //     // It'll try to bump the date by 1, which is a Sunday. Let's bump it one further if that's the case.
-  //     if (weekendDates[weekendDates.length - 1]?.getDay() === 6) {
-  //       console.log("YES, the LAST DAY TO SHOW is SATURDAY");
-  //       datesToShow = dates_to_show + weekendDates.length + 1;
-  //     } else {
-  //       console.log("NO, NOT THE CASE");
-  //       datesToShow = dates_to_show + weekendDates.length;
-  //     }
-  //     console.log(
-  //       "reactive calc",
-  //       dates_to_show,
-  //       datesToShow,
-  //       startDay,
-  //       weekendDates,
-  //     );
-  //   } else {
-  //     datesToShow = dates_to_show;
-  //   }
-  // }
-
-  $: console.log("----", days[0].timestamp);
-
   // You can have as few as 1, and as many as 7, days shown
-  // start_date dates_to_show gets overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
+  // start_date and dates_to_show get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
   let startDay: Date;
   let endDay: Date;
+
+  $: dayRange = generateDayRange({
+    startDay,
+    endDay: show_as_week
+      ? timeDay.offset(startDay, 6)
+      : timeDay.offset(startDay, dates_to_show - 1),
+  });
+
   $: startDay = show_as_week
     ? timeWeek.floor(start_date)
     : timeDay.floor(start_date);
 
   $: endDay = dayRange[dayRange.length - 1];
-  $: console.log({ dayRange });
-  // TODO: make endDay read from dayRange[last]
-  // $: endDay = show_as_week
-  //   ? timeDay.offset(startDay, 6)
-  //   : timeDay.offset(start_date, datesToShow - 1);
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -392,9 +350,11 @@
   function generateDayRange({
     startDay,
     endDay,
+    reverse = false,
   }: {
     startDay: Date;
     endDay: Date;
+    reverse?: boolean;
   }) {
     let range = scaleTime()
       .domain([startDay, endDay])
@@ -409,27 +369,28 @@
           );
         }
       });
-    console.log("any weekends?");
     if (!show_weekends) {
       let weekdayDates = range.filter(
         (date) => date.getDay() !== 6 || date.getDay() !== 0,
       );
       if (weekdayDates.length < dates_to_show) {
-        range = generateDayRange({
-          startDay,
-          endDay: timeDay.offset(endDay, 1),
-        });
+        if (reverse) {
+          range = generateDayRange({
+            startDay: timeDay.offset(startDay, -1),
+            endDay,
+            reverse: true,
+          });
+        } else {
+          range = generateDayRange({
+            startDay,
+            endDay: timeDay.offset(endDay, 1),
+          });
+        }
       }
     }
     return range;
   }
 
-  $: dayRange = generateDayRange({
-    startDay,
-    endDay: show_as_week
-      ? timeDay.offset(startDay, 6)
-      : timeDay.offset(start_date, datesToShow - 1),
-  });
   $: days = dayRange.map((timestamp: Date) => {
     let slots = generateDaySlots(timestamp, start_hour, end_hour);
     return {
@@ -486,7 +447,7 @@
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
     // When dates_to_show is updated, update availability
-    if (email_ids?.length && dates_to_show && show_as_week !== undefined) {
+    if (email_ids?.length && endDay) {
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
   })();
@@ -497,9 +458,12 @@
       body: {
         emails: email_ids,
         start_time:
-          new Date(new Date(startDay).setHours(start_hour)).getTime() / 1000,
+          timeHour(
+            new Date(new Date(startDay).setHours(start_hour)),
+          ).getTime() / 1000,
         end_time:
-          new Date(new Date(endDay).setHours(end_hour)).getTime() / 1000,
+          timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
+          1000,
       },
       component_id: id,
       access_token: access_token,
@@ -634,20 +598,26 @@
 
   // #region Date Change
   function goToNextDate() {
-    // console.log(
-    //   { start_date },
-    //   { startDay },
-    //   { datesToShow },
-    //   { show_as_week },
-    // );
-    if (!show_as_week) {
-      // start_date = timeDay.offset(start_date, datesToShow);
+    if (show_as_week) {
+      start_date = timeWeek.offset(endDay, 1);
+    } else {
       start_date = timeDay.offset(endDay, 1);
-      // console.log("so start date becomes", start_date);
     }
   }
   function goToPreviousDate() {
-    console.log("lol");
+    if (show_as_week) {
+      start_date = timeWeek.offset(startDay, -1);
+    } else {
+      // Can't do something as simple as `start_date = timeDay.offset(startDay, -dates_to_show)` here;
+      // broken case: !show_weekends, start_date = a monday, dates_to_show = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
+      // Instead, we generateDayRange() with reverse=true to take advance of recursive non-weekend range-making.
+      let previousRange = generateDayRange({
+        startDay: timeDay.offset(startDay, -dates_to_show),
+        endDay: timeDay.offset(endDay, -dates_to_show),
+        reverse: true,
+      });
+      start_date = previousRange[0];
+    }
   }
   // #endregion Date Change
 </script>
