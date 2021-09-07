@@ -1,8 +1,9 @@
 <svelte:options tag="nylas-contact-image" />
 
 <script>
-  import { beforeUpdate } from "svelte/internal";
   import { ContactAvatarStore } from "@commons";
+  import { beforeUpdate } from "svelte/internal";
+
   export let contact;
   export let contact_query;
   export let height = "32px";
