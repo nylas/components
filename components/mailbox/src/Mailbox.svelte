@@ -534,7 +534,9 @@
 
       // #region define background styles
       --nylas-email-background: transparent;
-      background: var(--grey-lightest);
+      &:not(.unread) {
+        background: var(--grey-lightest);
+      }
       &.unread {
         background: white;
       }
@@ -697,7 +699,7 @@
         {#each paginatedThreads as thread}
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
-              class:unread={unreadThreads.has(thread)}
+              class:unread={unreadThreads.has(thread) || thread.unread}
               class:checked={selectedThreads.has(thread)}
             >
               {#if show_thread_checkbox}<div
