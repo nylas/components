@@ -139,7 +139,9 @@
       allow_date_change,
       true,
     );
+  }
 
+  $: {
     if (
       $$props.hasOwnProperty("start_date") &&
       $$props.start_date !== startDate
