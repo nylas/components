@@ -66,12 +66,7 @@
           },
         ];
 
-        //component.calendars = calendars;
-        component.email_ids = [
-          "phil.r@nylas.com",
-          "aaron.d@nylas.com",
-          "hazik.a@nylas.com",
-        ];
+        component.calendars = calendars;
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
@@ -187,7 +182,7 @@
           class="days"
           type="range"
           min="1"
-          max="21"
+          max="7"
           step="1"
           value="1"
         />
@@ -306,7 +301,6 @@
           Do not include weekends
         </label>
       </fieldset>
-
       <fieldset>
         <legend>Date Change</legend>
         <label>
@@ -322,7 +316,7 @@
 
     <main>
       <div class="demo-box">
-        <nylas-availability id="phils-availability"></nylas-availability>
+        <nylas-availability id="demo-availability"></nylas-availability>
       </div>
     </main>
   </body>
