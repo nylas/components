@@ -56,6 +56,7 @@
   export let show_weekends: boolean;
   export let attendees_to_show: number;
   export let allow_date_change: boolean;
+  export let required_participants: string[];
   //#endregion props
 
   //#region mount and prop initialization
@@ -140,6 +141,11 @@
       internalProps.allow_date_change,
       allow_date_change,
       true,
+    );
+    required_participants = getPropertyValue(
+      internalProps.required_participants,
+      required_participants,
+      [],
     );
   }
 
@@ -247,6 +253,26 @@
           availability = AvailabilityStatus.BUSY;
         }
 
+        if (
+          availability === AvailabilityStatus.PARTIAL &&
+          required_participants.length &&
+          availability === AvailabilityStatus.PARTIAL
+        ) {
+          if (
+            !required_participants.every((participant) =>
+              freeCalendars.includes(participant),
+            )
+          ) {
+            availability = AvailabilityStatus.BUSY;
+          }
+        }
+
+        // if (
+        //   required_participants.length && availability === AvailabilityStatus.PARTIAL
+        // ) {
+        //   availability = AvailabilityStatus.BUSY;
+        // }
+
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           calendar_id: calendarID,
@@ -335,7 +361,11 @@
         if (
           numFreeCalendars === 0 ||
           (numFreeCalendars !== allCalendars.length &&
-            numFreeCalendars < allCalendars.length * partial_bookable_ratio)
+            numFreeCalendars < allCalendars.length * partial_bookable_ratio) ||
+          (required_participants.length &&
+            !required_participants.every((participant) =>
+              epoch[0].available_calendars.includes(participant),
+            ))
         ) {
           status = "busy";
         } else if (
