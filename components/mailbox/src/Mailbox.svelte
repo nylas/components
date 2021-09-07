@@ -269,8 +269,9 @@
       threads = await MailboxStore.hydrateMessageInThread(message, query);
     }
   }
-
+  let refreshingMailbox = false;
   async function refreshClicked(event: MouseEvent) {
+    refreshingMailbox = true;
     dispatchEvent("refreshClicked", { event });
     if (!all_threads) {
       if (keyword_to_search) {
@@ -283,6 +284,7 @@
         threads = (await MailboxStore.getThreads(query, true)) || [];
       }
     }
+    refreshingMailbox = false;
   }
 
   function onSelectOne(event: MouseEvent, thread: Thread) {
@@ -465,6 +467,13 @@
       @include barStyle;
       border-radius: 4px 4px 0 0;
       font-weight: bold;
+      button {
+        svg {
+          &.refreshing {
+            animation: rotate 1s linear infinite;
+          }
+        }
+      }
     }
 
     button {
@@ -620,7 +629,12 @@
       {#if header}
         <header>
           <button on:click={refreshClicked}>
-            <svg width="16" height="16" viewBox="0 0 16 16">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              class:refreshing={refreshingMailbox}
+            >
               <path
                 d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
               />
