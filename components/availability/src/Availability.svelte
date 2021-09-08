@@ -35,6 +35,8 @@
   import "@commons/components/ContactImage/ContactImage.svelte";
   import AvailableIcon from "./assets/available.svg";
   import UnavailableIcon from "./assets/unavailable.svg";
+  import BackIcon from "./assets/left-arrow.svg";
+  import NextIcon from "./assets/right-arrow.svg";
 
   //#region props
   export let id: string = "";
@@ -171,12 +173,14 @@
   let endDay: Date;
   let startDate: Date; // internally-settable start_date
 
-  $: dayRange = generateDayRange(
-    startDay,
-    show_as_week
-      ? timeDay.offset(startDay, 6)
-      : timeDay.offset(startDay, dates_to_show - 1),
-  );
+  $: dayRange =
+    (show_weekends || !show_weekends) &&
+    generateDayRange(
+      startDay, // TODO: weird just to get show_weekends passed in
+      show_as_week
+        ? timeDay.offset(startDay, 6)
+        : timeDay.offset(startDay, dates_to_show - 1),
+    );
 
   $: startDay = show_as_week
     ? timeWeek.floor(startDate)
@@ -371,7 +375,7 @@
           return timestamp.getDay() !== 6 && timestamp.getDay() !== 0;
         }
       });
-    if (!show_weekends) {
+    if (!show_as_week && !show_weekends) {
       if (range.length < dates_to_show) {
         if (reverse) {
           return generateDayRange(timeDay.offset(startDay, -1), endDay, true);
@@ -639,8 +643,21 @@
 
     &.dated {
       grid-template-rows: auto 1fr;
-      header {
+      gap: 1rem;
+      header.change-dates {
         grid-column: -1 / 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        button {
+          background-color: #f7f7f8;
+          border: 1px solid #e3e8ee;
+          cursor: pointer;
+          &:hover {
+            background-color: #e3e8ee;
+          }
+        }
       }
     }
 
@@ -903,8 +920,12 @@
 >
   {#if allow_date_change}
     <header class="change-dates">
-      <button on:click={goToPreviousDate} aria-label="Previous date">‹</button>
-      <button on:click={goToNextDate} aria-label="Next date">›</button>
+      <button on:click={goToPreviousDate} aria-label="Previous date"
+        ><BackIcon style="height:32px;width:32px;" /></button
+      >
+      <button on:click={goToNextDate} aria-label="Next date"
+        ><NextIcon style="height:32px;width:32px;" /></button
+      >
     </header>
   {/if}
   {#if show_ticks}

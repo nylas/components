@@ -481,7 +481,7 @@ describe("availability component", () => {
           component.show_weekends = false;
           cy.get("div.day:eq(0) header h2").contains("Tuesday");
           cy.get("div.day:eq(4) header h2").contains("Monday");
-          cy.get("div.day:eq(5) header h2").should("not.exist");
+          cy.get("div.day:eq(5) header h2").contains("Tuesday");
         });
     });
 
@@ -491,6 +491,7 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.start_date = new Date("2021-04-06 00:00");
+          component.dates_to_show = 7;
           component.show_as_week = true;
           component.show_weekends = false;
           cy.get("div.day:eq(0) header h2").contains("Monday");
@@ -537,7 +538,6 @@ describe("availability component", () => {
             .contains(15)
             .then(() => {
               component.show_weekends = false;
-              cy.get(".change-dates button:eq(1)").click();
               cy.get("header h2").contains(17);
             });
         });
