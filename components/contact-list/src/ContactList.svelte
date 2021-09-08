@@ -101,7 +101,7 @@
       click_action,
       "email",
     );
-    sort_by = getPropertyValue(internalProps.sort_by, sort_by, "last_emailed");
+    sort_by = getPropertyValue(internalProps.sort_by, sort_by, "name");
     show_names = getPropertyValue(internalProps.show_names, show_names, true);
     contacts_to_load = getPropertyValue(
       internalProps.contacts_to_load,
