@@ -638,7 +638,7 @@
     z-index: 1;
 
     &.ticked {
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 70px 1fr;
     }
 
     &.dated {
