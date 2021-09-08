@@ -176,4 +176,36 @@ describe("Optional Prop Handling", () => {
       .find("[data-cy=default_set_by_user]")
       .should("exist");
   });
+
+  it("Component loads and works for sort_by=last_emailed when account has email & contact scopes", () => {
+    cy.loadContacts();
+    cy.visit("/components/contact-list/src/index.html");
+    cy.get("nylas-contact-list").should("exist");
+    cy.get("nylas-contact-list").then((element) => {
+      const component = element[0];
+      component.sort_by = "last_emailed";
+    });
+    cy.get("nylas-contact-list")
+      .find(".contact")
+      .should("have.length.greaterThan", 1);
+  });
+});
+
+describe("ContactList component with contact scope (only) should work by default", () => {
+  beforeEach(() => {
+    cy.loadContacts();
+    cy.visit("/components/contact-list/src/index.html");
+    cy.get("nylas-contact-list").should("exist");
+    cy.get("nylas-contact-list").then((element) => {
+      const component = element[0];
+      component.id = "75f0cbc5-6b15-4bf1-894e-11eeb198cc34";
+      component.sort_by = "name";
+    });
+  });
+
+  it("Component loads and works for sort_by=name when account has only contact scope", () => {
+    cy.get("nylas-contact-list")
+      .find(".contact")
+      .should("have.length.greaterThan", 1);
+  });
 });
