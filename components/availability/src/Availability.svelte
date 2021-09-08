@@ -56,6 +56,7 @@
   export let show_weekends: boolean;
   export let attendees_to_show: number;
   export let allow_date_change: boolean;
+  export let required_participants: string[];
   //#endregion props
 
   //#region mount and prop initialization
@@ -141,6 +142,11 @@
       allow_date_change,
       true,
     );
+    required_participants = getPropertyValue(
+      internalProps.required_participants,
+      required_participants,
+      [],
+    );
   }
 
   $: {
@@ -187,6 +193,12 @@
     : timeDay.floor(startDate);
 
   $: endDay = dayRange[dayRange.length - 1];
+
+  const allRequiredParticipantsIncluded = (calendars: string[]) => {
+    return required_participants.every((participant) =>
+      calendars.includes(participant),
+    );
+  };
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -245,6 +257,15 @@
           freeCalendars.length < allCalendars.length * partial_bookable_ratio
         ) {
           availability = AvailabilityStatus.BUSY;
+        }
+
+        if (
+          availability === AvailabilityStatus.PARTIAL &&
+          required_participants.length
+        ) {
+          if (!allRequiredParticipantsIncluded(freeCalendars)) {
+            availability = AvailabilityStatus.BUSY;
+          }
         }
 
         return {
@@ -332,10 +353,14 @@
       .map((epoch) => {
         let status = "free";
         const numFreeCalendars = epoch[0].available_calendars.length;
+        const fewerCalendarsThanRatio =
+          numFreeCalendars !== allCalendars.length &&
+          numFreeCalendars < allCalendars.length * partial_bookable_ratio;
         if (
           numFreeCalendars === 0 ||
-          (numFreeCalendars !== allCalendars.length &&
-            numFreeCalendars < allCalendars.length * partial_bookable_ratio)
+          fewerCalendarsThanRatio ||
+          (required_participants.length &&
+            !allRequiredParticipantsIncluded(epoch[0].available_calendars))
         ) {
           status = "busy";
         } else if (

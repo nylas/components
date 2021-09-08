@@ -120,44 +120,44 @@ describe("availability component", () => {
   });
 
   describe("multiple availability sets", () => {
-    it("observes multiple availabilites", () => {
-      const calendars = [
-        {
-          email_address: "person@name.com",
-          availability: "busy",
-          timeslots: [
-            {
-              start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(6, 0, 0, 0)),
-            },
-            {
-              start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(15, 0, 0, 0)),
-            },
-          ],
-        },
-        {
-          email_address: "thelonious@nylas.com",
-          availability: "busy",
-          timeslots: [
-            {
-              start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-            },
-          ],
-        },
-        {
-          email_address: "booker@nylas.com",
-          availability: "busy",
-          timeslots: [
-            {
-              start_time: new Date(new Date().setHours(5, 30, 0, 0)),
-              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
-            },
-          ],
-        },
-      ];
+    const calendars = [
+      {
+        emailAddress: "person@name.com",
+        availability: "busy",
+        timeslots: [
+          {
+            start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+          },
+          {
+            start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+          },
+        ],
+      },
+      {
+        emailAddress: "thelonious@nylas.com",
+        availability: "busy",
+        timeslots: [
+          {
+            start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+          },
+        ],
+      },
+      {
+        emailAddress: "booker@nylas.com",
+        availability: "busy",
+        timeslots: [
+          {
+            start_time: new Date(new Date().setHours(5, 30, 0, 0)),
+            end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+          },
+        ],
+      },
+    ];
 
+    it("observes multiple availabilites", () => {
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -167,6 +167,25 @@ describe("availability component", () => {
           cy.get(".slot.partial").should("have.length", 42);
           cy.get(".slot.busy").should("have.length", 10);
           cy.get(".slot.free").should("have.length", 44);
+        });
+    });
+
+    it("requires certain participants be present for booking", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.calendars = calendars;
+          cy.get(
+            `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+          )
+            .should("have.class", "partial")
+            .then(() => {
+              component.required_participants = [calendars[1].emailAddress];
+              cy.get(
+                `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+              ).should("have.class", "busy");
+            });
         });
     });
   });

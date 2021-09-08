@@ -19,6 +19,7 @@ export interface Manifest extends NylasManifest {
   show_weekends: boolean;
   attendees_to_show: number;
   allow_date_change: boolean;
+  required_participants: string[];
 }
 
 export interface Calendar {
