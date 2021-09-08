@@ -1,0 +1,11 @@
+{
+  "name": "@nylas/components-schedule-editor",
+  "version": "1.0.3-canary.0",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "tscheck": "tsc && svelte-check",
+    "start": "echo 'Nothing to start'"
+  },
+  "main": "index.js"
+}
