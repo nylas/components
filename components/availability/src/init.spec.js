@@ -481,7 +481,7 @@ describe("availability component", () => {
           component.show_weekends = false;
           cy.get("div.day:eq(0) header h2").contains("Tuesday");
           cy.get("div.day:eq(4) header h2").contains("Monday");
-          cy.get("div.day:eq(5) header h2").should("not.exist");
+          cy.get("div.day:eq(5) header h2").contains("Tuesday");
         });
     });
 
@@ -491,11 +491,126 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.start_date = new Date("2021-04-06 00:00");
+          component.dates_to_show = 7;
           component.show_as_week = true;
           component.show_weekends = false;
           cy.get("div.day:eq(0) header h2").contains("Monday");
           cy.get("div.day:eq(4) header h2").contains("Friday");
           cy.get("div.day:eq(5) header h2").should("not.exist");
+        });
+    });
+  });
+
+  describe("date changes", () => {
+    it("Shows date change header by default", () => {
+      cy.get("header.change-dates").should("exist");
+    });
+    it("Does not show date change header when date change is disallowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = false;
+          cy.get("header.change-dates").should("not.exist");
+        });
+    });
+    it("Does not show date change header when date change is allowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          cy.get("header.change-dates").should("exist");
+        });
+    });
+    it("Moves me from Friday to Monday when weekends are disallowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          component.show_weekends = true;
+          const friday = new Date("May 14 2021");
+          component.start_date = friday;
+          cy.get("header.change-dates").should("exist");
+          cy.get(".change-dates button:eq(1)").click();
+          cy.get("header h2")
+            .contains(15)
+            .then(() => {
+              component.show_weekends = false;
+              cy.get("header h2").contains(17);
+            });
+        });
+    });
+    it("Moves me from Monday to Friday on prev click when weekends are disallowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          component.show_weekends = true;
+          const monday = new Date("May 17 2021");
+          component.start_date = monday;
+          cy.get("header.change-dates").should("exist");
+          cy.get(".change-dates button:eq(0)").click();
+          cy.get("header h2")
+            .contains(16)
+            .then(() => {
+              component.show_weekends = false;
+              cy.get(".change-dates button:eq(0)").click();
+              cy.get("header h2").contains(14);
+            });
+        });
+    });
+    it("Moves multiple-shown-dates when weekends are disallowed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          component.show_weekends = false;
+          component.dates_to_show = 3;
+          const monday = new Date("May 17 2021");
+          component.start_date = monday;
+          cy.get("header.change-dates").should("exist");
+          cy.get(".change-dates button:eq(1)").click();
+          cy.get(".day:eq(0) header h2").contains("Thursday");
+          cy.get(".day:eq(1) header h2").contains("Friday");
+          cy.get(".day:eq(2) header h2")
+            .contains("Monday")
+            .then(() => {
+              cy.get(".change-dates button:eq(1)").click();
+              cy.get(".day:eq(0) header h2").contains("Tuesday");
+              cy.get(".day:eq(1) header h2").contains("Wednesday");
+              cy.get(".day:eq(2) header h2").contains("Thursday");
+            });
+        });
+    });
+    it("Moves a full week on prev/next push", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.allow_date_change = true;
+          component.show_weekends = false;
+          component.show_as_week = true;
+          const monday = new Date("May 17 2021");
+          component.start_date = monday;
+          cy.get("header.change-dates").should("exist");
+          cy.get(".change-dates button:eq(1)").click();
+          cy.get(".day").should("have.length", 5);
+          cy.get(".day:eq(0) header h2").contains("Monday");
+          cy.get(".day:eq(0) header h2").contains("24");
+          cy.get(".day:eq(1) header h2").contains("Tuesday");
+          cy.get(".day:eq(4) header h2")
+            .contains("Friday")
+            .then(() => {
+              cy.get(".change-dates button:eq(0)").click();
+              cy.get(".change-dates button:eq(0)").click();
+              cy.get(".day:eq(0) header h2").contains("Monday");
+              cy.get(".day:eq(0) header h2").contains("10");
+              cy.get(".day:eq(4) header h2").contains("Friday");
+            });
         });
     });
   });

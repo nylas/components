@@ -18,6 +18,7 @@ export interface Manifest extends NylasManifest {
   show_as_week: boolean;
   show_weekends: boolean;
   attendees_to_show: number;
+  allow_date_change: boolean;
 }
 
 export interface Calendar {

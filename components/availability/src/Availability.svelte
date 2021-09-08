@@ -14,14 +14,7 @@
     buildInternalProps,
   } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
-  import {
-    timeSaturday,
-    timeSunday,
-    timeWeek,
-    timeDay,
-    timeHour,
-    timeMinute,
-  } from "d3-time";
+  import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
   import type { CalendarQuery } from "@commons/types/Events";
 
@@ -42,6 +35,8 @@
   import "@commons/components/ContactImage/ContactImage.svelte";
   import AvailableIcon from "./assets/available.svg";
   import UnavailableIcon from "./assets/unavailable.svg";
+  import BackIcon from "./assets/left-arrow.svg";
+  import NextIcon from "./assets/right-arrow.svg";
 
   //#region props
   export let id: string = "";
@@ -60,6 +55,7 @@
   export let show_as_week: boolean;
   export let show_weekends: boolean;
   export let attendees_to_show: number;
+  export let allow_date_change: boolean;
   //#endregion props
 
   //#region mount and prop initialization
@@ -140,6 +136,26 @@
       attendees_to_show,
       5,
     );
+    allow_date_change = getPropertyValue(
+      internalProps.allow_date_change,
+      allow_date_change,
+      true,
+    );
+  }
+
+  $: {
+    if (
+      $$props.hasOwnProperty("start_date") &&
+      $$props.start_date !== startDate
+    ) {
+      startDate = getPropertyValue(
+        internalProps.start_date,
+        new Date(),
+        new Date(),
+      );
+    } else if (!startDate) {
+      startDate = start_date;
+    }
   }
 
   //#endregion mount and prop initialization
@@ -152,15 +168,25 @@
   let clientHeight: number;
 
   // You can have as few as 1, and as many as 7, days shown
-  // start_date dates_to_show gets overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
-  let startDay: Date;
+  // start_date and dates_to_show get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
+  let startDay: Date; // the first day column shown; depends on show_as_week
   let endDay: Date;
+  let startDate: Date; // internally-settable start_date
+
+  $: dayRange =
+    (show_weekends || !show_weekends) &&
+    generateDayRange(
+      startDay, // TODO: weird just to get show_weekends passed in
+      show_as_week
+        ? timeDay.offset(startDay, 6)
+        : timeDay.offset(startDay, dates_to_show - 1),
+    );
+
   $: startDay = show_as_week
-    ? timeWeek.floor(start_date)
-    : timeDay.floor(start_date);
-  $: endDay = show_as_week
-    ? timeDay.offset(startDay, 6)
-    : timeDay.offset(start_date, dates_to_show - 1);
+    ? timeWeek.floor(startDate)
+    : timeDay.floor(startDate);
+
+  $: endDay = dayRange[dayRange.length - 1];
 
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -334,27 +360,40 @@
     return epochs;
   }
 
-  $: days = scaleTime()
-    .domain([startDay, endDay])
-    .ticks(timeDay)
-    .filter((timestamp: Date) => {
-      if (show_weekends) {
-        return true;
-      } else {
-        return (
-          timestamp.toString() !== timeSaturday(timestamp).toString() &&
-          timestamp.toString() !== timeSunday(timestamp).toString()
-        );
+  function generateDayRange(
+    startDay: Date,
+    endDay: Date,
+    reverse?: boolean,
+  ): Date[] {
+    let range = scaleTime()
+      .domain([startDay, endDay])
+      .ticks(timeDay)
+      .filter((timestamp: Date) => {
+        if (show_weekends) {
+          return true;
+        } else {
+          return timestamp.getDay() !== 6 && timestamp.getDay() !== 0;
+        }
+      });
+    if (!show_as_week && !show_weekends) {
+      if (range.length < dates_to_show) {
+        if (reverse) {
+          return generateDayRange(timeDay.offset(startDay, -1), endDay, true);
+        }
+        return generateDayRange(startDay, timeDay.offset(endDay, 1));
       }
-    })
-    .map((timestamp: Date) => {
-      let slots = generateDaySlots(timestamp, start_hour, end_hour);
-      return {
-        slots,
-        epochs: generateEpochs(slots, partial_bookable_ratio),
-        timestamp,
-      };
-    });
+    }
+    return range;
+  }
+
+  $: days = dayRange.map((timestamp: Date) => {
+    let slots = generateDaySlots(timestamp, start_hour, end_hour);
+    return {
+      slots,
+      epochs: generateEpochs(slots, partial_bookable_ratio),
+      timestamp,
+    };
+  });
   //#endregion layout
 
   // #region timeSlot selection
@@ -403,7 +442,7 @@
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
     // When dates_to_show is updated, update availability
-    if (email_ids?.length && dates_to_show && show_as_week !== undefined) {
+    if (email_ids?.length && endDay) {
       newCalendarTimeslotsForGivenEmails = await getAvailability();
     }
   })();
@@ -414,9 +453,12 @@
       body: {
         emails: email_ids,
         start_time:
-          new Date(new Date(startDay).setHours(start_hour)).getTime() / 1000,
+          timeHour(
+            new Date(new Date(startDay).setHours(start_hour)),
+          ).getTime() / 1000,
         end_time:
-          new Date(new Date(endDay).setHours(end_hour)).getTime() / 1000,
+          timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
+          1000,
       },
       component_id: id,
       access_token: access_token,
@@ -548,6 +590,37 @@
     return classes.join(" ");
   }
   //#endregion Attendee Overlay
+
+  // #region Date Change
+  function goToNextDate() {
+    if ($$props.start_date) {
+      delete $$props.start_date;
+    }
+    if (show_as_week) {
+      startDate = timeWeek.offset(endDay, 1);
+    } else {
+      startDate = timeDay.offset(endDay, 1);
+    }
+  }
+  function goToPreviousDate() {
+    if ($$props.start_date) {
+      delete $$props.start_date;
+    }
+    if (show_as_week) {
+      startDate = timeWeek.offset(startDay, -1);
+    } else {
+      // Can't do something as simple as `start_date = timeDay.offset(startDay, -dates_to_show)` here;
+      // broken case: !show_weekends, start_date = a monday, dates_to_show = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
+      // Instead, we generateDayRange() with reverse=true to take advance of recursive non-weekend range-making.
+      let previousRange = generateDayRange(
+        timeDay.offset(startDay, -dates_to_show),
+        timeDay.offset(endDay, -dates_to_show),
+        true,
+      );
+      startDate = previousRange[0];
+    }
+  }
+  // #endregion Date Change
 </script>
 
 <style lang="scss">
@@ -566,6 +639,26 @@
 
     &.ticked {
       grid-template-columns: auto 1fr;
+    }
+
+    &.dated {
+      grid-template-rows: auto 1fr;
+      gap: 1rem;
+      header.change-dates {
+        grid-column: -1 / 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        button {
+          background-color: #f7f7f8;
+          border: 1px solid #e3e8ee;
+          cursor: pointer;
+          &:hover {
+            background-color: #e3e8ee;
+          }
+        }
+      }
     }
 
     .days {
@@ -822,8 +915,19 @@
   bind:this={main}
   bind:clientHeight
   class:ticked={show_ticks}
+  class:dated={allow_date_change}
   class:allow_booking
 >
+  {#if allow_date_change}
+    <header class="change-dates">
+      <button on:click={goToPreviousDate} aria-label="Previous date"
+        ><BackIcon style="height:32px;width:32px;" /></button
+      >
+      <button on:click={goToNextDate} aria-label="Next date"
+        ><NextIcon style="height:32px;width:32px;" /></button
+      >
+    </header>
+  {/if}
   {#if show_ticks}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}

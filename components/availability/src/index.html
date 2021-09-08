@@ -133,6 +133,14 @@
               component.show_weekends = JSON.parse(event.target.value);
             });
           });
+
+        document
+          .querySelectorAll('input[name="allow-date-change"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.allow_date_change = JSON.parse(event.target.value);
+            });
+          });
       });
     </script>
     <style>
@@ -291,6 +299,17 @@
         <label>
           <input type="radio" name="show-weekends" value="false" />
           Do not include weekends
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Date Change</legend>
+        <label>
+          <input checked type="radio" name="allow-date-change" value="true" />
+          Allowed
+        </label>
+        <label>
+          <input type="radio" name="allow-date-change" value="false" />
+          Not allowed
         </label>
       </fieldset>
     </aside>
