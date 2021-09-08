@@ -194,6 +194,12 @@
 
   $: endDay = dayRange[dayRange.length - 1];
 
+  const allRequiredParticipantsIncluded = (calendars: string[]) => {
+    return required_participants.every((participant) =>
+      calendars.includes(participant),
+    );
+  };
+
   // map over the ticks() of the time scale between your start day and end day
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
   $: generateDaySlots = function (
@@ -257,11 +263,7 @@
           availability === AvailabilityStatus.PARTIAL &&
           required_participants.length
         ) {
-          if (
-            !required_participants.every((participant) =>
-              freeCalendars.includes(participant),
-            )
-          ) {
+          if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
           }
         }
@@ -351,14 +353,14 @@
       .map((epoch) => {
         let status = "free";
         const numFreeCalendars = epoch[0].available_calendars.length;
+        const fewerCalendarsThanRatio =
+          numFreeCalendars !== allCalendars.length &&
+          numFreeCalendars < allCalendars.length * partial_bookable_ratio;
         if (
           numFreeCalendars === 0 ||
-          (numFreeCalendars !== allCalendars.length &&
-            numFreeCalendars < allCalendars.length * partial_bookable_ratio) ||
+          fewerCalendarsThanRatio ||
           (required_participants.length &&
-            !required_participants.every((participant) =>
-              epoch[0].available_calendars.includes(participant),
-            ))
+            !allRequiredParticipantsIncluded(epoch[0].available_calendars))
         ) {
           status = "busy";
         } else if (
