@@ -40,7 +40,7 @@ For both installation options, in the body of your page, you can instantiate the
 
 ## Using It in Your App
 
-All Nylas components have two ways of dislaying data to your end-user:
+All Nylas components have two ways of displaying data to your end-user:
 
 1. [Fetching data directly from Nylas](#fetching-data-directly-from-nylas)
 2. [Passing in your own data](#passing-in-your-own-data)
