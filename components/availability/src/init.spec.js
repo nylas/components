@@ -122,7 +122,7 @@ describe("availability component", () => {
   describe("multiple availability sets", () => {
     const calendars = [
       {
-        email_address: "person@name.com",
+        emailAddress: "person@name.com",
         availability: "busy",
         timeslots: [
           {
@@ -136,7 +136,7 @@ describe("availability component", () => {
         ],
       },
       {
-        email_address: "thelonious@nylas.com",
+        emailAddress: "thelonious@nylas.com",
         availability: "busy",
         timeslots: [
           {
@@ -146,7 +146,7 @@ describe("availability component", () => {
         ],
       },
       {
-        email_address: "booker@nylas.com",
+        emailAddress: "booker@nylas.com",
         availability: "busy",
         timeslots: [
           {
@@ -176,14 +176,15 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.calendars = calendars;
-          cy.get(".slot[data-start-time='9/7/2021, 6:30:00 AM']")
+          cy.get(
+            `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+          )
             .should("have.class", "partial")
             .then(() => {
-              component.required_participants = [calendars[1].email_address];
-              cy.get(".slot[data-start-time='9/7/2021, 6:30:00 AM']").should(
-                "have.class",
-                "busy",
-              );
+              component.required_participants = [calendars[1].emailAddress];
+              cy.get(
+                `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+              ).should("have.class", "busy");
             });
         });
     });
