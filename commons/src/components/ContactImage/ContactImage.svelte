@@ -1,8 +1,8 @@
 <svelte:options tag="nylas-contact-image" />
 
 <script>
+  import { ContactAvatarStore } from "@commons";
   import { beforeUpdate } from "svelte/internal";
-  import { fetchContactImage } from "@commons";
 
   export let contact;
   export let contact_query;
@@ -13,7 +13,10 @@
 
   beforeUpdate(async () => {
     if (contact && contact.picture_url) {
-      image = await fetchContactImage(contact_query, contact.id);
+      image = await ContactAvatarStore.getContactAvatar(
+        contact_query,
+        contact.id,
+      );
     }
   });
 </script>

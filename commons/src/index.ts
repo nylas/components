@@ -23,6 +23,7 @@ export {
 export { AvailabilityStore } from "./store/availability";
 export { CalendarStore } from "./store/calendars";
 export { ContactStore } from "./store/contacts";
+export { ContactAvatarStore } from "./store/contact-avatar";
 export { ConversationStore } from "./store/conversations";
 export { EventStore } from "./store/events";
 export { MailboxStore, Threads } from "./store/threads";
