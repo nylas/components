@@ -7,8 +7,17 @@
     <script src="../index.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const component = document.querySelector("nylas-scheduler");
-        component.email_ids = ["nylascypresstest@gmail.com"];
+        const availability = document.querySelector("nylas-availability");
+        const scheduler = document.querySelector("nylas-scheduler");
+
+        availability.email_ids = ["nylascypresstest@gmail.com"];
+        availability.addEventListener("timeSlotChosen", (event) => {
+          scheduler.slots_to_book = event.detail.timeSlots;
+        });
+
+        scheduler.addEventListener("bookedEvents", () => {
+          scheduler.slots_to_book = [];
+        });
       });
     </script>
     <style>
@@ -22,15 +31,24 @@
         margin-left: 10vw;
         height: 80vh;
         margin-top: 10vh;
+
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
       }
     </style>
   </head>
+
   <body>
     <main>
-      <nylas-scheduler
-        availability_id="demo-availability"
-        id="demo-scheduler"
-      ></nylas-scheduler>
+      <nylas-availability
+        show_as_week="true"
+        allow_booking="true"
+        max_bookable_slots="4"
+        id="demo-availability"
+      >
+      </nylas-availability>
+      <nylas-scheduler id="demo-scheduler"></nylas-scheduler>
     </main>
   </body>
 </html>
