@@ -42,11 +42,11 @@
   onMount(async () => {
     await tick();
     const storeKey = JSON.stringify({ component_id: id, access_token });
-    manifest = (await $ManifestStore[storeKey]) || {};
+    manifest = (await ManifestStore.getAndMerge(storeKey, editor_id)) || {};
 
-    if (editor_id) {
-      editorManifest = await fetchManifest(editor_id);
-    }
+    // if (editor_id) {
+    //   editorManifest = await fetchManifest(editor_id);
+    // }
 
     internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
   });
