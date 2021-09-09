@@ -1,24 +1,19 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import {
-    ManifestStore,
-    EventStore,
-    AvailabilityStore,
-  } from "../../../commons/src";
   import { createEvent } from "@commons/connections/events";
-
-  import { onMount, tick } from "svelte";
-  import "../../availability/src/Availability.svelte";
-
+  import { get_current_component } from "svelte/internal";
   import {
-    getPropertyValue,
     buildInternalProps,
+    getEventDispatcher,
+    getPropertyValue,
   } from "@commons/methods/component";
-
-  import type { Manifest } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
-  import type { TimespanEvent, EventQuery } from "@commons/types/Events";
+  import type { EventQuery, TimespanEvent } from "@commons/types/Events";
+  import type { Manifest } from "@commons/types/Scheduler";
+  import { onMount, tick } from "svelte";
+  import { AvailabilityStore, ManifestStore } from "../../../commons/src";
+  import "../../availability/src/Availability.svelte";
 
   // #region props
   export let id: string = "";
@@ -28,6 +23,7 @@
   export let booking_label: string;
   export let event_title: string;
   export let event_description: string;
+  export let slots_to_book: TimeSlot[] = [];
   // #endregion props
 
   //#region mount and prop initialization
@@ -73,14 +69,15 @@
       event_description,
       "",
     );
+    slots_to_book = getPropertyValue(
+      internalProps.slots_to_book,
+      slots_to_book,
+      [],
+    );
   }
+
+  const dispatchEvent = getEventDispatcher(get_current_component());
   // #endregion mount and prop initialization
-
-  let timeSlots: TimeSlot[] = [];
-
-  function timeSlotChosen({ detail }: CustomEvent) {
-    timeSlots = detail.timeSlots;
-  }
 
   async function bookTimeSlots(events: TimeSlot[]) {
     const bookings = events.map(async (event) => {
@@ -107,7 +104,9 @@
       );
     });
     await Promise.all(bookings);
-    timeSlots = [];
+
+    dispatchEvent("bookedEvents");
+
     // Reset the Availability store and force a re-render
     // TODO: it's possible that this isn't good enough / will involve a race condition between provider sync and return. Need to test.
     AvailabilityStore.reset();
@@ -115,37 +114,22 @@
   }
 </script>
 
-<style lang="scss">
-  main {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    height: 100%;
-    gap: 1rem;
-  }
-</style>
-
 <nylas-error {id} />
 <main>
-  <nylas-availability
-    show_as_week={true}
-    {email_ids}
-    allow_booking={true}
-    max_bookable_slots={4}
-    id={availability_id}
-    on:timeSlotChosen={timeSlotChosen}
-  />
   <section class="booker">
     <h2>Event-bookable details to follow here</h2>
-    {#if timeSlots.length}
+    {#if slots_to_book.length}
       <p>Book the following?</p>
       <ul>
-        {#each timeSlots as timeSlot}
+        {#each slots_to_book as timeSlot}
           <li>
             {timeSlot.start_time.toLocaleString()} to {timeSlot.end_time.toLocaleString()}
           </li>
         {/each}
       </ul>
-      <button on:click={() => bookTimeSlots(timeSlots)}>{booking_label}</button>
+      <button on:click={() => bookTimeSlots(slots_to_book)}
+        >{booking_label}</button
+      >
     {/if}
   </section>
 </main>
