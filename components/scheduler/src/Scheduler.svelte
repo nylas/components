@@ -1,11 +1,7 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import {
-    ManifestStore,
-    AvailabilityStore,
-    fetchManifest,
-  } from "../../../commons/src";
+  import { ManifestStore, AvailabilityStore } from "../../../commons/src";
   import { createEvent } from "@commons/connections/events";
   import { get_current_component } from "svelte/internal";
   import {
@@ -46,10 +42,6 @@
       external_manifest_ids: [editor_id],
     });
     manifest = (await $ManifestStore[storeKey]) || {};
-
-    // if (editor_id) {
-    //   editorManifest = await fetchManifest(editor_id);
-    // }
 
     internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
   });
