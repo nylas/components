@@ -24,21 +24,21 @@ Nylas Email is currently in active development. Want to contribute? [Find out ho
 
 ## Installation
 
-In your JavaScript application, you can install Nylas Agenda with:
+In your JavaScript application, you can install Nylas Email with:
 
 - npm `npm i @nylas/components-email`
 - Yarn `yarn add @nylas/components-email`
 
-Alternatively, on an html page, you can load the Agenda using a script tag:
+Alternatively, on an html page, you can load the Email using a script tag:
 
 ```
    <head>
       <!-- Import the script from CDN -->
-      <script src="https://unpkg.com/@nylas/components-agenda"></script>
+      <script src="https://unpkg.com/@nylas/components-email"></script>
     </head>
 ```
 
-For both installation options, in the body of your page, you can instantiate the agenda with `<nylas-agenda></nylas-agenda>`.
+For both installation options, in the body of your page, you can instantiate the email component with `<nylas-email></nylas-email>`.
 
 ## Using It in Your App
 
@@ -51,17 +51,17 @@ All Nylas components have two ways of displaying data to your end-user:
 
 #### Setup
 
-If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Agenda component.
+If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Email component.
 
-You'll be guided through the component setup and be given the option to tie your component to your calendar account. Review the [Agenda Documentation](https://developer.nylas.com/docs/user-experience/components/agenda-component/).
+You'll be guided through the component setup and be given the option to tie your component to a thread. Review the [Email Documentation](To be updated).
 
 #### Allowed domains
 
-During the setup process, you'll be prompted to provide a list of [allowed domains](https://developer.nylas.com/docs/user-experience/components/agenda-component/#allowed-domains). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
+During the setup process, you'll be prompted to provide a list of [allowed domains](To be updated). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
 
 ### Passing in your own data
 
-Nylas Agenda can be used as a UI on top of any event data that you provide. Events should follow the [Nylas events object standard](https://developer.nylas.com/docs/api/#tag--Events--events-object).
+Nylas Email can be used as a UI on top of any thread data that you provide. Threads should follow the [Nylas thread object standard](https://developer.nylas.com/docs/api/#tag--Threads).
 
 > :bell:
 >
@@ -69,23 +69,54 @@ Nylas Agenda can be used as a UI on top of any event data that you provide. Even
 >
 > Make sure to review the events `when` subobject since that determines where your Agenda events will appear.
 
-The property to use for this is `events`. You can pass in an JSON array of events.
+The property to use for this is `thread`. You can pass in a JSON thread with an array of messages.
 
 ```json
-  const staticEvents = [
+  const staticThread =
     {
-      "title": "Some event that I am manipulating outside of the context of Nylas",
-      "description": "Passed in from HTML!",
-      "participants": [],
-      "when": { "end_time": 1600444800, "object": "timespan", "start_time": 1600438500 }
-    },
-    {
-      "title": "Some I got from elsewhere",
-      "description": "Passed in from HTML!",
-      "participants": [],
-      "when": { "end_time": 1600449999, "object": "timespan", "start_time": 1600448500 }
+      "account_id":"adsghdgajhsgdikzvz9afb",
+      "drafts":[],
+      "first_message_timestamp":1621472861,
+      "has_attachments":false,
+      "id":"daskjdkahskjdhk7md84fgk",
+      "labels":[{"display_name":"Inbox","id":"asdghsdfafasdfdsfcm4","name":"inbox"}],"last_message_received_timestamp":1621472865,
+      "last_message_sent_timestamp":null,
+      "last_message_timestamp":1621472865,
+      "messages":[
+        {
+          "account_id":"adsghdgajhsgdikzvz9afb",
+          "bcc":[],
+          "cc":[
+            {"email":"phil.r@nylas.com","name":"Phil Renaud"},
+            {"email":"review_requested@noreply.github.com","name":"Review requested"}
+          ],
+          "date":1621472861,
+          "files":[],
+          "from":[
+            {"email":"notifications@github.com","name":"Mostafa Rashed"}
+          ],
+          "id":"epgdadhsgfdghasyy6h9yyle6v",
+          "labels":[
+            {"display_name":"Inbox","id":"3fhdx7ssdfsfsdfm5ecwcm4","name":"inbox"}
+          ],
+          "object":"message",
+          "reply_to":[
+            {"email":"reply+AAFOKBZZTCUKW3S3KF62NIF6WGLV3EVBNHHDK2QOAM@reply.github.com","name":"nylas/nylas-nodejs"}
+          ],
+          "snippet":"Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par","starred":false,
+          "subject":"[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)","thread_id":"ddfgdfdgdjsgdjhas7md84fgk",
+          "to":[
+            {"email":"nylas-nodejs@noreply.github.com","name":"nylas/nylas-nodejs"}
+          ],
+          "unread":true
+        },
+        {}
+      ],
+      "snippet":"This pull request has been linked to Clubhouse Story #59911: Node SDK - Add support for querying event metadata. — You are receiving this because your review was requested. Reply to this emai","starred":false,
+      "subject":"[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      "unread":true,
+      "version":1
     }
-  ]
 ```
 
 Then pass the array into your component using any JavaScript.
@@ -93,6 +124,8 @@ Then pass the array into your component using any JavaScript.
 ```js
 <nylas-email thread={thread}>
 <nylas-email thread_id={thread_id}>
+<nylas-email message={message}>
+<nylas-email message_id={message_id}>
 ```
 
 You can also use plain JavaScript as an attribute.
@@ -100,11 +133,13 @@ You can also use plain JavaScript as an attribute.
 ```js
 document.querySelector("nylas-email").thread = staticThread;
 document.querySelector("nylas-email").thread_id = staticThreadID;
+document.querySelector("nylas-email").message = staticMessage;
+document.querySelector("nylas-email").message_id = staticMessageID;
 ```
 
 ### Properties
 
-Nylas Email allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Email](https://developer.nylas.com/docs/user-experience/components/agenda-component/#application-component-display-options)
+Nylas Email allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Email](To be updated)
 
 ### Events and Callbacks
 
@@ -117,11 +152,11 @@ document
   .querySelector("nylas-email")
   .addEventListener("threadClicked", (event) => {
     let { detail } = event;
-    console.log("thread clicked", detail.thread);
+    console.log("thread clicked: ", detail.thread);
   });
 ```
 
-A list of emitted events is available on our [Documentation for Nylas Email](https://developer.nylas.com/docs/user-experience/components/agenda-component/#custom-callbacks)
+A list of emitted events is available on our [Documentation for Nylas Email](To be updated)
 
 ## Contributing
 
@@ -139,5 +174,5 @@ snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 
 ## Additional Documentation
 
-- [Nylas Agenda on NPM](https://www.npmjs.com/package/@nylas/components-email)
-- [Nylas Docs: Email Component](https://developer.nylas.com/docs/user-experience/components/email-component/)
+- [Nylas Email on NPM](https://www.npmjs.com/package/@nylas/components-email)
+- [Nylas Docs: Email Component](To be updated)
