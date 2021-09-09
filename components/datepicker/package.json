@@ -12,5 +12,6 @@
     "tscheck": "tsc && svelte-check --compiler-warnings \"missing-custom-element-compile-options:ignore\"",
     "start": "echo 'Nothing to start'"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "gitHead": "c886a89314447098f80e6dcacb4d068f34639d4c"
 }
