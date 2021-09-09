@@ -41,8 +41,12 @@
 
   onMount(async () => {
     await tick();
-    const storeKey = JSON.stringify({ component_id: id, access_token });
-    manifest = (await ManifestStore.getAndMerge(storeKey, editor_id)) || {};
+    const storeKey = JSON.stringify({
+      component_id: id,
+      access_token,
+      merge_ids: [editor_id],
+    });
+    manifest = (await $ManifestStore[storeKey]) || {};
 
     // if (editor_id) {
     //   editorManifest = await fetchManifest(editor_id);

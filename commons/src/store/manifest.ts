@@ -2,74 +2,58 @@ import { fetchManifest } from "../connections/manifest";
 import { Writable, writable } from "svelte/store";
 import type { Manifest } from "@commons/types/Nylas";
 
-type ManifestAccessor = { component_id: string; access_token?: string };
+type ManifestAccessor = {
+  component_id: string;
+  access_token?: string;
+  merge_ids?: [];
+};
 type ManifestStore = Record<string, Promise<Manifest>>;
 
-function initialize() {
-  const { subscribe, update, set } = writable(new Proxy<ManifestStore>({}, {}));
-  let manifestMap: ManifestStore = {};
+function initialize(): Writable<ManifestStore> {
+  const get = (
+    target: ManifestStore,
+    key: string,
+  ): Promise<Manifest> | void => {
+    const accessor: ManifestAccessor = JSON.parse(key);
 
-  return {
-    subscribe,
-    get: (key: string): Promise<Manifest> | void => {
-      const accessor: ManifestAccessor = JSON.parse(key);
+    if (!accessor.component_id) return;
 
-      if (!accessor.component_id) return;
+    if (!target[key]) {
+      const fetchPromise = fetchManifest(
+        accessor.component_id,
+        accessor.access_token,
+      ).then((manifest) => {
+        if (!accessor.merge_ids) {
+          return manifest;
+        }
 
-      if (!manifestMap[key]) {
-        const fetchPromise = fetchManifest(
-          accessor.component_id,
-          accessor.access_token,
-        );
-        update((store) => ({
-          ...store,
-          [key]: fetchPromise,
-        }));
-        manifestMap[key] = fetchPromise;
-      }
-      return manifestMap[key];
-    },
-    getAndMerge: async (key: string, ...otherManifestIds: string[]) => {
-      const accessor: ManifestAccessor = JSON.parse(key);
+        const filteredIds = accessor.merge_ids.filter((id) => !!id);
+        if (filteredIds.length === 0) {
+          return manifest;
+        }
 
-      if (!accessor.component_id) return;
+        const mergeManifestPromises = [];
+        for (const manifestId of filteredIds) {
+          mergeManifestPromises.push(
+            fetchManifest(manifestId, accessor.access_token),
+          );
+        }
 
-      // TODO - handle case where manifest was already loaded using `get` so it isn't merged yet
-      if (!manifestMap[key]) {
-        const fetchPromise = fetchManifest(
-          accessor.component_id,
-          accessor.access_token,
-        ).then((manifest) => {
-          const filteredIds = otherManifestIds.filter((id) => !!id);
-          if (filteredIds.length === 0) {
-            return manifest;
-          }
-
-          const mergeManifestPromises = [];
-          for (const manifestId of filteredIds) {
-            mergeManifestPromises.push(
-              fetchManifest(manifestId, accessor.access_token),
-            );
-          }
-
-          return Promise.all(mergeManifestPromises).then((manifestsToMerge) => {
-            // TODO - not sure if this is exactly how we want to merge
-            return Object.assign({}, manifest, ...manifestsToMerge);
-          });
+        return Promise.all(mergeManifestPromises).then((manifestsToMerge) => {
+          // TODO - not sure if this is exactly how we want to merge
+          return Object.assign({}, manifest, ...manifestsToMerge);
         });
-        update((store) => ({
-          ...store,
-          [key]: fetchPromise,
-        }));
-        manifestMap[key] = fetchPromise;
-      }
-      return manifestMap[key];
-    },
-    reset: () => {
-      manifestMap = {};
-      set({});
-    },
+      });
+      store.update((store) => ({
+        ...store,
+        [key]: fetchPromise,
+      }));
+      target[key] = fetchPromise;
+    }
+    return target[key];
   };
+  const store = writable(new Proxy<ManifestStore>({}, { get }));
+  return store;
 }
 
 export const ManifestStore = initialize();
