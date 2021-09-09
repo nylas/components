@@ -3,7 +3,6 @@
 <script lang="ts">
   import {
     ManifestStore,
-    EventStore,
     AvailabilityStore,
     fetchManifest,
   } from "../../../commons/src";
@@ -126,7 +125,7 @@
     });
     await Promise.all(bookings);
 
-    dispatchEvent("bookedEvents");
+    dispatchEvent("bookedEvents", {});
 
     // Reset the Availability store and force a re-render
     // TODO: it's possible that this isn't good enough / will involve a race condition between provider sync and return. Need to test.
