@@ -5,7 +5,7 @@ import type { Manifest } from "@commons/types/Nylas";
 type ManifestAccessor = {
   component_id: string;
   access_token?: string;
-  merge_ids?: [];
+  external_manifest_ids?: [];
 };
 type ManifestStore = Record<string, Promise<Manifest>>;
 
@@ -23,11 +23,11 @@ function initialize(): Writable<ManifestStore> {
         accessor.component_id,
         accessor.access_token,
       ).then((manifest) => {
-        if (!accessor.merge_ids) {
+        if (!accessor.external_manifest_ids) {
           return manifest;
         }
 
-        const filteredIds = accessor.merge_ids.filter((id) => !!id);
+        const filteredIds = accessor.external_manifest_ids.filter((id) => !!id);
         if (filteredIds.length === 0) {
           return manifest;
         }

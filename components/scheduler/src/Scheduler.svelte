@@ -44,7 +44,7 @@
     const storeKey = JSON.stringify({
       component_id: id,
       access_token,
-      merge_ids: [editor_id],
+      external_manifest_ids: [editor_id],
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
