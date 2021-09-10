@@ -5,6 +5,7 @@ import type {
 
 export interface Manifest extends AvailabilityManifest {
   availability_id?: string;
+  editor_id?: string;
   booking_label?: string;
   event_title?: string;
   event_description?: string;
