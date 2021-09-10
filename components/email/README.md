@@ -63,12 +63,6 @@ During the setup process, you'll be prompted to provide a list of [allowed domai
 
 Nylas Email can be used as a UI on top of any thread data that you provide. Threads should follow the [Nylas thread object standard](https://developer.nylas.com/docs/api/#tag--Threads).
 
-> :bell:
->
-> Events `when` Subobject
->
-> Make sure to review the events `when` subobject since that determines where your Agenda events will appear.
-
 The property to use for this is `thread`. You can pass in a JSON thread with an array of messages.
 
 ```json
