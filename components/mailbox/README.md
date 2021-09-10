@@ -73,7 +73,8 @@ The property to use for this is `all_threads`. You can pass in a JSON array of t
       "first_message_timestamp":1621472861,
       "has_attachments":false,
       "id":"daskjdkahskjdhk7md84fgk",
-      "labels":[{"display_name":"Inbox","id":"asdghsdfafasdfdsfcm4","name":"inbox"}],"last_message_received_timestamp":1621472865,
+      "labels":[{"display_name":"Inbox","id":"asdghsdfafasdfdsfcm4","name":"inbox"}],
+      "last_message_received_timestamp":1621472865,
       "last_message_sent_timestamp":null,
       "last_message_timestamp":1621472865,
       "messages":[
