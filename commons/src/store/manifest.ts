@@ -44,10 +44,10 @@ function initialize(): Writable<ManifestStore> {
           return Object.assign({}, manifest, ...manifestsToMerge);
         });
       });
-      store.update((store) => ({
-        ...store,
-        [key]: fetchPromise,
-      }));
+      store.update((store) => {
+        store[key] = fetchPromise;
+        return store;
+      });
       target[key] = fetchPromise;
     }
     return target[key];
