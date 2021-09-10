@@ -95,10 +95,12 @@ The property to use for this is `all_threads`. You can pass in a JSON array of t
           ],
           "object":"message",
           "reply_to":[
-            {"email":"reply+AAFOKBZZTCUKW3S3KF62NIF6WGLV3EVBNHHDK2QOAM@reply.github.com","name":"nylas/nylas-nodejs"}
+            {"email":"abcd@reply.github.com","name":"nylas/nylas-nodejs"}
           ],
-          "snippet":"Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par","starred":false,
-          "subject":"[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)","thread_id":"ddfgdfdgdjsgdjhas7md84fgk",
+          "snippet":"Hi, Welcome to Nylas",
+          "starred":false,
+          "subject":"Hello from Nylas",
+          "thread_id":"ddfgdfdgdjsgdjhas7md84fgk",
           "to":[
             {"email":"nylas-nodejs@noreply.github.com","name":"nylas/nylas-nodejs"}
           ],
@@ -106,8 +108,9 @@ The property to use for this is `all_threads`. You can pass in a JSON array of t
         },
         {}
       ],
-      "snippet":"This pull request has been linked to Clubhouse Story #59911: Node SDK - Add support for querying event metadata. — You are receiving this because your review was requested. Reply to this emai","starred":false,
-      "subject":"[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      "snippet":"Hi, Welcome to Nylas",
+      "starred":false,
+      "subject":"Hello from Nylas",
       "unread":true,
       "version":1
     },
