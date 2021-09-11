@@ -646,6 +646,22 @@
     }
   }
   // #endregion Date Change
+
+  //#region dragging
+  let dragging = false;
+  function startDrag(slot: TimeSlot) {
+    console.log("started dragging on ", slot);
+    dragging = true;
+  }
+
+  function addToDrag(slot: TimeSlot) {
+    console.log("added to drag");
+  }
+
+  function endDrag(slot: TimeSlot) {
+    console.log("drag ended");
+  }
+  //#endregion dragging
 </script>
 
 <style lang="scss">
@@ -1017,6 +1033,13 @@
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
               disabled={slot.availability === AvailabilityStatus.BUSY}
+              on:mousedown={() => startDrag(slot)}
+              on:mouseenter={() => {
+                if (dragging) addToDrag(slot);
+              }}
+              on:mouseup={() => {
+                if (dragging) endDrag(slot);
+              }}
               on:click={() => {
                 if (allow_booking) {
                   slot.selectionStatus =
