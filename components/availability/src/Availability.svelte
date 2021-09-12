@@ -659,115 +659,159 @@
   let dragging = false;
   let dragStartSlot: SelectableSlot | null = null;
   let dragStartDay: Day | null = null;
-  let deselectionDrag: boolean = false;
+  let dragExisting: boolean = false;
+  let draggedBlock: SelectableSlot | null = null;
+  $: draggedBlockSlots = draggedBlock
+    ? dragStartDay?.slots.filter(
+        (slot) =>
+          slot.start_time >= draggedBlock.start_time &&
+          slot.end_time <= draggedBlock.end_time,
+      )
+    : [];
+
   function startDrag(slot: SelectableSlot, day: Day) {
     if (allow_booking) {
-      if (
-        (slot.selectionStatus === SelectionStatus.UNSELECTED &&
-          slotSelection.length < max_bookable_slots) ||
-        slot.selectionStatus === SelectionStatus.SELECTED
-      ) {
-        dragStartSlot = slot;
-        dragStartDay = day;
-        slot.selectionPending = true;
-      }
+      dragStartSlot = slot;
+      dragStartDay = day;
 
       if (slot.selectionStatus === SelectionStatus.SELECTED) {
-        deselectionDrag = true;
+        dragExisting = true;
+        draggedBlock =
+          sortedSlots.find(
+            (block) =>
+              slot.start_time >= block.start_time &&
+              slot.end_time <= block.end_time,
+          ) || null;
+      } else if (
+        slot.selectionStatus === SelectionStatus.UNSELECTED &&
+        slotSelection.length < max_bookable_slots
+      ) {
+        slot.selectionPending = true;
       }
     }
   }
 
   function addToDrag(slot: SelectableSlot, day: Day) {
-    let direction: "forward" | "backward" = "forward";
-    if (dragging && allow_booking && day === dragStartDay) {
-      if (slot.start_time < dragStartSlot.start_time) {
-        direction = "backward";
-      }
-      day.slots.forEach((daySlot) => {
-        if (
-          direction === "forward"
-            ? daySlot.start_time >= dragStartSlot.start_time &&
-              daySlot.start_time <= slot.start_time
-            : daySlot.start_time <= dragStartSlot.start_time &&
-              daySlot.start_time >= slot.start_time
-        ) {
-          daySlot.selectionPending =
-            daySlot.availability !== AvailabilityStatus.BUSY ? true : false;
+    if (dragging) {
+      if (dragExisting) {
+        if (day === dragStartDay) {
+          let delta =
+            day.slots.indexOf(slot) - day.slots.indexOf(dragStartSlot);
+          day.slots
+            .filter((slot) => slot.selectionPending)
+            .forEach((slot) => (slot.selectionPending = false));
+          draggedBlockSlots?.forEach((slot) => {
+            day.slots[day.slots.indexOf(slot) + delta].selectionPending = true;
+          });
+          days = [...days];
         } else {
-          if (daySlot.selectionPending) {
-            daySlot.selectionPending = false;
-          }
+          console.log("moved to another day, do more math", day, dragStartDay);
         }
-      });
+      } else {
+        let direction: "forward" | "backward" = "forward";
+        if (allow_booking && day === dragStartDay) {
+          if (slot.start_time < dragStartSlot.start_time) {
+            direction = "backward";
+          }
+          day.slots.forEach((daySlot) => {
+            if (
+              direction === "forward"
+                ? daySlot.start_time >= dragStartSlot.start_time &&
+                  daySlot.start_time <= slot.start_time
+                : daySlot.start_time <= dragStartSlot.start_time &&
+                  daySlot.start_time >= slot.start_time
+            ) {
+              daySlot.selectionPending =
+                daySlot.availability !== AvailabilityStatus.BUSY ? true : false;
+            } else {
+              if (daySlot.selectionPending) {
+                daySlot.selectionPending = false;
+              }
+            }
+          });
 
-      // Don't let the user book more slots than are allowed
-      if (!deselectionDrag) {
-        if (
-          day.slots.filter(
-            (x) =>
-              x.selectionPending ||
-              x.selectionStatus === SelectionStatus.SELECTED,
-          ).length > max_bookable_slots
-        ) {
-          if (direction === "forward") {
-            // Only select the first N allowed slots after your initially-dragegd one
-            day.slots
-              .filter((x) => x.selectionPending)
-              .slice(
-                max_bookable_slots -
-                  day.slots.filter(
-                    (x) => x.selectionStatus === SelectionStatus.SELECTED,
-                  ).length,
-              )
-              .forEach((slot) => (slot.selectionPending = false));
-          } else {
-            // Only select the first N allowed slots before your initially-dragegd one
-            day.slots
-              .filter((x) => x.selectionPending)
-              .slice(
-                0,
-                -(
+          // Don't let the user book more slots than are allowed
+          if (
+            day.slots.filter(
+              (x) =>
+                x.selectionPending ||
+                x.selectionStatus === SelectionStatus.SELECTED,
+            ).length > max_bookable_slots
+          ) {
+            if (direction === "forward") {
+              // Only select the first N allowed slots after your initially-dragegd one
+              day.slots
+                .filter((x) => x.selectionPending)
+                .slice(
                   max_bookable_slots -
-                  day.slots.filter(
-                    (x) => x.selectionStatus === SelectionStatus.SELECTED,
-                  ).length
-                ),
-              )
-              .forEach((slot) => (slot.selectionPending = false));
+                    day.slots.filter(
+                      (x) => x.selectionStatus === SelectionStatus.SELECTED,
+                    ).length,
+                )
+                .forEach((slot) => (slot.selectionPending = false));
+            } else {
+              // Only select the first N allowed slots before your initially-dragegd one
+              day.slots
+                .filter((x) => x.selectionPending)
+                .slice(
+                  0,
+                  -(
+                    max_bookable_slots -
+                    day.slots.filter(
+                      (x) => x.selectionStatus === SelectionStatus.SELECTED,
+                    ).length
+                  ),
+                )
+                .forEach((slot) => (slot.selectionPending = false));
+            }
           }
         }
+        days = [...days];
       }
-      days = [...days];
     }
   }
 
   function endDrag(slot: SelectableSlot | null, day: Day | null) {
-    if (!day || day !== dragStartDay) {
+    if (dragExisting) {
+      draggedBlockSlots?.forEach(
+        (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
+      );
       days.forEach((day) =>
         day.slots
           .filter((x) => x.selectionPending)
           .forEach((x) => {
+            if (x.availability !== AvailabilityStatus.BUSY) {
+              x.selectionStatus = SelectionStatus.SELECTED;
+            }
             x.selectionPending = false;
           }),
       );
     } else {
-      days.forEach((day) =>
-        day.slots
-          .filter((x) => x.selectionPending)
-          .forEach((x) => {
-            x.selectionStatus = deselectionDrag
-              ? SelectionStatus.UNSELECTED
-              : SelectionStatus.SELECTED;
-            x.selectionPending = false;
-          }),
-      );
+      if (!day || day !== dragStartDay) {
+        days.forEach((day) =>
+          day.slots
+            .filter((x) => x.selectionPending)
+            .forEach((x) => {
+              x.selectionPending = false;
+            }),
+        );
+      } else {
+        days.forEach((day) =>
+          day.slots
+            .filter((x) => x.selectionPending)
+            .forEach((x) => {
+              x.selectionStatus = SelectionStatus.SELECTED;
+              x.selectionPending = false;
+            }),
+        );
+      }
     }
     days = [...days];
     dragging = false;
     dragStartDay = null;
     dragStartSlot = null;
-    deselectionDrag = false;
+    dragExisting = false;
+    draggedBlock = null;
   }
   //#endregion dragging
 </script>
