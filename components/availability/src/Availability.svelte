@@ -659,32 +659,85 @@
   let dragging = false;
   let dragStartSlot: SelectableSlot | null = null;
   let dragStartDay: Day | null = null;
+  let deselectionDrag: boolean = false;
   function startDrag(slot: SelectableSlot, day: Day) {
-    dragging = true;
-    dragStartSlot = slot;
-    dragStartDay = day;
-    slot.selectionPending = true;
+    if (allow_booking) {
+      if (
+        (slot.selectionStatus === SelectionStatus.UNSELECTED &&
+          slotSelection.length < max_bookable_slots) ||
+        slot.selectionStatus === SelectionStatus.SELECTED
+      ) {
+        dragStartSlot = slot;
+        dragStartDay = day;
+        slot.selectionPending = true;
+      }
+
+      if (slot.selectionStatus === SelectionStatus.SELECTED) {
+        deselectionDrag = true;
+      }
+    }
   }
 
   function addToDrag(slot: SelectableSlot, day: Day) {
-    if (
-      dragging &&
-      allow_booking &&
-      slotSelection.length < max_bookable_slots &&
-      day === dragStartDay
-    ) {
+    let direction: "forward" | "backward" = "forward";
+    if (dragging && allow_booking && day === dragStartDay) {
+      if (slot.start_time < dragStartSlot.start_time) {
+        direction = "backward";
+      }
       day.slots.forEach((daySlot) => {
         if (
-          daySlot.start_time >= dragStartSlot.start_time &&
-          daySlot.start_time <= slot.start_time
+          direction === "forward"
+            ? daySlot.start_time >= dragStartSlot.start_time &&
+              daySlot.start_time <= slot.start_time
+            : daySlot.start_time <= dragStartSlot.start_time &&
+              daySlot.start_time >= slot.start_time
         ) {
           daySlot.selectionPending =
             daySlot.availability !== AvailabilityStatus.BUSY ? true : false;
         } else {
-          daySlot.selectionPending = false;
+          if (daySlot.selectionPending) {
+            daySlot.selectionPending = false;
+          }
         }
       });
 
+      // Don't let the user book more slots than are allowed
+      if (!deselectionDrag) {
+        if (
+          day.slots.filter(
+            (x) =>
+              x.selectionPending ||
+              x.selectionStatus === SelectionStatus.SELECTED,
+          ).length > max_bookable_slots
+        ) {
+          if (direction === "forward") {
+            // Only select the first N allowed slots after your initially-dragegd one
+            day.slots
+              .filter((x) => x.selectionPending)
+              .slice(
+                max_bookable_slots -
+                  day.slots.filter(
+                    (x) => x.selectionStatus === SelectionStatus.SELECTED,
+                  ).length,
+              )
+              .forEach((slot) => (slot.selectionPending = false));
+          } else {
+            // Only select the first N allowed slots before your initially-dragegd one
+            day.slots
+              .filter((x) => x.selectionPending)
+              .slice(
+                0,
+                -(
+                  max_bookable_slots -
+                  day.slots.filter(
+                    (x) => x.selectionStatus === SelectionStatus.SELECTED,
+                  ).length
+                ),
+              )
+              .forEach((slot) => (slot.selectionPending = false));
+          }
+        }
+      }
       days = [...days];
     }
   }
@@ -695,21 +748,26 @@
         day.slots
           .filter((x) => x.selectionPending)
           .forEach((x) => {
-            x.selectionStatus = SelectionStatus.UNSELECTED;
+            x.selectionPending = false;
+          }),
+      );
+    } else {
+      days.forEach((day) =>
+        day.slots
+          .filter((x) => x.selectionPending)
+          .forEach((x) => {
+            x.selectionStatus = deselectionDrag
+              ? SelectionStatus.UNSELECTED
+              : SelectionStatus.SELECTED;
             x.selectionPending = false;
           }),
       );
     }
-    days.forEach((day) =>
-      day.slots
-        .filter((x) => x.selectionPending)
-        .forEach((x) => {
-          x.selectionStatus = SelectionStatus.SELECTED;
-          x.selectionPending = false;
-        }),
-    );
     days = [...days];
     dragging = false;
+    dragStartDay = null;
+    dragStartSlot = null;
+    deselectionDrag = false;
   }
   //#endregion dragging
 </script>
@@ -1089,27 +1147,24 @@
               class:pending={slot.selectionPending}
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
-              disabled={slot.availability === AvailabilityStatus.BUSY}
-              on:mousedown={() => startDrag(slot, day)}
+              on:mousedown={() => {
+                dragging = true;
+                startDrag(slot, day);
+              }}
               on:mousemove={() => {
+                // TODO: make sure touchstart / touchmove is good w this
                 addToDrag(slot, day);
-                // if (dragging && allow_booking && slotSelection.length < max_bookable_slots) {
-                //   slot.selectionStatus = SelectionStatus.SELECTED;
-                // }
               }}
               on:mouseup={() => {
                 if (dragging) {
                   endDrag(slot, day);
                 }
               }}
-              on:click={() => {
-                if (allow_booking) {
-                  slot.selectionStatus =
-                    slot.selectionStatus === SelectionStatus.SELECTED
-                      ? SelectionStatus.UNSELECTED
-                      : slotSelection.length < max_bookable_slots
-                      ? SelectionStatus.SELECTED
-                      : SelectionStatus.UNSELECTED;
+              on:click={(e) => {
+                if (e.pointerType !== "mouse") {
+                  // account for keyboard button press; TODO: fix type error
+                  startDrag(slot, day);
+                  endDrag(slot, day);
                 }
               }}
             />
