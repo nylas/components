@@ -270,6 +270,7 @@
 
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
+          pendingSelection: false,
           calendar_id: calendarID,
           availability: availability,
           available_calendars: freeCalendars,
@@ -411,6 +412,13 @@
     return range;
   }
 
+  interface Day {
+    slots: SelectableSlot[];
+    epochs: any[]; // TODO
+    timestamp: Date;
+  }
+
+  let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
     let slots = generateDaySlots(timestamp, start_hour, end_hour);
     return {
@@ -649,17 +657,59 @@
 
   //#region dragging
   let dragging = false;
-  function startDrag(slot: TimeSlot) {
-    console.log("started dragging on ", slot);
+  let dragStartSlot: SelectableSlot | null = null;
+  let dragStartDay: Day | null = null;
+  function startDrag(slot: SelectableSlot, day: Day) {
     dragging = true;
+    dragStartSlot = slot;
+    dragStartDay = day;
+    slot.selectionPending = true;
   }
 
-  function addToDrag(slot: TimeSlot) {
-    console.log("added to drag");
+  function addToDrag(slot: SelectableSlot, day: Day) {
+    if (
+      dragging &&
+      allow_booking &&
+      slotSelection.length < max_bookable_slots &&
+      day === dragStartDay
+    ) {
+      day.slots.forEach((daySlot) => {
+        if (
+          daySlot.start_time >= dragStartSlot.start_time &&
+          daySlot.start_time <= slot.start_time
+        ) {
+          daySlot.selectionPending =
+            daySlot.availability !== AvailabilityStatus.BUSY ? true : false;
+        } else {
+          daySlot.selectionPending = false;
+        }
+      });
+
+      days = [...days];
+    }
   }
 
-  function endDrag(slot: TimeSlot) {
-    console.log("drag ended");
+  function endDrag(slot: SelectableSlot | null, day: Day | null) {
+    if (!day || day !== dragStartDay) {
+      days.forEach((day) =>
+        day.slots
+          .filter((x) => x.selectionPending)
+          .forEach((x) => {
+            x.selectionStatus = SelectionStatus.UNSELECTED;
+            x.selectionPending = false;
+          }),
+      );
+    }
+    days.forEach((day) =>
+      day.slots
+        .filter((x) => x.selectionPending)
+        .forEach((x) => {
+          x.selectionStatus = SelectionStatus.SELECTED;
+          x.selectionPending = false;
+        }),
+    );
+    days = [...days];
+    dragging = false;
   }
   //#endregion dragging
 </script>
@@ -835,6 +885,11 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
           }
 
+          &.pending {
+            background-color: rgba(128, 0, 128, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+          }
+
           &.busy {
             cursor: not-allowed;
           }
@@ -958,6 +1013,7 @@
   class:ticked={show_ticks}
   class:dated={allow_date_change}
   class:allow_booking
+  on:mouseleave={() => endDrag(null, null)}
 >
   {#if allow_date_change}
     <header class="change-dates">
@@ -1030,15 +1086,21 @@
                 slot.end_time,
               ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
               class="slot {slot.selectionStatus} {slot.availability}"
+              class:pending={slot.selectionPending}
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
               disabled={slot.availability === AvailabilityStatus.BUSY}
-              on:mousedown={() => startDrag(slot)}
-              on:mouseenter={() => {
-                if (dragging) addToDrag(slot);
+              on:mousedown={() => startDrag(slot, day)}
+              on:mousemove={() => {
+                addToDrag(slot, day);
+                // if (dragging && allow_booking && slotSelection.length < max_bookable_slots) {
+                //   slot.selectionStatus = SelectionStatus.SELECTED;
+                // }
               }}
               on:mouseup={() => {
-                if (dragging) endDrag(slot);
+                if (dragging) {
+                  endDrag(slot, day);
+                }
               }}
               on:click={() => {
                 if (allow_booking) {
