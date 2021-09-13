@@ -1255,7 +1255,7 @@
                     })}
                   <!-- TODO: work event.title into here -->
                 </span>
-              {:else if slot.selectionPending && slot.availability !== AvailabilityStatus.BUSY && (!day.slots[iter - 1].selectionPending || day.slots[iter - 1].availability === AvailabilityStatus.BUSY)}
+              {:else if slot.selectionPending && slot.availability !== AvailabilityStatus.BUSY && (!day.slots[iter - 1]?.selectionPending || day.slots[iter - 1]?.availability === AvailabilityStatus.BUSY)}
                 <span class="selected-heading">
                   {slot.start_time.toLocaleTimeString([], {
                     hour: "numeric",
