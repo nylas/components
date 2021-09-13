@@ -120,7 +120,7 @@
     partial_bookable_ratio = getPropertyValue(
       internalProps.partial_bookable_ratio,
       partial_bookable_ratio,
-      0,
+      0.01,
     );
     show_as_week = getPropertyValue(
       internalProps.show_as_week,
@@ -257,6 +257,14 @@
           freeCalendars.length < allCalendars.length * partial_bookable_ratio
         ) {
           availability = AvailabilityStatus.BUSY;
+        }
+
+        // Allows users to book over busy slots if partial_bookable_ratio is 0
+        if (
+          availability === AvailabilityStatus.BUSY &&
+          partial_bookable_ratio === 0
+        ) {
+          availability = AvailabilityStatus.PARTIAL;
         }
 
         if (
@@ -772,7 +780,6 @@
   }
 
   function endDrag(slot: SelectableSlot | null, day: Day | null) {
-    console.log("END DRAG");
     if (dragExisting) {
       if (day) {
         draggedBlockSlots?.forEach(
