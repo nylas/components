@@ -664,10 +664,36 @@
   // #endregion Date Change
 
   //#region dragging
+
+  // Click + Drag has two basic modes:
+  // - when you click + drag on an available spot, it should create a new series of selected timeSlots
+  // - when YOu click + drag on an already-selected spot, if should let you move that spot
+  // A non-dragging click will either select the timeslot you clicked, or if it's already a selected block, delete that block.
+  // Note some fun behaviour: If you drag a long event overtop a busy spot, it will automatically split it into multiple events.
+  // You can set partial_bookable_ratio to 0 in order to prevent this / let you book atop busy spots.
   let dragging = false;
   let dragStartSlot: SelectableSlot | null = null;
   let dragStartDay: Day | null = null;
   let dragExisting: boolean = false;
+
+  function resetDragState() {
+    days.forEach((day) =>
+      day.slots
+        .filter((x) => x.selectionPending)
+        .forEach((x) => {
+          x.selectionPending = false;
+        }),
+    );
+
+    dragging = false;
+    dragStartDay = null;
+    dragStartSlot = null;
+    dragExisting = false;
+    draggedBlock = null;
+  }
+
+  // draggedBlock is a member of the SortedSlots array; it has an arbitrary number of timeSlots and is represented by a single start_time and end_time
+  // draggedBlockSlots is an array of timeSlots that fall within the draggedBlock's start_time and end_time
   let draggedBlock: SelectableSlot | null = null;
   $: draggedBlockSlots = draggedBlock
     ? dragStartDay?.slots.filter(
@@ -679,6 +705,7 @@
 
   function startDrag(slot: SelectableSlot, day: Day) {
     if (allow_booking) {
+      // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
       dragStartSlot = slot;
       dragStartDay = day;
 
@@ -692,7 +719,7 @@
           ) || null;
       } else if (
         slot.selectionStatus === SelectionStatus.UNSELECTED &&
-        slotSelection.length < max_bookable_slots
+        slotSelection.length < max_bookable_slots // TODO: this should also consider already-existing selected slots
       ) {
         slot.selectionPending = true;
       }
@@ -702,27 +729,39 @@
   function addToDrag(slot: SelectableSlot, day: Day) {
     if (dragging) {
       if (dragExisting && dragStartSlot && dragStartDay) {
+        // dragStartSlot && dragStartDay are superfluous here, but type errors are thrown if we don't explicitly check for them
+
+        // Measure the distance between where you started and where you've dragged to, vertically.
         let delta =
           day.slots.indexOf(slot) - dragStartDay.slots.indexOf(dragStartSlot);
+
+        // Remove "pending" status from your previous location
         days.forEach((day) =>
           day.slots
             .filter((slot) => slot.selectionPending)
             .forEach((slot) => (slot.selectionPending = false)),
         );
+
         draggedBlockSlots?.forEach((slot) => {
-          if (day.slots[dragStartDay!.slots.indexOf(slot) + delta]) {
-            day.slots[
-              dragStartDay!.slots.indexOf(slot) + delta
-            ].selectionPending = true;
+          let slotPlusDelta =
+            day.slots[dragStartDay!.slots.indexOf(slot) + delta];
+          if (slotPlusDelta) {
+            slotPlusDelta.selectionPending = true;
           }
         });
-        days = [...days];
+
+        days = [...days]; // re-render
       } else {
+        // When drag-creating an event, dragging downward has different behaviour than dragging upward
+        // especially when you consider max_bookable_slots
         let direction: "forward" | "backward" = "forward";
+
         if (allow_booking && day === dragStartDay && dragStartSlot) {
           if (slot.start_time < dragStartSlot.start_time) {
             direction = "backward";
           }
+
+          // Mark a given slot as selectionPending=true if it falls between where we started dragging, and where we're dragging now
           day.slots.forEach((daySlot) => {
             if (
               direction === "forward"
@@ -741,52 +780,50 @@
           });
 
           // Don't let the user book more slots than are allowed
-          if (
+          let tooManySlots =
             day.slots.filter(
-              (x) =>
-                x.selectionPending ||
-                x.selectionStatus === SelectionStatus.SELECTED,
-            ).length > max_bookable_slots
-          ) {
+              (s) =>
+                s.selectionPending ||
+                s.selectionStatus === SelectionStatus.SELECTED,
+            ).length > max_bookable_slots;
+          let pendingSlots = day.slots.filter((x) => x.selectionPending);
+          if (tooManySlots) {
+            let allowableSlots =
+              max_bookable_slots -
+              day.slots.filter(
+                (x) => x.selectionStatus === SelectionStatus.SELECTED,
+              ).length;
             if (direction === "forward") {
-              // Only select the first N allowed slots after your initially-dragegd one
-              day.slots
-                .filter((x) => x.selectionPending)
-                .slice(
-                  max_bookable_slots -
-                    day.slots.filter(
-                      (x) => x.selectionStatus === SelectionStatus.SELECTED,
-                    ).length,
-                )
+              // Only select the first N allowed slots AFTER your initially-dragegd one
+              pendingSlots
+                .slice(allowableSlots)
                 .forEach((slot) => (slot.selectionPending = false));
             } else {
-              // Only select the first N allowed slots before your initially-dragegd one
-              day.slots
-                .filter((x) => x.selectionPending)
-                .slice(
-                  0,
-                  -(
-                    max_bookable_slots -
-                    day.slots.filter(
-                      (x) => x.selectionStatus === SelectionStatus.SELECTED,
-                    ).length
-                  ),
-                )
+              // Only select the first N allowed slots BEFORE your initially-dragegd one
+              pendingSlots
+                .slice(0, -allowableSlots)
                 .forEach((slot) => (slot.selectionPending = false));
             }
           }
         }
-        days = [...days];
+        days = [...days]; // re-render
       }
     }
   }
 
   function endDrag(slot: SelectableSlot | null, day: Day | null) {
+    // Mode: Drag-moving an existing block
     if (dragExisting) {
       if (day) {
+        // day is optional; endDrag with no "day" passed means user left the canvas / we should un-pend and reset our initially-dragged event
+
+        // Set all slots in our initially dragged block to unselected
         draggedBlockSlots?.forEach(
           (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
         );
+
+        // Set all our pending slots to Selected
+        // (This is effectively the "Move" function)
         days.forEach((day) =>
           day.slots
             .filter((x) => x.selectionPending)
@@ -794,44 +831,24 @@
               if (x.availability !== AvailabilityStatus.BUSY) {
                 x.selectionStatus = SelectionStatus.SELECTED;
               }
-              x.selectionPending = false;
-            }),
-        );
-      } else {
-        days.forEach((day) =>
-          day.slots
-            .filter((x) => x.selectionPending)
-            .forEach((x) => {
-              x.selectionPending = false;
             }),
         );
       }
     } else {
+      // Mode: Drag-mreating a new event
       if (!day || day !== dragStartDay) {
-        days.forEach((day) =>
-          day.slots
-            .filter((x) => x.selectionPending)
-            .forEach((x) => {
-              x.selectionPending = false;
-            }),
-        );
       } else {
         days.forEach((day) =>
           day.slots
             .filter((x) => x.selectionPending)
             .forEach((x) => {
               x.selectionStatus = SelectionStatus.SELECTED;
-              x.selectionPending = false;
             }),
         );
       }
     }
-    days = [...days];
-    dragging = false;
-    dragStartDay = null;
-    dragStartSlot = null;
-    dragExisting = false;
-    draggedBlock = null;
+    days = [...days]; // re-render
+    resetDragState();
   }
   //#endregion dragging
 </script>
