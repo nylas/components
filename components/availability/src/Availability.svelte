@@ -664,8 +664,8 @@
   $: draggedBlockSlots = draggedBlock
     ? dragStartDay?.slots.filter(
         (slot) =>
-          slot.start_time >= draggedBlock.start_time &&
-          slot.end_time <= draggedBlock.end_time,
+          slot.start_time >= draggedBlock!.start_time &&
+          slot.end_time <= draggedBlock!.end_time,
       )
     : [];
 
@@ -693,7 +693,7 @@
 
   function addToDrag(slot: SelectableSlot, day: Day) {
     if (dragging) {
-      if (dragExisting) {
+      if (dragExisting && dragStartSlot && dragStartDay) {
         let delta =
           day.slots.indexOf(slot) - dragStartDay.slots.indexOf(dragStartSlot);
         days.forEach((day) =>
@@ -703,22 +703,22 @@
         );
         draggedBlockSlots?.forEach((slot) => {
           day.slots[
-            dragStartDay.slots.indexOf(slot) + delta
+            dragStartDay!.slots.indexOf(slot) + delta
           ].selectionPending = true;
         });
         days = [...days];
       } else {
         let direction: "forward" | "backward" = "forward";
-        if (allow_booking && day === dragStartDay) {
+        if (allow_booking && day === dragStartDay && dragStartSlot) {
           if (slot.start_time < dragStartSlot.start_time) {
             direction = "backward";
           }
           day.slots.forEach((daySlot) => {
             if (
               direction === "forward"
-                ? daySlot.start_time >= dragStartSlot.start_time &&
+                ? daySlot.start_time >= dragStartSlot!.start_time &&
                   daySlot.start_time <= slot.start_time
-                : daySlot.start_time <= dragStartSlot.start_time &&
+                : daySlot.start_time <= dragStartSlot!.start_time &&
                   daySlot.start_time >= slot.start_time
             ) {
               daySlot.selectionPending =
