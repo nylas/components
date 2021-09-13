@@ -710,9 +710,11 @@
             .forEach((slot) => (slot.selectionPending = false)),
         );
         draggedBlockSlots?.forEach((slot) => {
-          day.slots[
-            dragStartDay!.slots.indexOf(slot) + delta
-          ].selectionPending = true;
+          if (day.slots[dragStartDay!.slots.indexOf(slot) + delta]) {
+            day.slots[
+              dragStartDay!.slots.indexOf(slot) + delta
+            ].selectionPending = true;
+          }
         });
         days = [...days];
       } else {
