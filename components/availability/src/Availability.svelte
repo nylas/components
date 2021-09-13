@@ -985,7 +985,7 @@
             display: inline-block;
             position: relative;
             z-index: 2;
-            display: none; // TODO: TEMP
+            display: none; // TODO: temporary, until we rework this to not collide w/ time ranges
 
             span {
               background: rgba(0, 0, 0, 0.5);
@@ -1256,12 +1256,13 @@
               }}
               on:click={(e) => {
                 if (e.pointerType !== "mouse") {
-                  // account for keyboard button press; TODO: fix type error
+                  // account for keyboard button press; TODO: fix type error, fix keyboard-deselect
                   startDrag(slot, day);
                   endDrag(slot, day);
                 }
               }}
             >
+              <!-- TODO: generally clean up block time handling -->
               {#if sortedSlots.find((block) => block.start_time === slot.start_time)}
                 <span class="selected-heading">
                   {sortedSlots
