@@ -67,7 +67,7 @@ Nylas Agenda can be used as a UI on top of any event data that you provide. Even
 >
 > Make sure to review the events `when` subobject since that determines where your Agenda events will appear.
 
-The property to use for this is `events`. You can pass in an JSON array of events.
+The property to use for this is `events`. You can pass in a JSON array of events.
 
 ```json
   const staticEvents = [
