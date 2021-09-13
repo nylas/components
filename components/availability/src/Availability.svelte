@@ -836,16 +836,13 @@
       }
     } else {
       // Mode: Drag-mreating a new event
-      if (!day || day !== dragStartDay) {
-      } else {
-        days.forEach((day) =>
-          day.slots
-            .filter((x) => x.selectionPending)
-            .forEach((x) => {
-              x.selectionStatus = SelectionStatus.SELECTED;
-            }),
-        );
-      }
+      days.forEach((day) =>
+        day.slots
+          .filter((x) => x.selectionPending)
+          .forEach((x) => {
+            x.selectionStatus = SelectionStatus.SELECTED;
+          }),
+      );
     }
     days = [...days]; // re-render
     resetDragState();
