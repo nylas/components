@@ -959,6 +959,7 @@
             display: inline-block;
             position: relative;
             z-index: 2;
+            display: none; // TODO: TEMP
 
             span {
               background: rgba(0, 0, 0, 0.5);
@@ -995,7 +996,8 @@
 
           &.selected {
             background-color: purple;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+            box-shadow: none;
+            border-bottom: 1px solid transparent;
           }
 
           &.pending {
@@ -1005,6 +1007,17 @@
 
           &.busy {
             cursor: not-allowed;
+          }
+
+          .selected-heading {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0 3px;
+            font-size: 0.75rem;
+            z-index: 2;
           }
         }
       }
@@ -1190,7 +1203,7 @@
           {/each}
         </div>
         <div class="slots">
-          {#each day.slots as slot}
+          {#each day.slots as slot, iter}
             <button
               data-available-calendars={slot.available_calendars.toString()}
               aria-label="{new Date(
@@ -1206,7 +1219,7 @@
                 dragging = true;
                 startDrag(slot, day);
               }}
-              on:mousemove={() => {
+              on:mouseenter={() => {
                 // TODO: make sure touchstart / touchmove is good w this
                 addToDrag(slot, day);
               }}
@@ -1222,7 +1235,49 @@
                   endDrag(slot, day);
                 }
               }}
-            />
+            >
+              {#if sortedSlots.find((block) => block.start_time === slot.start_time)}
+                <span class="selected-heading">
+                  {sortedSlots
+                    .find((block) => block.start_time === slot.start_time)
+                    ?.start_time.toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  -
+                  {sortedSlots
+                    .find((block) => block.start_time === slot.start_time)
+                    ?.end_time.toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  <!-- TODO: work event.title into here -->
+                </span>
+              {:else if slot.selectionPending && slot.availability !== AvailabilityStatus.BUSY && (!day.slots[iter - 1].selectionPending || day.slots[iter - 1].availability === AvailabilityStatus.BUSY)}
+                <span class="selected-heading">
+                  {slot.start_time.toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                  -
+                  {day.slots
+                    .find(
+                      (s) =>
+                        s.start_time > slot.start_time &&
+                        (!s.selectionPending ||
+                          s.availability === AvailabilityStatus.BUSY),
+                    )
+                    ?.start_time.toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                </span>
+              {/if}
+            </button>
           {/each}
         </div>
       </div>
