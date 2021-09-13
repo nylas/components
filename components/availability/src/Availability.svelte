@@ -694,19 +694,19 @@
   function addToDrag(slot: SelectableSlot, day: Day) {
     if (dragging) {
       if (dragExisting) {
-        if (day === dragStartDay) {
-          let delta =
-            day.slots.indexOf(slot) - day.slots.indexOf(dragStartSlot);
+        let delta =
+          day.slots.indexOf(slot) - dragStartDay.slots.indexOf(dragStartSlot);
+        days.forEach((day) =>
           day.slots
             .filter((slot) => slot.selectionPending)
-            .forEach((slot) => (slot.selectionPending = false));
-          draggedBlockSlots?.forEach((slot) => {
-            day.slots[day.slots.indexOf(slot) + delta].selectionPending = true;
-          });
-          days = [...days];
-        } else {
-          console.log("moved to another day, do more math", day, dragStartDay);
-        }
+            .forEach((slot) => (slot.selectionPending = false)),
+        );
+        draggedBlockSlots?.forEach((slot) => {
+          day.slots[
+            dragStartDay.slots.indexOf(slot) + delta
+          ].selectionPending = true;
+        });
+        days = [...days];
       } else {
         let direction: "forward" | "backward" = "forward";
         if (allow_booking && day === dragStartDay) {
@@ -772,20 +772,31 @@
   }
 
   function endDrag(slot: SelectableSlot | null, day: Day | null) {
+    console.log("END DRAG");
     if (dragExisting) {
-      draggedBlockSlots?.forEach(
-        (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
-      );
-      days.forEach((day) =>
-        day.slots
-          .filter((x) => x.selectionPending)
-          .forEach((x) => {
-            if (x.availability !== AvailabilityStatus.BUSY) {
-              x.selectionStatus = SelectionStatus.SELECTED;
-            }
-            x.selectionPending = false;
-          }),
-      );
+      if (day) {
+        draggedBlockSlots?.forEach(
+          (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
+        );
+        days.forEach((day) =>
+          day.slots
+            .filter((x) => x.selectionPending)
+            .forEach((x) => {
+              if (x.availability !== AvailabilityStatus.BUSY) {
+                x.selectionStatus = SelectionStatus.SELECTED;
+              }
+              x.selectionPending = false;
+            }),
+        );
+      } else {
+        days.forEach((day) =>
+          day.slots
+            .filter((x) => x.selectionPending)
+            .forEach((x) => {
+              x.selectionPending = false;
+            }),
+        );
+      }
     } else {
       if (!day || day !== dragStartDay) {
         days.forEach((day) =>
