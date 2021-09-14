@@ -37,7 +37,6 @@
   import UnavailableIcon from "./assets/unavailable.svg";
   import BackIcon from "./assets/left-arrow.svg";
   import NextIcon from "./assets/right-arrow.svg";
-  import Day from "components/day/src/Day.svelte";
 
   //#region props
   export let id: string = "";
@@ -547,10 +546,11 @@
         day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY)
     ) {
       let pendingEndTime =
-        day.slots.find((s) => {
+        day.slots.find((daySlot) => {
           return (
-            s.start_time > slot.start_time &&
-            (!s.selectionPending || s.availability === AvailabilityStatus.BUSY)
+            daySlot.start_time > slot.start_time &&
+            (!daySlot.selectionPending ||
+              daySlot.availability === AvailabilityStatus.BUSY)
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
       return `
@@ -740,9 +740,9 @@
   function resetDragState() {
     days.forEach((day) =>
       day.slots
-        .filter((x) => x.selectionPending)
-        .forEach((x) => {
-          x.selectionPending = false;
+        .filter((slot) => slot.selectionPending)
+        .forEach((slot) => {
+          slot.selectionPending = false;
         }),
     );
 
@@ -778,7 +778,10 @@
               slot.start_time >= block.start_time &&
               slot.end_time <= block.end_time,
           ) || null;
-      } else if (slotSelection.length < max_bookable_slots) {
+      } else if (
+        slotSelection.length < max_bookable_slots &&
+        slot.availability !== AvailabilityStatus.BUSY
+      ) {
         slot.selectionPending = true;
       }
     }
@@ -794,11 +797,7 @@
           day.slots.indexOf(slot) - dragStartDay.slots.indexOf(dragStartSlot);
 
         // Remove "pending" status from your previous location
-        days.forEach((day) =>
-          day.slots
-            .filter((slot) => slot.selectionPending)
-            .forEach((slot) => (slot.selectionPending = false)),
-        );
+        resetDragState();
 
         draggedBlockSlots?.forEach((slot) => {
           let slotPlusDelta =
@@ -807,8 +806,6 @@
             slotPlusDelta.selectionPending = true;
           }
         });
-
-        days = [...days]; // re-render
       } else {
         // When drag-creating an event, dragging downward has different behaviour than dragging upward
         // especially when you consider max_bookable_slots
@@ -864,8 +861,8 @@
             }
           }
         }
-        days = [...days]; // re-render
       }
+      days = [...days]; // re-render
     }
   }
 
@@ -1314,7 +1311,7 @@
                 }
               }}
               on:keypress={(e) => {
-                if (e.key === " " || e.key === "Enter") {
+                if (e.code === "Space" || e.code === "Enter") {
                   startDrag(slot, day);
                   tick().then(() => endDrag(slot, day));
                 }
