@@ -177,6 +177,21 @@ describe("Optional Prop Handling", () => {
       .should("exist");
   });
 
+  it("Component shows filter by email option when 'show_filter' is set to true", () => {
+    cy.loadContacts();
+    cy.visit("/components/contact-list/src/index.html");
+    cy.get("nylas-contact-list").should("exist");
+    cy.get("nylas-contact-list").then((element) => {
+      const component = element[0];
+      component.show_filter = true;
+    });
+    cy.wait("@contacts");
+    cy.get("label.entry.filter").contains("Filter by email: ");
+    cy.get("input#show-filter-input").should("exist");
+    cy.get("input#show-filter-input").type("nylascypresstest");
+    cy.get("nylas-contact-list").find(".contact").should("have.length", 2);
+  });
+
   it("Component loads and works for sort_by=last_emailed when account has email & contact scopes", () => {
     cy.loadContacts();
     cy.visit("/components/contact-list/src/index.html");

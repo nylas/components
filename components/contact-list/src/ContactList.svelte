@@ -495,7 +495,11 @@
 
     {#if show_filter}
       <label class="entry filter">
-        Filter by email: <input type="text" bind:value={filterValue} />
+        Filter by email: <input
+          id="show-filter-input"
+          type="text"
+          bind:value={filterValue}
+        />
       </label>
     {/if}
 
