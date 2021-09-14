@@ -37,6 +37,7 @@
   import UnavailableIcon from "./assets/unavailable.svg";
   import BackIcon from "./assets/left-arrow.svg";
   import NextIcon from "./assets/right-arrow.svg";
+  import Day from "components/day/src/Day.svelte";
 
   //#region props
   export let id: string = "";
@@ -525,6 +526,66 @@
     }
     return freeBusyCalendars;
   }
+
+  // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
+  function getBlockTimes(slot: SelectableSlot, day: Day) {
+    let slotIndex = day.slots.indexOf(slot);
+    let wrappingSortedSlot = sortedSlots.find(
+      (block) => block.start_time === slot.start_time,
+    );
+    // A slot is first in a Pending block if:
+    // it's pending
+    // and it's not busy
+    // and either:
+    // the slot immediately before it isn't pending
+    // OR
+    // the slot immediately before it is busy
+    if (
+      slot.selectionPending &&
+      slot.availability !== AvailabilityStatus.BUSY &&
+      (!day.slots[slotIndex - 1]?.selectionPending ||
+        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY)
+    ) {
+      let pendingEndTime =
+        day.slots.find((s) => {
+          return (
+            s.start_time > slot.start_time &&
+            (!s.selectionPending || s.availability === AvailabilityStatus.BUSY)
+          );
+        })?.start_time || day.slots[day.slots.length - 1].end_time;
+      return `
+        ${slot.start_time.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}
+        - 
+        ${pendingEndTime.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}
+      `;
+      // Otherwise, it's first in a selected block if its start_time matches a sortedSlot's start_time
+    } else if (wrappingSortedSlot) {
+      return `
+      ${wrappingSortedSlot.start_time.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })}
+        - 
+        ${wrappingSortedSlot.end_time.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}
+      `;
+    } else {
+      return null;
+    }
+  }
+
   //#region event query
   let query: EventQuery;
   $: query = {
@@ -671,10 +732,10 @@
   // A non-dragging click will either select the timeslot you clicked, or if it's already a selected block, delete that block.
   // Note some fun behaviour: If you drag a long event overtop a busy spot, it will automatically split it into multiple events.
   // You can set partial_bookable_ratio to 0 in order to prevent this / let you book atop busy spots.
-  let dragging = false;
+  let mouseIsDown = false;
   let dragStartSlot: SelectableSlot | null = null;
   let dragStartDay: Day | null = null;
-  let dragExisting: boolean = false;
+  let draggingExistingBlock: boolean = false;
 
   function resetDragState() {
     days.forEach((day) =>
@@ -685,10 +746,10 @@
         }),
     );
 
-    dragging = false;
+    mouseIsDown = false;
     dragStartDay = null;
     dragStartSlot = null;
-    dragExisting = false;
+    draggingExistingBlock = false;
     draggedBlock = null;
   }
 
@@ -710,25 +771,22 @@
       dragStartDay = day;
 
       if (slot.selectionStatus === SelectionStatus.SELECTED) {
-        dragExisting = true;
+        draggingExistingBlock = true;
         draggedBlock =
           sortedSlots.find(
             (block) =>
               slot.start_time >= block.start_time &&
               slot.end_time <= block.end_time,
           ) || null;
-      } else if (
-        slot.selectionStatus === SelectionStatus.UNSELECTED &&
-        slotSelection.length < max_bookable_slots // TODO: this should also consider already-existing selected slots
-      ) {
+      } else if (slotSelection.length < max_bookable_slots) {
         slot.selectionPending = true;
       }
     }
   }
 
   function addToDrag(slot: SelectableSlot, day: Day) {
-    if (dragging) {
-      if (dragExisting && dragStartSlot && dragStartDay) {
+    if (mouseIsDown) {
+      if (draggingExistingBlock && dragStartSlot && dragStartDay) {
         // dragStartSlot && dragStartDay are superfluous here, but type errors are thrown if we don't explicitly check for them
 
         // Measure the distance between where you started and where you've dragged to, vertically.
@@ -771,7 +829,7 @@
                   daySlot.start_time >= slot.start_time
             ) {
               daySlot.selectionPending =
-                daySlot.availability !== AvailabilityStatus.BUSY ? true : false;
+                daySlot.availability !== AvailabilityStatus.BUSY ? true : false; // when you're dragging over a busy spot, don't set it to pending.
             } else {
               if (daySlot.selectionPending) {
                 daySlot.selectionPending = false;
@@ -813,7 +871,7 @@
 
   function endDrag(slot: SelectableSlot | null, day: Day | null) {
     // Mode: Drag-moving an existing block
-    if (dragExisting) {
+    if (draggingExistingBlock) {
       if (day) {
         // day is optional; endDrag with no "day" passed means user left the canvas / we should un-pend and reset our initially-dragged event
 
@@ -1239,7 +1297,12 @@
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
               on:mousedown={() => {
-                dragging = true;
+                if (
+                  slotSelection.length < max_bookable_slots ||
+                  slot.selectionStatus === SelectionStatus.SELECTED
+                ) {
+                  mouseIsDown = true;
+                }
                 startDrag(slot, day);
               }}
               on:mouseenter={() => {
@@ -1247,59 +1310,19 @@
                 addToDrag(slot, day);
               }}
               on:mouseup={() => {
-                if (dragging) {
+                if (mouseIsDown) {
                   endDrag(slot, day);
                 }
               }}
-              on:click={(e) => {
-                if (e.pointerType !== "mouse") {
-                  // account for keyboard button press; TODO: fix type error, fix keyboard-deselect
+              on:keypress={(e) => {
+                if (e.key === " " || e.key === "Enter") {
                   startDrag(slot, day);
-                  endDrag(slot, day);
+                  tick().then(() => endDrag(slot, day));
                 }
               }}
             >
-              <!-- TODO: generally clean up block time handling -->
-              {#if sortedSlots.find((block) => block.start_time === slot.start_time)}
-                <span class="selected-heading">
-                  {sortedSlots
-                    .find((block) => block.start_time === slot.start_time)
-                    ?.start_time.toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  -
-                  {sortedSlots
-                    .find((block) => block.start_time === slot.start_time)
-                    ?.end_time.toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  <!-- TODO: work event.title into here -->
-                </span>
-              {:else if slot.selectionPending && slot.availability !== AvailabilityStatus.BUSY && (!day.slots[iter - 1]?.selectionPending || day.slots[iter - 1]?.availability === AvailabilityStatus.BUSY)}
-                <span class="selected-heading">
-                  {slot.start_time.toLocaleTimeString([], {
-                    hour: "numeric",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                  -
-                  {day.slots
-                    .find(
-                      (s) =>
-                        s.start_time > slot.start_time &&
-                        (!s.selectionPending ||
-                          s.availability === AvailabilityStatus.BUSY),
-                    )
-                    ?.start_time.toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                </span>
+              {#if getBlockTimes(slot, day)}
+                <span class="selected-heading">{getBlockTimes(slot, day)}</span>
               {/if}
             </button>
           {/each}
