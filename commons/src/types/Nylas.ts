@@ -176,6 +176,9 @@ export interface EmailProperties extends Manifest {
   clean_conversation: boolean;
   show_star: boolean;
   show_expanded_email_view_onload: boolean;
+  unread: boolean;
+  show_thread_actions: boolean;
+  click_action: "default" | "mailbox" | "custom";
 }
 
 export interface MailboxProperties extends Manifest {
