@@ -535,7 +535,6 @@
               />
             </span>
             <span class="cc">
-              <!-- {#each reply.cc as cc}<span>{cc.email}</span>{/each} -->
               <nylas-contacts-search
                 placeholder="cc:"
                 change={handleContactsChange("cc")}
