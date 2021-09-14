@@ -120,7 +120,7 @@
     partial_bookable_ratio = getPropertyValue(
       internalProps.partial_bookable_ratio,
       partial_bookable_ratio,
-      0,
+      0.01,
     );
     show_as_week = getPropertyValue(
       internalProps.show_as_week,
@@ -259,6 +259,14 @@
           availability = AvailabilityStatus.BUSY;
         }
 
+        // Allows users to book over busy slots if partial_bookable_ratio is 0
+        if (
+          availability === AvailabilityStatus.BUSY &&
+          partial_bookable_ratio === 0
+        ) {
+          availability = AvailabilityStatus.PARTIAL;
+        }
+
         if (
           availability === AvailabilityStatus.PARTIAL &&
           required_participants.length
@@ -270,6 +278,7 @@
 
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
+          pendingSelection: false,
           calendar_id: calendarID,
           availability: availability,
           available_calendars: freeCalendars,
@@ -411,6 +420,13 @@
     return range;
   }
 
+  interface Day {
+    slots: SelectableSlot[];
+    epochs: any[]; // TODO
+    timestamp: Date;
+  }
+
+  let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
     let slots = generateDaySlots(timestamp, start_hour, end_hour);
     return {
@@ -509,6 +525,67 @@
     }
     return freeBusyCalendars;
   }
+
+  // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
+  function getBlockTimes(slot: SelectableSlot, day: Day) {
+    let slotIndex = day.slots.indexOf(slot);
+    let wrappingSortedSlot = sortedSlots.find(
+      (block) => block.start_time === slot.start_time,
+    );
+    // A slot is first in a Pending block if:
+    // it's pending
+    // and it's not busy
+    // and either:
+    // the slot immediately before it isn't pending
+    // OR
+    // the slot immediately before it is busy
+    if (
+      slot.selectionPending &&
+      slot.availability !== AvailabilityStatus.BUSY &&
+      (!day.slots[slotIndex - 1]?.selectionPending ||
+        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY)
+    ) {
+      let pendingEndTime =
+        day.slots.find((daySlot) => {
+          return (
+            daySlot.start_time > slot.start_time &&
+            (!daySlot.selectionPending ||
+              daySlot.availability === AvailabilityStatus.BUSY)
+          );
+        })?.start_time || day.slots[day.slots.length - 1].end_time;
+      return `
+        ${slot.start_time.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}
+        - 
+        ${pendingEndTime.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}
+      `;
+      // Otherwise, it's first in a selected block if its start_time matches a sortedSlot's start_time
+    } else if (wrappingSortedSlot) {
+      return `
+      ${wrappingSortedSlot.start_time.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })}
+        - 
+        ${wrappingSortedSlot.end_time.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}
+      `;
+    } else {
+      return null;
+    }
+  }
+
   //#region event query
   let query: EventQuery;
   $: query = {
@@ -646,6 +723,186 @@
     }
   }
   // #endregion Date Change
+
+  //#region dragging
+
+  // Click + Drag has two basic modes:
+  // - when you click + drag on an available spot, it should create a new series of selected timeSlots
+  // - when YOu click + drag on an already-selected spot, if should let you move that spot
+  // A non-dragging click will either select the timeslot you clicked, or if it's already a selected block, delete that block.
+  // Note some fun behaviour: If you drag a long event overtop a busy spot, it will automatically split it into multiple events.
+  // You can set partial_bookable_ratio to 0 in order to prevent this / let you book atop busy spots.
+  let mouseIsDown = false;
+  let dragStartSlot: SelectableSlot | null = null;
+  let dragStartDay: Day | null = null;
+  let draggingExistingBlock: boolean = false;
+
+  function resetDragState() {
+    days.forEach((day) =>
+      day.slots
+        .filter((slot) => slot.selectionPending)
+        .forEach((slot) => {
+          slot.selectionPending = false;
+        }),
+    );
+
+    mouseIsDown = false;
+    dragStartDay = null;
+    dragStartSlot = null;
+    draggingExistingBlock = false;
+    draggedBlock = null;
+  }
+
+  // draggedBlock is a member of the SortedSlots array; it has an arbitrary number of timeSlots and is represented by a single start_time and end_time
+  // draggedBlockSlots is an array of timeSlots that fall within the draggedBlock's start_time and end_time
+  let draggedBlock: SelectableSlot | null = null;
+  $: draggedBlockSlots = draggedBlock
+    ? dragStartDay?.slots.filter(
+        (slot) =>
+          slot.start_time >= draggedBlock!.start_time &&
+          slot.end_time <= draggedBlock!.end_time,
+      )
+    : [];
+
+  function startDrag(slot: SelectableSlot, day: Day) {
+    if (allow_booking) {
+      // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
+      dragStartSlot = slot;
+      dragStartDay = day;
+
+      if (slot.selectionStatus === SelectionStatus.SELECTED) {
+        draggingExistingBlock = true;
+        draggedBlock =
+          sortedSlots.find(
+            (block) =>
+              slot.start_time >= block.start_time &&
+              slot.end_time <= block.end_time,
+          ) || null;
+      } else if (
+        slotSelection.length < max_bookable_slots &&
+        slot.availability !== AvailabilityStatus.BUSY
+      ) {
+        slot.selectionPending = true;
+      }
+    }
+  }
+
+  function addToDrag(slot: SelectableSlot, day: Day) {
+    if (mouseIsDown) {
+      if (draggingExistingBlock && dragStartSlot && dragStartDay) {
+        // dragStartSlot && dragStartDay are superfluous here, but type errors are thrown if we don't explicitly check for them
+
+        // Measure the distance between where you started and where you've dragged to, vertically.
+        let delta =
+          day.slots.indexOf(slot) - dragStartDay.slots.indexOf(dragStartSlot);
+
+        // Remove "pending" status from your previous location
+        resetDragState();
+
+        draggedBlockSlots?.forEach((slot) => {
+          let slotPlusDelta =
+            day.slots[dragStartDay!.slots.indexOf(slot) + delta];
+          if (slotPlusDelta) {
+            slotPlusDelta.selectionPending = true;
+          }
+        });
+      } else {
+        // When drag-creating an event, dragging downward has different behaviour than dragging upward
+        // especially when you consider max_bookable_slots
+        let direction: "forward" | "backward" = "forward";
+
+        if (allow_booking && day === dragStartDay && dragStartSlot) {
+          if (slot.start_time < dragStartSlot.start_time) {
+            direction = "backward";
+          }
+
+          // Mark a given slot as selectionPending=true if it falls between where we started dragging, and where we're dragging now
+          day.slots.forEach((daySlot) => {
+            if (
+              direction === "forward"
+                ? daySlot.start_time >= dragStartSlot!.start_time &&
+                  daySlot.start_time <= slot.start_time
+                : daySlot.start_time <= dragStartSlot!.start_time &&
+                  daySlot.start_time >= slot.start_time
+            ) {
+              daySlot.selectionPending =
+                daySlot.availability !== AvailabilityStatus.BUSY ? true : false; // when you're dragging over a busy spot, don't set it to pending.
+            } else {
+              if (daySlot.selectionPending) {
+                daySlot.selectionPending = false;
+              }
+            }
+          });
+
+          // Don't let the user book more slots than are allowed
+          let tooManySlots =
+            day.slots.filter(
+              (s) =>
+                s.selectionPending ||
+                s.selectionStatus === SelectionStatus.SELECTED,
+            ).length > max_bookable_slots;
+          let pendingSlots = day.slots.filter((x) => x.selectionPending);
+          if (tooManySlots) {
+            let allowableSlots =
+              max_bookable_slots -
+              day.slots.filter(
+                (x) => x.selectionStatus === SelectionStatus.SELECTED,
+              ).length;
+            if (direction === "forward") {
+              // Only select the first N allowed slots AFTER your initially-dragegd one
+              pendingSlots
+                .slice(allowableSlots)
+                .forEach((slot) => (slot.selectionPending = false));
+            } else {
+              // Only select the first N allowed slots BEFORE your initially-dragegd one
+              pendingSlots
+                .slice(0, -allowableSlots)
+                .forEach((slot) => (slot.selectionPending = false));
+            }
+          }
+        }
+      }
+      days = [...days]; // re-render
+    }
+  }
+
+  function endDrag(slot: SelectableSlot | null, day: Day | null) {
+    // Mode: Drag-moving an existing block
+    if (draggingExistingBlock) {
+      if (day) {
+        // day is optional; endDrag with no "day" passed means user left the canvas / we should un-pend and reset our initially-dragged event
+
+        // Set all slots in our initially dragged block to unselected
+        draggedBlockSlots?.forEach(
+          (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
+        );
+
+        // Set all our pending slots to Selected
+        // (This is effectively the "Move" function)
+        days.forEach((day) =>
+          day.slots
+            .filter((x) => x.selectionPending)
+            .forEach((x) => {
+              if (x.availability !== AvailabilityStatus.BUSY) {
+                x.selectionStatus = SelectionStatus.SELECTED;
+              }
+            }),
+        );
+      }
+    } else {
+      // Mode: Drag-mreating a new event
+      days.forEach((day) =>
+        day.slots
+          .filter((x) => x.selectionPending)
+          .forEach((x) => {
+            x.selectionStatus = SelectionStatus.SELECTED;
+          }),
+      );
+    }
+    days = [...days]; // re-render
+    resetDragState();
+  }
+  //#endregion dragging
 </script>
 
 <style lang="scss">
@@ -780,6 +1037,7 @@
             display: inline-block;
             position: relative;
             z-index: 2;
+            display: none; // TODO: temporary, until we rework this to not collide w/ time ranges
 
             span {
               background: rgba(0, 0, 0, 0.5);
@@ -816,11 +1074,28 @@
 
           &.selected {
             background-color: purple;
+            box-shadow: none;
+            border-bottom: 1px solid transparent;
+          }
+
+          &.pending {
+            background-color: rgba(128, 0, 128, 0.3);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
           }
 
           &.busy {
             cursor: not-allowed;
+          }
+
+          .selected-heading {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0 3px;
+            font-size: 0.75rem;
+            z-index: 2;
           }
         }
       }
@@ -942,6 +1217,7 @@
   class:ticked={show_ticks}
   class:dated={allow_date_change}
   class:allow_booking
+  on:mouseleave={() => endDrag(null, null)}
 >
   {#if allow_date_change}
     <header class="change-dates">
@@ -1014,20 +1290,37 @@
                 slot.end_time,
               ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
               class="slot {slot.selectionStatus} {slot.availability}"
+              class:pending={slot.selectionPending}
               data-start-time={new Date(slot.start_time).toLocaleString()}
               data-end-time={new Date(slot.end_time).toLocaleString()}
-              disabled={slot.availability === AvailabilityStatus.BUSY}
-              on:click={() => {
-                if (allow_booking) {
-                  slot.selectionStatus =
-                    slot.selectionStatus === SelectionStatus.SELECTED
-                      ? SelectionStatus.UNSELECTED
-                      : slotSelection.length < max_bookable_slots
-                      ? SelectionStatus.SELECTED
-                      : SelectionStatus.UNSELECTED;
+              on:mousedown={() => {
+                if (
+                  slotSelection.length < max_bookable_slots ||
+                  slot.selectionStatus === SelectionStatus.SELECTED
+                ) {
+                  mouseIsDown = true;
+                }
+                startDrag(slot, day);
+              }}
+              on:mouseenter={() => {
+                addToDrag(slot, day);
+              }}
+              on:mouseup={() => {
+                if (mouseIsDown) {
+                  endDrag(slot, day);
                 }
               }}
-            />
+              on:keypress={(e) => {
+                if (e.code === "Space" || e.code === "Enter") {
+                  startDrag(slot, day);
+                  tick().then(() => endDrag(slot, day));
+                }
+              }}
+            >
+              {#if getBlockTimes(slot, day)}
+                <span class="selected-heading">{getBlockTimes(slot, day)}</span>
+              {/if}
+            </button>
           {/each}
         </div>
       </div>

@@ -45,6 +45,7 @@ export interface TimeSlot {
 export interface SelectableSlot extends TimeSlot {
   selectionStatus: SelectionStatus;
   availability: AvailabilityStatus;
+  selectionPending?: boolean;
 }
 
 export interface AvailabilityQuery {

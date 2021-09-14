@@ -126,6 +126,22 @@
   }
 </script>
 
+<style lang="scss">
+  main {
+    height: 100%;
+    overflow: hidden;
+    display: grid;
+    font-family: Arial, Helvetica, sans-serif;
+    position: relative;
+    z-index: 1;
+
+    .booker {
+      height: 100%;
+      overflow: auto;
+    }
+  }
+</style>
+
 <nylas-error {id} />
 <main>
   <section class="booker">
