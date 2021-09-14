@@ -1284,7 +1284,7 @@
           {/each}
         </div>
         <div class="slots">
-          {#each day.slots as slot, iter}
+          {#each day.slots as slot}
             <button
               data-available-calendars={slot.available_calendars.toString()}
               aria-label="{new Date(
@@ -1306,7 +1306,6 @@
                 startDrag(slot, day);
               }}
               on:mouseenter={() => {
-                // TODO: make sure touchstart / touchmove is good w this
                 addToDrag(slot, day);
               }}
               on:mouseup={() => {
