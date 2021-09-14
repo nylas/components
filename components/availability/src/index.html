@@ -141,6 +141,13 @@
               component.allow_date_change = JSON.parse(event.target.value);
             });
           });
+
+        document.querySelectorAll('input[name^="color-"]').forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            const type = elem.getAttribute("data-type");
+            component.style.setProperty(type, event.target.value);
+          });
+        });
       });
     </script>
     <style>
@@ -310,6 +317,26 @@
         <label>
           <input type="radio" name="allow-date-change" value="false" />
           Not allowed
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Colours</legend>
+        <label>
+          <input type="color" name="color-free" data-type="--free-color" />
+          Free color
+        </label>
+        <label>
+          <input type="color" name="color-busy" data-type="--busy-color" />
+          Busy color
+        </label>
+        <label>
+          <input
+            type="color"
+            name="color-partial"
+            data-type="--partial-color"
+          />
+          Partial color
         </label>
       </fieldset>
     </aside>

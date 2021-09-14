@@ -505,9 +505,8 @@
       access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
-      availabilityQuery,
-    );
+    const consolidatedAvailabilityForGivenDay =
+      await AvailabilityStore.getAvailability(availabilityQuery);
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
@@ -911,9 +910,6 @@
 <style lang="scss">
   @import "../../theming/variables.scss";
   $headerHeight: 40px;
-  $color-free: rgba(54, 210, 173, 0.4);
-  $color-busy: rgba(255, 100, 117, 0.4);
-  $color-partial: rgba(255, 255, 117, 0.4);
   main {
     height: 100%;
     overflow: hidden;
@@ -1026,14 +1022,14 @@
           }
 
           &.busy .inner {
-            background-color: $color-busy;
+            background-color: var(--busy-color, rgba(255, 100, 117, 0.4));
           }
           &.partial .inner {
-            background-color: $color-partial;
+            background-color: var(--partial-color, rgba(255, 255, 117, 0.4));
           }
 
           &.free .inner {
-            background-color: $color-free;
+            background-color: var(--free-color, rgba(54, 210, 173, 0.4));
           }
 
           .available-calendars {
