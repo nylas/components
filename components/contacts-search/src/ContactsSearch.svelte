@@ -16,6 +16,7 @@
   export let placeholder: string = "To";
   export let single: boolean = false;
   export let change: ChangeCallback | void;
+  export let show_dropdown: boolean = true;
 
   let selectedContacts: Participant[] = [];
   let term: string = ""; // TODO: rename to "term"
@@ -355,7 +356,7 @@
       </form>
     {/if}
   </div>
-  {#if isOpen}
+  {#if isOpen && show_dropdown}
     <div class="dropdown-content">
       <!-- <p class="active">{email}</p> -->
       {#if loading && !filteredContacts.length}

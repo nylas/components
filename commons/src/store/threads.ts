@@ -81,13 +81,6 @@ function initializeThreads() {
       set({});
     },
 
-    // addThreads: (incomingThreads: StoredThreads) => {
-    //   update((threads) => {
-    //     threads[incomingThreads.queryKey] = incomingThreads.data;
-    //     return { ...threads };
-    //   });
-    // },
-
     hydrateMessageInThread: (incomingMessage: Message, query: MailboxQuery) => {
       const queryKey = JSON.stringify(query);
       const foundThread = threadsMap[queryKey].find(
