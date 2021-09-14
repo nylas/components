@@ -113,10 +113,6 @@ describe("availability component", () => {
           cy.get(".slot.free").should("have.length", 28);
         });
     });
-
-    it("busy time slot is disabled", () => {
-      cy.get(".slot.busy").should("be.disabled");
-    });
   });
 
   describe("multiple availability sets", () => {
