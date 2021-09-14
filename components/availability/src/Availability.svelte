@@ -737,7 +737,7 @@
   let dragStartDay: Day | null = null;
   let draggingExistingBlock: boolean = false;
 
-  function resetDragState() {
+  function unPendSlots() {
     days.forEach((day) =>
       day.slots
         .filter((slot) => slot.selectionPending)
@@ -745,7 +745,10 @@
           slot.selectionPending = false;
         }),
     );
+  }
 
+  function resetDragState() {
+    unPendSlots();
     mouseIsDown = false;
     dragStartDay = null;
     dragStartSlot = null;
@@ -797,7 +800,7 @@
           day.slots.indexOf(slot) - dragStartDay.slots.indexOf(dragStartSlot);
 
         // Remove "pending" status from your previous location
-        resetDragState();
+        unPendSlots();
 
         draggedBlockSlots?.forEach((slot) => {
           let slotPlusDelta =
