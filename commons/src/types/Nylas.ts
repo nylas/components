@@ -221,6 +221,8 @@ export interface ContactListProperties extends Manifest {
   threads_to_load: number;
   contacts_to_load: number;
   show_names: boolean;
+  show_filter: boolean;
+  default_photo: string | null;
 }
 
 export interface ConversationProperties extends Manifest {

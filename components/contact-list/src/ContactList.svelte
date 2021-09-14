@@ -102,6 +102,16 @@
       "email",
     );
     sort_by = getPropertyValue(internalProps.sort_by, sort_by, "name");
+    show_filter = getPropertyValue(
+      internalProps.show_filter,
+      show_filter,
+      true,
+    );
+    default_photo = getPropertyValue(
+      internalProps.default_photo,
+      default_photo,
+      null,
+    );
     show_names = getPropertyValue(internalProps.show_names, show_names, true);
     contacts_to_load = getPropertyValue(
       internalProps.contacts_to_load,
