@@ -67,13 +67,6 @@
 </script>
 
 <style lang="scss">
-  div {
-    border: 3px solid #f00;
-    strong {
-      display: block;
-      font-style: italic;
-    }
-  }
 </style>
 
 {#if manifest && manifest.error}

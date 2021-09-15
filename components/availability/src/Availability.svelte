@@ -1070,7 +1070,7 @@
             display: none;
             position: relative;
             z-index: 2;
-            float: right;
+            text-align: right;
 
             span {
               background: rgba(0, 0, 0, 0.5);
