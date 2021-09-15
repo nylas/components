@@ -11,8 +11,12 @@
     fetchCleanConversations,
   } from "@commons";
   import { afterUpdate } from "svelte";
-  import { get_current_component } from "svelte/internal";
-  import { getEventDispatcher } from "@commons/methods/component";
+  import { get_current_component, onMount } from "svelte/internal";
+  import {
+    buildInternalProps,
+    getEventDispatcher,
+    getPropertyValue,
+  } from "@commons/methods/component";
   import type {
     Participant,
     ConversationProperties,
@@ -21,6 +25,7 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
+  import "../../contacts-search/src/ContactsSearch.svelte";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -30,30 +35,48 @@
   export let show_avatars: boolean | string;
   export let show_reply: boolean | string;
 
-  $: manifest =
-    $ManifestStore[JSON.stringify({ component_id: id, access_token })];
+  let manifest: Partial<ConversationProperties> = {};
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
+  onMount(async () => {
+    manifest = ((await $ManifestStore[
+      JSON.stringify({ component_id: id, access_token })
+    ]) || {}) as ConversationProperties;
+  });
+
   $: messages = conversation?.messages || [];
 
   let participants: Participant[] = [];
-  $: participants = conversation ? conversation.participants : [];
+  $: participants = conversation?.participants || [];
 
   let main: Element;
 
-  $: getPropertyValue = (name: keyof ConversationProperties) => {
-    if ($$props.hasOwnProperty(name)) {
-      return $$props[name];
-    } else if (manifest?.hasOwnProperty(name)) {
-      return manifest[name];
+  let internalProps: SvelteAllProps;
+  $: {
+    const rebuiltProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<SvelteAllProps>;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
+      internalProps = rebuiltProps;
     }
-  };
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+    ) as Partial<SvelteAllProps>;
+  }
 
-  $: theme = getPropertyValue("theme") ?? "theme-1";
-  $: show_avatars = getPropertyValue("show_avatars") ?? undefined;
-  $: show_reply = getPropertyValue("show_reply") ?? undefined;
+  $: {
+    theme = getPropertyValue(internalProps.theme, theme, "theme-1");
+    show_avatars = getPropertyValue(
+      internalProps.show_avatars,
+      show_avatars,
+      false,
+    );
+    show_reply = getPropertyValue(internalProps.show_reply, show_reply, false);
+  }
 
   $: hideAvatars = show_avatars === false || show_avatars === "false"; // can be boolean or string, for developer experience reasons. Awkward for us, better for them.
 
@@ -133,39 +156,36 @@
 
   let replyBody = "";
 
-  $: lastMessage = messages[messages.length - 1];
+  const handleContactsChange =
+    (field: "to" | "from" | "cc") => (data: Participant[]) => {
+      reply[field] = data;
+    };
 
-  $: {
-    // If you sent the last message, your TO is the reply's TO.
-    // If someone else sent the last message, your TO is the reply's FROM.
-    if (lastMessage) {
-      if (lastMessage.from[0].email === you.email_address) {
-        reply.to = lastMessage.to;
-      } else {
-        reply.to = lastMessage.from;
-      }
-    }
+  let lastMessage: Message;
+  let lastMessageInitialised = false;
+  $: if (messages) {
+    lastMessage = messages[messages.length - 1];
+    lastMessageInitialised = true;
   }
 
-  $: {
-    if (lastMessage) {
-      if (lastMessage.from[0].email === you.email_address) {
-        reply.cc = lastMessage?.cc || [];
-      } else {
-        reply.cc = [...lastMessage.cc, ...lastMessage.to];
-      }
-
-      reply.cc = reply.cc.filter(
-        (recipient) => recipient.email !== you.email_address,
-      );
+  // If you sent the last message, initilize your TO to the reply's TO.
+  // If someone else sent the last message, initialize your TO to the reply's FROM.
+  $: if (lastMessage && lastMessageInitialised) {
+    lastMessageInitialised = false;
+    if (lastMessage.from[0].email === you.email_address) {
+      reply.to = lastMessage.to;
+      reply.cc = lastMessage?.cc || [];
+    } else {
+      reply.to = lastMessage.from;
+      reply.cc = [...lastMessage.cc, ...lastMessage.to];
     }
+    reply.cc = reply.cc.filter(
+      (recipient) => recipient.email !== you.email_address,
+    );
   }
 
-  $: {
-    if (you.email_address) {
-      //  plz halp
-      reply.from = [{ name: you.name, email: you.email_address }];
-    }
+  $: if (you.email_address) {
+    reply.from = [{ name: you.name, email: you.email_address }];
   }
 
   let replyStatus: string = "";
@@ -228,7 +248,6 @@
     position: relative;
     background-color: #eee;
   }
-
   $avatar-size: 32px;
   $min-horizontal-space-between-participants: 4rem;
 
@@ -363,18 +382,21 @@
       background: #ddd;
       padding: 1rem;
       margin: 1rem -1rem -1rem;
+      form {
+        button[type="submit"] {
+          &:disabled {
+            cursor: not-allowed;
+            background: gray;
+          }
+        }
+      }
+      span.to {
+        --background: gray;
+      }
       span.to,
       span.cc {
         display: inline-block;
         padding: 0 1rem 0 0;
-        &:before {
-          content: "to: ";
-          font-weight: bold;
-        }
-        &:is(.cc):before {
-          content: "cc: ";
-          font-weight: bold;
-        }
 
         & > span {
           display: inline-block;
@@ -501,8 +523,9 @@
                   cc: reply.cc,
                   reply_to_message_id: lastMessage.id,
                   bcc: [],
-                }).then(() => {
-                  setConversation();
+                }).then((res) => {
+                  const conversationQuery = { queryKey: queryKey, data: res };
+                  ConversationStore.addMessageToThread(conversationQuery);
                   replyStatus = "";
                   replyBody = "";
                 });
@@ -510,10 +533,22 @@
             }}
           >
             <span class="to">
-              {#each reply.to as to}<span>{to.email}</span>{/each}
+              <nylas-contacts-search
+                placeholder="to:"
+                change={handleContactsChange("to")}
+                contacts={reply.to}
+                value={reply.to}
+                show_dropdown={false}
+              />
             </span>
             <span class="cc">
-              {#each reply.cc as cc}<span>{cc.email}</span>{/each}
+              <nylas-contacts-search
+                placeholder="cc:"
+                change={handleContactsChange("cc")}
+                contacts={reply.cc}
+                value={reply.cc}
+                show_dropdown={false}
+              />
             </span>
             <label class="response">
               <input
@@ -521,7 +556,7 @@
                 placeholder="Type a Response"
                 bind:value={replyBody}
               />
-              <button type="submit">
+              <button type="submit" disabled={!reply.to.length}>
                 {#if replyStatus === "sending"}Sending...{:else}Send{/if}
               </button>
             </label>
