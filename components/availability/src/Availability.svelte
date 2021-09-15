@@ -57,6 +57,9 @@
   export let attendees_to_show: number;
   export let allow_date_change: boolean;
   export let required_participants: string[];
+  export let busy_color: string;
+  export let partial_color: string;
+  export let free_color: string;
   //#endregion props
 
   //#region mount and prop initialization
@@ -147,6 +150,13 @@
       required_participants,
       [],
     );
+    busy_color = getPropertyValue(internalProps.busy_color, busy_color, "");
+    partial_color = getPropertyValue(
+      internalProps.partial_color,
+      partial_color,
+      "",
+    );
+    free_color = getPropertyValue(internalProps.free_color, free_color, "");
   }
 
   $: {
@@ -1022,14 +1032,14 @@
           }
 
           &.busy .inner {
-            background-color: var(--busy-color, rgba(255, 100, 117, 0.4));
+            background-color: var(--busy-color, #ff647566);
           }
           &.partial .inner {
-            background-color: var(--partial-color, rgba(255, 255, 117, 0.4));
+            background-color: var(--partial-color, #ffff7566);
           }
 
           &.free .inner {
-            background-color: var(--free-color, rgba(54, 210, 173, 0.4));
+            background-color: var(--free-color, #36d2ad66);
           }
 
           .available-calendars {
@@ -1217,6 +1227,7 @@
   class:dated={allow_date_change}
   class:allow_booking
   on:mouseleave={() => endDrag(null, null)}
+  style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
 >
   {#if allow_date_change}
     <header class="change-dates">
