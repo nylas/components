@@ -61,7 +61,6 @@
   export let show_star: boolean;
   export let unread: boolean | null = null;
   export let you: Partial<Account> = {};
-  export let is_starred: boolean;
   export let show_contact_avatar: boolean;
   export let clean_conversation: boolean;
   export let show_expanded_email_view_onload: boolean;
@@ -177,7 +176,6 @@
       "default",
     );
     thread_id = getPropertyValue(internalProps.thread_id, thread_id, "");
-    is_starred = getPropertyValue(internalProps.is_starred, is_starred, false);
     show_contact_avatar = getPropertyValue(
       internalProps.show_contact_avatar,
       show_contact_avatar,

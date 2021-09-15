@@ -170,17 +170,15 @@ export interface AgendaProperties extends Manifest {
 export interface EmailProperties extends Manifest {
   show_number_of_messages: boolean;
   show_received_timestamp: boolean;
-  is_clean_conversation_enabled: boolean;
   thread_id: string;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   show_contact_avatar: boolean;
   clean_conversation: boolean;
-  query_parameters: ThreadsQuery;
-  keyword_to_search: string;
   show_star: boolean;
-  show_thread_checkbox: boolean;
-  unread_status: EmailUnreadStatus;
   show_expanded_email_view_onload: boolean;
+  unread: boolean;
+  show_thread_actions: boolean;
+  click_action: "default" | "mailbox" | "custom";
 }
 
 export interface MailboxProperties extends Manifest {
@@ -191,7 +189,7 @@ export interface MailboxProperties extends Manifest {
   actions_bar: MailboxActions[];
   header: string;
   keyword_to_search: string;
-  query_parameters: ThreadsQuery;
+  query_string: string;
   items_per_page: number;
 }
 

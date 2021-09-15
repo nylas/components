@@ -50,7 +50,8 @@
   export let header: string | null;
   export let actions_bar: MailboxActions[];
   export let keyword_to_search: string | null;
-  export let query_parameters: ThreadsQuery | null; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
+  // query_string format => "in=trash from=phil.r@nylas.com"
+  export let query_string: string | null; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
   export let items_per_page: number = 13;
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
@@ -113,7 +114,12 @@
     hasComponentLoaded = true;
   });
 
-  $: queryParams = query_parameters || queryParams;
+  $: queryParams = {
+    ...queryParams,
+    ...Object.fromEntries(
+      new URLSearchParams(query_string?.replaceAll(" ", "&")),
+    ),
+  };
 
   let inboxThreads: Thread[]; // threads currently in the inbox
   $: if (threads) {
@@ -156,6 +162,11 @@
       13,
     );
     header = getPropertyValue(internalProps.header, header, null);
+    query_string = getPropertyValue(
+      internalProps.query_string,
+      query_string,
+      null,
+    );
     actions_bar = getPropertyValue(internalProps.actions_bar, actions_bar, []);
   }
 
@@ -610,7 +621,7 @@
     {#if openedEmailData}
       <div class="email-container">
         <nylas-email
-          is_clean_conversation_enabled={false}
+          clean_conversation={false}
           thread={openedEmailData}
           {you}
           {show_star}
@@ -730,7 +741,7 @@
                 </div>{/if}
               <div class="email-container">
                 <nylas-email
-                  is_clean_conversation_enabled={false}
+                  clean_conversation={false}
                   {thread}
                   {you}
                   {show_star}
