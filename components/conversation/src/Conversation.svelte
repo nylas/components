@@ -49,7 +49,7 @@
   $: messages = conversation?.messages || [];
 
   let participants: Participant[] = [];
-  $: participants = conversation ? conversation.participants : [];
+  $: participants = conversation?.participants || [];
 
   let main: Element;
 
@@ -158,35 +158,34 @@
 
   const handleContactsChange =
     (field: "to" | "from" | "cc") => (data: Participant[]) => {
-      console.log(field, data);
       reply[field] = data;
-      console.log(reply);
     };
 
-  $: lastMessage = messages[messages.length - 1];
-
-  $: {
-    // If you sent the last message, your TO is the reply's TO.
-    // If someone else sent the last message, your TO is the reply's FROM.
-    if (lastMessage) {
-      if (lastMessage.from[0].email === you.email_address) {
-        reply.to = lastMessage.to;
-        reply.cc = [...lastMessage?.cc, ...reply.cc] || [];
-      } else {
-        reply.to = lastMessage.from;
-        reply.cc = [...lastMessage.cc, ...lastMessage.to];
-      }
-      reply.cc = reply.cc.filter(
-        (recipient) => recipient.email !== you.email_address,
-      );
-    }
+  let lastMessage: Message;
+  let lastMessageInitialised = false;
+  $: if (messages) {
+    lastMessage = messages[messages.length - 1];
+    lastMessageInitialised = true;
   }
 
-  $: {
-    if (you.email_address) {
-      //  plz halp
-      reply.from = [{ name: you.name, email: you.email_address }];
+  // If you sent the last message, initilize your TO to the reply's TO.
+  // If someone else sent the last message, initialize your TO to the reply's FROM.
+  $: if (lastMessage && lastMessageInitialised) {
+    lastMessageInitialised = false;
+    if (lastMessage.from[0].email === you.email_address) {
+      reply.to = lastMessage.to;
+      reply.cc = lastMessage?.cc || [];
+    } else {
+      reply.to = lastMessage.from;
+      reply.cc = [...lastMessage.cc, ...lastMessage.to];
     }
+    reply.cc = reply.cc.filter(
+      (recipient) => recipient.email !== you.email_address,
+    );
+  }
+
+  $: if (you.email_address) {
+    reply.from = [{ name: you.name, email: you.email_address }];
   }
 
   let replyStatus: string = "";
@@ -383,6 +382,14 @@
       background: #ddd;
       padding: 1rem;
       margin: 1rem -1rem -1rem;
+      form {
+        button[type="submit"] {
+          &:disabled {
+            cursor: not-allowed;
+            background: gray;
+          }
+        }
+      }
       span.to {
         --background: gray;
       }
@@ -549,7 +556,7 @@
                 placeholder="Type a Response"
                 bind:value={replyBody}
               />
-              <button type="submit">
+              <button type="submit" disabled={!reply.to.length}>
                 {#if replyStatus === "sending"}Sending...{:else}Send{/if}
               </button>
             </label>
