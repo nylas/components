@@ -14,6 +14,7 @@
   export let access_token: string = "";
   export let event_title: string;
   export let event_description: string;
+  export let show_hosts: "show" | "hide";
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -47,37 +48,66 @@
       event_description,
       "",
     );
+    show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
   }
 
-  $: editableProperties = [
-    {
-      label: "Event Title",
-      value: event_title,
-    },
-    {
-      label: "Event Description",
-      value: event_description,
-    },
-  ];
+  $: manifestProperties = {
+    event_title,
+    event_description,
+    show_hosts,
+  };
   // #endregion mount and prop initialization
 
   function saveProperties() {
     console.log("Saving the following properties:");
-    console.log(editableProperties);
+    Object.entries(manifestProperties).forEach(([k, v]) => {
+      console.log(k, v);
+    });
   }
 </script>
 
 <style lang="scss">
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
 </style>
 
 {#if manifest && manifest.error}
   <nylas-domain-error {id} />
 {:else}
-  {#each editableProperties as prop}
+  <fieldset>
     <label>
-      <strong>{prop.label}</strong>
-      <input value={prop.value} />
+      <strong>Event Title</strong>
+      <input type="text" bind:value={manifestProperties.event_title} />
     </label>
-  {/each}
+  </fieldset>
+  <fieldset>
+    <label>
+      <strong>Event Description</strong>
+      <input type="text" bind:value={manifestProperties.event_description} />
+    </label>
+  </fieldset>
+  <fieldset>
+    <strong>Show meeting hosts to the end-user?</strong>
+    <label>
+      <input
+        type="radio"
+        bind:group={manifestProperties.show_hosts}
+        value="show"
+      />
+      <span>Show Hosts</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        bind:group={manifestProperties.show_hosts}
+        value="hide"
+      />
+      <span>Hide Hosts</span>
+    </label>
+  </fieldset>
+
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}
