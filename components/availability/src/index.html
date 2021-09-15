@@ -145,7 +145,7 @@
         document.querySelectorAll('input[name^="color-"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
             const type = elem.getAttribute("data-type");
-            component.style.setProperty(type, event.target.value);
+            component[type] = event.target.value;
           });
         });
       });
@@ -321,21 +321,17 @@
       </fieldset>
 
       <fieldset>
-        <legend>Colours (via CSS var)</legend>
+        <legend>Colours</legend>
         <label>
-          <input type="color" name="color-free" data-type="--free-color" />
+          <input type="color" name="color-free" data-type="free_color" />
           Free color
         </label>
         <label>
-          <input type="color" name="color-busy" data-type="--busy-color" />
+          <input type="color" name="color-busy" data-type="busy_color" />
           Busy color
         </label>
         <label>
-          <input
-            type="color"
-            name="color-partial"
-            data-type="--partial-color"
-          />
+          <input type="color" name="color-partial" data-type="partial_color" />
           Partial color
         </label>
       </fieldset>

@@ -150,13 +150,21 @@
       required_participants,
       [],
     );
-    busy_color = getPropertyValue(internalProps.busy_color, busy_color, "");
+    busy_color = getPropertyValue(
+      internalProps.busy_color,
+      busy_color,
+      "#ff647566",
+    );
     partial_color = getPropertyValue(
       internalProps.partial_color,
       partial_color,
-      "",
+      "#ffff7566",
     );
-    free_color = getPropertyValue(internalProps.free_color, free_color, "");
+    free_color = getPropertyValue(
+      internalProps.free_color,
+      free_color,
+      "#36d2ad66",
+    );
   }
 
   $: {
