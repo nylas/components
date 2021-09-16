@@ -92,6 +92,8 @@
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
+  $: console.log({ editorManifest });
+
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
