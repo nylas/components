@@ -20,6 +20,10 @@ export interface Manifest extends NylasManifest {
   attendees_to_show: number;
   allow_date_change: boolean;
   required_participants: string[];
+  show_hosts: "show" | "hide";
+  partial_color: string;
+  free_color: string;
+  busy_color: string;
 }
 
 export interface Calendar {
