@@ -19,8 +19,15 @@ interface _Event {
   locationString?: string;
   attendeeStatus?: "yes" | "no" | "noreply" | "maybe";
   isNewEvent?: boolean;
+  conferencing?: EventConferencing;
 }
 
+export interface EventConferencing {
+  provider?: "WebEx" | "Zoom Meeting" | "GoToMeeting" | "Google Meet";
+  details: {
+    url: string;
+  };
+}
 export interface Timespan {
   start_time: number;
   end_time: number;

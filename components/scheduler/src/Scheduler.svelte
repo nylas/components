@@ -17,6 +17,7 @@
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
   import "../../availability/src/Availability.svelte";
+  import { event } from "cypress/types/jquery";
 
   // #region props
   export let id: string = "";
@@ -27,6 +28,8 @@
   export let booking_label: string;
   export let event_title: string;
   export let event_description: string;
+  export let event_location: string;
+  export let event_conferencing: string;
   export let slots_to_book: TimeSlot[] = [];
   export let notification_mode: NotificationMode;
   export let notification_message: string;
@@ -85,6 +88,16 @@
       event_description,
       "",
     );
+    event_location = getPropertyValue(
+      internalProps.event_location,
+      event_location,
+      "",
+    );
+    event_conferencing = getPropertyValue(
+      internalProps.event_conferencing,
+      event_conferencing,
+      "",
+    );
     slots_to_book = getPropertyValue(
       internalProps.slots_to_book,
       slots_to_book,
@@ -120,6 +133,13 @@
       let postableEvent: Partial<TimespanEvent> = {
         title: event_title,
         description: event_description,
+        location: event_location,
+        conferencing: {
+          provider: "Zoom Meeting", // TODO: make this dynamic
+          details: {
+            url: event_conferencing,
+          },
+        },
         participants: event.available_calendars.map((c) => {
           return {
             email: c,
@@ -197,6 +217,14 @@
           <li>
             <h3>{event_title}: {event_description}</h3>
             {timeSlot.start_time.toLocaleString()} to {timeSlot.end_time.toLocaleString()}
+            <ul>
+              {#if event_location}
+                <li>{event_location}</li>
+              {/if}
+              {#if event_conferencing}
+                <li>{event_conferencing}</li>
+              {/if}
+            </ul>
           </li>
         {/each}
       </ul>
