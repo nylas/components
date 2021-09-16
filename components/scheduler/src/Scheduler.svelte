@@ -93,7 +93,7 @@
     notification_mode = getPropertyValue(
       internalProps.notification_mode,
       notification_mode,
-      NotificationMode.SEND_MESSAGE,
+      NotificationMode.SHOW_MESSAGE,
     );
     notification_message = getPropertyValue(
       internalProps.notification_message,
