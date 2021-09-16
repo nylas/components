@@ -67,33 +67,29 @@
 </script>
 
 <style lang="scss">
-  fieldset {
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
 </style>
 
 {#if manifest && manifest.error}
   <nylas-domain-error {id} />
 {:else}
-  <fieldset>
+  <div>
     <label>
       <strong>Event Title</strong>
       <input type="text" bind:value={manifestProperties.event_title} />
     </label>
-  </fieldset>
-  <fieldset>
+  </div>
+  <div>
     <label>
       <strong>Event Description</strong>
       <input type="text" bind:value={manifestProperties.event_description} />
     </label>
-  </fieldset>
-  <fieldset>
+  </div>
+  <div>
     <strong>Show meeting hosts to the end-user?</strong>
     <label>
       <input
         type="radio"
+        name="show_hosts"
         bind:group={manifestProperties.show_hosts}
         value="show"
       />
@@ -102,12 +98,13 @@
     <label>
       <input
         type="radio"
+        name="show_hosts"
         bind:group={manifestProperties.show_hosts}
         value="hide"
       />
       <span>Hide Hosts</span>
     </label>
-  </fieldset>
+  </div>
 
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}
