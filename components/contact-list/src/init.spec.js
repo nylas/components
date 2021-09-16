@@ -200,6 +200,7 @@ describe("Optional Prop Handling", () => {
       const component = element[0];
       component.sort_by = "last_emailed";
     });
+    cy.get(".loader").should("not.exist");
     cy.get("nylas-contact-list")
       .find(".contact")
       .should("have.length.greaterThan", 1);

@@ -649,23 +649,5 @@ describe("availability component", () => {
           );
         });
     });
-    it("changes colour by css var", () => {
-      cy.get(".epoch.partial .inner").should(
-        "not.have.css",
-        "background-color",
-        "rgb(0, 0, 0)",
-      );
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.style.setProperty("--partial-color", "#000");
-          cy.get(".epoch.partial .inner").should(
-            "have.css",
-            "background-color",
-            "rgb(0, 0, 0)",
-          );
-        });
-    });
   });
 });
