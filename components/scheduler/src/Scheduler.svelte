@@ -16,8 +16,6 @@
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
-  import "../../availability/src/Availability.svelte";
-  import { event } from "cypress/types/jquery";
 
   // #region props
   export let id: string = "";
