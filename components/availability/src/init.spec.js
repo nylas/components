@@ -428,34 +428,35 @@ describe("availability component", () => {
       });
 
       cy.wait(1000); // TODO: have this as a wait for render to be complete instead of a timer
+      cy.get(".slot.free").should("exist");
       expect(selectedTimeslots).to.have.lengthOf(0);
       cy.get(".slot.free")
         .eq(0)
         .click()
         .then(() => {
           expect(selectedTimeslots).to.have.lengthOf(1);
-        });
-      cy.get(".slot.free")
-        .eq(3)
-        .click()
-        .then(() => {
-          expect(selectedTimeslots).to.have.lengthOf(2);
-        });
-      cy.get(".slot.free")
-        .eq(1)
-        .click()
-        .then(() => {
-          expect(selectedTimeslots).to.have.lengthOf(2);
-          expect(selectedTimeslots[0].end_time.toISOString()).eq(
-            consecutiveSlotEndTime,
-          );
-          expect(selectedTimeslots[1].start_time.toISOString()).eq(
-            singularSlotStartTime,
-          );
-          expect(selectedTimeslots[1].end_time.toISOString()).eq(
-            singularSlotEndTime,
-          );
-          done();
+          cy.get(".slot.free")
+            .eq(3)
+            .click()
+            .then(() => {
+              expect(selectedTimeslots).to.have.lengthOf(2);
+              cy.get(".slot.free")
+                .eq(1)
+                .click()
+                .then(() => {
+                  expect(selectedTimeslots).to.have.lengthOf(2);
+                  expect(selectedTimeslots[0].end_time.toISOString()).eq(
+                    consecutiveSlotEndTime,
+                  );
+                  expect(selectedTimeslots[1].start_time.toISOString()).eq(
+                    singularSlotStartTime,
+                  );
+                  expect(selectedTimeslots[1].end_time.toISOString()).eq(
+                    singularSlotEndTime,
+                  );
+                  done();
+                });
+            });
         });
     });
   });
