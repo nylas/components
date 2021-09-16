@@ -5,10 +5,10 @@ export interface Message {
   component_id?: string;
   subject?: string;
   body?: string;
-  from: Participant[];
+  from?: Participant[];
   to: Participant[];
-  cc: Participant[];
-  bcc: Participant[];
+  cc?: Participant[];
+  bcc?: Participant[];
   file_ids?: string[];
   send_at?: number | null;
 }
