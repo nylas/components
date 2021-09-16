@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import { ManifestStore, AvailabilityStore } from "../../../commons/src";
+  import { ManifestStore, AvailabilityStore, sendMessage } from "@commons";
   import { createEvent } from "@commons/connections/events";
   import { get_current_component } from "svelte/internal";
   import {
@@ -14,6 +14,7 @@
   import type { Manifest } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
+  import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
   import "../../availability/src/Availability.svelte";
 
@@ -27,6 +28,9 @@
   export let event_title: string;
   export let event_description: string;
   export let slots_to_book: TimeSlot[] = [];
+  export let notification_mode: NotificationMode;
+  export let notification_message: string;
+  export let notification_subject: string;
   // #endregion props
 
   //#region mount and prop initialization
@@ -86,10 +90,30 @@
       slots_to_book,
       [],
     );
+    notification_mode = getPropertyValue(
+      internalProps.notification_mode,
+      notification_mode,
+      NotificationMode.SHOW_MESSAGE,
+    );
+    notification_message = getPropertyValue(
+      internalProps.notification_message,
+      notification_message,
+      "Thank you for scheduling!",
+    );
+    notification_subject = getPropertyValue(
+      internalProps.notification_subject,
+      notification_subject,
+      "Invitation",
+    );
   }
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   // #endregion mount and prop initialization
+
+  let show_success_notification = false;
+  $: if (slots_to_book.length) {
+    show_success_notification = false;
+  }
 
   async function bookTimeSlots(events: TimeSlot[]) {
     const bookings = events.map(async (event) => {
@@ -115,10 +139,30 @@
         } as EventQuery,
       );
     });
-    await Promise.all(bookings);
+    const eventBookings = await Promise.all(bookings);
 
     dispatchEvent("bookedEvents", {});
 
+    if (notification_mode === NotificationMode.SEND_MESSAGE) {
+      eventBookings.map((event, i) => {
+        console.log(`event ${i}`, event);
+        const event_participants = event.participants?.map((participant) => {
+          const { email, name } = participant;
+          let to: { email: string; name?: string } = { email };
+          if (name) to["name"] = name; // Only assign name if not null, else we get error
+          return to;
+        });
+        if (event_participants) {
+          sendMessage(id, {
+            to: event_participants,
+            body: `${notification_message}`,
+            subject: `${notification_subject}`,
+          });
+        }
+      });
+    } else if (notification_mode === NotificationMode.SHOW_MESSAGE) {
+      show_success_notification = true;
+    }
     // Reset the Availability store and force a re-render
     // TODO: it's possible that this isn't good enough / will involve a race condition between provider sync and return. Need to test.
     AvailabilityStore.reset();
@@ -159,6 +203,9 @@
       <button on:click={() => bookTimeSlots(slots_to_book)}
         >{booking_label}</button
       >
+    {/if}
+    {#if show_success_notification}
+      <p>{notification_message}</p>
     {/if}
   </section>
 </main>
