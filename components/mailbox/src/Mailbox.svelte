@@ -34,7 +34,6 @@
   } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
-  import { has } from "cypress/types/lodash";
 
   let manifest: Partial<MailboxProperties> = {};
 
@@ -165,6 +164,11 @@
     query_string = getPropertyValue(
       internalProps.query_string,
       query_string,
+      null,
+    );
+    keyword_to_search = getPropertyValue(
+      internalProps.keyword_to_search,
+      keyword_to_search,
       null,
     );
     actions_bar = getPropertyValue(internalProps.actions_bar, actions_bar, []);
