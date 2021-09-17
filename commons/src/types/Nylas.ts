@@ -178,10 +178,7 @@ export interface EmailProperties extends Manifest {
   show_expanded_email_view_onload: boolean;
   unread: boolean;
   show_thread_actions: boolean;
-  click_action:
-    | "default"
-    | "mailbox"
-    | ((event: MouseEvent | KeyboardEvent, thread: Thread) => any);
+  click_action: "default" | "mailbox" | "custom";
 }
 
 export interface MailboxProperties extends Manifest {
