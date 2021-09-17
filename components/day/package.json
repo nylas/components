@@ -13,7 +13,7 @@
     "start": "echo 'Nothing to start'"
   },
   "main": "index.js",
-  "gitHead": "d17b8427a95e98ece322fa59a0dc65aaec6e4cdf",
+  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c",
   "dependencies": {
     "d3": "^6.5.0"
   },
