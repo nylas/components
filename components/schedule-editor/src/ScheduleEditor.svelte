@@ -14,6 +14,8 @@
   export let access_token: string = "";
   export let event_title: string;
   export let event_description: string;
+  export let event_location: string;
+  export let event_conferencing: string;
   export let show_hosts: "show" | "hide";
 
   //#region mount and prop initialization
@@ -48,12 +50,24 @@
       event_description,
       "",
     );
+    event_conferencing = getPropertyValue(
+      internalProps.event_conferencing,
+      event_conferencing,
+      "",
+    );
+    event_location = getPropertyValue(
+      internalProps.event_location,
+      event_location,
+      "",
+    );
     show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
   }
 
   $: manifestProperties = {
     event_title,
     event_description,
+    event_location,
+    event_conferencing,
     show_hosts,
   };
   // #endregion mount and prop initialization
@@ -67,13 +81,6 @@
 </script>
 
 <style lang="scss">
-  div {
-    border: 3px solid #f00;
-    strong {
-      display: block;
-      font-style: italic;
-    }
-  }
 </style>
 
 {#if manifest && manifest.error}
@@ -89,6 +96,18 @@
     <label>
       <strong>Event Description</strong>
       <input type="text" bind:value={manifestProperties.event_description} />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Event Location</strong>
+      <input type="text" bind:value={manifestProperties.event_location} />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Event Conferencing</strong>
+      <input type="url" bind:value={manifestProperties.event_conferencing} />
     </label>
   </div>
   <div role="radiogroup" aria-labelledby="show_hosts">
