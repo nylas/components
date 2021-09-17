@@ -34,7 +34,6 @@
   } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
-  import { has } from "cypress/types/lodash";
 
   let manifest: Partial<MailboxProperties> = {};
 
