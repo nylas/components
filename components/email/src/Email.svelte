@@ -437,6 +437,7 @@
 
   function handleThreadKeypress(e: KeyboardEvent) {
     if (message && (!thread_id || !thread)) return;
+    else if (click_action === "mailbox" && activeThread.expanded) return;
     e.preventDefault();
     if (e.code === "Enter") {
       handleThread(e);
