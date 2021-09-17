@@ -166,6 +166,11 @@
       query_string,
       null,
     );
+    keyword_to_search = getPropertyValue(
+      internalProps.keyword_to_search,
+      keyword_to_search,
+      null,
+    );
     actions_bar = getPropertyValue(internalProps.actions_bar, actions_bar, []);
   }
 
