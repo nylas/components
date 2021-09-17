@@ -57,7 +57,10 @@
   export let show_number_of_messages: boolean;
   export let thread: Thread | null;
   export let message: Message | null;
-  export let click_action: "default" | "mailbox" | "custom" = "default";
+  export let click_action:
+    | "default"
+    | "mailbox"
+    | ((event: MouseEvent | KeyboardEvent, thread: Thread) => any) = "default";
   export let show_star: boolean;
   export let unread: boolean | null = null;
   export let you: Partial<Account> = {};
@@ -380,12 +383,14 @@
           });
         }, 50);
       }
+      dispatchEvent("threadClicked", {
+        event: e,
+        thread: activeThread,
+      });
       //#endregion open thread + messages
+    } else if (typeof click_action === "function") {
+      click_action(e, activeThread);
     }
-    dispatchEvent("threadClicked", {
-      event: e,
-      thread: activeThread,
-    });
     current_tooltip_id = "";
   }
 
@@ -437,6 +442,7 @@
 
   function handleThreadKeypress(e: KeyboardEvent) {
     if (message && (!thread_id || !thread)) return;
+    else if (click_action === "mailbox" && activeThread.expanded) return;
     e.preventDefault();
     if (e.code === "Enter") {
       handleThread(e);
