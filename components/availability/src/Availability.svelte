@@ -57,6 +57,9 @@
   export let attendees_to_show: number;
   export let allow_date_change: boolean;
   export let required_participants: string[];
+  export let busy_color: string;
+  export let partial_color: string;
+  export let free_color: string;
   //#endregion props
 
   //#region mount and prop initialization
@@ -146,6 +149,21 @@
       internalProps.required_participants,
       required_participants,
       [],
+    );
+    busy_color = getPropertyValue(
+      internalProps.busy_color,
+      busy_color,
+      "#ff647566",
+    );
+    partial_color = getPropertyValue(
+      internalProps.partial_color,
+      partial_color,
+      "#ffff7566",
+    );
+    free_color = getPropertyValue(
+      internalProps.free_color,
+      free_color,
+      "#36d2ad66",
     );
   }
 
@@ -505,9 +523,8 @@
       access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
-      availabilityQuery,
-    );
+    const consolidatedAvailabilityForGivenDay =
+      await AvailabilityStore.getAvailability(availabilityQuery);
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
@@ -911,9 +928,6 @@
 <style lang="scss">
   @import "../../theming/variables.scss";
   $headerHeight: 40px;
-  $color-free: rgba(54, 210, 173, 0.4);
-  $color-busy: rgba(255, 100, 117, 0.4);
-  $color-partial: rgba(255, 255, 117, 0.4);
   main {
     height: 100%;
     overflow: hidden;
@@ -1026,14 +1040,14 @@
           }
 
           &.busy .inner {
-            background-color: $color-busy;
+            background-color: var(--busy-color, #ff647566);
           }
           &.partial .inner {
-            background-color: $color-partial;
+            background-color: var(--partial-color, #ffff7566);
           }
 
           &.free .inner {
-            background-color: $color-free;
+            background-color: var(--free-color, #36d2ad66);
           }
 
           .available-calendars {
@@ -1221,6 +1235,7 @@
   class:dated={allow_date_change}
   class:allow_booking
   on:mouseleave={() => endDrag(null, null)}
+  style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
 >
   {#if allow_date_change}
     <header class="change-dates">
