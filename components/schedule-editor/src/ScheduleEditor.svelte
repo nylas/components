@@ -67,6 +67,13 @@
 </script>
 
 <style lang="scss">
+  div {
+    border: 3px solid #f00;
+    strong {
+      display: block;
+      font-style: italic;
+    }
+  }
 </style>
 
 {#if manifest && manifest.error}
@@ -84,8 +91,8 @@
       <input type="text" bind:value={manifestProperties.event_description} />
     </label>
   </div>
-  <div>
-    <strong>Show meeting hosts to the end-user?</strong>
+  <div role="radiogroup" aria-labelledby="show_hosts">
+    <strong id="show_hosts">Show meeting hosts to the end-user?</strong>
     <label>
       <input
         type="radio"

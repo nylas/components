@@ -92,8 +92,6 @@
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
-  $: console.log({ editorManifest });
-
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
@@ -539,8 +537,9 @@
       access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay =
-      await AvailabilityStore.getAvailability(availabilityQuery);
+    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
+      availabilityQuery,
+    );
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
