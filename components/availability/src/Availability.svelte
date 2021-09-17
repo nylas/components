@@ -32,6 +32,7 @@
     EventQuery,
     CalendarAccount,
   } from "@commons/types/Availability";
+  import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import AvailableIcon from "./assets/available.svg";
   import UnavailableIcon from "./assets/unavailable.svg";
@@ -41,6 +42,7 @@
   //#region props
   export let id: string = "";
   export let access_token: string = "";
+  export let editor_id: string;
   export let start_hour: number;
   export let end_hour: number;
   export let slot_size: number; // in minutes
@@ -60,16 +62,23 @@
   export let busy_color: string;
   export let partial_color: string;
   export let free_color: string;
+  export let show_hosts: "show" | "hide";
   //#endregion props
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
+  let editorManifest: Partial<EditorManifest> = {};
+
   $: calendarID = "";
   onMount(async () => {
     await tick();
     clientHeight = main?.getBoundingClientRect().height;
-    const storeKey = JSON.stringify({ component_id: id, access_token });
+    const storeKey = JSON.stringify({
+      component_id: id,
+      access_token,
+      external_manifest_ids: [editor_id],
+    });
     manifest = (await $ManifestStore[storeKey]) || {};
 
     internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
@@ -164,6 +173,11 @@
       internalProps.free_color,
       free_color,
       "#36d2ad66",
+    );
+    show_hosts = getPropertyValue(
+      internalProps.show_hosts || editorManifest.show_hosts,
+      show_hosts,
+      "show",
     );
   }
 
@@ -523,8 +537,9 @@
       access_token: access_token,
     };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay =
-      await AvailabilityStore.getAvailability(availabilityQuery);
+    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
+      availabilityQuery,
+    );
     if (consolidatedAvailabilityForGivenDay?.length) {
       consolidatedAvailabilityForGivenDay.forEach((user) => {
         freeBusyCalendars.push({
@@ -708,6 +723,7 @@
     }
     return classes.join(" ");
   }
+
   //#endregion Attendee Overlay
 
   // #region Date Change
@@ -1051,21 +1067,27 @@
           }
 
           .available-calendars {
-            display: inline-block;
+            display: none;
             position: relative;
             z-index: 2;
-            display: none; // TODO: temporary, until we rework this to not collide w/ time ranges
+            float: right;
 
             span {
               background: rgba(0, 0, 0, 0.5);
               display: inline-block;
-              margin: 0.25rem;
+              margin: 0;
               padding: 0.25rem;
-              font-size: 0.7rem;
               color: white;
+              border-radius: 4px;
+              font-size: 0.6rem;
+              // font-weight: 700;
             }
           }
         }
+      }
+
+      &:hover .epoch.partial .available-calendars {
+        display: block;
       }
 
       .slots {
@@ -1093,11 +1115,18 @@
             background-color: purple;
             box-shadow: none;
             border-bottom: 1px solid transparent;
+            z-index: 3;
           }
 
           &.pending {
             background-color: rgba(128, 0, 128, 0.3);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+            z-index: 3;
+          }
+
+          &.selected + .selected,
+          &.pending + .pending {
+            z-index: 2;
           }
 
           &.busy {
@@ -1286,14 +1315,16 @@
               data-end-time={new Date(epoch.end_time).toLocaleString()}
             >
               <div class="inner">
-                <div class="available-calendars">
-                  <span
-                    on:mouseenter={(event) => showOverlay(event, epoch)}
-                    on:mouseleave={hideOverlay}
-                  >
-                    {epoch.available_calendars.length} of {allCalendars.length}
-                  </span>
-                </div>
+                {#if show_hosts === "show"}
+                  <div class="available-calendars">
+                    <span
+                      on:mouseenter={(event) => showOverlay(event, epoch)}
+                      on:mouseleave={hideOverlay}
+                    >
+                      {epoch.available_calendars.length} of {allCalendars.length}
+                    </span>
+                  </div>
+                {/if}
               </div>
             </div>
           {/each}
