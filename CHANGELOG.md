@@ -1,3 +1,11 @@
+# 2021-09-17
+
+## 1.0.4
+
+### Bug Fixes
+
+- ContactList: Fixed a bug where prop value `show_filter` was not being read from the manifest [Pull Request](https://github.com/nylas/components/pull/71)
+
 # 2021-09-08
 
 ## 1.0.3
