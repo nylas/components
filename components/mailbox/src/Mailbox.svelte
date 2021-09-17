@@ -313,7 +313,7 @@
   }
 
   function onSelectAll(event: MouseEvent) {
-    dispatchEvent("onSelectAllClicked", { event });
+    dispatchEvent("onSelectAllClicked", { event, selectedThreads });
     if (areAllSelected) {
       selectedThreads.clear();
     } else {
@@ -335,7 +335,7 @@
   }
 
   function onStarSelected(event: MouseEvent) {
-    dispatchEvent("onStarSelected", { event });
+    dispatchEvent("onStarSelected", { event, selectedThreads });
     if (areAllSelectedStarred) {
       selectedThreads.forEach(async (t) => {
         starredThreads.delete(t);
@@ -372,7 +372,7 @@
   }
 
   function onChangeSelectedReadStatus(event: MouseEvent) {
-    dispatchEvent("onChangeSelectedReadStatus", { event });
+    dispatchEvent("onChangeSelectedReadStatus", { event, selectedThreads });
     if (areAllSelectedUnread) {
       selectedThreads.forEach(async (t) => {
         unreadThreads.delete(t);
@@ -412,7 +412,11 @@
   }
 
   async function onDeleteSelected(event: MouseEvent) {
-    dispatchEvent("onDeleteSelected", { event });
+    dispatchEvent("onDeleteSelected", {
+      event,
+      selectedThreads,
+      thread: openedEmailData,
+    });
     if (trashLabelID || trashFolderID) {
       if (openedEmailData) {
         threads = inboxThreads.filter((thread) => thread !== openedEmailData);
