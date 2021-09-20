@@ -988,7 +988,25 @@
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
       height: 100%;
-      overflow: hidden;
+      overflow: auto;
+
+      &.schedule {
+        overflow: hidden;
+      }
+      &.list {
+        .day {
+          display: block;
+
+          header {
+            position: sticky;
+            top: 0;
+            margin-top: 0;
+            background-color: white;
+            height: $headerHeight;
+            z-index: 2;
+          }
+        }
+      }
     }
 
     .ticks {
@@ -1021,8 +1039,7 @@
       display: grid;
       grid-template-rows: $headerHeight 1fr;
       position: relative;
-      height: 100%;
-      overflow: hidden;
+      // overflow: hidden;
 
       h2 {
         margin: 0;
@@ -1167,7 +1184,7 @@
         padding: 0;
 
         .slot {
-          border-radius: 8px;
+          border-radius: 4px;
           background: transparent;
           position: relative;
           align-items: center;
@@ -1175,10 +1192,16 @@
           align-content: center;
           font-family: sans-serif;
           border: 1px solid rgba(0, 0, 0, 0.1);
+          box-shadow: none !important;
+
+          &:hover {
+            box-shadow: none;
+            background-color: rgba(0, 0, 0, 0.1);
+          }
 
           &.selected {
-            border-color: purple;
-            // box-shadow: none;
+            background: purple;
+            color: white;
           }
 
           .partial {
@@ -1330,7 +1353,11 @@
       {/each}
     </ul>
   {/if}
-  <div class="days">
+  <div
+    class="days"
+    class:schedule={view_as === "schedule"}
+    class:list={view_as === "list"}
+  >
     {#each days as day}
       <div class="day">
         <header>

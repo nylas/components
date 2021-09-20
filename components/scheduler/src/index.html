@@ -11,12 +11,7 @@
         const availability = document.querySelector("nylas-availability");
         const scheduler = document.querySelector("nylas-scheduler");
 
-        availability.email_ids = [
-          "phil.r@nylas.com",
-          "chantal.l@nylas.com",
-          "david.t@nylas.com",
-          "hazik.a@nylas.com",
-        ];
+        availability.email_ids = ["nylascypresstest@gmail.com"];
         availability.addEventListener("timeSlotChosen", (event) => {
           scheduler.slots_to_book = event.detail.timeSlots;
         });
@@ -51,9 +46,9 @@
         show_as_week="true"
         allow_booking="true"
         max_bookable_slots="8"
-        id="phils-availability"
+        id="demo-availability"
         editor_id="demo-schedule-editor"
-        slot_size="15"
+        slot_size="10"
         view_as="list"
         start_hour="9"
         end_hour="17"
