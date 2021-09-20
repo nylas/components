@@ -11,7 +11,12 @@
         const availability = document.querySelector("nylas-availability");
         const scheduler = document.querySelector("nylas-scheduler");
 
-        availability.email_ids = ["nylascypresstest@gmail.com"];
+        availability.email_ids = [
+          "phil.r@nylas.com",
+          "chantal.l@nylas.com",
+          "david.t@nylas.com",
+          "hazik.a@nylas.com",
+        ];
         availability.addEventListener("timeSlotChosen", (event) => {
           scheduler.slots_to_book = event.detail.timeSlots;
         });
@@ -32,9 +37,9 @@
         margin-left: 10vw;
         height: 80vh;
         margin-top: 10vh;
-
         display: grid;
         grid-template-columns: 2fr 1fr;
+        grid-template-rows: 100%;
         gap: 1rem;
       }
     </style>
@@ -46,9 +51,12 @@
         show_as_week="true"
         allow_booking="true"
         max_bookable_slots="8"
-        id="demo-availability"
+        id="phils-availability"
         editor_id="demo-schedule-editor"
-        slot_size="60"
+        slot_size="15"
+        view_as="list"
+        start_hour="9"
+        end_hour="17"
       >
       </nylas-availability>
       <nylas-scheduler
