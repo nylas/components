@@ -1021,7 +1021,6 @@
       padding-top: $headerHeight;
       font-size: 0.8rem;
       font-family: sans-serif;
-      // text-align: right;
 
       li {
         display: block;
@@ -1030,7 +1029,6 @@
         overflow: hidden;
         padding: 0 0.25rem;
         display: grid;
-        // align-content: center;
         justify-content: right;
       }
     }
@@ -1039,7 +1037,6 @@
       display: grid;
       grid-template-rows: $headerHeight 1fr;
       position: relative;
-      // overflow: hidden;
 
       h2 {
         margin: 0;

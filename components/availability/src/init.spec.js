@@ -652,8 +652,7 @@ describe("availability component", () => {
     });
   });
 
-  describe.only("list view", () => {
-    // TODO
+  describe("list view", () => {
     it("Shows scheduler view by default", () => {
       cy.get("nylas-availability")
         .as("availability")
