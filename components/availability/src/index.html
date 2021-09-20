@@ -148,6 +148,12 @@
             component[type] = event.target.value;
           });
         });
+
+        document.querySelectorAll('input[name="view-as"]').forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.view_as = event.target.value;
+          });
+        });
       });
     </script>
     <style>
@@ -348,6 +354,17 @@
             value="#aeedde"
           />
           Free color
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>View As</legend>
+        <label>
+          <input checked type="radio" name="view-as" value="schedule" />
+          Schedule
+        </label>
+        <label>
+          <input type="radio" name="view-as" value="list" />
+          List
         </label>
       </fieldset>
     </aside>

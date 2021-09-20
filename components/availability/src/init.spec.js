@@ -651,4 +651,29 @@ describe("availability component", () => {
         });
     });
   });
+
+  describe.only("list view", () => {
+    // TODO
+    it("Shows scheduler view by default", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then(() => {
+          cy.get(".epochs").should("exist");
+          cy.get(".slots").should("exist");
+          cy.get(".slot-list").should("not.exist");
+        });
+    });
+    it("Shows list view by passed property", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.view_as = "list";
+
+          cy.get(".epochs").should("not.exist");
+          cy.get(".slots").should("not.exist");
+          cy.get(".slot-list").should("exist");
+        });
+    });
+  });
 });

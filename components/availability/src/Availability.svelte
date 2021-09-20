@@ -63,6 +63,7 @@
   export let partial_color: string;
   export let free_color: string;
   export let show_hosts: "show" | "hide";
+  export let view_as: "schedule" | "list";
   //#endregion props
 
   //#region mount and prop initialization
@@ -178,6 +179,11 @@
       internalProps.show_hosts || editorManifest.show_hosts,
       show_hosts,
       "show",
+    );
+    view_as = getPropertyValue(
+      internalProps.view_as || editorManifest.view_as,
+      view_as,
+      "schedule",
     );
   }
 
@@ -1305,73 +1311,79 @@
             </span>
           </h2>
         </header>
-        <div class="epochs">
-          {#each day.epochs as epoch}
-            <div
-              class="epoch {epoch.status}"
-              style="height: {epoch.height}%; top: {epoch.offset}%;"
-              data-available-calendars={epoch.available_calendars.toString()}
-              data-start-time={new Date(epoch.start_time).toLocaleString()}
-              data-end-time={new Date(epoch.end_time).toLocaleString()}
-            >
-              <div class="inner">
-                {#if show_hosts === "show"}
-                  <div class="available-calendars">
-                    <span
-                      on:mouseenter={(event) => showOverlay(event, epoch)}
-                      on:mouseleave={hideOverlay}
-                    >
-                      {epoch.available_calendars.length} of {allCalendars.length}
-                    </span>
-                  </div>
-                {/if}
+        {#if view_as === "schedule"}
+          <div class="epochs">
+            {#each day.epochs as epoch}
+              <div
+                class="epoch {epoch.status}"
+                style="height: {epoch.height}%; top: {epoch.offset}%;"
+                data-available-calendars={epoch.available_calendars.toString()}
+                data-start-time={new Date(epoch.start_time).toLocaleString()}
+                data-end-time={new Date(epoch.end_time).toLocaleString()}
+              >
+                <div class="inner">
+                  {#if show_hosts === "show"}
+                    <div class="available-calendars">
+                      <span
+                        on:mouseenter={(event) => showOverlay(event, epoch)}
+                        on:mouseleave={hideOverlay}
+                      >
+                        {epoch.available_calendars.length} of {allCalendars.length}
+                      </span>
+                    </div>
+                  {/if}
+                </div>
               </div>
-            </div>
-          {/each}
-        </div>
-        <div class="slots">
-          {#each day.slots as slot}
-            <button
-              data-available-calendars={slot.available_calendars.toString()}
-              aria-label="{new Date(
-                slot.start_time,
-              ).toLocaleString()} to {new Date(
-                slot.end_time,
-              ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
-              class="slot {slot.selectionStatus} {slot.availability}"
-              class:pending={slot.selectionPending}
-              data-start-time={new Date(slot.start_time).toLocaleString()}
-              data-end-time={new Date(slot.end_time).toLocaleString()}
-              on:mousedown={() => {
-                if (
-                  slotSelection.length < max_bookable_slots ||
-                  slot.selectionStatus === SelectionStatus.SELECTED
-                ) {
-                  mouseIsDown = true;
-                }
-                startDrag(slot, day);
-              }}
-              on:mouseenter={() => {
-                addToDrag(slot, day);
-              }}
-              on:mouseup={() => {
-                if (mouseIsDown) {
-                  endDrag(slot, day);
-                }
-              }}
-              on:keypress={(e) => {
-                if (e.code === "Space" || e.code === "Enter") {
+            {/each}
+          </div>
+          <div class="slots">
+            {#each day.slots as slot}
+              <button
+                data-available-calendars={slot.available_calendars.toString()}
+                aria-label="{new Date(
+                  slot.start_time,
+                ).toLocaleString()} to {new Date(
+                  slot.end_time,
+                ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
+                class="slot {slot.selectionStatus} {slot.availability}"
+                class:pending={slot.selectionPending}
+                data-start-time={new Date(slot.start_time).toLocaleString()}
+                data-end-time={new Date(slot.end_time).toLocaleString()}
+                on:mousedown={() => {
+                  if (
+                    slotSelection.length < max_bookable_slots ||
+                    slot.selectionStatus === SelectionStatus.SELECTED
+                  ) {
+                    mouseIsDown = true;
+                  }
                   startDrag(slot, day);
-                  tick().then(() => endDrag(slot, day));
-                }
-              }}
-            >
-              {#if getBlockTimes(slot, day)}
-                <span class="selected-heading">{getBlockTimes(slot, day)}</span>
-              {/if}
-            </button>
-          {/each}
-        </div>
+                }}
+                on:mouseenter={() => {
+                  addToDrag(slot, day);
+                }}
+                on:mouseup={() => {
+                  if (mouseIsDown) {
+                    endDrag(slot, day);
+                  }
+                }}
+                on:keypress={(e) => {
+                  if (e.code === "Space" || e.code === "Enter") {
+                    startDrag(slot, day);
+                    tick().then(() => endDrag(slot, day));
+                  }
+                }}
+              >
+                {#if getBlockTimes(slot, day)}
+                  <span class="selected-heading"
+                    >{getBlockTimes(slot, day)}</span
+                  >
+                {/if}
+              </button>
+            {/each}
+          </div>
+        {:else if view_as === "list"}
+          <div class="slot-list" />
+        {/if}
       </div>
     {/each}
   </div>

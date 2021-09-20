@@ -34,6 +34,7 @@
   export let notification_mode: NotificationMode;
   export let notification_message: string;
   export let notification_subject: string;
+  export let view_as: "schedule" | "list";
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -77,6 +78,7 @@
       event_location,
       "",
     );
+    view_as = getPropertyValue(internalProps.view_as, view_as, "schedule");
     show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
     start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
     end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
@@ -166,6 +168,7 @@
     notification_mode,
     notification_message,
     notification_subject,
+    view_as,
   };
 
   $: console.table(manifestProperties);
@@ -417,6 +420,27 @@
     <label>
       <strong>Notification Subject</strong>
       <input type="text" bind:value={manifestProperties.notification_subject} />
+    </label>
+  </div>
+  <div role="radiogroup" aria-labelledby="view_as">
+    <strong id="view_as">View as a Schedule, or as a List?</strong>
+    <label>
+      <input
+        type="radio"
+        name="view_as"
+        bind:group={manifestProperties.view_as}
+        value="schedule"
+      />
+      <span>Schedule</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="view_as"
+        bind:group={manifestProperties.view_as}
+        value="list"
+      />
+      <span>List</span>
     </label>
   </div>
   <button on:click={saveProperties}>Save Editor Options</button>
