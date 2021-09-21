@@ -1105,7 +1105,7 @@
             display: none;
             position: relative;
             z-index: 2;
-            text-align: right;
+            float: right;
 
             span {
               background: rgba(0, 0, 0, 0.5);
