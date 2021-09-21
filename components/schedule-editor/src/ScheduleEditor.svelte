@@ -164,7 +164,7 @@
     notification_subject,
   };
   // #endregion mount and prop initialization
-  $: console.log(manifestProperties);
+
   function saveProperties() {
     console.log("Saving the following properties:");
     Object.entries(manifestProperties).forEach(([k, v]) => {
