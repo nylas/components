@@ -246,9 +246,9 @@
     width: 100%;
     overflow: auto;
     position: relative;
-    background-color: #eee;
+    background-color: var(--grey-light);
   }
-  $avatar-size: 32px;
+  $avatar-size: 40px;
   $min-horizontal-space-between-participants: 4rem;
 
   header {
@@ -256,6 +256,8 @@
     background: white;
     padding: 15px 32px;
     gap: 32px;
+    color: var(--black);
+    font-size: var(--fs-14);
   }
 
   .messages {
@@ -282,6 +284,7 @@
       .body {
         border-radius: 8px;
         background-color: white;
+        color: var(--black);
         max-height: 50vh;
         overflow: auto;
         position: relative;
@@ -293,7 +296,7 @@
         grid-template-rows: auto 1fr;
         gap: 0.5rem;
         .avatar {
-          border-radius: 16px;
+          border-radius: 20px;
           width: $avatar-size;
           height: $avatar-size;
           text-align: center;
@@ -311,7 +314,7 @@
           }
           span {
             // perfectly center text
-            padding-top: 3px;
+            padding-top: 4px;
           }
         }
         .email {
@@ -324,11 +327,12 @@
       }
       .time {
         grid-column: 2/3;
+        font-size: var(--fs-12);
+        color: var(--grey-dark);
       }
 
       p {
         padding: 1rem;
-        color: black;
         font-weight: 300;
         line-height: 1.3em;
         font-size: 0.9em;
@@ -350,7 +354,12 @@
           grid-row: 1/2;
           grid-column: 2/3;
         }
-        .body,
+        .body {
+          order: 1;
+          grid-column: 1 / 1;
+          color: var(--white);
+          background-color: var(--blue);
+        }
         .time {
           order: 1;
           grid-column: 1 / 1;
@@ -399,6 +408,12 @@
         height: 50px;
         padding: 12px 1rem;
         width: 100%;
+        font-size: var(--fs-16);
+        color: var(--grey-black);
+
+        &::placeholder {
+          color: var(--grey);
+        }
       }
     }
   }
