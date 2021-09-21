@@ -9,6 +9,7 @@
     getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
+  import { NotificationMode } from "@commons/enums/Scheduler";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -30,7 +31,9 @@
   export let show_as_week: boolean;
   export let show_weekends: boolean;
   export let attendees_to_show: number;
-
+  export let notification_mode: NotificationMode;
+  export let notification_message: string;
+  export let notification_subject: string;
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
@@ -119,6 +122,21 @@
       attendees_to_show,
       5,
     );
+    notification_mode = getPropertyValue(
+      internalProps.notification_mode,
+      notification_mode,
+      NotificationMode.SHOW_MESSAGE,
+    );
+    notification_message = getPropertyValue(
+      internalProps.notification_message,
+      notification_message,
+      "Thank you for scheduling!",
+    );
+    notification_subject = getPropertyValue(
+      internalProps.notification_subject,
+      notification_subject,
+      "Invitation",
+    );
   }
 
   $: manifestProperties = {
@@ -140,9 +158,12 @@
     show_as_week,
     show_weekends,
     attendees_to_show,
+    notification_mode,
+    notification_message,
+    notification_subject,
   };
   // #endregion mount and prop initialization
-
+  $: console.log(manifestProperties);
   function saveProperties() {
     console.log("Saving the following properties:");
     Object.entries(manifestProperties).forEach(([k, v]) => {
@@ -187,8 +208,10 @@
       <input
         type="radio"
         name="show_hosts"
-        bind:group={manifestProperties.show_hosts}
-        value="show"
+        value={"show"}
+        on:input={(e) => {
+          manifestProperties.show_hosts = e?.target?.value;
+        }}
       />
       <span>Show Hosts</span>
     </label>
@@ -196,8 +219,10 @@
       <input
         type="radio"
         name="show_hosts"
-        bind:group={manifestProperties.show_hosts}
-        value="hide"
+        value={"hide"}
+        on:input={(e) => {
+          manifestProperties.show_hosts = e?.target?.value;
+        }}
       />
       <span>Hide Hosts</span>
     </label>
@@ -232,14 +257,16 @@
       />
     </label>
   </div>
-  <div role="radiogroup" aria-labelledby="show_hosts">
+  <div role="radiogroup" aria-labelledby="slot_size">
     <strong id="slot_size">Timeslot size</strong>
     <label>
       <input
         type="radio"
         name="slot_size"
-        bind:group={manifestProperties.slot_size}
         value={15}
+        on:input={(e) => {
+          manifestProperties.slot_size = parseInt(e?.target?.value);
+        }}
       />
       <span>15 minutes</span>
     </label>
@@ -247,8 +274,10 @@
       <input
         type="radio"
         name="slot_size"
-        bind:group={manifestProperties.slot_size}
         value={30}
+        on:input={(e) => {
+          manifestProperties.slot_size = parseInt(e?.target?.value);
+        }}
       />
       <span>30 minutes</span>
     </label>
@@ -256,8 +285,10 @@
       <input
         type="radio"
         name="slot_size"
-        bind:group={manifestProperties.slot_size}
         value={60}
+        on:input={(e) => {
+          manifestProperties.slot_size = parseInt(e?.target?.value);
+        }}
       />
       <span>60 minutes</span>
     </label>
@@ -383,6 +414,45 @@
           manifestProperties.attendees_to_show = e?.target?.value;
         }}
       />
+    </label>
+  </div>
+  <div role="radiogroup" aria-labelledby="notification_mode">
+    <strong id="notification_mode"
+      >How would you like to notify the customer on event creation?</strong
+    >
+    <label>
+      <input
+        type="radio"
+        name="notification_mode"
+        value={NotificationMode.SHOW_MESSAGE}
+        on:input={(e) => {
+          manifestProperties.notification_mode = e?.target?.value;
+        }}
+      />
+      <span>Show Message on UI</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="notification_mode"
+        value={NotificationMode.SEND_MESSAGE}
+        on:input={(e) => {
+          manifestProperties.notification_mode = e?.target?.value;
+        }}
+      />
+      <span>Send message via email</span>
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Notification message</strong>
+      <input type="text" bind:value={manifestProperties.notification_message} />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Notification Subject</strong>
+      <input type="text" bind:value={manifestProperties.notification_subject} />
     </label>
   </div>
   <button on:click={saveProperties}>Save Editor Options</button>
