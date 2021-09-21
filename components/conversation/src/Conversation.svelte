@@ -279,21 +279,6 @@
       &:last-child {
         padding-bottom: 2rem;
       }
-
-      header {
-        grid-column: -1 / 2;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        font-size: 0.8rem;
-        opacity: 0.75;
-        overflow: hidden;
-        .date {
-          text-align: right;
-        }
-        &.hidden {
-          display: none;
-        }
-      }
       .body {
         border-radius: 8px;
         background-color: white;
@@ -361,10 +346,6 @@
         justify-self: end;
         grid-template-columns: 1fr $contactWidth;
 
-        header {
-          grid-column: 1 / 1;
-        }
-
         .contact {
           grid-row: 1/2;
           grid-column: 2/3;
@@ -391,47 +372,33 @@
         }
       }
     }
+  }
 
-    .reply {
-      background: #ddd;
-      padding: 1rem;
-      margin: 1rem -1rem -1rem;
-      form {
-        button[type="submit"] {
-          &:disabled {
-            cursor: not-allowed;
-            background: gray;
-          }
-        }
-      }
-      span.to {
-        --background: gray;
-      }
-      span.to,
-      span.cc {
-        display: inline-block;
-        padding: 0 1rem 0 0;
+  .reply-box {
+    form {
+      position: relative;
+      display: flex;
+      align-items: center;
 
-        & > span {
-          display: inline-block;
-          margin-right: 0.5rem;
+      button[type="submit"] {
+        position: absolute;
+        right: 1rem;
+        border-radius: 4px;
+        background-color: var(--blue);
+        height: 28px;
+        width: 28px;
+        color: white;
+
+        &:disabled {
+          cursor: not-allowed;
+          background-color: gray;
         }
       }
 
-      .response {
+      input {
+        height: 50px;
+        padding: 12px 1rem;
         width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 100px;
-        gap: 1rem;
-        margin-top: 0.5rem;
-        input {
-          padding: 0.5rem;
-        }
-        button {
-          background-color: black;
-          font-weight: 500;
-          color: white;
-        }
       }
     }
   }
@@ -518,64 +485,48 @@
           {/await}
         {/await}
       {/each}
-      {#if show_reply}
-        <div class="reply">
-          <form
-            on:submit={(e) => {
-              if (replyStatus !== "sending") {
-                e.preventDefault();
-                replyStatus = "sending";
-                if (!conversation) {
-                  return;
-                }
-                sendMessage(id, {
-                  from: reply.from,
-                  to: reply.to,
-                  body: `${replyBody} <br /><br /> --Sent with Nylas`,
-                  subject: conversation.subject,
-                  cc: reply.cc,
-                  reply_to_message_id: lastMessage.id,
-                  bcc: [],
-                }).then((res) => {
-                  const conversationQuery = { queryKey: queryKey, data: res };
-                  ConversationStore.addMessageToThread(conversationQuery);
-                  replyStatus = "";
-                  replyBody = "";
-                });
-              }
-            }}
-          >
-            <span class="to">
-              <nylas-contacts-search
-                placeholder="to:"
-                change={handleContactsChange("to")}
-                contacts={reply.to}
-                value={reply.to}
-                show_dropdown={false}
-              />
-            </span>
-            <span class="cc">
-              <nylas-contacts-search
-                placeholder="cc:"
-                change={handleContactsChange("cc")}
-                contacts={reply.cc}
-                value={reply.cc}
-                show_dropdown={false}
-              />
-            </span>
-            <label class="response">
-              <input
-                type="text"
-                placeholder="Type a Response"
-                bind:value={replyBody}
-              />
-              <button type="submit" disabled={!reply.to.length}>
-                {#if replyStatus === "sending"}Sending...{:else}Send{/if}
-              </button>
-            </label>
-          </form>
-        </div>
-      {/if}
     </div>
+    {#if show_reply}
+      <div class="reply-box">
+        <form
+          on:submit={(e) => {
+            if (replyStatus !== "sending") {
+              e.preventDefault();
+              replyStatus = "sending";
+              if (!conversation) {
+                return;
+              }
+              sendMessage(id, {
+                from: reply.from,
+                to: reply.to,
+                body: `${replyBody} <br /><br /> --Sent with Nylas`,
+                subject: conversation.subject,
+                cc: reply.cc,
+                reply_to_message_id: lastMessage.id,
+                bcc: [],
+              }).then((res) => {
+                const conversationQuery = { queryKey: queryKey, data: res };
+                ConversationStore.addMessageToThread(conversationQuery);
+                replyStatus = "";
+                replyBody = "";
+              });
+            }
+          }}
+        >
+          <label for="send-response" class="sr-only"
+            >Type and send a response</label
+          >
+          <input
+            id="send-response"
+            type="text"
+            placeholder="Type a Response"
+            bind:value={replyBody}
+          />
+          <button type="submit" disabled={!reply.to.length}>
+            {#if replyStatus === "sending"}...{:else}>{/if}
+          </button>
+        </form>
+      </div>
+    {/if}
   {/await}
 </main>
