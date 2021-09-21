@@ -944,6 +944,19 @@
     days = [...days]; // re-render
     resetDragState();
   }
+
+  // Click action for un-draggable slot-list buttons (list view)
+  function toggleSlot(slot: SelectableSlot) {
+    if (slot.selectionStatus === SelectionStatus.SELECTED) {
+      slot.selectionStatus = SelectionStatus.UNSELECTED;
+    } else {
+      if (slotSelection.length < max_bookable_slots) {
+        slot.selectionStatus = SelectionStatus.SELECTED;
+      }
+    }
+    days = [...days];
+  }
+
   //#endregion dragging
 </script>
 
@@ -1456,8 +1469,7 @@
                 data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
                 on:click={() => {
-                  startDrag(slot, day);
-                  tick().then(() => endDrag(slot, day));
+                  toggleSlot(slot);
                 }}
               >
                 {new Date(slot.start_time).toLocaleTimeString([], {
