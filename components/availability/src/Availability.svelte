@@ -63,6 +63,7 @@
   export let partial_color: string;
   export let free_color: string;
   export let show_hosts: "show" | "hide";
+  export let view_as: "schedule" | "list";
   //#endregion props
 
   //#region mount and prop initialization
@@ -178,6 +179,11 @@
       internalProps.show_hosts || editorManifest.show_hosts,
       show_hosts,
       "show",
+    );
+    view_as = getPropertyValue(
+      internalProps.view_as || editorManifest.view_as,
+      view_as,
+      "schedule",
     );
   }
 
@@ -938,6 +944,17 @@
     days = [...days]; // re-render
     resetDragState();
   }
+
+  // Click action for un-draggable slot-list buttons (list view)
+  function toggleSlot(slot: SelectableSlot) {
+    if (slot.selectionStatus === SelectionStatus.SELECTED) {
+      slot.selectionStatus = SelectionStatus.UNSELECTED;
+    } else if (slotSelection.length < max_bookable_slots) {
+      slot.selectionStatus = SelectionStatus.SELECTED;
+    }
+    days = [...days];
+  }
+
   //#endregion dragging
 </script>
 
@@ -981,6 +998,26 @@
       gap: 0.25rem;
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
+      height: 100%;
+      overflow: auto;
+
+      &.schedule {
+        overflow: hidden;
+      }
+      &.list {
+        .day {
+          display: block;
+
+          header {
+            position: sticky;
+            top: 0;
+            margin-top: 0;
+            background-color: white;
+            height: $headerHeight;
+            z-index: 2;
+          }
+        }
+      }
     }
 
     .ticks {
@@ -995,7 +1032,6 @@
       padding-top: $headerHeight;
       font-size: 0.8rem;
       font-family: sans-serif;
-      // text-align: right;
 
       li {
         display: block;
@@ -1004,7 +1040,6 @@
         overflow: hidden;
         padding: 0 0.25rem;
         display: grid;
-        // align-content: center;
         justify-content: right;
       }
     }
@@ -1145,6 +1180,47 @@
           }
         }
       }
+
+      .slot-list {
+        display: grid;
+        grid-auto-rows: 50px;
+        grid-auto-flow: row;
+        overflow: auto;
+        gap: 0.25rem;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+
+        .slot {
+          border-radius: 4px;
+          background: transparent;
+          position: relative;
+          align-items: center;
+          justify-content: center;
+          align-content: center;
+          font-family: sans-serif;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          box-shadow: none !important;
+
+          @media (hover: hover) and (pointer: fine) {
+            // prevents touch-deselect hover state color
+            &:hover {
+              box-shadow: none;
+              background-color: rgba(0, 0, 0, 0.1);
+            }
+          }
+
+          &.selected {
+            background: purple;
+            color: white;
+          }
+
+          .partial {
+            display: block;
+            font-size: 0.6rem;
+          }
+        }
+      }
     }
     button.confirm {
       grid-column: -1 / 1;
@@ -1260,7 +1336,7 @@
 <main
   bind:this={main}
   bind:clientHeight
-  class:ticked={show_ticks}
+  class:ticked={show_ticks && view_as === "schedule"}
   class:dated={allow_date_change}
   class:allow_booking
   on:mouseleave={() => endDrag(null, null)}
@@ -1276,7 +1352,7 @@
       >
     </header>
   {/if}
-  {#if show_ticks}
+  {#if show_ticks && view_as === "schedule"}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
         <li class="tick">
@@ -1288,7 +1364,11 @@
       {/each}
     </ul>
   {/if}
-  <div class="days">
+  <div
+    class="days"
+    class:schedule={view_as === "schedule"}
+    class:list={view_as === "list"}
+  >
     {#each days as day}
       <div class="day">
         <header>
@@ -1305,73 +1385,109 @@
             </span>
           </h2>
         </header>
-        <div class="epochs">
-          {#each day.epochs as epoch}
-            <div
-              class="epoch {epoch.status}"
-              style="height: {epoch.height}%; top: {epoch.offset}%;"
-              data-available-calendars={epoch.available_calendars.toString()}
-              data-start-time={new Date(epoch.start_time).toLocaleString()}
-              data-end-time={new Date(epoch.end_time).toLocaleString()}
-            >
-              <div class="inner">
-                {#if show_hosts === "show"}
-                  <div class="available-calendars">
-                    <span
-                      on:mouseenter={(event) => showOverlay(event, epoch)}
-                      on:mouseleave={hideOverlay}
-                    >
-                      {epoch.available_calendars.length} of {allCalendars.length}
-                    </span>
-                  </div>
-                {/if}
+        {#if view_as === "schedule"}
+          <div class="epochs">
+            {#each day.epochs as epoch}
+              <div
+                class="epoch {epoch.status}"
+                style="height: {epoch.height}%; top: {epoch.offset}%;"
+                data-available-calendars={epoch.available_calendars.toString()}
+                data-start-time={new Date(epoch.start_time).toLocaleString()}
+                data-end-time={new Date(epoch.end_time).toLocaleString()}
+              >
+                <div class="inner">
+                  {#if show_hosts === "show"}
+                    <div class="available-calendars">
+                      <span
+                        on:mouseenter={(event) => showOverlay(event, epoch)}
+                        on:mouseleave={hideOverlay}
+                      >
+                        {epoch.available_calendars.length} of {allCalendars.length}
+                      </span>
+                    </div>
+                  {/if}
+                </div>
               </div>
-            </div>
-          {/each}
-        </div>
-        <div class="slots">
-          {#each day.slots as slot}
-            <button
-              data-available-calendars={slot.available_calendars.toString()}
-              aria-label="{new Date(
-                slot.start_time,
-              ).toLocaleString()} to {new Date(
-                slot.end_time,
-              ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
-              class="slot {slot.selectionStatus} {slot.availability}"
-              class:pending={slot.selectionPending}
-              data-start-time={new Date(slot.start_time).toLocaleString()}
-              data-end-time={new Date(slot.end_time).toLocaleString()}
-              on:mousedown={() => {
-                if (
-                  slotSelection.length < max_bookable_slots ||
-                  slot.selectionStatus === SelectionStatus.SELECTED
-                ) {
-                  mouseIsDown = true;
-                }
-                startDrag(slot, day);
-              }}
-              on:mouseenter={() => {
-                addToDrag(slot, day);
-              }}
-              on:mouseup={() => {
-                if (mouseIsDown) {
-                  endDrag(slot, day);
-                }
-              }}
-              on:keypress={(e) => {
-                if (e.code === "Space" || e.code === "Enter") {
+            {/each}
+          </div>
+          <div class="slots">
+            {#each day.slots as slot}
+              <button
+                data-available-calendars={slot.available_calendars.toString()}
+                aria-label="{new Date(
+                  slot.start_time,
+                ).toLocaleString()} to {new Date(
+                  slot.end_time,
+                ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
+                class="slot {slot.selectionStatus} {slot.availability}"
+                class:pending={slot.selectionPending}
+                data-start-time={new Date(slot.start_time).toLocaleString()}
+                data-end-time={new Date(slot.end_time).toLocaleString()}
+                on:mousedown={() => {
+                  if (
+                    slotSelection.length < max_bookable_slots ||
+                    slot.selectionStatus === SelectionStatus.SELECTED
+                  ) {
+                    mouseIsDown = true;
+                  }
                   startDrag(slot, day);
-                  tick().then(() => endDrag(slot, day));
-                }
-              }}
-            >
-              {#if getBlockTimes(slot, day)}
-                <span class="selected-heading">{getBlockTimes(slot, day)}</span>
-              {/if}
-            </button>
-          {/each}
-        </div>
+                }}
+                on:mouseenter={() => {
+                  addToDrag(slot, day);
+                }}
+                on:mouseup={() => {
+                  if (mouseIsDown) {
+                    endDrag(slot, day);
+                  }
+                }}
+                on:keypress={(e) => {
+                  if (e.code === "Space" || e.code === "Enter") {
+                    startDrag(slot, day);
+                    tick().then(() => endDrag(slot, day));
+                  }
+                }}
+              >
+                {#if getBlockTimes(slot, day)}
+                  <span class="selected-heading"
+                    >{getBlockTimes(slot, day)}</span
+                  >
+                {/if}
+              </button>
+            {/each}
+          </div>
+        {:else if view_as === "list"}
+          <div class="slot-list">
+            {#each day.slots.filter((slot) => slot.availability === AvailabilityStatus.FREE || slot.availability === AvailabilityStatus.PARTIAL) as slot}
+              <button
+                data-available-calendars={slot.available_calendars.toString()}
+                aria-label="{new Date(
+                  slot.start_time,
+                ).toLocaleString()} to {new Date(
+                  slot.end_time,
+                ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
+                class="slot {slot.selectionStatus} {slot.availability}"
+                class:pending={slot.selectionPending}
+                data-start-time={new Date(slot.start_time).toLocaleString()}
+                data-end-time={new Date(slot.end_time).toLocaleString()}
+                on:click={() => {
+                  toggleSlot(slot);
+                }}
+              >
+                {new Date(slot.start_time).toLocaleTimeString([], {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+                {#if slot.availability === AvailabilityStatus.PARTIAL}
+                  <span class="partial"
+                    >({slot.available_calendars.length} of {allCalendars.length}
+                    available)</span
+                  >
+                {/if}
+              </button>
+            {/each}
+          </div>
+        {/if}
       </div>
     {/each}
   </div>

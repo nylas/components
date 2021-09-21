@@ -23,4 +23,5 @@ export interface Manifest extends NylasManifest {
   notification_mode?: NotificationMode;
   notification_message?: string;
   notification_subject?: string;
+  view_as?: "schedule" | "list";
 }
