@@ -10,7 +10,6 @@
     getPropertyValue,
   } from "@commons/methods/component";
 
-  import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import type { Manifest } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
@@ -37,7 +36,6 @@
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
-  let editorManifest: Partial<EditorManifest> = {};
 
   onMount(async () => {
     await tick();
@@ -50,8 +48,6 @@
 
     internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
   });
-
-  $: console.log({ editorManifest });
 
   $: {
     const rebuiltProps = buildInternalProps(
@@ -77,7 +73,7 @@
       "Schedule",
     );
     event_title = getPropertyValue(
-      internalProps.event_title || editorManifest.event_title,
+      internalProps.event_title,
       event_title,
       "Meeting",
     );
@@ -181,9 +177,6 @@
     } else if (notification_mode === NotificationMode.SHOW_MESSAGE) {
       show_success_notification = true;
     }
-    // Reset the Availability store and force a re-render
-    // TODO: it's possible that this isn't good enough / will involve a race condition between provider sync and return. Need to test.
-    AvailabilityStore.reset();
     availability_id = availability_id;
   }
 </script>

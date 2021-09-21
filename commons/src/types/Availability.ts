@@ -59,8 +59,9 @@ export interface AvailabilityQuery {
     start_time: number;
     end_time: number;
   };
-  access_token?: string;
   component_id: string;
+  access_token?: string;
+  forceReload?: boolean;
 }
 
 export interface AvailabilityResponse {

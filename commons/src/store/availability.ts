@@ -1,38 +1,37 @@
-import { writable } from "svelte/store";
+import { Writable, writable } from "svelte/store";
 import { fetchAvailability } from "../connections/availability";
 import type {
   AvailabilityQuery,
   AvailabilityResponse,
 } from "@commons/types/Availability";
 
-function initializeAvailability() {
-  const { subscribe, update, set } = writable<
-    Record<string, Promise<AvailabilityResponse[]>>
-  >({});
-  let availabilityMap: Record<string, Promise<AvailabilityResponse[]>> = {};
+type AvailabilityStore = Record<string, Promise<AvailabilityResponse[]>>;
 
-  return {
-    subscribe,
-    getAvailability: async (query: AvailabilityQuery) => {
-      const queryKey = JSON.stringify(query);
-      if (
-        !availabilityMap[queryKey] &&
-        (query.component_id || query.access_token)
-      ) {
-        availabilityMap[queryKey] = fetchAvailability(query);
-        update((availability) => {
-          availability[queryKey] = availabilityMap[queryKey];
-          return { ...availability };
-        });
-      }
+function initialize(): Writable<AvailabilityStore> {
+  const get = (
+    target: AvailabilityStore,
+    key: string,
+  ): Promise<AvailabilityResponse[]> | void => {
+    const accessor: AvailabilityQuery = JSON.parse(key);
+    // Avoid saving forceReload property as part of store key
+    const accessorCopy = { ...accessor };
+    delete accessorCopy.forceReload;
+    key = JSON.stringify(accessorCopy);
 
-      return await availabilityMap[queryKey];
-    },
-    reset: () => {
-      availabilityMap = {};
-      set({});
-    },
+    if (!accessor.component_id) return;
+
+    if (!target[key] || accessor.forceReload) {
+      const fetchPromise = fetchAvailability(accessor);
+      store.update((store) => {
+        store[key] = fetchPromise;
+        return store;
+      });
+      target[key] = fetchPromise;
+    }
+    return target[key];
   };
+  const store = writable(new Proxy<AvailabilityStore>({}, { get }));
+  return store;
 }
 
-export const AvailabilityStore = initializeAvailability();
+export const AvailabilityStore = initialize();
