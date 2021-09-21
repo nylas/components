@@ -343,10 +343,9 @@
         border-radius: 8px;
         white-space: pre-line; // maintains newlines from conversation
         &.snippet {
-          color: rgba(0, 0, 0, 0.5);
           &:before {
-            content: "Expanding your message; please wait...";
-            color: rgba(0, 0, 0, 1);
+            content: "Expanding your message; please wait...  ";
+            font-weight: bold;
           }
         }
       }
@@ -405,6 +404,9 @@
         height: 28px;
         width: 28px;
         color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         &:disabled {
           cursor: not-allowed;
@@ -413,7 +415,8 @@
       }
 
       input {
-        height: 50px;
+        border-top: 1px solid #ebebeb;
+        height: 25px;
         padding: 12px 1rem;
         width: 100%;
         font-size: var(--fs-16);
@@ -546,7 +549,20 @@
             bind:value={replyBody}
           />
           <button type="submit" disabled={!reply.to.length}>
-            {#if replyStatus === "sending"}...{:else}>{/if}
+            {#if replyStatus === "sending"}...{:else}
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 13 13"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.460449 12.1807L13.0001 6.50003L0.460449 0.819336V5.23765L9.41731 6.50003L0.460449 7.76241V12.1807Z"
+                  fill="white"
+                />
+              </svg>
+            {/if}
           </button>
         </form>
       </div>
