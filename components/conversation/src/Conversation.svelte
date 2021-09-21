@@ -251,6 +251,13 @@
   $avatar-size: 32px;
   $min-horizontal-space-between-participants: 4rem;
 
+  header {
+    display: flex;
+    background: white;
+    padding: 15px 32px;
+    gap: 32px;
+  }
+
   .messages {
     display: grid;
     gap: 1rem;
@@ -428,6 +435,14 @@
   {#await conversation}
     Loading Component...
   {:then _}
+    <header>
+      {#if reply.to.length > 0}
+        <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
+      {/if}
+      {#if reply.cc.length > 0}
+        <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
+      {/if}
+    </header>
     {#if status === "loading"}Loading Messages...{/if}
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
       {#each messages as message, i}
