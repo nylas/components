@@ -140,6 +140,10 @@
     );
   }
 
+  // Manifest properties requiring further manipulation:
+  let emailIDs: string = "";
+  let startDate: string = "0";
+
   $: manifestProperties = {
     event_title,
     event_description,
@@ -149,10 +153,10 @@
     start_hour,
     end_hour,
     slot_size,
-    start_date,
+    start_date: new Date(startDate),
     dates_to_show,
     show_ticks,
-    email_ids,
+    email_ids: parseStringToArray(emailIDs),
     allow_booking,
     max_bookable_slots,
     partial_bookable_ratio,
@@ -163,6 +167,8 @@
     notification_message,
     notification_subject,
   };
+
+  $: console.table(manifestProperties);
   // #endregion mount and prop initialization
 
   function saveProperties() {
@@ -210,9 +216,7 @@
         type="radio"
         name="show_hosts"
         value={"show"}
-        on:input={(e) => {
-          manifestProperties.show_hosts = e?.target?.value;
-        }}
+        bind:group={manifestProperties.show_hosts}
       />
       <span>Show Hosts</span>
     </label>
@@ -221,9 +225,7 @@
         type="radio"
         name="show_hosts"
         value={"hide"}
-        on:input={(e) => {
-          manifestProperties.show_hosts = e?.target?.value;
-        }}
+        bind:group={manifestProperties.show_hosts}
       />
       <span>Hide Hosts</span>
     </label>
@@ -236,10 +238,7 @@
         min={0}
         max={24}
         step={1}
-        value={0}
-        on:input={(e) => {
-          manifestProperties.start_hour = e?.target?.value;
-        }}
+        bind:value={manifestProperties.start_hour}
       />
     </label>
   </div>
@@ -251,10 +250,7 @@
         min={0}
         max={24}
         step={1}
-        value={24}
-        on:input={(e) => {
-          manifestProperties.end_hour = e?.target?.value;
-        }}
+        bind:value={manifestProperties.end_hour}
       />
     </label>
   </div>
@@ -265,9 +261,7 @@
         type="radio"
         name="slot_size"
         value={15}
-        on:input={(e) => {
-          manifestProperties.slot_size = parseInt(e?.target?.value);
-        }}
+        bind:group={manifestProperties.slot_size}
       />
       <span>15 minutes</span>
     </label>
@@ -276,9 +270,7 @@
         type="radio"
         name="slot_size"
         value={30}
-        on:input={(e) => {
-          manifestProperties.slot_size = parseInt(e?.target?.value);
-        }}
+        bind:group={manifestProperties.slot_size}
       />
       <span>30 minutes</span>
     </label>
@@ -287,9 +279,7 @@
         type="radio"
         name="slot_size"
         value={60}
-        on:input={(e) => {
-          manifestProperties.slot_size = parseInt(e?.target?.value);
-        }}
+        bind:group={manifestProperties.slot_size}
       />
       <span>60 minutes</span>
     </label>
@@ -297,14 +287,7 @@
   <div>
     <label>
       <strong>Start Date</strong>
-      <input
-        type="date"
-        value={new Date(start_date).toLocaleDateString("en-CA")}
-        on:input={(e) => {
-          const date = e?.target?.value;
-          manifestProperties.start_date = date ? new Date(date) : new Date();
-        }}
-      />
+      <input type="date" bind:value={startDate} />
     </label>
   </div>
   <div>
@@ -315,10 +298,7 @@
         min={1}
         max={7}
         step={1}
-        value={1}
-        on:input={(e) => {
-          manifestProperties.dates_to_show = e?.target?.value;
-        }}
+        bind:value={manifestProperties.dates_to_show}
       />
     </label>
   </div>
@@ -328,10 +308,7 @@
       <input
         type="checkbox"
         name="show_ticks"
-        checked={manifestProperties.show_ticks}
-        on:input={(e) => {
-          manifestProperties.show_ticks = e?.target?.checked;
-        }}
+        bind:checked={manifestProperties.show_ticks}
       />
     </label>
   </div>
@@ -340,13 +317,7 @@
       <strong id="email_ids">Email Ids to include for scheduling</strong>
     </div>
     <label>
-      <textarea
-        name="email_ids"
-        value={""}
-        on:input={(e) => {
-          manifestProperties.email_ids = parseStringToArray(e?.target?.value);
-        }}
-      />
+      <textarea name="email_ids" bind:value={emailIDs} />
     </label>
   </div>
   <div role="checkbox" aria-labelledby="allow_booking">
@@ -355,10 +326,7 @@
       <input
         type="checkbox"
         name="allow_booking"
-        checked={manifestProperties.allow_booking}
-        on:input={(e) => {
-          manifestProperties.allow_booking = e?.target?.checked;
-        }}
+        bind:checked={manifestProperties.allow_booking}
       />
     </label>
   </div>
@@ -369,10 +337,7 @@
         type="number"
         min={1}
         max={20}
-        value={8}
-        on:input={(e) => {
-          manifestProperties.max_bookable_slots = e?.target?.value;
-        }}
+        bind:value={manifestProperties.max_bookable_slots}
       />
     </label>
   </div>
@@ -383,11 +348,8 @@
         type="range"
         min={0}
         max={1}
-        value={0}
         step={0.01}
-        on:input={(e) => {
-          manifestProperties.partial_bookable_ratio = e?.target?.value;
-        }}
+        bind:value={manifestProperties.partial_bookable_ratio}
       />
     </label>
   </div>
@@ -397,10 +359,7 @@
       <input
         type="checkbox"
         name="show_as_week"
-        checked={manifestProperties.show_as_week}
-        on:input={(e) => {
-          manifestProperties.show_as_week = e?.target?.checked;
-        }}
+        bind:checked={manifestProperties.show_as_week}
       />
     </label>
   </div>
@@ -410,10 +369,7 @@
       <input
         type="checkbox"
         name="show_weekends"
-        checked={manifestProperties.show_weekends}
-        on:input={(e) => {
-          manifestProperties.show_weekends = e?.target?.checked;
-        }}
+        bind:checked={manifestProperties.show_weekends}
       />
     </label>
   </div>
@@ -424,10 +380,7 @@
         type="number"
         min={1}
         max={20}
-        value={5}
-        on:input={(e) => {
-          manifestProperties.attendees_to_show = e?.target?.value;
-        }}
+        bind:value={manifestProperties.attendees_to_show}
       />
     </label>
   </div>
@@ -440,9 +393,7 @@
         type="radio"
         name="notification_mode"
         value={NotificationMode.SHOW_MESSAGE}
-        on:input={(e) => {
-          manifestProperties.notification_mode = e?.target?.value;
-        }}
+        bind:group={manifestProperties.notification_mode}
       />
       <span>Show Message on UI</span>
     </label>
@@ -451,9 +402,7 @@
         type="radio"
         name="notification_mode"
         value={NotificationMode.SEND_MESSAGE}
-        on:input={(e) => {
-          manifestProperties.notification_mode = e?.target?.value;
-        }}
+        bind:group={manifestProperties.notification_mode}
       />
       <span>Send message via email</span>
     </label>
