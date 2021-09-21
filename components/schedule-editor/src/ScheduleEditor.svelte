@@ -5,10 +5,11 @@
   import { onMount, tick } from "svelte";
 
   import type { Manifest } from "@commons/types/ScheduleEditor";
-  import {
+  import parseStringToArray, {
     getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
+  import { NotificationMode } from "@commons/enums/Scheduler";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -17,6 +18,22 @@
   export let event_location: string;
   export let event_conferencing: string;
   export let show_hosts: "show" | "hide";
+  export let start_hour: number;
+  export let end_hour: number;
+  export let slot_size: number; // in minutes
+  export let start_date: Date;
+  export let dates_to_show: number;
+  export let show_ticks: boolean;
+  export let email_ids: string[];
+  export let allow_booking: boolean;
+  export let max_bookable_slots: number;
+  export let partial_bookable_ratio: number;
+  export let show_as_week: boolean;
+  export let show_weekends: boolean;
+  export let attendees_to_show: number;
+  export let notification_mode: NotificationMode;
+  export let notification_message: string;
+  export let notification_subject: string;
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -61,7 +78,71 @@
       "",
     );
     show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
+    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
+    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
+    slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
+    start_date = getPropertyValue(
+      internalProps.start_date,
+      start_date,
+      new Date(),
+    );
+    dates_to_show = getPropertyValue(
+      internalProps.dates_to_show,
+      dates_to_show,
+      1,
+    );
+    show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
+    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
+    allow_booking = getPropertyValue(
+      internalProps.allow_booking,
+      allow_booking,
+      false,
+    );
+    max_bookable_slots = getPropertyValue(
+      internalProps.max_bookable_slots,
+      max_bookable_slots,
+      1,
+    );
+    partial_bookable_ratio = getPropertyValue(
+      internalProps.partial_bookable_ratio,
+      partial_bookable_ratio,
+      0.01,
+    );
+    show_as_week = getPropertyValue(
+      internalProps.show_as_week,
+      show_as_week,
+      false,
+    );
+    show_weekends = getPropertyValue(
+      internalProps.show_weekends,
+      show_weekends,
+      true,
+    );
+    attendees_to_show = getPropertyValue(
+      internalProps.attendees_to_show,
+      attendees_to_show,
+      5,
+    );
+    notification_mode = getPropertyValue(
+      internalProps.notification_mode,
+      notification_mode,
+      NotificationMode.SHOW_MESSAGE,
+    );
+    notification_message = getPropertyValue(
+      internalProps.notification_message,
+      notification_message,
+      "Thank you for scheduling!",
+    );
+    notification_subject = getPropertyValue(
+      internalProps.notification_subject,
+      notification_subject,
+      "Invitation",
+    );
   }
+
+  // Manifest properties requiring further manipulation:
+  let emailIDs: string = "";
+  let startDate: string = "0";
 
   $: manifestProperties = {
     event_title,
@@ -69,7 +150,25 @@
     event_location,
     event_conferencing,
     show_hosts,
+    start_hour,
+    end_hour,
+    slot_size,
+    start_date: new Date(startDate),
+    dates_to_show,
+    show_ticks,
+    email_ids: parseStringToArray(emailIDs),
+    allow_booking,
+    max_bookable_slots,
+    partial_bookable_ratio,
+    show_as_week,
+    show_weekends,
+    attendees_to_show,
+    notification_mode,
+    notification_message,
+    notification_subject,
   };
+
+  $: console.table(manifestProperties);
   // #endregion mount and prop initialization
 
   function saveProperties() {
@@ -116,8 +215,8 @@
       <input
         type="radio"
         name="show_hosts"
+        value={"show"}
         bind:group={manifestProperties.show_hosts}
-        value="show"
       />
       <span>Show Hosts</span>
     </label>
@@ -125,12 +224,200 @@
       <input
         type="radio"
         name="show_hosts"
+        value={"hide"}
         bind:group={manifestProperties.show_hosts}
-        value="hide"
       />
       <span>Hide Hosts</span>
     </label>
   </div>
-
+  <div>
+    <label>
+      <strong>Start Hour</strong>
+      <input
+        type="range"
+        min={0}
+        max={24}
+        step={1}
+        bind:value={manifestProperties.start_hour}
+      />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>End Hour</strong>
+      <input
+        type="range"
+        min={0}
+        max={24}
+        step={1}
+        bind:value={manifestProperties.end_hour}
+      />
+    </label>
+  </div>
+  <div role="radiogroup" aria-labelledby="slot_size">
+    <strong id="slot_size">Timeslot size</strong>
+    <label>
+      <input
+        type="radio"
+        name="slot_size"
+        value={15}
+        bind:group={manifestProperties.slot_size}
+      />
+      <span>15 minutes</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="slot_size"
+        value={30}
+        bind:group={manifestProperties.slot_size}
+      />
+      <span>30 minutes</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="slot_size"
+        value={60}
+        bind:group={manifestProperties.slot_size}
+      />
+      <span>60 minutes</span>
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Start Date</strong>
+      <input type="date" bind:value={startDate} />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Days to show</strong>
+      <input
+        type="range"
+        min={1}
+        max={7}
+        step={1}
+        bind:value={manifestProperties.dates_to_show}
+      />
+    </label>
+  </div>
+  <div role="checkbox" aria-labelledby="show_ticks">
+    <strong id="show_ticks">Show ticks</strong>
+    <label>
+      <input
+        type="checkbox"
+        name="show_ticks"
+        bind:checked={manifestProperties.show_ticks}
+      />
+    </label>
+  </div>
+  <div>
+    <div>
+      <strong id="email_ids">Email Ids to include for scheduling</strong>
+    </div>
+    <label>
+      <textarea name="email_ids" bind:value={emailIDs} />
+    </label>
+  </div>
+  <div role="checkbox" aria-labelledby="allow_booking">
+    <strong id="allow_booking">Allow booking</strong>
+    <label>
+      <input
+        type="checkbox"
+        name="allow_booking"
+        bind:checked={manifestProperties.allow_booking}
+      />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Maximum slots that can be booked at once</strong>
+      <input
+        type="number"
+        min={1}
+        max={20}
+        bind:value={manifestProperties.max_bookable_slots}
+      />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Participant Threshold / Partial bookable ratio</strong>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.01}
+        bind:value={manifestProperties.partial_bookable_ratio}
+      />
+    </label>
+  </div>
+  <div role="checkbox" aria-labelledby="show_as_week">
+    <strong id="show_as_week">Show as week</strong>
+    <label>
+      <input
+        type="checkbox"
+        name="show_as_week"
+        bind:checked={manifestProperties.show_as_week}
+      />
+    </label>
+  </div>
+  <div role="checkbox" aria-labelledby="show_weekends">
+    <strong id="show_weekends">Show weekends</strong>
+    <label>
+      <input
+        type="checkbox"
+        name="show_weekends"
+        bind:checked={manifestProperties.show_weekends}
+      />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Attendees to show</strong>
+      <input
+        type="number"
+        min={1}
+        max={20}
+        bind:value={manifestProperties.attendees_to_show}
+      />
+    </label>
+  </div>
+  <div role="radiogroup" aria-labelledby="notification_mode">
+    <strong id="notification_mode"
+      >How would you like to notify the customer on event creation?</strong
+    >
+    <label>
+      <input
+        type="radio"
+        name="notification_mode"
+        value={NotificationMode.SHOW_MESSAGE}
+        bind:group={manifestProperties.notification_mode}
+      />
+      <span>Show Message on UI</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="notification_mode"
+        value={NotificationMode.SEND_MESSAGE}
+        bind:group={manifestProperties.notification_mode}
+      />
+      <span>Send message via email</span>
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Notification message</strong>
+      <input type="text" bind:value={manifestProperties.notification_message} />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Notification Subject</strong>
+      <input type="text" bind:value={manifestProperties.notification_subject} />
+    </label>
+  </div>
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}
