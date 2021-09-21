@@ -274,6 +274,7 @@
       column-gap: 1rem;
       row-gap: 0.25rem;
       grid-template-columns: $contactWidth 1fr;
+      grid-template-rows: auto auto;
       transition: 0.5s;
       &:last-child {
         padding-bottom: 2rem;
@@ -294,11 +295,8 @@
         }
       }
       .body {
-        border-radius: 4px;
+        border-radius: 8px;
         background-color: white;
-        border-bottom: 10px solid;
-        box-shadow: 1px 1px 30px rgba(0, 0, 0, 0.05);
-        border-color: inherit;
         max-height: 50vh;
         overflow: auto;
         position: relative;
@@ -326,6 +324,10 @@
             width: 100%;
             height: 100%;
           }
+          span {
+            // perfectly center text
+            padding-top: 3px;
+          }
         }
         .email {
           font-size: 0.8rem;
@@ -334,6 +336,9 @@
           overflow: hidden;
           text-overflow: ellipsis;
         }
+      }
+      .time {
+        grid-column: 2/3;
       }
 
       p {
@@ -361,9 +366,11 @@
         }
 
         .contact {
-          order: 2;
+          grid-row: 1/2;
+          grid-column: 2/3;
         }
-        .body {
+        .body,
+        .time {
           order: 1;
           grid-column: 1 / 1;
         }
@@ -454,25 +461,6 @@
                   class="message member-{participantIndex + 1}"
                   class:you={isYou}
                 >
-                  <header
-                    class:hidden={previousFrom.email === from.email &&
-                      previousFrom.name === from.name}
-                  >
-                    <span class="email">
-                      <!-- A lot of services, like dropbox or github, use same-email, different-name to differentiate who posted a message to a shared thread -->
-                      {#if participants.filter((p) => p.email === from.email).length > 1}
-                        {from.name}
-                      {:else}{from.email}{/if}
-                    </span>
-                    <span class="date">
-                      <!-- If today: show time. Else: show date. -->
-                      {#if new Date().toDateString() === new Date(message.date * 1000).toDateString()}
-                        {new Date(message.date * 1000).toLocaleTimeString()}
-                      {:else}
-                        {new Date(message.date * 1000).toLocaleDateString()}
-                      {/if}
-                    </span>
-                  </header>
                   <div class="contact">
                     {#await (participants[participantIndex] || {}).contact then contact}
                       <div class="avatar">
@@ -495,10 +483,12 @@
                             {contact.given_name[0] + contact.surname[0]}
                           {:else}{contact.emails[0].email.slice(0, 2)}{/if}
                         {:else if from.email === you.name}
-                          {you.name.slice(0, 2)}
+                          <span>{you.name.slice(0, 2)}</span>
                         {:else if from.name}
-                          {from.name.slice(0, 2)}
-                        {:else if from.email}{from.email.slice(0, 2)}{/if}
+                          <span>{from.name.slice(0, 2)}</span>
+                        {:else if from.email}
+                          <span>{from.email.slice(0, 2)}</span>
+                        {/if}
                       </div>
                     {/await}
                   </div>
@@ -512,6 +502,14 @@
                       </p>
                     {:else}
                       <p class="snippet">{message.snippet}</p>
+                    {/if}
+                  </div>
+                  <div class="time">
+                    <!-- If today: show time. Else: show date. -->
+                    {#if new Date().toDateString() === new Date(message.date * 1000).toDateString()}
+                      {new Date(message.date * 1000).toLocaleTimeString()}
+                    {:else}
+                      {new Date(message.date * 1000).toLocaleDateString()}
                     {/if}
                   </div>
                 </article>
