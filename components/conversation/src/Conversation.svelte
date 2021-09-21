@@ -258,6 +258,10 @@
     gap: 32px;
     color: var(--black);
     font-size: var(--fs-14);
+
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
 
   .messages {
@@ -384,6 +388,10 @@
   }
 
   .reply-box {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+
     form {
       position: relative;
       display: flex;
