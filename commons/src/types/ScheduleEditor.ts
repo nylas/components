@@ -6,4 +6,17 @@ export interface Manifest extends NylasManifest {
   show_hosts?: "show" | "hide";
   event_location?: string;
   event_conferencing?: string;
+  start_hour: number;
+  end_hour: number;
+  slot_size: 15 | 30 | 60;
+  start_date: Date;
+  dates_to_show: number;
+  show_ticks: boolean;
+  email_ids: string[];
+  allow_booking: boolean;
+  max_bookable_slots: number;
+  partial_bookable_ratio: number;
+  show_as_week: boolean;
+  show_weekends: boolean;
+  attendees_to_show: number;
 }
