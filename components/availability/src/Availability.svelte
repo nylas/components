@@ -949,10 +949,8 @@
   function toggleSlot(slot: SelectableSlot) {
     if (slot.selectionStatus === SelectionStatus.SELECTED) {
       slot.selectionStatus = SelectionStatus.UNSELECTED;
-    } else {
-      if (slotSelection.length < max_bookable_slots) {
-        slot.selectionStatus = SelectionStatus.SELECTED;
-      }
+    } else if (slotSelection.length < max_bookable_slots) {
+      slot.selectionStatus = SelectionStatus.SELECTED;
     }
     days = [...days];
   }
