@@ -1202,9 +1202,12 @@
           border: 1px solid rgba(0, 0, 0, 0.1);
           box-shadow: none !important;
 
-          &:hover {
-            box-shadow: none;
-            background-color: rgba(0, 0, 0, 0.1);
+          @media (hover: hover) and (pointer: fine) {
+            // prevents touch-deselect hover state color
+            &:hover {
+              box-shadow: none;
+              background-color: rgba(0, 0, 0, 0.1);
+            }
           }
 
           &.selected {
