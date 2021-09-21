@@ -5,7 +5,7 @@
   import { onMount, tick } from "svelte";
 
   import type { Manifest } from "@commons/types/ScheduleEditor";
-  import {
+  import parseStringToArray, {
     getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
@@ -34,6 +34,7 @@
   export let notification_mode: NotificationMode;
   export let notification_message: string;
   export let notification_subject: string;
+
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
@@ -330,6 +331,20 @@
         checked={manifestProperties.show_ticks}
         on:input={(e) => {
           manifestProperties.show_ticks = e?.target?.checked;
+        }}
+      />
+    </label>
+  </div>
+  <div>
+    <div>
+      <strong id="email_ids">Email Ids to include for scheduling</strong>
+    </div>
+    <label>
+      <textarea
+        name="email_ids"
+        value={""}
+        on:input={(e) => {
+          manifestProperties.email_ids = parseStringToArray(e?.target?.value);
         }}
       />
     </label>
