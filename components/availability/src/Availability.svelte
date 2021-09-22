@@ -501,9 +501,8 @@
       return slotList;
     }, [] as SelectableSlot[]);
 
-  $: if (sortedSlots.length) {
-    dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
-  }
+  $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+
   // #endregion timeSlot selection
 
   $: newCalendarTimeslotsForGivenEmails = [];
