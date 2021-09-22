@@ -27,6 +27,7 @@
   } from "@commons/types/Nylas";
   import "../../contacts-search/src/ContactsSearch.svelte";
   import { getDate } from "@commons/methods/datetime";
+  import { getNameInitials } from "@commons/methods/contact_strings";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -476,12 +477,16 @@
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
                           {:else}{contact.emails[0].email.slice(0, 2)}{/if}
-                        {:else if from.email === you.name}
-                          <span>{you.name.slice(0, 2)}</span>
+                        {:else if isYou}
+                          {#if you.name}
+                            <span>{getNameInitials(you.name)}</span>
+                          {:else}
+                            <span>{you.email_address?.slice(0, 1) || "?"}</span>
+                          {/if}
                         {:else if from.name}
-                          <span>{from.name.slice(0, 2)}</span>
-                        {:else if from.email}
-                          <span>{from.email.slice(0, 2)}</span>
+                          <span>{getNameInitials(from.name)}</span>
+                        {:else}
+                          <span>{from.email?.slice(0, 1) || "?"}</span>
                         {/if}
                       </div>
                     {/await}
