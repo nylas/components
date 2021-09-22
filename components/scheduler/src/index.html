@@ -17,7 +17,7 @@
         });
 
         scheduler.addEventListener("bookedEvents", () => {
-          scheduler.slots_to_book = [];
+          availability.reload(true, true);
         });
       });
     </script>

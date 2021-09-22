@@ -29,7 +29,6 @@
     TimeSlot,
     SelectableSlot,
     AvailabilityQuery,
-    EventQuery,
     CalendarAccount,
   } from "@commons/types/Availability";
   import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
@@ -64,6 +63,54 @@
   export let free_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
+
+  /**
+   * Re-loads availability data from the Nylas API.
+   * @param {boolean} clearSelection Used to indicate whether any currently selected timeslots should be cleared. Defaults to false.
+   * @param {boolean} slotsBooked Used to indicate whether the component should assume the previously selected slots were booked. Defaults to false.
+   */
+  export async function reload(clearSelection = false, slotsBooked = false) {
+    if (slotsBooked) {
+      const selectedSlots: any = [];
+      for (const day of days) {
+        selectedSlots.push(
+          ...day?.slots
+            .filter(
+              (slot: any) => slot.selectionStatus === SelectionStatus.SELECTED,
+            )
+            .map((slot: any) => ({
+              status: "busy",
+              start_time: new Date(slot.start_time).getTime() / 1000,
+              end_time: new Date(slot.end_time).getTime() / 1000,
+            })),
+        );
+      }
+
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
+
+      await getAvailability();
+    }
+
+    if (clearSelection && Array.isArray(days)) {
+      for (const day of days) {
+        for (const slot of day.slots) {
+          slot.selectionStatus = SelectionStatus.UNSELECTED;
+        }
+      }
+      days = [...days];
+    }
+
+    await getAvailability(true);
+  }
+
   //#endregion props
 
   //#region mount and prop initialization
@@ -506,62 +553,48 @@
   }
   // #endregion timeSlot selection
 
-  $: newCalendarTimeslotsForGivenEmails = [];
-
-  $: allCalendars = [
-    // TODO: consider merging these 2 into just calendars
-    ...calendars,
-    ...newCalendarTimeslotsForGivenEmails,
-  ];
-
   let availabilityQuery: AvailabilityQuery;
+  $: availabilityQuery = {
+    body: {
+      emails: email_ids,
+      start_time:
+        timeHour(new Date(new Date(startDay).setHours(start_hour))).getTime() /
+        1000,
+      end_time:
+        timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
+        1000,
+    },
+    component_id: id,
+    access_token: access_token,
+  };
 
+  $: newCalendarTimeslotsForGivenEmails = [];
   $: (async () => {
-    if (email_ids?.length) {
-      newCalendarTimeslotsForGivenEmails = await getAvailability();
-    }
-    // When dates_to_show is updated, update availability
-    if (email_ids?.length && endDay) {
-      newCalendarTimeslotsForGivenEmails = await getAvailability();
+    if (availabilityQuery?.body?.emails?.length) {
+      await getAvailability();
     }
   })();
 
-  async function getAvailability() {
+  async function getAvailability(forceReload = false) {
     let freeBusyCalendars: any = [];
-    availabilityQuery = {
-      body: {
-        emails: email_ids,
-        start_time:
-          timeHour(
-            new Date(new Date(startDay).setHours(start_hour)),
-          ).getTime() / 1000,
-        end_time:
-          timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
-          1000,
-      },
-      component_id: id,
-      access_token: access_token,
-    };
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay = await AvailabilityStore.getAvailability(
-      availabilityQuery,
-    );
-    if (consolidatedAvailabilityForGivenDay?.length) {
-      consolidatedAvailabilityForGivenDay.forEach((user) => {
-        freeBusyCalendars.push({
-          emailAddress: user.email,
-          account: {
-            emailAddress: user.email, // ¯\_(ツ)_/¯
-          },
-          availability: AvailabilityStatus.BUSY,
-          timeslots: user.time_slots.map((_slot) => ({
-            start_time: new Date(_slot.start_time * 1000),
-            end_time: new Date(_slot.end_time * 1000),
-          })),
-        });
+    const consolidatedAvailabilityForGivenDay = await $AvailabilityStore[
+      JSON.stringify({ ...availabilityQuery, forceReload })
+    ];
+    for (const user of consolidatedAvailabilityForGivenDay) {
+      freeBusyCalendars.push({
+        emailAddress: user.email,
+        account: {
+          emailAddress: user.email, // ¯\_(ツ)_/¯
+        },
+        availability: AvailabilityStatus.BUSY,
+        timeslots: user.time_slots.map((slot) => ({
+          start_time: new Date(slot.start_time * 1000),
+          end_time: new Date(slot.end_time * 1000),
+        })),
       });
     }
-    return freeBusyCalendars;
+    newCalendarTimeslotsForGivenEmails = freeBusyCalendars;
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
@@ -633,6 +666,11 @@
     participants: [{ email_address: "" }],
   };
   //#endregion event query
+  $: allCalendars = [
+    // TODO: consider merging these 2 into just calendars
+    ...calendars,
+    ...newCalendarTimeslotsForGivenEmails,
+  ];
 
   //#region Attendee Overlay
   let attendeeOverlay: HTMLElement;
