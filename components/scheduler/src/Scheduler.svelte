@@ -70,7 +70,7 @@
     booking_label = getPropertyValue(
       internalProps.booking_label,
       booking_label,
-      "Schedule time slots",
+      "Schedule",
     );
     event_title = getPropertyValue(
       internalProps.event_title,
@@ -182,9 +182,6 @@
 </script>
 
 <style lang="scss">
-  @import "../../theming/reset.scss";
-  @import "../../theming/variables.scss";
-
   main {
     height: 100%;
     overflow: hidden;
@@ -196,57 +193,6 @@
     .booker {
       height: 100%;
       overflow: auto;
-      background: rgba(0, 0, 0, 0.03);
-      padding: 1rem;
-
-      h2 {
-        font-size: 1.3rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-      }
-
-      & > p {
-        opacity: 0.8;
-        font-size: 0.9rem;
-        line-height: 1.3rem;
-        margin-bottom: 1rem;
-      }
-
-      .timeslots {
-        display: grid;
-        grid-auto-flow: row;
-        gap: 1rem;
-        margin-bottom: 1rem;
-
-        li {
-          background: rgba(255, 255, 255, 0.8);
-          list-style-type: none;
-          margin: 0;
-          padding: 1rem;
-          border: 1px solid #ebebeb;
-          display: grid;
-          gap: 0.5rem;
-          grid-auto-flow: row;
-
-          h3 {
-            font-size: 0.8rem;
-            opacity: 0.8;
-          }
-          .time {
-            color: var(--blue);
-          }
-          .date {
-            font-size: 0.8rem;
-          }
-        }
-      }
-
-      button.book {
-        background: var(--blue);
-        color: white;
-        padding: 0.5rem 2rem;
-        cursor: pointer;
-      }
     }
   }
 </style>
@@ -254,38 +200,28 @@
 <nylas-error {id} />
 <main>
   <section class="booker">
-    <h2>Your Appointment Bookings</h2>
+    <h2>Event-bookable details to follow here</h2>
     {#if slots_to_book.length}
-      <p>Do you want to book the following?</p>
-      <ul class="timeslots">
+      <p>Book the following?</p>
+      <ul>
         {#each slots_to_book as timeSlot}
           <li>
             <h3>{event_title}: {event_description}</h3>
-            <span class="time"
-              >{timeSlot.start_time.toLocaleTimeString([], {
-                timeStyle: "short",
-              })}
-              -
-              {timeSlot.end_time.toLocaleTimeString([], {
-                timeStyle: "short",
-              })}</span
-            >
-            <span class="date"
-              >{timeSlot.start_time.toLocaleDateString("default", {
-                dateStyle: "full",
-              })}</span
-            >
+            {timeSlot.start_time.toLocaleString()} to {timeSlot.end_time.toLocaleString()}
+            <ul>
+              {#if event_location}
+                <li>{event_location}</li>
+              {/if}
+              {#if event_conferencing}
+                <li>{event_conferencing}</li>
+              {/if}
+            </ul>
           </li>
         {/each}
       </ul>
-      <button class="book" on:click={() => bookTimeSlots(slots_to_book)}
+      <button on:click={() => bookTimeSlots(slots_to_book)}
         >{booking_label}</button
       >
-    {:else}
-      <p>
-        Select timeslots to view event information (You'll be able to review
-        before you book)
-      </p>
     {/if}
     {#if show_success_notification}
       <p>{notification_message}</p>
