@@ -26,6 +26,7 @@
     Account,
   } from "@commons/types/Nylas";
   import "../../contacts-search/src/ContactsSearch.svelte";
+  import { getDate } from "@commons/methods/datetime";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -498,12 +499,7 @@
                     {/if}
                   </div>
                   <div class="time">
-                    <!-- If today: show time. Else: show date. -->
-                    {#if new Date().toDateString() === new Date(message.date * 1000).toDateString()}
-                      {new Date(message.date * 1000).toLocaleTimeString()}
-                    {:else}
-                      {new Date(message.date * 1000).toLocaleDateString()}
-                    {/if}
+                    {getDate(new Date(message.date * 1000))}
                   </div>
                 </article>
               {/await}
