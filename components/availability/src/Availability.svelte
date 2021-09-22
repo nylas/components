@@ -548,9 +548,8 @@
       return slotList;
     }, [] as SelectableSlot[]);
 
-  $: if (sortedSlots.length) {
-    dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
-  }
+  $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+
   // #endregion timeSlot selection
 
   let availabilityQuery: AvailabilityQuery;
@@ -1143,7 +1142,7 @@
             display: none;
             position: relative;
             z-index: 2;
-            text-align: right;
+            float: right;
 
             span {
               background: rgba(0, 0, 0, 0.5);
