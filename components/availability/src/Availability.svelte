@@ -255,38 +255,16 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
 
   //#region layout
+
   let main: HTMLElement;
   let tickContainer: HTMLElement;
   let dayContainerWidth: number = 0;
-  // $: dayWidth = dayWidths[0];
   let clientHeight: number;
 
   const MINIMUM_DAY_WIDTH = 100;
 
   // Internally-settable reactive-to-external-props variable
   let datesToShow: number;
-  // $: {
-  //   if (
-  //     $$props.hasOwnProperty("dates_to_show") &&
-  //     $$props.dates_to_show !== datesToShow
-  //   ) {
-  //     datesToShow = getPropertyValue(
-  //       internalProps.dates_to_show,
-  //       1,
-  //       1,
-  //     );
-  //   } else if (!datesToShow) {
-  //     datesToShow = +dates_to_show;
-  //   }
-  // }
-
-  // function establishDatesToShow(width, intervalCounter = 0) {
-  //   console.log('esty', intervalCounter);
-  //   if (intervalCounter < dates_to_show && width < MINIMUM_DAY_WIDTH) {
-  //     return establishDatesToShow(width, intervalCounter+1)
-  //   }
-  //   return dates_to_show - intervalCounter;
-  // }
 
   $: optimalDatesToShow =
     Math.floor(dayContainerWidth / MINIMUM_DAY_WIDTH) || 1;
@@ -296,51 +274,6 @@
       : dates_to_show;
 
   $: tooSmallForWeek = show_as_week && optimalDatesToShow < 7;
-  $: console.log(
-    { dayContainerWidth },
-    { optimalDatesToShow },
-    { datesToShow },
-    { tooSmallForWeek },
-  );
-  // $: datesToShow = establishDatesToShow(dayWidth);
-
-  $: console.log({ datesToShow });
-
-  // $: console.log({dayWidth});
-
-  // $: needsToDropOne =
-  //   dates_to_show > 1
-  //   // && datesToShow < dates_to_show
-  //   && dayWidth - (dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH;
-
-  // $: console.log('what would doing one more do?', {dayWidth}, dayWidth - (dayWidth / (datesToShow + 1)), needsToDropOne);
-
-  // $: if (dayWidth - (dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH) {
-  //   console.log('ya');
-  //   datesToShow = datesToShow - 1;
-  // } else {
-  //   datesToShow = datesToShow - 1;
-  // }
-  ////////////////////////////////////////
-  // $: {
-  //   if (dates_to_show > 1) {
-  //     if (dayWidth < MINIMUM_DAY_WIDTH) {
-  //       console.log('111');
-  //       datesToShow = datesToShow - 1;
-  //     // } else if (dayWidth + (dayWidth * dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH) {
-  //     //   console.log('222');
-  //     //   datesToShow = datesToShow + 1;
-  //     } else {
-  //       console.log('222');
-  //       datesToShow = datesToShow;
-  //     }
-  //   }
-  // }
-  //   // && datesToShow < dates_to_show
-  //   && (dayWidth * dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH) {
-  //   console.log('OH NO')
-  //   datesToShow = datesToShow - 1;
-  // }
 
   //#endregion layout
 
@@ -572,7 +505,6 @@
     startDay: Date,
     endDay: Date,
     reverse?: boolean,
-    intervalCounter: number = 0,
   ): Date[] {
     let range = scaleTime()
       .domain([startDay, endDay])
@@ -592,14 +524,6 @@
         return generateDayRange(startDay, timeDay.offset(endDay, 1));
       }
     }
-    // if (dayWidth - (dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH)
-    // if (dayWidth > 0 && dayWidth < MINIMUM_DAY_WIDTH && intervalCounter === 0) {
-    //   console.log('oh no!');
-    //   console.log('hmm',  generateDayRange(startDay, endDay, reverse, intervalCounter + 1), dayWidth);
-    //   return generateDayRange(startDay, endDay, reverse, intervalCounter + 1);
-    // } else {
-    //   console.log('u good bb');
-    // }
     return range;
   }
 
