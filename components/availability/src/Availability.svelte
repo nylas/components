@@ -1433,7 +1433,7 @@
     class:list={view_as === "list"}
     bind:clientWidth={dayContainerWidth}
   >
-    {#each days as day, iter}
+    {#each days as day}
       <div class="day">
         <header>
           <h2>
