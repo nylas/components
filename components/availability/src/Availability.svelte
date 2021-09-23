@@ -291,8 +291,17 @@
   $: optimalDatesToShow =
     Math.floor(dayContainerWidth / MINIMUM_DAY_WIDTH) || 1;
   $: datesToShow =
-    optimalDatesToShow < dates_to_show ? optimalDatesToShow : dates_to_show;
-  $: console.log({ dayContainerWidth }, { optimalDatesToShow });
+    optimalDatesToShow < dates_to_show || show_as_week
+      ? optimalDatesToShow
+      : dates_to_show;
+
+  $: tooSmallForWeek = show_as_week && optimalDatesToShow < 7;
+  $: console.log(
+    { dayContainerWidth },
+    { optimalDatesToShow },
+    { datesToShow },
+    { tooSmallForWeek },
+  );
   // $: datesToShow = establishDatesToShow(dayWidth);
 
   $: console.log({ datesToShow });
@@ -348,13 +357,14 @@
     generateDayRange(
       startDay, // TODO: weird just to get show_weekends passed in
       show_as_week
-        ? timeDay.offset(startDay, 6)
+        ? timeDay.offset(startDay, tooSmallForWeek ? datesToShow - 1 : 6)
         : timeDay.offset(startDay, datesToShow - 1),
     );
 
-  $: startDay = show_as_week
-    ? timeWeek.floor(startDate)
-    : timeDay.floor(startDate);
+  $: startDay =
+    show_as_week && !tooSmallForWeek
+      ? timeWeek.floor(startDate)
+      : timeDay.floor(startDate);
 
   $: endDay = dayRange[dayRange.length - 1];
 
@@ -862,7 +872,7 @@
     if ($$props.start_date) {
       delete $$props.start_date;
     }
-    if (show_as_week) {
+    if (show_as_week && !tooSmallForWeek) {
       startDate = timeWeek.offset(endDay, 1);
     } else {
       startDate = timeDay.offset(endDay, 1);
@@ -872,7 +882,7 @@
     if ($$props.start_date) {
       delete $$props.start_date;
     }
-    if (show_as_week) {
+    if (show_as_week && !tooSmallForWeek) {
       startDate = timeWeek.offset(startDay, -1);
     } else {
       // Can't do something as simple as `start_date = timeDay.offset(startDay, -datesToShow)` here;
