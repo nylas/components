@@ -86,15 +86,16 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
-        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-          (availability) => {
-            for (const calendar of availability) {
-              calendar.time_slots.push(...selectedSlots);
-            }
-            return availability;
-          },
-        );
+      $AvailabilityStore[
+        JSON.stringify(availabilityQuery)
+      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+        (availability) => {
+          for (const calendar of availability) {
+            calendar.time_slots.push(...selectedSlots);
+          }
+          return availability;
+        },
+      );
 
       await getAvailability();
     }
@@ -256,10 +257,88 @@
   //#region layout
   let main: HTMLElement;
   let tickContainer: HTMLElement;
+  let dayContainerWidth: number = 0;
+  // $: dayWidth = dayWidths[0];
   let clientHeight: number;
 
+  const MINIMUM_DAY_WIDTH = 100;
+
+  // Internally-settable reactive-to-external-props variable
+  let datesToShow: number;
+  // $: {
+  //   if (
+  //     $$props.hasOwnProperty("dates_to_show") &&
+  //     $$props.dates_to_show !== datesToShow
+  //   ) {
+  //     datesToShow = getPropertyValue(
+  //       internalProps.dates_to_show,
+  //       1,
+  //       1,
+  //     );
+  //   } else if (!datesToShow) {
+  //     datesToShow = +dates_to_show;
+  //   }
+  // }
+
+  // function establishDatesToShow(width, intervalCounter = 0) {
+  //   console.log('esty', intervalCounter);
+  //   if (intervalCounter < dates_to_show && width < MINIMUM_DAY_WIDTH) {
+  //     return establishDatesToShow(width, intervalCounter+1)
+  //   }
+  //   return dates_to_show - intervalCounter;
+  // }
+
+  $: optimalDatesToShow =
+    Math.floor(dayContainerWidth / MINIMUM_DAY_WIDTH) || 1;
+  $: datesToShow =
+    optimalDatesToShow < dates_to_show ? optimalDatesToShow : dates_to_show;
+  $: console.log({ dayContainerWidth }, { optimalDatesToShow });
+  // $: datesToShow = establishDatesToShow(dayWidth);
+
+  $: console.log({ datesToShow });
+
+  // $: console.log({dayWidth});
+
+  // $: needsToDropOne =
+  //   dates_to_show > 1
+  //   // && datesToShow < dates_to_show
+  //   && dayWidth - (dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH;
+
+  // $: console.log('what would doing one more do?', {dayWidth}, dayWidth - (dayWidth / (datesToShow + 1)), needsToDropOne);
+
+  // $: if (dayWidth - (dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH) {
+  //   console.log('ya');
+  //   datesToShow = datesToShow - 1;
+  // } else {
+  //   datesToShow = datesToShow - 1;
+  // }
+  ////////////////////////////////////////
+  // $: {
+  //   if (dates_to_show > 1) {
+  //     if (dayWidth < MINIMUM_DAY_WIDTH) {
+  //       console.log('111');
+  //       datesToShow = datesToShow - 1;
+  //     // } else if (dayWidth + (dayWidth * dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH) {
+  //     //   console.log('222');
+  //     //   datesToShow = datesToShow + 1;
+  //     } else {
+  //       console.log('222');
+  //       datesToShow = datesToShow;
+  //     }
+  //   }
+  // }
+  //   // && datesToShow < dates_to_show
+  //   && (dayWidth * dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH) {
+  //   console.log('OH NO')
+  //   datesToShow = datesToShow - 1;
+  // }
+
+  //#endregion layout
+
+  //#region data generation
+
   // You can have as few as 1, and as many as 7, days shown
-  // start_date and dates_to_show get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
+  // start_date and datesToShow get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
   let startDay: Date; // the first day column shown; depends on show_as_week
   let endDay: Date;
   let startDate: Date; // internally-settable start_date
@@ -270,7 +349,7 @@
       startDay, // TODO: weird just to get show_weekends passed in
       show_as_week
         ? timeDay.offset(startDay, 6)
-        : timeDay.offset(startDay, dates_to_show - 1),
+        : timeDay.offset(startDay, datesToShow - 1),
     );
 
   $: startDay = show_as_week
@@ -483,6 +562,7 @@
     startDay: Date,
     endDay: Date,
     reverse?: boolean,
+    intervalCounter: number = 0,
   ): Date[] {
     let range = scaleTime()
       .domain([startDay, endDay])
@@ -495,13 +575,21 @@
         }
       });
     if (!show_as_week && !show_weekends) {
-      if (range.length < dates_to_show) {
+      if (range.length < datesToShow) {
         if (reverse) {
           return generateDayRange(timeDay.offset(startDay, -1), endDay, true);
         }
         return generateDayRange(startDay, timeDay.offset(endDay, 1));
       }
     }
+    // if (dayWidth - (dayWidth / (datesToShow + 1)) < MINIMUM_DAY_WIDTH)
+    // if (dayWidth > 0 && dayWidth < MINIMUM_DAY_WIDTH && intervalCounter === 0) {
+    //   console.log('oh no!');
+    //   console.log('hmm',  generateDayRange(startDay, endDay, reverse, intervalCounter + 1), dayWidth);
+    //   return generateDayRange(startDay, endDay, reverse, intervalCounter + 1);
+    // } else {
+    //   console.log('u good bb');
+    // }
     return range;
   }
 
@@ -520,7 +608,7 @@
       timestamp,
     };
   });
-  //#endregion layout
+  //#endregion data generation
 
   // #region timeSlot selection
   let slotSelection: SelectableSlot[] = [];
@@ -787,12 +875,12 @@
     if (show_as_week) {
       startDate = timeWeek.offset(startDay, -1);
     } else {
-      // Can't do something as simple as `start_date = timeDay.offset(startDay, -dates_to_show)` here;
-      // broken case: !show_weekends, start_date = a monday, dates_to_show = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
+      // Can't do something as simple as `start_date = timeDay.offset(startDay, -datesToShow)` here;
+      // broken case: !show_weekends, start_date = a monday, datesToShow = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
       // Instead, we generateDayRange() with reverse=true to take advance of recursive non-weekend range-making.
       let previousRange = generateDayRange(
-        timeDay.offset(startDay, -dates_to_show),
-        timeDay.offset(endDay, -dates_to_show),
+        timeDay.offset(startDay, -datesToShow),
+        timeDay.offset(endDay, -datesToShow),
         true,
       );
       startDate = previousRange[0];
@@ -1086,27 +1174,31 @@
       grid-template-rows: $headerHeight 1fr;
       position: relative;
 
-      h2 {
-        margin: 0;
-        padding: 0;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 0.5rem;
-        height: 30px;
-        line-height: 1.875;
-        font-size: 1rem;
-        font-weight: 300;
-
-        .date {
-          border-radius: 15px;
-          background: var(--blue);
-          color: white;
-          font-weight: bold;
-          display: block;
-          width: 30px;
+      header {
+        width: 100%;
+        overflow: hidden;
+        h2 {
+          margin: 0;
+          padding: 0;
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: 0.5rem;
           height: 30px;
           line-height: 1.875;
-          text-align: center;
+          font-size: 1rem;
+          font-weight: 300;
+
+          .date {
+            border-radius: 15px;
+            background: var(--blue);
+            color: white;
+            font-weight: bold;
+            display: block;
+            width: 30px;
+            height: 30px;
+            line-height: 1.875;
+            text-align: center;
+          }
         }
       }
 
@@ -1405,8 +1497,9 @@
     class="days"
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
+    bind:clientWidth={dayContainerWidth}
   >
-    {#each days as day}
+    {#each days as day, iter}
       <div class="day">
         <header>
           <h2>
