@@ -302,6 +302,8 @@
       new Date(new Date(timestamp).setHours(start_hour)),
     );
     const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
+    const totalSlots: number = 1440 / slot_size;
+    let busySlots: [{ startTime: Date; endTime: Date }] | [] = [];
     return scaleTime()
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
@@ -318,6 +320,18 @@
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
+              } else {
+                if (
+                  !busySlots.some(
+                    (slot: { startTime: Date; endTime: Date }) => {
+                      return (
+                        slot.startTime === time && slot.endTime === endTime
+                      );
+                    },
+                  )
+                ) {
+                  busySlots.push({ startTime: time, endTime: endTime });
+                }
               }
             } else if (
               calendar.availability === AvailabilityStatus.FREE ||
@@ -367,6 +381,21 @@
           }
         }
 
+        // Add overbooked_threshold check here
+        const isOverbookedThreshold =
+          (busySlots.length / totalSlots) * 100 > overbooked_threshold;
+        if (
+          (availability === AvailabilityStatus.FREE ||
+            availability === AvailabilityStatus.PARTIAL) &&
+          isOverbookedThreshold
+        ) {
+          availability = AvailabilityStatus.BUSY;
+          // generateEpochs is using freeCalendars to identify clickable slots, so we need to empty freeCalendars here
+          while (freeCalendars.length) {
+            freeCalendars.pop();
+          }
+        }
+
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           pendingSelection: false,
@@ -398,7 +427,6 @@
     ticks: Date[],
     intervalCounter: number = 0,
   ): Date[] => {
-    // console.time('ticks')
     const tickIters = slotSizes[intervalCounter];
 
     // ternary here because timeMinute.every(120) doesnt work, but timeHour.every(2) does.
@@ -420,7 +448,6 @@
     ) {
       return generateTicks(height, ticks, intervalCounter + 1);
     } else {
-      // console.timeEnd('ticks')
       return ticks;
     }
   };
@@ -452,10 +479,12 @@
       }, [] as TimeSlot[][])
       .map((epoch) => {
         let status = "free";
+
         const numFreeCalendars = epoch[0].available_calendars.length;
         const fewerCalendarsThanRatio =
           numFreeCalendars !== allCalendars.length &&
           numFreeCalendars < allCalendars.length * partial_bookable_ratio;
+
         if (
           numFreeCalendars === 0 ||
           fewerCalendarsThanRatio ||
@@ -469,6 +498,7 @@
         ) {
           status = "partial";
         }
+
         return {
           start_time: epoch[0].start_time,
           offset: epochScale(epoch[0].start_time) * 100,
@@ -865,6 +895,7 @@
           ) || null;
       } else if (
         slotSelection.length < max_bookable_slots &&
+        // (freeSlots/totalSlots * 100) < overbooked_threshold &&
         slot.availability !== AvailabilityStatus.BUSY
       ) {
         slot.selectionPending = true;

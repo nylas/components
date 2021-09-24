@@ -89,7 +89,6 @@
 
         overbookedThresholdInput.addEventListener("input", (event) => {
           component.overbooked_threshold = parseInt(event.target.value);
-          console.log("threshold", component.overbooked_threshold);
         });
 
         document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
