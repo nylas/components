@@ -176,9 +176,7 @@
     lastMessageInitialised = false;
     if (lastMessage.from[0].email === you.email_address) {
       reply.to = lastMessage.to;
-      reply.to = lastMessage.to.concat(reply.to);
       reply.cc = lastMessage?.cc || [];
-      reply.cc = lastMessage.to;
     } else {
       reply.to = lastMessage.from;
       reply.cc = [...lastMessage.cc, ...lastMessage.to];
