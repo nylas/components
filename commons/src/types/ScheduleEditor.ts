@@ -31,4 +31,5 @@ export interface Manifest extends NylasManifest {
   open_hours?: AvailabilityRule[];
   recurrence: "none" | "required" | "optional";
   recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
+  overbooked_threshold: number;
 }

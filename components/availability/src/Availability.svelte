@@ -74,6 +74,7 @@
   export let show_header: boolean;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let open_hours: AvailabilityRule[];
+  export let overbooked_threshold: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -276,6 +277,11 @@
       "full",
     );
     open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
+    overbooked_threshold = getPropertyValue(
+      internalProps.overbooked_threshold || editorManifest.overbooked_threshold,
+      overbooked_threshold,
+      100,
+    );
   }
   $: {
     if (

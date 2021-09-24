@@ -32,6 +32,7 @@ export interface Manifest extends NylasManifest {
   date_format: "full" | "weekday" | "date" | "none";
   show_header: boolean;
   open_hours: AvailabilityRule[];
+  overbooked_threshold: number;
 }
 
 export interface AvailabilityRule {
