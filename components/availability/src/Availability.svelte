@@ -63,6 +63,7 @@
   export let free_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
+  export let overbooked_threshold: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -231,6 +232,11 @@
       internalProps.view_as || editorManifest.view_as,
       view_as,
       "schedule",
+    );
+    overbooked_threshold = getPropertyValue(
+      internalProps.overbooked_threshold || editorManifest.overbooked_threshold,
+      overbooked_threshold,
+      100,
     );
   }
 
