@@ -176,7 +176,9 @@
     lastMessageInitialised = false;
     if (lastMessage.from[0].email === you.email_address) {
       reply.to = lastMessage.to;
+      reply.to = lastMessage.to.concat(reply.to);
       reply.cc = lastMessage?.cc || [];
+      reply.cc = lastMessage.to;
     } else {
       reply.to = lastMessage.from;
       reply.cc = [...lastMessage.cc, ...lastMessage.to];
@@ -233,6 +235,10 @@
     }
   };
   afterUpdate(scrollToBottom);
+
+  // #region mobile header view
+  let headerExpanded = false;
+  // #endregion mobile header view
 </script>
 
 <style lang="scss">
@@ -265,15 +271,47 @@
     color: var(--black);
     font-size: var(--fs-14);
 
-    position: sticky;
+    position: fixed;
+    width: 100%;
     top: 0;
     z-index: 1;
+
+    &.mobile {
+      @media (min-width: $tabletBreakpoint) {
+        display: none;
+      }
+      width: calc(100% - 32px - 32px);
+
+      button {
+        position: absolute;
+        right: 32px;
+        top: 16px;
+        background: none;
+        display: flex;
+      }
+
+      &.expanded {
+        display: grid;
+        gap: 12px;
+        button {
+          rotate: 180deg;
+        }
+      }
+    }
+    &.tablet {
+      display: none;
+      @media (min-width: $tabletBreakpoint) {
+        display: flex;
+      }
+    }
   }
 
   .messages {
     display: grid;
     gap: 1rem;
     padding: 1rem;
+    padding-top: calc(1rem + 15px + 15px + 15px);
+    padding-bottom: calc(25px + 12px + 12px);
     .message {
       max-width: min(
         400px,
@@ -399,7 +437,8 @@
   }
 
   .reply-box {
-    position: sticky;
+    position: fixed;
+    width: 100%;
     bottom: 0;
     z-index: 1;
 
@@ -447,7 +486,34 @@
   {#await conversation}
     Loading Component...
   {:then _}
-    <header>
+    <header class="mobile" class:expanded={headerExpanded}>
+      <span>to: {reply.to[0]?.email}</span>
+      {#if reply.to.length > 1 || reply.cc.length > 0}
+        <button on:click={() => (headerExpanded = !headerExpanded)}>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1.49229 3.49889C1.24729 3.74389 1.24729 4.13889 1.49229 4.38389L5.64729 8.53889C5.84229 8.73389 6.15729 8.73389 6.35229 8.53889L10.5073 4.38389C10.7523 4.13889 10.7523 3.74389 10.5073 3.49889C10.2623 3.25389 9.86729 3.25389 9.62229 3.49889L5.99729 7.11889L2.37229 3.49389C2.13229 3.25389 1.73229 3.25389 1.49229 3.49889Z"
+              fill="#636671"
+            />
+          </svg>
+        </button>
+      {/if}
+      {#if headerExpanded}
+        {#each reply.to.splice(1, reply.to.length - 1) as contact}
+          <span>to: {contact.email}</span>
+        {/each}
+        {#each reply.cc as contact}
+          <span>cc: {contact.email}</span>
+        {/each}
+      {/if}
+    </header>
+    <header class="tablet">
       {#if reply.to.length > 0}
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
