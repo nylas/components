@@ -1191,6 +1191,23 @@
             border-radius: 8px;
           }
 
+          &.busy {
+            $darkStripe: rgba(255, 0, 0, 0.1);
+            $lightStripe: white;
+
+            background-image: linear-gradient(
+              45deg,
+              $darkStripe 12.5%,
+              $lightStripe 12.5%,
+              $lightStripe 50%,
+              $darkStripe 50%,
+              $darkStripe 62.5%,
+              $lightStripe 62.5%,
+              $lightStripe 100%
+            );
+            background-size: 5.66px 5.66px;
+          }
+
           &.busy .inner {
             background-color: var(--busy-color, #ff647566);
           }
@@ -1265,24 +1282,10 @@
             z-index: 2;
           }
 
-          $darkStripe: rgba(0, 0, 0, 0.1);
-          $lightStripe: white;
-
           &.busy:not(.pending) {
             cursor: not-allowed;
             // background: rgba(0,0,0,0.05);
             margin-left: 8px;
-            background-image: linear-gradient(
-              45deg,
-              $darkStripe 16.67%,
-              $lightStripe 16.67%,
-              $lightStripe 50%,
-              $darkStripe 50%,
-              $darkStripe 66.67%,
-              $lightStripe 66.67%,
-              $lightStripe 100%
-            );
-            background-size: 4.24px 4.24px;
           }
 
           .selected-heading {
