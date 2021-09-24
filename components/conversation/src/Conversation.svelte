@@ -242,16 +242,20 @@
   @import "../../theming/variables.scss";
   @import "../../theming/themes.scss";
 
+  $tabletBreakpoint: 768px;
+  $desktopBreakpoint: 1140px;
+
   $contactWidth: 32px;
   main {
     height: 100%;
     width: 100%;
     overflow: auto;
     position: relative;
+    font-family: sans-serif;
     background-color: var(--grey-light);
   }
   $avatar-size: 40px;
-  $min-horizontal-space-between-participants: 4rem;
+  $avatar-horizontal-space: 1rem;
 
   header {
     display: flex;
@@ -271,15 +275,19 @@
     gap: 1rem;
     padding: 1rem;
     .message {
-      width: clamp(
-        200px,
-        calc(
-          100% - #{$avatar-size} - #{$min-horizontal-space-between-participants}
-        ),
-        700px
+      max-width: min(
+        400px,
+        calc(100% - #{$avatar-size} - #{$avatar-horizontal-space})
       );
+      @media (min-width: #{$tabletBreakpoint}) {
+        width: max-content;
+        max-width: 600px;
+      }
+      @media (min-width: #{$desktopBreakpoint}) {
+        max-width: 752px;
+      }
       display: grid;
-      column-gap: 1rem;
+      column-gap: $avatar-horizontal-space;
       row-gap: 0.25rem;
       grid-template-columns: $contactWidth 1fr;
       grid-template-rows: auto auto;
@@ -344,11 +352,10 @@
         font-size: 0.9em;
         border-radius: 8px;
         white-space: pre-line; // maintains newlines from conversation
-        &.snippet {
-          &:before {
-            content: "Expanding your message; please wait...  ";
-            font-weight: bold;
-          }
+        &.after {
+          padding-top: 0;
+          margin-top: -1rem;
+          color: var(--grey-dark);
         }
       }
       &.you {
@@ -364,6 +371,9 @@
           grid-column: 1 / 1;
           color: var(--white);
           background-color: var(--blue);
+          p.after {
+            color: var(--grey);
+          }
         }
         .time {
           order: 1;
@@ -499,8 +509,11 @@
                       <p>
                         {@html message.body}
                       </p>
+                    {:else if message.snippet.includes(" On ")}
+                      <p>{message.snippet.split("On ")[0]}</p>
+                      <p class="after">On {message.snippet.split("On ")[1]}</p>
                     {:else}
-                      <p class="snippet">{message.snippet}</p>
+                      <p>{message.snippet}</p>
                     {/if}
                   </div>
                   <div class="time">

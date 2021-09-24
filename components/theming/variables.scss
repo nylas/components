@@ -17,7 +17,9 @@ main {
   --black: #161717;
   --grey-dark: #636671;
   --grey: #bdc0cb;
-  --grey-light: #f7f7f8;
+  --grey-lighter: #dfe1e8;
+  --grey-lightest: #f7f7f8;
+  --grey-background: #f0f1f5;
   --white: #ffffff;
   --blue: #002db4;
   --blue-lighter: #f0f3ff;
@@ -29,7 +31,6 @@ main {
 
   // legacy
   --black-90: #2c2e2e;
-  --grey-lighter: #e3e8ee;
-  --grey-lightest: #f7f7f8;
+  --grey-light: #f7f7f8;
   --grey-warm: #cbcbcb;
 }
