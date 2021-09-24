@@ -212,17 +212,17 @@
     busy_color = getPropertyValue(
       internalProps.busy_color,
       busy_color,
-      "#ff647566",
+      "#EE3248cc",
     );
     partial_color = getPropertyValue(
       internalProps.partial_color,
       partial_color,
-      "#ffff7566",
+      "#FECA7Ccc",
     );
     free_color = getPropertyValue(
       internalProps.free_color,
       free_color,
-      "#36d2ad66",
+      "#078351cc",
     );
     show_hosts = getPropertyValue(
       internalProps.show_hosts || editorManifest.show_hosts,
@@ -262,6 +262,7 @@
   let dayContainer: HTMLElement;
   let dayContainerWidth: number = 0;
   let clientHeight: number;
+  let slotContainer: HTMLElement;
 
   const MINIMUM_DAY_WIDTH = 100;
 
@@ -647,33 +648,66 @@
               daySlot.availability === AvailabilityStatus.BUSY)
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
+
+      let startTimeString =
+        slot.start_time.getMinutes() === 0
+          ? slot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : slot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+
+      let endTimeString =
+        pendingEndTime.getMinutes() === 0
+          ? pendingEndTime.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : pendingEndTime.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+
       return `
-        ${slot.start_time.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })}
+        ${startTimeString.replace(" AM", "am").replace(" PM", "pm")}
         - 
-        ${pendingEndTime.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })}
+        ${endTimeString.replace(" AM", "am").replace(" PM", "pm")}
       `;
       // Otherwise, it's first in a selected block if its start_time matches a sortedSlot's start_time
     } else if (wrappingSortedSlot) {
+      let startTime =
+        wrappingSortedSlot.start_time.getMinutes() === 0
+          ? wrappingSortedSlot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : wrappingSortedSlot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+      let endTime =
+        wrappingSortedSlot.end_time.getMinutes() === 0
+          ? wrappingSortedSlot.end_time.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : wrappingSortedSlot.end_time.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
       return `
-      ${wrappingSortedSlot.start_time.toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}
-        - 
-        ${wrappingSortedSlot.end_time.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })}
+      ${startTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")} - ${endTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")}
       `;
     } else {
       return null;
@@ -1056,7 +1090,7 @@
 
     .days {
       display: grid;
-      gap: 0.25rem;
+      gap: 0rem;
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
       height: 100%;
@@ -1151,8 +1185,10 @@
           .inner {
             margin: 0rem;
             height: calc(100% - 0.5rem);
-            overflow: hidden;
-            padding: 0.25rem;
+            // overflow: hidden;
+            padding: 0.25rem 0;
+            width: 8px;
+            border-radius: 8px;
           }
 
           &.busy .inner {
@@ -1163,14 +1199,14 @@
           }
 
           &.free .inner {
-            background-color: var(--free-color, #36d2ad66);
+            background-color: var(--free-color, #36d2addf);
           }
 
           .available-calendars {
             display: none;
-            position: relative;
+            position: absolute;
             z-index: 2;
-            float: right;
+            left: 10px;
 
             span {
               background: rgba(0, 0, 0, 0.5);
@@ -1203,7 +1239,7 @@
 
         .slot {
           border: none;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
           background: transparent;
           position: relative;
           align-items: center;
@@ -1212,14 +1248,14 @@
           font-family: sans-serif;
 
           &.selected {
-            background-color: purple;
+            background-color: var(--blue);
             box-shadow: none;
             border-bottom: 1px solid transparent;
             z-index: 3;
           }
 
           &.pending {
-            background-color: rgba(128, 0, 128, 0.3);
+            background-color: #002db466;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
           }
@@ -1229,19 +1265,44 @@
             z-index: 2;
           }
 
-          &.busy {
+          $darkStripe: rgba(0, 0, 0, 0.1);
+          $lightStripe: white;
+
+          &.busy:not(.pending) {
             cursor: not-allowed;
+            // background: rgba(0,0,0,0.05);
+            margin-left: 8px;
+            background-image: linear-gradient(
+              45deg,
+              $darkStripe 16.67%,
+              $lightStripe 16.67%,
+              $lightStripe 50%,
+              $darkStripe 50%,
+              $darkStripe 66.67%,
+              $lightStripe 66.67%,
+              $lightStripe 100%
+            );
+            background-size: 4.24px 4.24px;
           }
 
           .selected-heading {
             position: absolute;
             top: 3px;
-            left: 3px;
+            left: 0;
             color: white;
-            background: rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 2px #002db4ff;
+            font-weight: 300;
+            // background: var(--blue);
             padding: 0 3px;
-            font-size: 0.75rem;
-            z-index: 2;
+            // width: calc(100% - 6px);
+            font-size: 0.8rem;
+            z-index: 3;
+            text-align: left;
+            font-family: system-ui, sans-serif;
+          }
+
+          &.pending .selected-heading {
+            width: auto;
           }
         }
       }
@@ -1276,7 +1337,7 @@
           }
 
           &.selected {
-            background: purple;
+            background: var(--blue);
             color: white;
           }
 
@@ -1488,7 +1549,6 @@
                 ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
-                data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
                 on:mousedown={() => {
                   if (
