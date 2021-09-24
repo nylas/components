@@ -1147,30 +1147,31 @@
       header {
         width: 100%;
         overflow: hidden;
+        
         h2 {
-          margin: 0;
-          padding: 0;
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 0.5rem;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem;
+        height: 30px;
+        line-height: 1.875;
+        font-size: 1rem;
+        font-weight: 200;
+
+        .date {
+          border-radius: 15px;
+          background: var(--blue);
+          color: white;
+          font-weight: bold;
+          display: block;
+          width: 30px;
           height: 30px;
           line-height: 1.875;
-          font-size: 1rem;
-          font-weight: 300;
-
-          .date {
-            border-radius: 15px;
-            background: var(--blue);
-            color: white;
-            font-weight: bold;
-            display: block;
-            width: 30px;
-            height: 30px;
-            line-height: 1.875;
-            text-align: center;
-          }
+          text-align: center;
         }
       }
+    }
 
       .epochs {
         position: absolute;
@@ -1184,11 +1185,12 @@
 
           .inner {
             margin: 0rem;
-            height: calc(100% - 0.5rem);
+            height: calc(100% - 0.5rem - 2px);
             // overflow: hidden;
             padding: 0.25rem 0;
             width: 8px;
             border-radius: 8px;
+            margin: 1px 0;
           }
 
           &.busy {
@@ -1269,6 +1271,8 @@
             box-shadow: none;
             border-bottom: 1px solid transparent;
             z-index: 3;
+            margin-left: 9px;
+            margin-right: 1px;
           }
 
           &.pending {
