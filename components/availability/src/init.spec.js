@@ -462,6 +462,10 @@ describe("availability component", () => {
   });
 
   describe("weeks and weekends", () => {
+    beforeEach(() => {
+      cy.viewport(1500, 550);
+    });
+
     it("Handles week_view false", () => {
       cy.get("nylas-availability")
         .as("availability")

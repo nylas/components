@@ -123,6 +123,7 @@
   onMount(async () => {
     await tick();
     clientHeight = main?.getBoundingClientRect().height;
+    dayContainerWidth = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({
       component_id: id,
       access_token,
@@ -258,6 +259,7 @@
 
   let main: HTMLElement;
   let tickContainer: HTMLElement;
+  let dayContainer: HTMLElement;
   let dayContainerWidth: number = 0;
   let clientHeight: number;
 
@@ -1431,6 +1433,7 @@
     class="days"
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
+    bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
     {#each days as day}
