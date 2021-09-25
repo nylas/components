@@ -12,18 +12,21 @@
         const startTimeInput = document.querySelector("input#start-time");
         const endTimeInput = document.querySelector("input#end-time");
         const daysInput = document.querySelector("input#days-to-show");
+        const overbookedThresholdInput = document.querySelector(
+          "input#overbooked-threshold",
+        );
 
         const calendars = [
           {
             availability: "busy",
             timeslots: [
               {
-                start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+                start_time: new Date(new Date().setHours(0, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(6, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+                start_time: new Date(new Date().setHours(6, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(12, 0, 0, 0)),
               },
             ],
             account: {
@@ -84,11 +87,23 @@
           component.dates_to_show = parseInt(event.target.value);
         });
 
+        overbookedThresholdInput.addEventListener("input", (event) => {
+          component.overbooked_threshold = parseInt(event.target.value);
+        });
+
         document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
             component.slot_size = event.target.value;
           });
         });
+
+        document
+          .querySelectorAll('input[name="event-buffer"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.event_buffer = event.target.value;
+            });
+          });
 
         document
           .querySelectorAll('input[name="show-ticks"]')
@@ -242,6 +257,36 @@
         <label>
           <input type="radio" name="slot-size" value="60" />
           60 minutes
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Event Buffer</legend>
+        <label>
+          <input checked type="radio" name="event-buffer" value="10" />
+          10 minutes
+        </label>
+        <label>
+          <input type="radio" name="event-buffer" value="15" />
+          15 minutes
+        </label>
+        <label>
+          <input type="radio" name="event-buffer" value="30" />
+          30 minutes
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Overbooked Threshold</legend>
+        <label>
+          <input
+            id="overbooked-threshold"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value="100"
+          />
         </label>
       </fieldset>
 
