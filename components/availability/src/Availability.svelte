@@ -63,6 +63,7 @@
   export let free_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
+  export let event_buffer: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -233,6 +234,11 @@
       internalProps.view_as || editorManifest.view_as,
       view_as,
       "schedule",
+    );
+    event_buffer = getPropertyValue(
+      internalProps.event_buffer || editorManifest.event_buffer,
+      event_buffer,
+      15,
     );
   }
 
