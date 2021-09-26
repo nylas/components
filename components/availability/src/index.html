@@ -91,10 +91,17 @@
         });
 
         document
-          .querySelectorAll('input[name="event-buffer"]')
+          .querySelectorAll('input[name="pre-event-buffer"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
-              component.event_buffer = event.target.value;
+              component.pre_event_buffer = event.target.value;
+            });
+          });
+        document
+          .querySelectorAll('input[name="post-event-buffer"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.post_event_buffer = event.target.value;
             });
           });
 
@@ -254,17 +261,44 @@
       </fieldset>
 
       <fieldset>
-        <legend>Event Buffer</legend>
+        <legend>Pre Event Buffer</legend>
         <label>
-          <input checked type="radio" name="event-buffer" value="10" />
+          <input
+            checked
+            type="radio"
+            name="pre-event-buffer"
+            value="10"
+            checked
+          />
           10 minutes
         </label>
         <label>
-          <input type="radio" name="event-buffer" value="15" checked />
+          <input type="radio" name="pre-event-buffer" value="15" />
           15 minutes
         </label>
         <label>
-          <input type="radio" name="event-buffer" value="30" />
+          <input type="radio" name="pre-event-buffer" value="30" />
+          30 minutes
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Post Event Buffer</legend>
+        <label>
+          <input
+            checked
+            type="radio"
+            name="post-event-buffer"
+            value="10"
+            checked
+          />
+          10 minutes
+        </label>
+        <label>
+          <input type="radio" name="post-event-buffer" value="15" />
+          15 minutes
+        </label>
+        <label>
+          <input type="radio" name="post-event-buffer" value="30" />
           30 minutes
         </label>
       </fieldset>
