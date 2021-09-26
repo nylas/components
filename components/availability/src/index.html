@@ -12,9 +12,6 @@
         const startTimeInput = document.querySelector("input#start-time");
         const endTimeInput = document.querySelector("input#end-time");
         const daysInput = document.querySelector("input#days-to-show");
-        const overbookedThresholdInput = document.querySelector(
-          "input#overbooked-threshold",
-        );
 
         const calendars = [
           {
@@ -85,10 +82,6 @@
 
         daysInput.addEventListener("input", (event) => {
           component.dates_to_show = parseInt(event.target.value);
-        });
-
-        overbookedThresholdInput.addEventListener("input", (event) => {
-          component.overbooked_threshold = parseInt(event.target.value);
         });
 
         document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
@@ -273,20 +266,6 @@
         <label>
           <input type="radio" name="event-buffer" value="30" />
           30 minutes
-        </label>
-      </fieldset>
-
-      <fieldset>
-        <legend>Overbooked Threshold</legend>
-        <label>
-          <input
-            id="overbooked-threshold"
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value="100"
-          />
         </label>
       </fieldset>
 
