@@ -290,6 +290,7 @@ describe("availability component", () => {
     });
 
     it("Updates dates_to_show via component prop", () => {
+      cy.viewport(1500, 550);
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -607,6 +608,7 @@ describe("availability component", () => {
         });
     });
     it("Moves a full week on prev/next push", () => {
+      cy.viewport(1500, 550);
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
