@@ -327,12 +327,14 @@
       new Date(new Date(timestamp).setHours(start_hour)),
     );
     const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
+    // console.log(parseInt(slot_size) + (2*event_buffer));
     return scaleTime()
       .domain([dayStart, dayEnd])
-      .ticks(timeMinute.every(slot_size) as TimeInterval)
+      .ticks(timeMinute.every(slot_size) as TimeInterval) //every( parseInt(slot_size) + (2*event_buffer)) )
       .slice(0, -1) // dont show the 25th hour
       .map((time: Date) => {
-        const endTime = timeMinute.offset(time, slot_size);
+        // startTime needs to be updated as well, because currently it is using 'time' which causes random overlap
+        const endTime = timeMinute.offset(time, slot_size); //(time, parseInt(slot_size) + (2*event_buffer))
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
