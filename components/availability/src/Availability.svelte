@@ -63,7 +63,8 @@
   export let free_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
-  export let event_buffer: number;
+  export let pre_event_buffer: number;
+  export let post_event_buffer: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -235,10 +236,15 @@
       view_as,
       "schedule",
     );
-    event_buffer = getPropertyValue(
-      internalProps.event_buffer || editorManifest.event_buffer,
-      event_buffer,
-      15,
+    pre_event_buffer = getPropertyValue(
+      internalProps.pre_event_buffer || editorManifest.pre_event_buffer,
+      pre_event_buffer,
+      0,
+    );
+    post_event_buffer = getPropertyValue(
+      internalProps.post_event_buffer || editorManifest.post_event_buffer,
+      post_event_buffer,
+      0,
     );
   }
 
@@ -327,14 +333,14 @@
       new Date(new Date(timestamp).setHours(start_hour)),
     );
     const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
-    // console.log(parseInt(slot_size) + (2*event_buffer));
+    // console.log(parseInt(slot_size) + pre_event_buffer+post_event_buffer);
     return scaleTime()
       .domain([dayStart, dayEnd])
-      .ticks(timeMinute.every(slot_size) as TimeInterval) //every( parseInt(slot_size) + (2*event_buffer)) )
+      .ticks(timeMinute.every(slot_size) as TimeInterval) //every(parseInt(slot_size) + pre_event_buffer+post_event_buffer)
       .slice(0, -1) // dont show the 25th hour
       .map((time: Date) => {
         // startTime needs to be updated as well, because currently it is using 'time' which causes random overlap
-        const endTime = timeMinute.offset(time, slot_size); //(time, parseInt(slot_size) + (2*event_buffer))
+        const endTime = timeMinute.offset(time, slot_size); //(time, (parseInt(slot_size) + pre_event_buffer+post_event_buffer))
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
