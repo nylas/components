@@ -486,9 +486,10 @@
   {:then _}
     <header class="mobile" class:expanded={headerExpanded}>
       <span>to: {reply.to[0]?.email}</span>
-      {#if reply.to.length > 1 || reply.cc.length > 0}
+      {#if reply.to.length > 1 || reply.cc.length}
         <button on:click={() => (headerExpanded = !headerExpanded)}>
           <svg
+            aria-label="Show additional emails in this thread"
             width="12"
             height="12"
             viewBox="0 0 12 12"
@@ -503,7 +504,8 @@
         </button>
       {/if}
       {#if headerExpanded}
-        {#each reply.to.splice(1, reply.to.length - 1) as contact}
+        <!-- Show rest of the emails -->
+        {#each reply.to.slice(1) as contact}
           <span>to: {contact.email}</span>
         {/each}
         {#each reply.cc as contact}
@@ -512,10 +514,10 @@
       {/if}
     </header>
     <header class="tablet">
-      {#if reply.to.length > 0}
+      {#if reply.to.length}
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
-      {#if reply.cc.length > 0}
+      {#if reply.cc.length}
         <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
       {/if}
     </header>
@@ -629,6 +631,7 @@
           <button type="submit" disabled={!reply.to.length}>
             {#if replyStatus === "sending"}...{:else}
               <svg
+                aria-label="Send email"
                 width="13"
                 height="13"
                 viewBox="0 0 13 13"

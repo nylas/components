@@ -1,9 +1,8 @@
 export function getTimeString(date: Date): string {
   // 11:11am
   return date
-    .toLocaleTimeString()
-    .replaceAll(/:\d{1,2} /g, "")
-    .replaceAll(/.m./g, "m");
+    .toLocaleTimeString([], { timeStyle: "short" })
+    .replaceAll(/\./g, "");
 }
 
 export function getYearString(date: Date): string {
