@@ -156,10 +156,11 @@
 
   let replyBody = "";
 
-  const handleContactsChange =
-    (field: "to" | "from" | "cc") => (data: Participant[]) => {
-      reply[field] = data;
-    };
+  const handleContactsChange = (field: "to" | "from" | "cc") => (
+    data: Participant[],
+  ) => {
+    reply[field] = data;
+  };
 
   let lastMessage: Message;
   let lastMessageInitialised = false;
@@ -246,7 +247,8 @@
     width: 100%;
     overflow: auto;
     position: relative;
-    background-color: #eee;
+    font-family: sans-serif;
+    background-color: var(--grey-light);
   }
   $avatar-size: 32px;
   $min-horizontal-space-between-participants: 4rem;
@@ -377,46 +379,42 @@
         }
       }
     }
+  }
 
-    .reply {
-      background: #ddd;
-      padding: 1rem;
-      margin: 1rem -1rem -1rem;
-      form {
-        button[type="submit"] {
-          &:disabled {
-            cursor: not-allowed;
-            background: gray;
-          }
+  .reply-box {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    z-index: 1;
+    form {
+      position: relative;
+      display: flex;
+      align-items: center;
+      button[type="submit"] {
+        position: absolute;
+        right: 1rem;
+        border-radius: 4px;
+        background-color: var(--blue);
+        height: 28px;
+        width: 28px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:disabled {
+          cursor: not-allowed;
+          background-color: gray;
         }
       }
-      span.to {
-        --background: gray;
-      }
-      span.to,
-      span.cc {
-        display: inline-block;
-        padding: 0 1rem 0 0;
-
-        & > span {
-          display: inline-block;
-          margin-right: 0.5rem;
-        }
-      }
-
-      .response {
+      input {
+        border-top: 1px solid #ebebeb;
+        height: 25px;
+        padding: 12px 1rem;
         width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 100px;
-        gap: 1rem;
-        margin-top: 0.5rem;
-        input {
-          padding: 0.5rem;
-        }
-        button {
-          background-color: black;
-          font-weight: 500;
-          color: white;
+        font-size: var(--fs-16);
+        color: var(--grey-black);
+        &::placeholder {
+          color: var(--grey);
         }
       }
     }
@@ -505,64 +503,62 @@
           {/await}
         {/await}
       {/each}
-      {#if show_reply}
-        <div class="reply">
-          <form
-            on:submit={(e) => {
-              if (replyStatus !== "sending") {
-                e.preventDefault();
-                replyStatus = "sending";
-                if (!conversation) {
-                  return;
-                }
-                sendMessage(id, {
-                  from: reply.from,
-                  to: reply.to,
-                  body: `${replyBody} <br /><br /> --Sent with Nylas`,
-                  subject: conversation.subject,
-                  cc: reply.cc,
-                  reply_to_message_id: lastMessage.id,
-                  bcc: [],
-                }).then((res) => {
-                  const conversationQuery = { queryKey: queryKey, data: res };
-                  ConversationStore.addMessageToThread(conversationQuery);
-                  replyStatus = "";
-                  replyBody = "";
-                });
-              }
-            }}
-          >
-            <span class="to">
-              <nylas-contacts-search
-                placeholder="to:"
-                change={handleContactsChange("to")}
-                contacts={reply.to}
-                value={reply.to}
-                show_dropdown={false}
-              />
-            </span>
-            <span class="cc">
-              <nylas-contacts-search
-                placeholder="cc:"
-                change={handleContactsChange("cc")}
-                contacts={reply.cc}
-                value={reply.cc}
-                show_dropdown={false}
-              />
-            </span>
-            <label class="response">
-              <input
-                type="text"
-                placeholder="Type a Response"
-                bind:value={replyBody}
-              />
-              <button type="submit" disabled={!reply.to.length}>
-                {#if replyStatus === "sending"}Sending...{:else}Send{/if}
-              </button>
-            </label>
-          </form>
-        </div>
-      {/if}
     </div>
+    {#if show_reply}
+      <div class="reply-box">
+        <form
+          on:submit={(e) => {
+            if (replyStatus !== "sending") {
+              e.preventDefault();
+              replyStatus = "sending";
+              if (!conversation) {
+                return;
+              }
+              sendMessage(id, {
+                from: reply.from,
+                to: reply.to,
+                body: `${replyBody} <br /><br /> --Sent with Nylas`,
+                subject: conversation.subject,
+                cc: reply.cc,
+                reply_to_message_id: lastMessage.id,
+                bcc: [],
+              }).then((res) => {
+                const conversationQuery = { queryKey: queryKey, data: res };
+                ConversationStore.addMessageToThread(conversationQuery);
+                replyStatus = "";
+                replyBody = "";
+              });
+            }
+          }}
+        >
+          <label for="send-response" class="sr-only">
+            Type and send a response
+          </label>
+          <input
+            id="send-response"
+            type="text"
+            placeholder="Type a Response"
+            bind:value={replyBody}
+          />
+          <button type="submit" disabled={!reply.to.length}>
+            {#if replyStatus === "sending"}...{:else}
+              <svg
+                aria-label="Send email"
+                width="13"
+                height="13"
+                viewBox="0 0 13 13"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.460449 12.1807L13.0001 6.50003L0.460449 0.819336V5.23765L9.41731 6.50003L0.460449 7.76241V12.1807Z"
+                  fill="white"
+                />
+              </svg>
+            {/if}
+          </button>
+        </form>
+      </div>
+    {/if}
   {/await}
 </main>
