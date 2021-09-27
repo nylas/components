@@ -86,15 +86,16 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
-        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-          (availability) => {
-            for (const calendar of availability) {
-              calendar.time_slots.push(...selectedSlots);
-            }
-            return availability;
-          },
-        );
+      $AvailabilityStore[
+        JSON.stringify(availabilityQuery)
+      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+        (availability) => {
+          for (const calendar of availability) {
+            calendar.time_slots.push(...selectedSlots);
+          }
+          return availability;
+        },
+      );
 
       await getAvailability();
     }
@@ -122,6 +123,7 @@
   onMount(async () => {
     await tick();
     clientHeight = main?.getBoundingClientRect().height;
+    dayContainerWidth = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({
       component_id: id,
       access_token,
@@ -254,12 +256,33 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
 
   //#region layout
+
   let main: HTMLElement;
   let tickContainer: HTMLElement;
+  let dayContainer: HTMLElement;
+  let dayContainerWidth: number = 0;
   let clientHeight: number;
 
+  const MINIMUM_DAY_WIDTH = 100;
+
+  // Internally-settable reactive-to-external-props variable
+  let datesToShow: number;
+
+  $: optimalDatesToShow =
+    Math.floor(dayContainerWidth / MINIMUM_DAY_WIDTH) || 1;
+  $: datesToShow =
+    optimalDatesToShow < dates_to_show || show_as_week
+      ? optimalDatesToShow
+      : dates_to_show;
+
+  $: tooSmallForWeek = show_as_week && optimalDatesToShow < 7;
+
+  //#endregion layout
+
+  //#region data generation
+
   // You can have as few as 1, and as many as 7, days shown
-  // start_date and dates_to_show get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
+  // start_date and datesToShow get overruled by show_as_week (always shows 5 or 7 dates that include your start_date instead)
   let startDay: Date; // the first day column shown; depends on show_as_week
   let endDay: Date;
   let startDate: Date; // internally-settable start_date
@@ -269,13 +292,14 @@
     generateDayRange(
       startDay, // TODO: weird just to get show_weekends passed in
       show_as_week
-        ? timeDay.offset(startDay, 6)
-        : timeDay.offset(startDay, dates_to_show - 1),
+        ? timeDay.offset(startDay, tooSmallForWeek ? datesToShow - 1 : 6)
+        : timeDay.offset(startDay, datesToShow - 1),
     );
 
-  $: startDay = show_as_week
-    ? timeWeek.floor(startDate)
-    : timeDay.floor(startDate);
+  $: startDay =
+    show_as_week && !tooSmallForWeek
+      ? timeWeek.floor(startDate)
+      : timeDay.floor(startDate);
 
   $: endDay = dayRange[dayRange.length - 1];
 
@@ -495,7 +519,7 @@
         }
       });
     if (!show_as_week && !show_weekends) {
-      if (range.length < dates_to_show) {
+      if (range.length < datesToShow) {
         if (reverse) {
           return generateDayRange(timeDay.offset(startDay, -1), endDay, true);
         }
@@ -520,7 +544,7 @@
       timestamp,
     };
   });
-  //#endregion layout
+  //#endregion data generation
 
   // #region timeSlot selection
   let slotSelection: SelectableSlot[] = [];
@@ -774,7 +798,7 @@
     if ($$props.start_date) {
       delete $$props.start_date;
     }
-    if (show_as_week) {
+    if (show_as_week && !tooSmallForWeek) {
       startDate = timeWeek.offset(endDay, 1);
     } else {
       startDate = timeDay.offset(endDay, 1);
@@ -784,15 +808,15 @@
     if ($$props.start_date) {
       delete $$props.start_date;
     }
-    if (show_as_week) {
+    if (show_as_week && !tooSmallForWeek) {
       startDate = timeWeek.offset(startDay, -1);
     } else {
-      // Can't do something as simple as `start_date = timeDay.offset(startDay, -dates_to_show)` here;
-      // broken case: !show_weekends, start_date = a monday, dates_to_show = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
+      // Can't do something as simple as `start_date = timeDay.offset(startDay, -datesToShow)` here;
+      // broken case: !show_weekends, start_date = a monday, datesToShow = 3; go backwards. You'll get fri-mon-tues, rather than wed-thu-fri.
       // Instead, we generateDayRange() with reverse=true to take advance of recursive non-weekend range-making.
       let previousRange = generateDayRange(
-        timeDay.offset(startDay, -dates_to_show),
-        timeDay.offset(endDay, -dates_to_show),
+        timeDay.offset(startDay, -datesToShow),
+        timeDay.offset(endDay, -datesToShow),
         true,
       );
       startDate = previousRange[0];
@@ -1086,27 +1110,31 @@
       grid-template-rows: $headerHeight 1fr;
       position: relative;
 
-      h2 {
-        margin: 0;
-        padding: 0;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 0.5rem;
-        height: 30px;
-        line-height: 1.875;
-        font-size: 1rem;
-        font-weight: 300;
-
-        .date {
-          border-radius: 15px;
-          background: var(--blue);
-          color: white;
-          font-weight: bold;
-          display: block;
-          width: 30px;
+      header {
+        width: 100%;
+        overflow: hidden;
+        h2 {
+          margin: 0;
+          padding: 0;
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: 0.5rem;
           height: 30px;
           line-height: 1.875;
-          text-align: center;
+          font-size: 1rem;
+          font-weight: 300;
+
+          .date {
+            border-radius: 15px;
+            background: var(--blue);
+            color: white;
+            font-weight: bold;
+            display: block;
+            width: 30px;
+            height: 30px;
+            line-height: 1.875;
+            text-align: center;
+          }
         }
       }
 
@@ -1405,6 +1433,8 @@
     class="days"
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
+    bind:this={dayContainer}
+    bind:clientWidth={dayContainerWidth}
   >
     {#each days as day}
       <div class="day">

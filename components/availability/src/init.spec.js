@@ -290,6 +290,7 @@ describe("availability component", () => {
     });
 
     it("Updates dates_to_show via component prop", () => {
+      cy.viewport(1500, 550);
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -462,6 +463,10 @@ describe("availability component", () => {
   });
 
   describe("weeks and weekends", () => {
+    beforeEach(() => {
+      cy.viewport(1500, 550);
+    });
+
     it("Handles week_view false", () => {
       cy.get("nylas-availability")
         .as("availability")
@@ -603,6 +608,7 @@ describe("availability component", () => {
         });
     });
     it("Moves a full week on prev/next push", () => {
+      cy.viewport(1500, 550);
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -672,6 +678,72 @@ describe("availability component", () => {
           cy.get(".epochs").should("not.exist");
           cy.get(".slots").should("not.exist");
           cy.get(".slot-list").should("exist");
+        });
+    });
+  });
+
+  describe("Limiting screen size", () => {
+    it("Cuts off the number of days if they drop below 100px in width", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.dates_to_show = 7;
+          cy.viewport(1500, 550);
+          cy.get(".days .day").should("have.length", 7);
+          cy.viewport(1200, 550);
+          cy.get(".days .day").should("have.length", 6);
+          cy.viewport(600, 550);
+          cy.get(".days .day").should("have.length", 1);
+          cy.viewport(3000, 550);
+          cy.get(".days .day").should("have.length", 7);
+        });
+    });
+    it("Allows you to navigate a squashed schedule", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.dates_to_show = 7;
+          component.start_date = new Date("2021-04-06 00:00");
+          component.show_as_week = false;
+          cy.viewport(800, 550);
+          cy.get("div.day:eq(0) header h2").contains("Tuesday");
+          cy.get("div.day:eq(2) header h2").contains("Thursday");
+          cy.get("div.day:eq(3)").should("not.exist");
+          cy.get(".change-dates button:eq(1)").click();
+          cy.get(".day:eq(0) header h2").contains("Friday");
+          cy.get(".day:eq(1) header h2").contains("Saturday");
+        });
+    });
+    it("Handles show_as_week gracefully when squashed", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.dates_to_show = 7;
+          component.start_date = new Date("2021-04-06 00:00");
+          component.show_as_week = true;
+          cy.viewport(1800, 550);
+          cy.get("div.day:eq(0) header h2").contains("Sunday");
+          cy.get("div.day:eq(0) header h2").contains("4");
+          cy.get("div.day:eq(2) header h2").contains("Tuesday");
+          cy.get(".days .day").should("have.length", 7);
+          cy.viewport(800, 550);
+          cy.get("div.day:eq(0) header h2").contains("Tuesday");
+          cy.get(".days .day").should("have.length", 3);
+          cy.get(".change-dates button:eq(1)").click();
+          cy.get(".day:eq(0) header h2").contains("Friday");
+          cy.get(".day:eq(1) header h2").contains("Saturday");
+          cy.get(".change-dates button:eq(0)").click();
+          cy.get(".change-dates button:eq(0)").click();
+          cy.get(".day:eq(0) header h2").contains("Saturday");
+          cy.get(".day:eq(1) header h2").contains("Sunday");
+          cy.get(".days .day").should("have.length", 3);
+          cy.viewport(1800, 550);
+          cy.get("div.day:eq(0) header h2").contains("Sunday");
+          cy.get("div.day:eq(0) header h2").contains("28");
+          cy.get("div.day:eq(2) header h2").contains("Tuesday");
         });
     });
   });
