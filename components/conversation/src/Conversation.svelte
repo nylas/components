@@ -25,7 +25,7 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
-  import "../../contacts-search/src/ContactsSearch.svelte";
+  import { getNameInitials } from "@commons/methods/contact_strings";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -241,6 +241,9 @@
   @import "../../theming/variables.scss";
   @import "../../theming/themes.scss";
 
+  $tabletBreakpoint: 768px;
+  $desktopBreakpoint: 1140px;
+
   $contactWidth: 32px;
   main {
     height: 100%;
@@ -250,50 +253,39 @@
     font-family: sans-serif;
     background-color: var(--grey-light);
   }
-  $avatar-size: 32px;
-  $min-horizontal-space-between-participants: 4rem;
-
+  $avatar-size: 40px;
+  $avatar-horizontal-space: 1rem;
   .messages {
     display: grid;
     gap: 1rem;
     padding: 1rem;
+    padding-top: calc(1rem + 15px + 15px + 15px);
+    padding-bottom: calc(25px + 12px + 12px);
     .message {
-      width: clamp(
-        200px,
-        calc(
-          100% - #{$avatar-size} - #{$min-horizontal-space-between-participants}
-        ),
-        700px
+      max-width: min(
+        400px,
+        calc(100% - #{$avatar-size} - #{$avatar-horizontal-space})
       );
+      @media (min-width: #{$tabletBreakpoint}) {
+        width: max-content;
+        max-width: 600px;
+      }
+      @media (min-width: #{$desktopBreakpoint}) {
+        max-width: 752px;
+      }
       display: grid;
-      column-gap: 1rem;
+      column-gap: $avatar-horizontal-space;
       row-gap: 0.25rem;
       grid-template-columns: $contactWidth 1fr;
+      grid-template-rows: auto auto;
       transition: 0.5s;
       &:last-child {
         padding-bottom: 2rem;
       }
-
-      header {
-        grid-column: -1 / 2;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        font-size: 0.8rem;
-        opacity: 0.75;
-        overflow: hidden;
-        .date {
-          text-align: right;
-        }
-        &.hidden {
-          display: none;
-        }
-      }
       .body {
-        border-radius: 4px;
+        border-radius: 8px;
         background-color: white;
-        border-bottom: 10px solid;
-        box-shadow: 1px 1px 30px rgba(0, 0, 0, 0.05);
-        border-color: inherit;
+        color: var(--black);
         max-height: 50vh;
         overflow: auto;
         position: relative;
@@ -305,7 +297,7 @@
         grid-template-rows: auto 1fr;
         gap: 0.5rem;
         .avatar {
-          border-radius: 16px;
+          border-radius: 20px;
           width: $avatar-size;
           height: $avatar-size;
           text-align: center;
@@ -321,6 +313,10 @@
             width: 100%;
             height: 100%;
           }
+          span {
+            // perfectly center text
+            padding-top: 4px;
+          }
         }
         .email {
           font-size: 0.8rem;
@@ -330,47 +326,51 @@
           text-overflow: ellipsis;
         }
       }
-
+      .time {
+        grid-column: 2/3;
+        font-size: var(--fs-12);
+        color: var(--grey-dark);
+      }
       p {
         padding: 1rem;
-        color: black;
         font-weight: 300;
         line-height: 1.3em;
         font-size: 0.9em;
         border-radius: 8px;
         white-space: pre-line; // maintains newlines from conversation
-        &.snippet {
-          color: rgba(0, 0, 0, 0.5);
-          &:before {
-            content: "Expanding your message; please wait...";
-            color: rgba(0, 0, 0, 1);
-          }
+        &.after {
+          padding-top: 0;
+          margin-top: -1rem;
+          color: var(--grey-dark);
         }
       }
       &.you {
         justify-self: end;
         grid-template-columns: 1fr $contactWidth;
-
-        header {
-          grid-column: 1 / 1;
-        }
-
         .contact {
-          order: 2;
+          grid-row: 1/2;
+          grid-column: 2/3;
         }
         .body {
+          order: 1;
+          grid-column: 1 / 1;
+          color: var(--white);
+          background-color: var(--blue);
+          p.after {
+            color: var(--grey);
+          }
+        }
+        .time {
           order: 1;
           grid-column: 1 / 1;
         }
       }
     }
-
     &.dont-show-avatars {
       .message {
         column-gap: 0;
         grid-template-columns: 0 1fr;
         width: clamp(200px, calc(100% - 4rem), 700px);
-
         .contact {
           overflow: hidden;
         }
@@ -477,11 +477,18 @@
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
                           {:else}{contact.emails[0].email.slice(0, 2)}{/if}
-                        {:else if from.email === you.name}
-                          {you.name.slice(0, 2)}
+                        {:else if isYou}
+                          {#if you.name}
+                            <span>{getNameInitials(you.name)}</span>
+                          {:else}
+                            <span>{you.email_address?.slice(0, 1) || "?"}</span>
+                          {/if}
                         {:else if from.name}
                           {from.name.slice(0, 2)}
-                        {:else if from.email}{from.email.slice(0, 2)}{/if}
+                          <span>{getNameInitials(from.name)}</span>
+                        {:else}
+                          <span>{from.email?.slice(0, 1) || "?"}</span>
+                        {/if}
                       </div>
                     {/await}
                   </div>
