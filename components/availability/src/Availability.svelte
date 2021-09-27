@@ -303,8 +303,6 @@
       new Date(new Date(timestamp).setHours(start_hour)),
     );
     const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
-    const totalSlots: number = 1440 / slot_size;
-    let busySlots: [{ startTime: Date; endTime: Date }] | [] = [];
     return scaleTime()
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
@@ -321,18 +319,6 @@
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
-                // } else {
-                //   if (
-                //     !busySlots.some(
-                //       (slot: { startTime: Date; endTime: Date }) => {
-                //         return (
-                //           slot.startTime === time && slot.endTime === endTime
-                //         );
-                //       },
-                //     )
-                //   ) {
-                //     busySlots.push({ startTime: time, endTime: endTime });
-                //   }
               }
             } else if (
               calendar.availability === AvailabilityStatus.FREE ||
@@ -912,7 +898,6 @@
           ) || null;
       } else if (
         slotSelection.length < max_bookable_slots &&
-        // (freeSlots/totalSlots * 100) < overbooked_threshold &&
         slot.availability !== AvailabilityStatus.BUSY
       ) {
         slot.selectionPending = true;
