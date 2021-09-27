@@ -1054,6 +1054,7 @@
 </script>
 
 <style lang="scss">
+  @import "../../theming/reset.scss";
   @import "../../theming/variables.scss";
   $headerHeight: 40px;
   main {
@@ -1063,16 +1064,30 @@
     font-family: Arial, Helvetica, sans-serif;
     position: relative;
     z-index: 1;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
 
     &.ticked {
       grid-template-columns: 70px 1fr;
     }
 
-    &.dated {
-      grid-template-rows: auto 1fr;
-      gap: 1rem;
-      header.change-dates {
-        grid-column: -1 / 1;
+    & > header {
+      grid-column: -1 / 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: baseline;
+
+      &.dated {
+        grid-template-columns: 1fr auto;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .change-dates {
+        // grid-column: -1 / 1;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
@@ -1081,8 +1096,37 @@
           background-color: #f7f7f8;
           border: 1px solid #e3e8ee;
           cursor: pointer;
+          display: flex;
           &:hover {
             background-color: #e3e8ee;
+          }
+        }
+      }
+
+      .legend {
+        padding: 0.5rem 0 0;
+        color: #636671;
+        span {
+          display: inline-block;
+          margin-right: 1rem;
+          &::before {
+            content: "";
+            border-radius: 8px;
+            height: 12px;
+            width: 12px;
+            margin-right: 0.25rem;
+            display: inline-block;
+            background-color: black;
+          }
+
+          &.available::before {
+            background-color: var(--free-color, #36d2addf);
+          }
+          &.not-available::before {
+            background-color: var(--busy-color, #36d2addf);
+          }
+          &.partially-available::before {
+            background-color: var(--partial-color, #ffff7566);
           }
         }
       }
@@ -1279,6 +1323,8 @@
             background-color: #002db466;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
+            margin-left: 9px;
+            margin-right: 1px;
           }
 
           &.selected + .selected,
@@ -1470,21 +1516,59 @@
   bind:this={main}
   bind:clientHeight
   class:ticked={show_ticks && view_as === "schedule"}
-  class:dated={allow_date_change}
   class:allow_booking
   on:mouseleave={() => endDrag(null, null)}
   style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
 >
-  {#if allow_date_change}
-    <header class="change-dates">
-      <button on:click={goToPreviousDate} aria-label="Previous date"
-        ><BackIcon style="height:32px;width:32px;" /></button
-      >
-      <button on:click={goToNextDate} aria-label="Next date"
-        ><NextIcon style="height:32px;width:32px;" /></button
-      >
-    </header>
-  {/if}
+  <header class:dated={allow_date_change}>
+    <h2 class="month">
+      {#if days[days.length - 1].timestamp.getMonth() !== days[0].timestamp.getMonth()}
+        {#if days[days.length - 1].timestamp.getFullYear() !== days[0].timestamp.getFullYear()}
+          <!-- Case 1: months and years differ: Dec 2021 - Jan 2022 -->
+          {days[0].timestamp.toLocaleDateString("default", {
+            month: "short",
+            year: "numeric",
+          })}
+          -
+          {days[days.length - 1].timestamp.toLocaleDateString("default", {
+            month: "short",
+            year: "numeric",
+          })}
+        {:else}
+          <!-- Case 2: months differ, years the same: Oct - Nov 2021 -->
+          {days[0].timestamp.toLocaleDateString("default", {
+            month: "short",
+          })}
+          -
+          {days[days.length - 1].timestamp.toLocaleDateString("default", {
+            month: "short",
+            year: "numeric",
+          })}
+        {/if}
+      {:else}
+        <!-- Case 3: months, and therefore years, are the same: Oct 2021 -->
+        {days[0].timestamp.toLocaleDateString("default", {
+          month: "short",
+          year: "numeric",
+        })}
+      {/if}
+    </h2>
+    {#if allow_date_change}
+      <div class="change-dates">
+        <button on:click={goToPreviousDate} aria-label="Previous date"
+          ><BackIcon style="height:32px;width:32px;" /></button
+        >
+        <button on:click={goToNextDate} aria-label="Next date"
+          ><NextIcon style="height:32px;width:32px;" /></button
+        >
+      </div>
+    {/if}
+    <div class="legend">
+      <span class="not-available">Not available</span>
+      <span class="partially-available">Partially available</span>
+      <span class="available">Available</span>
+    </div>
+  </header>
   {#if show_ticks && view_as === "schedule"}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
@@ -1515,7 +1599,7 @@
             </span>
             <span>
               {new Date(day.timestamp).toLocaleString("default", {
-                weekday: "long",
+                weekday: "short",
               })}
             </span>
           </h2>
