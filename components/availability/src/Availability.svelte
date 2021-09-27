@@ -1147,31 +1147,31 @@
       header {
         width: 100%;
         overflow: hidden;
-        
-        h2 {
-        margin: 0;
-        padding: 0;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 0.5rem;
-        height: 30px;
-        line-height: 1.875;
-        font-size: 1rem;
-        font-weight: 200;
 
-        .date {
-          border-radius: 15px;
-          background: var(--blue);
-          color: white;
-          font-weight: bold;
-          display: block;
-          width: 30px;
+        h2 {
+          margin: 0;
+          padding: 0;
+          display: grid;
+          grid-template-columns: auto 1fr;
+          gap: 0.5rem;
           height: 30px;
           line-height: 1.875;
-          text-align: center;
+          font-size: 1rem;
+          font-weight: 200;
+
+          .date {
+            border-radius: 15px;
+            background: var(--blue);
+            color: white;
+            font-weight: bold;
+            display: block;
+            width: 30px;
+            height: 30px;
+            line-height: 1.875;
+            text-align: center;
+          }
         }
       }
-    }
 
       .epochs {
         position: absolute;
@@ -1569,8 +1569,11 @@
                 on:mouseenter={() => {
                   addToDrag(slot, day);
                 }}
-                on:mouseup={() => {
+                on:mouseup={(e) => {
                   if (mouseIsDown) {
+                    if (document.activeElement instanceof HTMLElement) {
+                      document.activeElement.blur();
+                    }
                     endDrag(slot, day);
                   }
                 }}
