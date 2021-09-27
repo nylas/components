@@ -368,8 +368,6 @@
       new Date(new Date(timestamp).setHours(start_hour)),
     );
     const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
-    const totalSlots: number = 1440 / slot_size;
-    let busySlots: [{ startTime: Date; endTime: Date }] | [] = [];
     return scaleTime()
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
@@ -400,18 +398,6 @@
                 slotAvailability.concurrentEvents < capacity
               ) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
-              } else {
-                if (
-                  !busySlots.some(
-                    (slot: { startTime: Date; endTime: Date }) => {
-                      return (
-                        slot.startTime === time && slot.endTime === endTime
-                      );
-                    },
-                  )
-                ) {
-                  busySlots.push({ startTime: time, endTime: endTime });
-                }
               }
             } else if (
               calendar.availability === AvailabilityStatus.FREE ||
@@ -507,7 +493,6 @@
 
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
-          pendingSelection: false,
           calendar_id: calendarID,
           availability: availability,
           available_calendars: freeCalendars,
@@ -661,9 +646,41 @@
     timestamp: Date;
   }
 
+  function checkOverbooked(slots: SelectableSlot[]) {
+    allCalendars.forEach((calendar) => {
+      let availableSlotsForCalendar = slots.filter((slot) =>
+        slot.available_calendars.includes(calendar.account?.emailAddress),
+      );
+      if (
+        availableSlotsForCalendar.length >
+        (overbooked_threshold * slots.length) / 100
+      ) {
+        availableSlotsForCalendar.forEach((slot) => {
+          slot.available_calendars = slot.available_calendars.filter(
+            (cal) => cal !== calendar.account?.emailAddress,
+          );
+          if (!slot.available_calendars.length) {
+            // if it has no calendars avialble, it's busy
+            slot.availability = AvailabilityStatus.BUSY;
+          } else if (
+            slot.availability === AvailabilityStatus.FREE &&
+            slot.available_calendars.length !== allCalendars.length
+          ) {
+            // if it was previously free, but now lacks a calendar, it should be considered Partial.
+            slot.availability = AvailabilityStatus.PARTIAL;
+          }
+        });
+      }
+    });
+
+    return slots;
+  }
+
   let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
-    let slots = generateDaySlots(timestamp, start_hour, end_hour);
+    let slots = checkOverbooked(
+      generateDaySlots(timestamp, start_hour, end_hour),
+    ); // TODO: include other potentail post-all-slots-established checks, like overbooked, in a single secondary run here.
     return {
       slots,
       epochs: generateEpochs(slots, partial_bookable_ratio),
