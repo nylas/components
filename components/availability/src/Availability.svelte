@@ -521,7 +521,7 @@
   function checkOverbooked(slots: SelectableSlot[]) {
     allCalendars.forEach((calendar) => {
       let availableSlotsForCalendar = slots.filter((slot) =>
-        slot.available_calendars.includes(calendar.account.emailAddress),
+        slot.available_calendars.includes(calendar.account?.emailAddress),
       );
       if (
         availableSlotsForCalendar.length >
@@ -529,7 +529,7 @@
       ) {
         availableSlotsForCalendar.forEach((slot) => {
           slot.available_calendars = slot.available_calendars.filter(
-            (cal) => cal !== calendar.account.emailAddress,
+            (cal) => cal !== calendar.account?.emailAddress,
           );
           if (!slot.available_calendars.length) {
             // if it has no calendars avialble, it's busy
