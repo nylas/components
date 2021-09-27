@@ -918,7 +918,7 @@
         .from-participants {
           max-width: 220px;
           display: grid;
-          grid-template-columns: 1fr 60px;
+          grid-template-columns: 1fr fit-content(60px);
           .participants-name {
             .from-sub-section.second {
               display: none;
@@ -1092,7 +1092,7 @@
 
         .subject-snippet-date {
           display: grid;
-          grid-template-columns: auto 120px;
+          grid-template-columns: 1fr fit-content(120px);
           gap: 1rem;
           .desktop-subject-snippet {
             display: block;
