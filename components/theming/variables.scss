@@ -12,18 +12,25 @@ $ellsworth-kelly: #f8b800, #4db930, #00a14d, #008874, #0758bb, #093cb3, #58266e,
 // Responsive Vars
 $desktop: "(min-width: 640px)";
 
-// Colours
 main {
+  // colours
   --black: #161717;
-  --black-90: #2c2e2e;
-  --grey-dark: #454954;
-  --grey: #6a7285;
-  --grey-light: #8d94a5;
-  --grey-lighter: #e3e8ee;
+  --grey-dark: #636671;
+  --grey: #bdc0cb;
+  --grey-lighter: #dfe1e8;
   --grey-lightest: #f7f7f8;
-  --grey-warm: #cbcbcb;
+  --grey-background: #f0f1f5;
   --white: #ffffff;
-
   --blue: #002db4;
-  --blue-lighter: #e3e9ee;
+  --blue-lighter: #f0f3ff;
+
+  // font sizes
+  --fs-12: 0.75rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+
+  // legacy
+  --black-90: #2c2e2e;
+  --grey-light: #f7f7f8;
+  --grey-warm: #cbcbcb;
 }
