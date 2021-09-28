@@ -275,6 +275,19 @@ describe("Composer html", () => {
       cy.wait(75);
       cy.contains("async@test.com");
     });
+
+    it("Has a reactive value prop", () => {
+      cy.get("nylas-composer").should("exist").as("composer");
+      cy.get("header"); // wait for component to render
+
+      cy.get("@composer").then((el) => {
+        const component = el[0];
+        component.value = { body: "Test reactive prop" };
+        cy.get(".html-editor[contenteditable=true]")
+          .invoke("prop", "innerHTML")
+          .should("include", "Test reactive prop");
+      });
+    });
   });
 
   describe("Composer actions", () => {
