@@ -604,10 +604,13 @@
             placeholder="Type a Response"
             bind:value={replyBody}
           />
-          <button type="submit" disabled={!reply.to.length}>
+          <button
+            type="submit"
+            disabled={!reply.to.length}
+            aria-label={`Send${replyStatus ? "ing" : ""} email`}
+          >
             {#if replyStatus === "sending"}...{:else}
               <svg
-                aria-label="Send email"
                 width="13"
                 height="13"
                 viewBox="0 0 13 13"
