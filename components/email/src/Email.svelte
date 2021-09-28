@@ -810,7 +810,7 @@
               display: block;
               max-width: 90vw;
               color: var(--grey);
-              margin-top: $spacing-m;
+              margin-top: $spacing-xs;
             }
             div.message-head {
               .avatar-from {
@@ -840,6 +840,7 @@
           div.message-head {
             display: flex;
             justify-content: space-between;
+            align-items: center;
           }
           div.message-date {
             display: flex;
