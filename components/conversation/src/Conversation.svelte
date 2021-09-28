@@ -25,6 +25,7 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
+  import { getDate } from "@commons/methods/datetime";
   import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
 
   export let id: string = "";
@@ -557,9 +558,15 @@
                       <p>
                         {@html message.body}
                       </p>
+                    {:else if message.snippet.includes(" On ")}
+                      <p>{message.snippet.split("On ")[0]}</p>
+                      <p class="after">On {message.snippet.split("On ")[1]}</p>
                     {:else}
-                      <p class="snippet">{message.snippet}</p>
+                      <p>{message.snippet}</p>
                     {/if}
+                  </div>
+                  <div class="time">
+                    {getDate(new Date(message.date * 1000))}
                   </div>
                 </article>
               {/await}
