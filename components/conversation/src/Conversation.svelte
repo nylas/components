@@ -25,7 +25,7 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
-  import { getNameInitials } from "@commons/methods/contact_strings";
+  import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -540,12 +540,12 @@
                             {/if}
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
-                          {:else}{contact.emails[0].email.slice(0, 2)}{/if}
-                        {:else if from.email === you.name}
-                          {you.name.slice(0, 2)}
-                        {:else if from.name}
-                          {from.name.slice(0, 2)}
-                        {:else if from.email}{from.email.slice(0, 2)}{/if}
+                          {:else}{contact.emails[0].email[0]}{/if}
+                        {:else if isYou}
+                          <span>{getContactInitialForAvatar(you)}</span>
+                        {:else}
+                          <span>{getContactInitialForAvatar(from)}</span>
+                        {/if}
                       </div>
                     {/await}
                   </div>
