@@ -63,8 +63,7 @@
   export let free_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
-  export let pre_event_buffer: number;
-  export let post_event_buffer: number;
+  export let event_buffer: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -236,14 +235,9 @@
       view_as,
       "schedule",
     );
-    pre_event_buffer = getPropertyValue(
-      internalProps.pre_event_buffer || editorManifest.pre_event_buffer,
-      pre_event_buffer,
-      0,
-    );
-    post_event_buffer = getPropertyValue(
-      internalProps.post_event_buffer || editorManifest.post_event_buffer,
-      post_event_buffer,
+    event_buffer = getPropertyValue(
+      internalProps.event_buffer || editorManifest.event_buffer,
+      event_buffer,
       0,
     );
   }
@@ -552,7 +546,9 @@
 
   let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
-    let slots = generateDaySlots(timestamp, start_hour, end_hour);
+    let slots = filterBufferSlots(
+      generateDaySlots(timestamp, start_hour, end_hour),
+    );
     return {
       slots,
       epochs: generateEpochs(slots, partial_bookable_ratio),
@@ -633,6 +629,90 @@
       });
     }
     newCalendarTimeslotsForGivenEmails = freeBusyCalendars;
+  }
+
+  const deepCopy = (arr) => {
+    let copy = [];
+    arr.forEach((elem) => {
+      if (Array.isArray(elem)) {
+        copy.push(deepCopy(elem));
+      } else {
+        if (typeof elem === "object") {
+          copy.push(deepCopyObject(elem));
+        } else {
+          copy.push(elem);
+        }
+      }
+    });
+    return copy;
+  };
+
+  // Helper function to deal with Objects
+  const deepCopyObject = (obj) => {
+    let tempObj = {};
+    for (let [key, value] of Object.entries(obj)) {
+      if (Array.isArray(value)) {
+        tempObj[key] = deepCopy(value);
+      } else {
+        if (typeof value === "object") {
+          tempObj[key] = deepCopyObject(value);
+        } else {
+          tempObj[key] = value;
+        }
+      }
+    }
+    return tempObj;
+  };
+
+  function filterBufferSlots(slots: SelectableSlot[]) {
+    // Return slots if no buffer is added
+    if (parseInt(event_buffer) === 0) return slots;
+
+    allCalendars.forEach((calendar) => {
+      let availableSlotsForCalendar = slots.filter((slot) =>
+        slot.available_calendars.includes(calendar.account.emailAddress),
+      );
+      let filteredSlotsForCalendar = deepCopy(availableSlotsForCalendar);
+      availableSlotsForCalendar.forEach((slot, i) => {
+        if (slot.availability !== AvailabilityStatus.BUSY) {
+          //maybe FREE
+          // disable next blocks
+          if (
+            i > 0 &&
+            filteredSlotsForCalendar[i - 1].availability !==
+              AvailabilityStatus.FREE
+          ) {
+            // console.log("True: ", availableSlotsForCalendar[i-1]);
+            const busySlotNum = Math.ceil(event_buffer / slot_size);
+            for (let j = 0; j < busySlotNum; j++) {
+              availableSlotsForCalendar[i - j].available_calendars =
+                slot.available_calendars.filter(
+                  (cal) => cal !== calendar.account.emailAddress,
+                );
+              if (
+                !availableSlotsForCalendar[i - j].available_calendars.length
+              ) {
+                // if it has no calendars avialble, it's busy
+                availableSlotsForCalendar[i - j].availability =
+                  AvailabilityStatus.BUSY;
+              } else if (
+                availableSlotsForCalendar[i - j].availability ===
+                  AvailabilityStatus.FREE &&
+                availableSlotsForCalendar[i - j].available_calendars.length !==
+                  allCalendars.length
+              ) {
+                // if it was previously free, but now lacks a calendar, it should be considered Partial.
+                availableSlotsForCalendar[i - j].availability =
+                  AvailabilityStatus.PARTIAL;
+              }
+            }
+          }
+        }
+      });
+
+      console.log(availableSlotsForCalendar);
+    });
+    return slots; //filteredSlots
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
