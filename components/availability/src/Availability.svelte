@@ -1637,9 +1637,10 @@
                   slot.start_time,
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
-                ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
+                ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
+                data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
                 on:mousedown={() => {
                   if (

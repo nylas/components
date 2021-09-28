@@ -501,7 +501,7 @@ describe("availability component", () => {
           component.show_as_week = false;
           component.show_weekends = false;
           cy.get("div.day:eq(0) header h2").contains("Tue");
-          cy.get("div.day:eq(4) header h2").contains("Monday");
+          cy.get("div.day:eq(4) header h2").contains("Mon");
           cy.get("div.day:eq(5) header h2").contains("Tue");
         });
     });
@@ -515,7 +515,7 @@ describe("availability component", () => {
           component.dates_to_show = 7;
           component.show_as_week = true;
           component.show_weekends = false;
-          cy.get("div.day:eq(0) header h2").contains("Monday");
+          cy.get("div.day:eq(0) header h2").contains("Mon");
           cy.get("div.day:eq(4) header h2").contains("Fri");
           cy.get("div.day:eq(5) header h2").should("not.exist");
         });
@@ -598,7 +598,7 @@ describe("availability component", () => {
           cy.get(".day:eq(0) header h2").contains("Thu");
           cy.get(".day:eq(1) header h2").contains("Fri");
           cy.get(".day:eq(2) header h2")
-            .contains("Monday")
+            .contains("Mon")
             .then(() => {
               cy.get(".change-dates button:eq(1)").click();
               cy.get(".day:eq(0) header h2").contains("Tue");
@@ -621,7 +621,7 @@ describe("availability component", () => {
           cy.get("div.change-dates").should("exist");
           cy.get(".change-dates button:eq(1)").click();
           cy.get(".day").should("have.length", 5);
-          cy.get(".day:eq(0) header h2").contains("Monday");
+          cy.get(".day:eq(0) header h2").contains("Mon");
           cy.get(".day:eq(0) header h2").contains("24");
           cy.get(".day:eq(1) header h2").contains("Tue");
           cy.get(".day:eq(4) header h2")
@@ -629,7 +629,7 @@ describe("availability component", () => {
             .then(() => {
               cy.get(".change-dates button:eq(0)").click();
               cy.get(".change-dates button:eq(0)").click();
-              cy.get(".day:eq(0) header h2").contains("Monday");
+              cy.get(".day:eq(0) header h2").contains("Mon");
               cy.get(".day:eq(0) header h2").contains("10");
               cy.get(".day:eq(4) header h2").contains("Fri");
             });
