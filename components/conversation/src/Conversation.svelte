@@ -477,17 +477,11 @@
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
                           {:else}{contact.emails[0].email.slice(0, 2)}{/if}
-                        {:else if isYou}
-                          {#if you.name}
-                            <span>{getNameInitials(you.name)}</span>
-                          {:else}
-                            <span>{you.email_address?.slice(0, 1) || "?"}</span>
-                          {/if}
+                        {:else if from.email === you.name}
+                          {you.name.slice(0, 2)}
                         {:else if from.name}
-                          <span>{getNameInitials(from.name)}</span>
-                        {:else}
-                          <span>{from.email?.slice(0, 1) || "?"}</span>
-                        {/if}
+                          {from.name.slice(0, 2)}
+                        {:else if from.email}{from.email.slice(0, 2)}{/if}
                       </div>
                     {/await}
                   </div>
