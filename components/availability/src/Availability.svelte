@@ -212,17 +212,17 @@
     busy_color = getPropertyValue(
       internalProps.busy_color,
       busy_color,
-      "#ff647566",
+      "#EE3248cc",
     );
     partial_color = getPropertyValue(
       internalProps.partial_color,
       partial_color,
-      "#ffff7566",
+      "#FECA7Ccc",
     );
     free_color = getPropertyValue(
       internalProps.free_color,
       free_color,
-      "#36d2ad66",
+      "#078351cc",
     );
     show_hosts = getPropertyValue(
       internalProps.show_hosts || editorManifest.show_hosts,
@@ -262,6 +262,7 @@
   let dayContainer: HTMLElement;
   let dayContainerWidth: number = 0;
   let clientHeight: number;
+  let slotContainer: HTMLElement;
 
   const MINIMUM_DAY_WIDTH = 100;
 
@@ -647,33 +648,66 @@
               daySlot.availability === AvailabilityStatus.BUSY)
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
+
+      let startTimeString =
+        slot.start_time.getMinutes() === 0
+          ? slot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : slot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+
+      let endTimeString =
+        pendingEndTime.getMinutes() === 0
+          ? pendingEndTime.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : pendingEndTime.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+
       return `
-        ${slot.start_time.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })}
+        ${startTimeString.replace(" AM", "am").replace(" PM", "pm")}
         - 
-        ${pendingEndTime.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })}
+        ${endTimeString.replace(" AM", "am").replace(" PM", "pm")}
       `;
       // Otherwise, it's first in a selected block if its start_time matches a sortedSlot's start_time
     } else if (wrappingSortedSlot) {
+      let startTime =
+        wrappingSortedSlot.start_time.getMinutes() === 0
+          ? wrappingSortedSlot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : wrappingSortedSlot.start_time.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+      let endTime =
+        wrappingSortedSlot.end_time.getMinutes() === 0
+          ? wrappingSortedSlot.end_time.toLocaleTimeString([], {
+              hour: "numeric",
+              hour12: true,
+            })
+          : wrappingSortedSlot.end_time.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
       return `
-      ${wrappingSortedSlot.start_time.toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })}
-        - 
-        ${wrappingSortedSlot.end_time.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })}
+      ${startTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")} - ${endTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")}
       `;
     } else {
       return null;
@@ -1020,6 +1054,7 @@
 </script>
 
 <style lang="scss">
+  @import "../../theming/reset.scss";
   @import "../../theming/variables.scss";
   $headerHeight: 40px;
   main {
@@ -1029,16 +1064,30 @@
     font-family: Arial, Helvetica, sans-serif;
     position: relative;
     z-index: 1;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
 
     &.ticked {
       grid-template-columns: 70px 1fr;
     }
 
-    &.dated {
-      grid-template-rows: auto 1fr;
-      gap: 1rem;
-      header.change-dates {
-        grid-column: -1 / 1;
+    & > header {
+      grid-column: -1 / 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: baseline;
+
+      &.dated {
+        grid-template-columns: 1fr auto;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .change-dates {
+        // grid-column: -1 / 1;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
@@ -1047,8 +1096,37 @@
           background-color: #f7f7f8;
           border: 1px solid #e3e8ee;
           cursor: pointer;
+          display: flex;
           &:hover {
             background-color: #e3e8ee;
+          }
+        }
+      }
+
+      .legend {
+        padding: 0.5rem 0 0;
+        color: #636671;
+        span {
+          display: inline-block;
+          margin-right: 1rem;
+          &::before {
+            content: "";
+            border-radius: 8px;
+            height: 12px;
+            width: 12px;
+            margin-right: 0.25rem;
+            display: inline-block;
+            background-color: black;
+          }
+
+          &.available::before {
+            background-color: var(--free-color, #36d2addf);
+          }
+          &.not-available::before {
+            background-color: var(--busy-color, #36d2addf);
+          }
+          &.partially-available::before {
+            background-color: var(--partial-color, #ffff7566);
           }
         }
       }
@@ -1056,7 +1134,7 @@
 
     .days {
       display: grid;
-      gap: 0.25rem;
+      gap: 0rem;
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
       height: 100%;
@@ -1113,6 +1191,7 @@
       header {
         width: 100%;
         overflow: hidden;
+
         h2 {
           margin: 0;
           padding: 0;
@@ -1122,7 +1201,7 @@
           height: 30px;
           line-height: 1.875;
           font-size: 1rem;
-          font-weight: 300;
+          font-weight: 200;
 
           .date {
             border-radius: 15px;
@@ -1150,9 +1229,29 @@
 
           .inner {
             margin: 0rem;
-            height: calc(100% - 0.5rem);
-            overflow: hidden;
-            padding: 0.25rem;
+            height: calc(100% - 0.5rem - 2px);
+            // overflow: hidden;
+            padding: 0.25rem 0;
+            width: 8px;
+            border-radius: 8px;
+            margin: 1px 0;
+          }
+
+          &.busy {
+            $darkStripe: rgba(255, 0, 0, 0.1);
+            $lightStripe: white;
+
+            background-image: linear-gradient(
+              45deg,
+              $darkStripe 12.5%,
+              $lightStripe 12.5%,
+              $lightStripe 50%,
+              $darkStripe 50%,
+              $darkStripe 62.5%,
+              $lightStripe 62.5%,
+              $lightStripe 100%
+            );
+            background-size: 5.66px 5.66px;
           }
 
           &.busy .inner {
@@ -1163,14 +1262,14 @@
           }
 
           &.free .inner {
-            background-color: var(--free-color, #36d2ad66);
+            background-color: var(--free-color, #36d2addf);
           }
 
           .available-calendars {
             display: none;
-            position: relative;
+            position: absolute;
             z-index: 2;
-            float: right;
+            left: 10px;
 
             span {
               background: rgba(0, 0, 0, 0.5);
@@ -1203,7 +1302,7 @@
 
         .slot {
           border: none;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
           background: transparent;
           position: relative;
           align-items: center;
@@ -1212,16 +1311,20 @@
           font-family: sans-serif;
 
           &.selected {
-            background-color: purple;
+            background-color: var(--blue);
             box-shadow: none;
             border-bottom: 1px solid transparent;
             z-index: 3;
+            margin-left: 9px;
+            margin-right: 1px;
           }
 
           &.pending {
-            background-color: rgba(128, 0, 128, 0.3);
+            background-color: #002db466;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
+            margin-left: 9px;
+            margin-right: 1px;
           }
 
           &.selected + .selected,
@@ -1229,19 +1332,30 @@
             z-index: 2;
           }
 
-          &.busy {
+          &.busy:not(.pending) {
             cursor: not-allowed;
+            // background: rgba(0,0,0,0.05);
+            margin-left: 8px;
           }
 
           .selected-heading {
             position: absolute;
             top: 3px;
-            left: 3px;
+            left: 0;
             color: white;
-            background: rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 2px #002db4ff;
+            font-weight: 300;
+            // background: var(--blue);
             padding: 0 3px;
-            font-size: 0.75rem;
-            z-index: 2;
+            // width: calc(100% - 6px);
+            font-size: 0.8rem;
+            z-index: 3;
+            text-align: left;
+            font-family: system-ui, sans-serif;
+          }
+
+          &.pending .selected-heading {
+            width: auto;
           }
         }
       }
@@ -1276,7 +1390,7 @@
           }
 
           &.selected {
-            background: purple;
+            background: var(--blue);
             color: white;
           }
 
@@ -1402,21 +1516,59 @@
   bind:this={main}
   bind:clientHeight
   class:ticked={show_ticks && view_as === "schedule"}
-  class:dated={allow_date_change}
   class:allow_booking
   on:mouseleave={() => endDrag(null, null)}
   style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
 >
-  {#if allow_date_change}
-    <header class="change-dates">
-      <button on:click={goToPreviousDate} aria-label="Previous date"
-        ><BackIcon style="height:32px;width:32px;" /></button
-      >
-      <button on:click={goToNextDate} aria-label="Next date"
-        ><NextIcon style="height:32px;width:32px;" /></button
-      >
-    </header>
-  {/if}
+  <header class:dated={allow_date_change}>
+    <h2 class="month">
+      {#if days[days.length - 1].timestamp.getMonth() !== days[0].timestamp.getMonth()}
+        {#if days[days.length - 1].timestamp.getFullYear() !== days[0].timestamp.getFullYear()}
+          <!-- Case 1: months and years differ: Dec 2021 - Jan 2022 -->
+          {days[0].timestamp.toLocaleDateString("default", {
+            month: "short",
+            year: "numeric",
+          })}
+          -
+          {days[days.length - 1].timestamp.toLocaleDateString("default", {
+            month: "short",
+            year: "numeric",
+          })}
+        {:else}
+          <!-- Case 2: months differ, years the same: Oct - Nov 2021 -->
+          {days[0].timestamp.toLocaleDateString("default", {
+            month: "short",
+          })}
+          -
+          {days[days.length - 1].timestamp.toLocaleDateString("default", {
+            month: "short",
+            year: "numeric",
+          })}
+        {/if}
+      {:else}
+        <!-- Case 3: months, and therefore years, are the same: Oct 2021 -->
+        {days[0].timestamp.toLocaleDateString("default", {
+          month: "short",
+          year: "numeric",
+        })}
+      {/if}
+    </h2>
+    {#if allow_date_change}
+      <div class="change-dates">
+        <button on:click={goToPreviousDate} aria-label="Previous date"
+          ><BackIcon style="height:32px;width:32px;" /></button
+        >
+        <button on:click={goToNextDate} aria-label="Next date"
+          ><NextIcon style="height:32px;width:32px;" /></button
+        >
+      </div>
+    {/if}
+    <div class="legend">
+      <span class="not-available">Not available</span>
+      <span class="partially-available">Partially available</span>
+      <span class="available">Available</span>
+    </div>
+  </header>
   {#if show_ticks && view_as === "schedule"}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
@@ -1447,7 +1599,7 @@
             </span>
             <span>
               {new Date(day.timestamp).toLocaleString("default", {
-                weekday: "long",
+                weekday: "short",
               })}
             </span>
           </h2>
@@ -1485,7 +1637,7 @@
                   slot.start_time,
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
-                ).toLocaleString()}}; Free calendars: {slot.available_calendars.toString()}"
+                ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 data-start-time={new Date(slot.start_time).toLocaleString()}
@@ -1502,8 +1654,11 @@
                 on:mouseenter={() => {
                   addToDrag(slot, day);
                 }}
-                on:mouseup={() => {
+                on:mouseup={(e) => {
                   if (mouseIsDown) {
+                    if (document.activeElement instanceof HTMLElement) {
+                      document.activeElement.blur();
+                    }
                     endDrag(slot, day);
                   }
                 }}
