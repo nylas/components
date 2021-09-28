@@ -11,7 +11,7 @@
         const availability = document.querySelector("nylas-availability");
         const scheduler = document.querySelector("nylas-scheduler");
 
-        availability.email_ids = ["phil.r@nylas.com", "shashaank.s@nylas.com"];
+        availability.calendars = ["nylascypresstest@gmail.com"];
         availability.addEventListener("timeSlotChosen", (event) => {
           scheduler.slots_to_book = event.detail.timeSlots;
         });
@@ -46,11 +46,11 @@
       <nylas-availability
         show_as_week="true"
         allow_booking="true"
-        id="phils-availability"
+        id="demo-availability"
         editor_id="demo-schedule-editor"
         slot_size="15"
-        start_hour="8"
-        end_hour="18"
+        start_hour="9"
+        end_hour="17"
         show_hosts="show"
       >
       </nylas-availability>
