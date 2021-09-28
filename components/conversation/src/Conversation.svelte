@@ -232,6 +232,10 @@
     }
   };
   afterUpdate(scrollToBottom);
+
+  // #region mobile header view
+  let headerExpanded = false;
+  // #endregion mobile header view
 </script>
 
 <style lang="scss">
@@ -245,6 +249,7 @@
   $desktopBreakpoint: 1140px;
   $contactWidth: 32px;
   $avatar-size: 40px;
+  $headerHorizontalSpacing: 32px;
   $avatar-horizontal-space: 1rem;
 
   main {
@@ -259,14 +264,34 @@
   header {
     display: flex;
     background: white;
-    padding: 15px 32px;
-    gap: 32px;
+    padding: 15px $headerHorizontalSpacing;
+    gap: $headerHorizontalSpacing;
     color: var(--black);
     font-size: var(--fs-14);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1;
+    &.mobile {
+      @media (min-width: $tabletBreakpoint) {
+        display: none;
+      }
+      width: calc(100% - (#{$headerHorizontalSpacing} * 2));
+      button {
+        position: absolute;
+        right: $headerHorizontalSpacing;
+        top: 16px;
+        background: none;
+        display: flex;
+      }
+      &.expanded {
+        display: grid;
+        gap: 12px;
+        button {
+          rotate: 180deg;
+        }
+      }
+    }
     &.tablet {
       display: none;
       @media (min-width: $tabletBreakpoint) {
