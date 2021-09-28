@@ -669,10 +669,14 @@
     if (parseInt(event_buffer) === 0) return slots;
 
     allCalendars.forEach((calendar) => {
+      console.log("slots:", slots); //slots in the day (all slots, 24 if 60 min, 48 if 30 min, 96 if 15 min)
       let availableSlotsForCalendar = slots.filter((slot) =>
         slot.available_calendars.includes(calendar.account.emailAddress),
       );
+      console.log("calendar:", availableSlotsForCalendar); // slots with current user calendar (12 in the first test case with just Jim person)
       let filteredSlotsForCalendar = deepCopy(availableSlotsForCalendar);
+      console.log("calendar2:", filteredSlotsForCalendar); // copy of slots with current user calendar (12 in the first test case with just Jim person)
+
       availableSlotsForCalendar.forEach((slot, i) => {
         if (slot.availability !== AvailabilityStatus.BUSY) {
           //maybe FREE
@@ -689,16 +693,15 @@
                 slot.available_calendars.filter(
                   (cal) => cal !== calendar.account.emailAddress,
                 );
-              if (
-                !availableSlotsForCalendar[i - j].available_calendars.length
-              ) {
+              if (!filteredSlotsForCalendar[i - j].available_calendars.length) {
                 // if it has no calendars avialble, it's busy
+                // console.log(availableSlotsForCalendar, i);
                 availableSlotsForCalendar[i - j].availability =
                   AvailabilityStatus.BUSY;
               } else if (
-                availableSlotsForCalendar[i - j].availability ===
+                filteredSlotsForCalendar[i - j].availability ===
                   AvailabilityStatus.FREE &&
-                availableSlotsForCalendar[i - j].available_calendars.length !==
+                filteredSlotsForCalendar[i - j].available_calendars.length !==
                   allCalendars.length
               ) {
                 // if it was previously free, but now lacks a calendar, it should be considered Partial.
@@ -710,7 +713,8 @@
         }
       });
 
-      console.log(availableSlotsForCalendar);
+      // console.log(filteredSlotsForCalendar);
+      // console.log(availableSlotsForCalendar);
     });
     return slots; //filteredSlots
   }
