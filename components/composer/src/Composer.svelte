@@ -128,9 +128,6 @@
         JSON.stringify({ component_id: id, access_token })
       ]) || {};
 
-    if (value) {
-      mergeMessage(value);
-    }
     if (manifest && id) {
       const account: Account = await fetchAccount({
         component_id: id,
@@ -163,6 +160,10 @@
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
     }
+  }
+
+  $: if (value) {
+    mergeMessage(value);
   }
 
   $: {
