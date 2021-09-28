@@ -25,7 +25,7 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
-  // import { getNameInitials } from "@commons/methods/contact_strings";
+  import { getNameInitials } from "@commons/methods/contact_strings";
 
   export let id: string = "";
   export let access_token: string = "";
