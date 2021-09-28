@@ -189,7 +189,7 @@ describe("Composer html", () => {
     });
 
     it("shows template", () => {
-      element.value.body = "";
+      element.value = { body: "" };
       element.template = `Hey what up!<br />
       <br />
       <br />
@@ -433,11 +433,13 @@ describe("Composer html", () => {
     });
 
     it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
-      element.value.body = `[hi] what up!<br />
+      element.value = {
+        body: `[hi] what up!<br />
       <br />
       <br />
       Thanks,
-      -Phil`;
+      -Phil`,
+      };
       cy.get("nylas-composer")
         .as("composer")
         .then((el) => {
@@ -459,11 +461,13 @@ describe("Composer html", () => {
     });
 
     it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
-      element.value.body = `[hi] what up!<br />
+      element.value = {
+        body: `[hi] what up!<br />
       <br />
       <br />
       Thanks,
-      -Phil`;
+      -Phil`,
+      };
       cy.get("nylas-composer")
         .as("composer")
         .then((el) => {
