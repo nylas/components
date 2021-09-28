@@ -93,6 +93,7 @@
 
   let conversation: Conversation | null = null;
   let status: "loading" | "loaded" | "error" = "loading";
+  let headerExpanded = false;
 
   $: {
     if (id && thread_id) {
@@ -233,10 +234,6 @@
     }
   };
   afterUpdate(scrollToBottom);
-
-  // #region mobile header view
-  let headerExpanded = false;
-  // #endregion mobile header view
 </script>
 
 <style lang="scss">
