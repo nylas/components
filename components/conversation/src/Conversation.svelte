@@ -478,7 +478,7 @@
       {#if reply.to.length > 1 || reply.cc.length}
         <button on:click={() => (headerExpanded = !headerExpanded)}>
           <svg
-            aria-label="Show additional emails in this thread"
+            aria-label="Toggle showing additional emails in this thread"
             width="12"
             height="12"
             viewBox="0 0 12 12"
