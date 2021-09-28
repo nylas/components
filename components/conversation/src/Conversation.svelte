@@ -266,13 +266,13 @@
         400px,
         calc(100% - #{$avatar-size} - #{$avatar-horizontal-space})
       );
-      @media (min-width: #{$tabletBreakpoint}) {
-        width: max-content;
-        max-width: 600px;
-      }
-      @media (min-width: #{$desktopBreakpoint}) {
-        max-width: 752px;
-      }
+      // @media (min-width: #{$tabletBreakpoint}) {
+      //   width: max-content;
+      //   max-width: 600px;
+      // }
+      // @media (min-width: #{$desktopBreakpoint}) {
+      //   max-width: 752px;
+      // }
       display: grid;
       column-gap: $avatar-horizontal-space;
       row-gap: 0.25rem;
@@ -484,7 +484,6 @@
                             <span>{you.email_address?.slice(0, 1) || "?"}</span>
                           {/if}
                         {:else if from.name}
-                          {from.name.slice(0, 2)}
                           <span>{getNameInitials(from.name)}</span>
                         {:else}
                           <span>{from.email?.slice(0, 1) || "?"}</span>
