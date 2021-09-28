@@ -11,7 +11,7 @@
         const availability = document.querySelector("nylas-availability");
         const scheduler = document.querySelector("nylas-scheduler");
 
-        availability.calendars = ["nylascypresstest@gmail.com"];
+        availability.email_ids = ["nylascypresstest@gmail.com"];
         availability.addEventListener("timeSlotChosen", (event) => {
           scheduler.slots_to_book = event.detail.timeSlots;
         });
