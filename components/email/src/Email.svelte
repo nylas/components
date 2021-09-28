@@ -665,14 +665,11 @@
         flex-wrap: wrap;
         display: grid;
         align-items: center;
-        grid-template-areas:
-          "from-star subject-snippet-date"
-          "mobile-subject-snippet mobile-subject-snippet";
+        grid-template-columns: fit-content(350px) 1fr;
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
           column-gap: $spacing-xs;
-          grid-area: from-star;
         }
 
         .mobile-subject-snippet {
@@ -680,7 +677,6 @@
           font-size: 14px;
           margin-top: $spacing-xs;
           flex-basis: 100%;
-          grid-area: mobile-subject-snippet;
           .subject {
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -814,7 +810,7 @@
               display: block;
               max-width: 90vw;
               color: var(--grey);
-              margin-top: $spacing-m;
+              margin-top: $spacing-xs;
             }
             div.message-head {
               .avatar-from {
@@ -844,6 +840,7 @@
           div.message-head {
             display: flex;
             justify-content: space-between;
+            align-items: center;
           }
           div.message-date {
             display: flex;
@@ -914,7 +911,7 @@
       .from-message-count {
         align-items: center;
         display: grid;
-        grid-template-columns: repeat(4, auto);
+        grid-template-columns: repeat(3, auto);
         grid-gap: $spacing-m;
         justify-content: flex-start;
         max-width: 350px;
@@ -922,7 +919,7 @@
         .from-participants {
           max-width: 220px;
           display: grid;
-          grid-template-columns: 1fr 60px;
+          grid-template-columns: 1fr fit-content(60px);
           .participants-name {
             .from-sub-section.second {
               display: none;
@@ -939,7 +936,6 @@
         }
       }
       .subject-snippet-date {
-        grid-area: subject-snippet-date;
         .desktop-subject-snippet {
           display: none;
         }
@@ -993,6 +989,7 @@
     main {
       .email-row {
         .from-message-count {
+          max-width: 350px;
           .from-participants {
             .participants-name {
               overflow: hidden;
@@ -1030,10 +1027,8 @@
           display: grid;
           column-gap: $spacing-m;
           height: $collapsed-height;
-          grid-template-areas: "from-star subject-snippet-date";
-          grid-template-columns: 350px auto;
+          grid-template-columns: fit-content(350px) 1fr;
           justify-content: initial;
-
           div.starred {
             button {
               &:hover:before {
@@ -1098,7 +1093,7 @@
 
         .subject-snippet-date {
           display: grid;
-          grid-template-columns: auto 120px;
+          grid-template-columns: 1fr fit-content(120px);
           gap: 1rem;
           .desktop-subject-snippet {
             display: block;
