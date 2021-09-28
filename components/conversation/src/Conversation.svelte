@@ -25,9 +25,8 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
-  import "../../contacts-search/src/ContactsSearch.svelte";
   import { getDate } from "@commons/methods/datetime";
-  import { getNameInitials } from "@commons/methods/contact_strings";
+  import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -158,10 +157,11 @@
 
   let replyBody = "";
 
-  const handleContactsChange =
-    (field: "to" | "from" | "cc") => (data: Participant[]) => {
-      reply[field] = data;
-    };
+  const handleContactsChange = (field: "to" | "from" | "cc") => (
+    data: Participant[],
+  ) => {
+    reply[field] = data;
+  };
 
   let lastMessage: Message;
   let lastMessageInitialised = false;
@@ -248,8 +248,11 @@
 
   $tabletBreakpoint: 768px;
   $desktopBreakpoint: 1140px;
-
   $contactWidth: 32px;
+  $avatar-size: 40px;
+  $headerHorizontalSpacing: 32px;
+  $avatar-horizontal-space: 1rem;
+
   main {
     height: 100%;
     width: 100%;
@@ -258,36 +261,30 @@
     font-family: sans-serif;
     background-color: var(--grey-light);
   }
-  $avatar-size: 40px;
-  $avatar-horizontal-space: 1rem;
 
   header {
     display: flex;
     background: white;
-    padding: 15px 32px;
-    gap: 32px;
+    padding: 15px $headerHorizontalSpacing;
+    gap: $headerHorizontalSpacing;
     color: var(--black);
     font-size: var(--fs-14);
-
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1;
-
     &.mobile {
       @media (min-width: $tabletBreakpoint) {
         display: none;
       }
-      width: calc(100% - 32px - 32px);
-
+      width: calc(100% - (#{$headerHorizontalSpacing} * 2));
       button {
         position: absolute;
-        right: 32px;
+        right: $headerHorizontalSpacing;
         top: 16px;
         background: none;
         display: flex;
       }
-
       &.expanded {
         display: grid;
         gap: 12px;
@@ -315,11 +312,11 @@
         400px,
         calc(100% - #{$avatar-size} - #{$avatar-horizontal-space})
       );
-      @media (min-width: #{$tabletBreakpoint}) {
+      @media (min-width: $tabletBreakpoint) {
         width: max-content;
         max-width: 600px;
       }
-      @media (min-width: #{$desktopBreakpoint}) {
+      @media (min-width: $desktopBreakpoint) {
         max-width: 752px;
       }
       display: grid;
@@ -380,7 +377,6 @@
         font-size: var(--fs-12);
         color: var(--grey-dark);
       }
-
       p {
         padding: 1rem;
         font-weight: 300;
@@ -397,7 +393,6 @@
       &.you {
         justify-self: end;
         grid-template-columns: 1fr $contactWidth;
-
         .contact {
           grid-row: 1/2;
           grid-column: 2/3;
@@ -417,13 +412,11 @@
         }
       }
     }
-
     &.dont-show-avatars {
       .message {
         column-gap: 0;
         grid-template-columns: 0 1fr;
         width: clamp(200px, calc(100% - 4rem), 700px);
-
         .contact {
           overflow: hidden;
         }
@@ -439,12 +432,10 @@
     width: 100%;
     bottom: 0;
     z-index: 1;
-
     form {
       position: relative;
       display: flex;
       align-items: center;
-
       button[type="submit"] {
         position: absolute;
         right: 1rem;
@@ -456,13 +447,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         &:disabled {
           cursor: not-allowed;
           background-color: gray;
         }
       }
-
       input {
         border-top: 1px solid #ebebeb;
         height: 25px;
@@ -470,7 +459,6 @@
         width: 100%;
         font-size: var(--fs-16);
         color: var(--grey-black);
-
         &::placeholder {
           color: var(--grey);
         }
@@ -485,15 +473,16 @@
     Loading Component...
   {:then _}
     <header class="mobile" class:expanded={headerExpanded}>
-      <span>to: {reply.to[0]?.email}</span>
+      {#if reply.to.length}
+        <span>to: {reply.to[0].email}</span>
+      {/if}
       {#if reply.to.length > 1 || reply.cc.length}
         <button on:click={() => (headerExpanded = !headerExpanded)}>
           <svg
-            aria-label="Show additional emails in this thread"
+            aria-label="Toggle showing additional emails in this thread"
             width="12"
             height="12"
             viewBox="0 0 12 12"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -552,17 +541,11 @@
                             {/if}
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
-                          {:else}{contact.emails[0].email.slice(0, 2)}{/if}
+                          {:else}{contact.emails[0].email[0]}{/if}
                         {:else if isYou}
-                          {#if you.name}
-                            <span>{getNameInitials(you.name)}</span>
-                          {:else}
-                            <span>{you.email_address?.slice(0, 1) || "?"}</span>
-                          {/if}
-                        {:else if from.name}
-                          <span>{getNameInitials(from.name)}</span>
+                          <span>{getContactInitialForAvatar(you)}</span>
                         {:else}
-                          <span>{from.email?.slice(0, 1) || "?"}</span>
+                          <span>{getContactInitialForAvatar(from)}</span>
                         {/if}
                       </div>
                     {/await}
@@ -619,23 +602,25 @@
             }
           }}
         >
-          <label for="send-response" class="sr-only"
-            >Type and send a response</label
-          >
+          <label for="send-response" class="sr-only">
+            Type and send a response
+          </label>
           <input
             id="send-response"
             type="text"
             placeholder="Type a Response"
             bind:value={replyBody}
           />
-          <button type="submit" disabled={!reply.to.length}>
+          <button
+            type="submit"
+            disabled={!reply.to.length}
+            aria-label={`Send${replyStatus ? "ing" : ""} email`}
+          >
             {#if replyStatus === "sending"}...{:else}
               <svg
-                aria-label="Send email"
                 width="13"
                 height="13"
                 viewBox="0 0 13 13"
-                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
