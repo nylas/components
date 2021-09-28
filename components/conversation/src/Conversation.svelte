@@ -232,6 +232,10 @@
     }
   };
   afterUpdate(scrollToBottom);
+
+  // #region mobile header view
+  let headerExpanded = false;
+  // #endregion mobile header view
 </script>
 
 <style lang="scss">
@@ -243,8 +247,10 @@
 
   $tabletBreakpoint: 768px;
   $desktopBreakpoint: 1140px;
-
   $contactWidth: 32px;
+  $avatar-size: 40px;
+  $avatar-horizontal-space: 1rem;
+
   main {
     height: 100%;
     width: 100%;
@@ -253,8 +259,46 @@
     font-family: sans-serif;
     background-color: var(--grey-light);
   }
-  $avatar-size: 40px;
-  $avatar-horizontal-space: 1rem;
+
+  header {
+    display: flex;
+    background: white;
+    padding: 15px 32px;
+    gap: 32px;
+    color: var(--black);
+    font-size: var(--fs-14);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1;
+    &.mobile {
+      @media (min-width: $tabletBreakpoint) {
+        display: none;
+      }
+      width: calc(100% - 32px - 32px);
+      button {
+        position: absolute;
+        right: 32px;
+        top: 16px;
+        background: none;
+        display: flex;
+      }
+      &.expanded {
+        display: grid;
+        gap: 12px;
+        button {
+          rotate: 180deg;
+        }
+      }
+    }
+    &.tablet {
+      display: none;
+      @media (min-width: $tabletBreakpoint) {
+        display: flex;
+      }
+    }
+  }
+
   .messages {
     display: grid;
     gap: 1rem;
@@ -426,6 +470,43 @@
   {#await conversation}
     Loading Component...
   {:then _}
+    <header class="mobile" class:expanded={headerExpanded}>
+      <span>to: {reply.to[0]?.email}</span>
+      {#if reply.to.length > 1 || reply.cc.length}
+        <button on:click={() => (headerExpanded = !headerExpanded)}>
+          <svg
+            aria-label="Show additional emails in this thread"
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1.49229 3.49889C1.24729 3.74389 1.24729 4.13889 1.49229 4.38389L5.64729 8.53889C5.84229 8.73389 6.15729 8.73389 6.35229 8.53889L10.5073 4.38389C10.7523 4.13889 10.7523 3.74389 10.5073 3.49889C10.2623 3.25389 9.86729 3.25389 9.62229 3.49889L5.99729 7.11889L2.37229 3.49389C2.13229 3.25389 1.73229 3.25389 1.49229 3.49889Z"
+              fill="#636671"
+            />
+          </svg>
+        </button>
+      {/if}
+      {#if headerExpanded}
+        <!-- Show rest of the emails -->
+        {#each reply.to.slice(1) as contact}
+          <span>to: {contact.email}</span>
+        {/each}
+        {#each reply.cc as contact}
+          <span>cc: {contact.email}</span>
+        {/each}
+      {/if}
+    </header>
+    <header class="tablet">
+      {#if reply.to.length}
+        <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
+      {/if}
+      {#if reply.cc.length}
+        <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
+      {/if}
+    </header>
     {#if status === "loading"}Loading Messages...{/if}
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
       {#each messages as message, i}
@@ -437,25 +518,6 @@
                   class="message member-{participantIndex + 1}"
                   class:you={isYou}
                 >
-                  <header
-                    class:hidden={previousFrom.email === from.email &&
-                      previousFrom.name === from.name}
-                  >
-                    <span class="email">
-                      <!-- A lot of services, like dropbox or github, use same-email, different-name to differentiate who posted a message to a shared thread -->
-                      {#if participants.filter((p) => p.email === from.email).length > 1}
-                        {from.name}
-                      {:else}{from.email}{/if}
-                    </span>
-                    <span class="date">
-                      <!-- If today: show time. Else: show date. -->
-                      {#if new Date().toDateString() === new Date(message.date * 1000).toDateString()}
-                        {new Date(message.date * 1000).toLocaleTimeString()}
-                      {:else}
-                        {new Date(message.date * 1000).toLocaleDateString()}
-                      {/if}
-                    </span>
-                  </header>
                   <div class="contact">
                     {#await (participants[participantIndex] || {}).contact then contact}
                       <div class="avatar">
