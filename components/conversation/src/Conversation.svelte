@@ -243,8 +243,10 @@
 
   $tabletBreakpoint: 768px;
   $desktopBreakpoint: 1140px;
-
   $contactWidth: 32px;
+  $avatar-size: 40px;
+  $avatar-horizontal-space: 1rem;
+
   main {
     height: 100%;
     width: 100%;
@@ -253,8 +255,26 @@
     font-family: sans-serif;
     background-color: var(--grey-light);
   }
-  $avatar-size: 40px;
-  $avatar-horizontal-space: 1rem;
+
+  header {
+    display: flex;
+    background: white;
+    padding: 15px 32px;
+    gap: 32px;
+    color: var(--black);
+    font-size: var(--fs-14);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1;
+    &.tablet {
+      display: none;
+      @media (min-width: $tabletBreakpoint) {
+        display: flex;
+      }
+    }
+  }
+
   .messages {
     display: grid;
     gap: 1rem;
@@ -266,11 +286,11 @@
         400px,
         calc(100% - #{$avatar-size} - #{$avatar-horizontal-space})
       );
-      @media (min-width: #{$tabletBreakpoint}) {
+      @media (min-width: $tabletBreakpoint) {
         width: max-content;
         max-width: 600px;
       }
-      @media (min-width: #{$desktopBreakpoint}) {
+      @media (min-width: $desktopBreakpoint) {
         max-width: 752px;
       }
       display: grid;
@@ -426,6 +446,14 @@
   {#await conversation}
     Loading Component...
   {:then _}
+    <header class="tablet">
+      {#if reply.to.length}
+        <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
+      {/if}
+      {#if reply.cc.length}
+        <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
+      {/if}
+    </header>
     {#if status === "loading"}Loading Messages...{/if}
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
       {#each messages as message, i}
@@ -437,25 +465,6 @@
                   class="message member-{participantIndex + 1}"
                   class:you={isYou}
                 >
-                  <header
-                    class:hidden={previousFrom.email === from.email &&
-                      previousFrom.name === from.name}
-                  >
-                    <span class="email">
-                      <!-- A lot of services, like dropbox or github, use same-email, different-name to differentiate who posted a message to a shared thread -->
-                      {#if participants.filter((p) => p.email === from.email).length > 1}
-                        {from.name}
-                      {:else}{from.email}{/if}
-                    </span>
-                    <span class="date">
-                      <!-- If today: show time. Else: show date. -->
-                      {#if new Date().toDateString() === new Date(message.date * 1000).toDateString()}
-                        {new Date(message.date * 1000).toLocaleTimeString()}
-                      {:else}
-                        {new Date(message.date * 1000).toLocaleDateString()}
-                      {/if}
-                    </span>
-                  </header>
                   <div class="contact">
                     {#await (participants[participantIndex] || {}).contact then contact}
                       <div class="avatar">
