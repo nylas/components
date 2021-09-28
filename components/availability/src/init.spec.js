@@ -780,6 +780,28 @@ describe("availability component", () => {
     });
   });
 
+  describe("overbooked threshold prop", () => {
+    it("shows busy when slots booked over threshold", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.overbooked_threshold = 96;
+          cy.get(".slot.partial").should("exist");
+          cy.get(".slot.busy").should("have.length", 5);
+        });
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.overbooked_threshold = 95;
+          cy.get(".slot.partial").should("not.exist");
+          cy.get(".slot.busy").should("have.length", 96);
+        });
+    });
+  });
+
   describe("Capacity", () => {
     const timeSlot = {
       start_time: new Date(new Date().setHours(3, 0, 0, 0)),
