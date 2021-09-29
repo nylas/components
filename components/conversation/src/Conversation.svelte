@@ -25,7 +25,10 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
-  import "../../contacts-search/src/ContactsSearch.svelte";
+  import { getDate } from "@commons/methods/datetime";
+  import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
+  import ToggleIcon from "./assets/toggle.svg";
+  import SendIcon from "./assets/send.svg";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -156,10 +159,11 @@
 
   let replyBody = "";
 
-  const handleContactsChange =
-    (field: "to" | "from" | "cc") => (data: Participant[]) => {
-      reply[field] = data;
-    };
+  const handleContactsChange = (field: "to" | "from" | "cc") => (
+    data: Participant[],
+  ) => {
+    reply[field] = data;
+  };
 
   let lastMessage: Message;
   let lastMessageInitialised = false;
@@ -231,6 +235,10 @@
     }
   };
   afterUpdate(scrollToBottom);
+
+  // #region mobile header view
+  let headerExpanded = false;
+  // #endregion mobile header view
 </script>
 
 <style lang="scss">
@@ -240,58 +248,92 @@
   @import "../../theming/variables.scss";
   @import "../../theming/themes.scss";
 
+  $tabletBreakpoint: 768px;
+  $desktopBreakpoint: 1140px;
   $contactWidth: 32px;
+  $avatar-size: 40px;
+  $headerHorizontalSpacing: 32px;
+  $avatar-horizontal-space: 1rem;
+
   main {
     height: 100%;
     width: 100%;
     overflow: auto;
     position: relative;
-    background-color: #eee;
+    font-family: sans-serif;
+    background-color: var(--grey-light);
   }
-  $avatar-size: 32px;
-  $min-horizontal-space-between-participants: 4rem;
+
+  header {
+    display: flex;
+    background: white;
+    padding: 15px $headerHorizontalSpacing;
+    gap: $headerHorizontalSpacing;
+    color: var(--black);
+    font-size: var(--fs-14);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1;
+    &.mobile {
+      @media (min-width: $tabletBreakpoint) {
+        display: none;
+      }
+      width: calc(100% - (#{$headerHorizontalSpacing} * 2));
+      button {
+        position: absolute;
+        right: $headerHorizontalSpacing;
+        top: 16px;
+        background: none;
+        display: flex;
+      }
+      &.expanded {
+        display: grid;
+        gap: 12px;
+        button {
+          rotate: 180deg;
+        }
+      }
+    }
+    &.tablet {
+      display: none;
+      @media (min-width: $tabletBreakpoint) {
+        display: flex;
+      }
+    }
+  }
 
   .messages {
     display: grid;
     gap: 1rem;
     padding: 1rem;
+    padding-top: calc(1rem + 15px + 15px + 15px);
+    padding-bottom: calc(25px + 12px + 12px);
     .message {
-      width: clamp(
-        200px,
-        calc(
-          100% - #{$avatar-size} - #{$min-horizontal-space-between-participants}
-        ),
-        700px
+      max-width: min(
+        400px,
+        calc(100% - #{$avatar-size} - #{$avatar-horizontal-space})
       );
+      @media (min-width: $tabletBreakpoint) {
+        width: max-content;
+        max-width: 600px;
+      }
+      @media (min-width: $desktopBreakpoint) {
+        max-width: 752px;
+      }
       display: grid;
-      column-gap: 1rem;
+      column-gap: $avatar-horizontal-space;
       row-gap: 0.25rem;
       grid-template-columns: $contactWidth 1fr;
+      grid-template-rows: auto auto;
       transition: 0.5s;
       &:last-child {
         padding-bottom: 2rem;
       }
-
-      header {
-        grid-column: -1 / 2;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        font-size: 0.8rem;
-        opacity: 0.75;
-        overflow: hidden;
-        .date {
-          text-align: right;
-        }
-        &.hidden {
-          display: none;
-        }
-      }
       .body {
-        border-radius: 4px;
+        border-radius: 8px;
         background-color: white;
-        border-bottom: 10px solid;
-        box-shadow: 1px 1px 30px rgba(0, 0, 0, 0.05);
-        border-color: inherit;
+        color: var(--black);
         max-height: 50vh;
         overflow: auto;
         position: relative;
@@ -303,7 +345,7 @@
         grid-template-rows: auto 1fr;
         gap: 0.5rem;
         .avatar {
-          border-radius: 16px;
+          border-radius: 20px;
           width: $avatar-size;
           height: $avatar-size;
           text-align: center;
@@ -319,6 +361,10 @@
             width: 100%;
             height: 100%;
           }
+          span {
+            // perfectly center text
+            padding-top: 4px;
+          }
         }
         .email {
           font-size: 0.8rem;
@@ -328,47 +374,51 @@
           text-overflow: ellipsis;
         }
       }
-
+      .time {
+        grid-column: 2/3;
+        font-size: var(--fs-12);
+        color: var(--grey-dark);
+      }
       p {
         padding: 1rem;
-        color: black;
         font-weight: 300;
         line-height: 1.3em;
         font-size: 0.9em;
         border-radius: 8px;
         white-space: pre-line; // maintains newlines from conversation
-        &.snippet {
-          color: rgba(0, 0, 0, 0.5);
-          &:before {
-            content: "Expanding your message; please wait...";
-            color: rgba(0, 0, 0, 1);
-          }
+        &.after {
+          padding-top: 0;
+          margin-top: -1rem;
+          color: var(--grey-dark);
         }
       }
       &.you {
         justify-self: end;
         grid-template-columns: 1fr $contactWidth;
-
-        header {
-          grid-column: 1 / 1;
-        }
-
         .contact {
-          order: 2;
+          grid-row: 1/2;
+          grid-column: 2/3;
         }
         .body {
+          order: 1;
+          grid-column: 1 / 1;
+          color: var(--white);
+          background-color: var(--blue);
+          p.after {
+            color: var(--grey);
+          }
+        }
+        .time {
           order: 1;
           grid-column: 1 / 1;
         }
       }
     }
-
     &.dont-show-avatars {
       .message {
         column-gap: 0;
         grid-template-columns: 0 1fr;
         width: clamp(200px, calc(100% - 4rem), 700px);
-
         .contact {
           overflow: hidden;
         }
@@ -377,46 +427,42 @@
         }
       }
     }
+  }
 
-    .reply {
-      background: #ddd;
-      padding: 1rem;
-      margin: 1rem -1rem -1rem;
-      form {
-        button[type="submit"] {
-          &:disabled {
-            cursor: not-allowed;
-            background: gray;
-          }
+  .reply-box {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    z-index: 1;
+    form {
+      position: relative;
+      display: flex;
+      align-items: center;
+      button[type="submit"] {
+        position: absolute;
+        right: 1rem;
+        border-radius: 4px;
+        background-color: var(--blue);
+        height: 28px;
+        width: 28px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:disabled {
+          cursor: not-allowed;
+          background-color: gray;
         }
       }
-      span.to {
-        --background: gray;
-      }
-      span.to,
-      span.cc {
-        display: inline-block;
-        padding: 0 1rem 0 0;
-
-        & > span {
-          display: inline-block;
-          margin-right: 0.5rem;
-        }
-      }
-
-      .response {
+      input {
+        border-top: 1px solid #ebebeb;
+        height: 25px;
+        padding: 12px 1rem;
         width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 100px;
-        gap: 1rem;
-        margin-top: 0.5rem;
-        input {
-          padding: 0.5rem;
-        }
-        button {
-          background-color: black;
-          font-weight: 500;
-          color: white;
+        font-size: var(--fs-16);
+        color: var(--grey-black);
+        &::placeholder {
+          color: var(--grey);
         }
       }
     }
@@ -428,6 +474,36 @@
   {#await conversation}
     Loading Component...
   {:then _}
+    <header class="mobile" class:expanded={headerExpanded}>
+      {#if reply.to.length}
+        <span>to: {reply.to[0].email}</span>
+      {/if}
+      {#if reply.to.length > 1 || reply.cc.length}
+        <button
+          on:click={() => (headerExpanded = !headerExpanded)}
+          aria-label="Toggle showing additional emails in this thread"
+        >
+          <ToggleIcon aria-hidden="true" />
+        </button>
+      {/if}
+      {#if headerExpanded}
+        <!-- Show rest of the emails -->
+        {#each reply.to.slice(1) as contact}
+          <span>to: {contact.email}</span>
+        {/each}
+        {#each reply.cc as contact}
+          <span>cc: {contact.email}</span>
+        {/each}
+      {/if}
+    </header>
+    <header class="tablet">
+      {#if reply.to.length}
+        <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
+      {/if}
+      {#if reply.cc.length}
+        <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
+      {/if}
+    </header>
     {#if status === "loading"}Loading Messages...{/if}
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
       {#each messages as message, i}
@@ -439,25 +515,6 @@
                   class="message member-{participantIndex + 1}"
                   class:you={isYou}
                 >
-                  <header
-                    class:hidden={previousFrom.email === from.email &&
-                      previousFrom.name === from.name}
-                  >
-                    <span class="email">
-                      <!-- A lot of services, like dropbox or github, use same-email, different-name to differentiate who posted a message to a shared thread -->
-                      {#if participants.filter((p) => p.email === from.email).length > 1}
-                        {from.name}
-                      {:else}{from.email}{/if}
-                    </span>
-                    <span class="date">
-                      <!-- If today: show time. Else: show date. -->
-                      {#if new Date().toDateString() === new Date(message.date * 1000).toDateString()}
-                        {new Date(message.date * 1000).toLocaleTimeString()}
-                      {:else}
-                        {new Date(message.date * 1000).toLocaleDateString()}
-                      {/if}
-                    </span>
-                  </header>
                   <div class="contact">
                     {#await (participants[participantIndex] || {}).contact then contact}
                       <div class="avatar">
@@ -478,12 +535,12 @@
                             {/if}
                           {:else if contact.given_name && contact.surname}
                             {contact.given_name[0] + contact.surname[0]}
-                          {:else}{contact.emails[0].email.slice(0, 2)}{/if}
-                        {:else if from.email === you.name}
-                          {you.name.slice(0, 2)}
-                        {:else if from.name}
-                          {from.name.slice(0, 2)}
-                        {:else if from.email}{from.email.slice(0, 2)}{/if}
+                          {:else}{contact.emails[0].email[0]}{/if}
+                        {:else if isYou}
+                          <span>{getContactInitialForAvatar(you)}</span>
+                        {:else}
+                          <span>{getContactInitialForAvatar(from)}</span>
+                        {/if}
                       </div>
                     {/await}
                   </div>
@@ -495,9 +552,15 @@
                       <p>
                         {@html message.body}
                       </p>
+                    {:else if message.snippet.includes(" On ")}
+                      <p>{message.snippet.split("On ")[0]}</p>
+                      <p class="after">On {message.snippet.split("On ")[1]}</p>
                     {:else}
-                      <p class="snippet">{message.snippet}</p>
+                      <p>{message.snippet}</p>
                     {/if}
+                  </div>
+                  <div class="time">
+                    {getDate(new Date(message.date * 1000))}
                   </div>
                 </article>
               {/await}
@@ -505,64 +568,54 @@
           {/await}
         {/await}
       {/each}
-      {#if show_reply}
-        <div class="reply">
-          <form
-            on:submit={(e) => {
-              if (replyStatus !== "sending") {
-                e.preventDefault();
-                replyStatus = "sending";
-                if (!conversation) {
-                  return;
-                }
-                sendMessage(id, {
-                  from: reply.from,
-                  to: reply.to,
-                  body: `${replyBody} <br /><br /> --Sent with Nylas`,
-                  subject: conversation.subject,
-                  cc: reply.cc,
-                  reply_to_message_id: lastMessage.id,
-                  bcc: [],
-                }).then((res) => {
-                  const conversationQuery = { queryKey: queryKey, data: res };
-                  ConversationStore.addMessageToThread(conversationQuery);
-                  replyStatus = "";
-                  replyBody = "";
-                });
-              }
-            }}
-          >
-            <span class="to">
-              <nylas-contacts-search
-                placeholder="to:"
-                change={handleContactsChange("to")}
-                contacts={reply.to}
-                value={reply.to}
-                show_dropdown={false}
-              />
-            </span>
-            <span class="cc">
-              <nylas-contacts-search
-                placeholder="cc:"
-                change={handleContactsChange("cc")}
-                contacts={reply.cc}
-                value={reply.cc}
-                show_dropdown={false}
-              />
-            </span>
-            <label class="response">
-              <input
-                type="text"
-                placeholder="Type a Response"
-                bind:value={replyBody}
-              />
-              <button type="submit" disabled={!reply.to.length}>
-                {#if replyStatus === "sending"}Sending...{:else}Send{/if}
-              </button>
-            </label>
-          </form>
-        </div>
-      {/if}
     </div>
+    {#if show_reply}
+      <div class="reply-box">
+        <form
+          on:submit={(e) => {
+            if (replyStatus !== "sending") {
+              e.preventDefault();
+              replyStatus = "sending";
+              if (!conversation) {
+                return;
+              }
+              sendMessage(id, {
+                from: reply.from,
+                to: reply.to,
+                body: `${replyBody} <br /><br /> --Sent with Nylas`,
+                subject: conversation.subject,
+                cc: reply.cc,
+                reply_to_message_id: lastMessage.id,
+                bcc: [],
+              }).then((res) => {
+                const conversationQuery = { queryKey: queryKey, data: res };
+                ConversationStore.addMessageToThread(conversationQuery);
+                replyStatus = "";
+                replyBody = "";
+              });
+            }
+          }}
+        >
+          <label for="send-response" class="sr-only">
+            Type and send a response
+          </label>
+          <input
+            id="send-response"
+            type="text"
+            placeholder="Type a Response"
+            bind:value={replyBody}
+          />
+          <button
+            type="submit"
+            disabled={!reply.to.length}
+            aria-label={`Send${replyStatus ? "ing" : ""} email`}
+          >
+            {#if replyStatus === "sending"}...{:else}
+              <SendIcon aria-hidden="true" />
+            {/if}
+          </button>
+        </form>
+      </div>
+    {/if}
   {/await}
 </main>

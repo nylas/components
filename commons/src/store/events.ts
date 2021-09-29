@@ -26,9 +26,10 @@ function initializeEvents() {
         return await eventsMap[queryKey];
       }
     },
-    createEvent: (event: Event, query: EventQuery) => {
+    createEvent: async (event: Event, query: EventQuery) => {
       const queryKey = JSON.stringify(query);
-      if (eventsMap[queryKey]) {
+      const _event = await eventsMap[queryKey];
+      if (_event) {
         eventsMap[queryKey] = Promise.all([
           eventsMap[queryKey],
           createEvent(event, query),
