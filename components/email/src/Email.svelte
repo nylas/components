@@ -224,7 +224,7 @@
     // Thread is being passed in directly. We won't need to do an initial fetch.
     // Is it in the store already? (via <nylas-mailbox>, for example)
     let foundThread = $Threads.find(
-      (storedThread) => storedThread.id === thread?.id,
+      (storedThread) => storedThread && storedThread.id === thread?.id,
     ) as Conversation;
     if (!foundThread) {
       // Thread does not exist in the store, assume it was passed in

@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-mailbox" />
 
 <script lang="ts">
-  import { ManifestStore } from "@commons";
+  import { ManifestStore, fetchAccount } from "@commons";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -78,7 +78,6 @@
       manifest,
     ) as Partial<SvelteAllProps>;
 
-    you = await AccountStore.getAccount(query);
     const accountOrganizationUnitQuery = {
       component_id: id,
       access_token,
@@ -180,6 +179,14 @@
     inboxThreads = threads; // TODO: filter out those in trash folder
   }
 
+  $: if (id && !you.id) {
+    fetchAccount({ component_id: query.component_id }).then(
+      (account: Account) => {
+        you = account;
+      },
+    );
+  }
+
   let main: Element;
 
   let query: MailboxQuery;
@@ -272,8 +279,9 @@
 
   async function threadClicked(event: CustomEvent) {
     console.debug("thread clicked from mailbox", event.detail);
-    if (event.detail.thread?.expanded) {
-      openedEmailData = event.detail.thread;
+    dispatchEvent("threadClicked", { event, thread: event.detail.thread });
+    openedEmailData = event.detail.thread;
+    if (!all_threads && event.detail.thread?.expanded) {
       if (event.detail.thread.unread) {
         event.detail.thread.unread = false;
         await updateThreadStatus(event.detail.thread);
