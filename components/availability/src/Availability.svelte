@@ -64,7 +64,7 @@
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
-  export let capacity: number;
+  export let capacity: number = 1;
 
   /**
    * Re-loads availability data from the Nylas API.
