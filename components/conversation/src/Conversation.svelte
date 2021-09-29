@@ -240,11 +240,11 @@
 
   function _sendMessage(e) {
     e.preventDefault();
+    dispatchEvent("sendMessageClicked", {
+      event: e,
+      message: { ...reply, body: replyBody },
+    });
     if (!conversation && conversationManuallyPassed) {
-      dispatchEvent("sendMessageClicked", {
-        event: e,
-        message: { ...reply, body: replyBody },
-      });
       replyBody = "";
       return;
     }

@@ -179,7 +179,7 @@
     inboxThreads = threads; // TODO: filter out those in trash folder
   }
 
-  $: if (id && !you.id) {
+  $: if (id && !you.id && !all_threads) {
     fetchAccount({ component_id: query.component_id }).then(
       (account: Account) => {
         you = account;
