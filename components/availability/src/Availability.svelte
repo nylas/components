@@ -64,6 +64,7 @@
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
+  export let capacity: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -376,6 +377,7 @@
           }
         }
 
+        // Do not allow users to book over slots relatively full events
         if (
           availability === AvailabilityStatus.PARTIAL &&
           freeCalendars.length < allCalendars.length * partial_bookable_ratio
@@ -391,6 +393,7 @@
           availability = AvailabilityStatus.PARTIAL;
         }
 
+        // Do not allow users to book over slots that are missing required participants
         if (
           availability === AvailabilityStatus.PARTIAL &&
           required_participants.length
@@ -398,6 +401,24 @@
           if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
           }
+        }
+
+        // Allow users to book over busy slots if capacity isn't full
+        if (availability === AvailabilityStatus.BUSY) {
+          const busyCapacityRemaining = allCalendars
+            .filter((c) => c.availability === AvailabilityStatus.BUSY)
+            .map((c) => {
+              const slot = {
+                start_time: time,
+                end_time: endTime,
+                available_calendars: [],
+              };
+              let conflictingTimeSlotEvents = overlap([...c.timeslots, slot]);
+              return conflictingTimeSlotEvents.num;
+            })
+            .reduce((result, curr) => result && curr < capacity, true);
+
+          if (busyCapacityRemaining) availability = AvailabilityStatus.PARTIAL;
         }
 
         return {
@@ -589,6 +610,56 @@
 
   $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
 
+  // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
+  function overlap(dateRanges: TimeSlot[]) {
+    var sortedRanges = dateRanges.sort((previous, current) => {
+      // get the start date from previous and current
+      var previousTime = previous.start_time.getTime();
+      var currentTime = current.start_time.getTime();
+
+      // if the previous is earlier than the current
+      if (previousTime < currentTime) {
+        return -1;
+      }
+
+      // if the previous time is the same as the current time
+      if (previousTime === currentTime) {
+        return 0;
+      }
+
+      // if the previous time is later than the current time
+      return 1;
+    });
+
+    var result = sortedRanges.reduce(
+      (result, current, idx, arr) => {
+        // get the previous range
+        if (idx === 0) {
+          return result;
+        }
+        var previous = arr[idx - 1];
+
+        // check for any overlap
+        var previousEnd = previous.end_time.getTime();
+        var currentStart = current.start_time.getTime();
+        var overlap = previousEnd >= currentStart;
+
+        // store the result
+        if (overlap) {
+          // yes, there is overlap
+          result.overlap = true;
+          // store the amount of overlap
+          result.num++;
+        }
+        return result;
+        // seed the reduce
+      },
+      { overlap: false, num: 0 },
+    );
+
+    // return the final results
+    return result;
+  }
   // #endregion timeSlot selection
 
   let availabilityQuery: AvailabilityQuery;

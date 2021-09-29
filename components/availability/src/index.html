@@ -67,10 +67,12 @@
         ];
 
         component.calendars = calendars;
+        component.capacity = 3;
+        component.slot_size = 60;
 
-        component.addEventListener("timeSlotChosen", (event) => {
-          console.log(event.detail.timeSlots);
-        });
+        // component.addEventListener("timeSlotChosen", (event) => {
+        //   console.log(event.detail.timeSlots);
+        // });
 
         startTimeInput.addEventListener("input", (event) => {
           component.start_hour = parseInt(event.target.value);
@@ -240,7 +242,7 @@
       <fieldset>
         <legend>Timeslot size</legend>
         <label>
-          <input checked type="radio" name="slot-size" value="15" />
+          <input type="radio" name="slot-size" value="15" />
           15 minutes
         </label>
         <label>
@@ -248,7 +250,7 @@
           30 minutes
         </label>
         <label>
-          <input type="radio" name="slot-size" value="60" />
+          <input checked type="radio" name="slot-size" value="60" />
           60 minutes
         </label>
       </fieldset>
