@@ -27,6 +27,8 @@
   } from "@commons/types/Nylas";
   import { getDate } from "@commons/methods/datetime";
   import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
+  import ToggleIcon from "./assets/toggle.svg";
+  import SendIcon from "./assets/send.svg";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -477,19 +479,11 @@
         <span>to: {reply.to[0].email}</span>
       {/if}
       {#if reply.to.length > 1 || reply.cc.length}
-        <button on:click={() => (headerExpanded = !headerExpanded)}>
-          <svg
-            aria-label="Toggle showing additional emails in this thread"
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M1.49229 3.49889C1.24729 3.74389 1.24729 4.13889 1.49229 4.38389L5.64729 8.53889C5.84229 8.73389 6.15729 8.73389 6.35229 8.53889L10.5073 4.38389C10.7523 4.13889 10.7523 3.74389 10.5073 3.49889C10.2623 3.25389 9.86729 3.25389 9.62229 3.49889L5.99729 7.11889L2.37229 3.49389C2.13229 3.25389 1.73229 3.25389 1.49229 3.49889Z"
-              fill="#636671"
-            />
-          </svg>
+        <button
+          on:click={() => (headerExpanded = !headerExpanded)}
+          aria-label="Toggle showing additional emails in this thread"
+        >
+          <ToggleIcon aria-hidden="true" />
         </button>
       {/if}
       {#if headerExpanded}
@@ -617,17 +611,7 @@
             aria-label={`Send${replyStatus ? "ing" : ""} email`}
           >
             {#if replyStatus === "sending"}...{:else}
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 13 13"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0.460449 12.1807L13.0001 6.50003L0.460449 0.819336V5.23765L9.41731 6.50003L0.460449 7.76241V12.1807Z"
-                  fill="white"
-                />
-              </svg>
+              <SendIcon aria-hidden="true" />
             {/if}
           </button>
         </form>
