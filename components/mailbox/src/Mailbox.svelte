@@ -78,14 +78,19 @@
       manifest,
     ) as Partial<SvelteAllProps>;
 
+    // Fetch Account
+    if (id && !you.id && !all_threads) {
+      you = await fetchAccount({ component_id: query.component_id });
+    }
+
     const accountOrganizationUnitQuery = {
       component_id: id,
       access_token,
     };
     // Initialize labels / folders
-    if (you.organization_unit === AccountOrganizationUnit.Label) {
+    if (you?.organization_unit === AccountOrganizationUnit.Label) {
       labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
-    } else if (you.organization_unit === AccountOrganizationUnit.Folder) {
+    } else if (you?.organization_unit === AccountOrganizationUnit.Folder) {
       folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
     }
 
@@ -177,14 +182,6 @@
   $: if (all_threads) {
     threads = all_threads as Thread[];
     inboxThreads = threads; // TODO: filter out those in trash folder
-  }
-
-  $: if (id && !you.id && !all_threads) {
-    fetchAccount({ component_id: query.component_id }).then(
-      (account: Account) => {
-        you = account;
-      },
-    );
   }
 
   let main: Element;
