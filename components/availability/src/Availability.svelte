@@ -241,6 +241,11 @@
       event_buffer,
       0,
     );
+    capacity = getPropertyValue(
+      null, // TODO: internalProps.capacity || editorManifest.capacity,
+      capacity,
+      1,
+    );
   }
 
   $: {
@@ -338,19 +343,22 @@
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
-            let availabilityExistsInSlot = calendar.timeslots.some((block) => {
-              if (calendar.availability === AvailabilityStatus.FREE) {
-                // typical use case
-                return time < block.end_time && block.start_time < endTime;
-              } else if (calendar.availability === AvailabilityStatus.BUSY) {
-                return (
-                  time < timeMinute.offset(block.end_time, event_buffer) &&
-                  timeMinute.offset(block.start_time, -event_buffer) < endTime
-                );
-              }
-            });
+            const slot = {
+              start_time: time,
+              end_time: endTime,
+              available_calendars: [],
+            };
+            const timeslots =
+              calendar.availability === AvailabilityStatus.BUSY
+                ? calendar.timeslots.map((t) => ({
+                    start_time: timeMinute.offset(t.start_time, -event_buffer),
+                    end_time: timeMinute.offset(t.end_time, event_buffer),
+                    available_calendars: [],
+                  }))
+                : calendar.timeslots;
+            const slotAvailability = overlap([...timeslots], slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
-              if (!availabilityExistsInSlot) {
+              if (slotAvailability.num < capacity) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -358,7 +366,7 @@
               !calendar.availability
             ) {
               // if a calendar is passed in without availability, assume the timeslots are available.
-              if (availabilityExistsInSlot) {
+              if (slotAvailability.overlap) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             }
@@ -401,24 +409,6 @@
           if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
           }
-        }
-
-        // Allow users to book over busy slots if capacity isn't full
-        if (availability === AvailabilityStatus.BUSY) {
-          const busyCapacityRemaining = allCalendars
-            .filter((c) => c.availability === AvailabilityStatus.BUSY)
-            .map((c) => {
-              const slot = {
-                start_time: time,
-                end_time: endTime,
-                available_calendars: [],
-              };
-              let conflictingTimeSlotEvents = overlap([...c.timeslots, slot]);
-              return conflictingTimeSlotEvents.num;
-            })
-            .reduce((result, curr) => result && curr < capacity, true);
-
-          if (busyCapacityRemaining) availability = AvailabilityStatus.PARTIAL;
         }
 
         return {
@@ -611,54 +601,22 @@
   $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
 
   // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
-  function overlap(dateRanges: TimeSlot[]) {
-    var sortedRanges = dateRanges.sort((previous, current) => {
-      // get the start date from previous and current
-      var previousTime = previous.start_time.getTime();
-      var currentTime = current.start_time.getTime();
+  function overlap(events: TimeSlot[], slot: TimeSlot) {
+    return events.reduce(
+      (result, current) => {
+        var overlap =
+          slot.start_time < current.end_time &&
+          current.start_time < slot.end_time;
 
-      // if the previous is earlier than the current
-      if (previousTime < currentTime) {
-        return -1;
-      }
-
-      // if the previous time is the same as the current time
-      if (previousTime === currentTime) {
-        return 0;
-      }
-
-      // if the previous time is later than the current time
-      return 1;
-    });
-
-    var result = sortedRanges.reduce(
-      (result, current, idx, arr) => {
-        // get the previous range
-        if (idx === 0) {
-          return result;
-        }
-        var previous = arr[idx - 1];
-
-        // check for any overlap
-        var previousEnd = previous.end_time.getTime();
-        var currentStart = current.start_time.getTime();
-        var overlap = previousEnd >= currentStart;
-
-        // store the result
         if (overlap) {
-          // yes, there is overlap
           result.overlap = true;
           // store the amount of overlap
           result.num++;
         }
         return result;
-        // seed the reduce
       },
       { overlap: false, num: 0 },
     );
-
-    // return the final results
-    return result;
   }
   // #endregion timeSlot selection
 
