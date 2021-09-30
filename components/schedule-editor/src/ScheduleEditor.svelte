@@ -10,6 +10,7 @@
     buildInternalProps,
   } from "@commons/methods/component";
   import { NotificationMode } from "@commons/enums/Scheduler";
+  import "@nylas/components-availability";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -199,9 +200,22 @@
       console.log(k, v);
     });
   }
+
+  // #region unpersisted variables
+  let customize_weekdays: boolean = false;
+  let allow_weekends: boolean = false;
+  // #endregion unpersisted variables
 </script>
 
 <style lang="scss">
+  .availability-container {
+    overflow: auto;
+    height: 500px;
+    nylas-availability {
+      display: block;
+      height: 1000px;
+    }
+  }
 </style>
 
 {#if manifest && manifest.error}
@@ -543,6 +557,39 @@
       <strong>Capacity</strong>
       <input type="number" min={1} bind:value={manifestProperties.capacity} />
     </label>
+  </div>
+  <div>
+    <h3>Available Hours</h3>
+    <p>
+      Drag over the hours want to be availble for booking. All other hours will
+      always show up as "busy" to your users.
+    </p>
+    <label>
+      <input
+        type="checkbox"
+        name="customize_weekdays"
+        bind:checked={customize_weekdays}
+      />
+      <strong>Customize each weekday</strong>
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        name="allow_weekends"
+        bind:checked={allow_weekends}
+      />
+      <strong>Allow booking on weekends</strong>
+    </label>
+    <div class="availability-container">
+      <nylas-availability
+        allow_booking={true}
+        max_bookable_slots={Infinity}
+        show_as_week={customize_weekdays || allow_weekends}
+        show_weekends={allow_weekends}
+        allow_date_change={false}
+        partial_bookable_ratio="0"
+      />
+    </div>
   </div>
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}

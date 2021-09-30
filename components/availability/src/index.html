@@ -31,6 +31,7 @@
               firstName: "Jim",
               lastName: "Person",
               avatarUrl: "",
+              capcity: 3,
             },
           },
           {
@@ -111,6 +112,14 @@
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
               component.allow_booking = JSON.parse(event.target.value);
+            });
+          });
+
+        document
+          .querySelectorAll('input[name="show-header"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.show_header = JSON.parse(event.target.value);
             });
           });
 
@@ -299,6 +308,18 @@
         </label>
         <label>
           <input checked type="radio" name="allow-booking" value="false" />
+          False
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Show Header</legend>
+        <label>
+          <input checked type="radio" name="show-header" value="true" />
+          True
+        </label>
+        <label>
+          <input type="radio" name="show-header" value="false" />
           False
         </label>
       </fieldset>

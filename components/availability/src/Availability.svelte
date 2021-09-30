@@ -66,6 +66,7 @@
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
   export let capacity: number;
+  export let show_header: boolean;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -247,8 +248,12 @@
       capacity,
       1,
     );
+    show_header = getPropertyValue(
+      internalProps.show_header,
+      show_header,
+      true,
+    );
   }
-
   $: {
     if (
       $$props.hasOwnProperty("start_date") &&
@@ -1141,6 +1146,31 @@
       grid-template-columns: 70px 1fr;
     }
 
+    &.hide-header {
+      $headerHeight: 0px;
+      grid-template-rows: auto;
+
+      .ticks {
+        height: 100%;
+        padding-top: 0;
+      }
+
+      & > header {
+        display: none;
+      }
+      .day {
+        grid-template-rows: auto;
+        & > header {
+          display: none;
+        }
+
+        .epochs {
+          top: 0;
+          height: 100%;
+        }
+      }
+    }
+
     & > header {
       grid-column: -1 / 1;
       display: grid;
@@ -1587,6 +1617,7 @@
   bind:clientHeight
   class:ticked={show_ticks && view_as === "schedule"}
   class:allow_booking
+  class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
   style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
 >
