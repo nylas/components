@@ -26,6 +26,7 @@ export interface Manifest extends NylasManifest {
   busy_color: string;
   view_as: "schedule" | "list";
   event_buffer: number;
+  capacity: number;
 }
 
 export interface Calendar {

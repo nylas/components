@@ -242,7 +242,7 @@
       0,
     );
     capacity = getPropertyValue(
-      null, // TODO: internalProps.capacity || editorManifest.capacity,
+      internalProps.capacity || editorManifest.capacity,
       capacity,
       1,
     );
