@@ -1,6 +1,6 @@
 {
   "name": "@nylas/components-day",
-  "version": "1.0.6",
+  "version": "1.0.7-canary.0",
   "repository": {
     "type": "git",
     "url": "github:nylas/components.git",
