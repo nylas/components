@@ -181,7 +181,7 @@ const SAMPLE_THREAD = {
   version: 63,
 };
 
-describe("Email component", () => {
+xdescribe("Email component", () => {
   beforeEach(() => {
     cy.visit("/components/email/src/index.html");
     cy.get("nylas-email").should("exist");
