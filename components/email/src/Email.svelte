@@ -1170,14 +1170,20 @@
                 <div class="read-status">
                   <button
                     title={`Mark thread as ${
-                      unread || activeThread.unread ? "" : "un"
+                      unread ||
+                      (activeThread.unread && click_action !== "mailbox")
+                        ? ""
+                        : "un"
                     }read`}
                     aria-label={`Mark thread as ${
-                      unread || activeThread.unread ? "" : "un"
+                      unread ||
+                      (activeThread.unread && click_action !== "mailbox")
+                        ? ""
+                        : "un"
                     }read`}
                     on:click|stopPropagation={toggleUnreadStatus}
                   >
-                    {#if unread || activeThread.unread}
+                    {#if unread || (activeThread.unread && click_action !== "mailbox")}
                       <MarkReadIcon aria-hidden="true" />
                     {:else}
                       <MarkUnreadIcon aria-hidden="true" />
@@ -1317,7 +1323,8 @@
           <div
             class="email-row condensed"
             class:show_star
-            class:unread={unread || activeThread.unread}
+            class:unread={unread ||
+              (activeThread.unread && click_action !== "mailbox")}
           >
             <div class="from{show_star ? '-star' : ''}">
               {#if show_star}
@@ -1420,14 +1427,20 @@
                   <div class="read-status">
                     <button
                       title={`Mark thread as ${
-                        unread || activeThread.unread ? "" : "un"
+                        unread ||
+                        (activeThread.unread && click_action !== "mailbox")
+                          ? ""
+                          : "un"
                       }read`}
                       aria-label={`Mark thread as ${
-                        unread || activeThread.unread ? "" : "un"
+                        unread ||
+                        (activeThread.unread && click_action !== "mailbox")
+                          ? ""
+                          : "un"
                       }read`}
                       on:click|stopPropagation={toggleUnreadStatus}
                     >
-                      {#if unread || activeThread.unread}
+                      {#if unread || (activeThread.unread && click_action !== "mailbox")}
                         <MarkReadIcon aria-hidden="true" />
                       {:else}
                         <MarkUnreadIcon aria-hidden="true" />

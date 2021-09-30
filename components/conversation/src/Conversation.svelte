@@ -37,6 +37,7 @@
   export let theme: string;
   export let show_avatars: boolean | string;
   export let show_reply: boolean | string;
+  export let you: Partial<Account> = {};
 
   let manifest: Partial<ConversationProperties> = {};
 
@@ -50,6 +51,11 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
+
+    // Fetch Account
+    if (id && !you.id && !conversationManuallyPassed) {
+      you = await fetchAccount({ component_id: query.component_id });
+    }
   });
 
   $: conversationMessages = conversationManuallyPassed
@@ -205,14 +211,6 @@
   let replyStatus: string = "";
 
   //#endregion Reply
-
-  let you: Partial<Account> = { name: "" };
-  $: if (id && !you.id)
-    fetchAccount({ component_id: query.component_id }).then(
-      (account: Account) => {
-        you = account;
-      },
-    );
 
   const CONVERSATION_ENDPOINT_MAX_MESSAGES = 20;
 

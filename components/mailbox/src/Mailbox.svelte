@@ -639,7 +639,8 @@
           {you}
           {show_star}
           click_action="mailbox"
-          unread={unreadThreads.has(openedEmailData)}
+          unread={unreadThreads.has(openedEmailData) ||
+            (openedEmailData.unread && unread_status === "default")}
           on:threadClicked={threadClicked}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
@@ -759,7 +760,8 @@
                   {you}
                   {show_star}
                   click_action="mailbox"
-                  unread={unreadThreads.has(thread)}
+                  unread={unreadThreads.has(thread) ||
+                    (thread.unread && unread_status === "default")}
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
                   on:threadStarred={threadStarred}
