@@ -148,6 +148,8 @@ jobs:
     needs: [build, lint, test-unit, type-check, test-cypress]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Check out source code
         uses: actions/checkout@v2
@@ -171,17 +173,16 @@ jobs:
           npm config set access public
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
+          
+      - name: Configure NPM Token
+        run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
       - name: Publish (canary)
         if: contains(github.ref, 'canary') == true
         run: |
           npm run lerna -- changed && npm run lerna -- publish from-git --no-verify-access --dist-tag canary --canary --preid canary --yes
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish (stable)
         if: contains(github.ref, 'canary') == false
         run: |
           npm run lerna -- changed && npm run lerna -- publish from-git --no-verify-access --yes
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
