@@ -19,6 +19,18 @@
       margin: 0;
     }
   </style>
+  <!-- // If a list of messages is passed in manually
+<script type="module">
+  import { mockedMessages } from "./test-data.js";
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const conversation = document.getElementsByTagName("nylas-conversation")[0];
+    conversation.addEventListener("sendMessageClicked", function (e) {
+      console.log("sendMessageClicked: ", e.detail.message)
+    })
+    conversation.messages = mockedMessages
+  });
+</script> -->
 
   <body>
     <nylas-conversation
@@ -28,5 +40,8 @@
       show_avatars="true"
       show_reply="true"
     />
+
+    <!-- If a list of messages is passed in manually -->
+    <!-- <nylas-conversation theme="ellsworth-kelly" show_avatars="true" show_reply="true" /> -->
   </body>
 </html>

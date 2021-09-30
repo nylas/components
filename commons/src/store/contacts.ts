@@ -37,11 +37,11 @@ function initializeContacts() {
             }
           })
           .catch(() => []);
+        update((contacts) => {
+          contacts[queryKey] = contactsMap[queryKey];
+          return { ...contacts };
+        });
       }
-      update((contacts) => {
-        contacts[queryKey] = contactsMap[queryKey];
-        return { ...contacts };
-      });
       return contactsMap[queryKey];
     },
     reset: () => set({}),

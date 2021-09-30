@@ -43,13 +43,18 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
+  let conversationManuallyPassed: boolean;
+  $: conversationManuallyPassed = !!messages && messages.length > 0;
+
   onMount(async () => {
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
   });
 
-  $: messages = conversation?.messages || [];
+  $: conversationMessages = conversationManuallyPassed
+    ? messages
+    : conversation?.messages || [];
 
   let participants: Participant[] = [];
   $: participants = conversation?.participants || [];
@@ -99,11 +104,17 @@
   $: {
     if (id && thread_id) {
       setConversation();
+    } else if (conversationManuallyPassed) {
+      status = "loaded";
     }
   }
 
   $: {
-    if (messages.length && !messages.filter((m) => m.conversation).length) {
+    if (
+      !conversationManuallyPassed &&
+      conversationMessages.length &&
+      !conversationMessages.filter((m) => m.conversation).length
+    ) {
       cleanConversation();
     }
   }
@@ -159,16 +170,15 @@
 
   let replyBody = "";
 
-  const handleContactsChange = (field: "to" | "from" | "cc") => (
-    data: Participant[],
-  ) => {
-    reply[field] = data;
-  };
+  const handleContactsChange =
+    (field: "to" | "from" | "cc") => (data: Participant[]) => {
+      reply[field] = data;
+    };
 
   let lastMessage: Message;
   let lastMessageInitialised = false;
-  $: if (messages) {
-    lastMessage = messages[messages.length - 1];
+  $: if (conversationMessages) {
+    lastMessage = conversationMessages[conversationMessages.length - 1];
     lastMessageInitialised = true;
   }
 
@@ -210,20 +220,54 @@
   function cleanConversation() {
     fetchCleanConversations({
       component_id: id,
-      message_id: messages
+      message_id: conversationMessages
         .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)
         .map((message) => message.id),
     }).then((results) => {
       results.forEach((msg: Message) => {
-        let existingMessage = messages.find((message) => message.id === msg.id);
+        let existingMessage = conversationMessages.find(
+          (message) => message.id === msg.id,
+        );
         if (existingMessage) {
           existingMessage.conversation = msg.conversation;
           existingMessage.body = msg.body;
         }
       });
-      messages = messages;
+      conversationMessages = conversationMessages;
     });
     return true;
+  }
+
+  function _sendMessage(e) {
+    e.preventDefault();
+    dispatchEvent("sendMessageClicked", {
+      event: e,
+      message: { ...reply, body: replyBody },
+    });
+    if (!conversation && conversationManuallyPassed) {
+      replyBody = "";
+      return;
+    }
+    if (replyStatus !== "sending") {
+      replyStatus = "sending";
+      if (!conversation) {
+        return;
+      }
+      sendMessage(id, {
+        from: reply.from,
+        to: reply.to,
+        body: `${replyBody} <br /><br /> --Sent with Nylas`,
+        subject: conversation.subject,
+        cc: reply.cc,
+        reply_to_message_id: lastMessage.id,
+        bcc: [],
+      }).then((res) => {
+        const conversationQuery = { queryKey: queryKey, data: res };
+        ConversationStore.addMessageToThread(conversationQuery);
+        replyStatus = "";
+        replyBody = "";
+      });
+    }
   }
 
   //#endregion Clean Conversation
@@ -506,9 +550,9 @@
     </header>
     {#if status === "loading"}Loading Messages...{/if}
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
-      {#each messages as message, i}
+      {#each conversationMessages as message, i}
         {#await message.from[0] then from}
-          {#await messages[i - 1] ? messages[i - 1].from[0] : { name: "", email: "" } then previousFrom}
+          {#await conversationMessages[i - 1] ? conversationMessages[i - 1].from[0] : { name: "", email: "" } then previousFrom}
             {#await participants.findIndex((p) => p.email === from.email && p.name === from.name) then participantIndex}
               {#await from.email === you.email_address then isYou}
                 <article
@@ -571,31 +615,7 @@
     </div>
     {#if show_reply}
       <div class="reply-box">
-        <form
-          on:submit={(e) => {
-            if (replyStatus !== "sending") {
-              e.preventDefault();
-              replyStatus = "sending";
-              if (!conversation) {
-                return;
-              }
-              sendMessage(id, {
-                from: reply.from,
-                to: reply.to,
-                body: `${replyBody} <br /><br /> --Sent with Nylas`,
-                subject: conversation.subject,
-                cc: reply.cc,
-                reply_to_message_id: lastMessage.id,
-                bcc: [],
-              }).then((res) => {
-                const conversationQuery = { queryKey: queryKey, data: res };
-                ConversationStore.addMessageToThread(conversationQuery);
-                replyStatus = "";
-                replyBody = "";
-              });
-            }
-          }}
-        >
+        <form on:submit={_sendMessage}>
           <label for="send-response" class="sr-only">
             Type and send a response
           </label>

@@ -72,15 +72,19 @@
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
 
-    // Initialize labels / folders
-    const accountOrganizationUnitQuery = {
-      component_id: id,
-      access_token,
-    };
-    if (you.organization_unit === AccountOrganizationUnit.Label) {
-      labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
-    } else if (you.organization_unit === AccountOrganizationUnit.Folder) {
-      folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
+    // Fetch Account
+    if (id && !you.id && !emailManuallyPassed) {
+      you = await fetchAccount({ component_id: query.component_id });
+      // Initialize labels / folders
+      const accountOrganizationUnitQuery = {
+        component_id: id,
+        access_token,
+      };
+      if (you?.organization_unit === AccountOrganizationUnit.Label) {
+        labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
+      } else if (you?.organization_unit === AccountOrganizationUnit.Folder) {
+        folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
+      }
     }
   });
 
@@ -175,7 +179,10 @@
       click_action,
       "default",
     );
-    thread_id = getPropertyValue(internalProps.thread_id, thread_id, "");
+    // Assign thread_id to threadID stored in the manifest only when passing a thread_id
+    const internalPropThreadID =
+      !thread && !message_id && !message ? internalProps.thread_id : "";
+    thread_id = getPropertyValue(internalPropThreadID, thread_id, "");
     show_contact_avatar = getPropertyValue(
       internalProps.show_contact_avatar,
       show_contact_avatar,
@@ -224,7 +231,7 @@
     // Thread is being passed in directly. We won't need to do an initial fetch.
     // Is it in the store already? (via <nylas-mailbox>, for example)
     let foundThread = $Threads.find(
-      (storedThread) => storedThread.id === thread?.id,
+      (storedThread) => storedThread && storedThread.id === thread?.id,
     ) as Conversation;
     if (!foundThread) {
       // Thread does not exist in the store, assume it was passed in
@@ -255,14 +262,6 @@
   // #endregion thread intake and set
   let emailManuallyPassed: boolean;
   $: emailManuallyPassed = !!thread;
-
-  $: if (id && !you.id) {
-    fetchAccount({ component_id: query.component_id }).then(
-      (account: Account) => {
-        you = account;
-      },
-    );
-  }
 
   //#region Clean Conversation
   // If a user sets message_body_type to "clean", expand their message to clean conversation.
@@ -391,16 +390,16 @@
 
   async function toggleUnreadStatus(e: MouseEvent | KeyboardEvent) {
     if (activeThread) {
+      dispatchEvent("toggleThreadUnreadStatus", {
+        event: e,
+        thread: activeThread,
+      });
       if (click_action !== "mailbox") {
         activeThread.unread = !activeThread.unread;
         unread = activeThread.unread;
         await saveActiveThread();
         return;
       }
-      dispatchEvent("toggleThreadUnreadStatus", {
-        event: e,
-        thread: activeThread,
-      });
       return;
     }
     unread = !unread;

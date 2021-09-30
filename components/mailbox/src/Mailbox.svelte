@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-mailbox" />
 
 <script lang="ts">
-  import { ManifestStore } from "@commons";
+  import { ManifestStore, fetchAccount } from "@commons";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -78,15 +78,19 @@
       manifest,
     ) as Partial<SvelteAllProps>;
 
-    you = await AccountStore.getAccount(query);
+    // Fetch Account
+    if (id && !you.id && !all_threads) {
+      you = await fetchAccount({ component_id: query.component_id });
+    }
+
     const accountOrganizationUnitQuery = {
       component_id: id,
       access_token,
     };
     // Initialize labels / folders
-    if (you.organization_unit === AccountOrganizationUnit.Label) {
+    if (you?.organization_unit === AccountOrganizationUnit.Label) {
       labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
-    } else if (you.organization_unit === AccountOrganizationUnit.Folder) {
+    } else if (you?.organization_unit === AccountOrganizationUnit.Folder) {
       folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
     }
 
@@ -272,8 +276,9 @@
 
   async function threadClicked(event: CustomEvent) {
     console.debug("thread clicked from mailbox", event.detail);
-    if (event.detail.thread?.expanded) {
-      openedEmailData = event.detail.thread;
+    dispatchEvent("threadClicked", { event, thread: event.detail.thread });
+    openedEmailData = event.detail.thread;
+    if (!all_threads && event.detail.thread?.expanded) {
       if (event.detail.thread.unread) {
         event.detail.thread.unread = false;
         await updateThreadStatus(event.detail.thread);
