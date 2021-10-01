@@ -10,7 +10,8 @@
     buildInternalProps,
   } from "@commons/methods/component";
   import { NotificationMode } from "@commons/enums/Scheduler";
-  import "@nylas/components-availability";
+  // import "@nylas/components-availability";
+  import "../../availability";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -211,10 +212,10 @@
   .availability-container {
     overflow: auto;
     height: 500px;
-    nylas-availability {
-      display: block;
-      height: 1000px;
-    }
+    // nylas-availability {
+    //   display: block;
+    //   height: 1000px;
+    // }
   }
 </style>
 
@@ -588,6 +589,9 @@
         show_weekends={allow_weekends}
         allow_date_change={false}
         partial_bookable_ratio="0"
+        show_header={false}
+        busy_color="#000"
+        selected_color="#095"
       />
     </div>
   </div>

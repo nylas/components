@@ -62,6 +62,7 @@
   export let busy_color: string;
   export let partial_color: string;
   export let free_color: string;
+  export let selected_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
@@ -227,6 +228,11 @@
       internalProps.free_color,
       free_color,
       "#078351cc",
+    );
+    selected_color = getPropertyValue(
+      internalProps.selected_color,
+      selected_color,
+      "#002db4",
     );
     show_hosts = getPropertyValue(
       internalProps.show_hosts || editorManifest.show_hosts,
@@ -1126,11 +1132,59 @@
     }
   }
   // #endregion error
+  // TODO: testing
+  function hexLightened(H, lightness) {
+    console.log("H", H);
+    // Convert hex to RGB first
+    let r = 0,
+      g = 0,
+      b = 0;
+    if (H.length == 4) {
+      r = "0x" + H[1] + H[1];
+      g = "0x" + H[2] + H[2];
+      b = "0x" + H[3] + H[3];
+    } else {
+      r = "0x" + H[1] + H[2];
+      g = "0x" + H[3] + H[4];
+      b = "0x" + H[5] + H[6];
+    }
+    // Then to HSL
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    let cmin = Math.min(r, g, b),
+      cmax = Math.max(r, g, b),
+      delta = cmax - cmin,
+      h = 0,
+      s = 0,
+      l = 0;
+
+    if (delta == 0) h = 0;
+    else if (cmax == r) h = ((g - b) / delta) % 6;
+    else if (cmax == g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+
+    h = Math.round(h * 60);
+
+    if (h < 0) h += 360;
+
+    // return h;
+
+    l = (cmax + cmin) / 2;
+    s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+    console.log("h", h, s, l);
+    // return [h,s,l];
+
+    return "hsl(" + h + "," + s + "%," + lightness + "%)";
+  }
 </script>
 
 <style lang="scss">
   @import "../../theming/reset.scss";
   @import "../../theming/variables.scss";
+
   $headerHeight: 40px;
   main {
     height: 100%;
@@ -1322,7 +1376,6 @@
         top: $headerHeight;
         width: 100%;
         height: calc(100% - #{$headerHeight});
-        background: rgba(255, 255, 255, 0);
         .epoch {
           position: absolute;
           width: 100%;
@@ -1330,7 +1383,6 @@
           .inner {
             margin: 0rem;
             height: calc(100% - 0.5rem - 2px);
-            // overflow: hidden;
             padding: 0.25rem 0;
             width: 8px;
             border-radius: 8px;
@@ -1338,7 +1390,8 @@
           }
 
           &.busy {
-            $darkStripe: rgba(255, 0, 0, 0.1);
+            // $darkStripe: rgba(255, 0, 0, 0.1);
+            $darkStripe: var(--busy-color-lightened);
             $lightStripe: white;
 
             background-image: linear-gradient(
@@ -1411,7 +1464,7 @@
           font-family: sans-serif;
 
           &.selected {
-            background-color: var(--blue);
+            background-color: var(--selected-color, var(--blue));
             box-shadow: none;
             border-bottom: 1px solid transparent;
             z-index: 3;
@@ -1420,7 +1473,8 @@
           }
 
           &.pending {
-            background-color: #002db466;
+            background-color: var(--selected-color-lightened);
+            // background-color: #002db466;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
             margin-left: 9px;
@@ -1619,7 +1673,16 @@
   class:allow_booking
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
-  style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
+  style="
+  --busy-color-lightened: {hexLightened(
+    busy_color,
+    90,
+  )};
+  --selected-color-lightened: {hexLightened(
+    selected_color,
+    60,
+  )}; 
+--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
     <h2 class="month">
