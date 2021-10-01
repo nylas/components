@@ -840,6 +840,16 @@ describe("availability component", () => {
           component.calendars = calendar;
           cy.get(".slot.busy").should("have.length", 0);
         });
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.overbooked_threshold = 63;
+          cy.get(".slot.partial").should("exist");
+          cy.get(".slot.partial").should("have.length", 87);
+          cy.get(".slot.busy").should("have.length", 9);
+        });
     });
   });
 });
