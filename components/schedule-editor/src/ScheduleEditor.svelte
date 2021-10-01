@@ -37,6 +37,7 @@
   export let view_as: "schedule" | "list";
   export let recurrence: "none" | "mandated" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
+  export let capacity: number;
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -148,6 +149,7 @@
       recurrence_cadence,
       ["none"],
     );
+    capacity = getPropertyValue(internalProps.capacity, capacity, 1);
   }
 
   // Manifest properties requiring further manipulation:
@@ -181,6 +183,7 @@
     notification_subject,
     view_as,
     recurrence,
+    capacity,
   };
 
   $: {
@@ -535,5 +538,11 @@
       </label>
     </div>
   {/if}
+  <div>
+    <label>
+      <strong>Capacity</strong>
+      <input type="number" min={1} bind:value={manifestProperties.capacity} />
+    </label>
+  </div>
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}
