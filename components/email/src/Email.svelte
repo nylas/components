@@ -76,10 +76,7 @@
     // Fetch Account
     if (id && !you.id && !emailManuallyPassed) {
       you = await fetchAccount({ component_id: query.component_id });
-      userEmail =
-        !you.email_address || userEmail !== you.email_address
-          ? you.email_address
-          : userEmail;
+      userEmail = you.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
         component_id: id,
@@ -1212,7 +1209,7 @@
                     handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
                 >
-                  {#if message.expanded || (msgIndex === activeThread.messages.length - 1 && userEmail)}
+                  {#if message.expanded || msgIndex === activeThread.messages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
                         <div class="avatar-from">
@@ -1226,7 +1223,7 @@
                           {/if}
                           <div class="message-from">
                             <span class="name"
-                              >{message.from[0].email === userEmail
+                              >{userEmail && message.from[0].email === userEmail
                                 ? "me"
                                 : message.from[0].name ||
                                   message.from[0].email}</span
@@ -1244,8 +1241,9 @@
                         <div class="message-to">
                           {#each message.to as to, i}
                             <span>
-                              {#if to.name || (to.email && userEmail)}
-                                to&colon;&nbsp;{to.email === userEmail
+                              {#if to.name || to.email}
+                                to&colon;&nbsp;{userEmail &&
+                                to.email === userEmail
                                   ? "me"
                                   : to.name || to.email}
                                 {#if i !== message.to.length - 1}
@@ -1281,7 +1279,7 @@
                         {message.snippet}
                       {/if}
                     </div>
-                  {:else if userEmail}
+                  {:else}
                     <div class="message-head">
                       <div class="avatar-from">
                         {#if show_contact_avatar}
@@ -1294,7 +1292,7 @@
                         {/if}
                         <div class="message-from">
                           <span class="name"
-                            >{message.from[0].email === userEmail
+                            >{userEmail && message.from[0].email === userEmail
                               ? "me"
                               : message.from[0].name ||
                                 message.from[0].email}</span
@@ -1494,7 +1492,7 @@
                 {/if}
                 <div class="message-from">
                   <span class="name"
-                    >{message.from[0].email === userEmail
+                    >{userEmail && message.from[0].email === userEmail
                       ? "me"
                       : message.from[0].name || message.from[0].email}</span
                   >
@@ -1512,8 +1510,8 @@
               <div class="message-to">
                 {#each message.to as to, i}
                   <span>
-                    {#if to.name || (to.email && userEmail)}
-                      to&colon;&nbsp;{to.email === userEmail
+                    {#if to.name || to.email}
+                      to&colon;&nbsp;{userEmail && to.email === userEmail
                         ? "me"
                         : to.name || to.email}
                       {#if i !== message.to.length - 1}
