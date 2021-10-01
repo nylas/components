@@ -660,7 +660,7 @@
             (cal) => cal !== calendar.account?.emailAddress,
           );
           if (!slot.available_calendars.length) {
-            // if it has no calendars avialble, it's busy
+            // if it has no calendars available, it's busy
             slot.availability = AvailabilityStatus.BUSY;
           } else if (
             slot.availability === AvailabilityStatus.FREE &&
@@ -680,7 +680,7 @@
   $: days = dayRange.map((timestamp: Date) => {
     let slots = checkOverbooked(
       generateDaySlots(timestamp, start_hour, end_hour),
-    ); // TODO: include other potentail post-all-slots-established checks, like overbooked, in a single secondary run here.
+    ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
     return {
       slots,
       epochs: generateEpochs(slots, partial_bookable_ratio),
