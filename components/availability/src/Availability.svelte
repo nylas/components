@@ -676,28 +676,64 @@
     slots.forEach((slot, index) => {
       filteredSlots[index].start_time = slot.start_time;
       filteredSlots[index].end_time = slot.end_time;
-      if (slot.availability === AvailabilityStatus.FREE) {
+      if (slot.availability !== AvailabilityStatus.BUSY) {
         if (
           index + 1 < slots.length &&
-          availableSlots[index + 1].availability === AvailabilityStatus.BUSY
+          availableSlots[index + 1].availability !== AvailabilityStatus.FREE
         ) {
-          for (let j = 0; j < busySlotNum; j++) {
-            if (index - j > 0) {
-              filteredSlots[index - j].available_calendars = [];
-              filteredSlots[index - j].availability = AvailabilityStatus.BUSY;
+          // accommodate allCalendars below along with partial
+          allCalendars.forEach((calendar) => {
+            for (let j = 0; j < busySlotNum; j++) {
+              if (index - j > 0) {
+                filteredSlots[index - j].available_calendars =
+                  slot.available_calendars.filter(
+                    (cal) => cal !== calendar.account?.emailAddress,
+                  );
+                if (!filteredSlots[index - j].available_calendars.length) {
+                  // if it has no calendars avialble, it's busy
+                  filteredSlots[index - j].availability =
+                    AvailabilityStatus.BUSY;
+                } else if (
+                  filteredSlots[index - j].availability ===
+                    AvailabilityStatus.FREE &&
+                  filteredSlots[index - j].available_calendars.length !==
+                    allCalendars.length
+                ) {
+                  // if it was previously free, but now lacks a calendar, it should be considered Partial.
+                  filteredSlots[index - j].availability =
+                    AvailabilityStatus.PARTIAL;
+                }
+              }
             }
-          }
+          });
         }
         if (
           index > 0 &&
-          availableSlots[index - 1].availability === AvailabilityStatus.BUSY
+          availableSlots[index - 1].availability !== AvailabilityStatus.FREE
         ) {
-          for (let j = 0; j < busySlotNum; j++) {
-            if (filteredSlots.length >= index + j) {
-              filteredSlots[index + j].available_calendars = [];
-              filteredSlots[index + j].availability = AvailabilityStatus.BUSY;
+          allCalendars.forEach((calendar) => {
+            for (let j = 0; j < busySlotNum; j++) {
+              if (filteredSlots.length >= index + j) {
+                filteredSlots[index + j].available_calendars =
+                  slot.available_calendars.filter(
+                    (cal) => cal !== calendar.account?.emailAddress,
+                  );
+                if (!filteredSlots[index + j].available_calendars.length) {
+                  // if it has no calendars avialble, it's busy
+                  filteredSlots[index + j].availability =
+                    AvailabilityStatus.BUSY;
+                } else if (
+                  filteredSlots[index + j].availability ===
+                    AvailabilityStatus.FREE &&
+                  filteredSlots[index + j].available_calendars.length !==
+                    allCalendars.length
+                ) {
+                  // if it was previously free, but now lacks a calendar, it should be considered Partial.
+                  slot.availability = AvailabilityStatus.PARTIAL;
+                }
+              }
             }
-          }
+          });
         }
       }
     });

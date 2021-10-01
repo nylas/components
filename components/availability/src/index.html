@@ -18,12 +18,12 @@
             availability: "busy",
             timeslots: [
               {
-                start_time: new Date(new Date().setHours(2, 0, 0, 0)),
+                start_time: new Date(new Date().setHours(3, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(6, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(6, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(12, 0, 0, 0)),
+                start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(15, 0, 0, 0)),
               },
             ],
             account: {
@@ -33,38 +33,37 @@
               avatarUrl: "",
             },
           },
-          // ,
-          // {
-          //   availability: "busy",
-          //   timeslots: [
-          //     {
-          //       start_time: new Date(new Date().setHours(0, 0, 0, 0)),
-          //       end_time: new Date(new Date().setHours(12, 0, 0, 0)),
-          //     },
-          //   ],
-          //   account: {
-          //     emailAddress: "thelonious@nylas.com",
-          //     firstName: "Thelonious",
-          //     lastName: "",
-          //     avatarUrl: "",
-          //   },
-          // },
-          // {
-          //   emailAddress: "booker@nylas.com",
-          //   availability: "free",
-          //   timeslots: [
-          //     {
-          //       start_time: new Date(new Date().setHours(16, 0, 0, 0)),
-          //       end_time: new Date(new Date().setHours(18, 0, 0, 0)),
-          //     },
-          //   ],
-          //   account: {
-          //     emailAddress: "booker@nylas.com",
-          //     firstName: "Bill",
-          //     lastName: "Ooker",
-          //     avatarUrl: "",
-          //   },
-          // },
+          {
+            availability: "busy",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+              },
+            ],
+            account: {
+              emailAddress: "thelonious@nylas.com",
+              firstName: "Thelonious",
+              lastName: "",
+              avatarUrl: "",
+            },
+          },
+          {
+            emailAddress: "booker@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(new Date().setHours(5, 15, 0, 0)),
+                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              },
+            ],
+            account: {
+              emailAddress: "booker@nylas.com",
+              firstName: "Bill",
+              lastName: "Ooker",
+              avatarUrl: "",
+            },
+          },
         ];
 
         component.calendars = calendars;
