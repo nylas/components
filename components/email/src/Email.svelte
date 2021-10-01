@@ -66,6 +66,7 @@
   export let show_expanded_email_view_onload: boolean;
   export let show_thread_actions: boolean;
 
+  let userEmail: string;
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
     manifest = ((await $ManifestStore[
@@ -75,6 +76,7 @@
     // Fetch Account
     if (id && !you.id && !emailManuallyPassed) {
       you = await fetchAccount({ component_id: query.component_id });
+      userEmail = you.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
         component_id: id,
@@ -87,7 +89,6 @@
       }
     }
   });
-
   let contacts: any = null;
   $: activeThreadContact =
     activeThread && contacts
@@ -1222,8 +1223,10 @@
                           {/if}
                           <div class="message-from">
                             <span class="name"
-                              >{message.from[0].name ||
-                                message.from[0].email}</span
+                              >{userEmail && message.from[0].email === userEmail
+                                ? "me"
+                                : message.from[0].name ||
+                                  message.from[0].email}</span
                             >
                             <!-- tooltip component -->
                             <nylas-tooltip
@@ -1238,8 +1241,9 @@
                         <div class="message-to">
                           {#each message.to as to, i}
                             <span>
-                              {#if to.name || to.email || you.email_address}
-                                to&colon;&nbsp;{to.email === you.email_address
+                              {#if to.name || to.email}
+                                to&colon;&nbsp;{userEmail &&
+                                to.email === userEmail
                                   ? "me"
                                   : to.name || to.email}
                                 {#if i !== message.to.length - 1}
@@ -1288,8 +1292,10 @@
                         {/if}
                         <div class="message-from">
                           <span class="name"
-                            >{message.from[0].name ||
-                              message.from[0].email}</span
+                            >{userEmail && message.from[0].email === userEmail
+                              ? "me"
+                              : message.from[0].name ||
+                                message.from[0].email}</span
                           >
                           <!-- tooltip component -->
                           <nylas-tooltip
@@ -1486,7 +1492,9 @@
                 {/if}
                 <div class="message-from">
                   <span class="name"
-                    >{message.from[0].name || message.from[0].email}</span
+                    >{userEmail && message.from[0].email === userEmail
+                      ? "me"
+                      : message.from[0].name || message.from[0].email}</span
                   >
                   <!-- tooltip component -->
                   <nylas-tooltip
@@ -1502,8 +1510,8 @@
               <div class="message-to">
                 {#each message.to as to, i}
                   <span>
-                    {#if to.name || to.email || you.email_address}
-                      to&colon;&nbsp;{to.email === you.email_address
+                    {#if to.name || to.email}
+                      to&colon;&nbsp;{userEmail && to.email === userEmail
                         ? "me"
                         : to.name || to.email}
                       {#if i !== message.to.length - 1}
