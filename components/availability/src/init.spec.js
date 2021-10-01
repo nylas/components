@@ -779,4 +779,45 @@ describe("availability component", () => {
         });
     });
   });
+
+  describe("Capacity", () => {
+    const timeSlot = {
+      start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+      end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+    };
+    const calendar = [
+      {
+        availability: "busy",
+        timeslots: [timeSlot],
+        account: {
+          emailAddress: "person@name.com",
+          firstName: "Jim",
+          lastName: "Person",
+          avatarUrl: "",
+        },
+      },
+    ];
+    it("should have busy for 1 event with capacity 1", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.capacity = 1;
+          component.calendars = calendar;
+          cy.get(".slot.busy").should("have.length", 12);
+        });
+    });
+    it("should have free for 1 event with capacity 2", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.capacity = 2;
+          calendar[0].timeslots.concat([timeSlot]);
+          expect(calendar[0].timeslots.length === 2);
+          component.calendars = calendar;
+          cy.get(".slot.busy").should("have.length", 0);
+        });
+    });
+  });
 });
