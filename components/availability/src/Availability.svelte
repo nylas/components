@@ -337,11 +337,17 @@
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
-            let availabilityExistsInSlot = calendar.timeslots.some(
-              (block) =>
-                time < timeMinute.offset(block.end_time, event_buffer) &&
-                timeMinute.offset(block.start_time, -event_buffer) < endTime,
-            );
+            let availabilityExistsInSlot = calendar.timeslots.some((block) => {
+              if (calendar.availability === AvailabilityStatus.FREE) {
+                // typical use case
+                return time < block.end_time && block.start_time < endTime;
+              } else if (calendar.availability === AvailabilityStatus.BUSY) {
+                return (
+                  time < timeMinute.offset(block.end_time, event_buffer) &&
+                  timeMinute.offset(block.start_time, -event_buffer) < endTime
+                );
+              }
+            });
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
