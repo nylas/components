@@ -667,56 +667,42 @@
   function filterBufferSlots(slots: SelectableSlot[]) {
     // Return slots if no buffer is added
     if (parseInt(event_buffer) === 0) return slots;
-
-    allCalendars.forEach((calendar) => {
-      console.log("slots:", slots); //slots in the day (all slots, 24 if 60 min, 48 if 30 min, 96 if 15 min)
-      let availableSlotsForCalendar = slots.filter((slot) =>
-        slot.available_calendars.includes(calendar.account.emailAddress),
-      );
-      console.log("calendar:", availableSlotsForCalendar); // slots with current user calendar (12 in the first test case with just Jim person)
-      let filteredSlotsForCalendar = deepCopy(availableSlotsForCalendar);
-      console.log("calendar2:", filteredSlotsForCalendar); // copy of slots with current user calendar (12 in the first test case with just Jim person)
-
-      availableSlotsForCalendar.forEach((slot, i) => {
-        if (slot.availability !== AvailabilityStatus.BUSY) {
-          //maybe FREE
-          // disable next blocks
-          if (
-            i > 0 &&
-            filteredSlotsForCalendar[i - 1].availability !==
-              AvailabilityStatus.FREE
-          ) {
-            // console.log("True: ", availableSlotsForCalendar[i-1]);
-            const busySlotNum = Math.ceil(event_buffer / slot_size);
-            for (let j = 0; j < busySlotNum; j++) {
-              availableSlotsForCalendar[i - j].available_calendars =
-                slot.available_calendars.filter(
-                  (cal) => cal !== calendar.account.emailAddress,
-                );
-              if (!filteredSlotsForCalendar[i - j].available_calendars.length) {
-                // if it has no calendars avialble, it's busy
-                // console.log(availableSlotsForCalendar, i);
-                availableSlotsForCalendar[i - j].availability =
-                  AvailabilityStatus.BUSY;
-              } else if (
-                filteredSlotsForCalendar[i - j].availability ===
-                  AvailabilityStatus.FREE &&
-                filteredSlotsForCalendar[i - j].available_calendars.length !==
-                  allCalendars.length
-              ) {
-                // if it was previously free, but now lacks a calendar, it should be considered Partial.
-                availableSlotsForCalendar[i - j].availability =
-                  AvailabilityStatus.PARTIAL;
-              }
+    console.log("slots", slots);
+    // A very foundational logic to achieve desired outcome in very specific conditions
+    // Have got to grow this to cover all the possible needs
+    const filteredSlots = deepCopy(slots);
+    const availableSlots = deepCopy(slots);
+    const busySlotNum = Math.ceil(event_buffer / slot_size);
+    slots.forEach((slot, index) => {
+      filteredSlots[index].start_time = slot.start_time;
+      filteredSlots[index].end_time = slot.end_time;
+      if (slot.availability === AvailabilityStatus.FREE) {
+        if (
+          index + 1 < slots.length &&
+          availableSlots[index + 1].availability === AvailabilityStatus.BUSY
+        ) {
+          for (let j = 0; j < busySlotNum; j++) {
+            if (index - j > 0) {
+              filteredSlots[index - j].available_calendars = [];
+              filteredSlots[index - j].availability = AvailabilityStatus.BUSY;
             }
           }
         }
-      });
-
-      // console.log(filteredSlotsForCalendar);
-      // console.log(availableSlotsForCalendar);
+        if (
+          index > 0 &&
+          availableSlots[index - 1].availability === AvailabilityStatus.BUSY
+        ) {
+          for (let j = 0; j < busySlotNum; j++) {
+            if (filteredSlots.length >= index + j) {
+              filteredSlots[index + j].available_calendars = [];
+              filteredSlots[index + j].availability = AvailabilityStatus.BUSY;
+            }
+          }
+        }
+      }
     });
-    return slots; //filteredSlots
+
+    return filteredSlots; //filteredSlots
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
