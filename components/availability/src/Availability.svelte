@@ -1134,7 +1134,6 @@
   // #endregion error
   // TODO: testing
   function hexLightened(H, lightness) {
-    console.log("H", H);
     // Convert hex to RGB first
     let r = 0,
       g = 0,
@@ -1168,16 +1167,12 @@
 
     if (h < 0) h += 360;
 
-    // return h;
-
     l = (cmax + cmin) / 2;
     s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
     s = +(s * 100).toFixed(1);
     l = +(l * 100).toFixed(1);
-    console.log("h", h, s, l);
-    // return [h,s,l];
 
-    return "hsl(" + h + "," + s + "%," + lightness + "%)";
+    return "hsl(" + h + "," + s / 2 + "%," + lightness + "%)";
   }
 </script>
 
