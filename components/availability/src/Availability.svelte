@@ -327,20 +327,20 @@
       new Date(new Date(timestamp).setHours(start_hour)),
     );
     const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
-    // console.log(parseInt(slot_size) + pre_event_buffer+post_event_buffer);
     return scaleTime()
       .domain([dayStart, dayEnd])
-      .ticks(timeMinute.every(slot_size) as TimeInterval) //every(parseInt(slot_size) + pre_event_buffer+post_event_buffer)
+      .ticks(timeMinute.every(slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
       .map((time: Date) => {
-        // startTime needs to be updated as well, because currently it is using 'time' which causes random overlap
-        const endTime = timeMinute.offset(time, slot_size); //(time, (parseInt(slot_size) + pre_event_buffer+post_event_buffer))
+        const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
             let availabilityExistsInSlot = calendar.timeslots.some(
-              (block) => time < block.end_time && block.start_time < endTime,
+              (block) =>
+                time < timeMinute.offset(block.end_time, event_buffer) &&
+                timeMinute.offset(block.start_time, -event_buffer) < endTime,
             );
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
@@ -546,9 +546,7 @@
 
   let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
-    let slots = filterBufferSlots(
-      generateDaySlots(timestamp, start_hour, end_hour),
-    );
+    let slots = generateDaySlots(timestamp, start_hour, end_hour);
     return {
       slots,
       epochs: generateEpochs(slots, partial_bookable_ratio),
@@ -629,116 +627,6 @@
       });
     }
     newCalendarTimeslotsForGivenEmails = freeBusyCalendars;
-  }
-
-  const deepCopy = (arr) => {
-    let copy = [];
-    arr.forEach((elem) => {
-      if (Array.isArray(elem)) {
-        copy.push(deepCopy(elem));
-      } else {
-        if (typeof elem === "object") {
-          copy.push(deepCopyObject(elem));
-        } else {
-          copy.push(elem);
-        }
-      }
-    });
-    return copy;
-  };
-
-  // Helper function to deal with Objects
-  const deepCopyObject = (obj) => {
-    let tempObj = {};
-    for (let [key, value] of Object.entries(obj)) {
-      if (Array.isArray(value)) {
-        tempObj[key] = deepCopy(value);
-      } else {
-        if (typeof value === "object") {
-          tempObj[key] = deepCopyObject(value);
-        } else {
-          tempObj[key] = value;
-        }
-      }
-    }
-    return tempObj;
-  };
-
-  function filterBufferSlots(slots: SelectableSlot[]) {
-    // Return slots if no buffer is added
-    if (parseInt(event_buffer) === 0) return slots;
-    console.log("slots", slots);
-    // A very foundational logic to achieve desired outcome in very specific conditions
-    // Have got to grow this to cover all the possible needs
-    const filteredSlots = deepCopy(slots);
-    const availableSlots = deepCopy(slots);
-    const busySlotNum = Math.ceil(event_buffer / slot_size);
-    slots.forEach((slot, index) => {
-      filteredSlots[index].start_time = slot.start_time;
-      filteredSlots[index].end_time = slot.end_time;
-      if (slot.availability !== AvailabilityStatus.BUSY) {
-        if (
-          index + 1 < slots.length &&
-          availableSlots[index + 1].availability !== AvailabilityStatus.FREE
-        ) {
-          // accommodate allCalendars below along with partial
-          allCalendars.forEach((calendar) => {
-            for (let j = 0; j < busySlotNum; j++) {
-              if (index - j > 0) {
-                filteredSlots[index - j].available_calendars =
-                  slot.available_calendars.filter(
-                    (cal) => cal !== calendar.account?.emailAddress,
-                  );
-                if (!filteredSlots[index - j].available_calendars.length) {
-                  // if it has no calendars avialble, it's busy
-                  filteredSlots[index - j].availability =
-                    AvailabilityStatus.BUSY;
-                } else if (
-                  filteredSlots[index - j].availability ===
-                    AvailabilityStatus.FREE &&
-                  filteredSlots[index - j].available_calendars.length !==
-                    allCalendars.length
-                ) {
-                  // if it was previously free, but now lacks a calendar, it should be considered Partial.
-                  filteredSlots[index - j].availability =
-                    AvailabilityStatus.PARTIAL;
-                }
-              }
-            }
-          });
-        }
-        if (
-          index > 0 &&
-          availableSlots[index - 1].availability !== AvailabilityStatus.FREE
-        ) {
-          allCalendars.forEach((calendar) => {
-            for (let j = 0; j < busySlotNum; j++) {
-              if (filteredSlots.length >= index + j) {
-                filteredSlots[index + j].available_calendars =
-                  slot.available_calendars.filter(
-                    (cal) => cal !== calendar.account?.emailAddress,
-                  );
-                if (!filteredSlots[index + j].available_calendars.length) {
-                  // if it has no calendars avialble, it's busy
-                  filteredSlots[index + j].availability =
-                    AvailabilityStatus.BUSY;
-                } else if (
-                  filteredSlots[index + j].availability ===
-                    AvailabilityStatus.FREE &&
-                  filteredSlots[index + j].available_calendars.length !==
-                    allCalendars.length
-                ) {
-                  // if it was previously free, but now lacks a calendar, it should be considered Partial.
-                  slot.availability = AvailabilityStatus.PARTIAL;
-                }
-              }
-            }
-          });
-        }
-      }
-    });
-
-    return filteredSlots; //filteredSlots
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
