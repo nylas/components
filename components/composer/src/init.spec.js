@@ -189,7 +189,7 @@ describe("Composer html", () => {
     });
 
     it("shows template", () => {
-      element.value.body = "";
+      element.value = { body: "" };
       element.template = `Hey what up!<br />
       <br />
       <br />
@@ -274,6 +274,19 @@ describe("Composer html", () => {
       });
       cy.wait(75);
       cy.contains("async@test.com");
+    });
+
+    it("Has a reactive value prop", () => {
+      cy.get("nylas-composer").should("exist").as("composer");
+      cy.get("header"); // wait for component to render
+
+      cy.get("@composer").then((el) => {
+        const component = el[0];
+        component.value = { body: "Test reactive prop" };
+        cy.get(".html-editor[contenteditable=true]")
+          .invoke("prop", "innerHTML")
+          .should("include", "Test reactive prop");
+      });
     });
   });
 
@@ -420,11 +433,13 @@ describe("Composer html", () => {
     });
 
     it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
-      element.value.body = `[hi] what up!<br />
+      element.value = {
+        body: `[hi] what up!<br />
       <br />
       <br />
       Thanks,
-      -Phil`;
+      -Phil`,
+      };
       cy.get("nylas-composer")
         .as("composer")
         .then((el) => {
@@ -446,11 +461,13 @@ describe("Composer html", () => {
     });
 
     it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
-      element.value.body = `[hi] what up!<br />
+      element.value = {
+        body: `[hi] what up!<br />
       <br />
       <br />
       Thanks,
-      -Phil`;
+      -Phil`,
+      };
       cy.get("nylas-composer")
         .as("composer")
         .then((el) => {
