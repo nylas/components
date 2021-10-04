@@ -9,6 +9,7 @@
     fetchContactsByQuery,
     fetchAccount,
     fetchCleanConversations,
+    ErrorStore,
   } from "@commons";
   import { afterUpdate } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
@@ -25,8 +26,10 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
+  import "@commons/components/ErrorMessage.svelte";
   import { getDate } from "@commons/methods/datetime";
   import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
+  f;
   import ToggleIcon from "./assets/toggle.svg";
   import SendIcon from "./assets/send.svg";
 
@@ -48,6 +51,7 @@
   $: conversationManuallyPassed = !!messages && messages.length > 0;
 
   onMount(async () => {
+    status = "loading";
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
@@ -57,6 +61,8 @@
       you = await fetchAccount({ component_id: query.component_id });
     }
   });
+
+  $: hasError = Object.keys($ErrorStore).length ? true : false;
 
   $: conversationMessages = conversationManuallyPassed
     ? messages
@@ -276,7 +282,11 @@
       main.scrollTo({ top: scrollHeight, left: 0, behavior: "smooth" });
     }
   };
-  afterUpdate(scrollToBottom);
+
+  afterUpdate(() => {
+    status = "loaded";
+    scrollToBottom();
+  });
 
   // #region mobile header view
   let headerExpanded = false;
@@ -299,13 +309,31 @@
 
   main {
     height: 100%;
+    min-height: 100vh;
     width: 100%;
     overflow: auto;
     position: relative;
     font-family: sans-serif;
     background-color: var(--grey-light);
   }
-
+  .loading {
+    @include progress-bar(44.5px, 0, var(--blue), var(--blue-lighter));
+    &::before,
+    &::after {
+      top: initial;
+      bottom: 0;
+    }
+  }
+  .error {
+    @include progress-bar(44.5px, 0, var(--red), var(--red));
+    &::before,
+    &::after {
+      animation: none;
+      bottom: 0;
+      top: initial;
+      width: 100%;
+    }
+  }
   header {
     display: flex;
     background: white;
@@ -344,13 +372,11 @@
       }
     }
   }
-
   .messages {
     display: grid;
     gap: 1rem;
     padding: 1rem;
-    padding-top: calc(1rem + 15px + 15px + 15px);
-    padding-bottom: calc(25px + 12px + 12px);
+    padding: 61px 0 49px 0;
     .message {
       max-width: min(
         400px,
@@ -513,10 +539,18 @@
 
 <nylas-error {id} />
 <main bind:this={main}>
+  {#if hasError}
+    <nylas-message-error error_message={$ErrorStore[id].message} />
+  {/if}
   {#await conversation}
-    Loading Component...
+    <div class="loading" />
   {:then _}
-    <header class="mobile" class:expanded={headerExpanded}>
+    <header
+      class="mobile"
+      class:loading={!!(status === "loading")}
+      class:error={hasError}
+      class:expanded={headerExpanded}
+    >
       {#if reply.to.length}
         <span>to: {reply.to[0].email}</span>
       {/if}
@@ -538,7 +572,11 @@
         {/each}
       {/if}
     </header>
-    <header class="tablet">
+    <header
+      class="tablet"
+      class:error={hasError}
+      class:loading={!!(status === "loading")}
+    >
       {#if reply.to.length}
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
@@ -546,7 +584,6 @@
         <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
       {/if}
     </header>
-    {#if status === "loading"}Loading Messages...{/if}
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
       {#each conversationMessages as message, i}
         {#await message.from[0] then from}
@@ -635,5 +672,7 @@
         </form>
       </div>
     {/if}
+  {:catch error}
+    <nylas-message-error error_message={error.message} />
   {/await}
 </main>
