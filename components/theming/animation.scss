@@ -21,3 +21,38 @@
     animation: lds-dual-ring 1.2s linear infinite;
   }
 }
+
+/** progress bar loading animation **/
+@mixin progress-bar(
+  $topPosition,
+  $leftPosition,
+  $backgroundColor,
+  $progressBarColor
+) {
+  @keyframes progress {
+    0% {
+      width: 0;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+  &::before {
+    background-color: $backgroundColor;
+  }
+  &::before,
+  &::after {
+    animation: progress 2s ease-in-out infinite;
+    content: "";
+    display: block;
+    height: 4px;
+    left: $leftPosition;
+    position: absolute;
+    top: $topPosition;
+    width: 100%;
+    z-index: -1;
+  }
+  &::after {
+    background-color: var(--blue-lighter);
+  }
+}
