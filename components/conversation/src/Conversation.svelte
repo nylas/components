@@ -29,6 +29,7 @@
   import "@commons/components/ErrorMessage.svelte";
   import { getDate } from "@commons/methods/datetime";
   import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
+  f;
   import ToggleIcon from "./assets/toggle.svg";
   import SendIcon from "./assets/send.svg";
 
@@ -50,6 +51,7 @@
   $: conversationManuallyPassed = !!messages && messages.length > 0;
 
   onMount(async () => {
+    status = "loading";
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
@@ -282,7 +284,6 @@
   };
 
   afterUpdate(scrollToBottom);
-
   // #region mobile header view
   let headerExpanded = false;
   // #endregion mobile header view
