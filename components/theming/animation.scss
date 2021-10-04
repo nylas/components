@@ -37,12 +37,16 @@
       width: 100%;
     }
   }
+  &::after {
+    background-color: $progressBarColor;
+    z-index: -1;
+  }
   &::before {
+    animation: progress 2s ease-in-out infinite;
     background-color: $backgroundColor;
   }
   &::before,
   &::after {
-    animation: progress 2s ease-in-out infinite;
     content: "";
     display: block;
     height: 4px;
@@ -50,9 +54,5 @@
     position: absolute;
     top: $topPosition;
     width: 100%;
-    z-index: -1;
-  }
-  &::after {
-    background-color: var(--blue-lighter);
   }
 }
