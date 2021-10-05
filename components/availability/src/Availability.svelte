@@ -97,6 +97,7 @@
             })),
         );
       }
+
       $AvailabilityStore[JSON.stringify(availabilityQuery)] =
         $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
           (availability) => {
@@ -128,7 +129,7 @@
   let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
   let editorManifest: Partial<EditorManifest> = {};
-  let loading = true;
+  let loading: boolean;
 
   $: calendarID = "";
   onMount(async () => {
