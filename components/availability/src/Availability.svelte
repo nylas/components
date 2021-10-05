@@ -63,6 +63,7 @@
   export let free_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
+  export let event_buffer: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -234,6 +235,11 @@
       view_as,
       "schedule",
     );
+    event_buffer = getPropertyValue(
+      internalProps.event_buffer || editorManifest.event_buffer,
+      event_buffer,
+      0,
+    );
   }
 
   $: {
@@ -331,9 +337,17 @@
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
-            let availabilityExistsInSlot = calendar.timeslots.some(
-              (block) => time < block.end_time && block.start_time < endTime,
-            );
+            let availabilityExistsInSlot = calendar.timeslots.some((block) => {
+              if (calendar.availability === AvailabilityStatus.FREE) {
+                // typical use case
+                return time < block.end_time && block.start_time < endTime;
+              } else if (calendar.availability === AvailabilityStatus.BUSY) {
+                return (
+                  time < timeMinute.offset(block.end_time, event_buffer) &&
+                  timeMinute.offset(block.start_time, -event_buffer) < endTime
+                );
+              }
+            });
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");

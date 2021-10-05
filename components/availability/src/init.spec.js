@@ -747,4 +747,36 @@ describe("availability component", () => {
         });
     });
   });
+  describe("Event Buffer", () => {
+    it("With 0 min buffer time", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.event_buffer = 0;
+          cy.get(".slot.busy").should("have.length", 5);
+          cy.get(".slot.free").should("have.length", 4);
+        });
+    });
+    it("Adds 15 min buffer time", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.event_buffer = 15;
+          cy.get(".slot.busy").should("have.length", 6);
+          cy.get(".slot.free").should("have.length", 3);
+        });
+    });
+    it("Adds 30 min buffer time", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.event_buffer = 30;
+          cy.get(".slot.busy").should("have.length", 7);
+          cy.get(".slot.free").should("have.length", 2);
+        });
+    });
+  });
 });
