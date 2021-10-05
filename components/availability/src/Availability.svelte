@@ -33,6 +33,7 @@
     SelectableSlot,
     AvailabilityQuery,
     CalendarAccount,
+    AvailabilityRule,
   } from "@commons/types/Availability";
   import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import "@commons/components/ContactImage/ContactImage.svelte";
@@ -71,7 +72,7 @@
   export let capacity: number;
   export let show_header: boolean;
   export let date_format: "weekday" | "date" | "full" | "none";
-  export let open_hours: any[]; // TODO
+  export let open_hours: AvailabilityRule[];
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -441,36 +442,34 @@
         // (Mark the slot busy if it falls outside the open_hours)
         if (open_hours.length) {
           if (availability !== AvailabilityStatus.BUSY) {
-            let openHoursAppliedToAllDates = !open_hours.some(
-              (rule) => rule.startWeekday !== -1,
-            );
             let dayRelevantRules = [];
-            if (openHoursAppliedToAllDates) {
-              dayRelevantRules = open_hours;
-            } else {
-              dayRelevantRules = open_hours.filter(
-                (rule) => rule.startWeekday === time.getDay(),
-              );
-            }
+            dayRelevantRules = open_hours.filter(
+              (rule) =>
+                !rule.hasOwnProperty("startWeekday") ||
+                rule.startWeekday === time.getDay() ||
+                rule.endWeekday === time.getDay(),
+            );
             let slotExistsInOpenHours = dayRelevantRules.some((rule, iter) => {
-              let ruleStartAppliedAsDate = new Date(timestamp);
-              ruleStartAppliedAsDate.setHours(rule.startHour);
-              ruleStartAppliedAsDate.setMinutes(rule.startMinute);
+              let ruleStartAppliedDate = rule.hasOwnProperty("startWeekday")
+                ? timeDay.offset(time, rule.startWeekday - time.getDay())
+                : new Date(time);
+              ruleStartAppliedDate.setHours(rule.startHour);
+              ruleStartAppliedDate.setMinutes(rule.startMinute);
 
-              let ruleEndAppliedAsDate = new Date(timestamp);
-              ruleEndAppliedAsDate.setHours(rule.endHour);
-              ruleEndAppliedAsDate.setMinutes(rule.endMinute);
+              let ruleEndAppliedDate = rule.hasOwnProperty("startWeekday")
+                ? timeDay.offset(time, rule.endWeekday - time.getDay())
+                : new Date(time);
+              ruleEndAppliedDate.setHours(rule.endHour);
+              ruleEndAppliedDate.setMinutes(rule.endMinute);
 
               return (
-                time >= ruleStartAppliedAsDate &&
-                endTime <= ruleEndAppliedAsDate
+                time >= ruleStartAppliedDate && endTime <= ruleEndAppliedDate
               );
             });
             if (!slotExistsInOpenHours) {
               availability = AvailabilityStatus.BUSY;
               freeCalendars.length = 0;
             }
-            console.log({ open_hours }, time, availability);
           }
         }
 

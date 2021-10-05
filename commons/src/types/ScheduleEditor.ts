@@ -1,5 +1,6 @@
 import type { Manifest as NylasManifest } from "@commons/types/Nylas";
 import type { NotificationMode } from "@commons/enums/Scheduler";
+import type { AvailabilityRule } from "@commons/types/Availability";
 
 export interface Manifest extends NylasManifest {
   event_title?: string;
@@ -29,5 +30,5 @@ export interface Manifest extends NylasManifest {
   recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
   capacity: number;
   date_format: "full" | "weekday" | "date" | "none";
-  availabilities?: any[]; // TODO
+  open_hours?: AvailabilityRule[];
 }

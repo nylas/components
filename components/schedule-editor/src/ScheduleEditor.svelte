@@ -13,7 +13,7 @@
   import { NotificationMode } from "@commons/enums/Scheduler";
   // import "@nylas/components-availability";
   import "../../availability";
-  import type { TimeSlot } from "@commonstypes/Availability";
+  import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -42,7 +42,7 @@
   export let recurrence: "none" | "mandated" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
   export let capacity: number;
-  export let availabilities: any[];
+  export let open_hours: AvailabilityRule[];
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -156,19 +156,13 @@
       ["none"],
     );
     capacity = getPropertyValue(internalProps.capacity, capacity, 1);
-    availabilities = getPropertyValue(
-      internalProps.availabilities,
-      availabilities,
-      [],
-    );
+    open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
   }
 
   // Manifest properties requiring further manipulation:
   let emailIDs: string = "";
   let startDate: string = "0";
   let recurrenceCadence: string[] = [];
-
-  let manifestProperties: { [key: string]: any }; // allows adding keys later
 
   let manifestProperties: { [key: string]: any }; // allows adding keys later
 
@@ -210,7 +204,7 @@
   }
 
   $: {
-    manifestProperties.availabilities = availabilities;
+    manifestProperties.open_hours = open_hours;
   }
 
   $: {
@@ -231,7 +225,7 @@
   let allow_weekends: boolean = false;
 
   function availabilityChosen(event) {
-    availabilities = event.detail.timeSlots.map((slot: TimeSlot) => {
+    open_hours = event.detail.timeSlots.map((slot: TimeSlot) => {
       let { start_time, end_time } = slot;
       return {
         startWeekday:
@@ -245,8 +239,6 @@
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
     });
-
-    // manifestProperties.availabilities = availabilities;
   }
 
   function niceDate(block) {
@@ -677,7 +669,7 @@
       />
     </div>
     <ul class="availability">
-      {#each availabilities as availability}
+      {#each open_hours as availability}
         <li>
           <span class="date">
             {niceDate(availability)}

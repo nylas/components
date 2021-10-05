@@ -33,6 +33,16 @@ export interface Manifest extends NylasManifest {
   open_hours: any[]; // TODO
 }
 
+export interface AvailabilityRule {
+  startWeekday?: number;
+  startHour: number;
+  startMinute: number;
+  endWeekday?: number;
+  endHour: number;
+  endMinute: number;
+  timeZone?: string;
+}
+
 export interface Calendar {
   availability: AvailabilityStatus.FREE | AvailabilityStatus.BUSY;
   timeslots: TimeSlot[];
