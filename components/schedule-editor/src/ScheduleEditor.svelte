@@ -9,9 +9,11 @@
     getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
+  import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
   // import "@nylas/components-availability";
   import "../../availability";
+  import type { TimeSlot } from "@commonstypes/Availability";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -40,6 +42,7 @@
   export let recurrence: "none" | "mandated" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
   export let capacity: number;
+  export let availabilities: any[];
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -59,6 +62,7 @@
     ) as Partial<Manifest>;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
+      manifestProperties = { ...manifestProperties, ...rebuiltProps };
     }
   }
 
@@ -85,8 +89,8 @@
     );
     view_as = getPropertyValue(internalProps.view_as, view_as, "schedule");
     show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
-    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
-    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
+    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 9);
+    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 17);
     slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
     start_date = getPropertyValue(
       internalProps.start_date,
@@ -152,12 +156,19 @@
       ["none"],
     );
     capacity = getPropertyValue(internalProps.capacity, capacity, 1);
+    availabilities = getPropertyValue(
+      internalProps.availabilities,
+      availabilities,
+      [],
+    );
   }
 
   // Manifest properties requiring further manipulation:
   let emailIDs: string = "";
   let startDate: string = "0";
   let recurrenceCadence: string[] = [];
+
+  let manifestProperties: { [key: string]: any }; // allows adding keys later
 
   let manifestProperties: { [key: string]: any }; // allows adding keys later
 
@@ -170,10 +181,8 @@
     start_hour,
     end_hour,
     slot_size,
-    start_date: new Date(startDate),
     dates_to_show,
     show_ticks,
-    email_ids: parseStringToArray(emailIDs),
     allow_booking,
     max_bookable_slots,
     partial_bookable_ratio,
@@ -192,7 +201,22 @@
     manifestProperties.recurrence_cadence = recurrenceCadence;
   }
 
-  $: console.table(manifestProperties);
+  $: {
+    manifestProperties.email_ids = parseStringToArray(emailIDs);
+  }
+
+  $: {
+    manifestProperties.start_date = new Date(startDate);
+  }
+
+  $: {
+    manifestProperties.availabilities = availabilities;
+  }
+
+  $: {
+    console.clear();
+    console.table(manifestProperties);
+  }
   // #endregion mount and prop initialization
 
   function saveProperties() {
@@ -205,6 +229,59 @@
   // #region unpersisted variables
   let customize_weekdays: boolean = false;
   let allow_weekends: boolean = false;
+
+  function availabilityChosen(event) {
+    availabilities = event.detail.timeSlots.map((slot: TimeSlot) => {
+      let { start_time, end_time } = slot;
+      return {
+        startWeekday:
+          customize_weekdays || allow_weekends ? start_time.getDay() : -1,
+        startHour: start_time.getHours(),
+        startMinute: start_time.getMinutes(),
+        endWeekday:
+          customize_weekdays || allow_weekends ? end_time.getDay() : -1,
+        endHour: end_time.getHours(),
+        endMinute: end_time.getMinutes(),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+    });
+
+    // manifestProperties.availabilities = availabilities;
+  }
+
+  function niceDate(block) {
+    let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    let startMoment = new Date(
+      null,
+      null,
+      null,
+      block.startHour,
+      block.startMinute,
+    ).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    let endMoment = new Date(
+      null,
+      null,
+      null,
+      block.endHour,
+      block.endMinute,
+    ).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    let weekday = weekdays[block.startWeekday];
+    if (customize_weekdays || allow_weekends) {
+      return `${weekday}: ${startMoment} - ${endMoment}`;
+    } else {
+      return `${startMoment} - ${endMoment}`;
+    }
+  }
   // #endregion unpersisted variables
 </script>
 
@@ -587,13 +664,27 @@
         max_bookable_slots={Infinity}
         show_as_week={customize_weekdays || allow_weekends}
         show_weekends={allow_weekends}
+        start_hour={manifestProperties.start_hour}
+        end_hour={manifestProperties.end_hour}
         allow_date_change={false}
         partial_bookable_ratio="0"
         show_header={false}
+        date_format={customize_weekdays || allow_weekends ? "weekday" : "none"}
         busy_color="#000"
         selected_color="#095"
+        slot_size="15"
+        on:timeSlotChosen={availabilityChosen}
       />
     </div>
+    <ul class="availability">
+      {#each availabilities as availability}
+        <li>
+          <span class="date">
+            {niceDate(availability)}
+          </span>
+        </li>
+      {/each}
+    </ul>
   </div>
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}

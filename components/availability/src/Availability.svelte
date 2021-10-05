@@ -70,6 +70,7 @@
   export let event_buffer: number;
   export let capacity: number;
   export let show_header: boolean;
+  export let date_format: "weekday" | "date" | "full" | "none";
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -260,6 +261,11 @@
       internalProps.show_header,
       show_header,
       true,
+    );
+    date_format = getPropertyValue(
+      internalProps.date_format,
+      date_format,
+      "full",
     );
   }
   $: {
@@ -615,7 +621,14 @@
       return slotList;
     }, [] as SelectableSlot[]);
 
-  $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+  let lastDispatchedSlots: SelectableSlot[];
+  $: {
+    // Only dispatch if there's a diff
+    if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
+      dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+      lastDispatchedSlots = sortedSlots;
+    }
+  }
 
   // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
   function overlap(events: TimeSlot[], slot: TimeSlot) {
@@ -1158,24 +1171,8 @@
       $headerHeight: 0px;
       grid-template-rows: auto;
 
-      .ticks {
-        height: 100%;
-        padding-top: 0;
-      }
-
       & > header {
         display: none;
-      }
-      .day {
-        grid-template-rows: auto;
-        & > header {
-          display: none;
-        }
-
-        .epochs {
-          top: 0;
-          height: 100%;
-        }
       }
     }
 
@@ -1435,6 +1432,12 @@
             margin-right: 1px;
           }
 
+          &.hovering {
+            margin-left: 9px;
+            margin-right: 1px;
+            z-index: 3;
+          }
+
           &.selected + .selected,
           &.pending + .pending {
             z-index: 2;
@@ -1464,6 +1467,11 @@
 
           &.pending .selected-heading {
             width: auto;
+          }
+          &.hovering:not(.selected) .selected-heading {
+            color: var(--selected-color);
+            text-shadow: none;
+            top: 0;
           }
         }
       }
@@ -1710,16 +1718,20 @@
       <div class="day">
         <header>
           <h2>
-            <span class="date">
-              {new Date(day.timestamp).toLocaleString("default", {
-                day: "numeric",
-              })}
-            </span>
-            <span>
-              {new Date(day.timestamp).toLocaleString("default", {
-                weekday: "short",
-              })}
-            </span>
+            {#if date_format === "date" || date_format === "full"}
+              <span class="date">
+                {new Date(day.timestamp).toLocaleString("default", {
+                  day: "numeric",
+                })}
+              </span>
+            {/if}
+            {#if date_format === "weekday" || date_format === "full"}
+              <span>
+                {new Date(day.timestamp).toLocaleString("default", {
+                  weekday: "short",
+                })}
+              </span>
+            {/if}
           </h2>
         </header>
         {#if view_as === "schedule"}
@@ -1758,6 +1770,7 @@
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
+                class:hovering={slot.hovering}
                 data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
                 on:mousedown={() => {
@@ -1769,9 +1782,16 @@
                   }
                   startDrag(slot, day);
                 }}
-                on:mouseenter={() => {
+                on:mouseenter={(e) => {
                   addToDrag(slot, day);
+                  if (
+                    !mouseIsDown &&
+                    slot.selectionStatus !== SelectionStatus.SELECTED
+                  ) {
+                    slot.hovering = true;
+                  }
                 }}
+                on:mouseleave={() => (slot.hovering = false)}
                 on:mouseup={(e) => {
                   if (mouseIsDown) {
                     if (document.activeElement instanceof HTMLElement) {
@@ -1791,6 +1811,15 @@
                   <span class="selected-heading"
                     >{getBlockTimes(slot, day)}</span
                   >
+                {/if}
+                {#if slot.hovering}
+                  <span class="selected-heading">
+                    {slot.start_time.toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </span>
                 {/if}
               </button>
             {/each}

@@ -124,6 +124,14 @@
           });
 
         document
+          .querySelectorAll('input[name="date-format"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.date_format = event.target.value;
+            });
+          });
+
+        document
           .querySelectorAll('input[id="partial_bookable_ratio"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
@@ -436,6 +444,22 @@
         <label>
           <input type="radio" name="view-as" value="list" />
           List
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Date Format</legend>
+        <label>
+          <input checked type="radio" name="date-format" value="full" />
+          Full
+        </label>
+        <label>
+          <input type="radio" name="date-format" value="weekday" />
+          Weekday Only
+        </label>
+        <label>
+          <input type="radio" name="date-format" value="date" />
+          Date Only
         </label>
       </fieldset>
     </aside>

@@ -28,4 +28,6 @@ export interface Manifest extends NylasManifest {
   recurrence: "none" | "mandated" | "optional";
   recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
   capacity: number;
+  date_format: "full" | "weekday" | "date" | "none";
+  availabilities?: any[]; // TODO
 }
