@@ -359,7 +359,10 @@
                 : calendar.timeslots;
             const slotAvailability = overlap([...timeslots], slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
-              if (slotAvailability.concurrentEvents < capacity) {
+              if (
+                capacity >= 1 &&
+                slotAvailability.concurrentEvents < capacity
+              ) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -1108,11 +1111,11 @@
       } catch (error) {
         console.error(error);
       }
-    } else if (capacity <= 0) {
+    } else if (capacity < 1) {
       try {
         handleError(id, {
           name: "IncompatibleProperties",
-          message: "`capacity` must be larger than 0.",
+          message: "`capacity` must be an integer of 1 or more",
         });
       } catch (error) {
         console.error(error);

@@ -128,11 +128,11 @@
           });
         });
 
-        document.querySelector('input[name="capacity"]').forEach((elem) => {
-          elem.addEventListener("input", function (event) {
+        document
+          .querySelector('input[name="capacity"]')
+          .addEventListener("input", (event) => {
             component.capacity = JSON.parse(event.target.value);
           });
-        });
 
         document.querySelectorAll('input[name="week-view"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
