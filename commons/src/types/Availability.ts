@@ -30,6 +30,7 @@ export interface Manifest extends NylasManifest {
   capacity: number;
   date_format: "full" | "weekday" | "date" | "none";
   show_header: boolean;
+  open_hours: any[]; // TODO
 }
 
 export interface Calendar {

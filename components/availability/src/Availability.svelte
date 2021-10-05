@@ -71,6 +71,7 @@
   export let capacity: number;
   export let show_header: boolean;
   export let date_format: "weekday" | "date" | "full" | "none";
+  export let open_hours: any[]; // TODO
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -267,6 +268,7 @@
       date_format,
       "full",
     );
+    open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
   }
   $: {
     if (
@@ -357,7 +359,7 @@
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
-      .map((time: Date) => {
+      .map((time: Date, slotNumber: number) => {
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
@@ -408,7 +410,8 @@
           }
         }
 
-        // Do not allow users to book over slots relatively full events
+        // If availability is partial (not 100% of calendars), and that ratio is less than partial_bookable_ratio,
+        // mark the slot as busy
         if (
           availability === AvailabilityStatus.PARTIAL &&
           freeCalendars.length < allCalendars.length * partial_bookable_ratio
@@ -424,13 +427,50 @@
           availability = AvailabilityStatus.PARTIAL;
         }
 
-        // Do not allow users to book over slots that are missing required participants
+        // If availability is partial, but a required participant is unavailble, the slot becomes Busy
         if (
           availability === AvailabilityStatus.PARTIAL &&
           required_participants.length
         ) {
           if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
+          }
+        }
+
+        // if the "open_hours" property has rules, adhere to them above any other event-based free/busy statuses
+        // (Mark the slot busy if it falls outside the open_hours)
+        if (open_hours.length) {
+          if (availability !== AvailabilityStatus.BUSY) {
+            let openHoursAppliedToAllDates = !open_hours.some(
+              (rule) => rule.startWeekday !== -1,
+            );
+            let dayRelevantRules = [];
+            if (openHoursAppliedToAllDates) {
+              dayRelevantRules = open_hours;
+            } else {
+              dayRelevantRules = open_hours.filter(
+                (rule) => rule.startWeekday === time.getDay(),
+              );
+            }
+            let slotExistsInOpenHours = dayRelevantRules.some((rule, iter) => {
+              let ruleStartAppliedAsDate = new Date(timestamp);
+              ruleStartAppliedAsDate.setHours(rule.startHour);
+              ruleStartAppliedAsDate.setMinutes(rule.startMinute);
+
+              let ruleEndAppliedAsDate = new Date(timestamp);
+              ruleEndAppliedAsDate.setHours(rule.endHour);
+              ruleEndAppliedAsDate.setMinutes(rule.endMinute);
+
+              return (
+                time >= ruleStartAppliedAsDate &&
+                endTime <= ruleEndAppliedAsDate
+              );
+            });
+            if (!slotExistsInOpenHours) {
+              availability = AvailabilityStatus.BUSY;
+              freeCalendars.length = 0;
+            }
+            console.log({ open_hours }, time, availability);
           }
         }
 

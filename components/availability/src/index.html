@@ -185,6 +185,71 @@
             component.view_as = event.target.value;
           });
         });
+
+        document
+          .querySelectorAll('input[name="block-lunch"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              console.log("ya", event.target.value);
+              if (event.target.value === "none") {
+                component.open_hours = [];
+              } else if (event.target.value === "everyday") {
+                component.open_hours = [
+                  {
+                    startWeekday: -1,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: -1,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                ];
+              } else if ((event.target.value = "weekdays")) {
+                component.open_hours = [
+                  {
+                    startWeekday: 1,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 1,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 2,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 2,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                ];
+              }
+            });
+          });
       });
     </script>
     <style>
@@ -202,6 +267,8 @@
         background: #333;
         padding: 0.5rem;
         color: white;
+        max-height: 100%;
+        overflow: auto;
       }
 
       aside label {
@@ -460,6 +527,22 @@
         <label>
           <input type="radio" name="date-format" value="date" />
           Date Only
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Block off lunch hour</legend>
+        <label>
+          <input checked type="radio" name="block-lunch" value="none" />
+          Don't block
+        </label>
+        <label>
+          <input type="radio" name="block-lunch" value="weekdays" />
+          Block on all weekdays
+        </label>
+        <label>
+          <input type="radio" name="block-lunch" value="everyday" />
+          Block every day
         </label>
       </fieldset>
     </aside>
