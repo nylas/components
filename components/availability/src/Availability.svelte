@@ -6,6 +6,7 @@
     AvailabilityStore,
     CalendarStore,
   } from "../../../commons/src";
+  import { handleError } from "@commons/methods/api";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import {
@@ -358,7 +359,7 @@
                 : calendar.timeslots;
             const slotAvailability = overlap([...timeslots], slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
-              if (slotAvailability.num < capacity) {
+              if (slotAvailability.concurrentEvents < capacity) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -611,11 +612,11 @@
         if (overlap) {
           result.overlap = true;
           // store the amount of overlap
-          result.num++;
+          result.concurrentEvents++;
         }
         return result;
       },
-      { overlap: false, num: 0 },
+      { overlap: false, concurrentEvents: 0 },
     );
   }
   // #endregion timeSlot selection
@@ -1094,6 +1095,20 @@
   }
 
   //#endregion dragging
+
+  $: {
+    if (id.length && email_ids.length && capacity > 1) {
+      try {
+        handleError(id, {
+          name: "IncompatibleProperties",
+          message:
+            "Setting `capacity` currently does not work with `email_ids`. Please use `calendars` to use `capacity`.",
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
 </script>
 
 <style lang="scss">

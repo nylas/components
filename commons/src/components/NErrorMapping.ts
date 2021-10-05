@@ -9,41 +9,45 @@ export type NErrorType = [
   "RequestNotAllowed",
   "UserInputError",
   "MiddlewareError",
+  "IncompatibleProperties",
 ];
 
 type INErrorExplanationMap = {
   [Key in NErrorType[number]]: () => Explanation;
 };
 
-export const NErrorExplanationMap: INErrorExplanationMap =
-  new Proxy<INErrorExplanationMap>(
-    {
-      DatabaseError: () => ({
-        title: "",
-        subtitle: "",
-      }),
-      HostDomainNotAllowedError: () => ({
-        title: `
+export const NErrorExplanationMap: INErrorExplanationMap = new Proxy<INErrorExplanationMap>(
+  {
+    DatabaseError: () => ({
+      title: "",
+      subtitle: "",
+    }),
+    HostDomainNotAllowedError: () => ({
+      title: `
         You are trying to access this component from <code>${window.location.hostname}</code>. 
         The component's settings do not allow access from this domain.
       `,
-        subtitle: `The list of allowed domains can be modified in your <a href="https://dashboard.nylas.com">Dashboard</a>.`,
-      }),
-      RequestNotAllowed: () => ({
-        title: "",
-        subtitle: "",
-      }),
-      UserInputError: () => ({
-        title: "",
-        subtitle: "",
-      }),
-      MiddlewareError: () => ({
-        title: "",
-        subtitle: "",
-      }),
-    } as INErrorExplanationMap,
-    {
-      get: (target, prop: keyof INErrorExplanationMap) =>
-        target[prop] || target.MiddlewareError, // fall back to middleware error
-    },
-  );
+      subtitle: `The list of allowed domains can be modified in your <a href="https://dashboard.nylas.com">Dashboard</a>.`,
+    }),
+    RequestNotAllowed: () => ({
+      title: "",
+      subtitle: "",
+    }),
+    UserInputError: () => ({
+      title: "",
+      subtitle: "",
+    }),
+    MiddlewareError: () => ({
+      title: "",
+      subtitle: "",
+    }),
+    IncompatibleProperties: () => ({
+      title: "Your component properties do not work with each other.",
+      subtitle: "",
+    }),
+  } as INErrorExplanationMap,
+  {
+    get: (target, prop: keyof INErrorExplanationMap) =>
+      target[prop] || target.MiddlewareError, // fall back to middleware error
+  },
+);
