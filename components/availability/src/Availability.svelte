@@ -605,7 +605,7 @@
   function overlap(events: TimeSlot[], slot: TimeSlot) {
     return events.reduce(
       (result, current) => {
-        var overlap =
+        const overlap =
           slot.start_time < current.end_time &&
           current.start_time < slot.end_time;
 
@@ -1096,8 +1096,9 @@
 
   //#endregion dragging
 
+  // #region error
   $: {
-    if (id.length && email_ids.length && capacity > 1) {
+    if (id && email_ids.length && capacity) {
       try {
         handleError(id, {
           name: "IncompatibleProperties",
@@ -1107,8 +1108,18 @@
       } catch (error) {
         console.error(error);
       }
+    } else if (capacity <= 0) {
+      try {
+        handleError(id, {
+          name: "IncompatibleProperties",
+          message: "`capacity` must be larger than 0.",
+        });
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
+  // #endregion error
 </script>
 
 <style lang="scss">

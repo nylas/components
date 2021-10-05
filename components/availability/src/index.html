@@ -128,7 +128,7 @@
           });
         });
 
-        document.querySelectorAll('input[name="capacity"]').forEach((elem) => {
+        document.querySelector('input[name="capacity"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
             component.capacity = JSON.parse(event.target.value);
           });
