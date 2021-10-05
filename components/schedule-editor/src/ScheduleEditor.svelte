@@ -11,6 +11,7 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
+  // TODO: switch to a non-relative path when new version of availability is deployed
   // import "@nylas/components-availability";
   import "../../availability";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
@@ -241,12 +242,12 @@
     });
   }
 
-  function niceDate(block) {
-    let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // niceDate: shows date rules in a nice string format; selectively includes weekday if customize_weekdays / allow_weekends are set
+  function niceDate(block: AvailabilityRule) {
     let startMoment = new Date(
-      null,
-      null,
-      null,
+      0,
+      0,
+      0,
       block.startHour,
       block.startMinute,
     ).toLocaleTimeString([], {
@@ -256,9 +257,9 @@
     });
 
     let endMoment = new Date(
-      null,
-      null,
-      null,
+      0,
+      0,
+      0,
       block.endHour,
       block.endMinute,
     ).toLocaleTimeString([], {
@@ -267,8 +268,8 @@
       hour12: true,
     });
 
-    let weekday = weekdays[block.startWeekday];
-    if (customize_weekdays || allow_weekends) {
+    if ((customize_weekdays || allow_weekends) && block.startWeekday) {
+      let weekday = weekdays[block.startWeekday];
       return `${weekday}: ${startMoment} - ${endMoment}`;
     } else {
       return `${startMoment} - ${endMoment}`;
@@ -281,10 +282,6 @@
   .availability-container {
     overflow: auto;
     height: 500px;
-    // nylas-availability {
-    //   display: block;
-    //   height: 1000px;
-    // }
   }
 </style>
 

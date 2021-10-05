@@ -360,7 +360,7 @@
       .domain([dayStart, dayEnd])
       .ticks(timeMinute.every(slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
-      .map((time: Date, slotNumber: number) => {
+      .map((time: Date) => {
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
@@ -451,13 +451,19 @@
             );
             let slotExistsInOpenHours = dayRelevantRules.some((rule, iter) => {
               let ruleStartAppliedDate = rule.hasOwnProperty("startWeekday")
-                ? timeDay.offset(time, rule.startWeekday - time.getDay())
+                ? timeDay.offset(
+                    time,
+                    (rule.startWeekday as number) - time.getDay(),
+                  )
                 : new Date(time);
               ruleStartAppliedDate.setHours(rule.startHour);
               ruleStartAppliedDate.setMinutes(rule.startMinute);
 
               let ruleEndAppliedDate = rule.hasOwnProperty("startWeekday")
-                ? timeDay.offset(time, rule.endWeekday - time.getDay())
+                ? timeDay.offset(
+                    time,
+                    (rule.endWeekday as number) - time.getDay(),
+                  )
                 : new Date(time);
               ruleEndAppliedDate.setHours(rule.endHour);
               ruleEndAppliedDate.setMinutes(rule.endMinute);
@@ -1380,7 +1386,6 @@
           }
 
           &.busy {
-            // $darkStripe: rgba(255, 0, 0, 0.1);
             $darkStripe: var(--busy-color-lightened);
             $lightStripe: white;
 
@@ -1464,7 +1469,6 @@
 
           &.pending {
             background-color: var(--selected-color-lightened);
-            // background-color: #002db466;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
             margin-left: 9px;
@@ -1484,7 +1488,6 @@
 
           &.busy:not(.pending) {
             cursor: not-allowed;
-            // background: rgba(0,0,0,0.05);
             margin-left: 8px;
           }
 
