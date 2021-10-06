@@ -70,7 +70,7 @@
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
-  export let capacity: number;
+  export let capacity: number | null;
   export let show_header: boolean;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let open_hours: AvailabilityRule[];
@@ -263,7 +263,7 @@
     capacity = getPropertyValue(
       internalProps.capacity || editorManifest.capacity,
       capacity,
-      1,
+      null,
     );
     show_header = getPropertyValue(
       internalProps.show_header,
@@ -388,9 +388,12 @@
             const slotAvailability = overlap(timeslots, slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (
+                capacity &&
                 capacity >= 1 &&
                 slotAvailability.concurrentEvents < capacity
               ) {
+                freeCalendars.push(calendar?.account?.emailAddress || "");
+              } else if (!slotAvailability.overlap) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -1206,7 +1209,7 @@
     } catch (error) {
       console.error(error);
     }
-  } else if (capacity < 1) {
+  } else if (capacity && capacity < 1) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
