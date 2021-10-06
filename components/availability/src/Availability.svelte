@@ -6,6 +6,7 @@
     AvailabilityStore,
     CalendarStore,
   } from "../../../commons/src";
+  import { handleError } from "@commons/methods/api";
   import { onMount, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import {
@@ -64,6 +65,7 @@
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
+  export let capacity: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -240,6 +242,11 @@
       event_buffer,
       0,
     );
+    capacity = getPropertyValue(
+      internalProps.capacity || editorManifest.capacity,
+      capacity,
+      1,
+    );
   }
 
   $: {
@@ -337,19 +344,25 @@
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
-            let availabilityExistsInSlot = calendar.timeslots.some((block) => {
-              if (calendar.availability === AvailabilityStatus.FREE) {
-                // typical use case
-                return time < block.end_time && block.start_time < endTime;
-              } else if (calendar.availability === AvailabilityStatus.BUSY) {
-                return (
-                  time < timeMinute.offset(block.end_time, event_buffer) &&
-                  timeMinute.offset(block.start_time, -event_buffer) < endTime
-                );
-              }
-            });
+            const slot = {
+              start_time: time,
+              end_time: endTime,
+              available_calendars: [],
+            };
+            const timeslots =
+              calendar.availability === AvailabilityStatus.BUSY
+                ? calendar.timeslots.map((t) => ({
+                    start_time: timeMinute.offset(t.start_time, -event_buffer),
+                    end_time: timeMinute.offset(t.end_time, event_buffer),
+                    available_calendars: t.available_calendars,
+                  }))
+                : calendar.timeslots;
+            const slotAvailability = overlap(timeslots, slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
-              if (!availabilityExistsInSlot) {
+              if (
+                capacity >= 1 &&
+                slotAvailability.concurrentEvents < capacity
+              ) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -357,7 +370,7 @@
               !calendar.availability
             ) {
               // if a calendar is passed in without availability, assume the timeslots are available.
-              if (availabilityExistsInSlot) {
+              if (slotAvailability.overlap) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             }
@@ -376,6 +389,7 @@
           }
         }
 
+        // Do not allow users to book over slots relatively full events
         if (
           availability === AvailabilityStatus.PARTIAL &&
           freeCalendars.length < allCalendars.length * partial_bookable_ratio
@@ -391,6 +405,7 @@
           availability = AvailabilityStatus.PARTIAL;
         }
 
+        // Do not allow users to book over slots that are missing required participants
         if (
           availability === AvailabilityStatus.PARTIAL &&
           required_participants.length
@@ -589,6 +604,24 @@
 
   $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
 
+  // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
+  function overlap(events: TimeSlot[], slot: TimeSlot) {
+    return events.reduce(
+      (result, current) => {
+        const overlap =
+          slot.start_time < current.end_time &&
+          current.start_time < slot.end_time;
+
+        if (overlap) {
+          result.overlap = true;
+          // store the amount of overlap
+          result.concurrentEvents++;
+        }
+        return result;
+      },
+      { overlap: false, concurrentEvents: 0 },
+    );
+  }
   // #endregion timeSlot selection
 
   let availabilityQuery: AvailabilityQuery;
@@ -1065,6 +1098,29 @@
   }
 
   //#endregion dragging
+
+  // #region error
+  $: if (id && email_ids.length && capacity) {
+    try {
+      handleError(id, {
+        name: "IncompatibleProperties",
+        message:
+          "Setting `capacity` currently does not work with `email_ids`. Please use `calendars` to use `capacity`.",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  } else if (capacity < 1) {
+    try {
+      handleError(id, {
+        name: "IncompatibleProperties",
+        message: "`capacity` must be an integer of 1 or more",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  // #endregion error
 </script>
 
 <style lang="scss">

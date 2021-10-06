@@ -4,7 +4,7 @@
   import { NErrorExplanationMap } from "./NErrorMapping";
   import { ErrorStore } from "../index";
 
-  export let id; // component id
+  export let id: string; // component id
 
   $: error = $ErrorStore[id] || { name: "" };
   $: explanation = NErrorExplanationMap[errorName]();

@@ -128,6 +128,12 @@
           });
         });
 
+        document
+          .querySelector('input[name="capacity"]')
+          .addEventListener("input", (event) => {
+            component.capacity = JSON.parse(event.target.value);
+          });
+
         document.querySelectorAll('input[name="week-view"]').forEach((elem) => {
           elem.addEventListener("input", function (event) {
             component.show_as_week = JSON.parse(event.target.value);
@@ -301,6 +307,13 @@
         <label>
           Max Bookable Slots
           <input type="number" name="max-slots" min="1" value="1" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <label>
+          Event Capacity
+          <input type="number" name="capacity" min="1" value="1" />
         </label>
       </fieldset>
 

@@ -27,4 +27,5 @@ export interface Manifest extends NylasManifest {
   event_buffer: number;
   recurrence: "none" | "mandated" | "optional";
   recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
+  capacity: number;
 }
