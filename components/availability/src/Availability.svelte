@@ -19,6 +19,8 @@
   import { scaleTime } from "d3-scale";
   import type { CalendarQuery } from "@commons/types/Events";
 
+  import { lightenHexColour } from "@commons/methods/colour";
+
   import {
     SelectionStatus,
     AvailabilityStatus,
@@ -31,6 +33,7 @@
     SelectableSlot,
     AvailabilityQuery,
     CalendarAccount,
+    AvailabilityRule,
   } from "@commons/types/Availability";
   import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import "@commons/components/ContactImage/ContactImage.svelte";
@@ -60,12 +63,17 @@
   export let allow_date_change: boolean;
   export let required_participants: string[];
   export let busy_color: string;
+  export let closed_color: string;
   export let partial_color: string;
   export let free_color: string;
+  export let selected_color: string;
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
   export let capacity: number;
+  export let show_header: boolean;
+  export let date_format: "weekday" | "date" | "full" | "none";
+  export let open_hours: AvailabilityRule[];
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -217,6 +225,11 @@
       busy_color,
       "#EE3248cc",
     );
+    closed_color = getPropertyValue(
+      internalProps.closed_color,
+      closed_color,
+      "#EE3248cc",
+    );
     partial_color = getPropertyValue(
       internalProps.partial_color,
       partial_color,
@@ -226,6 +239,11 @@
       internalProps.free_color,
       free_color,
       "#078351cc",
+    );
+    selected_color = getPropertyValue(
+      internalProps.selected_color,
+      selected_color,
+      "#002db4",
     );
     show_hosts = getPropertyValue(
       internalProps.show_hosts || editorManifest.show_hosts,
@@ -247,8 +265,18 @@
       capacity,
       1,
     );
+    show_header = getPropertyValue(
+      internalProps.show_header,
+      show_header,
+      true,
+    );
+    date_format = getPropertyValue(
+      internalProps.date_format,
+      date_format,
+      "full",
+    );
+    open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
   }
-
   $: {
     if (
       $$props.hasOwnProperty("start_date") &&
@@ -389,7 +417,8 @@
           }
         }
 
-        // Do not allow users to book over slots relatively full events
+        // If availability is partial (not 100% of calendars), and that ratio is less than partial_bookable_ratio,
+        // mark the slot as busy
         if (
           availability === AvailabilityStatus.PARTIAL &&
           freeCalendars.length < allCalendars.length * partial_bookable_ratio
@@ -405,13 +434,54 @@
           availability = AvailabilityStatus.PARTIAL;
         }
 
-        // Do not allow users to book over slots that are missing required participants
+        // If availability is partial, but a required participant is unavailble, the slot becomes Busy
         if (
           availability === AvailabilityStatus.PARTIAL &&
           required_participants.length
         ) {
           if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
+          }
+        }
+
+        // if the "open_hours" property has rules, adhere to them above any other event-based free/busy statuses
+        // (Mark the slot busy if it falls outside the open_hours)
+        if (open_hours.length) {
+          if (availability !== AvailabilityStatus.BUSY) {
+            let dayRelevantRules = [];
+            dayRelevantRules = open_hours.filter(
+              (rule) =>
+                !rule.hasOwnProperty("startWeekday") ||
+                rule.startWeekday === time.getDay() ||
+                rule.endWeekday === time.getDay(),
+            );
+            let slotExistsInOpenHours = dayRelevantRules.some((rule, iter) => {
+              let ruleStartAppliedDate = rule.hasOwnProperty("startWeekday")
+                ? timeDay.offset(
+                    time,
+                    (rule.startWeekday as number) - time.getDay(),
+                  )
+                : new Date(time);
+              ruleStartAppliedDate.setHours(rule.startHour);
+              ruleStartAppliedDate.setMinutes(rule.startMinute);
+
+              let ruleEndAppliedDate = rule.hasOwnProperty("startWeekday")
+                ? timeDay.offset(
+                    time,
+                    (rule.endWeekday as number) - time.getDay(),
+                  )
+                : new Date(time);
+              ruleEndAppliedDate.setHours(rule.endHour);
+              ruleEndAppliedDate.setMinutes(rule.endMinute);
+
+              return (
+                time >= ruleStartAppliedDate && endTime <= ruleEndAppliedDate
+              );
+            });
+            if (!slotExistsInOpenHours) {
+              availability = AvailabilityStatus.CLOSED;
+              freeCalendars.length = 0;
+            }
           }
         }
 
@@ -490,14 +560,15 @@
         if (
           prevEpoch &&
           JSON.stringify(prevEpoch[0].available_calendars) ===
-            JSON.stringify(slot.available_calendars)
+            JSON.stringify(slot.available_calendars) &&
+          prevEpoch[0].availability === slot.availability
         ) {
           prevEpoch.push(slot);
         } else {
           epochList.push([slot]);
         }
         return epochList;
-      }, [] as TimeSlot[][])
+      }, [] as SelectableSlot[][])
       .map((epoch) => {
         let status = "free";
         const numFreeCalendars = epoch[0].available_calendars.length;
@@ -510,7 +581,11 @@
           (required_participants.length &&
             !allRequiredParticipantsIncluded(epoch[0].available_calendars))
         ) {
-          status = "busy";
+          if (epoch[0].availability === AvailabilityStatus.CLOSED) {
+            status = "closed";
+          } else {
+            status = "busy";
+          }
         } else if (
           numFreeCalendars > 0 &&
           numFreeCalendars !== allCalendars.length
@@ -602,7 +677,14 @@
       return slotList;
     }, [] as SelectableSlot[]);
 
-  $: dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+  let lastDispatchedSlots: SelectableSlot[];
+  $: {
+    // Only dispatch if there's a diff
+    if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
+      dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+      lastDispatchedSlots = sortedSlots;
+    }
+  }
 
   // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
   function overlap(events: TimeSlot[], slot: TimeSlot) {
@@ -683,16 +765,21 @@
     // the slot immediately before it is busy
     if (
       slot.selectionPending &&
-      slot.availability !== AvailabilityStatus.BUSY &&
+      !(
+        slot.availability === AvailabilityStatus.BUSY ||
+        slot.availability === AvailabilityStatus.CLOSED
+      ) &&
       (!day.slots[slotIndex - 1]?.selectionPending ||
-        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY)
+        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY ||
+        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.CLOSED)
     ) {
       let pendingEndTime =
         day.slots.find((daySlot) => {
           return (
             daySlot.start_time > slot.start_time &&
             (!daySlot.selectionPending ||
-              daySlot.availability === AvailabilityStatus.BUSY)
+              daySlot.availability === AvailabilityStatus.BUSY ||
+              daySlot.availability === AvailabilityStatus.CLOSED)
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
 
@@ -964,7 +1051,8 @@
           ) || null;
       } else if (
         slotSelection.length < max_bookable_slots &&
-        slot.availability !== AvailabilityStatus.BUSY
+        slot.availability !== AvailabilityStatus.BUSY &&
+        slot.availability !== AvailabilityStatus.CLOSED
       ) {
         slot.selectionPending = true;
       }
@@ -1009,8 +1097,12 @@
                 : daySlot.start_time <= dragStartSlot!.start_time &&
                   daySlot.start_time >= slot.start_time
             ) {
-              daySlot.selectionPending =
-                daySlot.availability !== AvailabilityStatus.BUSY ? true : false; // when you're dragging over a busy spot, don't set it to pending.
+              daySlot.selectionPending = !(
+                daySlot.availability === AvailabilityStatus.BUSY ||
+                daySlot.availability === AvailabilityStatus.CLOSED
+              )
+                ? true
+                : false; // when you're dragging over a busy spot, don't set it to pending.
             } else {
               if (daySlot.selectionPending) {
                 daySlot.selectionPending = false;
@@ -1067,7 +1159,12 @@
           day.slots
             .filter((x) => x.selectionPending)
             .forEach((x) => {
-              if (x.availability !== AvailabilityStatus.BUSY) {
+              if (
+                !(
+                  x.availability === AvailabilityStatus.BUSY ||
+                  x.availability === AvailabilityStatus.CLOSED
+                )
+              ) {
                 x.selectionStatus = SelectionStatus.SELECTED;
               }
             }),
@@ -1098,7 +1195,6 @@
   }
 
   //#endregion dragging
-
   // #region error
   $: if (id && email_ids.length && capacity) {
     try {
@@ -1126,6 +1222,7 @@
 <style lang="scss">
   @import "../../theming/reset.scss";
   @import "../../theming/variables.scss";
+
   $headerHeight: 40px;
   main {
     height: 100%;
@@ -1139,6 +1236,15 @@
 
     &.ticked {
       grid-template-columns: 70px 1fr;
+    }
+
+    &.hide-header {
+      $headerHeight: 0px;
+      grid-template-rows: auto;
+
+      & > header {
+        display: none;
+      }
     }
 
     & > header {
@@ -1194,6 +1300,9 @@
           }
           &.not-available::before {
             background-color: var(--busy-color, #36d2addf);
+          }
+          &.closed::before {
+            background-color: var(--closed-color, #999);
           }
           &.partially-available::before {
             background-color: var(--partial-color, #ffff7566);
@@ -1292,7 +1401,6 @@
         top: $headerHeight;
         width: 100%;
         height: calc(100% - #{$headerHeight});
-        background: rgba(255, 255, 255, 0);
         .epoch {
           position: absolute;
           width: 100%;
@@ -1300,7 +1408,6 @@
           .inner {
             margin: 0rem;
             height: calc(100% - 0.5rem - 2px);
-            // overflow: hidden;
             padding: 0.25rem 0;
             width: 8px;
             border-radius: 8px;
@@ -1308,7 +1415,24 @@
           }
 
           &.busy {
-            $darkStripe: rgba(255, 0, 0, 0.1);
+            $darkStripe: var(--busy-color-lightened);
+            $lightStripe: white;
+
+            background-image: linear-gradient(
+              45deg,
+              $darkStripe 12.5%,
+              $lightStripe 12.5%,
+              $lightStripe 50%,
+              $darkStripe 50%,
+              $darkStripe 62.5%,
+              $lightStripe 62.5%,
+              $lightStripe 100%
+            );
+            background-size: 5.66px 5.66px;
+          }
+
+          &.closed {
+            $darkStripe: var(--closed-color-lightened);
             $lightStripe: white;
 
             background-image: linear-gradient(
@@ -1326,6 +1450,9 @@
 
           &.busy .inner {
             background-color: var(--busy-color, #ff647566);
+          }
+          &.closed .inner {
+            background-color: var(--closed-color, #ff647566);
           }
           &.partial .inner {
             background-color: var(--partial-color, #ffff7566);
@@ -1381,7 +1508,7 @@
           font-family: sans-serif;
 
           &.selected {
-            background-color: var(--blue);
+            background-color: var(--selected-color, var(--blue));
             box-shadow: none;
             border-bottom: 1px solid transparent;
             z-index: 3;
@@ -1390,11 +1517,17 @@
           }
 
           &.pending {
-            background-color: #002db466;
+            background-color: var(--selected-color-lightened);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
             margin-left: 9px;
             margin-right: 1px;
+          }
+
+          &.hovering {
+            margin-left: 9px;
+            margin-right: 1px;
+            z-index: 3;
           }
 
           &.selected + .selected,
@@ -1402,9 +1535,9 @@
             z-index: 2;
           }
 
-          &.busy:not(.pending) {
+          &.busy:not(.pending),
+          &.closed:not(.pending) {
             cursor: not-allowed;
-            // background: rgba(0,0,0,0.05);
             margin-left: 8px;
           }
 
@@ -1426,6 +1559,11 @@
 
           &.pending .selected-heading {
             width: auto;
+          }
+          &.hovering:not(.selected) .selected-heading {
+            color: var(--selected-color);
+            text-shadow: none;
+            top: 0;
           }
         }
       }
@@ -1477,7 +1615,9 @@
 
     &.allow_booking {
       .slot:not(.busy):hover,
-      .slot:not(.busy):focus {
+      .slot:not(.busy):focus,
+      .slot:not(.closed):hover,
+      .slot:not(.closed):focus {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
         cursor: pointer;
       }
@@ -1587,8 +1727,22 @@
   bind:clientHeight
   class:ticked={show_ticks && view_as === "schedule"}
   class:allow_booking
+  class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
-  style="--free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color};"
+  style="
+  --busy-color-lightened: {lightenHexColour(
+    busy_color,
+    90,
+  )};
+  --closed-color-lightened: {lightenHexColour(
+    closed_color,
+    90,
+  )};
+  --selected-color-lightened: {lightenHexColour(
+    selected_color,
+    60,
+  )}; 
+--free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
     <h2 class="month">
@@ -1637,6 +1791,9 @@
       <span class="not-available">Not available</span>
       <span class="partially-available">Partially available</span>
       <span class="available">Available</span>
+      {#if busy_color !== closed_color}
+        <span class="closed">Closed</span>
+      {/if}
     </div>
   </header>
   {#if show_ticks && view_as === "schedule"}
@@ -1662,16 +1819,20 @@
       <div class="day">
         <header>
           <h2>
-            <span class="date">
-              {new Date(day.timestamp).toLocaleString("default", {
-                day: "numeric",
-              })}
-            </span>
-            <span>
-              {new Date(day.timestamp).toLocaleString("default", {
-                weekday: "short",
-              })}
-            </span>
+            {#if date_format === "date" || date_format === "full"}
+              <span class="date">
+                {new Date(day.timestamp).toLocaleString("default", {
+                  day: "numeric",
+                })}
+              </span>
+            {/if}
+            {#if date_format === "weekday" || date_format === "full"}
+              <span>
+                {new Date(day.timestamp).toLocaleString("default", {
+                  weekday: "short",
+                })}
+              </span>
+            {/if}
           </h2>
         </header>
         {#if view_as === "schedule"}
@@ -1710,6 +1871,7 @@
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
+                class:hovering={slot.hovering}
                 data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
                 on:mousedown={() => {
@@ -1721,9 +1883,16 @@
                   }
                   startDrag(slot, day);
                 }}
-                on:mouseenter={() => {
+                on:mouseenter={(e) => {
                   addToDrag(slot, day);
+                  if (
+                    !mouseIsDown &&
+                    slot.selectionStatus !== SelectionStatus.SELECTED
+                  ) {
+                    slot.hovering = true;
+                  }
                 }}
+                on:mouseleave={() => (slot.hovering = false)}
                 on:mouseup={(e) => {
                   if (mouseIsDown) {
                     if (document.activeElement instanceof HTMLElement) {
@@ -1743,6 +1912,15 @@
                   <span class="selected-heading"
                     >{getBlockTimes(slot, day)}</span
                   >
+                {/if}
+                {#if slot.hovering}
+                  <span class="selected-heading">
+                    {slot.start_time.toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </span>
                 {/if}
               </button>
             {/each}

@@ -9,7 +9,12 @@
     getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
+  import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
+  // TODO: switch for local development
+  import "@nylas/components-availability";
+  // import "../../availability";
+  import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -38,6 +43,7 @@
   export let recurrence: "none" | "mandated" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
   export let capacity: number;
+  export let open_hours: AvailabilityRule[];
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -57,6 +63,7 @@
     ) as Partial<Manifest>;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
+      manifestProperties = { ...manifestProperties, ...rebuiltProps };
     }
   }
 
@@ -83,8 +90,8 @@
     );
     view_as = getPropertyValue(internalProps.view_as, view_as, "schedule");
     show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
-    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
-    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
+    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 9);
+    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 17);
     slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
     start_date = getPropertyValue(
       internalProps.start_date,
@@ -150,6 +157,7 @@
       ["none"],
     );
     capacity = getPropertyValue(internalProps.capacity, capacity, 1);
+    open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
   }
 
   // Manifest properties requiring further manipulation:
@@ -168,10 +176,8 @@
     start_hour,
     end_hour,
     slot_size,
-    start_date: new Date(startDate),
     dates_to_show,
     show_ticks,
-    email_ids: parseStringToArray(emailIDs),
     allow_booking,
     max_bookable_slots,
     partial_bookable_ratio,
@@ -190,7 +196,22 @@
     manifestProperties.recurrence_cadence = recurrenceCadence;
   }
 
-  $: console.table(manifestProperties);
+  $: {
+    manifestProperties.email_ids = parseStringToArray(emailIDs);
+  }
+
+  $: {
+    manifestProperties.start_date = new Date(startDate);
+  }
+
+  $: {
+    manifestProperties.open_hours = open_hours;
+  }
+
+  // $: {
+  //   console.clear();
+  //   console.table(manifestProperties);
+  // }
   // #endregion mount and prop initialization
 
   function saveProperties() {
@@ -199,9 +220,69 @@
       console.log(k, v);
     });
   }
+
+  // #region unpersisted variables
+  let customize_weekdays: boolean = false;
+  let allow_weekends: boolean = false;
+
+  function availabilityChosen(event) {
+    open_hours = event.detail.timeSlots.map((slot: TimeSlot) => {
+      let { start_time, end_time } = slot;
+      return {
+        startWeekday:
+          customize_weekdays || allow_weekends ? start_time.getDay() : -1,
+        startHour: start_time.getHours(),
+        startMinute: start_time.getMinutes(),
+        endWeekday:
+          customize_weekdays || allow_weekends ? end_time.getDay() : -1,
+        endHour: end_time.getHours(),
+        endMinute: end_time.getMinutes(),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+    });
+  }
+
+  // niceDate: shows date rules in a nice string format; selectively includes weekday if customize_weekdays / allow_weekends are set
+  function niceDate(block: AvailabilityRule) {
+    let startMoment = new Date(
+      0,
+      0,
+      0,
+      block.startHour,
+      block.startMinute,
+    ).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    let endMoment = new Date(
+      0,
+      0,
+      0,
+      block.endHour,
+      block.endMinute,
+    ).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    if ((customize_weekdays || allow_weekends) && block.startWeekday) {
+      let weekday = weekdays[block.startWeekday];
+      return `${weekday}: ${startMoment} - ${endMoment}`;
+    } else {
+      return `${startMoment} - ${endMoment}`;
+    }
+  }
+  // #endregion unpersisted variables
 </script>
 
 <style lang="scss">
+  .availability-container {
+    overflow: auto;
+    height: 500px;
+  }
 </style>
 
 {#if manifest && manifest.error}
@@ -543,6 +624,57 @@
       <strong>Capacity</strong>
       <input type="number" min={1} bind:value={manifestProperties.capacity} />
     </label>
+  </div>
+  <div>
+    <h3>Available Hours</h3>
+    <p>
+      Drag over the hours want to be availble for booking. All other hours will
+      always show up as "busy" to your users.
+    </p>
+    <label>
+      <input
+        type="checkbox"
+        name="customize_weekdays"
+        bind:checked={customize_weekdays}
+      />
+      <strong>Customize each weekday</strong>
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        name="allow_weekends"
+        bind:checked={allow_weekends}
+      />
+      <strong>Allow booking on weekends</strong>
+    </label>
+    <div class="availability-container">
+      <nylas-availability
+        allow_booking={true}
+        max_bookable_slots={Infinity}
+        show_as_week={customize_weekdays || allow_weekends}
+        show_weekends={allow_weekends}
+        start_hour={manifestProperties.start_hour}
+        end_hour={manifestProperties.end_hour}
+        allow_date_change={false}
+        partial_bookable_ratio="0"
+        show_header={false}
+        date_format={customize_weekdays || allow_weekends ? "weekday" : "none"}
+        busy_color="#000"
+        closed_color="#999"
+        selected_color="#095"
+        slot_size="15"
+        on:timeSlotChosen={availabilityChosen}
+      />
+    </div>
+    <ul class="availability">
+      {#each open_hours as availability}
+        <li>
+          <span class="date">
+            {niceDate(availability)}
+          </span>
+        </li>
+      {/each}
+    </ul>
   </div>
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}

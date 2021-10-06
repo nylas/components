@@ -115,6 +115,22 @@
           });
 
         document
+          .querySelectorAll('input[name="show-header"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.show_header = JSON.parse(event.target.value);
+            });
+          });
+
+        document
+          .querySelectorAll('input[name="date-format"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.date_format = event.target.value;
+            });
+          });
+
+        document
           .querySelectorAll('input[id="partial_bookable_ratio"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
@@ -168,6 +184,110 @@
             component.view_as = event.target.value;
           });
         });
+
+        document
+          .querySelectorAll('input[name="block-lunch"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              console.log("ya", event.target.value);
+              if (event.target.value === "none") {
+                component.open_hours = [];
+              } else if (event.target.value === "everyday") {
+                component.open_hours = [
+                  {
+                    startHour: 8,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: -1,
+                    endHour: 19,
+                    endMinute: 0,
+                  },
+                ];
+              } else if ((event.target.value = "weekdays")) {
+                component.open_hours = [
+                  {
+                    startWeekday: 1,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: 1,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  // Check it out: this next open_hours object spans across the midnight barrier (the rest all end at midnight)
+                  {
+                    startWeekday: 1,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: 2,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 2,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: 2,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 3,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: 3,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 3,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: 3,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 4,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: 4,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 4,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: 4,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 5,
+                    startHour: 0,
+                    startMinute: 0,
+                    endWeekday: 5,
+                    endHour: 12,
+                    endMinute: 0,
+                  },
+                  {
+                    startWeekday: 5,
+                    startHour: 13,
+                    startMinute: 0,
+                    endWeekday: 5,
+                    endHour: 24,
+                    endMinute: 0,
+                  },
+                ];
+              }
+            });
+          });
       });
     </script>
     <style>
@@ -185,6 +305,8 @@
         background: #333;
         padding: 0.5rem;
         color: white;
+        max-height: 100%;
+        overflow: auto;
       }
 
       aside label {
@@ -304,6 +426,18 @@
       </fieldset>
 
       <fieldset>
+        <legend>Show Header</legend>
+        <label>
+          <input checked type="radio" name="show-header" value="true" />
+          True
+        </label>
+        <label>
+          <input type="radio" name="show-header" value="false" />
+          False
+        </label>
+      </fieldset>
+
+      <fieldset>
         <label>
           Max Bookable Slots
           <input type="number" name="max-slots" min="1" value="1" />
@@ -396,6 +530,24 @@
           />
           Free color
         </label>
+        <label>
+          <input
+            type="color"
+            name="color-selected"
+            data-type="selected_color"
+            value="#002db4"
+          />
+          Selected color
+        </label>
+        <label>
+          <input
+            type="color"
+            name="color-closed"
+            data-type="closed_color"
+            value="#EE3248"
+          />
+          Closed color
+        </label>
       </fieldset>
       <fieldset>
         <legend>View As</legend>
@@ -406,6 +558,38 @@
         <label>
           <input type="radio" name="view-as" value="list" />
           List
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Date Format</legend>
+        <label>
+          <input checked type="radio" name="date-format" value="full" />
+          Full
+        </label>
+        <label>
+          <input type="radio" name="date-format" value="weekday" />
+          Weekday Only
+        </label>
+        <label>
+          <input type="radio" name="date-format" value="date" />
+          Date Only
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Block off lunch hour</legend>
+        <label>
+          <input checked type="radio" name="block-lunch" value="none" />
+          Don't block
+        </label>
+        <label>
+          <input type="radio" name="block-lunch" value="weekdays" />
+          Block on all weekdays
+        </label>
+        <label>
+          <input type="radio" name="block-lunch" value="everyday" />
+          Block every day
         </label>
       </fieldset>
     </aside>

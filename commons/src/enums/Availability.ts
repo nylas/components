@@ -2,6 +2,7 @@ export enum AvailabilityStatus {
   FREE = "free",
   BUSY = "busy",
   PARTIAL = "partial",
+  CLOSED = "closed",
 }
 
 export enum SelectionStatus {

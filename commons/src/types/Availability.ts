@@ -24,9 +24,24 @@ export interface Manifest extends NylasManifest {
   partial_color: string;
   free_color: string;
   busy_color: string;
+  closed_color: string;
+  selected_color: string;
   view_as: "schedule" | "list";
   event_buffer: number;
   capacity: number;
+  date_format: "full" | "weekday" | "date" | "none";
+  show_header: boolean;
+  open_hours: AvailabilityRule[];
+}
+
+export interface AvailabilityRule {
+  startWeekday?: number;
+  startHour: number;
+  startMinute: number;
+  endWeekday?: number;
+  endHour: number;
+  endMinute: number;
+  timeZone?: string;
 }
 
 export interface Calendar {
@@ -53,6 +68,7 @@ export interface SelectableSlot extends TimeSlot {
   selectionStatus: SelectionStatus;
   availability: AvailabilityStatus;
   selectionPending?: boolean;
+  hovering?: boolean;
 }
 
 export interface AvailabilityQuery {

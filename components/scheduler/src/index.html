@@ -12,6 +12,64 @@
         const scheduler = document.querySelector("nylas-scheduler");
 
         availability.email_ids = ["nylascypresstest@gmail.com"];
+        availability.open_hours = [
+          {
+            startWeekday: 0,
+            startHour: 12,
+            startMinute: 30,
+            endWeekday: 0,
+            endHour: 16,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 1,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 1,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 2,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 2,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 3,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 3,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 4,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 4,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 5,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 5,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 6,
+            startHour: 11,
+            startMinute: 30,
+            endWeekday: 6,
+            endHour: 15,
+            endMinute: 0,
+          },
+        ];
         availability.addEventListener("timeSlotChosen", (event) => {
           scheduler.slots_to_book = event.detail.timeSlots;
         });
@@ -52,6 +110,7 @@
         start_hour="9"
         end_hour="17"
         show_hosts="show"
+        closed_color="#999"
       >
       </nylas-availability>
       <nylas-scheduler
