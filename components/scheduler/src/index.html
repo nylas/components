@@ -77,6 +77,8 @@
         scheduler.addEventListener("bookedEvents", () => {
           availability.reload(true, true);
         });
+
+        scheduler.recurrence_cadence = ["weekly", "monthly"];
       });
     </script>
     <style>
@@ -116,6 +118,7 @@
       <nylas-scheduler
         id="demo-scheduler"
         editor_id="demo-schedule-editor"
+        recurrence="optional"
       ></nylas-scheduler>
     </main>
   </body>
