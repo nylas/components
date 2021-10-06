@@ -51,6 +51,7 @@
   export let show_ticks: boolean;
   export let email_ids: string[];
   export let allow_booking: boolean;
+  export let mandate_top_hour: boolean;
   export let max_bookable_slots: number;
   export let partial_bookable_ratio: number;
   export let show_as_week: boolean;
@@ -87,16 +88,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(availabilityQuery)
-      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -170,6 +170,11 @@
     calendars = getPropertyValue(internalProps.calendars, calendars, []);
     show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
     email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
+    mandate_top_hour = getPropertyValue(
+      internalProps.mandate_top_hour,
+      mandate_top_hour,
+      false,
+    );
     allow_booking = getPropertyValue(
       internalProps.allow_booking,
       allow_booking,
@@ -348,9 +353,12 @@
                 );
               }
             });
+
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (!availabilityExistsInSlot) {
-                freeCalendars.push(calendar?.account?.emailAddress || "");
+                if (!(mandate_top_hour && time.getMinutes() > 0)) {
+                  freeCalendars.push(calendar?.account?.emailAddress || "");
+                }
               }
             } else if (
               calendar.availability === AvailabilityStatus.FREE ||
@@ -358,12 +366,13 @@
             ) {
               // if a calendar is passed in without availability, assume the timeslots are available.
               if (availabilityExistsInSlot) {
-                freeCalendars.push(calendar?.account?.emailAddress || "");
+                if (!(mandate_top_hour && time.getMinutes() > 0)) {
+                  freeCalendars.push(calendar?.account?.emailAddress || "");
+                }
               }
             }
           }
         }
-
         if (allCalendars.length) {
           if (freeCalendars.length) {
             if (freeCalendars.length === allCalendars.length) {
@@ -717,9 +726,7 @@
               hour12: true,
             });
       return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
+      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;

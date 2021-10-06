@@ -107,6 +107,14 @@
           });
 
         document
+          .querySelectorAll('input[name="mandate-top-hour"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.mandate_top_hour = JSON.parse(event.target.value);
+            });
+          });
+
+        document
           .querySelectorAll('input[name="allow-booking"]')
           .forEach((elem) => {
             elem.addEventListener("input", function (event) {
@@ -281,6 +289,18 @@
         </label>
         <label>
           <input type="radio" name="show-ticks" value="false" />
+          False
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Mandate Top of Hour</legend>
+        <label>
+          <input type="radio" name="mandate-top-hour" value="true" />
+          True
+        </label>
+        <label>
+          <input checked type="radio" name="mandate-top-hour" value="false" />
           False
         </label>
       </fieldset>

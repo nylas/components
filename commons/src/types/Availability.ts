@@ -13,6 +13,7 @@ export interface Manifest extends NylasManifest {
   calendars: Calendar[];
   email_ids: string[];
   allow_booking: boolean;
+  mandate_top_hour: boolean;
   max_bookable_slots: number;
   partial_bookable_ratio: number;
   show_as_week: boolean;
