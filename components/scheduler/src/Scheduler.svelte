@@ -17,7 +17,13 @@
   import { onMount, tick } from "svelte";
 
   interface BookableSlot extends TimeSlot {
-    recurrence_cadence?: "none" | "daily" | "biweekly" | "weekly" | "monthly";
+    recurrence_cadence?:
+      | "none"
+      | "daily"
+      | "weekdays"
+      | "biweekly"
+      | "weekly"
+      | "monthly";
   }
 
   // #region props
@@ -36,7 +42,7 @@
   export let notification_message: string;
   export let notification_subject: string;
   export let recurrence: "none" | "mandated" | "optional";
-  export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
+  export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
 
   // #endregion props
 
@@ -132,14 +138,20 @@
 
   let show_success_notification = false;
   $: slotsToBook = slots_to_book.map((slot) => {
-    if (!slot.recurrence_cadence) slot.recurrence_cadence = "none";
+    if (!slot.recurrence_cadence) {
+      if (recurrence === "mandated") {
+        slot.recurrence_cadence = recurrence_cadence[0];
+      } else {
+        slot.recurrence_cadence = "none";
+      }
+    }
     return slot;
   });
   $: if (slotsToBook.length) {
     show_success_notification = false;
   }
 
-  async function bookTimeSlots(events: TimeSlot[]) {
+  async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
       let postableEvent: Partial<TimespanEvent> = {
         title: event_title,
@@ -162,6 +174,25 @@
           end_time: event.end_time.getTime() / 1000,
         },
       };
+
+      if (event.recurrence_cadence && event.recurrence_cadence !== "none") {
+        let rrule: string[] = [];
+        if (event.recurrence_cadence === "daily") {
+          rrule = ["RRULE:FREQ=DAILY"];
+        } else if (event.recurrence_cadence === "weekdays") {
+          rrule = ["RRULE:FREQ=DAIY;BYDAY=MO,TU,WE,TH,FR"];
+        } else if (event.recurrence_cadence === "weekly") {
+          rrule = ["RRULE:FREQ=WEEKLY"];
+        } else if (event.recurrence_cadence === "biweekly") {
+          rrule = ["RRULE:FREQ=WEEKLY;INTERVAL=2"];
+        } else if (event.recurrence_cadence === "monthly") {
+          rrule = ["RRULE:FREQ=MONTHLY"];
+        }
+        postableEvent.recurrence = {
+          rrule,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        };
+      }
       return createEvent(
         postableEvent as TimespanEvent,
         {
@@ -213,7 +244,7 @@
     z-index: 1;
 
     .booker {
-      height: 100%;
+      height: calc(100% - 2rem);
       overflow: auto;
       background: rgba(0, 0, 0, 0.03);
       padding: 1rem;
@@ -329,9 +360,13 @@
             >
             {#if recurrence !== "none"}
               <footer>
-                <strong>How often should this event repeat?</strong>
-                <div class="cadences">
-                  {#if recurrence === "optional"}
+                {#if recurrence === "optional"}
+                  <strong>How often should this event repeat?</strong>
+                {:else if recurrence === "mandated"}
+                  <strong>Repeating {timeSlot.recurrence_cadence}</strong>
+                {/if}
+                {#if recurrence === "optional"}
+                  <div class="cadences">
                     <label
                       class:checked={timeSlot.recurrence_cadence === "none"}
                     >
@@ -342,20 +377,20 @@
                       />
                       <span>Never</span>
                     </label>
-                  {/if}
-                  {#each recurrence_cadence as cadence}
-                    <label
-                      class:checked={timeSlot.recurrence_cadence === cadence}
-                    >
-                      <input
-                        type="radio"
-                        value={cadence}
-                        bind:group={timeSlot.recurrence_cadence}
-                      />
-                      <span>{cadence}</span>
-                    </label>
-                  {/each}
-                </div>
+                    {#each recurrence_cadence as cadence}
+                      <label
+                        class:checked={timeSlot.recurrence_cadence === cadence}
+                      >
+                        <input
+                          type="radio"
+                          value={cadence}
+                          bind:group={timeSlot.recurrence_cadence}
+                        />
+                        <span>{cadence}</span>
+                      </label>
+                    {/each}
+                  </div>
+                {/if}
               </footer>
             {/if}
           </li>

@@ -27,8 +27,8 @@ export interface Manifest extends NylasManifest {
   view_as?: "schedule" | "list";
   event_buffer: number;
   recurrence: "none" | "mandated" | "optional";
-  recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
   capacity: number;
   date_format: "full" | "weekday" | "date" | "none";
   open_hours?: AvailabilityRule[];
+  recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
 }

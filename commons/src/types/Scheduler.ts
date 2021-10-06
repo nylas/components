@@ -16,6 +16,6 @@ export interface Manifest extends AvailabilityManifest {
   notification_mode?: NotificationMode;
   notification_message?: string;
   notification_subject?: string;
-  recurrence: "none" | "mandated" | "optional";
-  recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
+  recurrence?: "none" | "mandated" | "optional";
+  recurrence_cadence?: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
 }

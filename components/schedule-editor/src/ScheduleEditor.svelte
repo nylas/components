@@ -41,7 +41,7 @@
   export let notification_subject: string;
   export let view_as: "schedule" | "list";
   export let recurrence: "none" | "mandated" | "optional";
-  export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
+  export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
   export let capacity: number;
   export let open_hours: AvailabilityRule[];
 
@@ -589,6 +589,15 @@
           value="daily"
         />
         <span>Daily</span>
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          name="recurrence_cadence"
+          bind:group={recurrenceCadence}
+          value="weekdays"
+        />
+        <span>Daily, only on weekdays</span>
       </label>
       <label>
         <input

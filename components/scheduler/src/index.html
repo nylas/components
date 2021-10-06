@@ -78,7 +78,7 @@
           availability.reload(true, true);
         });
 
-        scheduler.recurrence_cadence = ["weekly", "monthly"];
+        scheduler.recurrence_cadence = ["weekly", "biweekly", "monthly"];
       });
     </script>
     <style>
@@ -118,7 +118,7 @@
       <nylas-scheduler
         id="demo-scheduler"
         editor_id="demo-schedule-editor"
-        recurrence="optional"
+        recurrence="mandated"
       ></nylas-scheduler>
     </main>
   </body>
