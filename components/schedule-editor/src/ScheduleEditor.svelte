@@ -208,10 +208,10 @@
     manifestProperties.open_hours = open_hours;
   }
 
-  $: {
-    console.clear();
-    console.table(manifestProperties);
-  }
+  // $: {
+  //   console.clear();
+  //   console.table(manifestProperties);
+  // }
   // #endregion mount and prop initialization
 
   function saveProperties() {

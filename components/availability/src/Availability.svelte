@@ -479,7 +479,6 @@
               );
             });
             if (!slotExistsInOpenHours) {
-              // availability = AvailabilityStatus.BUSY;
               availability = AvailabilityStatus.CLOSED;
               freeCalendars.length = 0;
             }
@@ -571,7 +570,6 @@
         return epochList;
       }, [] as SelectableSlot[][])
       .map((epoch) => {
-        console.log("epoch", epoch);
         let status = "free";
         const numFreeCalendars = epoch[0].available_calendars.length;
         const fewerCalendarsThanRatio =
