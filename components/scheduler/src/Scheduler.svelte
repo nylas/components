@@ -180,7 +180,7 @@
         if (event.recurrence_cadence === "daily") {
           rrule = ["RRULE:FREQ=DAILY"];
         } else if (event.recurrence_cadence === "weekdays") {
-          rrule = ["RRULE:FREQ=DAIY;BYDAY=MO,TU,WE,TH,FR"];
+          rrule = ["RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR"];
         } else if (event.recurrence_cadence === "weekly") {
           rrule = ["RRULE:FREQ=WEEKLY"];
         } else if (event.recurrence_cadence === "biweekly") {
@@ -364,10 +364,6 @@
               <footer>
                 {#if recurrence === "optional"}
                   <strong>How often should this event repeat?</strong>
-                {:else if recurrence === "required"}
-                  <strong>Repeating {timeSlot.recurrence_cadence}</strong>
-                {/if}
-                {#if recurrence === "optional"}
                   <div class="cadences">
                     <label
                       class:checked={timeSlot.recurrence_cadence === "none"}
@@ -392,6 +388,8 @@
                       </label>
                     {/each}
                   </div>
+                {:else if recurrence === "required"}
+                  <strong>Repeating {timeSlot.recurrence_cadence}</strong>
                 {/if}
               </footer>
             {/if}
