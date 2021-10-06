@@ -65,7 +65,7 @@
   export let show_hosts: "show" | "hide";
   export let view_as: "schedule" | "list";
   export let event_buffer: number;
-  export let capacity: number = 1;
+  export let capacity: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -354,10 +354,10 @@
                 ? calendar.timeslots.map((t) => ({
                     start_time: timeMinute.offset(t.start_time, -event_buffer),
                     end_time: timeMinute.offset(t.end_time, event_buffer),
-                    available_calendars: [],
+                    available_calendars: t.available_calendars,
                   }))
                 : calendar.timeslots;
-            const slotAvailability = overlap([...timeslots], slot);
+            const slotAvailability = overlap(timeslots, slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (
                 capacity >= 1 &&
@@ -1100,26 +1100,24 @@
   //#endregion dragging
 
   // #region error
-  $: {
-    if (id && email_ids.length && capacity) {
-      try {
-        handleError(id, {
-          name: "IncompatibleProperties",
-          message:
-            "Setting `capacity` currently does not work with `email_ids`. Please use `calendars` to use `capacity`.",
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    } else if (capacity < 1) {
-      try {
-        handleError(id, {
-          name: "IncompatibleProperties",
-          message: "`capacity` must be an integer of 1 or more",
-        });
-      } catch (error) {
-        console.error(error);
-      }
+  $: if (id && email_ids.length && capacity) {
+    try {
+      handleError(id, {
+        name: "IncompatibleProperties",
+        message:
+          "Setting `capacity` currently does not work with `email_ids`. Please use `calendars` to use `capacity`.",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  } else if (capacity < 1) {
+    try {
+      handleError(id, {
+        name: "IncompatibleProperties",
+        message: "`capacity` must be an integer of 1 or more",
+      });
+    } catch (error) {
+      console.error(error);
     }
   }
   // #endregion error
