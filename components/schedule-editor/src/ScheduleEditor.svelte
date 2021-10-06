@@ -35,6 +35,8 @@
   export let notification_message: string;
   export let notification_subject: string;
   export let view_as: "schedule" | "list";
+  export let recurrence: "none" | "mandated" | "optional";
+  export let recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -140,11 +142,20 @@
       notification_subject,
       "Invitation",
     );
+    recurrence = getPropertyValue(internalProps.recurrence, recurrence, "none");
+    recurrence_cadence = getPropertyValue(
+      internalProps.recurrence_cadence,
+      recurrence_cadence,
+      ["none"],
+    );
   }
 
   // Manifest properties requiring further manipulation:
   let emailIDs: string = "";
   let startDate: string = "0";
+  let recurrenceCadence: string[] = [];
+
+  let manifestProperties: { [key: string]: any }; // allows adding keys later
 
   $: manifestProperties = {
     event_title,
@@ -169,7 +180,12 @@
     notification_message,
     notification_subject,
     view_as,
+    recurrence,
   };
+
+  $: {
+    manifestProperties.recurrence_cadence = recurrenceCadence;
+  }
 
   $: console.table(manifestProperties);
   // #endregion mount and prop initialization
@@ -443,5 +459,81 @@
       <span>List</span>
     </label>
   </div>
+  <div role="radiogroup" aria-labelledby="recurrence">
+    <strong id="recurrence"
+      >Allow, Disallow, or Mandate events to repeat?</strong
+    >
+    <label>
+      <input
+        type="radio"
+        name="recurrence"
+        bind:group={manifestProperties.recurrence}
+        value="none"
+      />
+      <span>Don't Repeat Events</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="recurrence"
+        bind:group={manifestProperties.recurrence}
+        value="optional"
+      />
+      <span>Users May Repeat Events</span>
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="recurrence"
+        bind:group={manifestProperties.recurrence}
+        value="mandated"
+      />
+      <span>Events Always Repeat</span>
+    </label>
+  </div>
+  {#if manifestProperties.recurrence === "mandated" || manifestProperties.recurrence === "optional"}
+    <div role="radiogroup" aria-labelledby="recurrence_cadence">
+      <strong id="recurrence_cadence"
+        >How often should events repeat{#if manifestProperties.recurrence === "optional"},
+          if a user chooses to do so{/if}?</strong
+      >
+      <label>
+        <input
+          type="checkbox"
+          name="recurrence_cadence"
+          bind:group={recurrenceCadence}
+          value="daily"
+        />
+        <span>Daily</span>
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          name="recurrence_cadence"
+          bind:group={recurrenceCadence}
+          value="weekly"
+        />
+        <span>Weekly</span>
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          name="recurrence_cadence"
+          bind:group={recurrenceCadence}
+          value="biweekly"
+        />
+        <span>Biweekly</span>
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          name="recurrence_cadence"
+          bind:group={recurrenceCadence}
+          value="monthly"
+        />
+        <span>Monthly</span>
+      </label>
+    </div>
+  {/if}
   <button on:click={saveProperties}>Save Editor Options</button>
 {/if}

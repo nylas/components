@@ -25,4 +25,6 @@ export interface Manifest extends NylasManifest {
   notification_subject?: string;
   view_as?: "schedule" | "list";
   event_buffer: number;
+  recurrence: "none" | "mandated" | "optional";
+  recurrence_cadence: string[]; // "none" | "daily" | "weekly" | "biweekly" | "monthly";
 }
