@@ -40,7 +40,7 @@
   export let notification_message: string;
   export let notification_subject: string;
   export let view_as: "schedule" | "list";
-  export let recurrence: "none" | "mandated" | "optional";
+  export let recurrence: "none" | "required" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
   export let capacity: number;
   export let open_hours: AvailabilityRule[];
@@ -570,12 +570,12 @@
         type="radio"
         name="recurrence"
         bind:group={manifestProperties.recurrence}
-        value="mandated"
+        value="required"
       />
       <span>Events Always Repeat</span>
     </label>
   </div>
-  {#if manifestProperties.recurrence === "mandated" || manifestProperties.recurrence === "optional"}
+  {#if manifestProperties.recurrence === "required" || manifestProperties.recurrence === "optional"}
     <div role="radiogroup" aria-labelledby="recurrence_cadence">
       <strong id="recurrence_cadence"
         >How often should events repeat{#if manifestProperties.recurrence === "optional"},

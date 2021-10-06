@@ -41,7 +41,7 @@
   export let notification_mode: NotificationMode;
   export let notification_message: string;
   export let notification_subject: string;
-  export let recurrence: "none" | "mandated" | "optional";
+  export let recurrence: "none" | "required" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
 
   // #endregion props
@@ -139,7 +139,7 @@
   let show_success_notification = false;
   $: slotsToBook = slots_to_book.map((slot) => {
     if (!slot.recurrence_cadence) {
-      if (recurrence === "mandated") {
+      if (recurrence === "required") {
         slot.recurrence_cadence = recurrence_cadence[0];
       } else {
         slot.recurrence_cadence = "none";
@@ -300,9 +300,9 @@
             }
 
             .cadences {
-              display: grid;
+              display: flex;
+              flex-wrap: wrap;
               gap: 0.5rem;
-              grid-template-columns: repeat(auto-fit, minmax(0px, max-content));
 
               label {
                 padding: 0.25rem 0.5rem;
@@ -315,6 +315,10 @@
                 &.checked {
                   background-color: var(--blue);
                   color: white;
+                }
+
+                span {
+                  text-transform: capitalize;
                 }
               }
             }
@@ -360,7 +364,7 @@
               <footer>
                 {#if recurrence === "optional"}
                   <strong>How often should this event repeat?</strong>
-                {:else if recurrence === "mandated"}
+                {:else if recurrence === "required"}
                   <strong>Repeating {timeSlot.recurrence_cadence}</strong>
                 {/if}
                 {#if recurrence === "optional"}
@@ -373,7 +377,7 @@
                         value="none"
                         bind:group={timeSlot.recurrence_cadence}
                       />
-                      <span>Never</span>
+                      <span>never</span>
                     </label>
                     {#each recurrence_cadence as cadence}
                       <label
