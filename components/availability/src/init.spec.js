@@ -780,6 +780,100 @@ describe("availability component", () => {
     });
   });
 
+  describe("overbooked threshold prop", () => {
+    const calendars = [
+      {
+        availability: "busy",
+        timeslots: [
+          {
+            start_time: new Date(new Date().setHours(0, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+          },
+        ],
+        account: {
+          emailAddress: "person@name.com",
+          firstName: "Jim",
+          lastName: "Person",
+          avatarUrl: "",
+        },
+      },
+      {
+        availability: "busy",
+        timeslots: [
+          {
+            start_time: new Date(new Date().setHours(5, 0, 0, 0)),
+            end_time: new Date(new Date().setHours(12, 0, 0, 0)),
+          },
+        ],
+        account: {
+          emailAddress: "thelonious@nylas.com",
+          firstName: "Thelonious",
+          lastName: "Bacon",
+          avatarUrl: "",
+        },
+      },
+    ];
+
+    it("shows busy when slots booked over threshold", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.calendars = calendars;
+          component.overbooked_threshold = 100;
+          cy.get(".slot.partial").should("exist");
+          cy.get(".slot.busy").should("have.length", 4);
+        });
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.calendars = calendars;
+          component.overbooked_threshold = 24;
+          cy.get(".slot.partial").should("not.exist");
+          cy.get(".slot.busy").should("have.length", 96);
+        });
+
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.calendars = calendars;
+          component.overbooked_threshold = 25;
+          cy.get(".slot.partial").should("exist");
+          cy.get(".slot.partial").should("have.length", 72);
+          cy.get(".slot.busy").should("have.length", 24);
+        });
+    });
+
+    it("handles overbooked_threshold correctly with reduced hours", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.calendars = calendars;
+          component.start_hour = 0;
+          component.end_hour = 12;
+          component.overbooked_threshold = 50;
+          cy.get(".slot.partial").should("exist");
+          cy.get(".slot.partial").should("have.length", 24);
+          cy.get(".slot.busy").should("have.length", 24);
+        });
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.calendars = calendars;
+          component.start_hour = 0;
+          component.end_hour = 12;
+          component.overbooked_threshold = 49;
+          cy.get(".slot.partial").should("have.length", 0);
+          cy.get(".slot.busy").should("have.length", 48);
+        });
+    });
+  });
+
   describe("Capacity", () => {
     const timeSlot = {
       start_time: new Date(new Date().setHours(3, 0, 0, 0)),

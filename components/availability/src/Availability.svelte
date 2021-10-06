@@ -74,6 +74,7 @@
   export let show_header: boolean;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let open_hours: AvailabilityRule[];
+  export let overbooked_threshold: number;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -276,6 +277,11 @@
       "full",
     );
     open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
+    overbooked_threshold = getPropertyValue(
+      internalProps.overbooked_threshold || editorManifest.overbooked_threshold,
+      overbooked_threshold,
+      100,
+    );
   }
   $: {
     if (
@@ -490,7 +496,6 @@
 
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
-          pendingSelection: false,
           calendar_id: calendarID,
           availability: availability,
           available_calendars: freeCalendars,
@@ -519,7 +524,6 @@
     ticks: Date[],
     intervalCounter: number = 0,
   ): Date[] => {
-    // console.time('ticks')
     const tickIters = slotSizes[intervalCounter];
 
     // ternary here because timeMinute.every(120) doesnt work, but timeHour.every(2) does.
@@ -541,7 +545,6 @@
     ) {
       return generateTicks(height, ticks, intervalCounter + 1);
     } else {
-      // console.timeEnd('ticks')
       return ticks;
     }
   };
@@ -574,10 +577,12 @@
       }, [] as SelectableSlot[][])
       .map((epoch) => {
         let status = "free";
+
         const numFreeCalendars = epoch[0].available_calendars.length;
         const fewerCalendarsThanRatio =
           numFreeCalendars !== allCalendars.length &&
           numFreeCalendars < allCalendars.length * partial_bookable_ratio;
+
         if (
           numFreeCalendars === 0 ||
           fewerCalendarsThanRatio ||
@@ -595,6 +600,7 @@
         ) {
           status = "partial";
         }
+
         return {
           start_time: epoch[0].start_time,
           offset: epochScale(epoch[0].start_time) * 100,
@@ -643,9 +649,41 @@
     timestamp: Date;
   }
 
+  function checkOverbooked(slots: SelectableSlot[]) {
+    allCalendars.forEach((calendar) => {
+      let availableSlotsForCalendar = slots.filter((slot) =>
+        slot.available_calendars.includes(calendar.account?.emailAddress),
+      );
+      if (
+        slots.length - availableSlotsForCalendar.length >
+        (overbooked_threshold * slots.length) / 100
+      ) {
+        availableSlotsForCalendar.forEach((slot) => {
+          slot.available_calendars = slot.available_calendars.filter(
+            (cal) => cal !== calendar.account?.emailAddress,
+          );
+          if (!slot.available_calendars.length) {
+            // if it has no calendars available, it's busy
+            slot.availability = AvailabilityStatus.BUSY;
+          } else if (
+            slot.availability === AvailabilityStatus.FREE &&
+            slot.available_calendars.length !== allCalendars.length
+          ) {
+            // if it was previously free, but now lacks a calendar, it should be considered Partial.
+            slot.availability = AvailabilityStatus.PARTIAL;
+          }
+        });
+      }
+    });
+
+    return slots;
+  }
+
   let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
-    let slots = generateDaySlots(timestamp, start_hour, end_hour);
+    let slots = checkOverbooked(
+      generateDaySlots(timestamp, start_hour, end_hour),
+    ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
     return {
       slots,
       epochs: generateEpochs(slots, partial_bookable_ratio),
