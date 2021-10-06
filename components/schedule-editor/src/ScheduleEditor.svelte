@@ -42,7 +42,7 @@
   export let view_as: "schedule" | "list";
   export let recurrence: "none" | "required" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
-  export let capacity: number;
+  export let capacity: number | null;
   export let open_hours: AvailabilityRule[];
 
   //#region mount and prop initialization

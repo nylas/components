@@ -26,7 +26,7 @@ export interface Manifest extends NylasManifest {
   notification_subject?: string;
   view_as?: "schedule" | "list";
   event_buffer: number;
-  capacity: number;
+  capacity: number | null;
   date_format: "full" | "weekday" | "date" | "none";
   open_hours?: AvailabilityRule[];
   recurrence: "none" | "required" | "optional";
