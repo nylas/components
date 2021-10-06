@@ -8,8 +8,5 @@
     "start": "echo 'Nothing to start'"
   },
   "main": "index.js",
-  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c",
-  "dependencies": {
-    "@types/d3-time": "^3.0.0"
-  }
+  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c"
 }
