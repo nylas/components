@@ -264,6 +264,9 @@
   }
 
   function toggleThreadUnreadStatus(event: CustomEvent) {
+    if (selectedThreads.has(event.detail.thread)) {
+      dispatchEvent("onChangeSelectedReadStatus", { event, selectedThreads });
+    }
     event.detail.thread.unread = !event.detail.thread.unread;
     updateThreadStatus(event.detail.thread);
     if (event.detail.thread.unread) {
@@ -328,6 +331,10 @@
   }
 
   async function threadStarred(event: CustomEvent) {
+    dispatchEvent("onStarSelected", {
+      event,
+      selectedThreads: event.detail.thread,
+    });
     if (starredThreads.has(event.detail.thread)) {
       starredThreads.delete(event.detail.thread);
       event.detail.thread.starred = false;
@@ -409,7 +416,8 @@
 
   async function deleteThread(thread: Thread) {
     if (trashLabelID) {
-      thread.label_ids = [trashLabelID];
+      const existingLabelIds = thread.labels?.map((i) => i.id) || [];
+      thread.label_ids = [...existingLabelIds, trashLabelID];
     } else if (trashFolderID) {
       thread.folder_id = trashFolderID;
     }
@@ -441,7 +449,11 @@
       }
     }
 
-    return (inboxThreads = inboxThreads), (selectedThreads = selectedThreads);
+    return (
+      (inboxThreads = inboxThreads),
+      (selectedThreads = selectedThreads),
+      (threads = threads)
+    );
   }
   //#endregion actions
 
