@@ -561,7 +561,8 @@
         if (
           prevEpoch &&
           JSON.stringify(prevEpoch[0].available_calendars) ===
-            JSON.stringify(slot.available_calendars)
+            JSON.stringify(slot.available_calendars) &&
+          prevEpoch[0].availability === slot.availability
         ) {
           prevEpoch.push(slot);
         } else {
