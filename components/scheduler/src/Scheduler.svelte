@@ -227,8 +227,6 @@
     }
     availability_id = availability_id;
   }
-
-  $: console.log({ slotsToBook });
 </script>
 
 <style lang="scss">
