@@ -12,8 +12,8 @@
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
   // TODO: switch for local development
-  import "@nylas/components-availability";
-  // import "../../availability";
+  // import "@nylas/components-availability";
+  import "../../availability";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
@@ -660,6 +660,7 @@
         show_header={false}
         date_format={customize_weekdays || allow_weekends ? "weekday" : "none"}
         busy_color="#000"
+        closed_color="#999"
         selected_color="#095"
         slot_size="15"
         on:timeSlotChosen={availabilityChosen}

@@ -24,6 +24,7 @@ export interface Manifest extends NylasManifest {
   partial_color: string;
   free_color: string;
   busy_color: string;
+  closed_color: string;
   selected_color: string;
   view_as: "schedule" | "list";
   event_buffer: number;

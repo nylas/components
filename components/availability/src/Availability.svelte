@@ -63,6 +63,7 @@
   export let allow_date_change: boolean;
   export let required_participants: string[];
   export let busy_color: string;
+  export let closed_color: string;
   export let partial_color: string;
   export let free_color: string;
   export let selected_color: string;
@@ -222,6 +223,11 @@
     busy_color = getPropertyValue(
       internalProps.busy_color,
       busy_color,
+      "#EE3248cc",
+    );
+    closed_color = getPropertyValue(
+      internalProps.closed_color,
+      closed_color,
       "#EE3248cc",
     );
     partial_color = getPropertyValue(
@@ -473,7 +479,8 @@
               );
             });
             if (!slotExistsInOpenHours) {
-              availability = AvailabilityStatus.BUSY;
+              // availability = AvailabilityStatus.BUSY;
+              availability = AvailabilityStatus.CLOSED;
               freeCalendars.length = 0;
             }
           }
@@ -561,8 +568,9 @@
           epochList.push([slot]);
         }
         return epochList;
-      }, [] as TimeSlot[][])
+      }, [] as SelectableSlot[][])
       .map((epoch) => {
+        console.log("epoch", epoch);
         let status = "free";
         const numFreeCalendars = epoch[0].available_calendars.length;
         const fewerCalendarsThanRatio =
@@ -574,7 +582,11 @@
           (required_participants.length &&
             !allRequiredParticipantsIncluded(epoch[0].available_calendars))
         ) {
-          status = "busy";
+          if (epoch[0].availability === AvailabilityStatus.CLOSED) {
+            status = "closed";
+          } else {
+            status = "busy";
+          }
         } else if (
           numFreeCalendars > 0 &&
           numFreeCalendars !== allCalendars.length
@@ -754,16 +766,21 @@
     // the slot immediately before it is busy
     if (
       slot.selectionPending &&
-      slot.availability !== AvailabilityStatus.BUSY &&
+      !(
+        slot.availability === AvailabilityStatus.BUSY ||
+        slot.availability === AvailabilityStatus.CLOSED
+      ) &&
       (!day.slots[slotIndex - 1]?.selectionPending ||
-        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY)
+        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY ||
+        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.CLOSED)
     ) {
       let pendingEndTime =
         day.slots.find((daySlot) => {
           return (
             daySlot.start_time > slot.start_time &&
             (!daySlot.selectionPending ||
-              daySlot.availability === AvailabilityStatus.BUSY)
+              daySlot.availability === AvailabilityStatus.BUSY ||
+              daySlot.availability === AvailabilityStatus.CLOSED)
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
 
@@ -1035,7 +1052,8 @@
           ) || null;
       } else if (
         slotSelection.length < max_bookable_slots &&
-        slot.availability !== AvailabilityStatus.BUSY
+        slot.availability !== AvailabilityStatus.BUSY &&
+        slot.availability !== AvailabilityStatus.CLOSED
       ) {
         slot.selectionPending = true;
       }
@@ -1080,8 +1098,12 @@
                 : daySlot.start_time <= dragStartSlot!.start_time &&
                   daySlot.start_time >= slot.start_time
             ) {
-              daySlot.selectionPending =
-                daySlot.availability !== AvailabilityStatus.BUSY ? true : false; // when you're dragging over a busy spot, don't set it to pending.
+              daySlot.selectionPending = !(
+                daySlot.availability === AvailabilityStatus.BUSY ||
+                daySlot.availability === AvailabilityStatus.CLOSED
+              )
+                ? true
+                : false; // when you're dragging over a busy spot, don't set it to pending.
             } else {
               if (daySlot.selectionPending) {
                 daySlot.selectionPending = false;
@@ -1138,7 +1160,12 @@
           day.slots
             .filter((x) => x.selectionPending)
             .forEach((x) => {
-              if (x.availability !== AvailabilityStatus.BUSY) {
+              if (
+                !(
+                  x.availability === AvailabilityStatus.BUSY ||
+                  x.availability === AvailabilityStatus.CLOSED
+                )
+              ) {
                 x.selectionStatus = SelectionStatus.SELECTED;
               }
             }),
@@ -1275,6 +1302,9 @@
           &.not-available::before {
             background-color: var(--busy-color, #36d2addf);
           }
+          &.closed::before {
+            background-color: var(--closed-color, #999);
+          }
           &.partially-available::before {
             background-color: var(--partial-color, #ffff7566);
           }
@@ -1402,8 +1432,28 @@
             background-size: 5.66px 5.66px;
           }
 
+          &.closed {
+            $darkStripe: var(--closed-color-lightened);
+            $lightStripe: white;
+
+            background-image: linear-gradient(
+              45deg,
+              $darkStripe 12.5%,
+              $lightStripe 12.5%,
+              $lightStripe 50%,
+              $darkStripe 50%,
+              $darkStripe 62.5%,
+              $lightStripe 62.5%,
+              $lightStripe 100%
+            );
+            background-size: 5.66px 5.66px;
+          }
+
           &.busy .inner {
             background-color: var(--busy-color, #ff647566);
+          }
+          &.closed .inner {
+            background-color: var(--closed-color, #ff647566);
           }
           &.partial .inner {
             background-color: var(--partial-color, #ffff7566);
@@ -1486,7 +1536,8 @@
             z-index: 2;
           }
 
-          &.busy:not(.pending) {
+          &.busy:not(.pending),
+          &.closed:not(.pending) {
             cursor: not-allowed;
             margin-left: 8px;
           }
@@ -1565,7 +1616,9 @@
 
     &.allow_booking {
       .slot:not(.busy):hover,
-      .slot:not(.busy):focus {
+      .slot:not(.busy):focus,
+      .slot:not(.closed):hover,
+      .slot:not(.closed):focus {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
         cursor: pointer;
       }
@@ -1682,11 +1735,15 @@
     busy_color,
     90,
   )};
+  --closed-color-lightened: {lightenHexColour(
+    closed_color,
+    90,
+  )};
   --selected-color-lightened: {lightenHexColour(
     selected_color,
     60,
   )}; 
---free-color: {free_color}; --busy-color: {busy_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
+--free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
     <h2 class="month">
@@ -1735,6 +1792,9 @@
       <span class="not-available">Not available</span>
       <span class="partially-available">Partially available</span>
       <span class="available">Available</span>
+      {#if busy_color !== closed_color}
+        <span class="closed">Closed</span>
+      {/if}
     </div>
   </header>
   {#if show_ticks && view_as === "schedule"}

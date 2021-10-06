@@ -195,7 +195,7 @@
               } else if (event.target.value === "everyday") {
                 component.open_hours = [
                   {
-                    startHour: 0,
+                    startHour: 8,
                     startMinute: 0,
                     endWeekday: -1,
                     endHour: 12,
@@ -205,7 +205,7 @@
                     startHour: 13,
                     startMinute: 0,
                     endWeekday: -1,
-                    endHour: 24,
+                    endHour: 19,
                     endMinute: 0,
                   },
                 ];
@@ -538,6 +538,15 @@
             value="#002db4"
           />
           Selected color
+        </label>
+        <label>
+          <input
+            type="color"
+            name="color-closed"
+            data-type="closed_color"
+            value="#EE3248"
+          />
+          Closed color
         </label>
       </fieldset>
       <fieldset>

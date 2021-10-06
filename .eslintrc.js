@@ -41,5 +41,12 @@ module.exports = {
     "no-console": ["error", { allow: ["warn", "error", "time"] }],
     "@typescript-eslint/no-var-requires": 0,
     "@typescript-eslint/no-empty-function": 0,
+    "prefer-const": [
+      "error",
+      {
+        destructuring: "any",
+        ignoreReadBeforeAssign: false,
+      },
+    ],
   },
 };
