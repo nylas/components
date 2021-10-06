@@ -652,7 +652,7 @@
         slot.available_calendars.includes(calendar.account?.emailAddress),
       );
       if (
-        availableSlotsForCalendar.length >
+        slots.length - availableSlotsForCalendar.length >
         (overbooked_threshold * slots.length) / 100
       ) {
         availableSlotsForCalendar.forEach((slot) => {
