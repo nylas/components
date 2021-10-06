@@ -295,6 +295,14 @@
               }
             });
           });
+
+        document
+          .querySelectorAll('input[name="mandate-top-of-hour"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.mandate_top_of_hour = JSON.parse(event.target.value);
+            });
+          });
       });
     </script>
     <style>
@@ -408,7 +416,7 @@
         </label>
       </fieldset>
 
-      <fiedlset>
+      <fieldset>
         <legend>Overbooked Threshold</legend>
         <label>
           <input
@@ -462,6 +470,23 @@
         <label>
           Max Bookable Slots
           <input type="number" name="max-slots" min="1" value="1" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Mandate Top of Hour</legend>
+        <label>
+          <input type="radio" name="mandate-top-of-hour" value="true" />
+          True
+        </label>
+        <label>
+          <input
+            checked
+            type="radio"
+            name="mandate-top-of-hour"
+            value="false"
+          />
+          False
         </label>
       </fieldset>
 

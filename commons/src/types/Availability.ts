@@ -33,6 +33,7 @@ export interface Manifest extends NylasManifest {
   show_header: boolean;
   open_hours: AvailabilityRule[];
   overbooked_threshold: number;
+  mandate_top_of_hour: boolean;
 }
 
 export interface AvailabilityRule {

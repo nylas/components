@@ -75,6 +75,7 @@
   export let date_format: "weekday" | "date" | "full" | "none";
   export let open_hours: AvailabilityRule[];
   export let overbooked_threshold: number;
+  export let mandate_top_of_hour: boolean;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -281,6 +282,11 @@
       internalProps.overbooked_threshold || editorManifest.overbooked_threshold,
       overbooked_threshold,
       100,
+    );
+    mandate_top_of_hour = getPropertyValue(
+      internalProps.mandate_top_of_hour || editorManifest.mandate_top_of_hour,
+      mandate_top_of_hour,
+      false,
     );
   }
   $: {
@@ -1081,6 +1087,9 @@
       // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
       dragStartSlot = slot;
       dragStartDay = day;
+      if (mandate_top_of_hour) {
+        console.log("start drag on", slot, day);
+      }
 
       if (slot.selectionStatus === SelectionStatus.SELECTED) {
         draggingExistingBlock = true;
