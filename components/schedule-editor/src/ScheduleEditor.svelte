@@ -11,9 +11,9 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
-  // TODO: switch to a non-relative path when new version of availability is deployed
-  // import "@nylas/components-availability";
-  import "../../availability";
+  // TODO: switch for local development
+  import "@nylas/components-availability";
+  // import "../../availability";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
