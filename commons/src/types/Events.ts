@@ -20,6 +20,12 @@ interface _Event {
   attendeeStatus?: "yes" | "no" | "noreply" | "maybe";
   isNewEvent?: boolean;
   conferencing?: EventConferencing;
+  recurrence: EventRecurrence;
+}
+
+export interface EventRecurrence {
+  rrule: string[];
+  timezone: string;
 }
 
 export interface EventConferencing {
