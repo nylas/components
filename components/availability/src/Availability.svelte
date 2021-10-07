@@ -460,7 +460,7 @@
         }
 
         if (mandate_top_of_hour) {
-          if (time.getMinutes() !== 0) {
+          if (mandate_top_of_hour && time.getMinutes() !== 0) {
             availability = AvailabilityStatus.BUSY;
             freeCalendars.length = 0;
           }
