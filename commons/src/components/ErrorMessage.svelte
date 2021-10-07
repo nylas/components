@@ -1,5 +1,9 @@
 <svelte:options tag="nylas-message-error" />
 
+<script>
+  export let error_message = "Uh oh! Looks like an error occurred";
+</script>
+
 <style lang="scss">
   @import "../../../components/theming/reset.scss";
   @import "../../../components/theming/variables.scss";
@@ -10,11 +14,11 @@
     color: var(--red);
     font-size: 1rem;
     line-height: 24px;
-    height: 85px;
+    min-height: 85px;
     padding: 20px 24px;
     position: absolute;
     right: 0;
-    width: 240px;
+    min-width: 240px;
   }
 
   button {
@@ -28,7 +32,7 @@
 </style>
 
 <div>
-  <p>Uh oh! Looks like an error occurred</p>
+  <p>{error_message}</p>
   <button type="button" on:click={() => location.reload()}
     >Refresh your page</button
   >
