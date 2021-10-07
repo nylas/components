@@ -5,6 +5,7 @@
     ManifestStore,
     AvailabilityStore,
     CalendarStore,
+    ErrorStore,
   } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
   import { onMount, tick } from "svelte";
@@ -37,6 +38,7 @@
   } from "@commons/types/Availability";
   import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import "@commons/components/ContactImage/ContactImage.svelte";
+  import "@commons/components/ErrorMessage.svelte";
   import AvailableIcon from "./assets/available.svg";
   import UnavailableIcon from "./assets/unavailable.svg";
   import BackIcon from "./assets/left-arrow.svg";
@@ -76,6 +78,7 @@
   export let open_hours: AvailabilityRule[];
   export let overbooked_threshold: number;
 
+  $: hasError = Object.keys($ErrorStore).length ? true : false;
   /**
    * Re-loads availability data from the Nylas API.
    * @param {boolean} clearSelection Used to indicate whether any currently selected timeslots should be cleared. Defaults to false.
@@ -1362,6 +1365,9 @@
       grid-auto-columns: 1fr;
       height: 100%;
       overflow: auto;
+      &.loading {
+        @include progress-bar(118px, 95px, var(--blue), var(--blue-lighter));
+      }
 
       &.schedule {
         overflow: hidden;
@@ -1410,7 +1416,6 @@
       display: grid;
       grid-template-rows: $headerHeight 1fr;
       position: relative;
-
       header {
         width: 100%;
         overflow: hidden;
@@ -1540,11 +1545,6 @@
         padding: 0;
         border: 1px solid rgba(0, 0, 0, 0.1);
         border-bottom: none;
-        &.loading {
-          .slot:first-of-type {
-            @include progress-bar(-4px, 8px, var(--blue), var(--blue-lighter));
-          }
-        }
 
         .slot {
           border: none;
@@ -1852,6 +1852,7 @@
     class="days"
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
+    class:loading
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
@@ -1900,7 +1901,7 @@
               </div>
             {/each}
           </div>
-          <div class="slots" class:loading>
+          <div class="slots">
             {#each day.slots as slot}
               <button
                 data-available-calendars={slot.available_calendars.toString()}
@@ -1935,7 +1936,7 @@
                 on:mouseleave={() => (slot.hovering = false)}
                 on:mouseup={(e) => {
                   if (mouseIsDown) {
-                    if (document.activeElement instanceof HTMLElement) {
+                    if (document.activeElement) {
                       document.activeElement.blur();
                     }
                     endDrag(slot, day);
@@ -2033,4 +2034,7 @@
       {/if}
     </div>
   </div>
+  {#if hasError}
+    <nylas-message-error />
+  {/if}
 </main>
