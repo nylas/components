@@ -157,12 +157,14 @@
         title: event_title,
         description: event_description,
         location: event_location,
-        conferencing: {
-          provider: "Zoom Meeting", // TODO: make this dynamic
-          details: {
-            url: event_conferencing,
-          },
-        },
+        conferencing: event_conferencing
+          ? {
+              provider: "Zoom Meeting", // TODO: make this dynamic
+              details: {
+                url: event_conferencing,
+              },
+            }
+          : undefined,
         participants: event.available_calendars.map((c) => {
           return {
             email: c,
