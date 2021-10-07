@@ -5,6 +5,7 @@
     ManifestStore,
     AvailabilityStore,
     CalendarStore,
+    ErrorStore,
   } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
   import { onMount, tick } from "svelte";
@@ -37,6 +38,7 @@
   } from "@commons/types/Availability";
   import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import "@commons/components/ContactImage/ContactImage.svelte";
+  import "@commons/components/ErrorMessage.svelte";
   import AvailableIcon from "./assets/available.svg";
   import UnavailableIcon from "./assets/unavailable.svg";
   import BackIcon from "./assets/left-arrow.svg";
@@ -77,6 +79,7 @@
   export let overbooked_threshold: number;
   export let mandate_top_of_hour: boolean;
 
+  $: hasError = Object.keys($ErrorStore).length ? true : false;
   /**
    * Re-loads availability data from the Nylas API.
    * @param {boolean} clearSelection Used to indicate whether any currently selected timeslots should be cleared. Defaults to false.
@@ -99,16 +102,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(availabilityQuery)
-      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -131,10 +133,12 @@
   let internalProps: Partial<Manifest> = {};
   let manifest: Partial<Manifest> = {};
   let editorManifest: Partial<EditorManifest> = {};
+  let loading: boolean;
 
   $: calendarID = "";
   onMount(async () => {
     await tick();
+    loading = true;
     clientHeight = main?.getBoundingClientRect().height;
     dayContainerWidth = main?.getBoundingClientRect().height;
     const storeKey = JSON.stringify({
@@ -152,6 +156,7 @@
       calendarIDs: [], // empty array will fetch all calendars
     };
     const calendarsList = await CalendarStore.getCalendars(calendarQuery); // TODO: we probably dont want to expose a list of all a users calendars to the end-user here.
+    loading = false;
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
@@ -782,11 +787,13 @@
   })();
 
   async function getAvailability(forceReload = false) {
+    loading = true;
     let freeBusyCalendars: any = [];
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
     const consolidatedAvailabilityForGivenDay = await $AvailabilityStore[
       JSON.stringify({ ...availabilityQuery, forceReload })
     ];
+    loading = false;
     for (const user of consolidatedAvailabilityForGivenDay) {
       freeBusyCalendars.push({
         emailAddress: user.email,
@@ -890,9 +897,7 @@
               hour12: true,
             });
       return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
+      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1275,6 +1280,7 @@
 <style lang="scss">
   @import "../../theming/reset.scss";
   @import "../../theming/variables.scss";
+  @import "../../theming/animation.scss";
 
   $headerHeight: 40px;
   main {
@@ -1371,6 +1377,13 @@
       grid-auto-columns: 1fr;
       height: 100%;
       overflow: auto;
+      &.loading {
+        @include progress-bar(118px, 95px, var(--blue), var(--blue-lighter));
+      }
+      &.loading.error {
+        @include progress-bar(118px, 95px, var(--red), var(--red));
+        animation: none;
+      }
 
       &.schedule {
         overflow: hidden;
@@ -1419,7 +1432,6 @@
       display: grid;
       grid-template-rows: $headerHeight 1fr;
       position: relative;
-
       header {
         width: 100%;
         overflow: hidden;
@@ -1782,18 +1794,9 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1864,6 +1867,8 @@
     class="days"
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
+    class:loading
+    class:error={hasError}
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
@@ -1947,7 +1952,7 @@
                 on:mouseleave={() => (slot.hovering = false)}
                 on:mouseup={(e) => {
                   if (mouseIsDown) {
-                    if (document.activeElement instanceof HTMLElement) {
+                    if (document.activeElement) {
                       document.activeElement.blur();
                     }
                     endDrag(slot, day);
@@ -2045,4 +2050,7 @@
       {/if}
     </div>
   </div>
+  {#if hasError}
+    <nylas-message-error />
+  {/if}
 </main>
