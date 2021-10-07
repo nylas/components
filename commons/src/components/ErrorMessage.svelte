@@ -28,7 +28,7 @@
 </style>
 
 <div>
-  <p>Uh oh! Looks like there’s an error with your calendar.</p>
+  <p>Uh oh! Looks like an error occurred</p>
   <button type="button" on:click={() => location.reload()}
     >Refresh your page</button
   >
