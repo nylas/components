@@ -413,7 +413,8 @@
     });
     if (click_action !== "mailbox") {
       if (trashLabelID) {
-        activeThread.label_ids = [trashLabelID];
+        const existingLabelIds = activeThread.labels?.map((i) => i.id) || [];
+        activeThread.label_ids = [...existingLabelIds, trashLabelID];
       } else if (trashFolderID) {
         activeThread.folder_id = trashFolderID;
       }
