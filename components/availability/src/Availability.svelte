@@ -459,6 +459,13 @@
           }
         }
 
+        if (mandate_top_of_hour) {
+          if (time.getMinutes() !== 0) {
+            availability = AvailabilityStatus.BUSY;
+            freeCalendars.length = 0;
+          }
+        }
+
         // if the "open_hours" property has rules, adhere to them above any other event-based free/busy statuses
         // (Mark the slot busy if it falls outside the open_hours)
         if (open_hours.length) {
@@ -1087,9 +1094,6 @@
       // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
       dragStartSlot = slot;
       dragStartDay = day;
-      if (mandate_top_of_hour) {
-        console.log("start drag on", slot, day);
-      }
 
       if (slot.selectionStatus === SelectionStatus.SELECTED) {
         draggingExistingBlock = true;
@@ -1568,7 +1572,7 @@
 
           &.pending {
             background-color: var(--selected-color-lightened);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+            // box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
             margin-left: 9px;
             margin-right: 1px;
@@ -1668,7 +1672,7 @@
       .slot:not(.busy):focus,
       .slot:not(.closed):hover,
       .slot:not(.closed):focus {
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 0 1px 0 var(--selected-color);
         cursor: pointer;
       }
     }
