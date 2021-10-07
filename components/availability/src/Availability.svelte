@@ -459,11 +459,10 @@
           }
         }
 
-        if (mandate_top_of_hour) {
-          if (mandate_top_of_hour && time.getMinutes() !== 0) {
-            availability = AvailabilityStatus.BUSY;
-            freeCalendars.length = 0;
-          }
+        // If mandate_top_of_hour, change any status to "busy" if it's not at :00
+        if (mandate_top_of_hour && time.getMinutes() !== 0) {
+          availability = AvailabilityStatus.BUSY;
+          freeCalendars.length = 0;
         }
 
         // if the "open_hours" property has rules, adhere to them above any other event-based free/busy statuses
