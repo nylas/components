@@ -914,4 +914,21 @@ describe("availability component", () => {
         });
     });
   });
+
+  describe("Top-of-hour requirement", () => {
+    it("should remove the ability to book slots that don't start at :00", () => {
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          cy.get(".slot.busy").should("have.length", 5);
+        });
+      cy.get("nylas-availability")
+        .as("availability")
+        .then((element) => {
+          const component = element[0];
+          component.mandate_top_of_hour = true;
+          cy.get(".slot.busy").should("have.length", 74);
+        });
+    });
+  });
 });

@@ -75,6 +75,7 @@
   export let date_format: "weekday" | "date" | "full" | "none";
   export let open_hours: AvailabilityRule[];
   export let overbooked_threshold: number;
+  export let mandate_top_of_hour: boolean;
 
   /**
    * Re-loads availability data from the Nylas API.
@@ -282,6 +283,11 @@
       overbooked_threshold,
       100,
     );
+    mandate_top_of_hour = getPropertyValue(
+      internalProps.mandate_top_of_hour || editorManifest.mandate_top_of_hour,
+      mandate_top_of_hour,
+      false,
+    );
   }
   $: {
     if (
@@ -451,6 +457,12 @@
           if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
           }
+        }
+
+        // If mandate_top_of_hour, change any status to "busy" if it's not at :00
+        if (mandate_top_of_hour && time.getMinutes() !== 0) {
+          availability = AvailabilityStatus.BUSY;
+          freeCalendars.length = 0;
         }
 
         // if the "open_hours" property has rules, adhere to them above any other event-based free/busy statuses
@@ -1559,7 +1571,6 @@
 
           &.pending {
             background-color: var(--selected-color-lightened);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
             z-index: 3;
             margin-left: 9px;
             margin-right: 1px;
@@ -1659,7 +1670,7 @@
       .slot:not(.busy):focus,
       .slot:not(.closed):hover,
       .slot:not(.closed):focus {
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 0 1px 0 var(--selected-color);
         cursor: pointer;
       }
     }

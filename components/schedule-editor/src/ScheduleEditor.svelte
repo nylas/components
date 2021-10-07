@@ -44,6 +44,7 @@
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
   export let capacity: number | null;
   export let open_hours: AvailabilityRule[];
+  export let mandate_top_of_hour: boolean;
 
   //#region mount and prop initialization
   let internalProps: Partial<Manifest> = {};
@@ -158,6 +159,11 @@
     );
     capacity = getPropertyValue(internalProps.capacity, capacity, 1);
     open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
+    mandate_top_of_hour = getPropertyValue(
+      internalProps.mandate_top_of_hour,
+      mandate_top_of_hour,
+      false,
+    );
   }
 
   // Manifest properties requiring further manipulation:
@@ -190,6 +196,7 @@
     view_as,
     recurrence,
     capacity,
+    mandate_top_of_hour,
   };
 
   $: {
@@ -632,6 +639,16 @@
     <label>
       <strong>Capacity</strong>
       <input type="number" min={1} bind:value={manifestProperties.capacity} />
+    </label>
+  </div>
+  <div>
+    <label>
+      <strong>Only allow events to be booked at the Top of the Hour</strong>
+      <input
+        type="checkbox"
+        name="mandate_top_of_hour"
+        bind:checked={manifestProperties.mandate_top_of_hour}
+      />
     </label>
   </div>
   <div>
