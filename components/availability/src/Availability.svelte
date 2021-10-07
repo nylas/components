@@ -1368,6 +1368,10 @@
       &.loading {
         @include progress-bar(118px, 95px, var(--blue), var(--blue-lighter));
       }
+      &.loading.error {
+        @include progress-bar(118px, 95px, var(--red), var(--red));
+        animation: none;
+      }
 
       &.schedule {
         overflow: hidden;
@@ -1853,6 +1857,7 @@
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
     class:loading
+    class:error={hasError}
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
