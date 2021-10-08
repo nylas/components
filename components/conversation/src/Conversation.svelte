@@ -329,7 +329,6 @@
   header {
     display: flex;
     background: white;
-    min-height: var(--fs-14);
     padding: 15px $headerHorizontalSpacing;
     gap: $headerHorizontalSpacing;
     color: var(--black);
