@@ -312,11 +312,25 @@
     background-color: var(--grey-light);
   }
   .loading {
-    @include progress-bar(top, 30px, left, 0, var(--blue), var(--blue-lighter));
+    @include progress-bar(
+      top,
+      calc(var(--fs-14) + 30px),
+      left,
+      0,
+      var(--blue),
+      var(--blue-lighter)
+    );
+    &.status {
+      border-top: calc(var(--fs-14) + 30px) solid #fff;
+      border-bottom: 50px solid #fff;
+      height: calc(100vh - (var(--fs-14) + 80px));
+      overflow: hidden;
+    }
   }
   header {
     display: flex;
     background: white;
+    min-height: var(--fs-14);
     padding: 15px $headerHorizontalSpacing;
     gap: $headerHorizontalSpacing;
     color: var(--black);
@@ -541,7 +555,7 @@
     <nylas-message-error error_message={$ErrorStore[id].message} />
   {/if}
   {#await conversation}
-    <div class="loading" />
+    <div class="loading status" />
   {:then _}
     <header
       class="mobile"
