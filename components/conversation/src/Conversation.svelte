@@ -313,15 +313,7 @@
     background-color: var(--grey-light);
   }
   .loading {
-    @include progress-bar(bottom, 0, left, 0, var(--blue), var(--blue-lighter));
-  }
-  .error {
-    @include progress-bar(bottom, 0, left, 0, var(--red), var(--red));
-    &::before,
-    &::after {
-      animation: none;
-      width: 100%;
-    }
+    @include progress-bar(top, 45px, left, 0, var(--blue), var(--blue-lighter));
   }
   header {
     display: flex;
@@ -334,6 +326,24 @@
     width: 100%;
     top: 0;
     z-index: 1;
+    .loading {
+      @include progress-bar(
+        bottom,
+        0,
+        left,
+        0,
+        var(--blue),
+        var(--blue-lighter)
+      );
+    }
+    .error {
+      @include progress-bar(bottom, 0, left, 0, var(--red), var(--red));
+      &::before,
+      &::after {
+        animation: none;
+        width: 100%;
+      }
+    }
     &.mobile {
       @media (min-width: $tabletBreakpoint) {
         display: none;
