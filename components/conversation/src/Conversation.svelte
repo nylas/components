@@ -29,7 +29,6 @@
   import "@commons/components/ErrorMessage.svelte";
   import { getDate } from "@commons/methods/datetime";
   import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
-  f;
   import ToggleIcon from "./assets/toggle.svg";
   import SendIcon from "./assets/send.svg";
 
@@ -283,10 +282,7 @@
     }
   };
 
-  afterUpdate(() => {
-    status = "loaded";
-    scrollToBottom();
-  });
+  afterUpdate(scrollToBottom);
 
   // #region mobile header view
   let headerExpanded = false;
@@ -317,7 +313,7 @@
     background-color: var(--grey-light);
   }
   .loading {
-    @include progress-bar(44.5px, 0, var(--blue), var(--blue-lighter));
+    @include progress-bar(initial, 0, var(--blue), var(--blue-lighter));
     &::before,
     &::after {
       top: initial;
@@ -325,7 +321,7 @@
     }
   }
   .error {
-    @include progress-bar(44.5px, 0, var(--red), var(--red));
+    @include progress-bar(initial, 0, var(--red), var(--red));
     &::before,
     &::after {
       animation: none;
