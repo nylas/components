@@ -29,7 +29,6 @@
   import "@commons/components/ErrorMessage.svelte";
   import { getDate } from "@commons/methods/datetime";
   import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
-  f;
   import ToggleIcon from "./assets/toggle.svg";
   import SendIcon from "./assets/send.svg";
 
