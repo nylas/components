@@ -16,9 +16,10 @@
     line-height: 24px;
     min-height: 85px;
     padding: 20px 24px;
-    position: absolute;
+    position: fixed;
     right: 0;
     min-width: 240px;
+    z-index: 2;
   }
 
   button {

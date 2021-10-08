@@ -24,8 +24,14 @@
 
 /** progress bar loading animation **/
 @mixin progress-bar(
-  $topPosition,
-  $leftPosition,
+  $positionOne,
+  // top, bottom, right, left
+  $positionOneMeasurement,
+  // px, %
+  $positionTwo,
+  // top, bottom, right, left
+  $positionTwoMeasurement,
+  // px, %
   $backgroundColor,
   $progressBarColor
 ) {
@@ -47,12 +53,11 @@
   }
   &::before,
   &::after {
+    #{$positionOne}: $positionOneMeasurement;
+    #{$positionTwo}: $positionTwoMeasurement;
     content: "";
     display: block;
     height: 4px;
-    left: $leftPosition;
     position: absolute;
-    top: $topPosition;
-    width: 100%;
   }
 }
