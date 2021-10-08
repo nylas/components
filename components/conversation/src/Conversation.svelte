@@ -313,20 +313,13 @@
     background-color: var(--grey-light);
   }
   .loading {
-    @include progress-bar(initial, 0, var(--blue), var(--blue-lighter));
-    &::before,
-    &::after {
-      top: initial;
-      bottom: 0;
-    }
+    @include progress-bar(bottom, 0, left, 0, var(--blue), var(--blue-lighter));
   }
   .error {
-    @include progress-bar(initial, 0, var(--red), var(--red));
+    @include progress-bar(bottom, 0, left, 0, var(--red), var(--red));
     &::before,
     &::after {
       animation: none;
-      bottom: 0;
-      top: initial;
       width: 100%;
     }
   }

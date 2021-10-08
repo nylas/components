@@ -1378,10 +1378,17 @@
       height: 100%;
       overflow: auto;
       &.loading {
-        @include progress-bar(118px, 95px, var(--blue), var(--blue-lighter));
+        @include progress-bar(
+          top,
+          118px,
+          left,
+          95px,
+          var(--blue),
+          var(--blue-lighter)
+        );
       }
       &.loading.error {
-        @include progress-bar(118px, 95px, var(--red), var(--red));
+        @include progress-bar(top, 118px, left, 95px, var(--red), var(--red));
         animation: none;
       }
 
