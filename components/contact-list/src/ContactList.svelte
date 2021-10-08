@@ -493,7 +493,7 @@
       </span>
     {/if}
 
-    {#if show_filter}
+    {#if show_filter && status !== "loading"}
       <label class="entry filter">
         Filter by email: <input
           id="show-filter-input"
