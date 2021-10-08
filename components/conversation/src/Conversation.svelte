@@ -50,7 +50,6 @@
   $: conversationManuallyPassed = !!messages && messages.length > 0;
 
   onMount(async () => {
-    status = "loading";
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
