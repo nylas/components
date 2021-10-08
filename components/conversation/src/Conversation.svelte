@@ -50,7 +50,6 @@
   $: conversationManuallyPassed = !!messages && messages.length > 0;
 
   onMount(async () => {
-    status = "loading";
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
@@ -313,7 +312,7 @@
     background-color: var(--grey-light);
   }
   .loading {
-    @include progress-bar(top, 45px, left, 0, var(--blue), var(--blue-lighter));
+    @include progress-bar(top, 30px, left, 0, var(--blue), var(--blue-lighter));
   }
   header {
     display: flex;
@@ -326,7 +325,7 @@
     width: 100%;
     top: 0;
     z-index: 1;
-    .loading {
+    &.loading {
       @include progress-bar(
         bottom,
         0,
@@ -336,7 +335,7 @@
         var(--blue-lighter)
       );
     }
-    .error {
+    &.error {
       @include progress-bar(bottom, 0, left, 0, var(--red), var(--red));
       &::before,
       &::after {
