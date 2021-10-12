@@ -47,7 +47,6 @@
   //#region props
   export let id: string = "";
   export let access_token: string = "";
-  export let editor_id: string;
   export let start_hour: number;
   export let end_hour: number;
   export let slot_size: number; // in minutes
@@ -144,7 +143,6 @@
     const storeKey = JSON.stringify({
       component_id: id,
       access_token,
-      external_manifest_ids: [editor_id],
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 

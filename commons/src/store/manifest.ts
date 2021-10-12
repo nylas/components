@@ -22,28 +22,7 @@ function initialize(): Writable<ManifestStore> {
       const fetchPromise = fetchManifest(
         accessor.component_id,
         accessor.access_token,
-      ).then((manifest) => {
-        if (!accessor.external_manifest_ids) {
-          return manifest;
-        }
-
-        const filteredIds = accessor.external_manifest_ids.filter((id) => !!id);
-        if (filteredIds.length === 0) {
-          return manifest;
-        }
-
-        const mergeManifestPromises = [];
-        for (const manifestId of filteredIds) {
-          mergeManifestPromises.push(
-            fetchManifest(manifestId, accessor.access_token),
-          );
-        }
-
-        return Promise.all(mergeManifestPromises).then((manifestsToMerge) => {
-          // TODO - not sure if this is exactly how we want to merge
-          return Object.assign({}, manifest, ...manifestsToMerge);
-        });
-      });
+      );
       store.update((store) => {
         store[key] = fetchPromise;
         return store;
