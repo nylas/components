@@ -594,8 +594,13 @@
       {#if reply.to.length}
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
-      {#if reply.cc.length}
-        <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
+      {#if reply.cc.length && you.email_address}
+        <span
+          >cc: {reply.cc
+            .filter((cc) => cc.email !== you.email_address)
+            .map((cc) => cc.email)
+            .join(", ")}
+        </span>
       {/if}
     </header>
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
