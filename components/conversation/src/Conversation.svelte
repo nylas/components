@@ -574,7 +574,7 @@
           <ToggleIcon aria-hidden="true" />
         </button>
       {/if}
-      {#if headerExpanded}
+      <span hidden={!headerExpanded ? true : false}>
         <!-- Show rest of the emails -->
         {#each reply.to.slice(1) as contact}
           <span>to: {contact.email}</span>
@@ -582,7 +582,7 @@
         {#each reply.cc as contact}
           <span>cc: {contact.email}</span>
         {/each}
-      {/if}
+      </span>
     </header>
     <header
       class="tablet"
