@@ -1,7 +1,7 @@
 describe("Conversation component (Svelte)", () => {
   beforeEach(() => {
     cy.visit("/components/conversation/src/index.html");
-    cy.get("nylas-conversation").should("be.visible").as("conversation");
+    cy.get("nylas-conversation").should("exist").as("conversation");
   });
 
   it("Shows Loading Animation for Mobile and Up", () => {
