@@ -46,7 +46,7 @@ describe("Conversation component (Svelte)", () => {
 
   it("Scrolls to most recent message", () => {
     cy.get("@conversation").then(() => {
-      cy.get("message").last().should("be.visible");
+      cy.get("article.message").last().should("be.visible");
     });
   });
 });
