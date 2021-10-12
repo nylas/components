@@ -574,15 +574,17 @@
           <ToggleIcon aria-hidden="true" />
         </button>
       {/if}
-      <span hidden={!headerExpanded ? true : false}>
+      {#if headerExpanded && you.email_address}
         <!-- Show rest of the emails -->
         {#each reply.to.slice(1) as contact}
           <span>to: {contact.email}</span>
         {/each}
-        {#each reply.cc as contact}
-          <span>cc: {contact.email}</span>
+        {#each [...new Set([...reply.cc
+              .filter((cc) => cc.email !== you.email_address)
+              .map((cc) => cc.email)])] as email}
+          <span>cc: {email}</span>
         {/each}
-      </span>
+      {/if}
     </header>
     <header
       class="tablet"
