@@ -198,10 +198,10 @@
     lastMessageInitialised = false;
     if (lastMessage.from[0].email === you.email_address) {
       reply.to = lastMessage.to;
-      reply.cc = lastMessage?.cc || [];
+      reply.cc = [...new Set(lastMessage.cc)] || [];
     } else {
       reply.to = lastMessage.from;
-      reply.cc = [...lastMessage.cc, ...lastMessage.to];
+      reply.cc = [...new Set([...lastMessage.cc, ...lastMessage.to])];
     }
     reply.cc = reply.cc.filter(
       (recipient) => recipient.email !== you.email_address,
@@ -260,7 +260,7 @@
         to: reply.to,
         body: `${replyBody} <br /><br /> --Sent with Nylas`,
         subject: conversation.subject,
-        cc: reply.cc,
+        cc: [...new Set(reply.cc)],
         reply_to_message_id: lastMessage.id,
         bcc: [],
       }).then((res) => {
@@ -574,15 +574,13 @@
           <ToggleIcon aria-hidden="true" />
         </button>
       {/if}
-      {#if headerExpanded && you.email_address}
+      {#if headerExpanded}
         <!-- Show rest of the emails -->
         {#each reply.to.slice(1) as contact}
           <span>to: {contact.email}</span>
         {/each}
-        {#each [...new Set([...reply.cc
-              .filter((cc) => cc.email !== you.email_address)
-              .map((cc) => cc.email)])] as email}
-          <span>cc: {email}</span>
+        {#each reply.cc as contact}
+          <span>cc: {contact.email}</span>
         {/each}
       {/if}
     </header>
@@ -594,13 +592,8 @@
       {#if reply.to.length}
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
-      {#if reply.cc.length && you.email_address}
-        <span
-          >cc: {reply.cc
-            .filter((cc) => cc.email !== you.email_address)
-            .map((cc) => cc.email)
-            .join(", ")}
-        </span>
+      {#if reply.cc.length}
+        <span>cc: {reply.cc.join(", ")} </span>
       {/if}
     </header>
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
