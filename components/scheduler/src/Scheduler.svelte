@@ -30,7 +30,6 @@
   export let id: string = "";
   export let access_token: string = "";
   export let availability_id: string;
-  export let editor_id: string;
   export let email_ids: string[];
   export let booking_label: string;
   export let event_title: string;
@@ -55,7 +54,6 @@
     const storeKey = JSON.stringify({
       component_id: id,
       access_token,
-      external_manifest_ids: [editor_id],
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
@@ -78,7 +76,6 @@
       availability_id,
       "",
     );
-    editor_id = getPropertyValue(internalProps.editor_id, editor_id, "");
     email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
     booking_label = getPropertyValue(
       internalProps.booking_label,
