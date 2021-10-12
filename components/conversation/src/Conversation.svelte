@@ -196,16 +196,18 @@
   // If someone else sent the last message, initialize your TO to the reply's FROM.
   $: if (lastMessage && lastMessageInitialised) {
     lastMessageInitialised = false;
-    if (lastMessage.from[0].email === you.email_address) {
-      reply.to = lastMessage.to;
-      reply.cc = [...new Set(lastMessage.cc)] || [];
+    if (you.email_address && lastMessage.from[0].email === you.email_address) {
+      reply.to = [...new Set(lastMessage.to)];
+      reply.cc =
+        [...new Set(lastMessage.cc)].filter(
+          (recipient) => recipient.email !== you.email_address,
+        ) || [];
     } else {
-      reply.to = lastMessage.from;
-      reply.cc = [...new Set([...lastMessage.cc, ...lastMessage.to])];
+      reply.to = [...new Set(lastMessage.from)];
+      reply.cc = [...new Set([...lastMessage.cc, ...lastMessage.to])].filter(
+        (recipient) => recipient.email !== you.email_address,
+      );
     }
-    reply.cc = reply.cc.filter(
-      (recipient) => recipient.email !== you.email_address,
-    );
   }
 
   $: if (you.email_address) {
@@ -260,7 +262,7 @@
         to: reply.to,
         body: `${replyBody} <br /><br /> --Sent with Nylas`,
         subject: conversation.subject,
-        cc: [...new Set(reply.cc)],
+        cc: reply.cc,
         reply_to_message_id: lastMessage.id,
         bcc: [],
       }).then((res) => {
@@ -286,6 +288,9 @@
   // #region mobile header view
   let headerExpanded = false;
   // #endregion mobile header view
+  $: if (reply.cc.length) {
+    reply.cc = [...new Set(reply.cc)];
+  }
 </script>
 
 <style lang="scss">
@@ -593,7 +598,7 @@
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
       {#if reply.cc.length}
-        <span>cc: {reply.cc.join(", ")} </span>
+        <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
       {/if}
     </header>
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
