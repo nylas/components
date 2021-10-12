@@ -288,9 +288,6 @@
   // #region mobile header view
   let headerExpanded = false;
   // #endregion mobile header view
-  $: if (reply.cc.length) {
-    reply.cc = [...new Set(reply.cc)];
-  }
 </script>
 
 <style lang="scss">
