@@ -102,15 +102,16 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
-        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-          (availability) => {
-            for (const calendar of availability) {
-              calendar.time_slots.push(...selectedSlots);
-            }
-            return availability;
-          },
-        );
+      $AvailabilityStore[
+        JSON.stringify(availabilityQuery)
+      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+        (availability) => {
+          for (const calendar of availability) {
+            calendar.time_slots.push(...selectedSlots);
+          }
+          return availability;
+        },
+      );
 
       await getAvailability();
     }
@@ -897,7 +898,9 @@
               hour12: true,
             });
       return `
-      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
+      ${startTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1328,12 +1331,11 @@
         gap: 1rem;
 
         button {
-          background-color: #f7f7f8;
-          border: 1px solid #e3e8ee;
+          background-color: rgba(128, 128, 128, 0.2);
           cursor: pointer;
           display: flex;
           &:hover {
-            background-color: #e3e8ee;
+            background-color: rgba(128, 128, 128, 0.3);
           }
         }
       }
@@ -1481,7 +1483,7 @@
 
           &.busy {
             $darkStripe: var(--busy-color-lightened);
-            $lightStripe: white;
+            $lightStripe: transparent;
 
             background-image: linear-gradient(
               45deg,
@@ -1498,7 +1500,7 @@
 
           &.closed {
             $darkStripe: var(--closed-color-lightened);
-            $lightStripe: white;
+            $lightStripe: transparent;
 
             background-image: linear-gradient(
               45deg,
@@ -1564,7 +1566,7 @@
 
         .slot {
           border: none;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+          border-bottom: 1px solid rgba(200, 200, 200, 0.2);
           background: transparent;
           position: relative;
           align-items: center;
@@ -1794,9 +1796,18 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
   style="
-  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
-  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
-  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
+  --busy-color-lightened: {lightenHexColour(
+    busy_color,
+    90,
+  )};
+  --closed-color-lightened: {lightenHexColour(
+    closed_color,
+    90,
+  )};
+  --selected-color-lightened: {lightenHexColour(
+    selected_color,
+    60,
+  )}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
