@@ -196,17 +196,19 @@
   // If someone else sent the last message, initialize your TO to the reply's FROM.
   $: if (lastMessage && lastMessageInitialised) {
     lastMessageInitialised = false;
-    if (you.email_address && lastMessage.from[0].email === you.email_address) {
-      reply.to = [...new Set(lastMessage.to)];
-      reply.cc =
-        [...new Set(lastMessage.cc)].filter(
+    if (you.email_address) {
+      if (lastMessage.from[0].email === you.email_address) {
+        reply.to = lastMessage.to;
+        reply.cc =
+          lastMessage.cc.filter(
+            (recipient) => recipient.email !== you.email_address,
+          ) || [];
+      } else {
+        reply.to = lastMessage.from;
+        reply.cc = [...lastMessage.cc, ...lastMessage.to].filter(
           (recipient) => recipient.email !== you.email_address,
-        ) || [];
-    } else {
-      reply.to = [...new Set(lastMessage.from)];
-      reply.cc = [...new Set([...lastMessage.cc, ...lastMessage.to])].filter(
-        (recipient) => recipient.email !== you.email_address,
-      );
+        );
+      }
     }
   }
 
