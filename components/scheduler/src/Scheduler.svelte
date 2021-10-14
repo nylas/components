@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import { ManifestStore, AvailabilityStore, sendMessage } from "@commons";
+  import { ManifestStore, sendMessage } from "@commons";
   import { createEvent } from "@commons/connections/events";
   import { get_current_component } from "svelte/internal";
   import {
@@ -24,6 +24,7 @@
       | "biweekly"
       | "weekly"
       | "monthly";
+    recurrence_expiry?: Date | string | undefined;
   }
 
   // #region props
@@ -42,6 +43,7 @@
   export let notification_subject: string;
   export let recurrence: "none" | "required" | "optional";
   export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
+  export let recurrence_expiry: Date | string | undefined;
 
   // #endregion props
 
@@ -128,6 +130,11 @@
       recurrence_cadence,
       ["none"],
     );
+    recurrence_expiry = getPropertyValue(
+      internalProps.recurrence_expiry,
+      recurrence_expiry,
+      undefined,
+    );
   }
 
   const dispatchEvent = getEventDispatcher(get_current_component());
@@ -148,6 +155,7 @@
     show_success_notification = false;
   }
 
+  let expirySelection = "none";
   async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
       let postableEvent: Partial<TimespanEvent> = {
@@ -175,20 +183,31 @@
       };
 
       if (event.recurrence_cadence && event.recurrence_cadence !== "none") {
-        let rrule: string[] = [];
+        let rrule: string = "";
         if (event.recurrence_cadence === "daily") {
-          rrule = ["RRULE:FREQ=DAILY"];
+          rrule = "RRULE:FREQ=DAILY";
         } else if (event.recurrence_cadence === "weekdays") {
-          rrule = ["RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR"];
+          rrule = "RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR";
         } else if (event.recurrence_cadence === "weekly") {
-          rrule = ["RRULE:FREQ=WEEKLY"];
+          rrule = "RRULE:FREQ=WEEKLY";
         } else if (event.recurrence_cadence === "biweekly") {
-          rrule = ["RRULE:FREQ=WEEKLY;INTERVAL=2"];
+          rrule = "RRULE:FREQ=WEEKLY;INTERVAL=2";
         } else if (event.recurrence_cadence === "monthly") {
-          rrule = ["RRULE:FREQ=MONTHLY"];
+          rrule = "RRULE:FREQ=MONTHLY";
+        }
+        const expiry = recurrence_expiry || event.recurrence_expiry;
+        const expiryInt = Number.parseInt(<string>expiry);
+
+        if (expiryInt !== NaN) {
+          rrule += `;COUNT=${expiryInt}`;
+        } else if (expiry instanceof Date) {
+          rrule += `;UNTIL=${expiry
+            .toISOString()
+            .substring(0, 19) // Remove MS from time string
+            .replace(/[^0-9]/g, "")}Z`;
         }
         postableEvent.recurrence = {
-          rrule,
+          rrule: [rrule],
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         };
       }

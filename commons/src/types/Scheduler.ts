@@ -18,4 +18,5 @@ export interface Manifest extends AvailabilityManifest {
   notification_subject?: string;
   recurrence?: "none" | "required" | "optional";
   recurrence_cadence?: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
+  recurrence_expiry?: Date | number | undefined;
 }
