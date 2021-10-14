@@ -101,16 +101,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(availabilityQuery)
-      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -738,7 +737,9 @@
   $: {
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
-      dispatchEvent("timeSlotChosen", { timeSlots: sortedSlots });
+      dispatchEvent("timeSlotChosen", {
+        timeSlots: sortedSlots.map((slot) => Object.assign({}, slot)),
+      });
       lastDispatchedSlots = sortedSlots;
     }
   }
@@ -896,9 +897,7 @@
               hour12: true,
             });
       return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
+      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1801,18 +1800,9 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
