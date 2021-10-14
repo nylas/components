@@ -299,6 +299,7 @@ main {
         justify-content: center;
         align-content: center;
         font-family: sans-serif;
+        touch-action: none;
 
         &.selected {
           background-color: var(--selected-color, var(--blue));

@@ -19,6 +19,7 @@
   import type { TimeInterval } from "d3-time";
   import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
+  import throttle from "just-throttle";
   import type { CalendarQuery } from "@commons/types/Events";
 
   import { lightenHexColour } from "@commons/methods/colour";
@@ -44,6 +45,7 @@
   import UnavailableIcon from "./assets/unavailable.svg";
   import BackIcon from "./assets/left-arrow.svg";
   import NextIcon from "./assets/right-arrow.svg";
+  import { isAvailable, isUnavailable } from "./method/slot";
 
   //#region props
   export let id: string = "";
@@ -134,6 +136,8 @@
   let manifest: Partial<Manifest> = {};
   let editorManifest: Partial<EditorManifest> = {};
   let loading: boolean;
+  let slotRef: Array<HTMLElement> = [];
+  let slotYPositions: Record<string, DOMRect> = {};
 
   $: calendarID = "";
   onMount(async () => {
@@ -157,6 +161,14 @@
     const calendarsList = await CalendarStore.getCalendars(calendarQuery); // TODO: we probably dont want to expose a list of all a users calendars to the end-user here.
     loading = false;
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
+
+    slotYPositions = slotRef.reduce<Record<string, DOMRect>>(
+      (allPositions, currentSlot, i) => {
+        if (currentSlot) allPositions[i] = currentSlot.getBoundingClientRect();
+        return allPositions;
+      },
+      {},
+    );
   });
 
   $: {
@@ -843,6 +855,7 @@
     let wrappingSortedSlot = sortedSlots.find(
       (block) => block.start_time === slot.start_time,
     );
+
     // A slot is first in a Pending block if:
     // it's pending
     // and it's not busy
@@ -850,23 +863,23 @@
     // the slot immediately before it isn't pending
     // OR
     // the slot immediately before it is busy
+
+    const precedingSlot: SelectableSlot | undefined = day.slots[slotIndex - 1];
+
+    const precedingSlotIsUnavailable = precedingSlot
+      ? isUnavailable(precedingSlot)
+      : false;
+
     if (
       slot.selectionPending &&
-      !(
-        slot.availability === AvailabilityStatus.BUSY ||
-        slot.availability === AvailabilityStatus.CLOSED
-      ) &&
-      (!day.slots[slotIndex - 1]?.selectionPending ||
-        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.BUSY ||
-        day.slots[slotIndex - 1]?.availability === AvailabilityStatus.CLOSED)
+      !isUnavailable(slot) &&
+      (!precedingSlot?.selectionPending || precedingSlotIsUnavailable)
     ) {
       let pendingEndTime =
         day.slots.find((daySlot) => {
           return (
             daySlot.start_time > slot.start_time &&
-            (!daySlot.selectionPending ||
-              daySlot.availability === AvailabilityStatus.BUSY ||
-              daySlot.availability === AvailabilityStatus.CLOSED)
+            (!daySlot.selectionPending || isUnavailable(daySlot))
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
 
@@ -1086,9 +1099,18 @@
   // Note some fun behaviour: If you drag a long event overtop a busy spot, it will automatically split it into multiple events.
   // You can set partial_bookable_ratio to 0 in order to prevent this / let you book atop busy spots.
   let mouseIsDown = false;
+  let touchIsDown = false;
   let dragStartSlot: SelectableSlot | null = null;
   let dragStartDay: Day | null = null;
   let draggingExistingBlock: boolean = false;
+  let currentTouchedSlot: SelectableSlot | null = null;
+  /**
+   * Typical order of events triggered for a single input:
+   * - touchstart, Zero or more touchmove events, depending on movement of the finger(s), touchend, mousemove, mousedown, mouseup, click
+   * To avoid conflicting mouse events and touch events, we need to track if user is on mobile to exclusively trigger
+   * mouse event flow or touch event flow.
+   */
+  let touchPriority = false;
 
   function unpendSlots() {
     days.forEach((day) =>
@@ -1103,6 +1125,7 @@
   function resetDragState() {
     unpendSlots();
     mouseIsDown = false;
+    touchIsDown = false;
     dragStartDay = null;
     dragStartSlot = null;
     draggingExistingBlock = false;
@@ -1136,8 +1159,7 @@
           ) || null;
       } else if (
         slotSelection.length < max_bookable_slots &&
-        slot.availability !== AvailabilityStatus.BUSY &&
-        slot.availability !== AvailabilityStatus.CLOSED
+        isAvailable(slot)
       ) {
         slot.selectionPending = true;
       }
@@ -1145,7 +1167,7 @@
   }
 
   function addToDrag(slot: SelectableSlot, day: Day) {
-    if (mouseIsDown) {
+    if (mouseIsDown || touchIsDown) {
       if (draggingExistingBlock && dragStartSlot && dragStartDay) {
         // dragStartSlot && dragStartDay are superfluous here, but type errors are thrown if we don't explicitly check for them
 
@@ -1182,12 +1204,7 @@
                 : daySlot.start_time <= dragStartSlot!.start_time &&
                   daySlot.start_time >= slot.start_time
             ) {
-              daySlot.selectionPending = !(
-                daySlot.availability === AvailabilityStatus.BUSY ||
-                daySlot.availability === AvailabilityStatus.CLOSED
-              )
-                ? true
-                : false; // when you're dragging over a busy spot, don't set it to pending.
+              daySlot.selectionPending = !isUnavailable(daySlot); // when you're dragging over a busy spot, don't set it to pending.
             } else {
               if (daySlot.selectionPending) {
                 daySlot.selectionPending = false;
@@ -1240,28 +1257,23 @@
         // Set all our pending slots to Selected
         // (This is effectively the "Move" function)
         days.forEach((day) =>
-          day.slots
-            .filter((x) => x.selectionPending)
-            .forEach((x) => {
-              if (
-                !(
-                  x.availability === AvailabilityStatus.BUSY ||
-                  x.availability === AvailabilityStatus.CLOSED
-                )
-              ) {
-                x.selectionStatus = SelectionStatus.SELECTED;
-              }
-            }),
+          day.slots.forEach((slot) => {
+            if (slot.selectionPending && !isUnavailable(slot)) {
+              slot.hovering = false;
+              slot.selectionStatus = SelectionStatus.SELECTED;
+            }
+          }),
         );
       }
     } else {
-      // Mode: Drag-mreating a new event
+      // Mode: Drag-creating a new event
       days.forEach((day) =>
-        day.slots
-          .filter((x) => x.selectionPending)
-          .forEach((x) => {
-            x.selectionStatus = SelectionStatus.SELECTED;
-          }),
+        day.slots.forEach((slot) => {
+          if (slot.selectionPending) {
+            slot.selectionStatus = SelectionStatus.SELECTED;
+            slot.hovering = false;
+          }
+        }),
       );
     }
     days = [...days]; // re-render
@@ -1277,8 +1289,86 @@
     }
     days = [...days];
   }
-
   //#endregion dragging
+
+  //#region slot interaction handlers
+  type SlotInteractionHandler = {
+    event: MouseEvent | TouchEvent;
+    slot: SelectableSlot | null;
+    day: Day;
+  };
+  function handleSlotInteractionStart({
+    event,
+    slot,
+    day,
+  }: SlotInteractionHandler) {
+    if (slot) {
+      if (
+        slotSelection.length < max_bookable_slots ||
+        slot.selectionStatus === SelectionStatus.SELECTED
+      ) {
+        if (event instanceof MouseEvent) mouseIsDown = true;
+        else if (event instanceof TouchEvent) touchIsDown = true;
+      }
+
+      startDrag(slot, day);
+    }
+  }
+
+  function handleSlotHover({
+    event,
+    slot: providedSlot,
+    day,
+  }: SlotInteractionHandler) {
+    if (providedSlot) {
+      const currentSlot: SelectableSlot = currentTouchedSlot ?? providedSlot;
+
+      addToDrag(currentSlot, day);
+
+      if (
+        !mouseIsDown &&
+        currentSlot.selectionStatus !== SelectionStatus.SELECTED
+      )
+        if (event instanceof MouseEvent) providedSlot.hovering = true;
+    }
+  }
+
+  function handleSlotInteractionEnd({ slot, day }: SlotInteractionHandler) {
+    if ((mouseIsDown || touchIsDown) && slot) {
+      if (document.activeElement) document.activeElement.blur();
+
+      endDrag(day);
+    }
+  }
+
+  function handleTouchMovement(event: TouchEvent) {
+    // On touch events, we need to manually calculate
+    // the position of the touch event and determine which slot is hovered
+    if (
+      event instanceof TouchEvent &&
+      event.touches.length === 1 &&
+      event.changedTouches.length === 1 // check if there is a single touch point
+    ) {
+      const { pageX, pageY: touchPositionY } = event.changedTouches[0];
+
+      const currentTouchedSlotPosition = Object.entries(slotYPositions).find(
+        ([_, slotPosition]) => slotPosition.y > touchPositionY,
+      );
+
+      if (currentTouchedSlotPosition && dragStartDay) {
+        const [currentTouchedSlotIndex] = currentTouchedSlotPosition;
+
+        currentTouchedSlot =
+          dragStartDay.slots[Number(currentTouchedSlotIndex)];
+
+        handleSlotHover({ event, slot: currentTouchedSlot, day: dragStartDay });
+      }
+    }
+  }
+
+  const throttledTouchMovement = throttle(handleTouchMovement, 100);
+  //#endregion slot interaction handlers
+
   // #region error
   $: if (id && email_ids.length && capacity) {
     try {
@@ -1314,7 +1404,7 @@
   class:ticked={show_ticks && view_as === "schedule"}
   class:allow_booking
   class:hide-header={!show_header}
-  on:mouseleave={() => endDrag(null, null)}
+  on:mouseleave={() => endDrag(null)}
   style="
   --busy-color-lightened: {lightenHexColour(busy_color, 90)};
   --closed-color-lightened: {lightenHexColour(closed_color, 90)};
@@ -1440,7 +1530,7 @@
             {/each}
           </div>
           <div class="slots">
-            {#each day.slots as slot}
+            {#each day.slots as slot, i (slot.start_time.toISOString())}
               <button
                 data-available-calendars={slot.available_calendars.toString()}
                 aria-label="{new Date(
@@ -1448,42 +1538,71 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
+                bind:this={slotRef[i]}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
                 data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
-                on:mousedown={() => {
-                  if (
-                    slotSelection.length < max_bookable_slots ||
-                    slot.selectionStatus === SelectionStatus.SELECTED
-                  ) {
-                    mouseIsDown = true;
-                  }
-                  startDrag(slot, day);
+                on:mousedown={(event) => {
+                  if (!touchPriority)
+                    handleSlotInteractionStart({ event, slot, day });
                 }}
-                on:mouseenter={(e) => {
-                  addToDrag(slot, day);
-                  if (
-                    !mouseIsDown &&
-                    slot.selectionStatus !== SelectionStatus.SELECTED
-                  ) {
-                    slot.hovering = true;
-                  }
+                on:mouseenter={(event) => {
+                  if (!touchPriority) handleSlotHover({ event, slot, day });
                 }}
                 on:mouseleave={() => (slot.hovering = false)}
-                on:mouseup={(e) => {
-                  if (mouseIsDown) {
-                    if (document.activeElement) {
-                      document.activeElement.blur();
-                    }
-                    endDrag(slot, day);
-                  }
+                on:mouseup={(event) => {
+                  if (!touchPriority && mouseIsDown)
+                    handleSlotInteractionEnd({ event, slot, day });
                 }}
                 on:keypress={(e) => {
                   if (e.code === "Space" || e.code === "Enter") {
                     startDrag(slot, day);
-                    tick().then(() => endDrag(slot, day));
+                    tick().then(() => endDrag(day));
+                  }
+                }}
+                on:touchstart={(event) => {
+                  const isFirstTouch =
+                    event.touches.length === 1 &&
+                    event.changedTouches.length === 1;
+
+                  if (isFirstTouch) {
+                    touchPriority = true;
+                    handleSlotInteractionStart({ event, slot, day });
+                  }
+                }}
+                on:touchmove={throttledTouchMovement}
+                on:touchend={(event) => {
+                  const isLastTouch =
+                    event.touches.length === 0 &&
+                    event.changedTouches.length === 1;
+
+                  if (isLastTouch) {
+                    const { pageX, pageY: touchPositionY } =
+                      event.changedTouches[0];
+
+                    const currentTouchedSlotPosition = Object.entries(
+                      slotYPositions,
+                    ).find(
+                      ([_, slotPosition]) => slotPosition.y > touchPositionY,
+                    );
+
+                    if (currentTouchedSlotPosition) {
+                      const [currentTouchedSlotIndex] =
+                        currentTouchedSlotPosition;
+
+                      currentTouchedSlot =
+                        day.slots[Number(currentTouchedSlotIndex)];
+                    }
+
+                    if (slot !== currentTouchedSlot) {
+                      handleSlotInteractionEnd({
+                        event,
+                        slot: currentTouchedSlot,
+                        day,
+                      });
+                    }
                   }
                 }}
               >
