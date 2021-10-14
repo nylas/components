@@ -308,7 +308,7 @@
 
   main {
     height: 100%;
-    min-height: 100vh;
+    max-height: 100vh;
     width: 100%;
     overflow: auto;
     position: relative;
@@ -339,7 +339,7 @@
     gap: $headerHorizontalSpacing;
     color: var(--black);
     font-size: var(--fs-14);
-    position: fixed;
+    position: sticky;
     width: 100%;
     top: 0;
     z-index: 1;
@@ -514,7 +514,7 @@
   }
 
   .reply-box {
-    position: fixed;
+    position: sticky;
     width: 100%;
     bottom: 0;
     z-index: 1;
