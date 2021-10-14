@@ -25,6 +25,7 @@
       | "weekly"
       | "monthly";
     recurrence_expiry?: Date | string | undefined;
+    expirySelection: string;
   }
 
   // #region props
@@ -149,13 +150,15 @@
         slot.recurrence_cadence = "none";
       }
     }
+    if (!slot.expirySelection) {
+      slot.expirySelection = "none";
+    }
     return slot;
   });
   $: if (slotsToBook.length) {
     show_success_notification = false;
   }
 
-  let expirySelection = "none";
   async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
       let postableEvent: Partial<TimespanEvent> = {
@@ -195,10 +198,14 @@
         } else if (event.recurrence_cadence === "monthly") {
           rrule = "RRULE:FREQ=MONTHLY";
         }
+        // Convert date input to Date type
+        if (typeof event.recurrence_expiry === "string") {
+          event.recurrence_expiry = new Date(event.recurrence_expiry as string);
+        }
         const expiry = recurrence_expiry || event.recurrence_expiry;
         const expiryInt = Number.parseInt(<string>expiry);
 
-        if (expiryInt !== NaN) {
+        if (!isNaN(expiryInt)) {
           rrule += `;COUNT=${expiryInt}`;
         } else if (expiry instanceof Date) {
           rrule += `;UNTIL=${expiry
@@ -317,7 +324,8 @@
               display: block;
             }
 
-            .cadences {
+            .cadences,
+            .expiry {
               display: flex;
               flex-wrap: wrap;
               gap: 0.5rem;
@@ -333,6 +341,12 @@
                 &.checked {
                   background-color: var(--blue);
                   color: white;
+                }
+                input {
+                  padding-left: 5px;
+                  &.after {
+                    width: 15%;
+                  }
                 }
 
                 span {
@@ -408,6 +422,53 @@
                   </div>
                 {:else if recurrence === "required"}
                   <strong>Repeating {timeSlot.recurrence_cadence}</strong>
+                {/if}
+                {#if timeSlot.recurrence_cadence !== "none" && !recurrence_expiry}
+                  <strong>Ends</strong>
+                  <div class="expiry">
+                    <label class:checked={timeSlot.expirySelection === "none"}>
+                      <input
+                        type="radio"
+                        value="none"
+                        bind:group={timeSlot.expirySelection}
+                      />
+                      <span>never</span>
+                    </label>
+                    <label class:checked={timeSlot.expirySelection === "after"}>
+                      <input
+                        type="radio"
+                        value="after"
+                        bind:group={timeSlot.expirySelection}
+                      />
+                      <span>After</span>
+                      {#if timeSlot.expirySelection === "after"}
+                        <input
+                          class="after"
+                          type="number"
+                          min="1"
+                          bind:value={timeSlot.recurrence_expiry}
+                        />
+                        <span>occurrences</span>
+                      {/if}
+                    </label>
+                    <label class:checked={timeSlot.expirySelection === "on"}>
+                      <input
+                        type="radio"
+                        value="on"
+                        bind:group={timeSlot.expirySelection}
+                      />
+                      <span>On</span>
+                      {#if timeSlot.expirySelection === "on"}
+                        <input
+                          type="date"
+                          min={timeSlot.start_time
+                            .toISOString()
+                            .substring(0, 10)}
+                          bind:value={timeSlot.recurrence_expiry}
+                        />
+                      {/if}
+                    </label>
+                  </div>
                 {/if}
               </footer>
             {/if}
