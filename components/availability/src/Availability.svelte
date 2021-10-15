@@ -1281,9 +1281,6 @@
 </script>
 
 <style lang="scss">
-  @import "../../theming/reset.scss";
-  @import "../../theming/variables.scss";
-  @import "../../theming/animation.scss";
   @import "./styles/availability.scss";
 </style>
 
