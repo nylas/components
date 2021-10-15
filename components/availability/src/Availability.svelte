@@ -1169,28 +1169,27 @@
           });
 
           // Don't let the user book more slots than are allowed
-          let tooManySlots =
-            day.slots.filter(
-              (s) =>
-                s.selectionPending ||
-                s.selectionStatus === SelectionStatus.SELECTED,
-            ).length > max_bookable_slots;
-          let pendingSlots = day.slots.filter((x) => x.selectionPending);
-          if (tooManySlots) {
-            let allowableSlots =
-              max_bookable_slots -
+          const remainingSlots =
+            max_bookable_slots -
+            (slotSelection.length +
               day.slots.filter(
-                (x) => x.selectionStatus === SelectionStatus.SELECTED,
-              ).length;
+                (slot) =>
+                  slot.selectionPending ||
+                  slot.selectionStatus === SelectionStatus.SELECTED,
+              ).length);
+          const pendingSlots = day.slots.filter(
+            (slot) => slot.selectionPending,
+          );
+          if (remainingSlots < 0) {
             if (direction === "forward") {
               // Only select the first N allowed slots AFTER your initially-dragegd one
               pendingSlots
-                .slice(allowableSlots)
+                .slice(remainingSlots)
                 .forEach((slot) => (slot.selectionPending = false));
             } else {
               // Only select the first N allowed slots BEFORE your initially-dragegd one
               pendingSlots
-                .slice(0, -allowableSlots)
+                .slice(0, -remainingSlots)
                 .forEach((slot) => (slot.selectionPending = false));
             }
           }
@@ -1200,7 +1199,7 @@
     }
   }
 
-  function endDrag(slot: SelectableSlot | null, day: Day | null) {
+  function endDrag(day: Day | null) {
     // Mode: Drag-moving an existing block
     if (draggingExistingBlock) {
       if (day) {
