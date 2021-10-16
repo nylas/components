@@ -8,8 +8,7 @@
   export let contact_query;
   export let height = "32px";
   export let width = "32px";
-
-  let image;
+  $: image = null;
 
   beforeUpdate(async () => {
     if (contact && contact.picture_url) {
@@ -17,6 +16,8 @@
         contact_query,
         contact.id,
       );
+    } else {
+      image = null;
     }
   });
 </script>

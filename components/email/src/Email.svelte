@@ -66,7 +66,8 @@
   export let show_expanded_email_view_onload: boolean;
   export let show_thread_actions: boolean;
 
-  let userEmail: string;
+  let userEmail: string | undefined;
+
   onMount(async () => {
     await tick(); // https://github.com/sveltejs/svelte/issues/2227
     manifest = ((await $ManifestStore[
@@ -99,9 +100,13 @@
   $: activeMessageContact =
     message && contacts ? contacts[message.from[0].email] : null;
 
+  let threadIdChanged = false;
+  $: thread_id, (threadIdChanged = true);
+
   $: (async () => {
-    if (!contacts) {
-      if (thread && thread.participants) {
+    if (threadIdChanged || !contacts) {
+      threadIdChanged = false;
+      if (thread && thread.messages) {
         await getThreadContacts(thread);
       } else if (activeThread) {
         await getThreadContacts(activeThread);
@@ -114,7 +119,20 @@
   })();
 
   async function getThreadContacts(thread: Thread) {
-    for (const participant of thread.participants) {
+    let fromParticipantEmails: string[] = [];
+    let fromParticipants: Participant[] = [];
+    thread.messages?.forEach((msg) => {
+      const participant = msg.from[0];
+      const participantEmail = participant.email;
+      if (
+        participantEmail &&
+        fromParticipantEmails.indexOf(participantEmail) === -1
+      ) {
+        fromParticipantEmails.push(participantEmail);
+        fromParticipants.push(participant);
+      }
+    });
+    for (const participant of fromParticipants) {
       const participantEmail = participant.email;
       contacts = contacts || {};
 
@@ -329,9 +347,9 @@
       if (!contact) {
         contact = await ContactStore.addContact(contact_query);
       }
-      return contact[0] ? contact[0] : { name: account.name };
+      return contact[0] ? contact[0] : account;
     } else {
-      return { name: account.name };
+      return account;
     }
   }
   // #endregion get contact for ContactImage
