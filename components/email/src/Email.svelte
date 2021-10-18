@@ -346,7 +346,7 @@
       if (!contact) {
         contact = await ContactStore.addContact(contact_query);
       }
-      return contact[0] ? contact[0] : account;
+      return contact[0] ?? account;
     } else {
       return account;
     }
