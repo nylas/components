@@ -170,17 +170,17 @@
   }
 
   async function getContact(email: string) {
-    const contact_query = {
+    const contactQuery = {
       component_id: id,
       access_token,
       query: `?email=${email}`,
     };
     if (id) {
-      let contact = $ContactStore[JSON.stringify(contact_query)];
+      let contact = $ContactStore[JSON.stringify(contactQuery)];
       if (!contact) {
         contact = await ContactStore.addContact(contact_query);
       }
-      return contact[0] ? contact[0] : {};
+      return contact[0] ?? {};
     }
   }
 
@@ -2061,9 +2061,7 @@
           </div>
           <div class="contact-details">
             <span class="name">
-              {`${attendee.firstName ? attendee.firstName : ""} ${
-                attendee.lastName ? attendee.lastName : ""
-              }`}
+              {`${attendee.firstName ?? ""} ${attendee.lastName ?? ""}`}
             </span>
             <span class="email">{attendee.emailAddress}</span>
           </div>
