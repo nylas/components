@@ -811,7 +811,7 @@
     for (const user of consolidatedAvailabilityForGivenDay) {
       if (!user.firstName && !user.lastName) {
         const contact = await getContact(user.email);
-        if (Object.keys(contact).length) {
+        if (!!contact) {
           user.account = {
             firstName: contact.given_name,
             lastName: contact.surname,
