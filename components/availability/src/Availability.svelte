@@ -6,6 +6,7 @@
     AvailabilityStore,
     CalendarStore,
     ErrorStore,
+    ContactStore,
   } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
   import { onMount, tick } from "svelte";
@@ -101,16 +102,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(availabilityQuery)
-      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -166,6 +166,21 @@
     ) as Partial<Manifest>;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
+    }
+  }
+
+  async function getContact(email: string) {
+    const contactQuery = {
+      component_id: id,
+      access_token,
+      query: `?email=${email}`,
+    };
+    if (id) {
+      let contact = $ContactStore[JSON.stringify(contactQuery)];
+      if (!contact) {
+        contact = await ContactStore.addContact(contact_query);
+      }
+      return contact[0] ?? {};
     }
   }
 
@@ -796,9 +811,20 @@
     ];
     loading = false;
     for (const user of consolidatedAvailabilityForGivenDay) {
+      if (!user.firstName && !user.lastName) {
+        const contact = await getContact(user.email);
+        if (!!contact) {
+          user.account = {
+            firstName: contact.given_name,
+            lastName: contact.surname,
+          };
+        }
+      }
+
       freeBusyCalendars.push({
         emailAddress: user.email,
         account: {
+          ...user.account,
           emailAddress: user.email, // ¯\_(ツ)_/¯
         },
         availability: AvailabilityStatus.BUSY,
@@ -898,9 +924,7 @@
               hour12: true,
             });
       return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
+      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1292,18 +1316,9 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null, null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1537,7 +1552,7 @@
           </div>
           <div class="contact-details">
             <span class="name">
-              {`${attendee.firstName} ${attendee.lastName}`}
+              {`${attendee.firstName ?? ""} ${attendee.lastName ?? ""}`}
             </span>
             <span class="email">{attendee.emailAddress}</span>
           </div>
