@@ -26,7 +26,7 @@
     "release:canary": "lerna version prerelease --no-private",
     "release:stable": "lerna version --force-publish --no-private",
     "snapshot": "build-storybook --quiet && percy-storybook --widths=320,1280",
-    "start": "concurrently \"live-server . --host=localhost --port=8000\" \"yarn dev\"",
+    "start": "concurrently \"live-server . --host=0.0.0.0 --port=8000\" \"yarn dev\"",
     "start:ci": "sirv . --port 8000 public",
     "storybook": "start-storybook --quiet -p 6006 -s ./public",
     "storybook:ci": "yarn run storybook -- --ci",
