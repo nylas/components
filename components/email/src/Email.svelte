@@ -119,20 +119,19 @@
   })();
 
   async function getThreadContacts(thread: Thread) {
-    let fromParticipantEmails: string[] = [];
-    let fromParticipants: Participant[] = [];
-    thread.messages?.forEach((msg) => {
-      const participant = msg.from[0];
-      const participantEmail = participant.email;
-      if (
-        participantEmail &&
-        fromParticipantEmails.indexOf(participantEmail) === -1
-      ) {
-        fromParticipantEmails.push(participantEmail);
-        fromParticipants.push(participant);
-      }
-    });
-    for (const participant of fromParticipants) {
+    const fromParticipants =
+      thread.messages?.reduce<Record<string, Participant>>(
+        (participants, message) => {
+          const participant: Participant = message.from[0];
+          participants[participant.email] = participant;
+          return participants;
+        },
+        {},
+      ) || {};
+    const fromParticipantsArray =
+      Array.from(Object.values(fromParticipants)) || [];
+
+    for (const participant of fromParticipantsArray) {
       const participantEmail = participant.email;
       contacts = contacts || {};
 
