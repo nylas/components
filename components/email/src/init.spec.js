@@ -197,7 +197,9 @@ describe("Email component", () => {
 
   it("Shows Email with demo id and thread", () => {
     cy.get("nylas-email").find(".subject").should("exist");
-    cy.get("nylas-email").find(".subject").should("contain", "Demo Thread");
+    cy.get("nylas-email")
+      .find(".subject")
+      .should("contain", "Welcome to Nylas!");
   });
   it("Shows Email with passed thread", () => {
     cy.get("nylas-email")
