@@ -95,7 +95,7 @@
     );
     show_reply = getPropertyValue(internalProps.show_reply, show_reply, false);
     // Assign thread_id with threadID stored in the manifest only when passing a thread_id
-    const internalPropThreadID = !(messages.length > 0)
+    const internalPropThreadID = messages.length === 0
       ? internalProps.thread_id
       : "";
     thread_id = getPropertyValue(internalPropThreadID, thread_id, "");
