@@ -34,6 +34,8 @@
       ? contact.given_name.charAt(0) + contact.surname.charAt(0)
       : contact.name
       ? contact.name.charAt(0)
+      : contact.email
+      ? contact.email.charAt(0)
       : "?"}
   </p>
 {/if}
