@@ -180,6 +180,7 @@
       show_header,
       false,
     );
+    visible = getPropertyValue(internalProps.visible, visible, true);
     show_subject = getPropertyValue(
       internalProps.show_subject,
       show_subject,
