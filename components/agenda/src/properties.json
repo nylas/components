@@ -1,87 +1,163 @@
 [
   {
+    "label": "id",
+    "title": "ID",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "access_token",
+    "title": "Access token",
+    "type": "string",
+    "noPreview": true
+  },
+  {
     "label": "theme",
     "title": "Theme",
+    "type": "string",
     "options": ["theme-1", "theme-2", "theme-3", "theme-4", "theme-5"],
     "value": "theme-1"
   },
   {
     "label": "header_type",
     "title": "Header type",
+    "type": "string",
     "options": ["none", "day", "full"],
     "value": "full"
   },
   {
     "label": "auto_time_box",
     "title": "Start/end day when events start/end",
+    "type": "boolean",
     "options": [true, false],
     "value": true
   },
   {
     "label": "hide_ticks",
     "title": "Hide ticks (hour markers)",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "allow_event_creation",
     "title": "Allow creating events",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "color_by",
     "title": "Color items by",
+    "type": "string",
     "options": ["calendar", "event"],
     "value": "calendar"
   },
   {
     "label": "hide_all_day_events",
     "title": "Hide all day events",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "prevent_zoom",
     "title": "Disable manual zoom",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "eagerly_fetch_events",
     "title": "Fetch events for consecutive days (previous & next)",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "show_no_events_message",
     "title": "Show a message when there are no events / calendar is empty",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "hide_current_time",
     "title": "Hide current-time bar",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "allow_date_change",
     "title": "Allow users to change date",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "condensed_view",
     "title": "Condensed view",
+    "type": "boolean",
     "options": [true, false],
     "value": false
   },
   {
     "label": "show_as_busy",
     "title": "Show as busy (changes applied after save & refresh)",
+    "type": "boolean",
     "options": [true, false],
-    "value": false,
+    "value": false
+  },
+  {
+    "label": "start_minute",
+    "title": "Minute that the Agenda will show at the top",
+    "type": "number",
+    "options": [0, 360, 420, 540],
+    "value": 0
+  },
+  {
+    "label": "end_minute",
+    "title": "Minute that the Agenda will show at the bottom",
+    "type": "number",
+    "options": [1020, 1080, 1320, 1440],
+    "value": 1440
+  },
+  {
+    "label": "events",
+    "title": "Events object that you can pass in",
+    "type": "Event[]",
     "noPreview": true
+  },
+  {
+    "label": "calendar_id",
+    "title": "Calendar ID to show",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "calendar_ids",
+    "title": "Calendar IDs to show",
+    "type": "any",
+    "noPreview": true
+  },
+  {
+    "label": "click_action",
+    "title": "Click action that you can specify",
+    "type": "function",
+    "noPreview": true
+  },
+  {
+    "label": "event_created",
+    "title": "Action that you can specify after event is created",
+    "type": "function",
+    "noPreview": true
+  },
+  {
+    "label": "event_snap_interval",
+    "title": "Snap interval that created events align to",
+    "type": "number",
+    "options": [5, 10, 15, 30],
+    "value": 15
   }
 ]

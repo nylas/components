@@ -1,0 +1,68 @@
+[
+  {
+    "label": "id",
+    "title": "ID",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "access_token",
+    "title": "Access token",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "theme",
+    "title": "Theme",
+    "options": ["theme-1", "theme-2", "theme-3", "theme-4"],
+    "type": "string",
+    "value": "theme-1"
+  },
+  {
+    "label": "click_action",
+    "title": "Click action",
+    "options": ["email", "select"],
+    "type": "string",
+    "value": "select"
+  },
+  {
+    "label": "sort_by",
+    "title": "Sort By",
+    "options": ["last_emailed", "name"],
+    "type": "string",
+    "value": "name"
+  },
+  {
+    "label": "show_names",
+    "title": "Show names",
+    "options": [true, false],
+    "type": "boolean",
+    "value": true
+  },
+  {
+    "label": "show_filter",
+    "title": "Show filter",
+    "options": [true, false],
+    "type": "boolean",
+    "value": true
+  },
+  {
+    "label": "contacts_to_load",
+    "title": "Contacts to load",
+    "options": [10, 50, 100, 1000],
+    "type": "number",
+    "value": 100
+  },
+  {
+    "label": "default_photo",
+    "title": "Set default picture for contacts",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "contacts",
+    "title": "Contacts object that you can pass in",
+    "type": "HydratedContact[]",
+    "noPreview": true
+  }
+]
