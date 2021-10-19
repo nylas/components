@@ -1,0 +1,112 @@
+[
+  {
+    "label": "theme",
+    "title": "Theme",
+    "options": ["light", "dark"],
+    "value": "light"
+  },
+  {
+    "label": "id",
+    "title": "Component Id",
+    "value": "",
+    "noPreview": true
+  },
+  {
+    "label": "value",
+    "title": "Message value",
+    "value": "",
+    "noPreview": true
+  },
+  {
+    "label": "minimized",
+    "title": "Minimized",
+    "description": "Open composer minimized",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "visible",
+    "title": "Open automatically",
+    "description": "Show open composer on initial load",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_to",
+    "title": "Show 'to' field",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_from",
+    "title": "Show 'from' field",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_close_button",
+    "title": "Show close button",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "reset_after_send",
+    "title": "Reset after send",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_minimize_button",
+    "title": "Show minimize button",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_header",
+    "title": "Show header",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_attachment_button",
+    "title": "Show attachment button",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_subject",
+    "title": "Show subject field",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_editor_toolbar",
+    "title": "Show text editor toolbar",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_cc",
+    "title": "Show cc field",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_cc_button",
+    "title": "Show cc button",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_bcc",
+    "title": "Show bcc field",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_bcc_button",
+    "title": "Show bcc button",
+    "options": [true, false],
+    "value": true
+  }
+]

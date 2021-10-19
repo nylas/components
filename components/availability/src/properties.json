@@ -1,0 +1,96 @@
+[
+  {
+    "label": "editor_id",
+    "title": "Schedule Editor Component ID",
+    "type": "text",
+    "value": ""
+  },
+  {
+    "label": "email_ids",
+    "title": "Emails of whose calendars to include",
+    "options": [],
+    "value": "",
+    "type": "multiple",
+    "validation_message": {
+      "  no_options_found": "No accounts found."
+    }
+  },
+  {
+    "label": "start_hour",
+    "title": "Start hour",
+    "options": [0, 7, 8, 9, 10],
+    "value": 0
+  },
+  {
+    "label": "end_hour",
+    "title": "End hour",
+    "options": [16, 17, 18, 22, 24],
+    "value": 24
+  },
+  {
+    "label": "slot_size",
+    "title": "Slot size in minutes",
+    "options": [10, 15, 30, 45, 60],
+    "value": 15
+  },
+  {
+    "label": "start_date",
+    "title": "Start date",
+    "type": "date",
+    "value": 0
+  },
+  {
+    "label": "dates_to_show",
+    "title": "Dates to show",
+    "options": [1, 3, 5],
+    "value": 1
+  },
+  {
+    "label": "show_ticks",
+    "title": "Show ticks",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "allow_booking",
+    "title": "Allow booking",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "max_bookable_slots",
+    "title": "Maximum bookable slots",
+    "options": [1, 2, 3],
+    "value": 1
+  },
+  {
+    "label": "partial_bookable_ratio",
+    "title": "Partial bookable ratio",
+    "options": [0, 3, 5],
+    "value": 0
+  },
+  {
+    "label": "show_as_week",
+    "title": "Show as week",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_weekends",
+    "title": "Show weekends",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "attendees_to_show",
+    "title": "Attendees to show",
+    "options": [3, 5, 10],
+    "value": 5
+  },
+  {
+    "label": "allow_date_change",
+    "title": "Allow date change",
+    "options": [true, false],
+    "value": true
+  }
+]
