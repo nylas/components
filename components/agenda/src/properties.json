@@ -1,0 +1,87 @@
+[
+  {
+    "label": "theme",
+    "title": "Theme",
+    "options": ["theme-1", "theme-2", "theme-3", "theme-4", "theme-5"],
+    "value": "theme-1"
+  },
+  {
+    "label": "header_type",
+    "title": "Header type",
+    "options": ["none", "day", "full"],
+    "value": "full"
+  },
+  {
+    "label": "auto_time_box",
+    "title": "Start/end day when events start/end",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "hide_ticks",
+    "title": "Hide ticks (hour markers)",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "allow_event_creation",
+    "title": "Allow creating events",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "color_by",
+    "title": "Color items by",
+    "options": ["calendar", "event"],
+    "value": "calendar"
+  },
+  {
+    "label": "hide_all_day_events",
+    "title": "Hide all day events",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "prevent_zoom",
+    "title": "Disable manual zoom",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "eagerly_fetch_events",
+    "title": "Fetch events for consecutive days (previous & next)",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_no_events_message",
+    "title": "Show a message when there are no events / calendar is empty",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "hide_current_time",
+    "title": "Hide current-time bar",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "allow_date_change",
+    "title": "Allow users to change date",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "condensed_view",
+    "title": "Condensed view",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_as_busy",
+    "title": "Show as busy (changes applied after save & refresh)",
+    "options": [true, false],
+    "value": false,
+    "noPreview": true
+  }
+]
