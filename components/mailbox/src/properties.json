@@ -1,0 +1,89 @@
+[
+  {
+    "label": "id",
+    "title": "ID",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "access_token",
+    "title": "Access token",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "show_thread_checkbox",
+    "title": "Show thread checkbox",
+    "options": [true, false],
+    "type": "boolean",
+    "value": true
+  },
+  {
+    "label": "show_star",
+    "title": "Show star",
+    "options": [true, false],
+    "type": "boolean",
+    "value": false
+  },
+  {
+    "label": "unread_status",
+    "title": "Show read/unread status of emails",
+    "options": ["read", "unread", "default"],
+    "type": "string",
+    "value": "default"
+  },
+  {
+    "label": "header",
+    "title": "Shows the header passed in the Mailbox",
+    "type": "string",
+    "value": "Mailbox header"
+  },
+  {
+    "label": "items_per_page",
+    "title": "Items to show per page",
+    "options": [10, 13, 15, 20, 25],
+    "value": 13
+  },
+  {
+    "label": "keyword_to_search",
+    "title": "Search for threads",
+    "type": "string",
+    "value": ""
+  },
+  {
+    "label": "query_string",
+    "title": "Filter your threads",
+    "type": "string",
+    "value": ""
+  },
+  {
+    "label": "actions_bar",
+    "title": "Actions allowed to be performed using the mailbox",
+    "type": "checkbox",
+    "options": [
+      {
+        "label": "Select All",
+        "value": "selectall"
+      },
+      {
+        "label": "Star",
+        "value": "star"
+      },
+      {
+        "label": "Delete",
+        "value": "delete"
+      },
+      {
+        "label": "Unread",
+        "value": "unread"
+      }
+    ],
+    "value": ["selectall", "star", "delete", "unread"]
+  },
+  {
+    "label": "onSelectThread",
+    "title": "Select thread action you can specify",
+    "type": "function",
+    "noPreview": true
+  }
+]
