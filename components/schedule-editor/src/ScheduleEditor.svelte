@@ -297,7 +297,7 @@
     margin-bottom: 96px;
     .contents {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
       margin-bottom: 24px;
 
@@ -495,7 +495,7 @@
             Keep weekends on
           </label>
         </div>
-        <div style="grid-column: 2/4">
+        <div>
           <strong>Available Hours</strong>
           <p>
             Drag over the hours want to be availble for booking. All other hours
