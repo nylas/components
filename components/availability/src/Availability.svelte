@@ -9,7 +9,7 @@
     ContactStore,
   } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
-  import { onMount, tick } from "svelte";
+  import { onMount, afterUpdate, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
   import {
     getEventDispatcher,
@@ -161,14 +161,16 @@
     const calendarsList = await CalendarStore.getCalendars(calendarQuery); // TODO: we probably dont want to expose a list of all a users calendars to the end-user here.
     loading = false;
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
+  });
 
-    slotYPositions = slotRef.reduce<Record<string, DOMRect>>(
-      (allPositions, currentSlot, i) => {
-        if (currentSlot) allPositions[i] = currentSlot.getBoundingClientRect();
-        return allPositions;
-      },
-      {},
-    );
+  const recalibrateSlotPositions = (ref: Array<HTMLElement>) =>
+    ref.reduce<Record<string, DOMRect>>((allPositions, currentSlot, i) => {
+      if (currentSlot) allPositions[i] = currentSlot.getBoundingClientRect();
+      return allPositions;
+    }, {});
+
+  afterUpdate(() => {
+    slotYPositions = recalibrateSlotPositions(slotRef);
   });
 
   $: {
@@ -872,7 +874,7 @@
 
     if (
       slot.selectionPending &&
-      !isUnavailable(slot) &&
+      isAvailable(slot) &&
       (!precedingSlot?.selectionPending || precedingSlotIsUnavailable)
     ) {
       let pendingEndTime =
@@ -1204,7 +1206,7 @@
                 : daySlot.start_time <= dragStartSlot!.start_time &&
                   daySlot.start_time >= slot.start_time
             ) {
-              daySlot.selectionPending = !isUnavailable(daySlot); // when you're dragging over a busy spot, don't set it to pending.
+              daySlot.selectionPending = isAvailable(daySlot); // when you're dragging over a busy spot, don't set it to pending.
             } else {
               if (daySlot.selectionPending) {
                 daySlot.selectionPending = false;
@@ -1258,7 +1260,7 @@
         // (This is effectively the "Move" function)
         days.forEach((day) =>
           day.slots.forEach((slot) => {
-            if (slot.selectionPending && !isUnavailable(slot)) {
+            if (slot.selectionPending && isAvailable(slot)) {
               slot.hovering = false;
               slot.selectionStatus = SelectionStatus.SELECTED;
             }
@@ -1315,21 +1317,12 @@
     }
   }
 
-  function handleSlotHover({
-    event,
-    slot: providedSlot,
-    day,
-  }: SlotInteractionHandler) {
-    if (providedSlot) {
-      const currentSlot: SelectableSlot = currentTouchedSlot ?? providedSlot;
+  function handleSlotHover({ event, slot, day }: SlotInteractionHandler) {
+    if (slot) {
+      addToDrag(slot, day);
 
-      addToDrag(currentSlot, day);
-
-      if (
-        !mouseIsDown &&
-        currentSlot.selectionStatus !== SelectionStatus.SELECTED
-      )
-        if (event instanceof MouseEvent) providedSlot.hovering = true;
+      if (!mouseIsDown && slot.selectionStatus !== SelectionStatus.SELECTED)
+        if (event instanceof MouseEvent) slot.hovering = true;
     }
   }
 
@@ -1359,7 +1352,7 @@
         const [currentTouchedSlotIndex] = currentTouchedSlotPosition;
 
         currentTouchedSlot =
-          dragStartDay.slots[Number(currentTouchedSlotIndex)];
+          dragStartDay.slots[Number(currentTouchedSlotIndex) - 1];
 
         handleSlotHover({ event, slot: currentTouchedSlot, day: dragStartDay });
       }
