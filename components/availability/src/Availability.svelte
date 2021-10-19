@@ -136,8 +136,34 @@
   let manifest: Partial<Manifest> = {};
   let editorManifest: Partial<EditorManifest> = {};
   let loading: boolean;
+  let dayRef: Array<HTMLElement> = [];
   let slotRef: Array<HTMLElement> = [];
   let slotYPositions: Record<string, DOMRect> = {};
+  let shouldUpdateSlotPositions = false;
+  let dayXPositions: Record<string, DOMRect> = {};
+  let shouldUpdateDayPositions = false;
+
+  $: {
+    if (dates_to_show || show_ticks || show_as_week || show_weekends) {
+      // Changes to these props will resize the width of day container
+      dayRef = dayRef.filter(Boolean);
+      shouldUpdateDayPositions = true;
+    }
+  }
+
+  $: {
+    if (
+      start_hour ||
+      end_hour ||
+      slot_size ||
+      show_header ||
+      allow_date_change
+    ) {
+      // Changes to these props changes the height of our slot buttons
+      slotRef = slotRef.filter(Boolean);
+      shouldUpdateSlotPositions = true;
+    }
+  }
 
   $: calendarID = "";
   onMount(async () => {
@@ -163,14 +189,21 @@
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
-  const recalibrateSlotPositions = (ref: Array<HTMLElement>) =>
+  const recalibratePositions = (ref: Array<HTMLElement>) =>
     ref.reduce<Record<string, DOMRect>>((allPositions, currentSlot, i) => {
       if (currentSlot) allPositions[i] = currentSlot.getBoundingClientRect();
       return allPositions;
     }, {});
 
   afterUpdate(() => {
-    slotYPositions = recalibrateSlotPositions(slotRef);
+    if (shouldUpdateSlotPositions) {
+      slotYPositions = recalibratePositions(slotRef);
+      shouldUpdateSlotPositions = false;
+    }
+    if (shouldUpdateDayPositions) {
+      dayXPositions = recalibratePositions(dayRef);
+      shouldUpdateDayPositions = false;
+    }
   });
 
   $: {
@@ -1326,9 +1359,13 @@
     }
   }
 
-  function handleSlotInteractionEnd({ slot, day }: SlotInteractionHandler) {
-    if ((mouseIsDown || touchIsDown) && slot) {
-      if (document.activeElement) document.activeElement.blur();
+  function handleSlotInteractionEnd(day: Day | null) {
+    if (mouseIsDown || touchIsDown) {
+      if (
+        document.activeElement &&
+        document.activeElement instanceof HTMLElement
+      )
+        document.activeElement.blur();
 
       endDrag(day);
     }
@@ -1342,19 +1379,32 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const { pageX, pageY: touchPositionY } = event.changedTouches[0];
+      const { pageX: touchPositionX, pageY: touchPositionY } =
+        event.changedTouches[0];
+
+      const currentTouchedDayPosition = Object.entries(dayXPositions).find(
+        ([_, dayPosition]) => dayPosition.x > touchPositionX,
+      ); // [index, DOMRect]
 
       const currentTouchedSlotPosition = Object.entries(slotYPositions).find(
         ([_, slotPosition]) => slotPosition.y > touchPositionY,
-      );
+      ); // [index, DOMRect]
 
       if (currentTouchedSlotPosition && dragStartDay) {
+        let hoveredDay = dragStartDay;
+
+        const currentTouchedDayIndex = currentTouchedDayPosition
+          ? Number(currentTouchedDayPosition[0])
+          : days.length;
+
+        hoveredDay = days[currentTouchedDayIndex - 1];
+
         const [currentTouchedSlotIndex] = currentTouchedSlotPosition;
 
         currentTouchedSlot =
-          dragStartDay.slots[Number(currentTouchedSlotIndex) - 1];
+          hoveredDay.slots[Number(currentTouchedSlotIndex) - 1];
 
-        handleSlotHover({ event, slot: currentTouchedSlot, day: dragStartDay });
+        handleSlotHover({ event, slot: currentTouchedSlot, day: hoveredDay });
       }
     }
   }
@@ -1390,6 +1440,12 @@
   @import "./styles/availability.scss";
 </style>
 
+<svelte:window
+  on:resize={() => {
+    shouldUpdateDayPositions = true;
+    shouldUpdateSlotPositions = true;
+  }}
+/>
 <nylas-error {id} />
 <main
   bind:this={main}
@@ -1477,8 +1533,12 @@
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
-    {#each days as day}
-      <div class="day">
+    {#each days as day, dayIndex (day.timestamp.toISOString())}
+      <div
+        class="day"
+        data-timestamp={day.timestamp.toISOString()}
+        bind:this={dayRef[dayIndex]}
+      >
         <header>
           <h2>
             {#if date_format === "date" || date_format === "full"}
@@ -1523,7 +1583,7 @@
             {/each}
           </div>
           <div class="slots">
-            {#each day.slots as slot, i (slot.start_time.toISOString())}
+            {#each day.slots as slot, slotIndex (slot.start_time.toISOString())}
               <button
                 data-available-calendars={slot.available_calendars.toString()}
                 aria-label="{new Date(
@@ -1531,7 +1591,7 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                bind:this={slotRef[i]}
+                bind:this={slotRef[slotIndex]}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
@@ -1545,9 +1605,9 @@
                   if (!touchPriority) handleSlotHover({ event, slot, day });
                 }}
                 on:mouseleave={() => (slot.hovering = false)}
-                on:mouseup={(event) => {
+                on:mouseup={() => {
                   if (!touchPriority && mouseIsDown)
-                    handleSlotInteractionEnd({ event, slot, day });
+                    handleSlotInteractionEnd(day);
                 }}
                 on:keypress={(e) => {
                   if (e.code === "Space" || e.code === "Enter") {
@@ -1567,35 +1627,30 @@
                 }}
                 on:touchmove={throttledTouchMovement}
                 on:touchend={(event) => {
-                  const isLastTouch =
-                    event.touches.length === 0 &&
-                    event.changedTouches.length === 1;
+                  const { pageX: touchPositionX, pageY: touchPositionY } =
+                    event.changedTouches[0];
 
-                  if (isLastTouch) {
-                    const { pageX, pageY: touchPositionY } =
-                      event.changedTouches[0];
+                  const allSlotPositions = Object.values(slotYPositions);
+                  const top = Math.floor(allSlotPositions.splice(0, 1)[0].top);
+                  const bottom = Math.floor(
+                    allSlotPositions.slice(-1)[0].bottom,
+                  );
 
-                    const currentTouchedSlotPosition = Object.entries(
-                      slotYPositions,
-                    ).find(
-                      ([_, slotPosition]) => slotPosition.y > touchPositionY,
-                    );
+                  const allDayPositions = Object.values(dayXPositions);
+                  const left = Math.floor(allDayPositions.splice(0, 1)[0].left);
+                  const right = Math.floor(allDayPositions.slice(-1)[0].right);
 
-                    if (currentTouchedSlotPosition) {
-                      const [currentTouchedSlotIndex] =
-                        currentTouchedSlotPosition;
-
-                      currentTouchedSlot =
-                        day.slots[Number(currentTouchedSlotIndex)];
-                    }
-
-                    if (slot !== currentTouchedSlot) {
-                      handleSlotInteractionEnd({
-                        event,
-                        slot: currentTouchedSlot,
-                        day,
-                      });
-                    }
+                  if (
+                    left <= touchPositionX &&
+                    touchPositionX <= right &&
+                    top <= touchPositionY &&
+                    touchPositionY <= bottom
+                  ) {
+                    // touch position is inside "canvas" complete endDrag
+                    handleSlotInteractionEnd(day);
+                  } else {
+                    // touch position is outside of "canvas" so reset to pre-drag slot position
+                    handleSlotInteractionEnd(null);
                   }
                 }}
               >
