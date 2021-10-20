@@ -192,7 +192,7 @@
     if (id) {
       let contact = $ContactStore[JSON.stringify(contactQuery)];
       if (!contact) {
-        contact = await ContactStore.addContact(contact_query);
+        contact = await ContactStore.addContact(contactQuery);
       }
       return contact[0] ?? {};
     }
