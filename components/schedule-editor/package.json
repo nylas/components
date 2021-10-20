@@ -1,6 +1,6 @@
 {
   "name": "@nylas/components-schedule-editor",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
