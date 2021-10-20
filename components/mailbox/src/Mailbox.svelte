@@ -475,7 +475,7 @@
 </script>
 
 <style lang="scss">
-  @use 'sass:list';
+  @use "sass:list";
   @import "../../theming/reset.scss";
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
@@ -598,6 +598,11 @@
       }
       // #endregion define checked styles
     }
+  }
+
+  .refreshing {
+    color: transparent;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   }
 
   .checkbox-container {
@@ -753,6 +758,7 @@
               class:unread={unreadThreads.has(thread) ||
                 (thread.unread && unread_status === "default")}
               class:checked={selectedThreads.has(thread)}
+              class:refreshing={refreshingMailbox}
             >
               {#if show_thread_checkbox}<div
                   class="checkbox-container thread-checkbox"
