@@ -136,8 +136,8 @@
   let manifest: Partial<Manifest> = {};
   let editorManifest: Partial<EditorManifest> = {};
   let loading: boolean;
-  let dayRef: Array<HTMLElement> = [];
-  let slotRef: Array<HTMLElement> = [];
+  let dayRef: HTMLElement[] = [];
+  let slotRef: HTMLElement[] = [];
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
@@ -146,7 +146,7 @@
   $: {
     if (dates_to_show || show_ticks || show_as_week || show_weekends) {
       // Changes to these props will resize the width of day container
-      dayRef = dayRef.filter(Boolean);
+      dayRef = dayRef.filter((day) => !!day);
       shouldUpdateDayPositions = true;
     }
   }
@@ -160,7 +160,7 @@
       allow_date_change
     ) {
       // Changes to these props changes the height of our slot buttons
-      slotRef = slotRef.filter(Boolean);
+      slotRef = slotRef.filter((slot) => !!slot);
       shouldUpdateSlotPositions = true;
     }
   }
@@ -189,7 +189,7 @@
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
-  const recalibratePositions = (ref: Array<HTMLElement>) =>
+  const recalibratePositions = (ref: HTMLElement[]) =>
     ref.reduce<Record<string, DOMRect>>((allPositions, currentSlot, i) => {
       if (currentSlot) allPositions[i] = currentSlot.getBoundingClientRect();
       return allPositions;
@@ -1361,10 +1361,7 @@
 
   function handleSlotInteractionEnd(day: Day | null) {
     if (mouseIsDown || touchIsDown) {
-      if (
-        document.activeElement &&
-        document.activeElement instanceof HTMLElement
-      )
+      if (document.activeElement instanceof HTMLElement)
         document.activeElement.blur();
 
       endDrag(day);
@@ -1390,14 +1387,12 @@
         ([_, slotPosition]) => slotPosition.y > touchPositionY,
       ); // [index, DOMRect]
 
-      if (currentTouchedSlotPosition && dragStartDay) {
-        let hoveredDay = dragStartDay;
-
+      if (currentTouchedSlotPosition) {
         const currentTouchedDayIndex = currentTouchedDayPosition
           ? Number(currentTouchedDayPosition[0])
           : days.length;
 
-        hoveredDay = days[currentTouchedDayIndex - 1];
+        const hoveredDay = days[currentTouchedDayIndex - 1];
 
         const [currentTouchedSlotIndex] = currentTouchedSlotPosition;
 
