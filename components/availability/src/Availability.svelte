@@ -1435,12 +1435,12 @@
   @import "./styles/availability.scss";
 </style>
 
-<svelte:window
+<!-- <svelte:window
   on:resize={() => {
     shouldUpdateDayPositions = true;
     shouldUpdateSlotPositions = true;
   }}
-/>
+/> -->
 <nylas-error {id} />
 <main
   bind:this={main}
