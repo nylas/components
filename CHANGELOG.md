@@ -1,3 +1,17 @@
+# 2021-10-21
+
+## 1.0.10
+
+- Nylas Email, Nylas Mailbox and Nylas Conversation components launched 🎉
+
+# 2021-10-08
+
+## 1.0.8
+
+### Bug Fixes
+
+- Composer: Fixed a bug where `value` prop was not reactive. This fix allows users to dynamically change the value [Pull Request](https://github.com/nylas/components/pull/93)
+
 # 2021-09-17
 
 ## 1.0.5

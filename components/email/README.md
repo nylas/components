@@ -1,4 +1,4 @@
-# Nylas Email -- In Development
+# Nylas Email
 
 Nylas Email (`<nylas-email>`) is part of the Nylas Components library that lets you build event/calendar applications in minutes. Use Nylas Email with your Nylas account or by passing in your own JSON data.
 
@@ -53,11 +53,11 @@ All Nylas components have two ways of displaying data to your end-user:
 
 If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Email component.
 
-You'll be guided through the component setup and be given the option to tie your component to a thread. Review the [Email Documentation](To be updated).
+You'll be guided through the component setup and be given the option to tie your component to a thread. Review the [Email Documentation](https://developer.nylas.com/docs/user-experience/components/email-component/).
 
 #### Allowed domains
 
-During the setup process, you'll be prompted to provide a list of [allowed domains](To be updated). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
+During the setup process, you'll be prompted to provide a list of [allowed domains](https://developer.nylas.com/docs/user-experience/components/email-component/#allowed-domains). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
 
 ### Passing in your own data
 
@@ -139,7 +139,7 @@ document.querySelector("nylas-email").message_id = staticMessageID;
 
 ### Properties
 
-Nylas Email allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Email](To be updated)
+Nylas Email allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Email](https://developer.nylas.com/docs/user-experience/components/email-component/#email-properties)
 
 ### Events and Callbacks
 
@@ -156,7 +156,7 @@ document
   });
 ```
 
-A list of emitted events is available on our [Documentation for Nylas Email](To be updated)
+A list of emitted events is available on our [Documentation for Nylas Email](https://developer.nylas.com/docs/user-experience/components/email-component/#event-listeners)
 
 ## Contributing
 
@@ -175,4 +175,4 @@ snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 ## Additional Documentation
 
 - [Nylas Email on NPM](https://www.npmjs.com/package/@nylas/components-email)
-- [Nylas Docs: Email Component](To be updated)
+- [Nylas Docs: Email Component](https://developer.nylas.com/docs/user-experience/components/email-component/)
