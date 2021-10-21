@@ -1,4 +1,4 @@
-# Nylas Mailbox -- In Development
+# Nylas Mailbox
 
 Nylas Mailbox (`<nylas-mailbox>`) is part of the Nylas Components library that lets you build email/mailbox applications in minutes. Use Nylas Mailbox with your Nylas account or by passing in your own JSON data.
 
