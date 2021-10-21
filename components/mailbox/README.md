@@ -53,11 +53,11 @@ All Nylas components have two ways of displaying data to your end-user:
 
 If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Mailbox component.
 
-You'll be guided through the component setup and be given the options to customize your mailbox component. Review the [Mailbox Documentation](To be updated).
+You'll be guided through the component setup and be given the options to customize your mailbox component. Review the [Mailbox Documentation](https://developer.nylas.com/docs/user-experience/components/mailbox-component/).
 
 #### Allowed domains
 
-During the setup process, you'll be prompted to provide a list of [allowed domains](To be updated). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
+During the setup process, you'll be prompted to provide a list of [allowed domains](https://developer.nylas.com/docs/user-experience/components/mailbox-component/#allowed-domains). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
 
 ### Passing in your own data
 
@@ -134,7 +134,7 @@ document.querySelector("nylas-mailbox").all_threads = staticThreads;
 
 ### Properties
 
-Nylas Mailbox allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Mailbox](To be updated)
+Nylas Mailbox allows for several properties that affect the layout and functionality of your component. You can find a complete list of properties within our [Documentation for Nylas Mailbox](https://developer.nylas.com/docs/user-experience/components/mailbox-component/#mailbox-properties)
 
 ### Events and Callbacks
 
@@ -151,7 +151,7 @@ document
   });
 ```
 
-A list of emitted events is available on our [Documentation for Nylas Mailbox](To be updated)
+A list of emitted events is available on our [Documentation for Nylas Mailbox](https://developer.nylas.com/docs/user-experience/components/mailbox-component/#event-listeners)
 
 ## Contributing
 
@@ -171,4 +171,5 @@ snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 
 - [Nylas Mailbox on NPM](https://www.npmjs.com/package/@nylas/components-mailbox)
 - [Allowed query parameters](https://developer.nylas.com/docs/api/#get/threads)
-- [Nylas Docs: Mailbox Component](To be updated)
+- [Threads search endpoint](https://developer.nylas.com/docs/api/#get/threads/search)
+- [Nylas Docs: Mailbox Component](https://developer.nylas.com/docs/user-experience/components/mailbox-component/)
