@@ -3,7 +3,7 @@
 main {
   font-family: system-ui, sans-serif;
   display: grid;
-  grid-template-columns: 1fr 2px auto;
+  grid-template-columns: 1fr 5px auto;
   gap: 1rem;
   padding: 0 1rem;
 
@@ -14,6 +14,8 @@ main {
 
   aside#preview {
     height: 100vh;
+    position: sticky;
+    top: 0;
     nylas-availability {
       height: 300px;
     }

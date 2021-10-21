@@ -188,10 +188,10 @@
     manifestProperties.open_hours = open_hours;
   }
 
-  // $: {
-  //   console.clear();
-  //   console.table(manifestProperties);
-  // }
+  $: {
+    // console.clear();
+    console.log(manifestProperties.open_hours);
+  }
   // #endregion mount and prop initialization
 
   function saveProperties() {
@@ -208,17 +208,19 @@
   function availabilityChosen(event: any) {
     open_hours = event.detail.timeSlots.map((slot: TimeSlot) => {
       let { start_time, end_time } = slot;
-      return {
-        startWeekday:
-          customize_weekdays || allow_weekends ? start_time.getDay() : -1,
+      let openTime = {
         startHour: start_time.getHours(),
         startMinute: start_time.getMinutes(),
-        endWeekday:
-          customize_weekdays || allow_weekends ? end_time.getDay() : -1,
         endHour: end_time.getHours(),
         endMinute: end_time.getMinutes(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
+
+      if (customize_weekdays || allow_weekends) {
+        openTime.startWeekday = start_time.getDay();
+        openTime.endWeekday = end_time.getDay();
+      }
+      return openTime;
     });
   }
 
@@ -262,7 +264,7 @@
 
   function adjustColumns(e: MouseEvent) {
     if (adjusting) {
-      width = e.clientX - 15 + "px";
+      width = e.clientX - 35 + "px";
     }
   }
 </script>
@@ -275,7 +277,7 @@
   <nylas-domain-error {id} />
 {:else}
   <main
-    style="grid-template-columns: {width} 2px auto"
+    style="grid-template-columns: {width} 5px auto"
     on:mousemove={adjustColumns}
     on:mouseup={() => (adjusting = false)}
   >
@@ -730,8 +732,19 @@
     </div>
     <span class="gutter" on:mousedown={() => (adjusting = true)} />
     <aside id="preview">
-      <h1>Preview</h1>
-      <nylas-availability {...manifestProperties} id="demo-scheduler" />
+      <nylas-availability
+        {...manifestProperties}
+        capacity={null}
+        calendars={!manifestProperties.email_ids
+          ? [
+              {
+                availability: "busy",
+                timeslots: [],
+              },
+            ]
+          : []}
+        id="demo-scheduler"
+      />
       <!-- TODO: replace the above with the ID of this component itself, if it exists, and add calendar scopes to schedule-editor requests -->
     </aside>
   </main>
