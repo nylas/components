@@ -32,30 +32,37 @@ export function debounce(
 export function buildInternalProps<T extends Manifest>(
   properties: any,
   manifest: Manifest,
+  defaultValueMap: Record<string, any>,
 ): T {
   return new Proxy(properties, {
-    get: (properties, name: keyof Manifest) => {
-      if (name in properties) {
-        return properties[name];
-      } else if (manifest && name in manifest) {
-        return manifest[name];
+    get: (properties, name: keyof Manifest | "toJSON" | "toString") => {
+      if (name === "toString" || name === "toJSON") {
+        return () => "";
       }
+
+      if (name in properties) {
+        return getPropertyValue(properties[name], defaultValueMap[name]);
+      }
+
+      if (manifest && name in manifest) {
+        return getPropertyValue(
+          manifest[<keyof Manifest>name],
+          defaultValueMap[name],
+        );
+      }
+      return defaultValueMap[name] ?? null;
     },
   });
 }
 
-export function getPropertyValue<T>(
-  propValue: any,
-  currentValue: T,
-  defaultTo: T,
-): T {
+export function getPropertyValue<T>(propValue: any, defaultTo: T): T {
   if (propValue) {
     return typeof defaultTo === "boolean"
       ? (parseBoolean(propValue) as any)
       : propValue;
   }
 
-  return currentValue === undefined ? defaultTo : currentValue;
+  return propValue === undefined ? defaultTo ?? null : propValue;
 }
 
 export function parseBoolean(

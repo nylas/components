@@ -12,12 +12,11 @@
     ContactStore,
     fetchCleanConversations,
   } from "@commons";
-  import type { ContactSearchQuery, Contact } from "@commons/types/Contacts";
+  import type { ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
     getEventDispatcher,
-    getPropertyValue,
   } from "@commons/methods/component";
   import DropdownSymbol from "./assets/chevron-down.svg";
   import TrashIcon from "./assets/trash-alt.svg";
@@ -66,18 +65,35 @@
   export let show_expanded_email_view_onload: boolean;
   export let show_thread_actions: boolean;
 
-  let userEmail: string | undefined;
+  const defaultValueMap = {
+    theme: "theme-1",
+    show_received_timestamp: true,
+    show_number_of_messages: true,
+    show_star: false,
+    click_action: "default",
+    thread_id: "",
+    show_contact_avatar: true,
+    show_expanded_email_view_onload: false,
+    clean_conversation: false,
+  };
 
+  let userEmail: string | undefined;
   onMount(async () => {
-    await tick(); // https://github.com/sveltejs/svelte/issues/2227
+    await tick();
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
 
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as EmailProperties;
+
     // Fetch Account
     if (id && !you.id && !emailManuallyPassed) {
       you = await fetchAccount({ component_id: query.component_id });
-      userEmail = you.email_address;
+      userEmail = <string>you.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
         component_id: id,
@@ -161,61 +177,34 @@
       : null;
   // #endregion initialize label and folder vars (for trash)
 
-  let internalProps: SvelteAllProps;
+  let internalProps: EmailProperties = <any>{};
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<SvelteAllProps>;
+      defaultValueMap,
+    ) as EmailProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
     }
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-    ) as Partial<SvelteAllProps>;
   }
 
-  $: theme = getPropertyValue(internalProps.theme, theme, "theme-1");
-
   $: {
-    show_received_timestamp = getPropertyValue(
-      internalProps.show_received_timestamp,
-      show_received_timestamp,
-      true,
-    );
-    show_number_of_messages = getPropertyValue(
-      internalProps.show_number_of_messages,
-      show_number_of_messages,
-      true,
-    );
-    show_star = getPropertyValue(internalProps.show_star, show_star, false);
-    unread = getPropertyValue(internalProps.unread, unread, null);
+    theme = internalProps.theme;
+    show_received_timestamp = internalProps.show_received_timestamp;
+    show_number_of_messages = internalProps.show_number_of_messages;
+    show_star = internalProps.show_star;
+    unread = internalProps.unread;
+    click_action = internalProps.click_action;
 
-    click_action = getPropertyValue(
-      internalProps.click_action,
-      click_action,
-      "default",
-    );
     // Assign thread_id to threadID stored in the manifest only when passing a thread_id
     const internalPropThreadID =
       !thread && !message_id && !message ? internalProps.thread_id : "";
-    thread_id = getPropertyValue(internalPropThreadID, thread_id, "");
-    show_contact_avatar = getPropertyValue(
-      internalProps.show_contact_avatar,
-      show_contact_avatar,
-      true,
-    );
-    show_expanded_email_view_onload = getPropertyValue(
-      internalProps.show_expanded_email_view_onload,
-      show_expanded_email_view_onload,
-      false, // default value is false
-    );
-    clean_conversation = getPropertyValue(
-      internalProps.clean_conversation,
-      clean_conversation,
-      false,
-    );
+    thread_id = internalPropThreadID;
+    show_contact_avatar = internalProps.show_contact_avatar;
+    show_expanded_email_view_onload =
+      internalProps.show_expanded_email_view_onload;
+    clean_conversation = internalProps.clean_conversation;
 
     if (activeThread && click_action === "mailbox") {
       // enables bulk starring action in mailbox to immediately reflect visually

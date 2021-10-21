@@ -13,7 +13,6 @@
   import { get_current_component } from "svelte/internal";
   import {
     getEventDispatcher,
-    getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
@@ -38,7 +37,6 @@
     CalendarAccount,
     AvailabilityRule,
   } from "@commons/types/Availability";
-  import type { Manifest as EditorManifest } from "@commons/types/ScheduleEditor";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
   import AvailableIcon from "./assets/available.svg";
@@ -80,6 +78,38 @@
   export let open_hours: AvailabilityRule[];
   export let overbooked_threshold: number;
   export let mandate_top_of_hour: boolean;
+
+  const defaultValueMap = {
+    start_hour: 0,
+    end_hour: 24,
+    slot_size: 15,
+    start_date: new Date(),
+    dates_to_show: 1,
+    calendars: [],
+    show_ticks: true,
+    email_ids: [],
+    allow_booking: false,
+    max_bookable_slots: 1,
+    partial_bookable_ratio: 0.01,
+    show_as_week: false,
+    show_weekends: true,
+    attendees_to_show: 5,
+    allow_date_change: true,
+    required_participants: [],
+    busy_color: "#EE3248cc",
+    closed_color: "#EE3248cc",
+    partial_color: "#FECA7Ccc",
+    free_color: "#078351cc",
+    selected_color: "#002db4",
+    show_hosts: "show",
+    view_as: "schedule",
+    event_buffer: 0,
+    show_header: true,
+    date_format: "full",
+    open_hours: [],
+    overbooked_threshold: 100,
+    mandate_top_of_hour: false,
+  };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
   /**
@@ -132,9 +162,8 @@
   //#endregion props
 
   //#region mount and prop initialization
-  let internalProps: Partial<Manifest> = {};
+  let internalProps: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
-  let editorManifest: Partial<EditorManifest> = {};
   let loading: boolean;
   let slotRef: Array<HTMLElement> = [];
   let slotYPositions: Record<string, DOMRect> = {};
@@ -151,7 +180,11 @@
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as Manifest;
 
     const calendarQuery: CalendarQuery = {
       access_token,
@@ -177,7 +210,8 @@
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<Manifest>;
+      defaultValueMap,
+    ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
     }
@@ -199,139 +233,44 @@
   }
 
   $: {
-    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 0);
-    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 24);
-    slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
-    start_date = getPropertyValue(
-      internalProps.start_date,
-      start_date,
-      new Date(),
-    );
-    dates_to_show = getPropertyValue(
-      internalProps.dates_to_show,
-      dates_to_show,
-      1,
-    );
-    calendars = getPropertyValue(internalProps.calendars, calendars, []);
-    show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
-    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
-    allow_booking = getPropertyValue(
-      internalProps.allow_booking,
-      allow_booking,
-      false,
-    );
-    max_bookable_slots = getPropertyValue(
-      internalProps.max_bookable_slots,
-      max_bookable_slots,
-      1,
-    );
-    partial_bookable_ratio = getPropertyValue(
-      internalProps.partial_bookable_ratio,
-      partial_bookable_ratio,
-      0.01,
-    );
-    show_as_week = getPropertyValue(
-      internalProps.show_as_week,
-      show_as_week,
-      false,
-    );
-    show_weekends = getPropertyValue(
-      internalProps.show_weekends,
-      show_weekends,
-      true,
-    );
-    attendees_to_show = getPropertyValue(
-      internalProps.attendees_to_show,
-      attendees_to_show,
-      5,
-    );
-    allow_date_change = getPropertyValue(
-      internalProps.allow_date_change,
-      allow_date_change,
-      true,
-    );
-    required_participants = getPropertyValue(
-      internalProps.required_participants,
-      required_participants,
-      [],
-    );
-    busy_color = getPropertyValue(
-      internalProps.busy_color,
-      busy_color,
-      "#EE3248cc",
-    );
-    closed_color = getPropertyValue(
-      internalProps.closed_color,
-      closed_color,
-      "#EE3248cc",
-    );
-    partial_color = getPropertyValue(
-      internalProps.partial_color,
-      partial_color,
-      "#FECA7Ccc",
-    );
-    free_color = getPropertyValue(
-      internalProps.free_color,
-      free_color,
-      "#078351cc",
-    );
-    selected_color = getPropertyValue(
-      internalProps.selected_color,
-      selected_color,
-      "#002db4",
-    );
-    show_hosts = getPropertyValue(
-      internalProps.show_hosts || editorManifest.show_hosts,
-      show_hosts,
-      "show",
-    );
-    view_as = getPropertyValue(
-      internalProps.view_as || editorManifest.view_as,
-      view_as,
-      "schedule",
-    );
-    event_buffer = getPropertyValue(
-      internalProps.event_buffer || editorManifest.event_buffer,
-      event_buffer,
-      0,
-    );
-    capacity = getPropertyValue(
-      internalProps.capacity || editorManifest.capacity,
-      capacity,
-      null,
-    );
-    show_header = getPropertyValue(
-      internalProps.show_header,
-      show_header,
-      true,
-    );
-    date_format = getPropertyValue(
-      internalProps.date_format,
-      date_format,
-      "full",
-    );
-    open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
-    overbooked_threshold = getPropertyValue(
-      internalProps.overbooked_threshold || editorManifest.overbooked_threshold,
-      overbooked_threshold,
-      100,
-    );
-    mandate_top_of_hour = getPropertyValue(
-      internalProps.mandate_top_of_hour || editorManifest.mandate_top_of_hour,
-      mandate_top_of_hour,
-      false,
-    );
+    start_hour = internalProps.start_hour;
+    end_hour = internalProps.end_hour;
+    slot_size = internalProps.slot_size;
+    start_date = internalProps.start_date;
+    dates_to_show = internalProps.dates_to_show;
+    calendars = internalProps.calendars;
+    show_ticks = internalProps.show_ticks;
+    email_ids = internalProps.email_ids;
+    allow_booking = internalProps.allow_booking;
+    max_bookable_slots = internalProps.max_bookable_slots;
+    partial_bookable_ratio = internalProps.partial_bookable_ratio;
+    show_as_week = internalProps.show_as_week;
+    show_weekends = internalProps.show_weekends;
+    attendees_to_show = internalProps.attendees_to_show;
+    allow_date_change = internalProps.allow_date_change;
+    required_participants = internalProps.required_participants;
+    busy_color = internalProps.busy_color;
+    closed_color = internalProps.closed_color;
+    partial_color = internalProps.partial_color;
+    free_color = internalProps.free_color;
+    selected_color = internalProps.selected_color;
+    show_hosts = internalProps.show_hosts;
+    view_as = internalProps.view_as;
+    event_buffer = internalProps.event_buffer;
+    capacity = internalProps.capacity;
+    show_header = internalProps.show_header;
+    date_format = internalProps.date_format;
+    open_hours = internalProps.open_hours;
+    overbooked_threshold = internalProps.overbooked_threshold;
+    mandate_top_of_hour = internalProps.mandate_top_of_hour;
   }
+
   $: {
     if (
       $$props.hasOwnProperty("start_date") &&
       $$props.start_date !== startDate
     ) {
-      startDate = getPropertyValue(
-        internalProps.start_date,
-        new Date(),
-        new Date(),
-      );
+      startDate = internalProps.start_date;
     } else if (!startDate) {
       startDate = start_date;
     }
@@ -348,7 +287,6 @@
   let dayContainer: HTMLElement;
   let dayContainerWidth: number = 0;
   let clientHeight: number;
-  let slotContainer: HTMLElement;
 
   const MINIMUM_DAY_WIDTH = 100;
 
@@ -959,7 +897,7 @@
   //#endregion event query
   $: allCalendars = [
     // TODO: consider merging these 2 into just calendars
-    ...calendars,
+    ...(calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
   ];
 
@@ -1250,12 +1188,10 @@
     if (draggingExistingBlock) {
       if (day) {
         // day is optional; endDrag with no "day" passed means user left the canvas / we should un-pend and reset our initially-dragged event
-
         // Set all slots in our initially dragged block to unselected
         draggedBlockSlots?.forEach(
           (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
         );
-
         // Set all our pending slots to Selected
         // (This is effectively the "Move" function)
         days.forEach((day) =>

@@ -6,14 +6,10 @@
 
   import type { Manifest } from "@commons/types/ScheduleEditor";
   import parseStringToArray, {
-    getPropertyValue,
     buildInternalProps,
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
-  // TODO: switch for local development
-  import "@nylas/components-availability";
-  // import "../../availability";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
@@ -41,27 +37,69 @@
   export let notification_subject: string;
   export let view_as: "schedule" | "list";
   export let recurrence: "none" | "required" | "optional";
-  export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
+  export let recurrence_cadence: (
+    | "none"
+    | "daily"
+    | "weekdays"
+    | "weekly"
+    | "biweekly"
+    | "monthly"
+  )[];
   export let capacity: number | null;
   export let open_hours: AvailabilityRule[];
   export let mandate_top_of_hour: boolean;
 
+  const defaultValueMap = {
+    event_title: "Meeting",
+    event_description: "",
+    event_conferencing: "",
+    event_location: "",
+    view_as: "schedule",
+    show_hosts: "show",
+    start_hour: 9,
+    end_hour: 17,
+    slot_size: 15,
+    start_date: new Date(),
+    dates_to_show: 1,
+    show_ticks: true,
+    email_ids: [],
+    allow_booking: false,
+    max_bookable_slots: 1,
+    partial_bookable_ratio: 0.01,
+    show_as_week: false,
+    show_weekends: true,
+    attendees_to_show: 5,
+    notification_mode: NotificationMode.SHOW_MESSAGE,
+    notification_message: "Thank you for scheduling!",
+    notification_subject: "Invitation",
+    recurrence: "none",
+    recurrence_cadence: ["none"],
+    capacity: 1,
+    open_hours: [],
+    mandate_top_of_hour: false,
+  };
+
   //#region mount and prop initialization
-  let internalProps: Partial<Manifest> = {};
+  let internalProps: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
   onMount(async () => {
     await tick();
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as Manifest;
   });
 
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<Manifest>;
+      defaultValueMap,
+    ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
       manifestProperties = { ...manifestProperties, ...rebuiltProps };
@@ -69,101 +107,33 @@
   }
 
   $: {
-    event_title = getPropertyValue(
-      internalProps.event_title,
-      event_title,
-      "Meeting",
-    );
-    event_description = getPropertyValue(
-      internalProps.event_description,
-      event_description,
-      "",
-    );
-    event_conferencing = getPropertyValue(
-      internalProps.event_conferencing,
-      event_conferencing,
-      "",
-    );
-    event_location = getPropertyValue(
-      internalProps.event_location,
-      event_location,
-      "",
-    );
-    view_as = getPropertyValue(internalProps.view_as, view_as, "schedule");
-    show_hosts = getPropertyValue(internalProps.show_hosts, show_hosts, "show");
-    start_hour = getPropertyValue(internalProps.start_hour, start_hour, 9);
-    end_hour = getPropertyValue(internalProps.end_hour, end_hour, 17);
-    slot_size = getPropertyValue(internalProps.slot_size, slot_size, 15);
-    start_date = getPropertyValue(
-      internalProps.start_date,
-      start_date,
-      new Date(),
-    );
-    dates_to_show = getPropertyValue(
-      internalProps.dates_to_show,
-      dates_to_show,
-      1,
-    );
-    show_ticks = getPropertyValue(internalProps.show_ticks, show_ticks, true);
-    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
-    allow_booking = getPropertyValue(
-      internalProps.allow_booking,
-      allow_booking,
-      false,
-    );
-    max_bookable_slots = getPropertyValue(
-      internalProps.max_bookable_slots,
-      max_bookable_slots,
-      1,
-    );
-    partial_bookable_ratio = getPropertyValue(
-      internalProps.partial_bookable_ratio,
-      partial_bookable_ratio,
-      0.01,
-    );
-    show_as_week = getPropertyValue(
-      internalProps.show_as_week,
-      show_as_week,
-      false,
-    );
-    show_weekends = getPropertyValue(
-      internalProps.show_weekends,
-      show_weekends,
-      true,
-    );
-    attendees_to_show = getPropertyValue(
-      internalProps.attendees_to_show,
-      attendees_to_show,
-      5,
-    );
-    notification_mode = getPropertyValue(
-      internalProps.notification_mode,
-      notification_mode,
-      NotificationMode.SHOW_MESSAGE,
-    );
-    notification_message = getPropertyValue(
-      internalProps.notification_message,
-      notification_message,
-      "Thank you for scheduling!",
-    );
-    notification_subject = getPropertyValue(
-      internalProps.notification_subject,
-      notification_subject,
-      "Invitation",
-    );
-    recurrence = getPropertyValue(internalProps.recurrence, recurrence, "none");
-    recurrence_cadence = getPropertyValue(
-      internalProps.recurrence_cadence,
-      recurrence_cadence,
-      ["none"],
-    );
-    capacity = getPropertyValue(internalProps.capacity, capacity, 1);
-    open_hours = getPropertyValue(internalProps.open_hours, open_hours, []);
-    mandate_top_of_hour = getPropertyValue(
-      internalProps.mandate_top_of_hour,
-      mandate_top_of_hour,
-      false,
-    );
+    event_title = internalProps.event_title;
+    event_description = internalProps.event_description;
+    event_conferencing = internalProps.event_conferencing;
+    event_location = internalProps.event_location;
+    view_as = internalProps.view_as;
+    show_hosts = internalProps.show_hosts;
+    start_hour = internalProps.start_hour;
+    end_hour = internalProps.end_hour;
+    slot_size = internalProps.slot_size;
+    start_date = internalProps.start_date;
+    dates_to_show = internalProps.dates_to_show;
+    show_ticks = internalProps.show_ticks;
+    email_ids = internalProps.email_ids;
+    allow_booking = internalProps.allow_booking;
+    max_bookable_slots = internalProps.max_bookable_slots;
+    partial_bookable_ratio = internalProps.partial_bookable_ratio;
+    show_as_week = internalProps.show_as_week;
+    show_weekends = internalProps.show_weekends;
+    attendees_to_show = internalProps.attendees_to_show;
+    notification_mode = internalProps.notification_mode;
+    notification_message = internalProps.notification_message;
+    notification_subject = internalProps.notification_subject;
+    recurrence = internalProps.recurrence;
+    recurrence_cadence = internalProps.recurrence_cadence;
+    capacity = internalProps.capacity;
+    open_hours = internalProps.open_hours;
+    mandate_top_of_hour = internalProps.mandate_top_of_hour;
   }
 
   // Manifest properties requiring further manipulation:
@@ -232,7 +202,7 @@
   let customize_weekdays: boolean = false;
   let allow_weekends: boolean = false;
 
-  function availabilityChosen(event) {
+  function availabilityChosen(event: any) {
     open_hours = event.detail.timeSlots.map((slot: TimeSlot) => {
       let { start_time, end_time } = slot;
       return {

@@ -190,7 +190,7 @@ export interface MailboxProperties extends Manifest {
   header: string;
   keyword_to_search: string;
   query_string: string;
-  items_per_page: number;
+  items_per_page: string;
 }
 
 export interface ComposerProperties extends Manifest {
@@ -229,6 +229,7 @@ export interface ConversationProperties extends Manifest {
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4";
   show_avatars: boolean | string;
   show_reply: boolean | string;
+  thread_id: string;
 }
 
 export interface DayProperties extends Manifest {

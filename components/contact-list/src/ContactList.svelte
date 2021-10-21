@@ -13,7 +13,6 @@
   import { debounce } from "@commons/methods/component";
   import {
     buildInternalProps,
-    getPropertyValue,
     getEventDispatcher,
   } from "@commons/methods/component";
   import type {
@@ -34,6 +33,15 @@
   export let default_photo: string | null;
   export let show_filter: boolean = false;
 
+  const defaultValueMap = {
+    theme: "theme-1",
+    click_action: "email",
+    sort_by: "name",
+    show_filter: true,
+    show_names: true,
+    contacts_to_load: 100,
+  };
+
   let filterValue: string = "";
   const filterPredicates = {
     byEmail: (contact: Contact) =>
@@ -46,7 +54,7 @@
 
   import { sortingPredicates } from "../lib/sorting";
 
-  let internalProps: Partial<ContactListProperties> = {};
+  let internalProps: ContactListProperties = <any>{};
   let manifest: Partial<ContactListProperties> = {};
   let main: Element;
   let clientHeight: number = 0;
@@ -57,7 +65,7 @@
   let status: "loading" | "loaded" | "error" = "loading";
 
   onMount(async () => {
-    await tick(); // https://github.com/sveltejs/svelte/issues/2227
+    await tick();
     clientHeight = main?.getBoundingClientRect().height || 0;
     clientWidth = main?.getBoundingClientRect().width || 0;
 
@@ -67,7 +75,8 @@
     internalProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<ContactListProperties>;
+      defaultValueMap,
+    ) as ContactListProperties;
 
     if (contacts) {
       hydratedContacts = contacts as HydratedContact[];
@@ -88,36 +97,21 @@
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<ContactListProperties>;
+      defaultValueMap,
+    ) as ContactListProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
     }
   }
 
   $: {
-    theme = getPropertyValue(internalProps.theme, theme, "theme-1");
-    click_action = getPropertyValue(
-      internalProps.click_action,
-      click_action,
-      "email",
-    );
-    sort_by = getPropertyValue(internalProps.sort_by, sort_by, "name");
-    show_filter = getPropertyValue(
-      internalProps.show_filter,
-      show_filter,
-      true,
-    );
-    default_photo = getPropertyValue(
-      internalProps.default_photo,
-      default_photo,
-      null,
-    );
-    show_names = getPropertyValue(internalProps.show_names, show_names, true);
-    contacts_to_load = getPropertyValue(
-      internalProps.contacts_to_load,
-      contacts_to_load,
-      100,
-    );
+    theme = internalProps.theme;
+    click_action = internalProps.click_action;
+    sort_by = internalProps.sort_by;
+    show_filter = internalProps.show_filter;
+    default_photo = internalProps.default_photo;
+    show_names = internalProps.show_names;
+    contacts_to_load = internalProps.contacts_to_load;
   }
 
   let themeUrl: string;
