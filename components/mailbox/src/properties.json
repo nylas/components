@@ -36,11 +36,12 @@
     "label": "header",
     "title": "Shows the header passed in the Mailbox",
     "type": "string",
-    "value": "Mailbox header"
+    "value": null
   },
   {
     "label": "items_per_page",
     "title": "Items to show per page",
+    "type": "number",
     "options": [10, 13, 15, 20, 25],
     "value": 13
   },
@@ -48,18 +49,18 @@
     "label": "keyword_to_search",
     "title": "Search for threads",
     "type": "string",
-    "value": ""
+    "value": null
   },
   {
     "label": "query_string",
     "title": "Filter your threads",
     "type": "string",
-    "value": ""
+    "value": null
   },
   {
     "label": "actions_bar",
     "title": "Actions allowed to be performed using the mailbox",
-    "type": "checkbox",
+    "type": "MailboxActions[]",
     "options": [
       {
         "label": "Select All",
