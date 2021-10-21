@@ -40,4 +40,5 @@ export interface Manifest extends NylasManifest {
   )[];
   overbooked_threshold: number;
   mandate_top_of_hour: boolean;
+  show_preview: boolean;
 }
