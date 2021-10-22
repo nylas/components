@@ -116,25 +116,23 @@
     ) as AgendaProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  $: {
-    allow_date_change = internalProps.allow_date_change;
-    allow_event_creation = internalProps.allow_event_creation;
-    auto_time_box = internalProps.auto_time_box;
-    calendar_ids = internalProps.calendar_ids;
-    color_by = internalProps.color_by;
-    condensed_view = internalProps.condensed_view;
-    header_type = internalProps.header_type;
-    hide_current_time = internalProps.hide_current_time;
-    hide_all_day_events = internalProps.hide_all_day_events;
-    prevent_zoom = internalProps.prevent_zoom;
-    show_no_events_message = internalProps.show_no_events_message;
-    eagerly_fetch_events = internalProps.eagerly_fetch_events;
-    event_snap_interval = internalProps.event_snap_interval;
-    theme = internalProps.theme;
-    hide_ticks = internalProps.hide_ticks;
+      allow_date_change = internalProps.allow_date_change;
+      allow_event_creation = internalProps.allow_event_creation;
+      auto_time_box = internalProps.auto_time_box;
+      calendar_ids = internalProps.calendar_ids;
+      color_by = internalProps.color_by;
+      condensed_view = internalProps.condensed_view;
+      header_type = internalProps.header_type;
+      hide_current_time = internalProps.hide_current_time;
+      hide_all_day_events = internalProps.hide_all_day_events;
+      prevent_zoom = internalProps.prevent_zoom;
+      show_no_events_message = internalProps.show_no_events_message;
+      eagerly_fetch_events = internalProps.eagerly_fetch_events;
+      event_snap_interval = internalProps.event_snap_interval;
+      theme = internalProps.theme;
+      hide_ticks = internalProps.hide_ticks;
+    }
   }
 
   let themeUrl: string;
@@ -245,8 +243,11 @@
 
   // Accept either comma-separated string, or array.
   $: calendarIDs = (() => {
-    let IDList = calendar_ids;
-    if (typeof calendar_ids === "string" && calendar_ids.length) {
+    let IDList = internalProps.calendar_ids;
+    if (
+      typeof internalProps.calendar_ids === "string" &&
+      internalProps.calendar_ids.length
+    ) {
       IDList = IDList.split(",").map((id: string) => id.trim());
     } else if (calendar_id) {
       IDList = [calendar_id];
@@ -1325,7 +1326,7 @@
 <main
   class:headless={header_type === "none"}
   data-cy="nylas-agenda"
-  class={!!themeUrl ? "custom" : theme}
+  class={!!themeUrl ? "custom" : internalProps.theme}
 >
   {#await hydratedEvents}
     (loading events)

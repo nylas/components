@@ -101,17 +101,15 @@
     ) as ContactListProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  $: {
-    theme = internalProps.theme;
-    click_action = internalProps.click_action;
-    sort_by = internalProps.sort_by;
-    show_filter = internalProps.show_filter;
-    default_photo = internalProps.default_photo;
-    show_names = internalProps.show_names;
-    contacts_to_load = internalProps.contacts_to_load;
+      theme = internalProps.theme;
+      click_action = internalProps.click_action;
+      sort_by = internalProps.sort_by;
+      show_filter = internalProps.show_filter;
+      default_photo = internalProps.default_photo;
+      show_names = internalProps.show_names;
+      contacts_to_load = internalProps.contacts_to_load;
+    }
   }
 
   let themeUrl: string;

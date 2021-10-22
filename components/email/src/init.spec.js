@@ -255,14 +255,17 @@ describe("Email component", () => {
           .should("contain", "Pooja Guggari");
       });
   });
-  it("Shows a thread even when message_id is passed", () => {
+  it("Shows a thread even when message_id is passed", (done) => {
     cy.get("nylas-email")
       .as("email")
       .then((element) => {
         const component = element[0];
         component.message_id = "ew8xkdd7aov1xkxqfed5l5mvt";
-        cy.get(component).find(".email-row.singular").should("not.exist");
-        cy.get(component).find(".email-row.condensed").should("exist");
+        setTimeout(() => {
+          cy.get(component).find(".email-row.singular").should("not.exist");
+          cy.get(component).find(".email-row.condensed").should("exist");
+          done();
+        }, 100);
       });
   });
   it("Shows a message when a full message is passed", () => {

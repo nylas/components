@@ -92,16 +92,14 @@
     ) as ConversationProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  $: {
-    theme = internalProps.theme;
-    show_avatars = internalProps.show_avatars;
-    show_reply = internalProps.show_reply;
-    const internalPropThreadID =
-      messages.length === 0 ? internalProps.thread_id : "";
-    thread_id = internalPropThreadID;
+      theme = internalProps.theme;
+      show_avatars = internalProps.show_avatars;
+      show_reply = internalProps.show_reply;
+      const internalPropThreadID =
+        messages.length === 0 ? internalProps.thread_id : "";
+      thread_id = internalPropThreadID;
+    }
   }
 
   $: hideAvatars = show_avatars === false || show_avatars === "false"; // can be boolean or string, for developer experience reasons. Awkward for us, better for them.

@@ -214,6 +214,37 @@
     ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
+
+      start_hour = internalProps.start_hour;
+      end_hour = internalProps.end_hour;
+      slot_size = internalProps.slot_size;
+      start_date = internalProps.start_date;
+      dates_to_show = internalProps.dates_to_show;
+      calendars = internalProps.calendars;
+      show_ticks = internalProps.show_ticks;
+      email_ids = internalProps.email_ids;
+      allow_booking = internalProps.allow_booking;
+      max_bookable_slots = internalProps.max_bookable_slots;
+      partial_bookable_ratio = internalProps.partial_bookable_ratio;
+      show_as_week = internalProps.show_as_week;
+      show_weekends = internalProps.show_weekends;
+      attendees_to_show = internalProps.attendees_to_show;
+      allow_date_change = internalProps.allow_date_change;
+      required_participants = internalProps.required_participants;
+      busy_color = internalProps.busy_color;
+      closed_color = internalProps.closed_color;
+      partial_color = internalProps.partial_color;
+      free_color = internalProps.free_color;
+      selected_color = internalProps.selected_color;
+      show_hosts = internalProps.show_hosts;
+      view_as = internalProps.view_as;
+      event_buffer = internalProps.event_buffer;
+      capacity = internalProps.capacity;
+      show_header = internalProps.show_header;
+      date_format = internalProps.date_format;
+      open_hours = internalProps.open_hours;
+      overbooked_threshold = internalProps.overbooked_threshold;
+      mandate_top_of_hour = internalProps.mandate_top_of_hour;
     }
   }
 
@@ -230,39 +261,6 @@
       }
       return contact[0] ?? {};
     }
-  }
-
-  $: {
-    start_hour = internalProps.start_hour;
-    end_hour = internalProps.end_hour;
-    slot_size = internalProps.slot_size;
-    start_date = internalProps.start_date;
-    dates_to_show = internalProps.dates_to_show;
-    calendars = internalProps.calendars;
-    show_ticks = internalProps.show_ticks;
-    email_ids = internalProps.email_ids;
-    allow_booking = internalProps.allow_booking;
-    max_bookable_slots = internalProps.max_bookable_slots;
-    partial_bookable_ratio = internalProps.partial_bookable_ratio;
-    show_as_week = internalProps.show_as_week;
-    show_weekends = internalProps.show_weekends;
-    attendees_to_show = internalProps.attendees_to_show;
-    allow_date_change = internalProps.allow_date_change;
-    required_participants = internalProps.required_participants;
-    busy_color = internalProps.busy_color;
-    closed_color = internalProps.closed_color;
-    partial_color = internalProps.partial_color;
-    free_color = internalProps.free_color;
-    selected_color = internalProps.selected_color;
-    show_hosts = internalProps.show_hosts;
-    view_as = internalProps.view_as;
-    event_buffer = internalProps.event_buffer;
-    capacity = internalProps.capacity;
-    show_header = internalProps.show_header;
-    date_format = internalProps.date_format;
-    open_hours = internalProps.open_hours;
-    overbooked_threshold = internalProps.overbooked_threshold;
-    mandate_top_of_hour = internalProps.mandate_top_of_hour;
   }
 
   $: {

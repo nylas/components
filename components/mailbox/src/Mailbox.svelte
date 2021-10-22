@@ -154,18 +154,15 @@
     ) as MailboxProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  // Reactive statements to continuously set manifest, prop and default values
-  $: {
-    show_star = internalProps.show_star;
-    unread_status = internalProps.unread_status;
-    items_per_page = parseInt(internalProps.items_per_page);
-    header = internalProps.header;
-    query_string = internalProps.query_string;
-    keyword_to_search = internalProps.keyword_to_search;
-    actions_bar = internalProps.actions_bar;
+      show_star = internalProps.show_star;
+      unread_status = internalProps.unread_status;
+      items_per_page = parseInt(internalProps.items_per_page);
+      header = internalProps.header;
+      query_string = internalProps.query_string;
+      keyword_to_search = internalProps.keyword_to_search;
+      actions_bar = internalProps.actions_bar;
+    }
   }
 
   // Reactive statement to continuously fetch all_threads

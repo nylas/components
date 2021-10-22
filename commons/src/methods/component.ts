@@ -37,7 +37,7 @@ export function buildInternalProps<T extends Manifest>(
   return new Proxy(properties, {
     get: (properties, name: keyof Manifest | "toJSON" | "toString") => {
       if (name === "toString" || name === "toJSON") {
-        return () => "";
+        return () => JSON.stringify(properties);
       }
 
       if (name in properties) {
