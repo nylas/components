@@ -16,7 +16,6 @@
   import {
     buildInternalProps,
     getEventDispatcher,
-    getPropertyValue,
   } from "@commons/methods/component";
   import type {
     Participant,
@@ -41,6 +40,13 @@
   export let show_reply: boolean | string;
   export let you: Partial<Account> = {};
 
+  const defaultValueMap = {
+    theme: "theme-1",
+    show_avatars: false,
+    show_reply: false,
+    thread_id: "",
+  };
+
   let manifest: Partial<ConversationProperties> = {};
 
   const dispatchEvent = getEventDispatcher(get_current_component());
@@ -53,6 +59,12 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
+
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as ConversationProperties;
 
     // Fetch Account
     if (id && !you.id && !conversationManuallyPassed) {
@@ -71,34 +83,23 @@
 
   let main: Element;
 
-  let internalProps: SvelteAllProps;
+  let internalProps: ConversationProperties = <any>{};
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<SvelteAllProps>;
+      defaultValueMap,
+    ) as ConversationProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-    ) as Partial<SvelteAllProps>;
-  }
 
-  $: {
-    theme = getPropertyValue(internalProps.theme, theme, "theme-1");
-    show_avatars = getPropertyValue(
-      internalProps.show_avatars,
-      show_avatars,
-      false,
-    );
-    show_reply = getPropertyValue(internalProps.show_reply, show_reply, false);
-    // Assign thread_id with threadID stored in the manifest only when passing a thread_id
-    const internalPropThreadID = messages.length === 0
-      ? internalProps.thread_id
-      : "";
-    thread_id = getPropertyValue(internalPropThreadID, thread_id, "");
+      theme = internalProps.theme;
+      show_avatars = internalProps.show_avatars;
+      show_reply = internalProps.show_reply;
+      const internalPropThreadID =
+        messages.length === 0 ? internalProps.thread_id : "";
+      thread_id = internalPropThreadID;
+    }
   }
 
   $: hideAvatars = show_avatars === false || show_avatars === "false"; // can be boolean or string, for developer experience reasons. Awkward for us, better for them.

@@ -26,12 +26,12 @@ describe("scheduler component", () => {
           cy.get("h3").contains("Meeting:");
         });
     });
-    it("inherits event title from editor-manifest", () => {
+    // TODO - Re-enable this once we have dedicated test components
+    xit("inherits event title from editor-manifest", () => {
       cy.document().then(($document) => {
         $document.getElementsByTagName("nylas-scheduler")[0].remove();
         let newScheduler = $document.createElement("nylas-scheduler");
         newScheduler.id = "demo-scheduler";
-        newScheduler.editor_id = "demo-schedule-editor";
         newScheduler.slots_to_book = slots_to_book;
         $document.body.getElementsByTagName("main")[0].append(newScheduler);
       });

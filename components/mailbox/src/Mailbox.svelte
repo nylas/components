@@ -6,15 +6,12 @@
   import {
     buildInternalProps,
     getEventDispatcher,
-    getPropertyValue,
   } from "@commons/methods/component";
   import { MailboxStore } from "@commons/store/threads";
   import "../../email/src/Email.svelte";
   import "./components/PaginationNav.svelte";
-  import { AccountStore } from "@commons/store/accounts";
   import { fetchMessage } from "@commons/connections/messages";
   import LoadingIcon from "./assets/loading.svg";
-  import LeftArrowLineIcon from "./assets/arrow-line.svg";
   import TrashIcon from "./assets/trash-alt.svg";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
   import MarkUnreadIcon from "./assets/envelope.svg";
@@ -55,6 +52,13 @@
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
 
+  const defaultValueMap = {
+    show_star: false,
+    unread_status: "default",
+    items_per_page: 13,
+    actions_bar: [],
+  };
+
   let queryParams: ThreadsQuery;
   let openedEmailData: Thread | null;
   let hasComponentLoaded = false;
@@ -65,7 +69,7 @@
   let lastPage: number = 1;
 
   onMount(async () => {
-    await tick(); // https://github.com/sveltejs/svelte/issues/2227
+    await tick();
     queryParams = Object.fromEntries(
       new URLSearchParams(window.location.search),
     );
@@ -76,7 +80,8 @@
     internalProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<SvelteAllProps>;
+      defaultValueMap,
+    ) as MailboxProperties;
 
     // Fetch Account
     if (id && !you.id && !all_threads) {
@@ -140,42 +145,24 @@
 
   $: paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
 
-  let internalProps: SvelteAllProps;
+  let internalProps: MailboxProperties = <any>{};
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<MailboxProperties>;
+      defaultValueMap,
+    ) as MailboxProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  // Reactive statements to continuously set manifest, prop and default values
-  $: {
-    show_star = getPropertyValue(internalProps.show_star, show_star, false);
-    unread_status = getPropertyValue(
-      internalProps.unread_status,
-      unread_status,
-      "default",
-    );
-    items_per_page = getPropertyValue(
-      parseInt(internalProps.items_per_page),
-      items_per_page,
-      13,
-    );
-    header = getPropertyValue(internalProps.header, header, null);
-    query_string = getPropertyValue(
-      internalProps.query_string,
-      query_string,
-      null,
-    );
-    keyword_to_search = getPropertyValue(
-      internalProps.keyword_to_search,
-      keyword_to_search,
-      null,
-    );
-    actions_bar = getPropertyValue(internalProps.actions_bar, actions_bar, []);
+      show_star = internalProps.show_star;
+      unread_status = internalProps.unread_status;
+      items_per_page = parseInt(internalProps.items_per_page);
+      header = internalProps.header;
+      query_string = internalProps.query_string;
+      keyword_to_search = internalProps.keyword_to_search;
+      actions_bar = internalProps.actions_bar;
+    }
   }
 
   // Reactive statement to continuously fetch all_threads
@@ -209,16 +196,7 @@
     ? labels.find((folder) => folder.name === "trash")?.id
     : null;
 
-  // let conversation: Conversation | null = null;
-  let status: "loading" | "loaded" | "error" = "loading";
-
   let you: Partial<Account> = {};
-
-  const readStatusOutputs = {
-    unread: true,
-    read: false,
-    default: null,
-  };
 
   //#region methods
   function fetchIndividualMessage(message: Message) {

@@ -226,7 +226,7 @@ describe("availability component", () => {
           const component = element[0];
           component.end_hour = 8;
           const end_time = new Date();
-          end_time.setHours(component.end_hour, 0, 0);
+          end_time.setHours(8, 0, 0);
           cy.get(".slot").should("have.length", 32);
           cy.get(".slot")
             .last()

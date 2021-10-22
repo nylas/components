@@ -15,7 +15,6 @@
   } from "@commons";
   import {
     buildInternalProps,
-    getPropertyValue,
     getEventDispatcher,
   } from "@commons/methods/component";
   import { onMount, tick, get_current_component } from "svelte/internal";
@@ -101,6 +100,24 @@
   export let beforeFileRemove: Function | null = null;
   export let afterFileRemove: Function | null = null;
 
+  const defaultValueMap = {
+    show_to: true,
+    show_from: true,
+    minimized: false,
+    reset_after_send: true,
+    show_header: false,
+    show_subject: false,
+    show_close_button: true,
+    show_minimize_button: true,
+    show_cc: false,
+    show_bcc: false,
+    show_cc_button: true,
+    show_bcc_button: true,
+    show_attachment_button: true,
+    show_editor_toolbar: true,
+    theme: "theme-1",
+  };
+
   // Callbacks
   export const open = (): void => {
     visible = true;
@@ -113,7 +130,7 @@
   };
 
   let isLoading = false;
-  let internalProps: Partial<ComposerProperties> = {};
+  let internalProps: ComposerProperties = <any>{};
   let manifest: Partial<ComposerProperties>;
   let showDatepicker = false;
   let themeLoaded = false;
@@ -142,7 +159,8 @@
     internalProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<ComposerProperties>;
+      defaultValueMap,
+    ) as ComposerProperties;
     if (tracking) {
       // Set tracking on message object
       update("tracking", tracking);
@@ -156,7 +174,8 @@
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<ComposerProperties>;
+      defaultValueMap,
+    ) as ComposerProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
     }
@@ -167,57 +186,21 @@
   }
 
   $: {
-    show_to = getPropertyValue(internalProps.show_to, show_to, true);
-    show_from = getPropertyValue(internalProps.show_from, show_from, true);
-    minimized = getPropertyValue(internalProps.minimized, minimized, false);
-    reset_after_send = getPropertyValue(
-      internalProps.reset_after_send,
-      reset_after_send,
-      true,
-    );
-    show_header = getPropertyValue(
-      internalProps.show_header,
-      show_header,
-      false,
-    );
-    show_subject = getPropertyValue(
-      internalProps.show_subject,
-      show_subject,
-      false,
-    );
-    show_close_button = getPropertyValue(
-      internalProps.show_close_button,
-      show_close_button,
-      true,
-    );
-    show_minimize_button = getPropertyValue(
-      internalProps.show_minimize_button,
-      show_minimize_button,
-      true,
-    );
-    show_cc = getPropertyValue(internalProps.show_cc, show_cc, false);
-    show_bcc = getPropertyValue(internalProps.show_bcc, show_bcc, false);
-    show_cc_button = getPropertyValue(
-      internalProps.show_cc_button,
-      show_cc_button,
-      true,
-    );
-    show_bcc_button = getPropertyValue(
-      internalProps.show_bcc_button,
-      show_bcc_button,
-      true,
-    );
-    show_attachment_button = getPropertyValue(
-      internalProps.show_attachment_button,
-      show_attachment_button,
-      true,
-    );
-    show_editor_toolbar = getPropertyValue(
-      internalProps.show_editor_toolbar,
-      show_editor_toolbar,
-      true,
-    );
-    theme = getPropertyValue(internalProps.theme, theme, "theme-1");
+    show_to = internalProps.show_to;
+    show_from = internalProps.show_from;
+    minimized = internalProps.minimized;
+    reset_after_send = internalProps.reset_after_send;
+    show_header = internalProps.show_header;
+    show_subject = internalProps.show_subject;
+    show_close_button = internalProps.show_close_button;
+    show_minimize_button = internalProps.show_minimize_button;
+    show_cc = internalProps.show_cc;
+    show_bcc = internalProps.show_bcc;
+    show_cc_button = internalProps.show_cc_button;
+    show_bcc_button = internalProps.show_bcc_button;
+    show_attachment_button = internalProps.show_attachment_button;
+    show_editor_toolbar = internalProps.show_editor_toolbar;
+    theme = internalProps.theme;
   }
 
   const handleInputChange = (e: Event) => {

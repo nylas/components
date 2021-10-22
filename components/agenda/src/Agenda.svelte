@@ -7,7 +7,6 @@
   import { CalendarStore, EventStore, ManifestStore } from "@commons";
   import {
     buildInternalProps,
-    getPropertyValue,
     getEventDispatcher,
   } from "@commons/methods/component";
   import type { EventPosition } from "./methods/position";
@@ -67,7 +66,25 @@
   export let show_no_events_message: boolean;
   export let theme: string;
 
-  let internalProps: Partial<AgendaProperties> = {};
+  const defaultValueMap = {
+    allow_date_change: false,
+    allow_event_creation: false,
+    auto_time_box: false,
+    calendar_ids: "",
+    color_by: "calendar",
+    condensed_view: false,
+    header_type: "full",
+    hide_current_time: false,
+    hide_all_day_events: false,
+    prevent_zoom: false,
+    show_no_events_message: false,
+    eagerly_fetch_events: true,
+    event_snap_interval: 15,
+    theme: "theme-1",
+    hide_ticks: false,
+  };
+
+  let internalProps: AgendaProperties = <any>{};
   let now = new Date().getTime();
 
   onMount(async () => {
@@ -79,7 +96,8 @@
     internalProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<AgendaProperties>;
+      defaultValueMap,
+    ) as AgendaProperties;
 
     setInterval(() => {
       now = new Date().getTime();
@@ -94,76 +112,27 @@
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<AgendaProperties>;
+      defaultValueMap,
+    ) as AgendaProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  $: {
-    allow_date_change = getPropertyValue(
-      internalProps.allow_date_change,
-      allow_date_change,
-      false,
-    );
-    allow_event_creation = getPropertyValue(
-      internalProps.allow_event_creation,
-      allow_event_creation,
-      false,
-    );
-    auto_time_box = getPropertyValue(
-      internalProps.auto_time_box,
-      auto_time_box,
-      false,
-    );
-    calendar_ids = getPropertyValue(
-      internalProps.calendar_ids,
-      calendar_ids,
-      "",
-    );
-    color_by = getPropertyValue(internalProps.color_by, color_by, "calendar");
-    condensed_view = getPropertyValue(
-      internalProps.condensed_view,
-      condensed_view,
-      false,
-    );
-    header_type = getPropertyValue(
-      internalProps.header_type,
-      header_type,
-      "full",
-    );
-    hide_current_time = getPropertyValue(
-      internalProps.hide_current_time,
-      hide_current_time,
-      false,
-    );
-    hide_all_day_events = getPropertyValue(
-      internalProps.hide_all_day_events,
-      hide_all_day_events,
-      false,
-    );
-    prevent_zoom = getPropertyValue(
-      internalProps.prevent_zoom,
-      prevent_zoom,
-      false,
-    );
-    show_no_events_message = getPropertyValue(
-      internalProps.show_no_events_message,
-      show_no_events_message,
-      false,
-    );
-    eagerly_fetch_events = getPropertyValue(
-      internalProps.eagerly_fetch_events,
-      eagerly_fetch_events,
-      true,
-    );
-    event_snap_interval = getPropertyValue(
-      internalProps.event_snap_interval,
-      event_snap_interval,
-      15,
-    );
-    theme = getPropertyValue(internalProps.theme, theme, "theme-1");
-    hide_ticks = getPropertyValue(internalProps.hide_ticks, hide_ticks, false);
+      allow_date_change = internalProps.allow_date_change;
+      allow_event_creation = internalProps.allow_event_creation;
+      auto_time_box = internalProps.auto_time_box;
+      calendar_ids = internalProps.calendar_ids;
+      color_by = internalProps.color_by;
+      condensed_view = internalProps.condensed_view;
+      header_type = internalProps.header_type;
+      hide_current_time = internalProps.hide_current_time;
+      hide_all_day_events = internalProps.hide_all_day_events;
+      prevent_zoom = internalProps.prevent_zoom;
+      show_no_events_message = internalProps.show_no_events_message;
+      eagerly_fetch_events = internalProps.eagerly_fetch_events;
+      event_snap_interval = internalProps.event_snap_interval;
+      theme = internalProps.theme;
+      hide_ticks = internalProps.hide_ticks;
+    }
   }
 
   let themeUrl: string;
@@ -274,8 +243,11 @@
 
   // Accept either comma-separated string, or array.
   $: calendarIDs = (() => {
-    let IDList = calendar_ids;
-    if (typeof calendar_ids === "string" && calendar_ids.length) {
+    let IDList = internalProps.calendar_ids;
+    if (
+      typeof internalProps.calendar_ids === "string" &&
+      internalProps.calendar_ids.length
+    ) {
       IDList = IDList.split(",").map((id: string) => id.trim());
     } else if (calendar_id) {
       IDList = [calendar_id];
@@ -1354,7 +1326,7 @@
 <main
   class:headless={header_type === "none"}
   data-cy="nylas-agenda"
-  class={!!themeUrl ? "custom" : theme}
+  class={!!themeUrl ? "custom" : internalProps.theme}
 >
   {#await hydratedEvents}
     (loading events)

@@ -7,7 +7,6 @@
   import {
     buildInternalProps,
     getEventDispatcher,
-    getPropertyValue,
   } from "@commons/methods/component";
 
   import type { Manifest } from "@commons/types/Scheduler";
@@ -43,13 +42,35 @@
   export let notification_message: string;
   export let notification_subject: string;
   export let recurrence: "none" | "required" | "optional";
-  export let recurrence_cadence: string[]; // "none" | "daily" | "weekdays" | "weekly" | "biweekly" | "monthly";
-  export let recurrence_expiry: Date | string | undefined;
-
+  export let recurrence_cadence: (
+    | "none"
+    | "daily"
+    | "weekdays"
+    | "weekly"
+    | "biweekly"
+    | "monthly"
+  )[];
+  export let recurrence_expiry: Date | string | null;
   // #endregion props
 
   //#region mount and prop initialization
-  let internalProps: Partial<Manifest> = {};
+  const defaultValueMap = {
+    availability_id: "",
+    email_ids: [],
+    booking_label: "Schedule time slots",
+    event_title: "Meeting",
+    event_description: "",
+    event_conferencing: "",
+    event_location: "",
+    slots_to_book: [],
+    notification_mode: NotificationMode.SHOW_MESSAGE,
+    notification_message: "Thank you for scheduling!",
+    notification_subject: "Invitation",
+    recurrence: "none",
+    recurrence_cadence: ["none"],
+  };
+
+  let internalProps: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
 
   onMount(async () => {
@@ -60,82 +81,37 @@
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    internalProps = buildInternalProps($$props, manifest) as Partial<Manifest>;
+    internalProps = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as Manifest;
   });
 
   $: {
     const rebuiltProps = buildInternalProps(
       $$props,
       manifest,
-    ) as Partial<Manifest>;
+      defaultValueMap,
+    ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-    }
-  }
 
-  $: {
-    availability_id = getPropertyValue(
-      internalProps.availability_id,
-      availability_id,
-      "",
-    );
-    email_ids = getPropertyValue(internalProps.email_ids, email_ids, []);
-    booking_label = getPropertyValue(
-      internalProps.booking_label,
-      booking_label,
-      "Schedule time slots",
-    );
-    event_title = getPropertyValue(
-      internalProps.event_title,
-      event_title,
-      "Meeting",
-    );
-    event_description = getPropertyValue(
-      internalProps.event_description,
-      event_description,
-      "",
-    );
-    event_location = getPropertyValue(
-      internalProps.event_location,
-      event_location,
-      "",
-    );
-    event_conferencing = getPropertyValue(
-      internalProps.event_conferencing,
-      event_conferencing,
-      "",
-    );
-    slots_to_book = getPropertyValue(
-      internalProps.slots_to_book,
-      slots_to_book,
-      [],
-    );
-    notification_mode = getPropertyValue(
-      internalProps.notification_mode,
-      notification_mode,
-      NotificationMode.SHOW_MESSAGE,
-    );
-    notification_message = getPropertyValue(
-      internalProps.notification_message,
-      notification_message,
-      "Thank you for scheduling!",
-    );
-    notification_subject = getPropertyValue(
-      internalProps.notification_subject,
-      notification_subject,
-      "Invitation",
-    );
-    recurrence = getPropertyValue(internalProps.recurrence, recurrence, "none");
-    recurrence_cadence = getPropertyValue(
-      internalProps.recurrence_cadence,
-      recurrence_cadence,
-      ["none"],
-    );
-    recurrence_expiry = getPropertyValue(
-      internalProps.recurrence_expiry,
-      recurrence_expiry,
-      undefined,
-    );
+      availability_id = internalProps.availability_id;
+      email_ids = internalProps.email_ids;
+      booking_label = internalProps.booking_label;
+      event_title = internalProps.event_title;
+      event_description = internalProps.event_description;
+      event_location = internalProps.event_location;
+      event_conferencing = internalProps.event_conferencing;
+      slots_to_book = internalProps.slots_to_book;
+      notification_mode = internalProps.notification_mode;
+      notification_message = internalProps.notification_message;
+      notification_subject = internalProps.notification_subject;
+      recurrence = internalProps.recurrence;
+      recurrence_cadence = internalProps.recurrence_cadence;
+      recurrence_expiry = internalProps.recurrence_expiry;
+    }
   }
 
   const dispatchEvent = getEventDispatcher(get_current_component());
