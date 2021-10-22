@@ -1,7 +1,10 @@
-<!-- Add information about your PR here -->
+# Code changes
+
+- []
 
 # Readiness checklist
 
+- [] New property added? make sure to update `component/src/properties.json`
 - [] Cypress tests passing?
 - [] New cypress tests added?
 - [] Included before/after screenshots, if the change is visual

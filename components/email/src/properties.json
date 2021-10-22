@@ -1,0 +1,101 @@
+[
+  {
+    "label": "id",
+    "title": "ID",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "access_token",
+    "title": "Access token",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "show_contact_avatar",
+    "title": "Show contact avatars",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "clean_conversation",
+    "title": "Show clean conversation using Neural API",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_expanded_email_view_onload",
+    "title": "Show Email expanded on load",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "show_thread_actions",
+    "title": "Show actions on email",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "thread_id",
+    "title": "Thread to view",
+    "noPreview": true,
+    "type": "string"
+  },
+  {
+    "label": "thread",
+    "title": "Thread to view, passed in",
+    "noPreview": true,
+    "type": "Thread"
+  },
+  {
+    "label": "message",
+    "title": "Message to view, passed in",
+    "noPreview": true,
+    "type": "Message"
+  },
+  {
+    "label": "show_received_timestamp",
+    "title": "Show received timestamp",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_number_of_messages",
+    "title": "Show number of messages",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_star",
+    "title": "Show star",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "unread",
+    "title": "Show a thread as unread by overriding the thread's default value",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "click_action",
+    "title": "This option allows to specify the type of click action",
+    "type": "string",
+    "options": ["default", "custom", "mailbox"],
+    "value": "default"
+  },
+  {
+    "label": "you",
+    "title": "User's account object that you can pass in",
+    "type": "Partial<Account>",
+    "noPreview": true
+  }
+]

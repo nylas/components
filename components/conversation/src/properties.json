@@ -1,0 +1,57 @@
+[
+  {
+    "label": "id",
+    "title": "ID",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "access_token",
+    "title": "Access token",
+    "type": "string",
+    "noPreview": true
+  },
+  {
+    "label": "theme",
+    "title": "Theme",
+    "options": ["theme-1", "theme-2", "theme-3"],
+    "type": "string",
+    "value": "theme-1"
+  },
+  {
+    "label": "show_avatars",
+    "title": "Show avatars",
+    "options": [true, false],
+    "type": "boolean",
+    "value": true
+  },
+  {
+    "label": "thread_id",
+    "title": "Thread to view",
+    "noPreview": true,
+    "type": "string",
+    "value": ""
+  },
+  {
+    "label": "show_reply",
+    "title": "Show Reply",
+    "description": "Allows an option to reply to the thread",
+    "options": [true, false],
+    "value": true,
+    "type": "boolean"
+  },
+  {
+    "label": "messages",
+    "title": "Messages object that you can pass in",
+    "type": "Message[]",
+    "noPreview": true,
+    "value": []
+  },
+  {
+    "label": "you",
+    "title": "User's account object that you can pass in",
+    "type": "Partial<Account>",
+    "noPreview": true,
+    "value": {}
+  }
+]
