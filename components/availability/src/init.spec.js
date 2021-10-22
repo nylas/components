@@ -486,6 +486,7 @@ describe("availability component", () => {
           const component = element[0];
           component.start_date = new Date("2021-04-06 00:00");
           component.show_as_week = true;
+          cy.wait(100);
           cy.get("div.day:eq(0) header h2").contains("Sun");
           cy.get("div.day:eq(6) header h2").contains("Sat");
         });
@@ -515,6 +516,7 @@ describe("availability component", () => {
           component.dates_to_show = 7;
           component.show_as_week = true;
           component.show_weekends = false;
+          cy.wait(100);
           cy.get("div.day:eq(0) header h2").contains("Mon");
           cy.get("div.day:eq(4) header h2").contains("Fri");
           cy.get("div.day:eq(5) header h2").should("not.exist");
@@ -690,6 +692,7 @@ describe("availability component", () => {
           const component = element[0];
           component.dates_to_show = 7;
           cy.viewport(1500, 550);
+          cy.wait(100);
           cy.get(".days .day").should("have.length", 7);
           cy.viewport(1200, 550);
           cy.get(".days .day").should("have.length", 6);
@@ -725,11 +728,14 @@ describe("availability component", () => {
           component.start_date = new Date("2021-04-06 00:00");
           component.show_as_week = true;
           cy.viewport(1800, 550);
+          cy.wait(100);
           cy.get("div.day:eq(0) header h2").contains("Sun");
           cy.get("div.day:eq(0) header h2").contains("4");
           cy.get("div.day:eq(2) header h2").contains("Tue");
           cy.get(".days .day").should("have.length", 7);
+
           cy.viewport(800, 550);
+          cy.wait(100); // we need to arbitrarily wait so viewport finishes resizing
           cy.get("div.day:eq(0) header h2").contains("Tue");
           cy.get(".days .day").should("have.length", 3);
           cy.get(".change-dates button:eq(1)").click();
@@ -740,7 +746,9 @@ describe("availability component", () => {
           cy.get(".day:eq(0) header h2").contains("Sat");
           cy.get(".day:eq(1) header h2").contains("Sun");
           cy.get(".days .day").should("have.length", 3);
+
           cy.viewport(1800, 550);
+          cy.wait(100);
           cy.get("div.day:eq(0) header h2").contains("Sun");
           cy.get("div.day:eq(0) header h2").contains("28");
           cy.get("div.day:eq(2) header h2").contains("Tue");
