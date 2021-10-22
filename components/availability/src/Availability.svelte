@@ -11,10 +11,7 @@
   import { handleError } from "@commons/methods/api";
   import { onMount, afterUpdate, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
-  import {
-    getEventDispatcher,
-    buildInternalProps,
-  } from "@commons/methods/component";
+  import { getEventDispatcher, build_this } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
   import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime } from "d3-scale";
@@ -162,7 +159,7 @@
   //#endregion props
 
   //#region mount and prop initialization
-  let internalProps: Manifest = <any>{};
+  let _this: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
@@ -173,7 +170,12 @@
   let shouldUpdateDayPositions = false;
 
   $: {
-    if (dates_to_show || show_ticks || show_as_week || show_weekends) {
+    if (
+      _this.dates_to_show ||
+      _this.show_ticks ||
+      _this.show_as_week ||
+      _this.show_weekends
+    ) {
       // Changes to these props will resize the width of day container
       dayRef = dayRef.filter((day) => !!day);
       shouldUpdateDayPositions = true;
@@ -182,11 +184,11 @@
 
   $: {
     if (
-      start_hour ||
-      end_hour ||
-      slot_size ||
-      show_header ||
-      allow_date_change
+      _this.start_hour ||
+      _this.end_hour ||
+      _this.slot_size ||
+      _this.show_header ||
+      _this.allow_date_change
     ) {
       // Changes to these props changes the height of our slot buttons
       slotRef = slotRef.filter((slot) => !!slot);
@@ -206,11 +208,7 @@
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as Manifest;
+    _this = build_this($$props, manifest, defaultValueMap) as Manifest;
 
     const calendarQuery: CalendarQuery = {
       access_token,
@@ -240,44 +238,13 @@
   });
 
   $: {
-    const rebuiltProps = buildInternalProps(
+    const rebuiltProps = build_this(
       $$props,
       manifest,
       defaultValueMap,
     ) as Manifest;
-    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      start_hour = internalProps.start_hour;
-      end_hour = internalProps.end_hour;
-      slot_size = internalProps.slot_size;
-      start_date = internalProps.start_date;
-      dates_to_show = internalProps.dates_to_show;
-      calendars = internalProps.calendars;
-      show_ticks = internalProps.show_ticks;
-      email_ids = internalProps.email_ids;
-      allow_booking = internalProps.allow_booking;
-      max_bookable_slots = internalProps.max_bookable_slots;
-      partial_bookable_ratio = internalProps.partial_bookable_ratio;
-      show_as_week = internalProps.show_as_week;
-      show_weekends = internalProps.show_weekends;
-      attendees_to_show = internalProps.attendees_to_show;
-      allow_date_change = internalProps.allow_date_change;
-      required_participants = internalProps.required_participants;
-      busy_color = internalProps.busy_color;
-      closed_color = internalProps.closed_color;
-      partial_color = internalProps.partial_color;
-      free_color = internalProps.free_color;
-      selected_color = internalProps.selected_color;
-      show_hosts = internalProps.show_hosts;
-      view_as = internalProps.view_as;
-      event_buffer = internalProps.event_buffer;
-      capacity = internalProps.capacity;
-      show_header = internalProps.show_header;
-      date_format = internalProps.date_format;
-      open_hours = internalProps.open_hours;
-      overbooked_threshold = internalProps.overbooked_threshold;
-      mandate_top_of_hour = internalProps.mandate_top_of_hour;
+    if (JSON.stringify(rebuiltProps) !== JSON.stringify(_this)) {
+      _this = rebuiltProps;
     }
   }
 
@@ -293,17 +260,6 @@
         contact = await ContactStore.addContact(contactQuery);
       }
       return contact[0] ?? {};
-    }
-  }
-
-  $: {
-    if (
-      $$props.hasOwnProperty("start_date") &&
-      $$props.start_date !== startDate
-    ) {
-      startDate = internalProps.start_date;
-    } else if (!startDate) {
-      startDate = start_date;
     }
   }
 
@@ -327,11 +283,11 @@
   $: optimalDatesToShow =
     Math.floor(dayContainerWidth / MINIMUM_DAY_WIDTH) || 1;
   $: datesToShow =
-    optimalDatesToShow < dates_to_show || show_as_week
+    optimalDatesToShow < _this.dates_to_show || _this.show_as_week
       ? optimalDatesToShow
-      : dates_to_show;
+      : _this.dates_to_show;
 
-  $: tooSmallForWeek = show_as_week && optimalDatesToShow < 7;
+  $: tooSmallForWeek = _this.show_as_week && optimalDatesToShow < 7;
 
   //#endregion layout
 
@@ -344,23 +300,23 @@
   let startDate: Date; // internally-settable start_date
 
   $: dayRange =
-    (show_weekends || !show_weekends) &&
+    (_this.show_weekends || !_this.show_weekends) &&
     generateDayRange(
       startDay, // TODO: weird just to get show_weekends passed in
-      show_as_week
+      _this.show_as_week
         ? timeDay.offset(startDay, tooSmallForWeek ? datesToShow - 1 : 6)
         : timeDay.offset(startDay, datesToShow - 1),
     );
 
   $: startDay =
-    show_as_week && !tooSmallForWeek
+    _this.show_as_week && !tooSmallForWeek
       ? timeWeek.floor(startDate)
       : timeDay.floor(startDate);
 
   $: endDay = dayRange[dayRange.length - 1];
 
   const allRequiredParticipantsIncluded = (calendars: string[]) => {
-    return required_participants.every((participant) =>
+    return _this.required_participants.every((participant) =>
       calendars.includes(participant),
     );
   };
@@ -369,19 +325,19 @@
   // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
   $: generateDaySlots = function (
     timestamp: Date,
-    start_hour: number,
-    end_hour: number,
+    startHour: number,
+    endHour: number,
   ) {
     const dayStart = timeHour(
-      new Date(new Date(timestamp).setHours(start_hour)),
+      new Date(new Date(timestamp).setHours(startHour)),
     );
-    const dayEnd = timeHour(new Date(new Date(timestamp).setHours(end_hour)));
+    const dayEnd = timeHour(new Date(new Date(timestamp).setHours(endHour)));
     return scaleTime()
       .domain([dayStart, dayEnd])
-      .ticks(timeMinute.every(slot_size) as TimeInterval)
+      .ticks(timeMinute.every(_this.slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
       .map((time: Date) => {
-        const endTime = timeMinute.offset(time, slot_size);
+        const endTime = timeMinute.offset(time, _this.slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
@@ -394,17 +350,20 @@
             const timeslots =
               calendar.availability === AvailabilityStatus.BUSY
                 ? calendar.timeslots.map((t) => ({
-                    start_time: timeMinute.offset(t.start_time, -event_buffer),
-                    end_time: timeMinute.offset(t.end_time, event_buffer),
+                    start_time: timeMinute.offset(
+                      t.start_time,
+                      -_this.event_buffer,
+                    ),
+                    end_time: timeMinute.offset(t.end_time, _this.event_buffer),
                     available_calendars: t.available_calendars,
                   }))
                 : calendar.timeslots;
             const slotAvailability = overlap(timeslots, slot);
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (
-                capacity &&
-                capacity >= 1 &&
-                slotAvailability.concurrentEvents < capacity
+                _this.capacity &&
+                _this.capacity >= 1 &&
+                slotAvailability.concurrentEvents < _this.capacity
               ) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               } else if (!slotAvailability.overlap) {
@@ -438,7 +397,8 @@
         // mark the slot as busy
         if (
           availability === AvailabilityStatus.PARTIAL &&
-          freeCalendars.length < allCalendars.length * partial_bookable_ratio
+          freeCalendars.length <
+            allCalendars.length * _this.partial_bookable_ratio
         ) {
           availability = AvailabilityStatus.BUSY;
         }
@@ -446,7 +406,7 @@
         // Allows users to book over busy slots if partial_bookable_ratio is 0
         if (
           availability === AvailabilityStatus.BUSY &&
-          partial_bookable_ratio === 0
+          _this.partial_bookable_ratio === 0
         ) {
           availability = AvailabilityStatus.PARTIAL;
         }
@@ -454,7 +414,7 @@
         // If availability is partial, but a required participant is unavailble, the slot becomes Busy
         if (
           availability === AvailabilityStatus.PARTIAL &&
-          required_participants.length
+          _this.required_participants.length
         ) {
           if (!allRequiredParticipantsIncluded(freeCalendars)) {
             availability = AvailabilityStatus.BUSY;
@@ -462,17 +422,17 @@
         }
 
         // If mandate_top_of_hour, change any status to "busy" if it's not at :00
-        if (mandate_top_of_hour && time.getMinutes() !== 0) {
+        if (_this.mandate_top_of_hour && time.getMinutes() !== 0) {
           availability = AvailabilityStatus.BUSY;
           freeCalendars.length = 0;
         }
 
         // if the "open_hours" property has rules, adhere to them above any other event-based free/busy statuses
         // (Mark the slot busy if it falls outside the open_hours)
-        if (open_hours.length) {
+        if (_this.open_hours.length) {
           if (availability !== AvailabilityStatus.BUSY) {
             let dayRelevantRules = [];
-            dayRelevantRules = open_hours.filter(
+            dayRelevantRules = _this.open_hours.filter(
               (rule) =>
                 !rule.hasOwnProperty("startWeekday") ||
                 rule.startWeekday === time.getDay() ||
@@ -553,7 +513,7 @@
     const averageTickHeight = height / ticks.length;
 
     if (
-      tickIters < slot_size || // dont show 15-min ticks if slot size is hourly
+      tickIters < _this.slot_size || // dont show 15-min ticks if slot size is hourly
       (averageTickHeight < minimumTickHeight && // make sure ticks're at least yea-pixels tall
         intervalCounter < slotSizes.length) // don't try to keep going if youve reached every 6 hours. Subdividing a day into fewer than 4 parts doesn't yield a nice result.
     ) {
@@ -566,7 +526,7 @@
   // Consecutive same-availability periods of time, from earliest start_time to latest end_time.
   function generateEpochs(
     slots: SelectableSlot[],
-    partial_bookable_ratio: number,
+    partialBookableRatio: number,
   ) {
     const epochScale = scaleTime().domain([
       slots[0].start_time,
@@ -595,12 +555,12 @@
         const numFreeCalendars = epoch[0].available_calendars.length;
         const fewerCalendarsThanRatio =
           numFreeCalendars !== allCalendars.length &&
-          numFreeCalendars < allCalendars.length * partial_bookable_ratio;
+          numFreeCalendars < allCalendars.length * partialBookableRatio;
 
         if (
           numFreeCalendars === 0 ||
           fewerCalendarsThanRatio ||
-          (required_participants.length &&
+          (_this.required_participants.length &&
             !allRequiredParticipantsIncluded(epoch[0].available_calendars))
         ) {
           if (epoch[0].availability === AvailabilityStatus.CLOSED) {
@@ -640,13 +600,13 @@
       .domain([startDay, endDay])
       .ticks(timeDay)
       .filter((timestamp: Date) => {
-        if (show_weekends) {
+        if (_this.show_weekends) {
           return true;
         } else {
           return timestamp.getDay() !== 6 && timestamp.getDay() !== 0;
         }
       });
-    if (!show_as_week && !show_weekends) {
+    if (!_this.show_as_week && !_this.show_weekends) {
       if (range.length < datesToShow) {
         if (reverse) {
           return generateDayRange(timeDay.offset(startDay, -1), endDay, true);
@@ -670,7 +630,7 @@
       );
       if (
         slots.length - availableSlotsForCalendar.length >
-        (overbooked_threshold * slots.length) / 100
+        (_this.overbooked_threshold * slots.length) / 100
       ) {
         availableSlotsForCalendar.forEach((slot) => {
           slot.available_calendars = slot.available_calendars.filter(
@@ -696,11 +656,11 @@
   let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
     let slots = checkOverbooked(
-      generateDaySlots(timestamp, start_hour, end_hour),
+      generateDaySlots(timestamp, _this.start_hour, _this.end_hour),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
     return {
       slots,
-      epochs: generateEpochs(slots, partial_bookable_ratio),
+      epochs: generateEpochs(slots, _this.partial_bookable_ratio),
       timestamp,
     };
   });
@@ -766,13 +726,15 @@
   let availabilityQuery: AvailabilityQuery;
   $: availabilityQuery = {
     body: {
-      emails: email_ids,
+      emails: _this.email_ids,
       start_time:
-        timeHour(new Date(new Date(startDay).setHours(start_hour))).getTime() /
-        1000,
+        timeHour(
+          new Date(new Date(startDay).setHours(_this.start_hour)),
+        ).getTime() / 1000,
       end_time:
-        timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
-        1000,
+        timeHour(
+          new Date(new Date(endDay).setHours(_this.end_hour)),
+        ).getTime() / 1000,
     },
     component_id: id,
     access_token: access_token,
@@ -928,7 +890,7 @@
   //#endregion event query
   $: allCalendars = [
     // TODO: consider merging these 2 into just calendars
-    ...(calendars ?? []),
+    ...(_this.calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
   ];
 
@@ -970,8 +932,8 @@
       });
 
     // Only show up to attendees_to_show attendees
-    if (attendees_to_show > 0) {
-      displayedAttendees = selectedAttendees.slice(0, attendees_to_show);
+    if (_this.attendees_to_show > 0) {
+      displayedAttendees = selectedAttendees.slice(0, _this.attendees_to_show);
     }
 
     const tickContainerDimensions = tickContainer.getBoundingClientRect(),
@@ -1032,20 +994,14 @@
 
   // #region Date Change
   function goToNextDate() {
-    if ($$props.start_date) {
-      delete $$props.start_date;
-    }
-    if (show_as_week && !tooSmallForWeek) {
+    if (_this.show_as_week && !tooSmallForWeek) {
       startDate = timeWeek.offset(endDay, 1);
     } else {
       startDate = timeDay.offset(endDay, 1);
     }
   }
   function goToPreviousDate() {
-    if ($$props.start_date) {
-      delete $$props.start_date;
-    }
-    if (show_as_week && !tooSmallForWeek) {
+    if (_this.show_as_week && !tooSmallForWeek) {
       startDate = timeWeek.offset(startDay, -1);
     } else {
       // Can't do something as simple as `start_date = timeDay.offset(startDay, -datesToShow)` here;
@@ -1115,7 +1071,7 @@
     : [];
 
   function startDrag(slot: SelectableSlot, day: Day) {
-    if (allow_booking) {
+    if (_this.allow_booking) {
       // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
       dragStartSlot = slot;
       dragStartDay = day;
@@ -1129,7 +1085,7 @@
               slot.end_time <= block.end_time,
           ) || null;
       } else if (
-        slotSelection.length < max_bookable_slots &&
+        slotSelection.length < _this.max_bookable_slots &&
         isAvailable(slot)
       ) {
         slot.selectionPending = true;
@@ -1161,7 +1117,7 @@
         // especially when you consider max_bookable_slots
         let direction: "forward" | "backward" = "forward";
 
-        if (allow_booking && day === dragStartDay && dragStartSlot) {
+        if (_this.allow_booking && day === dragStartDay && dragStartSlot) {
           if (slot.start_time < dragStartSlot.start_time) {
             direction = "backward";
           }
@@ -1185,7 +1141,7 @@
 
           // Don't let the user book more slots than are allowed
           const remainingSlots =
-            max_bookable_slots -
+            _this.max_bookable_slots -
             (slotSelection.length +
               day.slots.filter(
                 (slot) =>
@@ -1253,7 +1209,7 @@
   function toggleSlot(slot: SelectableSlot) {
     if (slot.selectionStatus === SelectionStatus.SELECTED) {
       slot.selectionStatus = SelectionStatus.UNSELECTED;
-    } else if (slotSelection.length < max_bookable_slots) {
+    } else if (slotSelection.length < _this.max_bookable_slots) {
       slot.selectionStatus = SelectionStatus.SELECTED;
     }
     days = [...days];
@@ -1273,7 +1229,7 @@
   }: SlotInteractionHandler) {
     if (slot) {
       if (
-        slotSelection.length < max_bookable_slots ||
+        slotSelection.length < _this.max_bookable_slots ||
         slot.selectionStatus === SelectionStatus.SELECTED
       ) {
         if (event instanceof MouseEvent) mouseIsDown = true;
@@ -1342,7 +1298,7 @@
   //#endregion slot interaction handlers
 
   // #region error
-  $: if (id && email_ids.length && capacity) {
+  $: if (id && _this.email_ids.length && _this.capacity) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
@@ -1352,7 +1308,7 @@
     } catch (error) {
       console.error(error);
     }
-  } else if (capacity && capacity < 1) {
+  } else if (_this.capacity && _this.capacity < 1) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
@@ -1379,17 +1335,17 @@
 <main
   bind:this={main}
   bind:clientHeight
-  class:ticked={show_ticks && view_as === "schedule"}
-  class:allow_booking
-  class:hide-header={!show_header}
+  class:ticked={_this.show_ticks && _this.view_as === "schedule"}
+  class:allow_booking={_this.allow_booking}
+  class:hide-header={!_this.show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
-  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
-  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
---free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
+  --busy-color-lightened: {lightenHexColour(_this.busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(_this.closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(_this.selected_color, 60)}; 
+--free-color: {_this.free_color}; --busy-color: {_this.busy_color}; --closed-color: {_this.closed_color}; --partial-color: {_this.partial_color}; --selected-color: {_this.selected_color};"
 >
-  <header class:dated={allow_date_change}>
+  <header class:dated={_this.allow_date_change}>
     <h2 class="month">
       {#if days[days.length - 1].timestamp.getMonth() !== days[0].timestamp.getMonth()}
         {#if days[days.length - 1].timestamp.getFullYear() !== days[0].timestamp.getFullYear()}
@@ -1422,7 +1378,7 @@
         })}
       {/if}
     </h2>
-    {#if allow_date_change}
+    {#if _this.allow_date_change}
       <div class="change-dates">
         <button on:click={goToPreviousDate} aria-label="Previous date"
           ><BackIcon style="height:32px;width:32px;" /></button
@@ -1436,12 +1392,12 @@
       <span class="not-available">Not available</span>
       <span class="partially-available">Partially available</span>
       <span class="available">Available</span>
-      {#if busy_color !== closed_color}
+      {#if _this.busy_color !== _this.closed_color}
         <span class="closed">Closed</span>
       {/if}
     </div>
   </header>
-  {#if show_ticks && view_as === "schedule"}
+  {#if _this.show_ticks && _this.view_as === "schedule"}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
         <li class="tick">
@@ -1455,8 +1411,8 @@
   {/if}
   <div
     class="days"
-    class:schedule={view_as === "schedule"}
-    class:list={view_as === "list"}
+    class:schedule={_this.view_as === "schedule"}
+    class:list={_this.view_as === "list"}
     class:loading
     class:error={hasError}
     bind:this={dayContainer}
@@ -1470,14 +1426,14 @@
       >
         <header>
           <h2>
-            {#if date_format === "date" || date_format === "full"}
+            {#if _this.date_format === "date" || _this.date_format === "full"}
               <span class="date">
                 {new Date(day.timestamp).toLocaleString("default", {
                   day: "numeric",
                 })}
               </span>
             {/if}
-            {#if date_format === "weekday" || date_format === "full"}
+            {#if _this.date_format === "weekday" || _this.date_format === "full"}
               <span>
                 {new Date(day.timestamp).toLocaleString("default", {
                   weekday: "short",
@@ -1486,7 +1442,7 @@
             {/if}
           </h2>
         </header>
-        {#if view_as === "schedule"}
+        {#if _this.view_as === "schedule"}
           <div class="epochs">
             {#each day.epochs as epoch}
               <div
@@ -1497,7 +1453,7 @@
                 data-end-time={new Date(epoch.end_time).toLocaleString()}
               >
                 <div class="inner">
-                  {#if show_hosts === "show"}
+                  {#if _this.show_hosts === "show"}
                     <div class="available-calendars">
                       <span
                         on:mouseenter={(event) => showOverlay(event, epoch)}
@@ -1600,7 +1556,7 @@
               </button>
             {/each}
           </div>
-        {:else if view_as === "list"}
+        {:else if _this.view_as === "list"}
           <div class="slot-list">
             {#each day.slots.filter((slot) => slot.availability === AvailabilityStatus.FREE || slot.availability === AvailabilityStatus.PARTIAL) as slot}
               <button
@@ -1661,9 +1617,9 @@
           {/if}
         </div>
       {/each}
-      {#if selectedAttendees.length > attendees_to_show}
+      {#if selectedAttendees.length > _this.attendees_to_show}
         <span class="more-attendees">
-          {`+${selectedAttendees.length - attendees_to_show} more`}
+          {`+${selectedAttendees.length - _this.attendees_to_show} more`}
         </span>
       {/if}
     </div>
