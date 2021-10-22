@@ -100,7 +100,6 @@
   export let uploadFile: Function | null = null;
   export let beforeFileRemove: Function | null = null;
   export let afterFileRemove: Function | null = null;
-  export let visible = true;
 
   // Callbacks
   export const open = (): void => {
@@ -118,6 +117,7 @@
   let manifest: Partial<ComposerProperties>;
   let showDatepicker = false;
   let themeLoaded = false;
+  let visible = true;
 
   onMount(async () => {
     isLoading = true;
@@ -180,7 +180,6 @@
       show_header,
       false,
     );
-    visible = getPropertyValue(internalProps.visible, visible, true);
     show_subject = getPropertyValue(
       internalProps.show_subject,
       show_subject,

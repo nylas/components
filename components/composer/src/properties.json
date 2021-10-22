@@ -34,14 +34,6 @@
     "value": false
   },
   {
-    "label": "visible",
-    "title": "Open automatically",
-    "description": "Show open composer on initial load",
-    "type": "boolean",
-    "options": [true, false],
-    "value": true
-  },
-  {
     "label": "show_to",
     "title": "Show 'to' field",
     "type": "boolean",
