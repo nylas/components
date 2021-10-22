@@ -17,6 +17,9 @@ main {
   &.ticked {
     grid-template-columns: 70px 1fr;
   }
+  &.timezone {
+    grid-template-columns: 70px 70px 1fr;
+  }
 
   &.hide-header {
     $headerHeight: 0px;
@@ -98,6 +101,12 @@ main {
     grid-auto-columns: 1fr;
     height: 100%;
     overflow: auto;
+    .timezone {
+      font-size: 0.8rem;
+      left: 25px;
+      position: absolute;
+      padding-top: 5px;
+    }
     &.loading {
       @include progress-bar(
         top,
@@ -139,9 +148,8 @@ main {
     height: calc(100% - #{$headerHeight});
     list-style-type: none;
     margin: 0;
-    padding: 0;
+    padding: $headerHeight 0 0 0;
     overflow: hidden;
-    padding-top: $headerHeight;
     font-size: 0.8rem;
     font-family: sans-serif;
 

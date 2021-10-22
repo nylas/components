@@ -2,6 +2,10 @@
 
 <script lang="ts">
   import {
+    formatTimeSlot,
+    getShortTimeZone,
+  } from "@commons/methods/convertDateTimeZone";
+  import {
     ManifestStore,
     AvailabilityStore,
     CalendarStore,
@@ -89,6 +93,7 @@
   export let start_date: Date;
   export let start_hour: number;
   export let view_as: "schedule" | "list";
+  export let timezone: string;
 
   const defaultValueMap = {
     allow_booking: false,
@@ -122,6 +127,7 @@
     start_date: new Date(),
     start_hour: 0,
     view_as: "schedule",
+    timezone: "",
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
@@ -301,6 +307,7 @@
     start_date = internalProps.start_date;
     start_hour = internalProps.start_hour;
     view_as = internalProps.view_as;
+    timezone = internalProps.timezone;
   }
 
   async function getContact(email: string) {
@@ -545,6 +552,10 @@
   const slotSizes = [15, 30, 60, 180, 360]; // we only want to show ticks in intervals of 15 mins, 30 mins, 60 mins, 3 hours, or 6 hours.
 
   $: ticks = generateTicks(
+    clientHeight,
+    days[0].slots.map((slot: TimeSlot) => slot.start_time),
+  );
+  $: timezoneTicks = generateTicks(
     clientHeight,
     days[0].slots.map((slot: TimeSlot) => slot.start_time),
   );
@@ -904,7 +915,6 @@
             (!daySlot.selectionPending || isUnavailable(daySlot))
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
-
       let startTime = getCondensedTimeString(slot.start_time).replace(" ", "");
       let endTime = getCondensedTimeString(pendingEndTime).replace(" ", "");
       return `${startTime} - ${endTime}`;
@@ -1433,6 +1443,7 @@
   bind:this={main}
   bind:clientHeight
   class:ticked={show_ticks && view_as === "schedule"}
+  class:timezone
   class:allow_booking
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
@@ -1464,6 +1475,15 @@
     </div>
   </header>
   {#if show_ticks && view_as === "schedule"}
+    {#if timezone}
+      <ul class="ticks" bind:this={tickContainer}>
+        {#each ticks as tick}
+          <li class="tick">
+            {formatTimeSlot(tick, timezone)}
+          </li>
+        {/each}
+      </ul>
+    {/if}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
         <li class="tick">
@@ -1481,6 +1501,9 @@
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
+    {#if timezone}
+      <p class="timezone">{getShortTimeZone(ticks[0], timezone)}</p>
+    {/if}
     {#each days as day, dayIndex (day.timestamp.toISOString())}
       <div
         class="day"

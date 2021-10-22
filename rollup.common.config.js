@@ -4,6 +4,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import livereload from "rollup-plugin-livereload";
 import replace from "@rollup/plugin-replace";
+import json from "@rollup/plugin-json";
 import alias from "@rollup/plugin-alias";
 import path from "path";
 import dotenv from "dotenv";
@@ -46,6 +47,7 @@ const config = {
       minify: !!production,
     }),
     commonjs(),
+    json(),
   ],
   watch: {
     clearScreen: false,

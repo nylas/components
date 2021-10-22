@@ -126,5 +126,10 @@
     "type": "boolean",
     "options": [true, false],
     "value": true
+  },
+  {
+    "label": "timezone",
+    "title": "Time zone",
+    "type": "string"
   }
 ]
