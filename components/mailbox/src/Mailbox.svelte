@@ -600,9 +600,8 @@
     }
   }
 
-  .refreshing {
-    color: transparent;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  ul.refreshing {
+    filter: blur(0.2rem);
   }
 
   .checkbox-container {
@@ -751,14 +750,13 @@
             {/if}{/if}
         </div>
       {/if}
-      <ul id="mailboxlist">
+      <ul id="mailboxlist" class:refreshing={refreshingMailbox}>
         {#each paginatedThreads as thread}
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
               class:unread={unreadThreads.has(thread) ||
                 (thread.unread && unread_status === "default")}
               class:checked={selectedThreads.has(thread)}
-              class:refreshing={refreshingMailbox}
             >
               {#if show_thread_checkbox}<div
                   class="checkbox-container thread-checkbox"
