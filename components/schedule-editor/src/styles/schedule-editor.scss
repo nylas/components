@@ -13,12 +13,13 @@ main {
   }
 
   aside#preview {
-    height: 100vh;
+    height: calc(100vh - 1rem);
+    padding-bottom: 1rem;
     position: sticky;
     top: 0;
-    nylas-availability {
-      height: 300px;
-    }
+    display: grid;
+    grid-template-rows: auto 1fr 250px;
+    gap: 1rem;
   }
 
   .gutter {

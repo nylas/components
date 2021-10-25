@@ -13,6 +13,8 @@
   // TODO: switch for local development
   // import "@nylas/components-availability";
   import "../../availability";
+  // import "@nylas/components-scheduler";
+  import "../../scheduler";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
@@ -91,6 +93,11 @@
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
 
+    if (manifest) {
+      console.log("manifest is loaded, do stuff");
+      setManifestDefaults(manifest);
+    }
+
     internalProps = buildInternalProps(
       $$props,
       manifest,
@@ -140,11 +147,23 @@
   }
 
   // Manifest properties requiring further manipulation:
+
+  $: console.log({ startDate });
+
+  function setManifestDefaults(manifest: Manifest) {
+    if (manifest.email_ids) {
+      emailIDs = manifest.email_ids?.join(", ");
+    }
+    if (manifest.start_date) {
+      startDate = manifest.start_date.toLocaleDateString("en-CA");
+    }
+    // recurrenceCadence = manifest.recurrence_cadence;
+  }
   let emailIDs: string = "";
-  let startDate: string = "0";
+  let startDate: string = new Date().toLocaleDateString("en-CA");
   let recurrenceCadence: string[] = [];
 
-  let manifestProperties: { [key: string]: any }; // allows adding keys later
+  let manifestProperties: { [key: string]: any } = {}; // allows adding keys later
 
   $: manifestProperties = {
     event_title,
@@ -181,7 +200,11 @@
   }
 
   $: {
-    manifestProperties.start_date = new Date(startDate);
+    console.log("THIS triggering", startDate);
+    manifestProperties.start_date = new Date(
+      new Date(startDate).getTime() -
+        new Date(startDate).getTimezoneOffset() * -60000,
+    );
   }
 
   $: {
@@ -267,6 +290,17 @@
       width = e.clientX - 35 + "px";
     }
   }
+
+  let debouncedInputTimer;
+  function debounceEmailInput(e: InputEvent) {
+    let thing = e.target.value;
+    clearTimeout(debouncedInputTimer);
+    debouncedInputTimer = setTimeout(() => {
+      emailIDs = thing;
+    }, 1000);
+  }
+
+  let slots_to_book = [];
 </script>
 
 <style lang="scss">
@@ -334,7 +368,11 @@
               >
             </div>
             <label>
-              <textarea name="email_ids" bind:value={emailIDs} />
+              <textarea
+                name="email_ids"
+                on:input={debounceEmailInput}
+                value={emailIDs}
+              />
             </label>
           </div>
         </div>
@@ -732,7 +770,25 @@
     </div>
     <span class="gutter" on:mousedown={() => (adjusting = true)} />
     <aside id="preview">
+      <h1>Preview</h1>
       <nylas-availability
+        {...manifestProperties}
+        capacity={null}
+        on:timeSlotChosen={(e) => {
+          slots_to_book = e.detail.timeSlots;
+        }}
+        calendars={!manifestProperties.email_ids
+          ? [
+              {
+                availability: "busy",
+                timeslots: [],
+              },
+            ]
+          : []}
+        {id}
+      />
+      <nylas-scheduler
+        {slots_to_book}
         {...manifestProperties}
         capacity={null}
         calendars={!manifestProperties.email_ids
@@ -743,9 +799,8 @@
               },
             ]
           : []}
-        id="demo-scheduler"
+        {id}
       />
-      <!-- TODO: replace the above with the ID of this component itself, if it exists, and add calendar scopes to schedule-editor requests -->
     </aside>
   </main>
 {/if}
