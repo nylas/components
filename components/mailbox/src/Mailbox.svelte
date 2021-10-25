@@ -85,7 +85,7 @@
 
     // Fetch Account
     if (id && !you.id && !all_threads) {
-      you = await fetchAccount({ component_id: query.component_id });
+      you = await fetchAccount({ component_id: query.component_id, access_token });
     }
 
     const accountOrganizationUnitQuery = {
