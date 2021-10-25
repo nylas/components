@@ -1,3 +1,11 @@
+# 2021-10-25
+
+## 1.0.11
+
+### Bug Fixes
+
+- Mailbox: Fixed a bug where access_token prop was not being sent in the requests [Pull Request](https://github.com/nylas/components/pull/142)
+
 # 2021-10-21
 
 ## 1.0.10
