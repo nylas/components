@@ -94,7 +94,6 @@
     manifest = (await $ManifestStore[storeKey]) || {};
 
     if (manifest) {
-      console.log("manifest is loaded, do stuff");
       setManifestDefaults(manifest);
     }
 
@@ -148,16 +147,22 @@
 
   // Manifest properties requiring further manipulation:
 
-  $: console.log({ startDate });
-
-  function setManifestDefaults(manifest: Manifest) {
-    if (manifest.email_ids) {
+  function setManifestDefaults(manifest: Partial<Manifest>) {
+    if (email_ids) {
+      emailIDs = email_ids?.join(", ");
+    } else if (manifest.email_ids) {
       emailIDs = manifest.email_ids?.join(", ");
     }
-    if (manifest.start_date) {
+    if (start_date) {
+      startDate = start_date.toLocaleDateString("en-CA");
+    } else if (manifest.start_date) {
       startDate = manifest.start_date.toLocaleDateString("en-CA");
     }
-    // recurrenceCadence = manifest.recurrence_cadence;
+    if (recurrence_cadence) {
+      recurrenceCadence = recurrence_cadence;
+    } else if (manifest.recurrence_cadence) {
+      recurrenceCadence = manifest.recurrence_cadence;
+    }
   }
   let emailIDs: string = "";
   let startDate: string = new Date().toLocaleDateString("en-CA");
@@ -200,7 +205,6 @@
   }
 
   $: {
-    console.log("THIS triggering", startDate);
     manifestProperties.start_date = new Date(
       new Date(startDate).getTime() -
         new Date(startDate).getTimezoneOffset() * -60000,
@@ -209,11 +213,6 @@
 
   $: {
     manifestProperties.open_hours = open_hours;
-  }
-
-  $: {
-    // console.clear();
-    console.log(manifestProperties.open_hours);
   }
   // #endregion mount and prop initialization
 
