@@ -134,16 +134,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(availabilityQuery)
-      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -167,14 +166,11 @@
   let manifest: Partial<Manifest> = {};
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
-  let slotRef: HTMLElement[][] = [[]];
-  $: slotRef = Array(datesToShow).fill([]);
+  let slotRef: Array<Array<HTMLElement | null>> = [[]];
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
   let shouldUpdateDayPositions = false;
-
-  $: console.log({ slotRef });
 
   $: {
     if (dates_to_show || show_ticks || show_as_week || show_weekends) {
@@ -186,6 +182,7 @@
 
   $: {
     if (
+      dates_to_show ||
       start_hour ||
       end_hour ||
       slot_size ||
@@ -193,7 +190,7 @@
       allow_date_change
     ) {
       // Changes to these props changes the height of our slot buttons
-      slotRef = slotRef.filter((slot) => !!slot); // TEMP TODO
+      slotRef = slotRef.map((dayRef) => dayRef.filter((slot) => !!slot)); // TEMP TODO
       shouldUpdateSlotPositions = true;
     }
   }
@@ -912,9 +909,7 @@
               hour12: true,
             });
       return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
+      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1316,10 +1311,8 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const {
-        pageX: touchPositionX,
-        pageY: touchPositionY,
-      } = event.changedTouches[0];
+      const { pageX: touchPositionX, pageY: touchPositionY } =
+        event.changedTouches[0];
 
       const currentTouchedDayPosition = Object.entries(dayXPositions).find(
         ([_, dayPosition]) => dayPosition.x > touchPositionX,
@@ -1384,6 +1377,22 @@
     }
   }
   // #endregion error
+
+  function storeRef(
+    node: HTMLElement,
+    params: { dayIndex: number; slotIndex: number },
+  ) {
+    if (typeof slotRef[params.dayIndex] === "undefined")
+      slotRef[params.dayIndex] = [];
+    slotRef[params.dayIndex][params.slotIndex] = node;
+
+    return {
+      destroy() {
+        // Setting to null so that we can clean up this array on re-render
+        slotRef[params.dayIndex][params.slotIndex] = null;
+      },
+    };
+  }
 </script>
 
 <style lang="scss">
@@ -1405,18 +1414,9 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1550,7 +1550,7 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                bind:this={slotRef[dayIndex][slotIndex]}
+                use:storeRef={{ dayIndex, slotIndex }}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
@@ -1591,10 +1591,8 @@
                 }}
                 on:touchmove={throttledTouchMovement}
                 on:touchend={(event) => {
-                  const {
-                    pageX: touchPositionX,
-                    pageY: touchPositionY,
-                  } = event.changedTouches[0];
+                  const { pageX: touchPositionX, pageY: touchPositionY } =
+                    event.changedTouches[0];
 
                   const allSlotPositions = Object.values(slotYPositions);
                   const top = Math.floor(allSlotPositions.splice(0, 1)[0].top);
