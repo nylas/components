@@ -68,7 +68,10 @@
 
     // Fetch Account
     if (id && !you.id && !conversationManuallyPassed) {
-      you = await fetchAccount({ component_id: query.component_id });
+      you = await fetchAccount({
+        component_id: query.component_id,
+        access_token,
+      });
     }
   });
 
