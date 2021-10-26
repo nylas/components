@@ -11,7 +11,6 @@ function initializeCalendars() {
   return {
     subscribe,
     getCalendars: async (query: CalendarQuery) => {
-      console.log("getCals", query);
       const queryKey = JSON.stringify(query);
       if (
         !calendarMap[queryKey] &&
