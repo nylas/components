@@ -110,7 +110,6 @@
       manifest,
       defaultValueMap,
     ) as Manifest;
-    // Problem: the below is false by the time manifest comes around
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
 
