@@ -11,10 +11,10 @@
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
   // TODO: switch for local development
-  // import "@nylas/components-availability";
-  import "../../availability";
-  // import "@nylas/components-scheduler";
-  import "../../scheduler";
+  import "@nylas/components-availability";
+  // import "../../availability";
+  import "@nylas/components-scheduler";
+  // import "../../scheduler";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
