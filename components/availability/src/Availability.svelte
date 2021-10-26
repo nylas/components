@@ -138,15 +138,16 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(getAvailabilityQuery())] =
-        $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
-          (availability) => {
-            for (const calendar of availability) {
-              calendar.time_slots.push(...selectedSlots);
-            }
-            return availability;
-          },
-        );
+      $AvailabilityStore[
+        JSON.stringify(getAvailabilityQuery())
+      ] = $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
+        (availability) => {
+          for (const calendar of availability) {
+            calendar.time_slots.push(...selectedSlots);
+          }
+          return availability;
+        },
+      );
 
       await getAvailability();
     }
@@ -170,11 +171,14 @@
   let manifest: Partial<Manifest> = {};
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
-  let slotRef: HTMLElement[] = [];
+  let slotRef: HTMLElement[][] = [[]];
+  $: slotRef = Array(datesToShow).fill([]);
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
   let shouldUpdateDayPositions = false;
+
+  $: console.log({ slotRef });
 
   $: {
     if (dates_to_show || show_ticks || show_as_week || show_weekends) {
@@ -193,7 +197,7 @@
       allow_date_change
     ) {
       // Changes to these props changes the height of our slot buttons
-      slotRef = slotRef.filter((slot) => !!slot);
+      slotRef = slotRef.filter((slot) => !!slot); // TEMP TODO
       shouldUpdateSlotPositions = true;
     }
   }
@@ -234,7 +238,7 @@
 
   afterUpdate(() => {
     if (shouldUpdateSlotPositions) {
-      slotYPositions = recalibratePositions(slotRef);
+      slotYPositions = recalibratePositions(slotRef[0]);
       shouldUpdateSlotPositions = false;
     }
     if (shouldUpdateDayPositions) {
@@ -804,23 +808,21 @@
     let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
     if (Array.isArray(email_ids) && email_ids.length > 0) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
-          ],
-        );
+      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
+        await $AvailabilityStore[
+          JSON.stringify({ ...getAvailabilityQuery(), forceReload })
+        ],
+      );
     }
     if (booking_user_email && booking_user_token) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({
-              ...getAvailabilityQuery([booking_user_email], booking_user_token),
-              forceReload,
-            })
-          ],
-        );
+      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
+        await $AvailabilityStore[
+          JSON.stringify({
+            ...getAvailabilityQuery([booking_user_email], booking_user_token),
+            forceReload,
+          })
+        ],
+      );
     }
 
     loading = false;
@@ -939,7 +941,9 @@
               hour12: true,
             });
       return `
-      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
+      ${startTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1341,8 +1345,10 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const { pageX: touchPositionX, pageY: touchPositionY } =
-        event.changedTouches[0];
+      const {
+        pageX: touchPositionX,
+        pageY: touchPositionY,
+      } = event.changedTouches[0];
 
       const currentTouchedDayPosition = Object.entries(dayXPositions).find(
         ([_, dayPosition]) => dayPosition.x > touchPositionX,
@@ -1370,6 +1376,19 @@
   }
 
   const throttledTouchMovement = throttle(handleTouchMovement, 100);
+
+  function arrowNavigate(code: string, slotIndex: number, dayIndex: number) {
+    console.log("slotIndex", slotIndex, slotRef);
+    if (code === "ArrowDown") {
+      slotRef[dayIndex][slotIndex + 1]?.focus();
+    } else if (code === "ArrowUp") {
+      slotRef[dayIndex][slotIndex - 1]?.focus();
+    } else if (code === "ArrowLeft") {
+      slotRef[dayIndex - 1][slotIndex]?.focus();
+    } else if (code === "ArrowRight") {
+      slotRef[dayIndex + 1][slotIndex]?.focus();
+    }
+  }
   //#endregion slot interaction handlers
 
   // #region error
@@ -1415,9 +1434,18 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
-  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
-  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
+  --busy-color-lightened: {lightenHexColour(
+    busy_color,
+    90,
+  )};
+  --closed-color-lightened: {lightenHexColour(
+    closed_color,
+    90,
+  )};
+  --selected-color-lightened: {lightenHexColour(
+    selected_color,
+    60,
+  )}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1551,7 +1579,7 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                bind:this={slotRef[slotIndex]}
+                bind:this={slotRef[dayIndex][slotIndex]}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
@@ -1575,6 +1603,11 @@
                     tick().then(() => endDrag(day));
                   }
                 }}
+                on:keydown={(e) => {
+                  if (e.code.startsWith("Arrow")) {
+                    arrowNavigate(e.code, slotIndex, dayIndex);
+                  }
+                }}
                 on:touchstart={(event) => {
                   const isFirstTouch =
                     event.touches.length === 1 &&
@@ -1587,8 +1620,10 @@
                 }}
                 on:touchmove={throttledTouchMovement}
                 on:touchend={(event) => {
-                  const { pageX: touchPositionX, pageY: touchPositionY } =
-                    event.changedTouches[0];
+                  const {
+                    pageX: touchPositionX,
+                    pageY: touchPositionY,
+                  } = event.changedTouches[0];
 
                   const allSlotPositions = Object.values(slotYPositions);
                   const top = Math.floor(allSlotPositions.splice(0, 1)[0].top);
