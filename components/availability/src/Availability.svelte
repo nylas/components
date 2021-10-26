@@ -36,6 +36,7 @@
     AvailabilityQuery,
     CalendarAccount,
     AvailabilityRule,
+    AvailabilityResponse,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
@@ -48,36 +49,39 @@
   //#region props
   export let id: string = "";
   export let access_token: string = "";
-  export let start_hour: number;
-  export let end_hour: number;
-  export let slot_size: number; // in minutes
-  export let start_date: Date;
-  export let dates_to_show: number;
-  export let calendars: Calendar[];
-  export let show_ticks: boolean;
-  export let email_ids: string[];
+
   export let allow_booking: boolean;
-  export let max_bookable_slots: number;
-  export let partial_bookable_ratio: number;
-  export let show_as_week: boolean;
-  export let show_weekends: boolean;
-  export let attendees_to_show: number;
   export let allow_date_change: boolean;
-  export let required_participants: string[];
+  export let attendees_to_show: number;
+  export let booking_user_email: string;
+  export let booking_user_token: string;
   export let busy_color: string;
-  export let closed_color: string;
-  export let partial_color: string;
-  export let free_color: string;
-  export let selected_color: string;
-  export let show_hosts: "show" | "hide";
-  export let view_as: "schedule" | "list";
-  export let event_buffer: number;
+  export let calendars: Calendar[];
   export let capacity: number | null;
-  export let show_header: boolean;
+  export let closed_color: string;
   export let date_format: "weekday" | "date" | "full" | "none";
+  export let dates_to_show: number;
+  export let email_ids: string[];
+  export let end_hour: number;
+  export let event_buffer: number;
+  export let free_color: string;
+  export let mandate_top_of_hour: boolean;
+  export let max_bookable_slots: number;
   export let open_hours: AvailabilityRule[];
   export let overbooked_threshold: number;
-  export let mandate_top_of_hour: boolean;
+  export let partial_bookable_ratio: number;
+  export let partial_color: string;
+  export let required_participants: string[];
+  export let selected_color: string;
+  export let show_as_week: boolean;
+  export let show_header: boolean;
+  export let show_hosts: "show" | "hide";
+  export let show_ticks: boolean;
+  export let show_weekends: boolean;
+  export let slot_size: number; // in minutes
+  export let start_date: Date;
+  export let start_hour: number;
+  export let view_as: "schedule" | "list";
 
   const defaultValueMap = {
     start_hour: 0,
@@ -134,8 +138,8 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
-        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+      $AvailabilityStore[JSON.stringify(getAvailabilityQuery())] =
+        $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
           (availability) => {
             for (const calendar of availability) {
               calendar.time_slots.push(...selectedSlots);
@@ -763,24 +767,32 @@
   }
   // #endregion timeSlot selection
 
-  let availabilityQuery: AvailabilityQuery;
-  $: availabilityQuery = {
-    body: {
-      emails: email_ids,
-      start_time:
-        timeHour(new Date(new Date(startDay).setHours(start_hour))).getTime() /
-        1000,
-      end_time:
-        timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
-        1000,
-    },
-    component_id: id,
-    access_token: access_token,
-  };
+  function getAvailabilityQuery(
+    emailAddresses = email_ids,
+    accessToken = access_token,
+  ): AvailabilityQuery {
+    return {
+      body: {
+        emails: emailAddresses,
+        start_time:
+          timeHour(
+            new Date(new Date(startDay).setHours(start_hour)),
+          ).getTime() / 1000,
+        end_time:
+          timeHour(new Date(new Date(endDay).setHours(end_hour))).getTime() /
+          1000,
+      },
+      component_id: id,
+      access_token: accessToken,
+    };
+  }
 
   $: newCalendarTimeslotsForGivenEmails = [];
   $: (async () => {
-    if (availabilityQuery?.body?.emails?.length) {
+    if (
+      (Array.isArray(email_ids) && email_ids.length > 0) ||
+      (booking_user_email && booking_user_token)
+    ) {
       await getAvailability();
     }
   })();
@@ -789,9 +801,28 @@
     loading = true;
     let freeBusyCalendars: any = [];
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    const consolidatedAvailabilityForGivenDay = await $AvailabilityStore[
-      JSON.stringify({ ...availabilityQuery, forceReload })
-    ];
+    let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
+
+    if (Array.isArray(email_ids) && email_ids.length > 0) {
+      consolidatedAvailabilityForGivenDay =
+        consolidatedAvailabilityForGivenDay.concat(
+          await $AvailabilityStore[
+            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
+          ],
+        );
+    }
+    if (booking_user_email && booking_user_token) {
+      consolidatedAvailabilityForGivenDay =
+        consolidatedAvailabilityForGivenDay.concat(
+          await $AvailabilityStore[
+            JSON.stringify({
+              ...getAvailabilityQuery([booking_user_email], booking_user_token),
+              forceReload,
+            })
+          ],
+        );
+    }
+
     loading = false;
     for (const user of consolidatedAvailabilityForGivenDay) {
       if (!user.firstName && !user.lastName) {
