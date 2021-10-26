@@ -113,7 +113,6 @@
     // Problem: the below is false by the time manifest comes around
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-      manifestProperties = { ...manifestProperties, ...rebuiltProps };
 
       event_title = internalProps.event_title;
       event_description = internalProps.event_description;
@@ -169,57 +168,29 @@
   let startDate: string = new Date().toLocaleDateString("en-CA");
   let recurrenceCadence: string[] = [];
 
-  let manifestProperties: { [key: string]: any } = {}; // allows adding keys later
-
-  $: manifestProperties = {
-    event_title,
-    event_description,
-    event_location,
-    event_conferencing,
-    show_hosts,
-    start_hour,
-    end_hour,
-    slot_size,
-    dates_to_show,
-    show_ticks,
-    allow_booking,
-    max_bookable_slots,
-    partial_bookable_ratio,
-    show_as_week,
-    show_weekends,
-    attendees_to_show,
-    notification_mode,
-    notification_message,
-    notification_subject,
-    view_as,
-    recurrence,
-    capacity,
-    mandate_top_of_hour,
-  };
-
   $: {
-    manifestProperties.recurrence_cadence = recurrenceCadence;
+    internalProps.recurrence_cadence = <any>recurrenceCadence;
   }
 
   $: {
-    manifestProperties.email_ids = parseStringToArray(emailIDs);
+    internalProps.email_ids = parseStringToArray(emailIDs);
   }
 
   $: {
-    manifestProperties.start_date = new Date(
+    internalProps.start_date = new Date(
       new Date(startDate).getTime() -
         new Date(startDate).getTimezoneOffset() * -60000,
     );
   }
 
   $: {
-    manifestProperties.open_hours = open_hours;
+    internalProps.open_hours = open_hours;
   }
   // #endregion mount and prop initialization
 
   function saveProperties() {
     console.log("Saving the following properties:");
-    Object.entries(manifestProperties).forEach(([k, v]) => {
+    Object.entries(internalProps).forEach(([k, v]) => {
       console.log(k, v);
     });
   }
@@ -329,21 +300,15 @@
           </label>
           <label>
             <strong>Event Description</strong>
-            <input
-              type="text"
-              bind:value={manifestProperties.event_description}
-            />
+            <input type="text" bind:value={internalProps.event_description} />
           </label>
           <label>
             <strong>Event Location</strong>
-            <input type="text" bind:value={manifestProperties.event_location} />
+            <input type="text" bind:value={internalProps.event_location} />
           </label>
           <label>
             <strong>Event Conferencing</strong>
-            <input
-              type="url"
-              bind:value={manifestProperties.event_conferencing}
-            />
+            <input type="url" bind:value={internalProps.event_conferencing} />
           </label>
           <div role="radiogroup" aria-labelledby="show_hosts">
             <strong id="show_hosts">Show meeting hosts to the end-user?</strong>
@@ -352,7 +317,7 @@
                 type="radio"
                 name="show_hosts"
                 value={"show"}
-                bind:group={manifestProperties.show_hosts}
+                bind:group={internalProps.show_hosts}
               />
               <span>Show Hosts</span>
             </label>
@@ -361,7 +326,7 @@
                 type="radio"
                 name="show_hosts"
                 value={"hide"}
-                bind:group={manifestProperties.show_hosts}
+                bind:group={internalProps.show_hosts}
               />
               <span>Hide Hosts</span>
             </label>
@@ -393,10 +358,10 @@
                 min={0}
                 max={24}
                 step={1}
-                bind:value={manifestProperties.start_hour}
+                bind:value={internalProps.start_hour}
               />
             </label>
-            {manifestProperties.start_hour}:00
+            {internalProps.start_hour}:00
           </div>
           <div>
             <label>
@@ -406,10 +371,10 @@
                 min={0}
                 max={24}
                 step={1}
-                bind:value={manifestProperties.end_hour}
+                bind:value={internalProps.end_hour}
               />
             </label>
-            {manifestProperties.end_hour}:00
+            {internalProps.end_hour}:00
           </div>
           <div role="radiogroup" aria-labelledby="slot_size">
             <strong id="slot_size">Timeslot size</strong>
@@ -418,7 +383,7 @@
                 type="radio"
                 name="slot_size"
                 value={15}
-                bind:group={manifestProperties.slot_size}
+                bind:group={internalProps.slot_size}
               />
               <span>15 minutes</span>
             </label>
@@ -427,7 +392,7 @@
                 type="radio"
                 name="slot_size"
                 value={30}
-                bind:group={manifestProperties.slot_size}
+                bind:group={internalProps.slot_size}
               />
               <span>30 minutes</span>
             </label>
@@ -436,7 +401,7 @@
                 type="radio"
                 name="slot_size"
                 value={60}
-                bind:group={manifestProperties.slot_size}
+                bind:group={internalProps.slot_size}
               />
               <span>60 minutes</span>
             </label>
@@ -453,10 +418,10 @@
                 min={1}
                 max={7}
                 step={1}
-                bind:value={manifestProperties.dates_to_show}
+                bind:value={internalProps.dates_to_show}
               />
             </label>
-            {manifestProperties.dates_to_show}
+            {internalProps.dates_to_show}
           </div>
           <div role="checkbox" aria-labelledby="show_as_week">
             <strong id="show_as_week">Show as week</strong>
@@ -464,7 +429,7 @@
               <input
                 type="checkbox"
                 name="show_as_week"
-                bind:checked={manifestProperties.show_as_week}
+                bind:checked={internalProps.show_as_week}
               />
               Show whole week
             </label>
@@ -475,7 +440,7 @@
               <input
                 type="checkbox"
                 name="show_weekends"
-                bind:checked={manifestProperties.show_weekends}
+                bind:checked={internalProps.show_weekends}
               />
               Keep weekends on
             </label>
@@ -512,8 +477,8 @@
                 max_bookable_slots={Infinity}
                 show_as_week={customize_weekdays || allow_weekends}
                 show_weekends={allow_weekends}
-                start_hour={manifestProperties.start_hour}
-                end_hour={manifestProperties.end_hour}
+                start_hour={internalProps.start_hour}
+                end_hour={internalProps.end_hour}
                 allow_date_change={false}
                 partial_bookable_ratio="0"
                 show_header={false}
@@ -549,7 +514,7 @@
               <input
                 type="checkbox"
                 name="show_ticks"
-                bind:checked={manifestProperties.show_ticks}
+                bind:checked={internalProps.show_ticks}
               />
               Show tick marks on left side
             </label>
@@ -560,7 +525,7 @@
               <input
                 type="radio"
                 name="view_as"
-                bind:group={manifestProperties.view_as}
+                bind:group={internalProps.view_as}
                 value="schedule"
               />
               <span>Schedule</span>
@@ -569,7 +534,7 @@
               <input
                 type="radio"
                 name="view_as"
-                bind:group={manifestProperties.view_as}
+                bind:group={internalProps.view_as}
                 value="list"
               />
               <span>List</span>
@@ -581,7 +546,7 @@
               type="number"
               min={1}
               max={20}
-              bind:value={manifestProperties.attendees_to_show}
+              bind:value={internalProps.attendees_to_show}
             />
           </label>
         </div>
@@ -596,7 +561,7 @@
               <input
                 type="checkbox"
                 name="allow_booking"
-                bind:checked={manifestProperties.allow_booking}
+                bind:checked={internalProps.allow_booking}
               />
               Allow bookings to be made
             </label>
@@ -607,7 +572,7 @@
               type="number"
               min={1}
               max={20}
-              bind:value={manifestProperties.max_bookable_slots}
+              bind:value={internalProps.max_bookable_slots}
             />
           </label>
           <label>
@@ -617,9 +582,9 @@
               min={0}
               max={1}
               step={0.01}
-              bind:value={manifestProperties.partial_bookable_ratio}
+              bind:value={internalProps.partial_bookable_ratio}
             />
-            {Math.floor(manifestProperties.partial_bookable_ratio * 100)}%
+            {Math.floor(internalProps.partial_bookable_ratio * 100)}%
           </label>
           <div role="radiogroup" aria-labelledby="recurrence">
             <strong id="recurrence"
@@ -629,7 +594,7 @@
               <input
                 type="radio"
                 name="recurrence"
-                bind:group={manifestProperties.recurrence}
+                bind:group={internalProps.recurrence}
                 value="none"
               />
               <span>Don't Repeat Events</span>
@@ -638,7 +603,7 @@
               <input
                 type="radio"
                 name="recurrence"
-                bind:group={manifestProperties.recurrence}
+                bind:group={internalProps.recurrence}
                 value="optional"
               />
               <span>Users May Repeat Events</span>
@@ -647,7 +612,7 @@
               <input
                 type="radio"
                 name="recurrence"
-                bind:group={manifestProperties.recurrence}
+                bind:group={internalProps.recurrence}
                 value="required"
               />
               <span>Events Always Repeat</span>
@@ -655,11 +620,7 @@
           </div>
           <label>
             <strong>Capacity</strong>
-            <input
-              type="number"
-              min={1}
-              bind:value={manifestProperties.capacity}
-            />
+            <input type="number" min={1} bind:value={internalProps.capacity} />
           </label>
           <div role="checkbox" aria-labelledby="allow_booking">
             <strong>Top of the Hour Events</strong>
@@ -667,15 +628,15 @@
               <input
                 type="checkbox"
                 name="mandate_top_of_hour"
-                bind:checked={manifestProperties.mandate_top_of_hour}
+                bind:checked={internalProps.mandate_top_of_hour}
               />
               Only allow events to be booked at the Top of the Hour
             </label>
           </div>
-          {#if manifestProperties.recurrence === "required" || manifestProperties.recurrence === "optional"}
+          {#if internalProps.recurrence === "required" || internalProps.recurrence === "optional"}
             <div role="radiogroup" aria-labelledby="recurrence_cadence">
               <strong id="recurrence_cadence"
-                >How often should events repeat{#if manifestProperties.recurrence === "optional"},
+                >How often should events repeat{#if internalProps.recurrence === "optional"},
                   if a user chooses to do so{/if}?</strong
               >
               <label>
@@ -740,7 +701,7 @@
                 type="radio"
                 name="notification_mode"
                 value={NotificationMode.SHOW_MESSAGE}
-                bind:group={manifestProperties.notification_mode}
+                bind:group={internalProps.notification_mode}
               />
               <span>Show Message on UI</span>
             </label>
@@ -749,7 +710,7 @@
                 type="radio"
                 name="notification_mode"
                 value={NotificationMode.SEND_MESSAGE}
-                bind:group={manifestProperties.notification_mode}
+                bind:group={internalProps.notification_mode}
               />
               <span>Send message via email</span>
             </label>
@@ -758,14 +719,14 @@
             <strong>Notification message</strong>
             <input
               type="text"
-              bind:value={manifestProperties.notification_message}
+              bind:value={internalProps.notification_message}
             />
           </label>
           <label>
             <strong>Notification Subject</strong>
             <input
               type="text"
-              bind:value={manifestProperties.notification_subject}
+              bind:value={internalProps.notification_subject}
             />
           </label>
         </div>
@@ -777,12 +738,12 @@
       <aside id="preview">
         <h1>Preview</h1>
         <nylas-availability
-          {...manifestProperties}
+          {...internalProps}
           capacity={null}
           on:timeSlotChosen={(e) => {
             slots_to_book = e.detail.timeSlots;
           }}
-          calendars={!manifestProperties.email_ids
+          calendars={!internalProps.email_ids
             ? [
                 {
                   availability: "busy",
@@ -794,9 +755,9 @@
         />
         <nylas-scheduler
           {slots_to_book}
-          {...manifestProperties}
+          {...internalProps}
           capacity={null}
-          calendars={!manifestProperties.email_ids
+          calendars={!internalProps.email_ids
             ? [
                 {
                   availability: "busy",
