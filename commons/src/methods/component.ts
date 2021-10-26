@@ -34,21 +34,24 @@ export function buildInternalProps<T extends Manifest>(
   manifest: Manifest,
   defaultValueMap: Record<string, any>,
 ): T {
-  console.log("buildInternalProps");
+  // console.log("buildInternalProps");
   return new Proxy(properties, {
+    // set: () => {
+    // },
     get: (properties, name: keyof Manifest | "toJSON" | "toString") => {
-      console.log("getstart", name, properties);
+      // console.log("getstart", name, properties);
+      console.log(Reflect.get(...arguments));
       if (name === "toString" || name === "toJSON") {
         return () => JSON.stringify(properties);
       }
 
       if (name in properties) {
-        console.log("--- in prop", name, properties[name]);
+        // console.log("--- in prop", name, properties[name]);
         return getPropertyValue(properties[name], defaultValueMap[name]);
       }
 
       if (manifest && name in manifest) {
-        console.log("+++ manifested", manifest[<keyof Manifest>name]);
+        // console.log("+++ manifested", manifest[<keyof Manifest>name]);
         return getPropertyValue(
           manifest[<keyof Manifest>name],
           defaultValueMap[name],

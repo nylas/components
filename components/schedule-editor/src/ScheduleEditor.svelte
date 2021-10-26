@@ -325,7 +325,7 @@
         <div class="contents">
           <label>
             <strong>Event Title</strong>
-            <input type="text" bind:value={manifestProperties.event_title} />
+            <input type="text" bind:value={internalProps.event_title} />
           </label>
           <label>
             <strong>Event Description</strong>
