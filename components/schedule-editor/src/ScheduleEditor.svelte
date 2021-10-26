@@ -110,6 +110,7 @@
       manifest,
       defaultValueMap,
     ) as Manifest;
+    // Problem: the below is false by the time manifest comes around
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
       manifestProperties = { ...manifestProperties, ...rebuiltProps };
@@ -148,7 +149,7 @@
   // Manifest properties requiring further manipulation:
 
   function setManifestDefaults(manifest: Partial<Manifest>) {
-    if (email_ids) {
+    if (email_ids.length) {
       emailIDs = email_ids?.join(", ");
     } else if (manifest.email_ids) {
       emailIDs = manifest.email_ids?.join(", ");
@@ -282,6 +283,7 @@
   // #endregion unpersisted variables
 
   let width = "60%";
+  $: width = showPreview ? "60%" : "100%";
   let adjusting: boolean = false;
 
   function adjustColumns(e: MouseEvent) {
@@ -300,6 +302,8 @@
   }
 
   let slots_to_book = [];
+  let mainElementWidth: number;
+  $: showPreview = mainElementWidth > 600;
 </script>
 
 <style lang="scss">
@@ -313,6 +317,7 @@
     style="grid-template-columns: {width} 5px auto"
     on:mousemove={adjustColumns}
     on:mouseup={() => (adjusting = false)}
+    bind:clientWidth={mainElementWidth}
   >
     <div class="settings">
       <section class="basic-details">
@@ -767,39 +772,41 @@
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
     </div>
-    <span class="gutter" on:mousedown={() => (adjusting = true)} />
-    <aside id="preview">
-      <h1>Preview</h1>
-      <nylas-availability
-        {...manifestProperties}
-        capacity={null}
-        on:timeSlotChosen={(e) => {
-          slots_to_book = e.detail.timeSlots;
-        }}
-        calendars={!manifestProperties.email_ids
-          ? [
-              {
-                availability: "busy",
-                timeslots: [],
-              },
-            ]
-          : []}
-        {id}
-      />
-      <nylas-scheduler
-        {slots_to_book}
-        {...manifestProperties}
-        capacity={null}
-        calendars={!manifestProperties.email_ids
-          ? [
-              {
-                availability: "busy",
-                timeslots: [],
-              },
-            ]
-          : []}
-        {id}
-      />
-    </aside>
+    {#if showPreview}
+      <span class="gutter" on:mousedown={() => (adjusting = true)} />
+      <aside id="preview">
+        <h1>Preview</h1>
+        <nylas-availability
+          {...manifestProperties}
+          capacity={null}
+          on:timeSlotChosen={(e) => {
+            slots_to_book = e.detail.timeSlots;
+          }}
+          calendars={!manifestProperties.email_ids
+            ? [
+                {
+                  availability: "busy",
+                  timeslots: [],
+                },
+              ]
+            : []}
+          {id}
+        />
+        <nylas-scheduler
+          {slots_to_book}
+          {...manifestProperties}
+          capacity={null}
+          calendars={!manifestProperties.email_ids
+            ? [
+                {
+                  availability: "busy",
+                  timeslots: [],
+                },
+              ]
+            : []}
+          {id}
+        />
+      </aside>
+    {/if}
   </main>
 {/if}
