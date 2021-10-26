@@ -92,7 +92,7 @@
 
     // Fetch Account
     if (id && !you.id && !emailManuallyPassed) {
-      you = await fetchAccount({ component_id: query.component_id });
+      you = await fetchAccount({ component_id: query.component_id, access_token });
       userEmail = <string>you.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
