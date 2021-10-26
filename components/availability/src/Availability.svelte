@@ -171,14 +171,11 @@
   let manifest: Partial<Manifest> = {};
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
-  let slotRef: HTMLElement[][] = [[]];
-  $: slotRef = Array(datesToShow).fill([]);
+  let slotRef: Array<Array<HTMLElement | null>> = [[]];
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
   let shouldUpdateDayPositions = false;
-
-  $: console.log({ slotRef });
 
   $: {
     if (dates_to_show || show_ticks || show_as_week || show_weekends) {
@@ -190,6 +187,7 @@
 
   $: {
     if (
+      dates_to_show ||
       start_hour ||
       end_hour ||
       slot_size ||
@@ -197,7 +195,7 @@
       allow_date_change
     ) {
       // Changes to these props changes the height of our slot buttons
-      slotRef = slotRef.filter((slot) => !!slot); // TEMP TODO
+      slotRef = slotRef.map((dayRef) => dayRef.filter((slot) => !!slot)); // TEMP TODO
       shouldUpdateSlotPositions = true;
     }
   }
@@ -1413,6 +1411,22 @@
     }
   }
   // #endregion error
+
+  function storeRef(
+    node: HTMLElement,
+    params: { dayIndex: number; slotIndex: number },
+  ) {
+    if (typeof slotRef[params.dayIndex] === "undefined")
+      slotRef[params.dayIndex] = [];
+    slotRef[params.dayIndex][params.slotIndex] = node;
+
+    return {
+      destroy() {
+        // Setting to null so that we can clean up this array on re-render
+        slotRef[params.dayIndex][params.slotIndex] = null;
+      },
+    };
+  }
 </script>
 
 <style lang="scss">
@@ -1579,7 +1593,7 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                bind:this={slotRef[dayIndex][slotIndex]}
+                use:storeRef={{ dayIndex, slotIndex }}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
