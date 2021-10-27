@@ -134,16 +134,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(availabilityQuery)
-      ] = $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(availabilityQuery)] =
+        $AvailabilityStore[JSON.stringify(availabilityQuery)].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -168,7 +167,7 @@
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
   let slotRef: Array<Array<HTMLElement | null>> = [[]];
-  let slotElements: Array<Array<HTMLElement | null>> = [[]];
+  // let slotElements: Array<Array<HTMLElement | null>> = [[]];
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
@@ -191,8 +190,10 @@
       show_header ||
       allow_date_change
     ) {
+      console.log("slotRef before filter:", slotRef);
       // Changes to these props changes the height of our slot buttons
       slotRef = slotRef.map((dayRef) => dayRef.filter((slot) => !!slot)); // TEMP TODO
+      console.log("slotRef after filter:", slotRef);
       shouldUpdateSlotPositions = true;
     }
   }
@@ -911,9 +912,7 @@
               hour12: true,
             });
       return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
+      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1315,10 +1314,8 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const {
-        pageX: touchPositionX,
-        pageY: touchPositionY,
-      } = event.changedTouches[0];
+      const { pageX: touchPositionX, pageY: touchPositionY } =
+        event.changedTouches[0];
 
       const currentTouchedDayPosition = Object.entries(dayXPositions).find(
         ([_, dayPosition]) => dayPosition.x > touchPositionX,
@@ -1348,17 +1345,14 @@
   const throttledTouchMovement = throttle(handleTouchMovement, 100);
 
   function arrowNavigate(code: string, slotIndex: number, dayIndex: number) {
-    console.log("slotIndex", dayIndex, slotIndex);
     if (code === "ArrowDown") {
-      slotElements[dayIndex][slotIndex + 1]?.focus();
+      slotRef[dayIndex][slotIndex + 1]?.focus();
     } else if (code === "ArrowUp") {
-      slotElements[dayIndex][slotIndex - 1]?.focus();
+      slotRef[dayIndex][slotIndex - 1]?.focus();
     } else if (code === "ArrowLeft") {
-      !!slotElements[dayIndex - 1] &&
-        slotElements[dayIndex - 1][slotIndex]?.focus();
+      !!slotRef[dayIndex - 1] && slotRef[dayIndex - 1][slotIndex]?.focus();
     } else if (code === "ArrowRight") {
-      !!slotElements[dayIndex + 1] &&
-        slotElements[dayIndex + 1][slotIndex]?.focus();
+      !!slotRef[dayIndex + 1] && slotRef[dayIndex + 1][slotIndex]?.focus();
     }
   }
   //#endregion slot interaction handlers
@@ -1393,11 +1387,30 @@
   // slotElements = Array(datesToShow).fill([]);
   // slotElements = [[], [], [], [], [], [], []];
 
-  $: slotElements = Array(datesToShow)
-    .fill()
-    .map(() => []);
+  // $: slotElements = Array(datesToShow)
+  //   .fill()
+  //   .map(() => []);
 
-  $: console.log({ slotElements });
+  $: console.log({ slotRef });
+
+  function storeRef(
+    node: HTMLElement,
+    params: { dayIndex: number; slotIndex: number; startTime: string },
+  ) {
+    if (typeof slotRef[params.dayIndex] === "undefined")
+      slotRef[params.dayIndex] = [];
+
+    slotRef[params.dayIndex][params.slotIndex] = node;
+
+    return {
+      destroy() {
+        // Setting to null so that we can clean up this array on re-render
+        const elemIndex = slotRef[params.dayIndex].indexOf(node);
+        console.log("destroying:", params.dayIndex, elemIndex, slotRef);
+        slotRef[params.dayIndex][elemIndex] = null;
+      },
+    };
+  }
 </script>
 
 <style lang="scss">
@@ -1419,18 +1432,9 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1564,7 +1568,11 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                bind:this={slotElements[dayIndex][slotIndex]}
+                use:storeRef={{
+                  dayIndex,
+                  slotIndex,
+                  startTime: new Date(slot.start_time).toLocaleString(),
+                }}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
@@ -1605,10 +1613,8 @@
                 }}
                 on:touchmove={throttledTouchMovement}
                 on:touchend={(event) => {
-                  const {
-                    pageX: touchPositionX,
-                    pageY: touchPositionY,
-                  } = event.changedTouches[0];
+                  const { pageX: touchPositionX, pageY: touchPositionY } =
+                    event.changedTouches[0];
 
                   const allSlotPositions = Object.values(slotYPositions);
                   const top = Math.floor(allSlotPositions.splice(0, 1)[0].top);
