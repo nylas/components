@@ -172,6 +172,7 @@
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
   let slotRef: Array<Array<HTMLElement | null>> = [[]];
+  let slotElements: Array<Array<HTMLElement | null>> = [[]];
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
@@ -1376,15 +1377,17 @@
   const throttledTouchMovement = throttle(handleTouchMovement, 100);
 
   function arrowNavigate(code: string, slotIndex: number, dayIndex: number) {
-    console.log("slotIndex", slotIndex, slotRef);
+    console.log("slotIndex", dayIndex, slotIndex);
     if (code === "ArrowDown") {
-      slotRef[dayIndex][slotIndex + 1]?.focus();
+      slotElements[dayIndex][slotIndex + 1]?.focus();
     } else if (code === "ArrowUp") {
-      slotRef[dayIndex][slotIndex - 1]?.focus();
+      slotElements[dayIndex][slotIndex - 1]?.focus();
     } else if (code === "ArrowLeft") {
-      slotRef[dayIndex - 1][slotIndex]?.focus();
+      !!slotElements[dayIndex - 1] &&
+        slotElements[dayIndex - 1][slotIndex]?.focus();
     } else if (code === "ArrowRight") {
-      slotRef[dayIndex + 1][slotIndex]?.focus();
+      !!slotElements[dayIndex + 1] &&
+        slotElements[dayIndex + 1][slotIndex]?.focus();
     }
   }
   //#endregion slot interaction handlers
@@ -1412,21 +1415,18 @@
   }
   // #endregion error
 
-  function storeRef(
-    node: HTMLElement,
-    params: { dayIndex: number; slotIndex: number },
-  ) {
-    if (typeof slotRef[params.dayIndex] === "undefined")
-      slotRef[params.dayIndex] = [];
-    slotRef[params.dayIndex][params.slotIndex] = node;
+  // Feels like I'm losing my mind, but array->fill->map works where Array(N).fill([]) does not (it retains array reference)
+  // slotElements = Array(datesToShow)
+  //   .fill()
+  //   .map(() => []);
+  // slotElements = Array(datesToShow).fill([]);
+  // slotElements = [[], [], [], [], [], [], []];
 
-    return {
-      destroy() {
-        // Setting to null so that we can clean up this array on re-render
-        slotRef[params.dayIndex][params.slotIndex] = null;
-      },
-    };
-  }
+  $: slotElements = Array(datesToShow)
+    .fill()
+    .map(() => []);
+
+  $: console.log({ slotElements });
 </script>
 
 <style lang="scss">
@@ -1593,7 +1593,7 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                use:storeRef={{ dayIndex, slotIndex }}
+                bind:this={slotElements[dayIndex][slotIndex]}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
