@@ -1,52 +1,28 @@
 import type { Day } from "@commons/types/Availability";
 
 export function showDateRange(days: Day[]): string {
-  const firstDayWithYear = days[0].timestamp.toLocaleDateString("default", {
-    month: "short",
-    year: "numeric",
-  });
+  const firstDay = days[0].timestamp;
+  const lastDay = days[days.length - 1].timestamp;
 
-  let timeString = "";
-  if (
-    days[days.length - 1].timestamp.getMonth() !== days[0].timestamp.getMonth()
-  ) {
-    if (
-      days[days.length - 1].timestamp.getFullYear() !==
-      days[0].timestamp.getFullYear()
-    ) {
+  if (lastDay.getMonth() !== firstDay.getMonth()) {
+    if (lastDay.getFullYear() !== firstDay.getFullYear()) {
       // Case 1: months and years differ: Dec 2021 - Jan 2022
-      const lastDayWithYear = days[
-        days.length - 1
-      ].timestamp.toLocaleDateString("default", {
-        month: "short",
-        year: "numeric",
-      });
-      timeString = `${firstDayWithYear} - ${lastDayWithYear}`;
+      return `${getMonthString(firstDay, true)} - ${getMonthString(
+        lastDay,
+        true,
+      )}`;
     } else {
       // Case 2: months differ, years the same: Oct - Nov 2021
-      const firstDayWithoutYear = days[0].timestamp.toLocaleDateString(
-        "default",
-        {
-          month: "short",
-        },
-      );
-      const lastDayWithoutYear = days[
-        days.length - 1
-      ].timestamp.toLocaleDateString("default", {
-        month: "short",
-      });
-      timeString = `${firstDayWithoutYear} - ${lastDayWithoutYear}`;
+      return `${getMonthString(firstDay)} - ${getMonthString(lastDay, true)}`;
     }
   } else {
     // Case 3: months, and therefore years, are the same: Oct 2021
-    timeString = firstDayWithYear;
+    return getMonthString(firstDay, true);
   }
-
-  return timeString.replaceAll(/\./g, "");
 }
 
 export function getCondensedTimeString(date: Date): string {
-  // "11 am", "11:11 am"
+  // 1 am | 1:15 am
   const timeString = date.toLocaleTimeString([], { timeStyle: "short" });
   if (date.getMinutes() === 0) {
     return date
@@ -66,6 +42,15 @@ export function getTimeString(date: Date): string {
     return "Noon";
   }
   return timeString.replaceAll(/\./g, "");
+}
+
+export function getMonthString(date: Date, withYear = false): string {
+  return date
+    .toLocaleDateString("default", {
+      month: "short",
+      year: withYear ? "numeric" : undefined,
+    })
+    .replaceAll(/\./g, "");
 }
 
 export function getYearString(date: Date): string {
