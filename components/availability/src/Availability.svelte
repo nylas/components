@@ -20,7 +20,6 @@
   import { scaleTime } from "d3-scale";
   import throttle from "just-throttle";
   import type { CalendarQuery } from "@commons/types/Events";
-
   import { lightenHexColour } from "@commons/methods/colour";
 
   import {
@@ -37,9 +36,15 @@
     CalendarAccount,
     AvailabilityRule,
     AvailabilityResponse,
+    Day,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
+  import {
+    getTimeString,
+    getCondensedTimeString,
+    showDateRange,
+  } from "@commons/methods/datetime";
   import AvailableIcon from "./assets/available.svg";
   import UnavailableIcon from "./assets/unavailable.svg";
   import BackIcon from "./assets/left-arrow.svg";
@@ -138,15 +143,16 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(getAvailabilityQuery())] =
-        $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
-          (availability) => {
-            for (const calendar of availability) {
-              calendar.time_slots.push(...selectedSlots);
-            }
-            return availability;
-          },
-        );
+      $AvailabilityStore[
+        JSON.stringify(getAvailabilityQuery())
+      ] = $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
+        (availability) => {
+          for (const calendar of availability) {
+            calendar.time_slots.push(...selectedSlots);
+          }
+          return availability;
+        },
+      );
 
       await getAvailability();
     }
@@ -661,12 +667,6 @@
     return range;
   }
 
-  interface Day {
-    slots: SelectableSlot[];
-    epochs: any[]; // TODO
-    timestamp: Date;
-  }
-
   function checkOverbooked(slots: SelectableSlot[]) {
     allCalendars.forEach((calendar) => {
       let availableSlotsForCalendar = slots.filter((slot) =>
@@ -804,23 +804,21 @@
     let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
     if (Array.isArray(email_ids) && email_ids.length > 0) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
-          ],
-        );
+      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
+        await $AvailabilityStore[
+          JSON.stringify({ ...getAvailabilityQuery(), forceReload })
+        ],
+      );
     }
     if (booking_user_email && booking_user_token) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({
-              ...getAvailabilityQuery([booking_user_email], booking_user_token),
-              forceReload,
-            })
-          ],
-        );
+      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
+        await $AvailabilityStore[
+          JSON.stringify({
+            ...getAvailabilityQuery([booking_user_email], booking_user_token),
+            forceReload,
+          })
+        ],
+      );
     }
 
     loading = false;
@@ -885,66 +883,14 @@
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
 
-      let startTimeString =
-        slot.start_time.getMinutes() === 0
-          ? slot.start_time.toLocaleTimeString([], {
-              hour: "numeric",
-              hour12: true,
-            })
-          : slot.start_time.toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            });
-
-      let endTimeString =
-        pendingEndTime.getMinutes() === 0
-          ? pendingEndTime.toLocaleTimeString([], {
-              hour: "numeric",
-              hour12: true,
-            })
-          : pendingEndTime.toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            });
-
-      return `
-        ${startTimeString.replace(" AM", "am").replace(" PM", "pm")}
-        - 
-        ${endTimeString.replace(" AM", "am").replace(" PM", "pm")}
-      `;
+      let startTime = getCondensedTimeString(slot.start_time).replace(" ", "");
+      let endTime = getCondensedTimeString(pendingEndTime).replace(" ", "");
+      return `${startTime} - ${endTime}`;
       // Otherwise, it's first in a selected block if its start_time matches a sortedSlot's start_time
     } else if (wrappingSortedSlot) {
-      let startTime =
-        wrappingSortedSlot.start_time.getMinutes() === 0
-          ? wrappingSortedSlot.start_time.toLocaleTimeString([], {
-              hour: "numeric",
-              hour12: true,
-            })
-          : wrappingSortedSlot.start_time.toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            });
-      let endTime =
-        wrappingSortedSlot.end_time.getMinutes() === 0
-          ? wrappingSortedSlot.end_time.toLocaleTimeString([], {
-              hour: "numeric",
-              hour12: true,
-            })
-          : wrappingSortedSlot.end_time.toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true,
-            });
-      return `
-      ${startTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")} - ${endTime
-        .replace(" AM", "am")
-        .replace(" PM", "pm")}
-      `;
+      let startTime = getCondensedTimeString(wrappingSortedSlot.start_time);
+      let endTime = getCondensedTimeString(wrappingSortedSlot.end_time);
+      return `${startTime.replace(" ", "")} - ${endTime.replace(" ", "")}`;
     } else {
       return null;
     }
@@ -1434,38 +1380,7 @@
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
-    <h2 class="month">
-      {#if days[days.length - 1].timestamp.getMonth() !== days[0].timestamp.getMonth()}
-        {#if days[days.length - 1].timestamp.getFullYear() !== days[0].timestamp.getFullYear()}
-          <!-- Case 1: months and years differ: Dec 2021 - Jan 2022 -->
-          {days[0].timestamp.toLocaleDateString("default", {
-            month: "short",
-            year: "numeric",
-          })}
-          -
-          {days[days.length - 1].timestamp.toLocaleDateString("default", {
-            month: "short",
-            year: "numeric",
-          })}
-        {:else}
-          <!-- Case 2: months differ, years the same: Oct - Nov 2021 -->
-          {days[0].timestamp.toLocaleDateString("default", {
-            month: "short",
-          })}
-          -
-          {days[days.length - 1].timestamp.toLocaleDateString("default", {
-            month: "short",
-            year: "numeric",
-          })}
-        {/if}
-      {:else}
-        <!-- Case 3: months, and therefore years, are the same: Oct 2021 -->
-        {days[0].timestamp.toLocaleDateString("default", {
-          month: "short",
-          year: "numeric",
-        })}
-      {/if}
-    </h2>
+    <h2 class="month">{showDateRange(days)}</h2>
     {#if allow_date_change}
       <div class="change-dates">
         <button on:click={goToPreviousDate} aria-label="Previous date"
@@ -1489,10 +1404,7 @@
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
         <li class="tick">
-          {tick.toLocaleTimeString("default", {
-            hour: "numeric",
-            minute: "numeric",
-          })}
+          {getTimeString(tick)}
         </li>
       {/each}
     </ul>
@@ -1642,11 +1554,7 @@
                 {/if}
                 {#if slot.hovering}
                   <span class="selected-heading">
-                    {slot.start_time.toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
+                    {getCondensedTimeString(slot.start_time)}
                   </span>
                 {/if}
               </button>
@@ -1657,24 +1565,18 @@
             {#each day.slots.filter((slot) => slot.availability === AvailabilityStatus.FREE || slot.availability === AvailabilityStatus.PARTIAL) as slot}
               <button
                 data-available-calendars={slot.available_calendars.toString()}
-                aria-label="{new Date(
-                  slot.start_time,
-                ).toLocaleString()} to {new Date(
-                  slot.end_time,
-                ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
+                aria-label="{getTimeString(
+                  new Date(slot.start_time),
+                )} to {getTimeString(
+                  new Date(slot.end_time),
+                )}; Free calendars: {slot.available_calendars.toString()}"
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 data-start-time={new Date(slot.start_time).toLocaleString()}
                 data-end-time={new Date(slot.end_time).toLocaleString()}
-                on:click={() => {
-                  toggleSlot(slot);
-                }}
+                on:click={() => toggleSlot(slot)}
               >
-                {new Date(slot.start_time).toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
+                {getTimeString(new Date(slot.start_time))}
                 {#if slot.availability === AvailabilityStatus.PARTIAL}
                   <span class="partial"
                     >({slot.available_calendars.length} of {allCalendars.length}
