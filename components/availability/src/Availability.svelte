@@ -173,10 +173,8 @@
   let manifest: Partial<Manifest> = {};
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
-  // let slotRef: Array<Array<HTMLElement | null>> = [[]];
   let slotRef: SlotRefs = {}; // mapping of dates to slot button DOM nodes
   let dayOrder: string[] = []; // maintains order of displayed dates
-  // let slotElements: Array<Array<HTMLElement | null>> = [[]];
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
@@ -1430,19 +1428,6 @@
     }
   }
   // #endregion error
-
-  // Feels like I'm losing my mind, but array->fill->map works where Array(N).fill([]) does not (it retains array reference)
-  // slotElements = Array(datesToShow)
-  //   .fill()
-  //   .map(() => []);
-  // slotElements = Array(datesToShow).fill([]);
-  // slotElements = [[], [], [], [], [], [], []];
-
-  // $: slotElements = Array(datesToShow)
-  //   .fill()
-  //   .map(() => []);
-
-  $: console.log({ slotRef });
 
   function storeRef(
     node: HTMLElement,
