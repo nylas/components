@@ -253,25 +253,26 @@
   // #endregion unpersisted variables
 
   let width = "60%";
+  let gutterWidth = 35;
   $: width = showPreview ? "60%" : "100%";
-  let adjusting: boolean = false;
+  let adjustingPreviewPane: boolean = false;
 
   function adjustColumns(e: MouseEvent) {
-    if (adjusting) {
-      width = e.clientX - 35 + "px";
+    if (adjustingPreviewPane) {
+      width = `${e.clientX - gutterWidth}px`;
     }
   }
 
-  let debouncedInputTimer;
-  function debounceEmailInput(e: InputEvent) {
-    let thing = e.target.value;
+  let debouncedInputTimer: number;
+  function debounceEmailInput(e: HTMLInputElement) {
+    const emailString = e.target.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      emailIDs = thing;
+      emailIDs = emailString;
     }, 1000);
   }
 
-  let slots_to_book = [];
+  let slots_to_book: TimeSlot;
   let mainElementWidth: number;
   $: showPreview = mainElementWidth > 600;
 </script>
@@ -286,7 +287,7 @@
   <main
     style="grid-template-columns: {width} 5px auto"
     on:mousemove={adjustColumns}
-    on:mouseup={() => (adjusting = false)}
+    on:mouseup={() => (adjustingPreviewPane = false)}
     bind:clientWidth={mainElementWidth}
   >
     <div class="settings">
@@ -733,7 +734,7 @@
       </section>
     </div>
     {#if showPreview}
-      <span class="gutter" on:mousedown={() => (adjusting = true)} />
+      <span class="gutter" on:mousedown={() => (adjustingPreviewPane = true)} />
       <aside id="preview">
         <h1>Preview</h1>
         <nylas-availability
