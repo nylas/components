@@ -8,6 +8,9 @@ Front-end UIs can often be time-consuming to build, even for simple functionalit
 
 The Nylas Components include:
 
+- [Email](./components/email): View an email thread or message
+- [Mailbox](./components/mailbox): View, filter, and search over a group of email threads
+- [Conversation](./components/conversation): View an email thread in a modern SMS-like interface
 - [Agenda](./components/agenda): Display a day, week, or month view of all events from one or more users or calendars.
 - [Contact List](./components/contact-list): Display a list of selectable contacts from a user’s contacts book.
 - [Composer](./components/composer): Draft and send emails.
@@ -18,6 +21,18 @@ If you want to report a bug, create a feature request, or contribute code, take 
 
 ## Install
 
+### Email
+
+`npm i @nylas/components-email`
+
+### Mailbox
+
+`npm i @nylas/components-mailbox`
+
+### Conversation
+
+`npm i @nylas/components-conversation`
+
 ### Agenda
 
 `npm i @nylas/components-agenda`
@@ -26,13 +41,13 @@ If you want to report a bug, create a feature request, or contribute code, take 
 
 `npm i @nylas/components-composer`
 
-OR
-
-`<script src="https://unpkg.com/@nylas/components-composer"></script>`
-
 ### Contact List
 
 `npm i @nylas/components-contact-list`
+
+### Alternative installation (vanilla JS)
+
+You can use `<script src="https://unpkg.com/@nylas/components-agenda"></script>` (replace agenda with the component of your choice) to load components directly into the head of your page or application.
 
 ## Usage
 
