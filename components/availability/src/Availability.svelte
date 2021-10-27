@@ -939,7 +939,9 @@
               hour12: true,
             });
       return `
-      ${startTime.replace(" AM", "am").replace(" PM", "pm")} - ${endTime
+      ${startTime
+        .replace(" AM", "am")
+        .replace(" PM", "pm")} - ${endTime
         .replace(" AM", "am")
         .replace(" PM", "pm")}
       `;
@@ -1341,8 +1343,10 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const { pageX: touchPositionX, pageY: touchPositionY } =
-        event.changedTouches[0];
+      const {
+        pageX: touchPositionX,
+        pageY: touchPositionY,
+      } = event.changedTouches[0];
 
       const currentTouchedDayPosition = Object.entries(dayXPositions).find(
         ([_, dayPosition]) => dayPosition.x > touchPositionX,
@@ -1415,9 +1419,18 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
-  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
-  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
+  --busy-color-lightened: {lightenHexColour(
+    busy_color,
+    90,
+  )};
+  --closed-color-lightened: {lightenHexColour(
+    closed_color,
+    90,
+  )};
+  --selected-color-lightened: {lightenHexColour(
+    selected_color,
+    60,
+  )}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1587,30 +1600,38 @@
                 }}
                 on:touchmove={throttledTouchMovement}
                 on:touchend={(event) => {
-                  const { pageX: touchPositionX, pageY: touchPositionY } =
-                    event.changedTouches[0];
+                  const isLastTouch =
+                    event.touches.length === 0 &&
+                    event.changedTouches.length === 1;
 
-                  const allSlotPositions = Object.values(slotYPositions);
-                  const top = Math.floor(allSlotPositions.splice(0, 1)[0].top);
-                  const bottom = Math.floor(
-                    allSlotPositions.slice(-1)[0].bottom,
-                  );
+                  if (isLastTouch) {
+                    const {
+                      pageX,
+                      pageY: touchPositionY,
+                    } = event.changedTouches[0];
 
-                  const allDayPositions = Object.values(dayXPositions);
-                  const left = Math.floor(allDayPositions.splice(0, 1)[0].left);
-                  const right = Math.floor(allDayPositions.slice(-1)[0].right);
+                    const currentTouchedSlotPosition = Object.entries(
+                      slotYPositions,
+                    ).find(
+                      ([_, slotPosition]) => slotPosition.y > touchPositionY,
+                    );
 
-                  if (
-                    left <= touchPositionX &&
-                    touchPositionX <= right &&
-                    top <= touchPositionY &&
-                    touchPositionY <= bottom
-                  ) {
-                    // touch position is inside "canvas" complete endDrag
-                    handleSlotInteractionEnd(day);
-                  } else {
-                    // touch position is outside of "canvas" so reset to pre-drag slot position
-                    handleSlotInteractionEnd(null);
+                    if (currentTouchedSlotPosition) {
+                      const [
+                        currentTouchedSlotIndex,
+                      ] = currentTouchedSlotPosition;
+
+                      currentTouchedSlot =
+                        day.slots[Number(currentTouchedSlotIndex)];
+                    }
+
+                    if (slot !== currentTouchedSlot) {
+                      handleSlotInteractionEnd({
+                        event,
+                        slot: currentTouchedSlot,
+                        day,
+                      });
+                    }
                   }
                 }}
               >

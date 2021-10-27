@@ -10,6 +10,13 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
+  // TODO: switch for local development
+  // import "@nylas/components-availability";
+  // import "../../availability";
+  import "../../availability/src/Availability.svelte";
+  // import "@nylas/components-scheduler";
+  // import "../../scheduler";
+  import "../../scheduler/src/Scheduler.svelte";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
 
   export let id: string = "";
@@ -48,6 +55,7 @@
   export let capacity: number | null;
   export let open_hours: AvailabilityRule[];
   export let mandate_top_of_hour: boolean;
+  export let show_preview: boolean;
 
   const defaultValueMap = {
     event_title: "Meeting",
@@ -87,6 +95,10 @@
     const storeKey = JSON.stringify({ component_id: id, access_token });
     manifest = (await $ManifestStore[storeKey]) || {};
 
+    if (manifest) {
+      setManifestDefaults(manifest);
+    }
+
     internalProps = buildInternalProps(
       $$props,
       manifest,
@@ -102,7 +114,6 @@
     ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
-      manifestProperties = { ...manifestProperties, ...rebuiltProps };
 
       event_title = internalProps.event_title;
       event_description = internalProps.event_description;
@@ -131,67 +142,56 @@
       capacity = internalProps.capacity;
       open_hours = internalProps.open_hours;
       mandate_top_of_hour = internalProps.mandate_top_of_hour;
+      show_preview = internalProps.show_preview;
     }
   }
 
   // Manifest properties requiring further manipulation:
+
+  function setManifestDefaults(manifest: Partial<Manifest>) {
+    if (email_ids.length) {
+      emailIDs = email_ids?.join(", ");
+    } else if (manifest.email_ids) {
+      emailIDs = manifest.email_ids?.join(", ");
+    }
+    if (start_date) {
+      startDate = start_date.toLocaleDateString("en-CA");
+    } else if (manifest.start_date) {
+      startDate = manifest.start_date.toLocaleDateString("en-CA");
+    }
+    if (recurrence_cadence) {
+      recurrenceCadence = recurrence_cadence;
+    } else if (manifest.recurrence_cadence) {
+      recurrenceCadence = manifest.recurrence_cadence;
+    }
+  }
   let emailIDs: string = "";
-  let startDate: string = "0";
+  let startDate: string = new Date().toLocaleDateString("en-CA");
   let recurrenceCadence: string[] = [];
 
-  let manifestProperties: { [key: string]: any }; // allows adding keys later
-
-  $: manifestProperties = {
-    event_title,
-    event_description,
-    event_location,
-    event_conferencing,
-    show_hosts,
-    start_hour,
-    end_hour,
-    slot_size,
-    dates_to_show,
-    show_ticks,
-    allow_booking,
-    max_bookable_slots,
-    partial_bookable_ratio,
-    show_as_week,
-    show_weekends,
-    attendees_to_show,
-    notification_mode,
-    notification_message,
-    notification_subject,
-    view_as,
-    recurrence,
-    capacity,
-    mandate_top_of_hour,
-  };
-
   $: {
-    manifestProperties.recurrence_cadence = recurrenceCadence;
+    internalProps.recurrence_cadence = <any>recurrenceCadence;
   }
 
   $: {
-    manifestProperties.email_ids = parseStringToArray(emailIDs);
+    internalProps.email_ids = parseStringToArray(emailIDs);
   }
 
   $: {
-    manifestProperties.start_date = new Date(startDate);
+    internalProps.start_date = new Date(
+      new Date(startDate).getTime() -
+        new Date(startDate).getTimezoneOffset() * -60000,
+    );
   }
 
   $: {
-    manifestProperties.open_hours = open_hours;
+    internalProps.open_hours = open_hours;
   }
-
-  // $: {
-  //   console.clear();
-  //   console.table(manifestProperties);
-  // }
   // #endregion mount and prop initialization
 
   function saveProperties() {
     console.log("Saving the following properties:");
-    Object.entries(manifestProperties).forEach(([k, v]) => {
+    Object.entries(internalProps).forEach(([k, v]) => {
       console.log(k, v);
     });
   }
@@ -203,17 +203,19 @@
   function availabilityChosen(event: any) {
     open_hours = event.detail.timeSlots.map((slot: TimeSlot) => {
       let { start_time, end_time } = slot;
-      return {
-        startWeekday:
-          customize_weekdays || allow_weekends ? start_time.getDay() : -1,
+      let openTime = {
         startHour: start_time.getHours(),
         startMinute: start_time.getMinutes(),
-        endWeekday:
-          customize_weekdays || allow_weekends ? end_time.getDay() : -1,
         endHour: end_time.getHours(),
         endMinute: end_time.getMinutes(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
+
+      if (customize_weekdays || allow_weekends) {
+        openTime.startWeekday = start_time.getDay();
+        openTime.endWeekday = end_time.getDay();
+      }
+      return openTime;
     });
   }
 
@@ -251,508 +253,523 @@
     }
   }
   // #endregion unpersisted variables
+
+  let width = "60%";
+  let gutterWidth = 35;
+  $: width = showPreview ? "60%" : "100%";
+  let adjustingPreviewPane: boolean = false;
+
+  function adjustColumns(e: MouseEvent) {
+    if (adjustingPreviewPane) {
+      width = `${e.clientX - gutterWidth}px`;
+    }
+  }
+
+  let debouncedInputTimer: number;
+  function debounceEmailInput(e: HTMLInputElement) {
+    const emailString = e.target.value;
+    clearTimeout(debouncedInputTimer);
+    debouncedInputTimer = setTimeout(() => {
+      emailIDs = emailString;
+    }, 1000);
+  }
+
+  let slots_to_book: TimeSlot;
+  let mainElementWidth: number;
+  $: showPreview = mainElementWidth > 600;
 </script>
 
 <style lang="scss">
-  @import "../../theming/variables.scss";
-
-  main {
-    font-family: system-ui, sans-serif;
-  }
-  section {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 96px;
-    .contents {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-      margin-bottom: 24px;
-
-      label {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        input {
-          padding: 12px;
-        }
-      }
-      [role="radiogroup"],
-      [role="checkbox"] {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-
-        label {
-          flex-direction: row;
-        }
-      }
-    }
-    button {
-      align-self: flex-end;
-      padding: 8px 16px;
-      border-radius: 4px;
-      background-color: var(--blue);
-      color: white;
-      border: none;
-      font-weight: 600;
-    }
-  }
-  .availability-container {
-    overflow: auto;
-    height: 300px;
-  }
+  @import "./styles/schedule-editor.scss";
 </style>
 
 {#if manifest && manifest.error}
   <nylas-domain-error {id} />
 {:else}
-  <main>
-    <section class="basic-details">
-      <h1>Event Details</h1>
-      <div class="contents">
-        <label>
-          <strong>Event Title</strong>
-          <input type="text" bind:value={manifestProperties.event_title} />
-        </label>
-        <label>
-          <strong>Event Description</strong>
-          <input
-            type="text"
-            bind:value={manifestProperties.event_description}
-          />
-        </label>
-        <label>
-          <strong>Event Location</strong>
-          <input type="text" bind:value={manifestProperties.event_location} />
-        </label>
-        <label>
-          <strong>Event Conferencing</strong>
-          <input
-            type="url"
-            bind:value={manifestProperties.event_conferencing}
-          />
-        </label>
-        <div role="radiogroup" aria-labelledby="show_hosts">
-          <strong id="show_hosts">Show meeting hosts to the end-user?</strong>
+  <main
+    style="grid-template-columns: {width} 5px auto"
+    on:mousemove={adjustColumns}
+    on:mouseup={() => (adjustingPreviewPane = false)}
+    bind:clientWidth={mainElementWidth}
+  >
+    <div class="settings">
+      <section class="basic-details">
+        <h1>Event Details</h1>
+        <div class="contents">
           <label>
-            <input
-              type="radio"
-              name="show_hosts"
-              value={"show"}
-              bind:group={manifestProperties.show_hosts}
-            />
-            <span>Show Hosts</span>
+            <strong>Event Title</strong>
+            <input type="text" bind:value={internalProps.event_title} />
           </label>
           <label>
-            <input
-              type="radio"
-              name="show_hosts"
-              value={"hide"}
-              bind:group={manifestProperties.show_hosts}
-            />
-            <span>Hide Hosts</span>
+            <strong>Event Description</strong>
+            <input type="text" bind:value={internalProps.event_description} />
           </label>
-        </div>
-        <div>
+          <label>
+            <strong>Event Location</strong>
+            <input type="text" bind:value={internalProps.event_location} />
+          </label>
+          <label>
+            <strong>Event Conferencing</strong>
+            <input type="url" bind:value={internalProps.event_conferencing} />
+          </label>
+          <div role="radiogroup" aria-labelledby="show_hosts">
+            <strong id="show_hosts">Show meeting hosts to the end-user?</strong>
+            <label>
+              <input
+                type="radio"
+                name="show_hosts"
+                value={"show"}
+                bind:group={internalProps.show_hosts}
+              />
+              <span>Show Hosts</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="show_hosts"
+                value={"hide"}
+                bind:group={internalProps.show_hosts}
+              />
+              <span>Hide Hosts</span>
+            </label>
+          </div>
           <div>
-            <strong id="email_ids">Email Ids to include for scheduling</strong>
+            <div>
+              <strong id="email_ids">Email Ids to include for scheduling</strong
+              >
+            </div>
+            <label>
+              <textarea
+                name="email_ids"
+                on:input={debounceEmailInput}
+                value={emailIDs}
+              />
+            </label>
+          </div>
+        </div>
+        <button on:click={saveProperties}>Save Editor Options</button>
+      </section>
+      <section class="time-date-details">
+        <h1>Date/Time Details</h1>
+        <div class="contents">
+          <div>
+            <label>
+              <strong>Start Hour</strong>
+              <input
+                type="range"
+                min={0}
+                max={24}
+                step={1}
+                bind:value={internalProps.start_hour}
+              />
+            </label>
+            {internalProps.start_hour}:00
+          </div>
+          <div>
+            <label>
+              <strong>End Hour</strong>
+              <input
+                type="range"
+                min={0}
+                max={24}
+                step={1}
+                bind:value={internalProps.end_hour}
+              />
+            </label>
+            {internalProps.end_hour}:00
+          </div>
+          <div role="radiogroup" aria-labelledby="slot_size">
+            <strong id="slot_size">Timeslot size</strong>
+            <label>
+              <input
+                type="radio"
+                name="slot_size"
+                value={15}
+                bind:group={internalProps.slot_size}
+              />
+              <span>15 minutes</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="slot_size"
+                value={30}
+                bind:group={internalProps.slot_size}
+              />
+              <span>30 minutes</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="slot_size"
+                value={60}
+                bind:group={internalProps.slot_size}
+              />
+              <span>60 minutes</span>
+            </label>
           </div>
           <label>
-            <textarea name="email_ids" bind:value={emailIDs} />
+            <strong>Start Date</strong>
+            <input type="date" bind:value={startDate} />
           </label>
+          <div>
+            <label>
+              <strong>Days to show</strong>
+              <input
+                type="range"
+                min={1}
+                max={7}
+                step={1}
+                bind:value={internalProps.dates_to_show}
+              />
+            </label>
+            {internalProps.dates_to_show}
+          </div>
+          <div role="checkbox" aria-labelledby="show_as_week">
+            <strong id="show_as_week">Show as week</strong>
+            <label>
+              <input
+                type="checkbox"
+                name="show_as_week"
+                bind:checked={internalProps.show_as_week}
+              />
+              Show whole week
+            </label>
+          </div>
+          <div role="checkbox" aria-labelledby="show_weekends">
+            <strong id="show_weekends">Show weekends</strong>
+            <label>
+              <input
+                type="checkbox"
+                name="show_weekends"
+                bind:checked={internalProps.show_weekends}
+              />
+              Keep weekends on
+            </label>
+          </div>
+          <div class="available-hours">
+            <strong>Available Hours</strong>
+            <p>
+              Drag over the hours want to be availble for booking. All other
+              hours will always show up as "busy" to your users.
+            </p>
+            <div role="checkbox" aria-labelledby="show_as_week">
+              <label>
+                <input
+                  type="checkbox"
+                  name="customize_weekdays"
+                  bind:checked={customize_weekdays}
+                />
+                Customize each weekday
+              </label>
+            </div>
+            <div role="checkbox" aria-labelledby="show_as_week">
+              <label>
+                <input
+                  type="checkbox"
+                  name="allow_weekends"
+                  bind:checked={allow_weekends}
+                />
+                Allow booking on weekends
+              </label>
+            </div>
+            <div class="availability-container">
+              <nylas-availability
+                allow_booking={true}
+                max_bookable_slots={Infinity}
+                show_as_week={customize_weekdays || allow_weekends}
+                show_weekends={allow_weekends}
+                start_hour={internalProps.start_hour}
+                end_hour={internalProps.end_hour}
+                allow_date_change={false}
+                partial_bookable_ratio="0"
+                show_header={false}
+                date_format={customize_weekdays || allow_weekends
+                  ? "weekday"
+                  : "none"}
+                busy_color="#000"
+                closed_color="#999"
+                selected_color="#095"
+                slot_size="15"
+                on:timeSlotChosen={availabilityChosen}
+              />
+            </div>
+            <ul class="availability">
+              {#each open_hours as availability}
+                <li>
+                  <span class="date">
+                    {niceDate(availability)}
+                  </span>
+                </li>
+              {/each}
+            </ul>
+          </div>
         </div>
-      </div>
-      <button on:click={saveProperties}>Save Editor Options</button>
-    </section>
-    <section class="time-date-details">
-      <h1>Date/Time Details</h1>
-      <div class="contents">
-        <div>
+        <button on:click={saveProperties}>Save Editor Options</button>
+      </section>
+      <section class="style-details">
+        <h1>Style Details</h1>
+        <div class="contents">
+          <div role="checkbox" aria-labelledby="show_ticks">
+            <strong id="show_ticks">Show ticks</strong>
+            <label>
+              <input
+                type="checkbox"
+                name="show_ticks"
+                bind:checked={internalProps.show_ticks}
+              />
+              Show tick marks on left side
+            </label>
+          </div>
+          <div role="radiogroup" aria-labelledby="view_as">
+            <strong id="view_as">View as a Schedule, or as a List?</strong>
+            <label>
+              <input
+                type="radio"
+                name="view_as"
+                bind:group={internalProps.view_as}
+                value="schedule"
+              />
+              <span>Schedule</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="view_as"
+                bind:group={internalProps.view_as}
+                value="list"
+              />
+              <span>List</span>
+            </label>
+          </div>
           <label>
-            <strong>Start Hour</strong>
+            <strong>Attendees to show</strong>
             <input
-              type="range"
-              min={0}
-              max={24}
-              step={1}
-              bind:value={manifestProperties.start_hour}
-            />
-          </label>
-          {manifestProperties.start_hour}:00
-        </div>
-        <div>
-          <label>
-            <strong>End Hour</strong>
-            <input
-              type="range"
-              min={0}
-              max={24}
-              step={1}
-              bind:value={manifestProperties.end_hour}
-            />
-          </label>
-          {manifestProperties.end_hour}:00
-        </div>
-        <div role="radiogroup" aria-labelledby="slot_size">
-          <strong id="slot_size">Timeslot size</strong>
-          <label>
-            <input
-              type="radio"
-              name="slot_size"
-              value={15}
-              bind:group={manifestProperties.slot_size}
-            />
-            <span>15 minutes</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="slot_size"
-              value={30}
-              bind:group={manifestProperties.slot_size}
-            />
-            <span>30 minutes</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="slot_size"
-              value={60}
-              bind:group={manifestProperties.slot_size}
-            />
-            <span>60 minutes</span>
-          </label>
-        </div>
-        <label>
-          <strong>Start Date</strong>
-          <input type="date" bind:value={startDate} />
-        </label>
-        <div>
-          <label>
-            <strong>Days to show</strong>
-            <input
-              type="range"
+              type="number"
               min={1}
-              max={7}
-              step={1}
-              bind:value={manifestProperties.dates_to_show}
+              max={20}
+              bind:value={internalProps.attendees_to_show}
             />
           </label>
-          {manifestProperties.dates_to_show}
         </div>
-        <div role="checkbox" aria-labelledby="show_as_week">
-          <strong id="show_as_week">Show as week</strong>
-          <label>
-            <input
-              type="checkbox"
-              name="show_as_week"
-              bind:checked={manifestProperties.show_as_week}
-            />
-            Show whole week
-          </label>
-        </div>
-        <div role="checkbox" aria-labelledby="show_weekends">
-          <strong id="show_weekends">Show weekends</strong>
-          <label>
-            <input
-              type="checkbox"
-              name="show_weekends"
-              bind:checked={manifestProperties.show_weekends}
-            />
-            Keep weekends on
-          </label>
-        </div>
-        <div>
-          <strong>Available Hours</strong>
-          <p>
-            Drag over the hours want to be availble for booking. All other hours
-            will always show up as "busy" to your users.
-          </p>
-          <div role="checkbox" aria-labelledby="show_as_week">
+        <button on:click={saveProperties}>Save Editor Options</button>
+      </section>
+      <section class="booking-details">
+        <h1>Booking Details</h1>
+        <div class="contents">
+          <div role="checkbox" aria-labelledby="allow_booking">
+            <strong id="allow_booking">Allow booking</strong>
             <label>
               <input
                 type="checkbox"
-                name="customize_weekdays"
-                bind:checked={customize_weekdays}
+                name="allow_booking"
+                bind:checked={internalProps.allow_booking}
               />
-              Customize each weekday
+              Allow bookings to be made
             </label>
           </div>
-          <div role="checkbox" aria-labelledby="show_as_week">
-            <label>
-              <input
-                type="checkbox"
-                name="allow_weekends"
-                bind:checked={allow_weekends}
-              />
-              Allow booking on weekends
-            </label>
-          </div>
-          <div class="availability-container">
-            <nylas-availability
-              allow_booking={true}
-              max_bookable_slots={Infinity}
-              show_as_week={customize_weekdays || allow_weekends}
-              show_weekends={allow_weekends}
-              start_hour={manifestProperties.start_hour}
-              end_hour={manifestProperties.end_hour}
-              allow_date_change={false}
-              partial_bookable_ratio="0"
-              show_header={false}
-              date_format={customize_weekdays || allow_weekends
-                ? "weekday"
-                : "none"}
-              busy_color="#000"
-              closed_color="#999"
-              selected_color="#095"
-              slot_size="15"
-              on:timeSlotChosen={availabilityChosen}
-            />
-          </div>
-          <ul class="availability">
-            {#each open_hours as availability}
-              <li>
-                <span class="date">
-                  {niceDate(availability)}
-                </span>
-              </li>
-            {/each}
-          </ul>
-        </div>
-      </div>
-      <button on:click={saveProperties}>Save Editor Options</button>
-    </section>
-    <section class="style-details">
-      <h1>Style Details</h1>
-      <div class="contents">
-        <div role="checkbox" aria-labelledby="show_ticks">
-          <strong id="show_ticks">Show ticks</strong>
           <label>
+            <strong>Maximum slots that can be booked at once</strong>
             <input
-              type="checkbox"
-              name="show_ticks"
-              bind:checked={manifestProperties.show_ticks}
+              type="number"
+              min={1}
+              max={20}
+              bind:value={internalProps.max_bookable_slots}
             />
-            Show tick marks on left side
-          </label>
-        </div>
-        <div role="radiogroup" aria-labelledby="view_as">
-          <strong id="view_as">View as a Schedule, or as a List?</strong>
-          <label>
-            <input
-              type="radio"
-              name="view_as"
-              bind:group={manifestProperties.view_as}
-              value="schedule"
-            />
-            <span>Schedule</span>
           </label>
           <label>
+            <strong>Participant Threshold / Partial bookable ratio</strong>
             <input
-              type="radio"
-              name="view_as"
-              bind:group={manifestProperties.view_as}
-              value="list"
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              bind:value={internalProps.partial_bookable_ratio}
             />
-            <span>List</span>
+            {Math.floor(internalProps.partial_bookable_ratio * 100)}%
           </label>
-        </div>
-        <label>
-          <strong>Attendees to show</strong>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            bind:value={manifestProperties.attendees_to_show}
-          />
-        </label>
-      </div>
-      <button on:click={saveProperties}>Save Editor Options</button>
-    </section>
-    <section class="booking-details">
-      <h1>Booking Details</h1>
-      <div class="contents">
-        <div role="checkbox" aria-labelledby="allow_booking">
-          <strong id="allow_booking">Allow booking</strong>
-          <label>
-            <input
-              type="checkbox"
-              name="allow_booking"
-              bind:checked={manifestProperties.allow_booking}
-            />
-            Allow bookings to be made
-          </label>
-        </div>
-        <label>
-          <strong>Maximum slots that can be booked at once</strong>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            bind:value={manifestProperties.max_bookable_slots}
-          />
-        </label>
-        <label>
-          <strong>Participant Threshold / Partial bookable ratio</strong>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            bind:value={manifestProperties.partial_bookable_ratio}
-          />
-          {Math.floor(manifestProperties.partial_bookable_ratio * 100)}%
-        </label>
-        <div role="radiogroup" aria-labelledby="recurrence">
-          <strong id="recurrence"
-            >Allow, Disallow, or Mandate events to repeat?</strong
-          >
-          <label>
-            <input
-              type="radio"
-              name="recurrence"
-              bind:group={manifestProperties.recurrence}
-              value="none"
-            />
-            <span>Don't Repeat Events</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="recurrence"
-              bind:group={manifestProperties.recurrence}
-              value="optional"
-            />
-            <span>Users May Repeat Events</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="recurrence"
-              bind:group={manifestProperties.recurrence}
-              value="required"
-            />
-            <span>Events Always Repeat</span>
-          </label>
-        </div>
-        <label>
-          <strong>Capacity</strong>
-          <input
-            type="number"
-            min={1}
-            bind:value={manifestProperties.capacity}
-          />
-        </label>
-        <div role="checkbox" aria-labelledby="allow_booking">
-          <strong>Top of the Hour Events</strong>
-          <label>
-            <input
-              type="checkbox"
-              name="mandate_top_of_hour"
-              bind:checked={manifestProperties.mandate_top_of_hour}
-            />
-            Only allow events to be booked at the Top of the Hour
-          </label>
-        </div>
-        {#if manifestProperties.recurrence === "required" || manifestProperties.recurrence === "optional"}
-          <div role="radiogroup" aria-labelledby="recurrence_cadence">
-            <strong id="recurrence_cadence"
-              >How often should events repeat{#if manifestProperties.recurrence === "optional"},
-                if a user chooses to do so{/if}?</strong
+          <div role="radiogroup" aria-labelledby="recurrence">
+            <strong id="recurrence"
+              >Allow, Disallow, or Mandate events to repeat?</strong
             >
             <label>
               <input
-                type="checkbox"
-                name="recurrence_cadence"
-                bind:group={recurrenceCadence}
-                value="daily"
+                type="radio"
+                name="recurrence"
+                bind:group={internalProps.recurrence}
+                value="none"
               />
-              <span>Daily</span>
+              <span>Don't Repeat Events</span>
             </label>
             <label>
               <input
-                type="checkbox"
-                name="recurrence_cadence"
-                bind:group={recurrenceCadence}
-                value="weekdays"
+                type="radio"
+                name="recurrence"
+                bind:group={internalProps.recurrence}
+                value="optional"
               />
-              <span>Daily, only on weekdays</span>
+              <span>Users May Repeat Events</span>
             </label>
             <label>
               <input
-                type="checkbox"
-                name="recurrence_cadence"
-                bind:group={recurrenceCadence}
-                value="weekly"
+                type="radio"
+                name="recurrence"
+                bind:group={internalProps.recurrence}
+                value="required"
               />
-              <span>Weekly</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="recurrence_cadence"
-                bind:group={recurrenceCadence}
-                value="biweekly"
-              />
-              <span>Biweekly</span>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                name="recurrence_cadence"
-                bind:group={recurrenceCadence}
-                value="monthly"
-              />
-              <span>Monthly</span>
+              <span>Events Always Repeat</span>
             </label>
           </div>
-        {/if}
-      </div>
-      <button on:click={saveProperties}>Save Editor Options</button>
-    </section>
-    <section class="Notification-details">
-      <h1>Notification Details</h1>
-      <div class="contents">
-        <div role="radiogroup" aria-labelledby="notification_mode">
-          <strong id="notification_mode"
-            >How would you like to notify the customer on event creation?</strong
-          >
           <label>
+            <strong>Capacity</strong>
+            <input type="number" min={1} bind:value={internalProps.capacity} />
+          </label>
+          <div role="checkbox" aria-labelledby="allow_booking">
+            <strong>Top of the Hour Events</strong>
+            <label>
+              <input
+                type="checkbox"
+                name="mandate_top_of_hour"
+                bind:checked={internalProps.mandate_top_of_hour}
+              />
+              Only allow events to be booked at the Top of the Hour
+            </label>
+          </div>
+          {#if internalProps.recurrence === "required" || internalProps.recurrence === "optional"}
+            <div role="radiogroup" aria-labelledby="recurrence_cadence">
+              <strong id="recurrence_cadence"
+                >How often should events repeat{#if internalProps.recurrence === "optional"},
+                  if a user chooses to do so{/if}?</strong
+              >
+              <label>
+                <input
+                  type="checkbox"
+                  name="recurrence_cadence"
+                  bind:group={recurrenceCadence}
+                  value="daily"
+                />
+                <span>Daily</span>
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="recurrence_cadence"
+                  bind:group={recurrenceCadence}
+                  value="weekdays"
+                />
+                <span>Daily, only on weekdays</span>
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="recurrence_cadence"
+                  bind:group={recurrenceCadence}
+                  value="weekly"
+                />
+                <span>Weekly</span>
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="recurrence_cadence"
+                  bind:group={recurrenceCadence}
+                  value="biweekly"
+                />
+                <span>Biweekly</span>
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="recurrence_cadence"
+                  bind:group={recurrenceCadence}
+                  value="monthly"
+                />
+                <span>Monthly</span>
+              </label>
+            </div>
+          {/if}
+        </div>
+        <button on:click={saveProperties}>Save Editor Options</button>
+      </section>
+      <section class="Notification-details">
+        <h1>Notification Details</h1>
+        <div class="contents">
+          <div role="radiogroup" aria-labelledby="notification_mode">
+            <strong id="notification_mode"
+              >How would you like to notify the customer on event creation?</strong
+            >
+            <label>
+              <input
+                type="radio"
+                name="notification_mode"
+                value={NotificationMode.SHOW_MESSAGE}
+                bind:group={internalProps.notification_mode}
+              />
+              <span>Show Message on UI</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="notification_mode"
+                value={NotificationMode.SEND_MESSAGE}
+                bind:group={internalProps.notification_mode}
+              />
+              <span>Send message via email</span>
+            </label>
+          </div>
+          <label>
+            <strong>Notification message</strong>
             <input
-              type="radio"
-              name="notification_mode"
-              value={NotificationMode.SHOW_MESSAGE}
-              bind:group={manifestProperties.notification_mode}
+              type="text"
+              bind:value={internalProps.notification_message}
             />
-            <span>Show Message on UI</span>
           </label>
           <label>
+            <strong>Notification Subject</strong>
             <input
-              type="radio"
-              name="notification_mode"
-              value={NotificationMode.SEND_MESSAGE}
-              bind:group={manifestProperties.notification_mode}
+              type="text"
+              bind:value={internalProps.notification_subject}
             />
-            <span>Send message via email</span>
           </label>
         </div>
-        <label>
-          <strong>Notification message</strong>
-          <input
-            type="text"
-            bind:value={manifestProperties.notification_message}
-          />
-        </label>
-        <label>
-          <strong>Notification Subject</strong>
-          <input
-            type="text"
-            bind:value={manifestProperties.notification_subject}
-          />
-        </label>
-      </div>
-      <button on:click={saveProperties}>Save Editor Options</button>
-    </section>
+        <button on:click={saveProperties}>Save Editor Options</button>
+      </section>
+    </div>
+    {#if showPreview}
+      <span class="gutter" on:mousedown={() => (adjustingPreviewPane = true)} />
+      <aside id="preview">
+        <h1>Preview</h1>
+        <nylas-availability
+          {...internalProps}
+          capacity={null}
+          on:timeSlotChosen={(e) => {
+            slots_to_book = e.detail.timeSlots;
+          }}
+          calendars={!internalProps.email_ids
+            ? [
+                {
+                  availability: "busy",
+                  timeslots: [],
+                },
+              ]
+            : []}
+          {id}
+        />
+        <nylas-scheduler
+          {slots_to_book}
+          {...internalProps}
+          capacity={null}
+          calendars={!internalProps.email_ids
+            ? [
+                {
+                  availability: "busy",
+                  timeslots: [],
+                },
+              ]
+            : []}
+          {id}
+        />
+      </aside>
+    {/if}
   </main>
 {/if}
