@@ -8,5 +8,9 @@
     "start": "echo 'Nothing to start'"
   },
   "main": "index.js",
-  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c"
+  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c",
+  "dependencies": {
+    "@nylas/components-availability": "file:components/availability",
+    "@nylas/components-scheduler": "file:components/scheduler"
+  }
 }
