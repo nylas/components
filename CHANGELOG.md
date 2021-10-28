@@ -6,6 +6,7 @@
 
 ### Bug Fixes
 
+- Mailbox: Fixed a bug where the component did not respect the parent container width [Pull Request](https://github.com/nylas/components/pull/158)
 - Email: Fixed a bug where access_token prop was not being sent in the requests [Pull Request](https://github.com/nylas/components/pull/145)
 - Conversation: Fixed a bug where access_token prop was not being sent in the requests [Pull Request](https://github.com/nylas/components/pull/147)
 
