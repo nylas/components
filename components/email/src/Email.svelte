@@ -92,7 +92,10 @@
 
     // Fetch Account
     if (id && !you.id && !emailManuallyPassed) {
-      you = await fetchAccount({ component_id: query.component_id, access_token });
+      you = await fetchAccount({
+        component_id: query.component_id,
+        access_token,
+      });
       userEmail = <string>you.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
@@ -637,6 +640,7 @@
     height: 100%;
     width: 100%;
     position: relative;
+    display: grid;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
@@ -1073,6 +1077,7 @@
                 width: 100%;
                 box-sizing: border-box;
                 padding: 0 $spacing-xl;
+                white-space: pre-wrap;
                 max-width: 95vw;
                 align-self: flex-start;
               }
