@@ -35,15 +35,16 @@ export function buildInternalProps<T extends Manifest>(
   defaultValueMap: Record<string, any>,
 ): T {
   return new Proxy(properties, {
-    // set: () => {
-    // },
     get: (properties, name: keyof Manifest | "toJSON" | "toString") => {
       if (name === "toString" || name === "toJSON") {
         return () => JSON.stringify(properties);
       }
 
       if (Reflect.get(properties, name) !== undefined) {
-        return Reflect.get(properties, name);
+        return getPropertyValue(
+          Reflect.get(properties, name),
+          defaultValueMap[name],
+        );
       }
 
       if (name in properties) {
