@@ -1,5 +1,12 @@
 import type { Day } from "@commons/types/Availability";
 
+/**
+ * Eventually, perhaps a design-system-level guideline for date and time strings.
+ *
+ * Currently, Date logic: https://www.figma.com/file/oiCKNsHDfAo9KnH1Sbs8Xj/Email-%26-Mailbox-Component?node-id=128%3A51
+ * No time logic standard yet
+ */
+
 export function showDateRange(days: Day[]): string {
   const firstDay = days[0].timestamp;
   const lastDay = days[days.length - 1].timestamp;
@@ -11,14 +18,12 @@ export function showDateRange(days: Day[]): string {
         lastDay,
         true,
       )}`;
-    } else {
-      // Case 2: months differ, years the same: Oct - Nov 2021
-      return `${getMonthString(firstDay)} - ${getMonthString(lastDay, true)}`;
     }
-  } else {
-    // Case 3: months, and therefore years, are the same: Oct 2021
-    return getMonthString(firstDay, true);
+    // Case 2: months differ, years the same: Oct - Nov 2021
+    return `${getMonthString(firstDay)} - ${getMonthString(lastDay, true)}`;
   }
+  // Case 3: months, and therefore years, are the same: Oct 2021
+  return getMonthString(firstDay, true);
 }
 
 export function getCondensedTimeString(date: Date): string {
@@ -78,7 +83,6 @@ export function getDateString(date: Date): string {
     .replaceAll(/[.]/g, "");
 }
 
-// Date logic: https://www.figma.com/file/oiCKNsHDfAo9KnH1Sbs8Xj/Email-%26-Mailbox-Component?node-id=128%3A51
 export function getDate(date: Date): string {
   const today = new Date();
   if (today.toDateString() === date.toDateString()) {
