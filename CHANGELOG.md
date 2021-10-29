@@ -1,3 +1,15 @@
+# 2021-10-28
+
+## 1.0.12
+
+- README & components index: Updated with our new launched components (Email, Mailbox, Conversation) 🎉
+
+### Bug Fixes
+
+- Mailbox: Fixed a bug where the component did not respect the parent container width [Pull Request](https://github.com/nylas/components/pull/158)
+- Email: Fixed a bug where access_token prop was not being sent in the requests [Pull Request](https://github.com/nylas/components/pull/145)
+- Conversation: Fixed a bug where access_token prop was not being sent in the requests [Pull Request](https://github.com/nylas/components/pull/147)
+
 # 2021-10-25
 
 ## 1.0.11

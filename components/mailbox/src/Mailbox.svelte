@@ -85,7 +85,10 @@
 
     // Fetch Account
     if (id && !you.id && !all_threads) {
-      you = await fetchAccount({ component_id: query.component_id, access_token });
+      you = await fetchAccount({
+        component_id: query.component_id,
+        access_token,
+      });
     }
 
     const accountOrganizationUnitQuery = {
@@ -466,6 +469,7 @@
     width: 100%;
     position: relative;
     display: grid;
+    grid-auto-rows: max-content;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
     $outline-style: 1px solid var(--grey-lighter);
@@ -584,13 +588,17 @@
 
   .mailbox-loader,
   .mailbox-empty {
-    width: calc(100vw - 16px);
+    width: calc(100% - 16px);
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: none;
+  }
+
+  .mailbox-loader {
+    position: absolute;
   }
 
   @keyframes rotate {

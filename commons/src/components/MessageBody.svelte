@@ -7,6 +7,13 @@
   export let message;
 </script>
 
+<style>
+  div {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
 <div>
   {#if message && message.body}
     {@html message.body}

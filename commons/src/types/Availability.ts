@@ -104,3 +104,9 @@ export interface EventQuery {
 export interface EventParticipant {
   email_address: string;
 }
+
+export interface Day {
+  slots: SelectableSlot[];
+  epochs: any[]; // TODO
+  timestamp: Date;
+}

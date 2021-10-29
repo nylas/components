@@ -40,6 +40,13 @@ export function buildInternalProps<T extends Manifest>(
         return () => JSON.stringify(properties);
       }
 
+      if (Reflect.get(properties, name) !== undefined) {
+        return getPropertyValue(
+          Reflect.get(properties, name),
+          defaultValueMap[name],
+        );
+      }
+
       if (name in properties) {
         return getPropertyValue(properties[name], defaultValueMap[name]);
       }

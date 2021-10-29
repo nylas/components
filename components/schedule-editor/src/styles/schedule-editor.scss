@@ -1,0 +1,75 @@
+@import "../../../theming/variables.scss";
+
+main {
+  font-family: system-ui, sans-serif;
+  display: grid;
+  grid-template-columns: 1fr 5px auto;
+  gap: 1rem;
+  padding: 0 1rem;
+
+  .settings {
+    resize: both;
+    overflow: auto;
+  }
+
+  aside#preview {
+    height: calc(100vh - 1rem);
+    padding-bottom: 1rem;
+    position: sticky;
+    top: 0;
+    display: grid;
+    grid-template-rows: auto 1fr 250px;
+    gap: 1rem;
+  }
+
+  .gutter {
+    background: #999;
+    cursor: col-resize;
+  }
+}
+section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 96px;
+  .contents {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      input {
+        padding: 12px;
+      }
+    }
+    [role="radiogroup"],
+    [role="checkbox"] {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      label {
+        flex-direction: row;
+      }
+    }
+    & > .available-hours {
+      grid-column: -1 / 1;
+    }
+  }
+  button {
+    align-self: flex-end;
+    padding: 8px 16px;
+    border-radius: 4px;
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    font-weight: 600;
+  }
+}
+.availability-container {
+  overflow: auto;
+  height: 300px;
+}
