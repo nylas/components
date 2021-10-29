@@ -72,6 +72,8 @@
   export let free_color: string;
   export let mandate_top_of_hour: boolean;
   export let max_bookable_slots: number;
+  export let max_book_ahead_days: number;
+  export let min_book_ahead_days: number;
   export let open_hours: AvailabilityRule[];
   export let overbooked_threshold: number;
   export let partial_bookable_ratio: number;
@@ -89,35 +91,37 @@
   export let view_as: "schedule" | "list";
 
   const defaultValueMap = {
-    start_hour: 0,
-    end_hour: 24,
-    slot_size: 15,
-    start_date: new Date(),
-    dates_to_show: 1,
-    calendars: [],
-    show_ticks: true,
-    email_ids: [],
     allow_booking: false,
-    max_bookable_slots: 1,
-    partial_bookable_ratio: 0.01,
-    show_as_week: false,
-    show_weekends: true,
-    attendees_to_show: 5,
     allow_date_change: true,
-    required_participants: [],
+    attendees_to_show: 5,
     busy_color: "#EE3248cc",
+    calendars: [],
     closed_color: "#EE3248cc",
-    partial_color: "#FECA7Ccc",
-    free_color: "#078351cc",
-    selected_color: "#002db4",
-    show_hosts: "show",
-    view_as: "schedule",
-    event_buffer: 0,
-    show_header: true,
     date_format: "full",
+    dates_to_show: 1,
+    email_ids: [],
+    end_hour: 24,
+    event_buffer: 0,
+    free_color: "#078351cc",
+    mandate_top_of_hour: false,
+    max_bookable_slots: 1,
+    max_book_ahead_days: 30,
+    min_book_ahead_days: 0,
     open_hours: [],
     overbooked_threshold: 100,
-    mandate_top_of_hour: false,
+    partial_bookable_ratio: 0.01,
+    partial_color: "#FECA7Ccc",
+    required_participants: [],
+    selected_color: "#002db4",
+    show_as_week: false,
+    show_header: true,
+    show_hosts: "show",
+    show_ticks: true,
+    show_weekends: true,
+    slot_size: 15,
+    start_date: new Date(),
+    start_hour: 0,
+    view_as: "schedule",
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
@@ -143,16 +147,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(getAvailabilityQuery())
-      ] = $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(getAvailabilityQuery())] =
+        $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -263,36 +266,38 @@
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
 
-      start_hour = internalProps.start_hour;
-      end_hour = internalProps.end_hour;
-      slot_size = internalProps.slot_size;
-      start_date = internalProps.start_date;
-      dates_to_show = internalProps.dates_to_show;
-      calendars = internalProps.calendars;
-      show_ticks = internalProps.show_ticks;
-      email_ids = internalProps.email_ids;
       allow_booking = internalProps.allow_booking;
-      max_bookable_slots = internalProps.max_bookable_slots;
-      partial_bookable_ratio = internalProps.partial_bookable_ratio;
-      show_as_week = internalProps.show_as_week;
-      show_weekends = internalProps.show_weekends;
-      attendees_to_show = internalProps.attendees_to_show;
       allow_date_change = internalProps.allow_date_change;
-      required_participants = internalProps.required_participants;
+      attendees_to_show = internalProps.attendees_to_show;
       busy_color = internalProps.busy_color;
-      closed_color = internalProps.closed_color;
-      partial_color = internalProps.partial_color;
-      free_color = internalProps.free_color;
-      selected_color = internalProps.selected_color;
-      show_hosts = internalProps.show_hosts;
-      view_as = internalProps.view_as;
-      event_buffer = internalProps.event_buffer;
+      calendars = internalProps.calendars;
       capacity = internalProps.capacity;
-      show_header = internalProps.show_header;
+      closed_color = internalProps.closed_color;
       date_format = internalProps.date_format;
+      dates_to_show = internalProps.dates_to_show;
+      email_ids = internalProps.email_ids;
+      end_hour = internalProps.end_hour;
+      event_buffer = internalProps.event_buffer;
+      free_color = internalProps.free_color;
+      mandate_top_of_hour = internalProps.mandate_top_of_hour;
+      max_bookable_slots = internalProps.max_bookable_slots;
+      max_book_ahead_days = internalProps.max_book_ahead_days;
+      min_book_ahead_days = internalProps.min_book_ahead_days;
       open_hours = internalProps.open_hours;
       overbooked_threshold = internalProps.overbooked_threshold;
-      mandate_top_of_hour = internalProps.mandate_top_of_hour;
+      partial_bookable_ratio = internalProps.partial_bookable_ratio;
+      partial_color = internalProps.partial_color;
+      required_participants = internalProps.required_participants;
+      selected_color = internalProps.selected_color;
+      show_as_week = internalProps.show_as_week;
+      show_header = internalProps.show_header;
+      show_hosts = internalProps.show_hosts;
+      show_ticks = internalProps.show_ticks;
+      show_weekends = internalProps.show_weekends;
+      slot_size = internalProps.slot_size;
+      start_date = internalProps.start_date;
+      start_hour = internalProps.start_hour;
+      view_as = internalProps.view_as;
     }
   }
 
@@ -435,9 +440,7 @@
               }
             }
           }
-        }
 
-        if (allCalendars.length) {
           if (freeCalendars.length) {
             if (freeCalendars.length === allCalendars.length) {
               availability = AvailabilityStatus.FREE;
@@ -704,12 +707,22 @@
 
   let days: Day[];
   $: days = dayRange.map((timestamp: Date) => {
-    let slots = checkOverbooked(
+    const slots = checkOverbooked(
       generateDaySlots(timestamp, start_hour, end_hour),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
+
+    const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime();
+    const dayOffset = Math.ceil(
+      (new Date(timestamp).getTime() - today) / (1000 * 60 * 60 * 24),
+    );
+
     return {
-      slots,
       epochs: generateEpochs(slots, partial_bookable_ratio),
+      isBookable:
+        dayOffset >= 0 &&
+        dayOffset >= min_book_ahead_days &&
+        dayOffset <= max_book_ahead_days,
+      slots,
       timestamp,
     };
   });
@@ -809,21 +822,23 @@
     let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
     if (Array.isArray(email_ids) && email_ids.length > 0) {
-      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
-        await $AvailabilityStore[
-          JSON.stringify({ ...getAvailabilityQuery(), forceReload })
-        ],
-      );
+      consolidatedAvailabilityForGivenDay =
+        consolidatedAvailabilityForGivenDay.concat(
+          await $AvailabilityStore[
+            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
+          ],
+        );
     }
     if (booking_user_email && booking_user_token) {
-      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
-        await $AvailabilityStore[
-          JSON.stringify({
-            ...getAvailabilityQuery([booking_user_email], booking_user_token),
-            forceReload,
-          })
-        ],
-      );
+      consolidatedAvailabilityForGivenDay =
+        consolidatedAvailabilityForGivenDay.concat(
+          await $AvailabilityStore[
+            JSON.stringify({
+              ...getAvailabilityQuery([booking_user_email], booking_user_token),
+              forceReload,
+            })
+          ],
+        );
     }
 
     loading = false;
@@ -1099,7 +1114,7 @@
     : [];
 
   function startDrag(slot: SelectableSlot, day: Day) {
-    if (allow_booking) {
+    if (allow_booking && day.isBookable) {
       // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
       dragStartSlot = slot;
       dragStartDay = day;
@@ -1122,7 +1137,7 @@
   }
 
   function addToDrag(slot: SelectableSlot, day: Day) {
-    if (mouseIsDown || touchIsDown) {
+    if (day.isBookable && (mouseIsDown || touchIsDown)) {
       if (draggingExistingBlock && dragStartSlot && dragStartDay) {
         // dragStartSlot && dragStartDay are superfluous here, but type errors are thrown if we don't explicitly check for them
 
@@ -1294,10 +1309,8 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const {
-        pageX: touchPositionX,
-        pageY: touchPositionY,
-      } = event.changedTouches[0];
+      const { pageX: touchPositionX, pageY: touchPositionY } =
+        event.changedTouches[0];
 
       const currentTouchedDayPosition = Object.entries(dayXPositions).find(
         ([_, dayPosition]) => dayPosition.x > touchPositionX,
@@ -1422,18 +1435,9 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
@@ -1587,10 +1591,8 @@
                     event.changedTouches.length === 1;
 
                   if (isLastTouch) {
-                    const {
-                      pageX,
-                      pageY: touchPositionY,
-                    } = event.changedTouches[0];
+                    const { pageX, pageY: touchPositionY } =
+                      event.changedTouches[0];
 
                     const currentTouchedSlotPosition = Object.entries(
                       slotYPositions,
@@ -1599,9 +1601,8 @@
                     );
 
                     if (currentTouchedSlotPosition) {
-                      const [
-                        currentTouchedSlotIndex,
-                      ] = currentTouchedSlotPosition;
+                      const [currentTouchedSlotIndex] =
+                        currentTouchedSlotPosition;
 
                       currentTouchedSlot =
                         day.slots[Number(currentTouchedSlotIndex)];

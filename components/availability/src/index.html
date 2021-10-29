@@ -152,6 +152,22 @@
         });
 
         document
+          .querySelectorAll('input[name="max-book-ahead"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.max_book_ahead_days = JSON.parse(event.target.value);
+            });
+          });
+
+        document
+          .querySelectorAll('input[name="min-book-ahead"]')
+          .forEach((elem) => {
+            elem.addEventListener("input", function (event) {
+              component.min_book_ahead_days = JSON.parse(event.target.value);
+            });
+          });
+
+        document
           .querySelector('input[name="capacity"]')
           .addEventListener("input", (event) => {
             component.capacity = JSON.parse(event.target.value);
@@ -468,6 +484,20 @@
         <label>
           Max Bookable Slots
           <input type="number" name="max-slots" min="1" value="1" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <label>
+          Max Book Ahead Days
+          <input type="number" name="max-book-ahead" min="1" value="30" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <label>
+          Min Book Ahead Days
+          <input type="number" name="min-book-ahead" min="0" value="0" />
         </label>
       </fieldset>
 

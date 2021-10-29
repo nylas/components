@@ -344,26 +344,28 @@ describe("availability component", () => {
 
   describe("selecting avaialble time slots", () => {
     let selectedTimeslots = [];
+    let availabilityComponent;
 
-    const consecutiveSlotEndTime = new Date(
-      `${new Date().toLocaleDateString()} 15:30:00`,
-    ).toISOString();
-    const singularSlotStartTime = new Date(
-      `${new Date().toLocaleDateString()} 15:45:00`,
-    ).toISOString();
-    const singularSlotEndTime = new Date(
-      `${new Date().toLocaleDateString()} 16:00:00`,
-    ).toISOString();
-
-    it("should combine consecutive time slots", (done) => {
+    beforeEach(() => {
+      selectedTimeslots = [];
       cy.get("nylas-availability").then((element) => {
         const component = element[0];
+        availabilityComponent = component;
         component.allow_booking = true;
         component.max_bookable_slots = 3;
+
         component.calendars = [
           {
             availability: "free",
             timeslots: [
+              {
+                start_time: new Date(new Date().setHours(15 - 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17 - 24, 0, 0, 0)),
+              },
               {
                 start_time: new Date(new Date().setHours(15, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(16, 0, 0, 0)),
@@ -371,6 +373,14 @@ describe("availability component", () => {
               {
                 start_time: new Date(new Date().setHours(16, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(15 + 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17 + 24, 0, 0, 0)),
               },
             ],
             account: {
@@ -385,12 +395,28 @@ describe("availability component", () => {
             availability: "free",
             timeslots: [
               {
+                start_time: new Date(new Date().setHours(15 - 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17 - 24, 0, 0, 0)),
+              },
+              {
                 start_time: new Date(new Date().setHours(15, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(16, 0, 0, 0)),
               },
               {
                 start_time: new Date(new Date().setHours(16, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(15 + 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17 + 24, 0, 0, 0)),
               },
             ],
             account: {
@@ -405,12 +431,28 @@ describe("availability component", () => {
             availability: "free",
             timeslots: [
               {
+                start_time: new Date(new Date().setHours(15 - 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17 - 24, 0, 0, 0)),
+              },
+              {
                 start_time: new Date(new Date().setHours(15, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(16, 0, 0, 0)),
               },
               {
                 start_time: new Date(new Date().setHours(16, 0, 0, 0)),
                 end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(15 + 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+                end_time: new Date(new Date().setHours(17 + 24, 0, 0, 0)),
               },
             ],
             account: {
@@ -427,8 +469,20 @@ describe("availability component", () => {
           selectedTimeslots = event.detail.timeSlots;
         });
       });
-
       cy.wait(1000); // TODO: have this as a wait for render to be complete instead of a timer
+    });
+
+    it("should combine consecutive time slots", (done) => {
+      const consecutiveSlotEndTime = new Date(
+        `${new Date().toLocaleDateString()} 15:30:00`,
+      ).toISOString();
+      const singularSlotStartTime = new Date(
+        `${new Date().toLocaleDateString()} 15:45:00`,
+      ).toISOString();
+      const singularSlotEndTime = new Date(
+        `${new Date().toLocaleDateString()} 16:00:00`,
+      ).toISOString();
+
       cy.get(".slot.free").should("exist");
       expect(selectedTimeslots).to.have.lengthOf(0);
       cy.get(".slot.free")
@@ -455,6 +509,93 @@ describe("availability component", () => {
                   expect(selectedTimeslots[1].end_time.toISOString()).eq(
                     singularSlotEndTime,
                   );
+                  done();
+                });
+            });
+        });
+    });
+
+    it("should prevent booking events in the past", () => {
+      // Change to previous date
+      cy.get("div.change-dates").should("exist");
+      cy.get(".change-dates button:eq(0)").click();
+
+      cy.get(".slot.free").should("exist");
+      expect(selectedTimeslots).to.have.lengthOf(0);
+      cy.get(".slot.free")
+        .eq(0)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(0);
+        });
+    });
+
+    it("should prevent booking on days before min_book_ahead_days", (done) => {
+      // Check that we can book on current date if min_book_ahead_days is 0
+      availabilityComponent.min_book_ahead_days = 0;
+      cy.get(".slot.free").should("exist");
+      expect(selectedTimeslots).to.have.lengthOf(0);
+      cy.get(".slot.free")
+        .eq(0)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(1);
+
+          // Check that min_book_ahead_days is respected
+          availabilityComponent.min_book_ahead_days = 1;
+          cy.get(".slot.free").should("exist");
+          expect(selectedTimeslots).to.have.lengthOf(0);
+          cy.get(".slot.free")
+            .eq(0)
+            .click()
+            .then(() => {
+              expect(selectedTimeslots).to.have.lengthOf(0);
+
+              // Change to next date
+              cy.get("div.change-dates").should("exist");
+              cy.get(".change-dates button:eq(1)").click();
+
+              expect(selectedTimeslots).to.have.lengthOf(0);
+              cy.get(".slot.free")
+                .eq(0)
+                .click()
+                .then(() => {
+                  expect(selectedTimeslots).to.have.lengthOf(1);
+                  done();
+                });
+            });
+        });
+    });
+
+    it("should prevent booking on dates after max_book_ahead_days", (done) => {
+      // Check that we can book on current date if max_book_ahead_days is 0
+      availabilityComponent.max_book_ahead_days = 0;
+      cy.get(".slot.free").should("exist");
+      expect(selectedTimeslots).to.have.lengthOf(0);
+      cy.get(".slot.free")
+        .eq(0)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(1);
+          selectedTimeslots = [];
+
+          // Change to next date
+          cy.get("div.change-dates").should("exist");
+          cy.get(".change-dates button:eq(1)").click();
+
+          expect(selectedTimeslots).to.have.lengthOf(0);
+          cy.get(".slot.free")
+            .eq(0)
+            .click()
+            .then(() => {
+              expect(selectedTimeslots).to.have.lengthOf(0);
+
+              availabilityComponent.max_book_ahead_days = 1;
+              cy.get(".slot.free")
+                .eq(0)
+                .click()
+                .then(() => {
+                  expect(selectedTimeslots).to.have.lengthOf(1);
                   done();
                 });
             });
