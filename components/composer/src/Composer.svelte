@@ -764,7 +764,8 @@
             class="composer-btn file-upload"
             style="margin-right: 10px; width: 32px; height: 32px;"
             on:click={() => fileSelector.click()}
-            ><AttachmentIcon
+          >
+            <AttachmentIcon
               style="fill: var(--icons); width: 16px; height: 16px; margin-right: 15px"
             />
           </button>

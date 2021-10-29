@@ -95,7 +95,8 @@
       class="paginate-btn last-btn"
       on:click={() => changePage(last_page)}
       disabled={current_page === last_page}
-      ><LastIcon style="height:24px;width:24px;" />
+    >
+      <LastIcon style="height:24px;width:24px;" />
     </button>
   {/if}
 </nav>

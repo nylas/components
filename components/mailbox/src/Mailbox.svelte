@@ -456,7 +456,7 @@
 </script>
 
 <style lang="scss">
-  @use 'sass:list';
+  @use "sass:list";
   @import "../../theming/reset.scss";
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
@@ -717,16 +717,18 @@
                     title="Mark selected email(s) as read"
                     aria-label="Mark selected email(s) as read"
                     on:click={(e) => onChangeSelectedReadStatus(e)}
-                    ><MarkReadIcon /></button
                   >
+                    <MarkReadIcon />
+                  </button>
                 {:else}
                   <button
                     data-cy="mark-unread"
                     title="Mark selected email(s) as unread"
                     aria-label="Mark selected email(s) as unread"
                     on:click={(e) => onChangeSelectedReadStatus(e)}
-                    ><MarkUnreadIcon /></button
                   >
+                    <MarkUnreadIcon />
+                  </button>
                 {/if}
               </div>
             {/if}{/if}
