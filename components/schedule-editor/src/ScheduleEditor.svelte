@@ -21,28 +21,26 @@
 
   export let id: string = "";
   export let access_token: string = "";
-  export let event_title: string;
+
+  export let allow_booking: boolean;
+  export let attendees_to_show: number;
+  export let capacity: number | null;
+  export let dates_to_show: number;
+  export let email_ids: string[];
+  export let end_hour: number;
+  export let event_conferencing: string;
   export let event_description: string;
   export let event_location: string;
-  export let event_conferencing: string;
-  export let show_hosts: "show" | "hide";
-  export let start_hour: number;
-  export let end_hour: number;
-  export let slot_size: number; // in minutes
-  export let start_date: Date;
-  export let dates_to_show: number;
-  export let show_ticks: boolean;
-  export let email_ids: string[];
-  export let allow_booking: boolean;
+  export let event_title: string;
+  export let mandate_top_of_hour: boolean;
   export let max_bookable_slots: number;
-  export let partial_bookable_ratio: number;
-  export let show_as_week: boolean;
-  export let show_weekends: boolean;
-  export let attendees_to_show: number;
-  export let notification_mode: NotificationMode;
+  export let max_book_ahead_days: number;
+  export let min_book_ahead_days: number;
   export let notification_message: string;
+  export let notification_mode: NotificationMode;
   export let notification_subject: string;
-  export let view_as: "schedule" | "list";
+  export let open_hours: AvailabilityRule[];
+  export let partial_bookable_ratio: number;
   export let recurrence: "none" | "required" | "optional";
   export let recurrence_cadence: (
     | "none"
@@ -52,39 +50,46 @@
     | "biweekly"
     | "monthly"
   )[];
-  export let capacity: number | null;
-  export let open_hours: AvailabilityRule[];
-  export let mandate_top_of_hour: boolean;
+  export let show_as_week: boolean;
+  export let show_hosts: "show" | "hide";
   export let show_preview: boolean;
+  export let show_ticks: boolean;
+  export let show_weekends: boolean;
+  export let slot_size: number; // in minutes
+  export let start_date: Date;
+  export let start_hour: number;
+  export let view_as: "schedule" | "list";
 
   const defaultValueMap = {
-    event_title: "Meeting",
-    event_description: "",
-    event_conferencing: "",
-    event_location: "",
-    view_as: "schedule",
-    show_hosts: "show",
-    start_hour: 9,
+    allow_booking: false,
+    attendees_to_show: 5,
+    capacity: 1,
+    dates_to_show: 1,
+    email_ids: [],
     end_hour: 17,
+    event_conferencing: "",
+    event_description: "",
+    event_location: "",
+    event_title: "Meeting",
+    mandate_top_of_hour: false,
+    max_bookable_slots: 1,
+    max_book_ahead_days: 30,
+    min_book_ahead_days: 0,
+    notification_message: "Thank you for scheduling!",
+    notification_mode: NotificationMode.SHOW_MESSAGE,
+    notification_subject: "Invitation",
+    open_hours: [],
+    partial_bookable_ratio: 0.01,
+    recurrence_cadence: ["none"],
+    recurrence: "none",
+    show_as_week: false,
+    show_hosts: "show",
+    show_ticks: true,
+    show_weekends: true,
     slot_size: 15,
     start_date: new Date(),
-    dates_to_show: 1,
-    show_ticks: true,
-    email_ids: [],
-    allow_booking: false,
-    max_bookable_slots: 1,
-    partial_bookable_ratio: 0.01,
-    show_as_week: false,
-    show_weekends: true,
-    attendees_to_show: 5,
-    notification_mode: NotificationMode.SHOW_MESSAGE,
-    notification_message: "Thank you for scheduling!",
-    notification_subject: "Invitation",
-    recurrence: "none",
-    recurrence_cadence: ["none"],
-    capacity: 1,
-    open_hours: [],
-    mandate_top_of_hour: false,
+    start_hour: 9,
+    view_as: "schedule",
   };
 
   //#region mount and prop initialization
@@ -115,34 +120,36 @@
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
       internalProps = rebuiltProps;
 
-      event_title = internalProps.event_title;
-      event_description = internalProps.event_description;
-      event_conferencing = internalProps.event_conferencing;
-      event_location = internalProps.event_location;
-      view_as = internalProps.view_as;
-      show_hosts = internalProps.show_hosts;
-      start_hour = internalProps.start_hour;
-      end_hour = internalProps.end_hour;
-      slot_size = internalProps.slot_size;
-      start_date = internalProps.start_date;
-      dates_to_show = internalProps.dates_to_show;
-      show_ticks = internalProps.show_ticks;
-      email_ids = internalProps.email_ids;
       allow_booking = internalProps.allow_booking;
-      max_bookable_slots = internalProps.max_bookable_slots;
-      partial_bookable_ratio = internalProps.partial_bookable_ratio;
-      show_as_week = internalProps.show_as_week;
-      show_weekends = internalProps.show_weekends;
       attendees_to_show = internalProps.attendees_to_show;
-      notification_mode = internalProps.notification_mode;
+      capacity = internalProps.capacity;
+      dates_to_show = internalProps.dates_to_show;
+      email_ids = internalProps.email_ids;
+      end_hour = internalProps.end_hour;
+      event_conferencing = internalProps.event_conferencing;
+      event_description = internalProps.event_description;
+      event_location = internalProps.event_location;
+      event_title = internalProps.event_title;
+      mandate_top_of_hour = internalProps.mandate_top_of_hour;
+      max_bookable_slots = internalProps.max_bookable_slots;
+      max_book_ahead_days = internalProps.max_book_ahead_days;
+      min_book_ahead_days = internalProps.min_book_ahead_days;
       notification_message = internalProps.notification_message;
+      notification_mode = internalProps.notification_mode;
       notification_subject = internalProps.notification_subject;
+      open_hours = internalProps.open_hours;
+      partial_bookable_ratio = internalProps.partial_bookable_ratio;
       recurrence = internalProps.recurrence;
       recurrence_cadence = internalProps.recurrence_cadence;
-      capacity = internalProps.capacity;
-      open_hours = internalProps.open_hours;
-      mandate_top_of_hour = internalProps.mandate_top_of_hour;
+      show_as_week = internalProps.show_as_week;
+      show_hosts = internalProps.show_hosts;
       show_preview = internalProps.show_preview;
+      show_ticks = internalProps.show_ticks;
+      show_weekends = internalProps.show_weekends;
+      slot_size = internalProps.slot_size;
+      start_date = internalProps.start_date;
+      start_hour = internalProps.start_hour;
+      view_as = internalProps.view_as;
     }
   }
 
@@ -742,8 +749,8 @@
         <nylas-availability
           {...internalProps}
           capacity={null}
-          on:timeSlotChosen={(e) => {
-            slots_to_book = e.detail.timeSlots;
+          on:timeSlotChosen={(event) => {
+            slots_to_book = event.detail.timeSlots;
           }}
           calendars={!internalProps.email_ids
             ? [

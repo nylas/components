@@ -4,36 +4,38 @@ import type {
 } from "@commons/enums/Availability";
 import type { Manifest as NylasManifest } from "@commons/types/Nylas";
 export interface Manifest extends NylasManifest {
-  start_hour: number;
-  end_hour: number;
-  slot_size: 15 | 30 | 60;
-  start_date: Date;
-  dates_to_show: number;
-  show_ticks: boolean;
-  calendars: Calendar[];
-  email_ids: string[];
   allow_booking: boolean;
-  max_bookable_slots: number;
-  partial_bookable_ratio: number;
-  show_as_week: boolean;
-  show_weekends: boolean;
-  attendees_to_show: number;
   allow_date_change: boolean;
-  required_participants: string[];
-  show_hosts: "show" | "hide";
-  partial_color: string;
-  free_color: string;
+  attendees_to_show: number;
   busy_color: string;
-  closed_color: string;
-  selected_color: string;
-  view_as: "schedule" | "list";
-  event_buffer: number;
+  calendars: Calendar[];
   capacity: number | null;
+  closed_color: string;
   date_format: "full" | "weekday" | "date" | "none";
-  show_header: boolean;
+  dates_to_show: number;
+  email_ids: string[];
+  end_hour: number;
+  event_buffer: number;
+  free_color: string;
+  mandate_top_of_hour: boolean;
+  max_bookable_slots: number;
+  max_book_ahead_days: number;
+  min_book_ahead_days: number;
   open_hours: AvailabilityRule[];
   overbooked_threshold: number;
-  mandate_top_of_hour: boolean;
+  partial_bookable_ratio: number;
+  partial_color: string;
+  required_participants: string[];
+  selected_color: string;
+  show_as_week: boolean;
+  show_header: boolean;
+  show_hosts: "show" | "hide";
+  show_ticks: boolean;
+  show_weekends: boolean;
+  slot_size: 15 | 30 | 60;
+  start_date: Date;
+  start_hour: number;
+  view_as: "schedule" | "list";
 }
 
 export interface AvailabilityRule {
@@ -106,7 +108,8 @@ export interface EventParticipant {
 }
 
 export interface Day {
+  epochs: any[]; // TODO typing
+  isBookable: boolean;
   slots: SelectableSlot[];
-  epochs: any[]; // TODO
   timestamp: Date;
 }

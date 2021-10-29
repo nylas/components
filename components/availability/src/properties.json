@@ -79,6 +79,20 @@
     "value": 1
   },
   {
+    "label": "max_book_ahead_days",
+    "title": "Maximum days ahead that are bookable",
+    "type": "number",
+    "options": [1, 2, 3],
+    "value": 1
+  },
+  {
+    "label": "min_book_ahead_days",
+    "title": "Minimum days ahead that are bookable",
+    "type": "number",
+    "options": [1, 2, 3],
+    "value": 1
+  },
+  {
     "label": "partial_bookable_ratio",
     "title": "Partial bookable ratio",
     "type": "number",
