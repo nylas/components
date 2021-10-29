@@ -155,7 +155,7 @@
   let selectedDate: Date;
   $: selectedDate = (() => {
     if (selected_date) {
-      const date = new Date(selected_date);
+      const date = convertToUTC(new Date(selected_date));
       date.setHours(0, 0, 0, 0);
       return date;
     } else if (allowedDates.length) {
@@ -167,8 +167,8 @@
     }
   })();
 
-  function convertToUTC(date: Date): number {
-    return date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  function convertToUTC(date: Date): Date {
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   }
 
   $: hideCurrentTime =
@@ -233,9 +233,9 @@
   let endOfDay: number;
 
   $: startOfDay =
-    convertToUTC(new Date(new Date(selectedDate).setHours(0, 0, 0, 0))) / 1000;
+    new Date(new Date(selectedDate).setHours(0, 0, 0, 0)).getTime() / 1000;
   $: endOfDay =
-    convertToUTC(new Date(new Date(selectedDate).setHours(24, 0, 0, 0))) / 1000;
+    new Date(new Date(selectedDate).setHours(24, 0, 0, 0)).getTime() / 1000;
 
   // #endregion time constants
 
@@ -289,10 +289,10 @@
         access_token: access_token,
         calendarIDs: calendarIDs,
         starts_after:
-          convertToUTC(new Date(new Date(previousDate).setHours(0, 0, 0, 0))) /
+          new Date(new Date(previousDate).setHours(0, 0, 0, 0)).getTime() /
           1000,
         ends_before:
-          convertToUTC(new Date(new Date(previousDate).setHours(24, 0, 0, 0))) /
+          new Date(new Date(previousDate).setHours(24, 0, 0, 0)).getTime() /
           1000,
       },
       {
@@ -300,11 +300,9 @@
         access_token: access_token,
         calendarIDs: calendarIDs,
         starts_after:
-          convertToUTC(new Date(new Date(nextDate).setHours(0, 0, 0, 0))) /
-          1000,
+          new Date(new Date(nextDate).setHours(0, 0, 0, 0)).getTime() / 1000,
         ends_before:
-          convertToUTC(new Date(new Date(nextDate).setHours(24, 0, 0, 0))) /
-          1000,
+          new Date(new Date(nextDate).setHours(24, 0, 0, 0)).getTime() / 1000,
       },
     ];
   }
@@ -1496,12 +1494,17 @@
                 class:expanded={expandedEventId === event.id}
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs.indexOf(event.calendar_id) + 1}
-                style="top: {event.relativeStartTime * 100}%; height: 
+                style="top: {event.relativeStartTime *
+                  100}%; height: 
               {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
-                  : `calc(${event.relativeRunTime * 100}%  - 4px)`};
-              left: {event.relativeOverlapOffset * 100}%; 
-              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
+                  : `calc(${
+                      event.relativeRunTime * 100
+                    }%  - 4px)`};
+              left: {event.relativeOverlapOffset *
+                  100}%; 
+              width: calc({event.relativeOverlapWidth *
+                  100}% - 4px)"
               >
                 <div
                   class="inner"
