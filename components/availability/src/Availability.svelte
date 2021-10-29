@@ -171,12 +171,15 @@
 
   //#endregion props
 
+  type SlotRefs = Record<string, Array<HTMLElement | null>>;
+
   //#region mount and prop initialization
   let internalProps: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
   let loading: boolean;
   let dayRef: HTMLElement[] = [];
-  let slotRef: HTMLElement[] = [];
+  let slotRef: SlotRefs = {}; // mapping of dates to slot button DOM nodes
+  let dayOrder: string[] = []; // maintains order of displayed dates
   let slotYPositions: Record<string, DOMRect> = {};
   let shouldUpdateSlotPositions = false;
   let dayXPositions: Record<string, DOMRect> = {};
@@ -192,6 +195,9 @@
 
   $: {
     if (
+      dates_to_show ||
+      show_as_week ||
+      show_weekends ||
       start_hour ||
       end_hour ||
       slot_size ||
@@ -199,7 +205,6 @@
       allow_date_change
     ) {
       // Changes to these props changes the height of our slot buttons
-      slotRef = slotRef.filter((slot) => !!slot);
       shouldUpdateSlotPositions = true;
     }
   }
@@ -232,7 +237,7 @@
     calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
   });
 
-  const recalibratePositions = (ref: HTMLElement[]) =>
+  const recalibratePositions = (ref: Array<HTMLElement | null>) =>
     ref.reduce<Record<string, DOMRect>>((allPositions, currentSlot, i) => {
       if (currentSlot) allPositions[i] = currentSlot.getBoundingClientRect();
       return allPositions;
@@ -240,7 +245,7 @@
 
   afterUpdate(() => {
     if (shouldUpdateSlotPositions) {
-      slotYPositions = recalibratePositions(slotRef);
+      slotYPositions = recalibratePositions(Object.values(slotRef)[0]);
       shouldUpdateSlotPositions = false;
     }
     if (shouldUpdateDayPositions) {
@@ -1320,6 +1325,32 @@
   }
 
   const throttledTouchMovement = throttle(handleTouchMovement, 100);
+
+  function arrowNavigate({
+    code,
+    currentDay,
+    slotIndex,
+  }: {
+    code: string;
+    currentDay: Date;
+    slotIndex: number;
+  }) {
+    if (code === "ArrowDown") {
+      slotRef[currentDay.toLocaleDateString()][slotIndex + 1]?.focus();
+    } else if (code === "ArrowUp") {
+      slotRef[currentDay.toLocaleDateString()][slotIndex - 1]?.focus();
+    } else if (code === "ArrowLeft") {
+      const currentDayKey = dayOrder.indexOf(currentDay.toLocaleDateString());
+      const prevDay = dayOrder[currentDayKey - 1];
+
+      slotRef[prevDay]?.[slotIndex]?.focus();
+    } else if (code === "ArrowRight") {
+      const currentDayKey = dayOrder.indexOf(currentDay.toLocaleDateString());
+      const nextDay = dayOrder[currentDayKey + 1];
+
+      slotRef[nextDay]?.[slotIndex]?.focus();
+    }
+  }
   //#endregion slot interaction handlers
 
   // #region error
@@ -1344,6 +1375,32 @@
     }
   }
   // #endregion error
+
+  function storeRef(
+    node: HTMLElement,
+    params: { dateKey: string; slotIndex: number; startTime: string },
+  ) {
+    if (typeof slotRef[params.dateKey] === "undefined") {
+      dayOrder = dayOrder.concat(params.dateKey).sort();
+      slotRef[params.dateKey] = [];
+    }
+
+    slotRef[params.dateKey][params.slotIndex] = node;
+
+    return {
+      destroy() {
+        // Find the node that was destroyed in hashmap
+        const elemIndex = slotRef[params.dateKey].indexOf(node);
+
+        // clean up slotRef hashmap
+        if (elemIndex >= 0) slotRef[params.dateKey].splice(elemIndex, 1);
+        if (slotRef[params.dateKey].length === 0) {
+          dayOrder = dayOrder.filter((day) => day !== params.dateKey);
+          delete slotRef[params.dateKey];
+        }
+      },
+    };
+  }
 </script>
 
 <style lang="scss">
@@ -1476,7 +1533,11 @@
                 ).toLocaleString()} to {new Date(
                   slot.end_time,
                 ).toLocaleString()}; Free calendars: {slot.available_calendars.toString()}"
-                bind:this={slotRef[slotIndex]}
+                use:storeRef={{
+                  dateKey: day.timestamp.toLocaleDateString(),
+                  slotIndex,
+                  startTime: new Date(slot.start_time).toLocaleString(),
+                }}
                 class="slot {slot.selectionStatus} {slot.availability}"
                 class:pending={slot.selectionPending}
                 class:hovering={slot.hovering}
@@ -1498,6 +1559,15 @@
                   if (e.code === "Space" || e.code === "Enter") {
                     startDrag(slot, day);
                     tick().then(() => endDrag(day));
+                  }
+                }}
+                on:keydown={({ code }) => {
+                  if (code.startsWith("Arrow")) {
+                    arrowNavigate({
+                      code,
+                      currentDay: day.timestamp,
+                      slotIndex,
+                    });
                   }
                 }}
                 on:touchstart={(event) => {
