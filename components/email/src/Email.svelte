@@ -621,7 +621,7 @@
 </script>
 
 <style lang="scss">
-  @use 'sass:list';
+  @use "sass:list";
   @import "../../theming/reset.scss";
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
@@ -1162,8 +1162,9 @@
                     title="Delete thread / Move to trash"
                     aria-label="Delete thread (Move to trash)"
                     on:click|stopPropagation={(e) => deleteEmail(e)}
-                    ><TrashIcon /></button
                   >
+                    <TrashIcon />
+                  </button>
                 </div>
                 {#if show_star}
                   <div class="starred">

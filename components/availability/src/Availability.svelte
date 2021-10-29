@@ -143,16 +143,15 @@
         );
       }
 
-      $AvailabilityStore[
-        JSON.stringify(getAvailabilityQuery())
-      ] = $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
-        (availability) => {
-          for (const calendar of availability) {
-            calendar.time_slots.push(...selectedSlots);
-          }
-          return availability;
-        },
-      );
+      $AvailabilityStore[JSON.stringify(getAvailabilityQuery())] =
+        $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
+          (availability) => {
+            for (const calendar of availability) {
+              calendar.time_slots.push(...selectedSlots);
+            }
+            return availability;
+          },
+        );
 
       await getAvailability();
     }
@@ -804,21 +803,23 @@
     let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
     if (Array.isArray(email_ids) && email_ids.length > 0) {
-      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
-        await $AvailabilityStore[
-          JSON.stringify({ ...getAvailabilityQuery(), forceReload })
-        ],
-      );
+      consolidatedAvailabilityForGivenDay =
+        consolidatedAvailabilityForGivenDay.concat(
+          await $AvailabilityStore[
+            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
+          ],
+        );
     }
     if (booking_user_email && booking_user_token) {
-      consolidatedAvailabilityForGivenDay = consolidatedAvailabilityForGivenDay.concat(
-        await $AvailabilityStore[
-          JSON.stringify({
-            ...getAvailabilityQuery([booking_user_email], booking_user_token),
-            forceReload,
-          })
-        ],
-      );
+      consolidatedAvailabilityForGivenDay =
+        consolidatedAvailabilityForGivenDay.concat(
+          await $AvailabilityStore[
+            JSON.stringify({
+              ...getAvailabilityQuery([booking_user_email], booking_user_token),
+              forceReload,
+            })
+          ],
+        );
     }
 
     loading = false;
@@ -1289,10 +1290,8 @@
       event.touches.length === 1 &&
       event.changedTouches.length === 1 // check if there is a single touch point
     ) {
-      const {
-        pageX: touchPositionX,
-        pageY: touchPositionY,
-      } = event.changedTouches[0];
+      const { pageX: touchPositionX, pageY: touchPositionY } =
+        event.changedTouches[0];
 
       const currentTouchedDayPosition = Object.entries(dayXPositions).find(
         ([_, dayPosition]) => dayPosition.x > touchPositionX,
@@ -1365,30 +1364,21 @@
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
   style="
-  --busy-color-lightened: {lightenHexColour(
-    busy_color,
-    90,
-  )};
-  --closed-color-lightened: {lightenHexColour(
-    closed_color,
-    90,
-  )};
-  --selected-color-lightened: {lightenHexColour(
-    selected_color,
-    60,
-  )}; 
+  --busy-color-lightened: {lightenHexColour(busy_color, 90)};
+  --closed-color-lightened: {lightenHexColour(closed_color, 90)};
+  --selected-color-lightened: {lightenHexColour(selected_color, 60)}; 
 --free-color: {free_color}; --busy-color: {busy_color}; --closed-color: {closed_color}; --partial-color: {partial_color}; --selected-color: {selected_color};"
 >
   <header class:dated={allow_date_change}>
     <h2 class="month">{showDateRange(days)}</h2>
     {#if allow_date_change}
       <div class="change-dates">
-        <button on:click={goToPreviousDate} aria-label="Previous date"
-          ><BackIcon style="height:32px;width:32px;" /></button
-        >
-        <button on:click={goToNextDate} aria-label="Next date"
-          ><NextIcon style="height:32px;width:32px;" /></button
-        >
+        <button on:click={goToPreviousDate} aria-label="Previous date">
+          <BackIcon style="height:32px;width:32px;" />
+        </button>
+        <button on:click={goToNextDate} aria-label="Next date">
+          <NextIcon style="height:32px;width:32px;" />
+        </button>
       </div>
     {/if}
     <div class="legend">
@@ -1517,10 +1507,8 @@
                     event.changedTouches.length === 1;
 
                   if (isLastTouch) {
-                    const {
-                      pageX,
-                      pageY: touchPositionY,
-                    } = event.changedTouches[0];
+                    const { pageX, pageY: touchPositionY } =
+                      event.changedTouches[0];
 
                     const currentTouchedSlotPosition = Object.entries(
                       slotYPositions,
@@ -1529,9 +1517,8 @@
                     );
 
                     if (currentTouchedSlotPosition) {
-                      const [
-                        currentTouchedSlotIndex,
-                      ] = currentTouchedSlotPosition;
+                      const [currentTouchedSlotIndex] =
+                        currentTouchedSlotPosition;
 
                       currentTouchedSlot =
                         day.slots[Number(currentTouchedSlotIndex)];

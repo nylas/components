@@ -81,11 +81,9 @@
 
 <div class="datepicker-modal">
   <div class="modal-content">
-    <span class="close" on:click={close}
-      ><CloseIcon
-        style="fill: var(--icons); width: 10px; height: 10px;"
-      /></span
-    >
+    <span class="close" on:click={close}>
+      <CloseIcon style="fill: var(--icons); width: 10px; height: 10px;" />
+    </span>
     <nylas-datepicker {change} timepicker={true} min={new Date()} />
     <button class="save-btn" on:click={submit}> Schedule send </button>
   </div>
