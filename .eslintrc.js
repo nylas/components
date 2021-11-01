@@ -20,7 +20,6 @@ module.exports = {
   },
   plugins: ["svelte3", "@typescript-eslint", "cypress"],
   extends: [
-    "plugin:svelte3/defaultWithJsx",
     "eslint:recommended",
     "prettier",
     "plugin:@typescript-eslint/eslint-recommended",
