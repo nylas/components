@@ -16,4 +16,3 @@ components/**/main.js.map
 components/**/styles.css
 coverage
 **/package-lock.json
-**/yarn.lock
