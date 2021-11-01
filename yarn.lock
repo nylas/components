@@ -2322,41 +2322,41 @@
     rimraf "^3.0.2"
 
 "@nylas/components-agenda@file:components/agenda":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-availability@file:components/availability":
-  version "1.0.11"
+  version "1.0.12"
   dependencies:
     d3-scale "^4.0.0"
     d3-time "^3.0.0"
     just-throttle "^2.3.1"
 
 "@nylas/components-composer@file:components/composer":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-contact-list@file:components/contact-list":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-contacts-search@file:components/contacts-search":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-conversation@file:components/conversation":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-datepicker@file:components/datepicker":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-email@file:components/email":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-mailbox@file:components/mailbox":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-schedule-editor@file:components/schedule-editor":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-scheduler@file:components/scheduler":
-  version "1.0.11"
+  version "1.0.12"
 
 "@nylas/components-theming@file:components/theming":
   version "1.0.0"
@@ -3699,11 +3699,6 @@
   version "3.0.1"
   resolved "https://registry.npmjs.org/@types/braces/-/braces-3.0.1.tgz"
   integrity sha512-+euflG6ygo4bn0JHtn4pYqcXwRtLvElQ7/nnjDu7iYG56H0+OhCd7d6Ug0IE3WcFpZozBKW2+80FUbv5QGk5AQ==
-
-"@types/clone-deep@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@types/clone-deep/-/clone-deep-4.0.1.tgz#7c488443ab9f571cd343d774551b78e9264ea990"
-  integrity sha512-bdkCSkyVHsgl3Goe1y16T9k6JuQx7SiDREkq728QjKmTZkGJZuS8R3gGcnGzVuGBP0mssKrzM/GlMOQxtip9cg==
 
 "@types/color-convert@^2.0.0":
   version "2.0.0"
@@ -7629,10 +7624,10 @@ eslint-plugin-cypress@^2.11.3:
   dependencies:
     globals "^11.12.0"
 
-"eslint-plugin-svelte3@git+https://github.com/nylas/eslint-plugin-svelte3.git#82ff79a12fd6d1d45a098b3fb69d572e42581dfa":
-  version "3.2.0"
-  resolved "git+ssh://git@github.com/nylas/eslint-plugin-svelte3.git#82ff79a12fd6d1d45a098b3fb69d572e42581dfa"
-  integrity sha512-g9tj+UyH/+eyK+eh74q2E0PVJQ0xHsSvDxtIhZ1z5FBupy9Cj1lsDVlpIx/lUcr6Yu8rIysWfNNooJXkpB5Clw==
+eslint-plugin-svelte3@^2.7.3:
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-svelte3/-/eslint-plugin-svelte3-2.7.3.tgz#e793b646b848e717674fe668c21b909cfa025eb3"
+  integrity sha512-p6HhxyICX9x/x+8WSy6AVk2bmv9ayoznoTSyCvK47th/k/07ksuJixMwbGX9qxJVAmPBaYMjEIMSEZtJHPIN7w==
 
 eslint-scope@^4.0.3:
   version "4.0.3"

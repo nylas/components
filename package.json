@@ -72,7 +72,7 @@
     "eslint": "^7.7.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-cypress": "^2.11.3",
-    "eslint-plugin-svelte3": "git+https://github.com/nylas/eslint-plugin-svelte3.git#82ff79a12fd6d1d45a098b3fb69d572e42581dfa",
+    "eslint-plugin-svelte3": "^2.7.3",
     "esbuild": "0.12.15",
     "rollup-plugin-esbuild": "4.5.0",
     "fetch-mock": "^9.11.0",
