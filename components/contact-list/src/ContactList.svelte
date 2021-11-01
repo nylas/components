@@ -72,11 +72,13 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ContactListProperties;
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as ContactListProperties;
+    updateInternalProps(
+      buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as ContactListProperties,
+    );
 
     if (contacts) {
       hydratedContacts = contacts as HydratedContact[];
@@ -100,16 +102,20 @@
       defaultValueMap,
     ) as ContactListProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      theme = internalProps.theme;
-      click_action = internalProps.click_action;
-      sort_by = internalProps.sort_by;
-      show_filter = internalProps.show_filter;
-      default_photo = internalProps.default_photo;
-      show_names = internalProps.show_names;
-      contacts_to_load = internalProps.contacts_to_load;
+      updateInternalProps(rebuiltProps);
     }
+  }
+
+  function updateInternalProps(updatedProps: ContactListProperties) {
+    internalProps = updatedProps;
+
+    theme = internalProps.theme;
+    click_action = internalProps.click_action;
+    sort_by = internalProps.sort_by;
+    show_filter = internalProps.show_filter;
+    default_photo = internalProps.default_photo;
+    show_names = internalProps.show_names;
+    contacts_to_load = internalProps.contacts_to_load;
   }
 
   let themeUrl: string;

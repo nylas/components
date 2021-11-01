@@ -81,11 +81,9 @@
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as Manifest;
+    updateInternalProps(
+      buildInternalProps($$props, manifest, defaultValueMap) as Manifest,
+    );
   });
 
   $: {
@@ -95,23 +93,27 @@
       defaultValueMap,
     ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      availability_id = internalProps.availability_id;
-      email_ids = internalProps.email_ids;
-      booking_label = internalProps.booking_label;
-      event_title = internalProps.event_title;
-      event_description = internalProps.event_description;
-      event_location = internalProps.event_location;
-      event_conferencing = internalProps.event_conferencing;
-      slots_to_book = internalProps.slots_to_book;
-      notification_mode = internalProps.notification_mode;
-      notification_message = internalProps.notification_message;
-      notification_subject = internalProps.notification_subject;
-      recurrence = internalProps.recurrence;
-      recurrence_cadence = internalProps.recurrence_cadence;
-      recurrence_expiry = internalProps.recurrence_expiry;
+      updateInternalProps(rebuiltProps);
     }
+  }
+
+  function updateInternalProps(updatedProps: Manifest) {
+    internalProps = updatedProps;
+
+    availability_id = internalProps.availability_id;
+    email_ids = internalProps.email_ids;
+    booking_label = internalProps.booking_label;
+    event_title = internalProps.event_title;
+    event_description = internalProps.event_description;
+    event_location = internalProps.event_location;
+    event_conferencing = internalProps.event_conferencing;
+    slots_to_book = internalProps.slots_to_book;
+    notification_mode = internalProps.notification_mode;
+    notification_message = internalProps.notification_message;
+    notification_subject = internalProps.notification_subject;
+    recurrence = internalProps.recurrence;
+    recurrence_cadence = internalProps.recurrence_cadence;
+    recurrence_expiry = internalProps.recurrence_expiry;
   }
 
   const dispatchEvent = getEventDispatcher(get_current_component());

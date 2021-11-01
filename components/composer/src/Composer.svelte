@@ -156,11 +156,13 @@
         show_from = false;
       }
     }
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as ComposerProperties;
+    updateInternalProps(
+      buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as ComposerProperties,
+    );
     if (tracking) {
       // Set tracking on message object
       update("tracking", tracking);
@@ -177,7 +179,7 @@
       defaultValueMap,
     ) as ComposerProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
+      updateInternalProps(rebuiltProps);
     }
   }
 
@@ -186,6 +188,11 @@
   }
 
   $: {
+  }
+
+  function updateInternalProps(updatedProps: ComposerProperties) {
+    internalProps = updatedProps;
+
     show_to = internalProps.show_to;
     show_from = internalProps.show_from;
     minimized = internalProps.minimized;

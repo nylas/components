@@ -224,11 +224,9 @@
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as Manifest;
+    updateInternalProps(
+      buildInternalProps($$props, manifest, defaultValueMap) as Manifest,
+    );
 
     const calendarQuery: CalendarQuery = {
       access_token,
@@ -264,41 +262,45 @@
       defaultValueMap,
     ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      allow_booking = internalProps.allow_booking;
-      allow_date_change = internalProps.allow_date_change;
-      attendees_to_show = internalProps.attendees_to_show;
-      busy_color = internalProps.busy_color;
-      calendars = internalProps.calendars;
-      capacity = internalProps.capacity;
-      closed_color = internalProps.closed_color;
-      date_format = internalProps.date_format;
-      dates_to_show = internalProps.dates_to_show;
-      email_ids = internalProps.email_ids;
-      end_hour = internalProps.end_hour;
-      event_buffer = internalProps.event_buffer;
-      free_color = internalProps.free_color;
-      mandate_top_of_hour = internalProps.mandate_top_of_hour;
-      max_bookable_slots = internalProps.max_bookable_slots;
-      max_book_ahead_days = internalProps.max_book_ahead_days;
-      min_book_ahead_days = internalProps.min_book_ahead_days;
-      open_hours = internalProps.open_hours;
-      overbooked_threshold = internalProps.overbooked_threshold;
-      partial_bookable_ratio = internalProps.partial_bookable_ratio;
-      partial_color = internalProps.partial_color;
-      required_participants = internalProps.required_participants;
-      selected_color = internalProps.selected_color;
-      show_as_week = internalProps.show_as_week;
-      show_header = internalProps.show_header;
-      show_hosts = internalProps.show_hosts;
-      show_ticks = internalProps.show_ticks;
-      show_weekends = internalProps.show_weekends;
-      slot_size = internalProps.slot_size;
-      start_date = internalProps.start_date;
-      start_hour = internalProps.start_hour;
-      view_as = internalProps.view_as;
+      updateInternalProps(rebuiltProps);
     }
+  }
+
+  function updateInternalProps(updatedProps: Manifest) {
+    internalProps = updatedProps;
+
+    allow_booking = internalProps.allow_booking;
+    allow_date_change = internalProps.allow_date_change;
+    attendees_to_show = internalProps.attendees_to_show;
+    busy_color = internalProps.busy_color;
+    calendars = internalProps.calendars;
+    capacity = internalProps.capacity;
+    closed_color = internalProps.closed_color;
+    date_format = internalProps.date_format;
+    dates_to_show = internalProps.dates_to_show;
+    email_ids = internalProps.email_ids;
+    end_hour = internalProps.end_hour;
+    event_buffer = internalProps.event_buffer;
+    free_color = internalProps.free_color;
+    mandate_top_of_hour = internalProps.mandate_top_of_hour;
+    max_bookable_slots = internalProps.max_bookable_slots;
+    max_book_ahead_days = internalProps.max_book_ahead_days;
+    min_book_ahead_days = internalProps.min_book_ahead_days;
+    open_hours = internalProps.open_hours;
+    overbooked_threshold = internalProps.overbooked_threshold;
+    partial_bookable_ratio = internalProps.partial_bookable_ratio;
+    partial_color = internalProps.partial_color;
+    required_participants = internalProps.required_participants;
+    selected_color = internalProps.selected_color;
+    show_as_week = internalProps.show_as_week;
+    show_header = internalProps.show_header;
+    show_hosts = internalProps.show_hosts;
+    show_ticks = internalProps.show_ticks;
+    show_weekends = internalProps.show_weekends;
+    slot_size = internalProps.slot_size;
+    start_date = internalProps.start_date;
+    start_hour = internalProps.start_hour;
+    view_as = internalProps.view_as;
   }
 
   async function getContact(email: string) {

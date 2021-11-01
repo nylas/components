@@ -104,11 +104,9 @@
       setManifestDefaults(manifest);
     }
 
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as Manifest;
+    updateInternalProps(
+      buildInternalProps($$props, manifest, defaultValueMap) as Manifest,
+    );
   });
 
   $: {
@@ -118,39 +116,43 @@
       defaultValueMap,
     ) as Manifest;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      allow_booking = internalProps.allow_booking;
-      attendees_to_show = internalProps.attendees_to_show;
-      capacity = internalProps.capacity;
-      dates_to_show = internalProps.dates_to_show;
-      email_ids = internalProps.email_ids;
-      end_hour = internalProps.end_hour;
-      event_conferencing = internalProps.event_conferencing;
-      event_description = internalProps.event_description;
-      event_location = internalProps.event_location;
-      event_title = internalProps.event_title;
-      mandate_top_of_hour = internalProps.mandate_top_of_hour;
-      max_bookable_slots = internalProps.max_bookable_slots;
-      max_book_ahead_days = internalProps.max_book_ahead_days;
-      min_book_ahead_days = internalProps.min_book_ahead_days;
-      notification_message = internalProps.notification_message;
-      notification_mode = internalProps.notification_mode;
-      notification_subject = internalProps.notification_subject;
-      open_hours = internalProps.open_hours;
-      partial_bookable_ratio = internalProps.partial_bookable_ratio;
-      recurrence = internalProps.recurrence;
-      recurrence_cadence = internalProps.recurrence_cadence;
-      show_as_week = internalProps.show_as_week;
-      show_hosts = internalProps.show_hosts;
-      show_preview = internalProps.show_preview;
-      show_ticks = internalProps.show_ticks;
-      show_weekends = internalProps.show_weekends;
-      slot_size = internalProps.slot_size;
-      start_date = internalProps.start_date;
-      start_hour = internalProps.start_hour;
-      view_as = internalProps.view_as;
+      updateInternalProps(rebuiltProps);
     }
+  }
+
+  function updateInternalProps(updatedProps: Manifest) {
+    internalProps = updatedProps;
+
+    allow_booking = internalProps.allow_booking;
+    attendees_to_show = internalProps.attendees_to_show;
+    capacity = internalProps.capacity;
+    dates_to_show = internalProps.dates_to_show;
+    email_ids = internalProps.email_ids;
+    end_hour = internalProps.end_hour;
+    event_conferencing = internalProps.event_conferencing;
+    event_description = internalProps.event_description;
+    event_location = internalProps.event_location;
+    event_title = internalProps.event_title;
+    mandate_top_of_hour = internalProps.mandate_top_of_hour;
+    max_bookable_slots = internalProps.max_bookable_slots;
+    max_book_ahead_days = internalProps.max_book_ahead_days;
+    min_book_ahead_days = internalProps.min_book_ahead_days;
+    notification_message = internalProps.notification_message;
+    notification_mode = internalProps.notification_mode;
+    notification_subject = internalProps.notification_subject;
+    open_hours = internalProps.open_hours;
+    partial_bookable_ratio = internalProps.partial_bookable_ratio;
+    recurrence = internalProps.recurrence;
+    recurrence_cadence = internalProps.recurrence_cadence;
+    show_as_week = internalProps.show_as_week;
+    show_hosts = internalProps.show_hosts;
+    show_preview = internalProps.show_preview;
+    show_ticks = internalProps.show_ticks;
+    show_weekends = internalProps.show_weekends;
+    slot_size = internalProps.slot_size;
+    start_date = internalProps.start_date;
+    start_hour = internalProps.start_hour;
+    view_as = internalProps.view_as;
   }
 
   // Manifest properties requiring further manipulation:
