@@ -93,11 +93,13 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as AgendaProperties;
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as AgendaProperties;
+    updateInternalProps(
+      buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as AgendaProperties,
+    );
 
     setInterval(() => {
       now = new Date().getTime();
@@ -115,24 +117,28 @@
       defaultValueMap,
     ) as AgendaProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      allow_date_change = internalProps.allow_date_change;
-      allow_event_creation = internalProps.allow_event_creation;
-      auto_time_box = internalProps.auto_time_box;
-      calendar_ids = internalProps.calendar_ids;
-      color_by = internalProps.color_by;
-      condensed_view = internalProps.condensed_view;
-      header_type = internalProps.header_type;
-      hide_current_time = internalProps.hide_current_time;
-      hide_all_day_events = internalProps.hide_all_day_events;
-      prevent_zoom = internalProps.prevent_zoom;
-      show_no_events_message = internalProps.show_no_events_message;
-      eagerly_fetch_events = internalProps.eagerly_fetch_events;
-      event_snap_interval = internalProps.event_snap_interval;
-      theme = internalProps.theme;
-      hide_ticks = internalProps.hide_ticks;
+      updateInternalProps(rebuiltProps);
     }
+  }
+
+  function updateInternalProps(updatedProps: AgendaProperties) {
+    internalProps = updatedProps;
+
+    allow_date_change = internalProps.allow_date_change;
+    allow_event_creation = internalProps.allow_event_creation;
+    auto_time_box = internalProps.auto_time_box;
+    calendar_ids = internalProps.calendar_ids;
+    color_by = internalProps.color_by;
+    condensed_view = internalProps.condensed_view;
+    header_type = internalProps.header_type;
+    hide_current_time = internalProps.hide_current_time;
+    hide_all_day_events = internalProps.hide_all_day_events;
+    prevent_zoom = internalProps.prevent_zoom;
+    show_no_events_message = internalProps.show_no_events_message;
+    eagerly_fetch_events = internalProps.eagerly_fetch_events;
+    event_snap_interval = internalProps.event_snap_interval;
+    theme = internalProps.theme;
+    hide_ticks = internalProps.hide_ticks;
   }
 
   let themeUrl: string;
@@ -1494,17 +1500,12 @@
                 class:expanded={expandedEventId === event.id}
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs.indexOf(event.calendar_id) + 1}
-                style="top: {event.relativeStartTime *
-                  100}%; height: 
+                style="top: {event.relativeStartTime * 100}%; height: 
               {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
-                  : `calc(${
-                      event.relativeRunTime * 100
-                    }%  - 4px)`};
-              left: {event.relativeOverlapOffset *
-                  100}%; 
-              width: calc({event.relativeOverlapWidth *
-                  100}% - 4px)"
+                  : `calc(${event.relativeRunTime * 100}%  - 4px)`};
+              left: {event.relativeOverlapOffset * 100}%; 
+              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
               >
                 <div
                   class="inner"

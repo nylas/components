@@ -84,11 +84,9 @@
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
 
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as EmailProperties;
+    updateInternalProps(
+      buildInternalProps($$props, manifest, defaultValueMap) as EmailProperties,
+    );
 
     // Fetch Account
     if (id && !you.id && !emailManuallyPassed) {
@@ -188,28 +186,32 @@
       defaultValueMap,
     ) as EmailProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
+      updateInternalProps(rebuiltProps);
+    }
+  }
 
-      theme = internalProps.theme;
-      show_received_timestamp = internalProps.show_received_timestamp;
-      show_number_of_messages = internalProps.show_number_of_messages;
-      show_star = internalProps.show_star;
-      unread = internalProps.unread;
-      click_action = internalProps.click_action;
+  function updateInternalProps(updatedProps: EmailProperties) {
+    internalProps = updatedProps;
 
-      // Assign thread_id to threadID stored in the manifest only when passing a thread_id
-      const internalPropThreadID =
-        !thread && !message_id && !message ? internalProps.thread_id : "";
-      thread_id = internalPropThreadID;
-      show_contact_avatar = internalProps.show_contact_avatar;
-      show_expanded_email_view_onload =
-        internalProps.show_expanded_email_view_onload;
-      clean_conversation = internalProps.clean_conversation;
+    theme = internalProps.theme;
+    show_received_timestamp = internalProps.show_received_timestamp;
+    show_number_of_messages = internalProps.show_number_of_messages;
+    show_star = internalProps.show_star;
+    unread = internalProps.unread;
+    click_action = internalProps.click_action;
 
-      if (activeThread && click_action === "mailbox") {
-        // enables bulk starring action in mailbox to immediately reflect visually
-        activeThread = activeThread;
-      }
+    // Assign thread_id to threadID stored in the manifest only when passing a thread_id
+    const internalPropThreadID =
+      !thread && !message_id && !message ? internalProps.thread_id : "";
+    thread_id = internalPropThreadID;
+    show_contact_avatar = internalProps.show_contact_avatar;
+    show_expanded_email_view_onload =
+      internalProps.show_expanded_email_view_onload;
+    clean_conversation = internalProps.clean_conversation;
+
+    if (activeThread && click_action === "mailbox") {
+      // enables bulk starring action in mailbox to immediately reflect visually
+      activeThread = activeThread;
     }
   }
 

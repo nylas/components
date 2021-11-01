@@ -77,11 +77,13 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as MailboxProperties;
-    internalProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as MailboxProperties;
+    updateInternalProps(
+      buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as MailboxProperties,
+    );
 
     // Fetch Account
     if (id && !you.id && !all_threads) {
@@ -156,16 +158,20 @@
       defaultValueMap,
     ) as MailboxProperties;
     if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      internalProps = rebuiltProps;
-
-      show_star = internalProps.show_star;
-      unread_status = internalProps.unread_status;
-      items_per_page = parseInt(internalProps.items_per_page);
-      header = internalProps.header;
-      query_string = internalProps.query_string;
-      keyword_to_search = internalProps.keyword_to_search;
-      actions_bar = internalProps.actions_bar;
+      updateInternalProps(rebuiltProps);
     }
+  }
+
+  function updateInternalProps(updatedProps: MailboxProperties) {
+    internalProps = updatedProps;
+
+    show_star = internalProps.show_star;
+    unread_status = internalProps.unread_status;
+    items_per_page = parseInt(internalProps.items_per_page);
+    header = internalProps.header;
+    query_string = internalProps.query_string;
+    keyword_to_search = internalProps.keyword_to_search;
+    actions_bar = internalProps.actions_bar;
   }
 
   // Reactive statement to continuously fetch all_threads
