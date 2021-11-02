@@ -8,7 +8,6 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
-  import { formatTimeSlot } from "@commons/methods/convertDateTimeZone";
 
   import type { Manifest } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";

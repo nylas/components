@@ -1,40 +1,43 @@
 import { DateTime } from "luxon";
 
 /**
- * Create a DateTime from a JavaScript Date object. `zone` is the zone to place the DateTime into
- * if zone or slot is invalid or no zone is set, return slot, otherwise return unix timestamp
  *
  * @param slot Date
- * @returns unixTimestamp Number
+ * @param zone string
+ * @returns Date | string
  */
 export function formatTimeSlot(slot: Date, zone: string): Date | string {
   try {
     const dateTimeSlot: DateTime = DateTime.fromJSDate(slot, { zone });
+
     if (
       !dateTimeSlot.isValid &&
       (dateTimeSlot.invalidReason === "unsupported zone" || !zone)
     ) {
       return slot;
     }
-    return dateTimeSlot.toLocaleString(DateTime.TIME_SIMPLE, {
-      locale: "en-US",
-    });
+    return dateTimeSlot.toLocaleString(DateTime.TIME_SIMPLE).replace(/\./g, "");
   } catch (err) {
     return slot;
   }
 }
 
-export function getShortTimeZone(slot: Date, zone: string): string | undefined {
+/**
+ *
+ * @param slot Date
+ * @param zone string
+ * @returns string | undefined
+ */
+export function setTimeZoneOffset(
+  slot: Date,
+  zone: string | undefined = undefined,
+): string | undefined {
   const dateTimeSlot: DateTime = DateTime.fromJSDate(slot, { zone });
-
   if (
     !dateTimeSlot.isValid &&
     (dateTimeSlot.invalidReason === "unsupported zone" || !zone)
   ) {
     return;
   }
-
-  return dateTimeSlot.zone.offsetName(dateTimeSlot.toMillis(), {
-    format: "short",
-  });
+  return dateTimeSlot.offsetNameShort;
 }
