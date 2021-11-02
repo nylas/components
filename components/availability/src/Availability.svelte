@@ -185,7 +185,7 @@
   //#region mount and prop initialization
   let internalProps: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
-  let loading: boolean = true;
+  let loading: boolean;
   let dayRef: HTMLElement[] = [];
   let slotRef: SlotRefs = {}; // mapping of dates to slot button DOM nodes
   let dayOrder: string[] = []; // maintains order of displayed dates

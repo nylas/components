@@ -10,7 +10,7 @@ const atlanticZone = "Atlantic/South_Georgia";
 describe("Format a time slot", () => {
   it("should convert a JS Date object to simple time string", () => {
     const timeSlot = formatTimeSlot(date, atlanticZone);
-    expect(timeSlot).toEqual("3:00 pm");
+    expect(timeSlot).toEqual("3:00 PM");
   });
 
   it("should return the same time slot when zone is an empty string", () => {

@@ -21,7 +21,6 @@ interface _Event {
   isNewEvent?: boolean;
   conferencing?: EventConferencing;
   recurrence: EventRecurrence;
-  timezone?: string;
 }
 
 export interface EventRecurrence {
