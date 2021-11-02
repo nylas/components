@@ -801,6 +801,9 @@
     return {
       body: {
         emails: emailAddresses,
+        free_busy: [],
+        duration_minutes: 15, // TODO
+        interval_minutes: 15, // TODO
         start_time:
           timeHour(
             new Date(new Date(startDay).setHours(start_hour)),
@@ -828,54 +831,82 @@
     loading = true;
     let freeBusyCalendars: any = [];
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
+    // let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
     if (Array.isArray(email_ids) && email_ids.length > 0) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
-          ],
-        );
-    }
-    if (booking_user_email && booking_user_token) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
+      // Note: we split our requests by email_id as calendars/availability doesn't support partial availability amongst a group
+      Promise.all(
+        email_ids.map(async (email_id) => {
+          console.log("fore", email_id);
+          let availableTimeslots = await $AvailabilityStore[
             JSON.stringify({
-              ...getAvailabilityQuery([booking_user_email], booking_user_token),
+              ...getAvailabilityQuery([email_id]),
               forceReload,
             })
-          ],
-        );
-    }
-
-    loading = false;
-    for (const user of consolidatedAvailabilityForGivenDay) {
-      if (!user.firstName && !user.lastName) {
-        const contact = await getContact(user.email);
-        if (!!contact) {
-          user.account = {
-            firstName: contact.given_name,
-            lastName: contact.surname,
+          ];
+          return {
+            email_id,
+            time_slots: availableTimeslots.time_slots,
           };
-        }
-      }
+          // console.log(
+          //   "aye timeslots done for",
+          //   email_id,
+          //   availableTimeslots,
+          //   consolidatedAvailabilityForGivenDay,
+          // );
+          // consolidatedAvailabilityForGivenDay =
+          //   consolidatedAvailabilityForGivenDay.concat(
+          //     await $AvailabilityStore[
+          //       JSON.stringify({
+          //         ...getAvailabilityQuery([email_id]),
+          //         forceReload,
+          //       })
+          //     ],
+          //   );
+        }),
+      ).then((consolidatedAvailabilityForGivenDay) => {
+        loading = false;
+        for (const user of consolidatedAvailabilityForGivenDay) {
+          console.log("userrrrrrrrr", user);
+          // TODO: re-implement contact fetch?
+          // if (!user.firstName && !user.lastName) {
+          //   const contact = await getContact(user.email);
+          //   if (!!contact) {
+          //     user.account = {
+          //       firstName: contact.given_name,
+          //       lastName: contact.surname,
+          //     };
+          //   }
+          // }
 
-      freeBusyCalendars.push({
-        emailAddress: user.email,
-        account: {
-          ...user.account,
-          emailAddress: user.email, // ¯\_(ツ)_/¯
-        },
-        availability: AvailabilityStatus.BUSY,
-        timeslots: user.time_slots.map((slot) => ({
-          start_time: new Date(slot.start_time * 1000),
-          end_time: new Date(slot.end_time * 1000),
-        })),
+          freeBusyCalendars.push({
+            emailAddress: user.email_id,
+            account: {
+              // ...user.account,
+              emailAddress: user.email_id, // ¯\_(ツ)_/¯
+            },
+            availability: AvailabilityStatus.FREE,
+            timeslots: user.time_slots.map((slot) => ({
+              start_time: new Date(slot.start * 1000),
+              end_time: new Date(slot.end * 1000),
+            })),
+          });
+        }
+        newCalendarTimeslotsForGivenEmails = freeBusyCalendars;
       });
     }
-    newCalendarTimeslotsForGivenEmails = freeBusyCalendars;
+    console.log("yo whats this about", booking_user_email, booking_user_token);
+    // if (booking_user_email && booking_user_token) {
+    //   consolidatedAvailabilityForGivenDay =
+    //     consolidatedAvailabilityForGivenDay.concat(
+    //       await $AvailabilityStore[
+    //         JSON.stringify({
+    //           ...getAvailabilityQuery([booking_user_email], booking_user_token),
+    //           forceReload,
+    //         })
+    //       ],
+    //     );
+    // }
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
@@ -938,6 +969,8 @@
     ...(calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
   ];
+
+  $: console.log({ allCalendars });
 
   //#region Attendee Overlay
   let attendeeOverlay: HTMLElement;

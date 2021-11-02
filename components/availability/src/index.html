@@ -69,7 +69,12 @@
           },
         ];
 
-        component.calendars = calendars;
+        // component.calendars = calendars;
+        component.email_ids = [
+          "phil.r@nylas.com",
+          "aaron.d@nylas.com",
+          "oliver.z@nylas.com",
+        ];
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
@@ -362,7 +367,8 @@
           min="1"
           max="7"
           step="1"
-          value="1" />
+          value="1"
+        />
         <span class="days"></span>
       </label>
 
@@ -375,7 +381,8 @@
           min="0"
           max="24"
           step="1"
-          value="0" />
+          value="0"
+        />
         <span class="start"></span>
       </label>
       <label>
@@ -387,7 +394,8 @@
           min="0"
           max="24"
           step="1"
-          value="24" />
+          value="24"
+        />
         <span class="end"></span>
       </label>
 
@@ -436,7 +444,8 @@
             min="0"
             max="100"
             step="1"
-            value="100" />
+            value="100"
+          />
         </label>
       </fieldset>
 
@@ -508,7 +517,8 @@
             checked
             type="radio"
             name="mandate-top-of-hour"
-            value="false" />
+            value="false"
+          />
           False
         </label>
       </fieldset>
@@ -530,7 +540,8 @@
             min="0"
             max="1"
             step="0.01"
-            value="0" />
+            value="0"
+          />
         </label>
       </fieldset>
 
@@ -576,7 +587,8 @@
             type="color"
             name="color-busy"
             data-type="busy_color"
-            value="#EE3248" />
+            value="#EE3248"
+          />
           Busy color
         </label>
         <label>
@@ -584,7 +596,8 @@
             type="color"
             name="color-partial"
             data-type="partial_color"
-            value="#FECA7C" />
+            value="#FECA7C"
+          />
           Partial color
         </label>
         <label>
@@ -592,7 +605,8 @@
             type="color"
             name="color-free"
             data-type="free_color"
-            value="#078351" />
+            value="#078351"
+          />
           Free color
         </label>
         <label>
@@ -600,7 +614,8 @@
             type="color"
             name="color-selected"
             data-type="selected_color"
-            value="#002db4" />
+            value="#002db4"
+          />
           Selected color
         </label>
         <label>
@@ -608,7 +623,8 @@
             type="color"
             name="color-closed"
             data-type="closed_color"
-            value="#EE3248" />
+            value="#EE3248"
+          />
           Closed color
         </label>
       </fieldset>
@@ -662,7 +678,8 @@
         <nylas-availability
           allow_booking="true"
           max_bookable_slots="8"
-          id="demo-availability">
+          id="phils-availability"
+        >
         </nylas-availability>
       </div>
     </main>

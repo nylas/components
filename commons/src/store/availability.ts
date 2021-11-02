@@ -1,5 +1,8 @@
 import { Writable, writable } from "svelte/store";
-import { fetchAvailability } from "../connections/availability";
+import {
+  fetchAvailability,
+  fetchAvailabilityNew,
+} from "../connections/availability";
 import type {
   AvailabilityQuery,
   AvailabilityResponse,
@@ -21,7 +24,8 @@ function initialize(): Writable<AvailabilityStore> {
     if (!accessor.component_id) return;
 
     if (!target[key] || accessor.forceReload) {
-      const fetchPromise = fetchAvailability(accessor);
+      // const fetchPromise = fetchAvailability(accessor);
+      const fetchPromise = fetchAvailabilityNew(accessor);
       store.update((store) => {
         store[key] = fetchPromise;
         return store;

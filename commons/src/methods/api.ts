@@ -59,6 +59,6 @@ export function getMiddlewareApiUrl(id: string): string {
       region = REGION_MAPPING[code];
     }
   }
-  const API_GATEWAY = `https://${region}${process.env.API_GATEWAY}`;
+  const API_GATEWAY = `http://${region}${process.env.API_GATEWAY}`;
   return API_GATEWAY;
 }
