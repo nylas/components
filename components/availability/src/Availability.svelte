@@ -3,7 +3,7 @@
 <script lang="ts">
   import {
     formatTimeSlot,
-    getShortTimeZone,
+    setTimeZoneOffset,
   } from "@commons/methods/convertDateTimeZone";
   import {
     ManifestStore,
@@ -185,7 +185,7 @@
   //#region mount and prop initialization
   let internalProps: Manifest = <any>{};
   let manifest: Partial<Manifest> = {};
-  let loading: boolean;
+  let loading: boolean = true;
   let dayRef: HTMLElement[] = [];
   let slotRef: SlotRefs = {}; // mapping of dates to slot button DOM nodes
   let dayOrder: string[] = []; // maintains order of displayed dates
@@ -552,10 +552,6 @@
   const slotSizes = [15, 30, 60, 180, 360]; // we only want to show ticks in intervals of 15 mins, 30 mins, 60 mins, 3 hours, or 6 hours.
 
   $: ticks = generateTicks(
-    clientHeight,
-    days[0].slots.map((slot: TimeSlot) => slot.start_time),
-  );
-  $: timezoneTicks = generateTicks(
     clientHeight,
     days[0].slots.map((slot: TimeSlot) => slot.start_time),
   );
@@ -1476,13 +1472,16 @@
   </header>
   {#if show_ticks && view_as === "schedule"}
     {#if timezone}
-      <ul class="ticks" bind:this={tickContainer}>
-        {#each ticks as tick}
-          <li class="tick">
-            {formatTimeSlot(tick, timezone)}
-          </li>
-        {/each}
-      </ul>
+      <div class="timezone-ticks">
+        <p class="timezone">{setTimeZoneOffset(ticks[0], timezone)}</p>
+        <ul class="ticks">
+          {#each ticks as tick}
+            <li class="tick">
+              {formatTimeSlot(tick, timezone)}
+            </li>
+          {/each}
+        </ul>
+      </div>
     {/if}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
@@ -1497,13 +1496,11 @@
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
     class:loading
+    class:timezone
     class:error={hasError}
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}
   >
-    {#if timezone}
-      <p class="timezone">{getShortTimeZone(ticks[0], timezone)}</p>
-    {/if}
     {#each days as day, dayIndex (day.timestamp.toISOString())}
       <div
         class="day"
