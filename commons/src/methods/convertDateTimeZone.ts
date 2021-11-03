@@ -8,7 +8,7 @@ import { DateTime } from "luxon";
  */
 export function formatTimeSlot(slot: Date, zone: string): Date | string {
   try {
-    const dateTimeSlot: DateTime = DateTime.fromJSDate(slot, { zone });
+    const dateTimeSlot = DateTime.fromJSDate(slot, { zone });
 
     if (
       !dateTimeSlot.isValid &&
@@ -31,13 +31,13 @@ export function formatTimeSlot(slot: Date, zone: string): Date | string {
 export function setTimeZoneOffset(
   slot: Date,
   zone: string | undefined = undefined,
-): string | undefined {
-  const dateTimeSlot: DateTime = DateTime.fromJSDate(slot, { zone });
+): string {
+  const dateTimeSlot = DateTime.fromJSDate(slot, { zone });
   if (
     !dateTimeSlot.isValid &&
     (dateTimeSlot.invalidReason === "unsupported zone" || !zone)
   ) {
-    return;
+    return "";
   }
   return dateTimeSlot.offsetNameShort;
 }
