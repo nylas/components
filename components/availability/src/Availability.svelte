@@ -427,7 +427,7 @@
                     end_time: timeMinute.offset(t.end_time, event_buffer),
                     available_calendars: t.available_calendars,
                   }))
-                : calendar.timeslots;
+                : calendar.timeslots; //  TODO: get buffer working with FREE timeslots
 
             const slotAvailability = overlap(timeslots, slot);
             // calendar.availability === AvailabilityStatus.BUSY
