@@ -428,7 +428,22 @@
                     available_calendars: t.available_calendars,
                   }))
                 : calendar.timeslots;
+
             const slotAvailability = overlap(timeslots, slot);
+            // calendar.availability === AvailabilityStatus.BUSY
+            //   ?
+            //   : // : there is even one minute between time and endTime that aint within a calendar.timeslot
+            //     // : there is calendar free timeslot such that
+            //     !calendar.timeslots.some(
+            //       (s) => time < s.end_time && s.start_time < endTime,
+            //     );
+            console.log(
+              "slotAvail",
+              calendar.account.emailAddress,
+              time,
+              slotAvailability,
+            );
+
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (
                 capacity &&
@@ -776,11 +791,13 @@
 
   // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
   function overlap(events: TimeSlot[], slot: TimeSlot) {
+    console.log("overlap on", slot, events);
     return events.reduce(
       (result, current) => {
         const overlap =
           slot.start_time < current.end_time &&
           current.start_time < slot.end_time;
+        // TODO: timeslot > api timeslot length bug source is probably here
 
         if (overlap) {
           result.overlap = true;
@@ -802,8 +819,8 @@
       body: {
         emails: emailAddresses,
         free_busy: [],
-        duration_minutes: 15, // TODO
-        interval_minutes: 15, // TODO
+        duration_minutes: +slot_size, // TODO
+        interval_minutes: +slot_size, // TODO
         start_time:
           timeHour(
             new Date(new Date(startDay).setHours(start_hour)),
