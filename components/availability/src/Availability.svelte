@@ -429,84 +429,25 @@
                   }))
                 : calendar.timeslots; //  TODO: get buffer working with FREE timeslots
 
-            let slotAvailability = { overlap: true };
+            let slotAvailability = 0;
             if (calendar.availability === AvailabilityStatus.BUSY) {
+              // For Busy calendars, a timeslot is considered available if its calendar has no overlapping events
               slotAvailability = overlap(timeslots, slot);
             } else if (calendar.availability === AvailabilityStatus.FREE) {
-              // 1. Make sure the free times are chrono ordered
-              // 2. Blob the free times together
-              // 3. See if one fully envelops the timeslot in question
-              // If so, this slot is available.
-              console.log("---------------");
-              console.log("okay, magic hour for", slot.start_time);
-              slotAvailability = calendar.timeslots.some((blob) => {
-                console.log(
-                  "evaluating on blob",
-                  blob.start_time,
-                  blob.end_time,
-                );
-                let isContained =
+              // For Free calendars, a timeslot is considered available if its calendar has a time that fully envelops it.
+              slotAvailability = calendar.timeslots.some(
+                (blob) =>
                   slot.start_time >= blob.start_time &&
-                  slot.end_time <= blob.end_time;
-                console.log({ isContained });
-                if (!(slot.start_time < blob.end_time)) {
-                  console.log(
-                    "starts too late:",
-                    slot.start_time,
-                    "is later than",
-                    blob.end_time,
-                  );
-                } else {
-                  console.log(
-                    "starts in time:",
-                    slot.start_time,
-                    "is earlier than",
-                    blob.end_time,
-                  );
-                }
-                if (!(blob.start_time < slot.end_time)) {
-                  console.log(
-                    "ends too early: ",
-                    slot.end_time,
-                    "is earlier than",
-                    blob.start_time,
-                  );
-                } else {
-                  console.log(
-                    "ends in time: ",
-                    slot.end_time,
-                    "is after",
-                    blob.start_time,
-                  );
-                }
-                return isContained;
-              })
-                ? { overlap: true }
-                : { overlap: false };
+                  slot.end_time <= blob.end_time,
+              )
+                ? 1
+                : 0; // TODO: consider changing slotAvailability to concurrentEvents or something.
               // slot availability is when a given timeslot has all of its minutes represented in calendar.free timeslots
             }
-            // calendar.availability === AvailabilityStatus.BUSY
-            //   ?
-            //   : // : there is even one minute between time and endTime that aint within a calendar.timeslot
-            //     // : there is calendar free timeslot such that
-            //     !calendar.timeslots.some(
-            //       (s) => time < s.end_time && s.start_time < endTime,
-            //     );
-            console.log(
-              "slotAvail",
-              calendar.account.emailAddress,
-              time,
-              slotAvailability.overlap,
-            );
-
             if (calendar.availability === AvailabilityStatus.BUSY) {
-              if (
-                capacity &&
-                capacity >= 1 &&
-                slotAvailability.concurrentEvents < capacity
-              ) {
+              if (capacity && capacity >= 1 && slotAvailability < capacity) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
-              } else if (!slotAvailability.overlap) {
+              } else if (!slotAvailability) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -514,7 +455,7 @@
               !calendar.availability
             ) {
               // if a calendar is passed in without availability, assume the timeslots are available.
-              if (slotAvailability.overlap) {
+              if (slotAvailability) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             }
@@ -847,22 +788,17 @@
   // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
   function overlap(events: TimeSlot[], slot: TimeSlot) {
     // console.log("overlap on", slot, events);
-    return events.reduce(
-      (result, current) => {
-        const overlap =
-          slot.start_time < current.end_time &&
-          current.start_time < slot.end_time;
-        // TODO: timeslot > api timeslot length bug source is probably here
+    return events.reduce((result, current) => {
+      const overlap =
+        slot.start_time < current.end_time &&
+        current.start_time < slot.end_time;
 
-        if (overlap) {
-          result.overlap = true;
-          // store the amount of overlap
-          result.concurrentEvents++;
-        }
-        return result;
-      },
-      { overlap: false, concurrentEvents: 0 },
-    );
+      if (overlap) {
+        // store the amount of overlap
+        result++;
+      }
+      return result;
+    }, 0);
   }
   // #endregion timeSlot selection
 
@@ -874,10 +810,8 @@
       body: {
         emails: emailAddresses,
         free_busy: [],
-        // duration_minutes: +slot_size, // TODO
-        // interval_minutes: +slot_size, // TODO
-        duration_minutes: 15, // TODO
-        interval_minutes: 15, // TODO
+        duration_minutes: 5, // minumum allowed duration/interval
+        interval_minutes: 5,
         start_time:
           timeHour(
             new Date(new Date(startDay).setHours(start_hour)),
@@ -901,32 +835,17 @@
     }
   })();
 
-  function blobTimeslots(slots: TimeSlot[] = []) {
-    // If 2 slots bump up to each other, make em the same thing
-
-    console.log("slots", slots);
-
-    let slotBlobs = slots.reduce((blobs, slot) => {
-      const prevSlot = blobs[blobs.length - 1];
-      console.log(
-        "checking on",
-        slot,
-        slot.start,
-        prevSlot ? prevSlot.end : "no prev",
-      );
-      if (
-        prevSlot &&
-        prevSlot.end === slot.start // TODO: check if I need to do a stringified date compare
-      ) {
-        console.log("yes case");
-        prevSlot.end = slot.end;
+  // If 2 slots bump up to each other consider them a single group of time
+  function groupConsecutiveTimeslots(slots: TimeSlot[] = []) {
+    return slots.reduce((groups, slot) => {
+      const prevSlot: TimeSlot = groups[groups.length - 1];
+      if (prevSlot && prevSlot.end_time === slot.start_time) {
+        prevSlot.end_time = slot.end_time;
       } else {
-        console.log("no case");
-        blobs.push({ ...slot });
+        groups.push({ ...slot });
       }
-      return blobs;
+      return groups;
     }, []);
-    return slotBlobs;
   }
 
   async function getAvailability(forceReload = false) {
@@ -948,19 +867,12 @@
           ];
 
           // Blob consecutive timeslots together for easier overlap logic elsewhere
-          let blobbed = blobTimeslots(availableTimeslots.time_slots);
-          console.log(
-            "blobbed",
-            blobbed.map((x) => {
-              return {
-                start: new Date(x.start * 1000),
-                end: new Date(x.end * 1000),
-              };
-            }),
+          let groupedSlots = groupConsecutiveTimeslots(
+            availableTimeslots.time_slots,
           );
           return {
             email_id,
-            time_slots: blobbed,
+            time_slots: groupedSlots,
           };
           // console.log(
           //   "aye timeslots done for",
@@ -1001,8 +913,8 @@
             },
             availability: AvailabilityStatus.FREE,
             timeslots: user.time_slots.map((slot) => ({
-              start_time: new Date(slot.start * 1000),
-              end_time: new Date(slot.end * 1000),
+              start_time: new Date(slot.start_time * 1000),
+              end_time: new Date(slot.end_time * 1000),
             })),
           });
         }
@@ -1083,8 +995,6 @@
     ...(calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
   ];
-
-  $: console.log({ allCalendars });
 
   //#region Attendee Overlay
   let attendeeOverlay: HTMLElement;

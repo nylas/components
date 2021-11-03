@@ -89,13 +89,21 @@ export interface AvailabilityQuery extends CommonQuery {
   forceReload?: boolean;
 }
 
-export interface AvailabilityResponse {
+export interface FreeBusyResponse {
   object: "free_busy";
   time_slots: {
     start_time: number;
     end_time: number;
   }[];
   email: string;
+}
+
+export interface AvailabilityResponse {
+  object: "availability";
+  time_slots: {
+    start: number;
+    end: number;
+  }[];
 }
 
 export interface EventQuery extends CommonQuery {
