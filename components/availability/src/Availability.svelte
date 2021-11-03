@@ -92,8 +92,8 @@
   export let slot_size: number; // in minutes
   export let start_date: Date;
   export let start_hour: number;
-  export let view_as: "schedule" | "list";
   export let timezone: string;
+  export let view_as: "schedule" | "list";
 
   const defaultValueMap = {
     allow_booking: false,
@@ -126,8 +126,8 @@
     slot_size: 15,
     start_date: new Date(),
     start_hour: 0,
-    view_as: "schedule",
     timezone: "",
+    view_as: "schedule",
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
