@@ -143,6 +143,12 @@
       }
     }
   }
+
+  .icon {
+    fill: var(--composer-icons-color, #666774) !important;
+    width: 12px;
+    height: 12px;
+  }
 </style>
 
 <!-- Toolbar -->
@@ -155,11 +161,7 @@
           class={item.state && item.state() ? "active" : ""}
         >
           {#if item.icon}
-            <svelte:component
-              this={item.icon}
-              class="icon"
-              style="fill: var(--composer-icons-color, #666774) !important; width: 12px; height: 12px;"
-            />
+            <svelte:component this={item.icon} class="icon" />
           {:else}{item.title.charAt(0)}{/if}
         </button>
       {/each}

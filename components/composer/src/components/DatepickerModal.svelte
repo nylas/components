@@ -80,6 +80,12 @@
     right: calc(var(--composer-outer-padding, 15px) * 0.85);
     left: calc(var(--composer-outer-padding, 15px) * 0.85);
   }
+
+  .CloseIcon {
+    fill: var(--composer-icons-color, #666774);
+    width: 10px;
+    height: 10px;
+  }
 </style>
 
 <!-- Modal content -->
@@ -87,9 +93,7 @@
 <div class="datepicker-modal">
   <div class="modal-content">
     <span class="close" on:click={close}>
-      <CloseIcon
-        style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px;"
-      />
+      <CloseIcon class="CloseIcon" />
     </span>
     <nylas-datepicker {change} timepicker={true} min={new Date()} />
     <button class="save-btn" on:click={submit}> Schedule send </button>
