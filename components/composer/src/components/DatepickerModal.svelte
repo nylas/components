@@ -31,13 +31,17 @@
   /* Modal Content/Box */
   .modal-content {
     display: block; /* Hidden by default */
-    box-shadow: var(--shadow);
-    border-radius: var(--border-radius);
+    box-shadow: var(
+      --composer-shadow,
+      0 1px 10px rgba(0, 0, 0, 0.11),
+      0 3px 36px rgba(0, 0, 0, 0.12)
+    );
+    border-radius: var(--composer-border-radius, 6px);
   }
 
   /* The Close Button */
   .close {
-    color: var(--text-light);
+    color: var(composer-text-light-color, #6e6e7a);
     float: right;
     padding-right: 10px;
     font-size: 28px;
@@ -46,34 +50,35 @@
 
   .close:hover,
   .close:focus {
-    color: var(--text);
+    color: var(--composer-text-color, black);
     text-decoration: none;
     cursor: pointer;
   }
 
   .save-btn {
     border: 0;
-    background: var(--primary);
+    background: var(--composer-primary-color, #5c77ff);
     width: 100%;
     color: white;
     cursor: pointer;
     padding: 10px 25px;
     font-weight: bold;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-    font-family: var(--font);
+    border-radius: 0 0 var(--composer-border-radius, 6px)
+      var(--composer-border-radius, 6px);
+    font-family: var(--composer-font, sans-serif);
     &:disabled {
       opacity: 0.5;
     }
     &:hover {
-      background: var(--primary-dark);
+      background: var(--composer-primary-dark-color, #294dff);
     }
   }
 
   .datepicker-modal {
     position: absolute;
-    bottom: calc(var(--outer-padding) * 0.85);
-    right: calc(var(--outer-padding) * 0.85);
-    left: calc(var(--outer-padding) * 0.85);
+    bottom: calc(var(--composer-outer-padding, 15px) * 0.85);
+    right: calc(var(--composer-outer-padding, 15px) * 0.85);
+    left: calc(var(--composer-outer-padding, 15px) * 0.85);
   }
 </style>
 
@@ -82,7 +87,9 @@
 <div class="datepicker-modal">
   <div class="modal-content">
     <span class="close" on:click={close}>
-      <CloseIcon style="fill: var(--icons); width: 10px; height: 10px;" />
+      <CloseIcon
+        style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px;"
+      />
     </span>
     <nylas-datepicker {change} timepicker={true} min={new Date()} />
     <button class="save-btn" on:click={submit}> Schedule send </button>
