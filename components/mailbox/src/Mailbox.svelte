@@ -481,7 +481,7 @@
     grid-auto-rows: max-content;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
-    $outline-style: 1px solid var(--mailbox-outline-color, var(--grey-lighter));
+    $outline-style: 1px solid var(--grey-lighter);
     @mixin barStyle {
       outline: $outline-style;
       display: flex;
@@ -541,7 +541,7 @@
         }
 
         &.starred:before {
-          color: var(--mailbox-star-color, #ffc107);
+          color: #ffc107;
         }
       }
     }
@@ -559,8 +559,7 @@
 
       &:hover {
         $hover-outline-width: 1px;
-        outline: $hover-outline-width solid
-          var(--mailbox-outline-color, var(--grey-warm));
+        outline: $hover-outline-width solid var(--grey-warm);
         cursor: pointer;
       }
 
@@ -572,17 +571,17 @@
       // #region define background styles
       --nylas-email-background: transparent;
       &:not(.unread) {
-        background: var(--mailbox-read-email-color, var(--grey-lightest));
+        background: var(--grey-lightest);
       }
       &.unread {
-        background: var(--mailbox-unread-email-color, white);
+        background: white;
       }
       // #endregion define background styles
 
       // #region define checked styles
       &.checked {
-        border-left: 4px solid var(--mailbox-checked-border-color, var(--blue));
-        background: var(--mailbox-checked-color, var(--blue-lighter));
+        border-left: 4px solid var(--blue);
+        background: var(--blue-lighter);
 
         .checkbox-container.thread-checkbox {
           padding-left: 13px;
@@ -633,7 +632,7 @@
       div.starred {
         button {
           &:hover:before {
-            color: var(--mailbox-star-color, #ffc107);
+            color: #ffc107;
           }
         }
       }
