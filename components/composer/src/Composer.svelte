@@ -573,6 +573,21 @@
       padding: 5px;
     }
   }
+
+  [class$="Icon"] {
+    fill: var(--composer-icons-color, #666774);
+    width: 10px;
+    height: 10px;
+  }
+  .ExpandIcon {
+    transform: translateY(1px);
+  }
+  .MinimizeIcon {
+    transform: translateY(4px);
+  }
+  .AttachmentIcon {
+    margin-right: 15px;
+  }
 </style>
 
 <nylas-error {id} />
@@ -601,23 +616,17 @@
           {#if show_minimize_button}
             {#if minimized}
               <button class="composer-btn" on:click={handleMinimize}>
-                <ExpandIcon
-                  style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px; transform: translateY(1px)"
-                />
+                <ExpandIcon class="ExpandIcon" />
               </button>
             {:else}
               <button class="composer-btn" on:click={handleMinimize}>
-                <MinimizeIcon
-                  style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px; transform: translateY(4px)"
-                />
+                <MinimizeIcon class="MinimizeIcon" />
               </button>
             {/if}
           {/if}
           {#if show_close_button}
             <button class="composer-btn" on:click={close}>
-              <CloseIcon
-                style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px;"
-              />
+              <CloseIcon class="CloseIcon" />
             </button>
           {/if}
         </div>
@@ -677,9 +686,7 @@
               }}
               aria-label="remove carbon copy field"
             >
-              <CloseIcon
-                style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px;"
-              />
+              <CloseIcon class="CloseIcon" />
             </button>
           </div>
         {/if}
@@ -700,9 +707,7 @@
               }}
               aria-label="remove blind carbon copy field"
             >
-              <CloseIcon
-                style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px;"
-              />
+              <CloseIcon class="CloseIcon" />
             </button>
           </div>
         {/if}
@@ -748,9 +753,7 @@
             style="margin-right: 10px; width: 32px; height: 32px;"
             on:click={() => fileSelector.click()}
           >
-            <AttachmentIcon
-              style="fill: var(--composer-icons-color, #666774); width: 16px; height: 16px; margin-right: 15px"
-            />
+            <AttachmentIcon class="AttachmentIcon" />
           </button>
         {/if}
         <div class="btn-group">

@@ -78,6 +78,18 @@
       transform: rotate(360deg);
     }
   }
+
+  .LoadingIcon {
+    fill: var(--composer-icons-color, #666774);
+    width: 15px;
+    height: 15px;
+    animation: rotate 0.5s infinite linear;
+  }
+  .CloseIcon {
+    fill: var(--composer-icons-color, #666774);
+    width: 10px;
+    height: 10px;
+  }
 </style>
 
 {#if attachment}
@@ -89,16 +101,12 @@
       </div>
       <div class="file-info__right">
         {#if attachment.loading}
-          <LoadingIcon
-            style="fill: var(--composer-icons-color, #666774); width: 15px; height: 15px; animation: rotate 0.5s infinite linear;"
-          />
+          <LoadingIcon class="LoadingIcon" />
         {/if}
         {#if attachment.error}<span class="file-info__error">Error</span>{/if}
         {#if !attachment.loading}
           <button class="close-btn" on:click={() => remove(attachment)}>
-            <CloseIcon
-              style="fill: var(--composer-icons-color, #666774); width: 10px; height: 10px;"
-            />
+            <CloseIcon class="CloseIcon" />
           </button>
         {/if}
       </div>
