@@ -76,8 +76,6 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-svelte3": "^2.7.3",
-    "esbuild": "0.12.15",
-    "rollup-plugin-esbuild": "4.5.0",
     "fetch-mock": "^9.11.0",
     "fs-extra": "10.0.0",
     "husky": "5.0.9",

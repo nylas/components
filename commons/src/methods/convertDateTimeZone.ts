@@ -1,24 +1,25 @@
 import { DateTime } from "luxon";
+import { getTimeString } from "@commons/methods/datetime";
 
 /**
  *
  * @param slot Date
  * @param zone string
- * @returns Date | string
+ * @returns string
  */
-export function formatTimeSlot(slot: Date, zone: string): Date | string {
+export function formatTimeSlot(slot: Date, zone: string): string {
+  const unformattedTimeSlot = getTimeString(slot);
   try {
     const dateTimeSlot = DateTime.fromJSDate(slot, { zone });
-
     if (
       !dateTimeSlot.isValid &&
       (dateTimeSlot.invalidReason === "unsupported zone" || !zone)
     ) {
-      return slot;
+      return unformattedTimeSlot;
     }
     return dateTimeSlot.toLocaleString(DateTime.TIME_SIMPLE).replace(/\./g, "");
   } catch (err) {
-    return slot;
+    return unformattedTimeSlot;
   }
 }
 
@@ -26,7 +27,7 @@ export function formatTimeSlot(slot: Date, zone: string): Date | string {
  *
  * @param slot Date
  * @param zone string
- * @returns string | undefined
+ * @returns string
  */
 export function setTimeZoneOffset(
   slot: Date,
