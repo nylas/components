@@ -229,7 +229,7 @@ describe("Email component", () => {
         cy.get(component).find(".message-body").should("exist");
         cy.get("nylas-message-body").then((nylasMessageBody) => {
           const messageBody = nylasMessageBody[0];
-          cy.get(messageBody).find("div").should("contain", "Bye!");
+          cy.get(messageBody).find("div").should("contain", "Allo bonjour");
         });
         cy.get(component).find(".name").should("exist");
         cy.get(component).find(".name").should("contain", "Test User");
