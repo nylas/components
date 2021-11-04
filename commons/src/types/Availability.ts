@@ -39,6 +39,7 @@ export interface Manifest extends NylasManifest {
   start_date: Date;
   start_hour: number;
   view_as: "schedule" | "list";
+  timezone: string;
 }
 
 export interface AvailabilityRule {
@@ -76,6 +77,7 @@ export interface SelectableSlot extends TimeSlot {
   availability: AvailabilityStatus;
   selectionPending?: boolean;
   hovering?: boolean;
+  timezone?: string;
 }
 
 export interface AvailabilityQuery extends CommonQuery {

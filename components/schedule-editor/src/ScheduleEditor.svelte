@@ -1,6 +1,7 @@
 <svelte:options tag="nylas-schedule-editor" />
 
 <script lang="ts">
+  import timezones from "timezones-list";
   import { ManifestStore } from "../../../commons/src";
   import { onMount, tick } from "svelte";
 
@@ -59,6 +60,7 @@
   export let start_date: Date;
   export let start_hour: number;
   export let view_as: "schedule" | "list";
+  export let timezone: string;
 
   const defaultValueMap = {
     allow_booking: false,
@@ -90,6 +92,7 @@
     start_date: new Date(),
     start_hour: 9,
     view_as: "schedule",
+    timezone: "",
   };
 
   //#region mount and prop initialization
@@ -153,6 +156,7 @@
     start_date = internalProps.start_date;
     start_hour = internalProps.start_hour;
     view_as = internalProps.view_as;
+    timezone = internalProps.timezone;
   }
 
   // Manifest properties requiring further manipulation:
@@ -420,6 +424,14 @@
           <label>
             <strong>Start Date</strong>
             <input type="date" bind:value={startDate} />
+          </label>
+          <label>
+            <strong>Time Zone</strong>
+            <select bind:value={internalProps.timezone}>
+              {#each timezones.default as timezone}
+                <option value={timezone.tzCode}>{timezone.name}</option>
+              {/each}
+            </select>
           </label>
           <div>
             <label>

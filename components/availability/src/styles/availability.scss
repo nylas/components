@@ -17,6 +17,9 @@ main {
   &.ticked {
     grid-template-columns: 70px 1fr;
   }
+  &.timezone {
+    grid-template-columns: 70px 70px 1fr;
+  }
 
   &.hide-header {
     $headerHeight: 0px;
@@ -90,6 +93,15 @@ main {
       }
     }
   }
+  .timezone-ticks {
+    position: relative;
+    .timezone {
+      font-size: 0.8rem;
+      left: 25%;
+      position: absolute;
+      top: 5px;
+    }
+  }
 
   .days {
     display: grid;
@@ -107,6 +119,12 @@ main {
         var(--blue),
         var(--blue-lighter)
       );
+    }
+    &.timezone.loading {
+      &::before,
+      &::after {
+        left: 180px;
+      }
     }
     &.loading.error {
       @include progress-bar(top, 118px, left, 95px, var(--red), var(--red));
@@ -139,9 +157,8 @@ main {
     height: calc(100% - #{$headerHeight});
     list-style-type: none;
     margin: 0;
-    padding: 0;
+    padding: $headerHeight 0 0 0;
     overflow: hidden;
-    padding-top: $headerHeight;
     font-size: 0.8rem;
     font-family: sans-serif;
 

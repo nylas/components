@@ -2,6 +2,10 @@
 
 <script lang="ts">
   import {
+    formatTimeSlot,
+    setTimeZoneOffset,
+  } from "@commons/methods/convertDateTimeZone";
+  import {
     ManifestStore,
     AvailabilityStore,
     CalendarStore,
@@ -88,6 +92,7 @@
   export let slot_size: number; // in minutes
   export let start_date: Date;
   export let start_hour: number;
+  export let timezone: string;
   export let view_as: "schedule" | "list";
 
   const defaultValueMap = {
@@ -121,6 +126,7 @@
     slot_size: 15,
     start_date: new Date(),
     start_hour: 0,
+    timezone: "",
     view_as: "schedule",
   };
 
@@ -301,6 +307,7 @@
     start_date = internalProps.start_date;
     start_hour = internalProps.start_hour;
     view_as = internalProps.view_as;
+    timezone = internalProps.timezone;
   }
 
   async function getContact(email: string) {
@@ -904,7 +911,6 @@
             (!daySlot.selectionPending || isUnavailable(daySlot))
           );
         })?.start_time || day.slots[day.slots.length - 1].end_time;
-
       let startTime = getCondensedTimeString(slot.start_time).replace(" ", "");
       let endTime = getCondensedTimeString(pendingEndTime).replace(" ", "");
       return `${startTime} - ${endTime}`;
@@ -1433,6 +1439,7 @@
   bind:this={main}
   bind:clientHeight
   class:ticked={show_ticks && view_as === "schedule"}
+  class:timezone
   class:allow_booking
   class:hide-header={!show_header}
   on:mouseleave={() => endDrag(null)}
@@ -1464,6 +1471,18 @@
     </div>
   </header>
   {#if show_ticks && view_as === "schedule"}
+    {#if timezone}
+      <div class="timezone-ticks">
+        <p class="timezone">{setTimeZoneOffset(ticks[0], timezone)}</p>
+        <ul class="ticks">
+          {#each ticks as tick}
+            <li class="tick">
+              {formatTimeSlot(tick, timezone)}
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
     <ul class="ticks" bind:this={tickContainer}>
       {#each ticks as tick}
         <li class="tick">
@@ -1477,6 +1496,7 @@
     class:schedule={view_as === "schedule"}
     class:list={view_as === "list"}
     class:loading
+    class:timezone
     class:error={hasError}
     bind:this={dayContainer}
     bind:clientWidth={dayContainerWidth}

@@ -46,7 +46,7 @@ export function getTimeString(date: Date): string {
   if (timeString === "12:00 p.m.") {
     return "Noon";
   }
-  return timeString.replaceAll(/\./g, "");
+  return timeString.replace(/\./g, "");
 }
 
 export function getMonthString(date: Date, withYear = false): string {
