@@ -8,13 +8,14 @@ import type {
   AvailabilityQuery,
   AvailabilityResponse,
   FreeBusyResponse,
+  TimeSlot,
 } from "@commons/types/Availability";
 import type { MiddlewareResponse } from "@commons/types/Nylas";
 
-export const fetchAvailability = async (
+// TODO: deprecate if we find /calendars/availability to be fully sufficient
+export const fetchFreeBusy = async (
   query: AvailabilityQuery,
 ): Promise<FreeBusyResponse[]> => {
-  console.log("fetchin avail for", query);
   return fetch(
     `${getMiddlewareApiUrl(query.component_id)}/calendars/free-busy`,
     getFetchConfig({
@@ -33,11 +34,10 @@ export const fetchAvailability = async (
     .catch((error) => handleError(query.component_id, error));
 };
 
-export const fetchAvailabilityNew = async (
+export const fetchAvailability = async (
   // TODO: rename
   query: AvailabilityQuery,
-): Promise<AvailabilityResponse[]> => {
-  console.log("fetchin avail for", query);
+): Promise<AvailabilityResponse> => {
   return fetch(
     `${getMiddlewareApiUrl(query.component_id)}/calendars/availability`,
     getFetchConfig({
@@ -49,9 +49,8 @@ export const fetchAvailabilityNew = async (
   )
     .then(async (apiResponse) => {
       const json = await handleResponse<
-        MiddlewareResponse<AvailabilityResponse[]>
+        MiddlewareResponse<AvailabilityResponse>
       >(apiResponse);
-      console.log("responsy", json.response);
       // Normalize response .start and .end to .start_time and .end_time to make up for discrependcy in the Nylas API: https://developer.nylas.com/docs/connectivity/calendar/calendar-availability/#availability-response
       // API story: https://app.shortcut.com/nylas/story/73196/
       json.response.time_slots = json.response.time_slots.map((s) => {
