@@ -116,6 +116,7 @@
   let query: ConversationQuery;
 
   $: query = {
+    access_token,
     component_id: id,
     thread_id: thread_id,
   };
@@ -240,6 +241,7 @@
   //#region Clean Conversation
   function cleanConversation() {
     fetchCleanConversations({
+      access_token,
       component_id: id,
       message_id: conversationMessages
         .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)

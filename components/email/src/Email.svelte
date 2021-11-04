@@ -221,8 +221,9 @@
   }
   let query: ConversationQuery;
   $: query = {
+    access_token,
     component_id: id,
-    thread_id: thread_id,
+    thread_id,
   };
 
   let queryKey: string;
@@ -282,6 +283,7 @@
   function cleanConversation() {
     if (activeThread) {
       fetchCleanConversations({
+        access_token,
         component_id: id,
         message_id: activeThread.messages
           .slice(-CONVERSATION_ENDPOINT_MAX_MESSAGES)
@@ -516,7 +518,7 @@
 
   // For cases when someone wants to show just a single email message, rather than the full thread.
   function fetchOneMessage() {
-    fetchEmail({ component_id: id, message_id: message_id }).then((json) => {
+    fetchEmail({ access_token, component_id: id, message_id }).then((json) => {
       message = json;
       messageLoadStatus[0] = "loaded";
     });

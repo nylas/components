@@ -5,6 +5,7 @@ import type {
   EmailUnreadStatus,
   MailboxActions,
 } from "@commons/enums/Nylas";
+
 export interface CommonQuery {
   component_id: string;
   access_token?: string;
@@ -18,10 +19,7 @@ export interface MailboxQuery extends CommonQuery {
   query: ThreadsQuery;
 }
 
-export interface AccountQuery {
-  component_id: string;
-  access_token?: string;
-}
+export interface AccountQuery extends CommonQuery {}
 
 export interface ThreadsQuery {
   limit?: number;
@@ -44,9 +42,7 @@ export interface ThreadsQuery {
   not_in?: string;
 }
 
-export interface SearchResultThreadsQuery {
-  component_id: string;
-  access_token?: string;
+export interface SearchResultThreadsQuery extends CommonQuery {
   keyword_to_search: string;
 }
 
@@ -55,13 +51,11 @@ export interface MessagesQuery extends CommonQuery {
   received_after?: number;
 }
 
-export interface CleanConversationQuery {
-  component_id: string;
+export interface CleanConversationQuery extends CommonQuery {
   message_id: string[]; // Note: singular name but expects array
 }
 
-export interface CleanConversationFeedbackQuery {
-  component_id: string;
+export interface CleanConversationFeedbackQuery extends CommonQuery {
   message_id: string;
 }
 
@@ -80,8 +74,7 @@ export interface StoredMessage {
   data: Message;
 }
 
-export interface SingularEmail {
-  component_id: string;
+export interface SingularEmail extends CommonQuery {
   message_id: string;
 }
 

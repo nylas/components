@@ -243,6 +243,7 @@
   async function updateThreadStatus(updatedThread: any) {
     if (id && updatedThread && updatedThread.id) {
       const threadQuery = {
+        access_token,
         component_id: id,
         thread_id: updatedThread.id,
       };
