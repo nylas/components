@@ -81,7 +81,7 @@ describe("Restricting Dates", () => {
   });
 });
 
-describe.only("Custom data", () => {
+describe("Custom data", () => {
   it("Toggles between custom and Nylas data", () => {
     cy.visit("/components/agenda/src/index.html");
     cy.get("nylas-agenda").should("exist");
