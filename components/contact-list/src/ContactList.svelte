@@ -79,18 +79,6 @@
         defaultValueMap,
       ) as ContactListProperties,
     );
-
-    if (contacts) {
-      hydratedContacts = contacts as HydratedContact[];
-      status = "loaded";
-    } else {
-      if ($ContactStore[queryKey]) {
-        hydratedContacts = $ContactStore[queryKey];
-        status = "loaded";
-      } else if (query.component_id) {
-        setContacts();
-      }
-    }
   });
 
   $: dispatchEvent("manifestLoaded", manifest);
@@ -125,10 +113,9 @@
   }
 
   // sanitization to conform with Nylas API maximums
-  $: {
-    Math.max(Math.min(contacts_to_load, 1000), 1);
-  }
+  $: Math.max(Math.min(contacts_to_load, 1000), 1);
 
+  // #region setting contacts
   let query: ContactsQuery;
   $: query = {
     component_id: id,
@@ -137,6 +124,25 @@
 
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
+
+  $: setHydratedContacts(), contacts, queryKey;
+  async function setHydratedContacts() {
+    status = "loading";
+    if (contacts && Array.isArray(contacts)) {
+      hydratedContacts = contacts as HydratedContact[];
+      status = "loaded";
+    } else {
+      if ($ContactStore[queryKey]) {
+        hydratedContacts = $ContactStore[queryKey];
+        status = "loaded";
+      } else if (query.component_id) {
+        setContacts();
+      } else {
+        hydratedContacts = [];
+        status = "loaded";
+      }
+    }
+  }
 
   /*
     Fetches more contacts, changes status from "loading" to show "loading more contacts" overlay.
@@ -154,6 +160,7 @@
       },
     );
   }
+  // #endregion setting contacts
 
   /*
     Detects if the user has scrolled to the bottom of the contact list. Fetches 100 more contacts if user is within 10px of bottom of contact list element
