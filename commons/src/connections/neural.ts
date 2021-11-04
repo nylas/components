@@ -18,6 +18,7 @@ export const fetchCleanConversations = (
     `${getMiddlewareApiUrl(query.component_id)}/neural/conversation`,
     getFetchConfig({
       method: "PUT",
+      access_token: query.access_token,
       component_id: query.component_id,
       body: { message_id: query.message_id },
     }),
@@ -38,6 +39,7 @@ export const sendCleanConversationFeedback = (
     `${getMiddlewareApiUrl(query.component_id)}/neural/conversation/feedback`,
     getFetchConfig({
       method: "POST",
+      access_token: query.access_token,
       component_id: query.component_id,
       body: { message_id: query.message_id },
     }),

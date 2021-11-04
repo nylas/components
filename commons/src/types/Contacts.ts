@@ -1,4 +1,4 @@
-import type { WebPage } from "@commons/types/Nylas";
+import type { CommonQuery, WebPage } from "@commons/types/Nylas";
 
 export interface Contact {
   account_id: string;
@@ -56,15 +56,10 @@ export interface ContactPhoneNumber {
   type: string;
 }
 
-export interface ContactsQuery {
-  component_id: string;
-  access_token?: string;
-}
+export interface ContactsQuery extends CommonQuery {}
 
-export interface ContactSearchQuery {
-  component_id: string;
+export interface ContactSearchQuery extends CommonQuery {
   query: string;
-  access_token?: string;
 }
 
 export interface StoredContacts {

@@ -2,7 +2,10 @@ import type {
   SelectionStatus,
   AvailabilityStatus,
 } from "@commons/enums/Availability";
-import type { Manifest as NylasManifest } from "@commons/types/Nylas";
+import type {
+  CommonQuery,
+  Manifest as NylasManifest,
+} from "@commons/types/Nylas";
 export interface Manifest extends NylasManifest {
   allow_booking: boolean;
   allow_date_change: boolean;
@@ -75,14 +78,12 @@ export interface SelectableSlot extends TimeSlot {
   hovering?: boolean;
 }
 
-export interface AvailabilityQuery {
+export interface AvailabilityQuery extends CommonQuery {
   body: {
     emails: string[];
     start_time: number;
     end_time: number;
   };
-  component_id: string;
-  access_token?: string;
   forceReload?: boolean;
 }
 
@@ -95,12 +96,10 @@ export interface AvailabilityResponse {
   email: string;
 }
 
-export interface EventQuery {
+export interface EventQuery extends CommonQuery {
   participants?: EventParticipant[];
   title?: string;
   location?: string;
-  access_token?: string;
-  component_id?: string;
 }
 
 export interface EventParticipant {
