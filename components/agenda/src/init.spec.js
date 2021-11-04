@@ -80,3 +80,64 @@ describe("Restricting Dates", () => {
       .should("have.attr", "disabled");
   });
 });
+
+describe.only("Custom data", () => {
+  it("Toggles between custom and Nylas data", () => {
+    cy.visit("/components/agenda/src/index.html");
+    cy.get("nylas-agenda").should("exist");
+    cy.get("nylas-agenda").then((element) => {
+      const agenda = element[0];
+
+      // Check to make sure it's using Nylas data (My Wonderful Event is a signifier)
+      cy.get("ul.events")
+        .find("li.event h2:contains('My Wonderful Event')")
+        .should("exist")
+        .then(() => {
+          // Set custom data
+          agenda.events = [
+            {
+              title:
+                "Some event that I am manipulating outside of the context of Nylas",
+              description: "Passed in from HTML!",
+              participants: [],
+              when: {
+                end_time: 1600444800,
+                object: "timespan",
+                start_time: 1600438500,
+              },
+            },
+            {
+              title: "Some I got from elsewhere",
+              description: "Passed in from HTML!",
+              participants: [],
+              when: {
+                end_time: 1600449999,
+                object: "timespan",
+                start_time: 1600448500,
+              },
+            },
+          ];
+
+          // Check to make sure it's using custom data (not Nylas data)
+          cy.get("ul.events")
+            .find("li.event h2")
+            .should("not.contain", "My Wonderful Event");
+          cy.get("ul.events")
+            .find("li.event h2:contains('Some I got from elsewhere')")
+            .should("exist")
+            .then(() => {
+              // Revert custom data
+              agenda.events = null;
+
+              // Check to make sure it's using Nylas data again
+              cy.get("ul.events")
+                .find("li.event h2")
+                .should("contain", "My Wonderful Event");
+              cy.get("ul.events")
+                .find("li.event h2")
+                .should("not.contain", "Some I got from elsewhere");
+            });
+        });
+    });
+  });
+});

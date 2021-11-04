@@ -248,29 +248,26 @@
   // #region Data Flow
 
   // Accept either comma-separated string, or array.
-  $: calendarIDs = (() => {
+  let calendarIDs: string[] = [];
+  $: (calendarIDs = setCalendarIDs()), internalProps, calendar_id;
+  function setCalendarIDs() {
     let IDList = internalProps.calendar_ids;
-    if (
-      typeof internalProps.calendar_ids === "string" &&
-      internalProps.calendar_ids.length
-    ) {
-      IDList = IDList.split(",").map((id: string) => id.trim());
+    if (typeof IDList === "string" && IDList.length) {
+      return IDList.split(",").map((id: string) => id.trim());
     } else if (calendar_id) {
-      IDList = [calendar_id];
+      return [calendar_id];
     }
-    return IDList;
-  })();
+    return [];
+  }
 
   let query: EventQuery;
-  $: {
-    query = {
-      component_id: id,
-      access_token: access_token,
-      calendarIDs: calendarIDs,
-      starts_after: startOfDay,
-      ends_before: endOfDay,
-    };
-  }
+  $: query = {
+    component_id: id,
+    access_token: access_token,
+    calendarIDs: calendarIDs,
+    starts_after: startOfDay,
+    ends_before: endOfDay,
+  };
 
   // Sibling Queries: eagerly fetch the events on the previous and next days,
   // so when the user clicks them, the loading will seem instantaneous.
@@ -335,12 +332,16 @@
     if (events && Array.isArray(events)) {
       calendarEvents = events as Event[];
     } else {
-      calendarEvents = (await EventStore.getEvents(query)) || [];
-      if (siblingQueries.length) {
-        siblingQueries.forEach((siblingQuery) =>
-          EventStore.getEvents(siblingQuery),
-        );
-      }
+      await EventStore.getEvents(query).then((nylasEvents) => {
+        if (!events) {
+          calendarEvents = nylasEvents || [];
+          if (siblingQueries.length) {
+            siblingQueries.forEach((siblingQuery) =>
+              EventStore.getEvents(siblingQuery),
+            );
+          }
+        }
+      });
     }
   }
 
