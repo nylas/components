@@ -855,7 +855,6 @@
     loading = true;
     let freeBusyCalendars: any = [];
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    // let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
     type fetchableCalendarUser = { email: string; token?: string };
     let calendarsToFetch: fetchableCalendarUser[] = email_ids.map((email) => {

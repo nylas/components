@@ -110,7 +110,6 @@
           .forEach((elem) => {
             elem.addEventListener("change", function (event) {
               component.show_ticks = JSON.parse(event.target.value);
-              component.reload(true, true);
             });
           });
 

@@ -21,7 +21,6 @@ function initialize(): Writable<AvailabilityStore> {
     if (!accessor.component_id) return;
 
     if (!target[key] || accessor.forceReload) {
-      // const fetchPromise = fetchAvailability(accessor);
       const fetchPromise = fetchAvailability(accessor);
       store.update((store) => {
         store[key] = fetchPromise;
