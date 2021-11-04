@@ -27,10 +27,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.8rem;
-    color: var(--text);
+    color: var(--composer-text-color, black);
     font-weight: 700;
-    background: var(--background-muted);
-    border-radius: var(--border-radius);
+    background: var(--composer-background-muted-color, #f0f2ff);
+    border-radius: var(--composer-border-radius, 6px);
   }
 
   .close-btn {
@@ -48,12 +48,12 @@
 
   .file-info {
     display: flex;
-    color: var(--text);
+    color: var(--composer-text-color, black);
     align-items: center;
     max-width: 90%;
     &__error {
-      color: var(--danger);
-      font-size: var(--font-size-small);
+      color: var(--composer-danger-color, #ff5c5c);
+      font-size: var(--composer-font-size-small, 12px);
       margin-right: 5px;
     }
     &__right {
@@ -68,15 +68,27 @@
   .file-item__size {
     flex-shrink: 0;
     word-break: keep-all;
-    color: var(--text-light);
+    color: var(composer-text-light-color, #6e6e7a);
     margin-left: 5px;
-    font-size: var(--font-size-small);
+    font-size: var(--composer-font-size-small, 12px);
   }
 
   @keyframes rotate {
     to {
       transform: rotate(360deg);
     }
+  }
+
+  .LoadingIcon {
+    fill: var(--composer-icons-color, #666774);
+    width: 15px;
+    height: 15px;
+    animation: rotate 0.5s infinite linear;
+  }
+  .CloseIcon {
+    fill: var(--composer-icons-color, #666774);
+    width: 10px;
+    height: 10px;
   }
 </style>
 
@@ -89,14 +101,12 @@
       </div>
       <div class="file-info__right">
         {#if attachment.loading}
-          <LoadingIcon
-            style="fill: var(--icons); width: 15px; height: 15px; animation: rotate 0.5s infinite linear;"
-          />
+          <LoadingIcon class="LoadingIcon" />
         {/if}
         {#if attachment.error}<span class="file-info__error">Error</span>{/if}
         {#if !attachment.loading}
           <button class="close-btn" on:click={() => remove(attachment)}>
-            <CloseIcon style="fill: var(--icons); width: 10px; height: 10px;" />
+            <CloseIcon class="CloseIcon" />
           </button>
         {/if}
       </div>

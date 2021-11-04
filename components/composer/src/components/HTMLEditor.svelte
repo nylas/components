@@ -91,24 +91,25 @@
 
 <style lang="scss">
   .html-editor {
-    min-height: var(--editor-height, 220px);
-    max-height: var(--editor-max-height);
+    min-height: var(--composer-editor-min-height, 220px);
+    max-height: var(--composer-editor-max-height, 480px);
     *:focus {
-      outline: 5px auto var(--primary);
+      outline: 5px auto var(--composer-primary-color, #5c77ff);
     }
   }
   a {
-    color: var(--primary);
+    color: var(--composer-primary-color, #5c77ff);
     &:hover {
-      color: var(--primary-dark);
+      color: var(--composer-primary-dark-color, #294dff);
     }
   }
   [contenteditable] {
-    padding: var(--outer-padding) var(--outer-padding);
+    padding: var(--composer-outer-padding, 15px)
+      var(--composer-outer-padding, 15px);
     margin: 0;
     outline: 0;
     line-height: 1.3;
-    color: var(--text);
+    color: var(--composer-text-color, black);
     overflow-y: auto;
   }
   .toolbar {
@@ -116,11 +117,11 @@
     font-size: 10px;
     align-items: center;
     justify-content: flex-start;
-    border-bottom: 1px solid var(--border);
-    padding: 0 calc(var(--outer-padding) / 2);
+    border-bottom: 1px solid var(--composer-border-color, #f7f7f7);
+    padding: 0 calc(var(--composer-outer-padding, 15px) / 2);
 
     button {
-      color: var(--text-light);
+      color: var(composer-text-light-color, #6e6e7a);
       background: none;
       border: 0;
       cursor: pointer;
@@ -128,19 +129,25 @@
       padding: 8px;
       margin: 2px;
       outline: 0;
-      border-radius: calc(var(--border-radius) / 2);
+      border-radius: calc(var(--composer-border-radius, 6px) / 2);
       transition: background-color 0.3s;
 
       &.active {
-        background: var(--background-muted);
+        background: var(--composer-background-muted-color, #f0f2ff);
       }
       &:first-child {
         margin-left: 0;
       }
       &:hover {
-        background: var(--background-muted);
+        background: var(--composer-background-muted-color, #f0f2ff);
       }
     }
+  }
+
+  .icon {
+    fill: var(--composer-icons-color, #666774) !important;
+    width: 12px;
+    height: 12px;
   }
 </style>
 
@@ -154,11 +161,7 @@
           class={item.state && item.state() ? "active" : ""}
         >
           {#if item.icon}
-            <svelte:component
-              this={item.icon}
-              class="icon"
-              style="fill: var(--icons) !important; width: 12px; height: 12px;"
-            />
+            <svelte:component this={item.icon} class="icon" />
           {:else}{item.title.charAt(0)}{/if}
         </button>
       {/each}

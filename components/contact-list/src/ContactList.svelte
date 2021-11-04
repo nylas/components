@@ -250,14 +250,6 @@
     width: 100%;
     overflow: auto;
     position: relative;
-
-    // theme-1 default
-    --mainText: #000000;
-    --linesAndIcons: #d5d5d5;
-    --contactColor: #002db4;
-    --contactTextColor: white;
-    --selectColor: #36d2ac;
-    --hoverColor: #eee;
   }
 
   @import "./themes/theme-1";

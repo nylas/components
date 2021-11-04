@@ -49,8 +49,10 @@
   // query_string format => "in=trash from=phil.r@nylas.com"
   export let query_string: string | null; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
   export let items_per_page: number = 13;
-  export let onSelectThread: (event: MouseEvent, t: Thread) => void =
-    onSelectOne;
+  export let onSelectThread: (
+    event: MouseEvent,
+    t: Thread,
+  ) => void = onSelectOne;
 
   const defaultValueMap = {
     show_star: false,
