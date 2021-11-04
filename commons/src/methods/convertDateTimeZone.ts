@@ -1,5 +1,4 @@
 import { DateTime } from "luxon";
-import { getTimeString } from "@commons/methods/datetime";
 
 /**
  *
@@ -8,7 +7,9 @@ import { getTimeString } from "@commons/methods/datetime";
  * @returns string
  */
 export function formatTimeSlot(slot: Date, zone: string): string {
-  const unformattedTimeSlot = getTimeString(slot);
+  const unformattedTimeSlot = DateTime.fromJSDate(slot)
+    .toLocaleString(DateTime.TIME_SIMPLE)
+    .replace(/\./g, "");
   try {
     const dateTimeSlot = DateTime.fromJSDate(slot, { zone });
     if (
