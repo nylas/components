@@ -427,7 +427,11 @@
                     end_time: timeMinute.offset(t.end_time, event_buffer),
                     available_calendars: t.available_calendars,
                   }))
-                : calendar.timeslots; //  TODO: get buffer working with FREE timeslots
+                : calendar.timeslots.map((t) => ({
+                    start_time: timeMinute.offset(t.start_time, event_buffer),
+                    end_time: timeMinute.offset(t.end_time, -event_buffer),
+                    available_calendars: t.available_calendars,
+                  })); //  TODO: get buffer working with FREE timeslots
 
             let slotAvailability = 0;
             if (calendar.availability === AvailabilityStatus.BUSY) {
@@ -435,7 +439,7 @@
               slotAvailability = overlap(timeslots, slot);
             } else if (calendar.availability === AvailabilityStatus.FREE) {
               // For Free calendars, a timeslot is considered available if its calendar has a time that fully envelops it.
-              slotAvailability = calendar.timeslots.some(
+              slotAvailability = timeslots.some(
                 (blob) =>
                   slot.start_time >= blob.start_time &&
                   slot.end_time <= blob.end_time,
