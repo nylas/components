@@ -588,6 +588,10 @@
     }
   }
 
+  ul.refreshing {
+    filter: blur(0.2rem);
+  }
+
   .checkbox-container {
     padding: 4px;
   }
@@ -740,7 +744,7 @@
             {/if}{/if}
         </div>
       {/if}
-      <ul id="mailboxlist">
+      <ul id="mailboxlist" class:refreshing={refreshingMailbox}>
         {#each paginatedThreads as thread}
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
