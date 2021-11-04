@@ -602,7 +602,7 @@
     return (
       messages &&
       participants &&
-      messages.length >= 1 &&
+      messages.length > 0 &&
       messages[messages.length - 1].from.length
     );
   }

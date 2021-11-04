@@ -219,17 +219,17 @@ describe("Email component", () => {
         component.id = "demo-email";
         component.thread_id = undefined;
         component.thread = undefined;
-        component.message_id = "3r5mx1zidx0a424j34jocc3no";
+        component.message_id = "affxolvozy2pcqh4303w7pc9n";
         cy.get(component)
           .find(".email-row.expanded.singular header")
           .should("exist");
         cy.get(component)
           .find(".email-row.expanded.singular header")
-          .should("contain", "Re: Demo Thread");
+          .should("contain", "Demo Thread");
         cy.get(component).find(".message-body").should("exist");
         cy.get("nylas-message-body").then((nylasMessageBody) => {
           const messageBody = nylasMessageBody[0];
-          cy.get(messageBody).find("div").should("contain", "Bye!");
+          cy.get(messageBody).find("div").should("contain", "Allo bonjour");
         });
         cy.get(component).find(".name").should("exist");
         cy.get(component).find(".name").should("contain", "Test User");
@@ -249,10 +249,8 @@ describe("Email component", () => {
         cy.get(component).find(".message-date span").should("exist");
         cy.get(component)
           .find(".message-date span")
-          .should("contain", "July 7");
-        cy.get(component)
-          .find(".message-to span")
-          .should("contain", "Pooja Guggari");
+          .should("contain", "October 21");
+        cy.get(component).find(".message-to span").should("contain", "me");
       });
   });
   it("Shows a thread even when message_id is passed", (done) => {
@@ -377,7 +375,7 @@ describe("Email component", () => {
             cy.get(secondTooltip).find(".tooltip").should("exist");
             cy.get(secondTooltip)
               .find(".tooltip")
-              .should("contain", "pooja.g@nylas.com");
+              .should("contain", "nylascypresstest@gmail.com");
             cy.get(firstTooltip).find(".tooltip-trigger").click();
             cy.get(firstTooltip).find(".tooltip").should("exist");
             cy.get(firstTooltip)
