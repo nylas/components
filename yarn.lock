@@ -2322,41 +2322,41 @@
     rimraf "^3.0.2"
 
 "@nylas/components-agenda@file:components/agenda":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-availability@file:components/availability":
-  version "1.0.12"
+  version "1.0.13"
   dependencies:
     d3-scale "^4.0.0"
     d3-time "^3.0.0"
     just-throttle "^2.3.1"
 
 "@nylas/components-composer@file:components/composer":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-contact-list@file:components/contact-list":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-contacts-search@file:components/contacts-search":
   version "1.0.12"
 
 "@nylas/components-conversation@file:components/conversation":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-datepicker@file:components/datepicker":
   version "1.0.12"
 
 "@nylas/components-email@file:components/email":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-mailbox@file:components/mailbox":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-schedule-editor@file:components/schedule-editor":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-scheduler@file:components/scheduler":
-  version "1.0.12"
+  version "1.0.13"
 
 "@nylas/components-theming@file:components/theming":
   version "1.0.0"
@@ -15942,9 +15942,9 @@ tmp@~0.2.1:
     rimraf "^3.0.0"
 
 tmpl@1.0.x:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/tmpl/-/tmpl-1.0.4.tgz"
-  integrity sha1-I2QN17QtAEM5ERQIIOXPRA5SHdE=
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/tmpl/-/tmpl-1.0.5.tgz#8683e0b902bb9c20c4f726e3c0b69f36518c07cc"
+  integrity sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==
 
 to-arraybuffer@^1.0.0:
   version "1.0.1"
