@@ -219,7 +219,7 @@ describe("Email component", () => {
         component.id = "demo-email";
         component.thread_id = undefined;
         component.thread = undefined;
-        component.message_id = "3r5mx1zidx0a424j34jocc3no";
+        component.message_id = "affxolvozy2pcqh4303w7pc9n";
         cy.get(component)
           .find(".email-row.expanded.singular header")
           .should("exist");
