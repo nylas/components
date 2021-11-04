@@ -330,19 +330,18 @@
 
   // Try getting events from 3 sources: first, directly passed in, then, from our store; finally, by way of a fetch
   let calendarEvents: Event[] = [];
-  $: {
-    (async () => {
-      if (events) {
-        calendarEvents = events as Event[];
-      } else {
-        calendarEvents = (await EventStore.getEvents(query)) || [];
-        if (siblingQueries.length) {
-          siblingQueries.forEach((siblingQuery) =>
-            EventStore.getEvents(siblingQuery),
-          );
-        }
+  $: setCalendarEvents(), events, query;
+  async function setCalendarEvents() {
+    if (events && Array.isArray(events)) {
+      calendarEvents = events as Event[];
+    } else {
+      calendarEvents = (await EventStore.getEvents(query)) || [];
+      if (siblingQueries.length) {
+        siblingQueries.forEach((siblingQuery) =>
+          EventStore.getEvents(siblingQuery),
+        );
       }
-    })();
+    }
   }
 
   $: allDayEvents = calendarEvents
@@ -1500,12 +1499,17 @@
                 class:expanded={expandedEventId === event.id}
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs.indexOf(event.calendar_id) + 1}
-                style="top: {event.relativeStartTime * 100}%; height: 
+                style="top: {event.relativeStartTime *
+                  100}%; height: 
               {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
-                  : `calc(${event.relativeRunTime * 100}%  - 4px)`};
-              left: {event.relativeOverlapOffset * 100}%; 
-              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
+                  : `calc(${
+                      event.relativeRunTime * 100
+                    }%  - 4px)`};
+              left: {event.relativeOverlapOffset *
+                  100}%; 
+              width: calc({event.relativeOverlapWidth *
+                  100}% - 4px)"
               >
                 <div
                   class="inner"
