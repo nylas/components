@@ -25,13 +25,9 @@ export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
   return await fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then((json) => {
-      return json.response.filter((thread) => {
-        if (thread && thread.messages) {
-          return thread?.messages?.length > 0;
-        } else {
-          return false;
-        }
-      });
+      return json.response.filter((thread) =>
+        thread && thread.messages ? thread?.messages?.length > 0 : false,
+      );
     })
     .catch((error) => handleError(query.component_id, error));
 };
