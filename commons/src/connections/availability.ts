@@ -53,12 +53,12 @@ export const fetchAvailability = async (
       >(apiResponse);
       // Normalize response .start and .end to .start_time and .end_time to make up for discrependcy in the Nylas API: https://developer.nylas.com/docs/connectivity/calendar/calendar-availability/#availability-response
       // API story: https://app.shortcut.com/nylas/story/73196/
-      json.response.time_slots = json.response.time_slots.map((s) => {
-        s.start_time = s.start;
-        s.end_time = s.end;
-        delete s.start;
-        delete s.end;
-        return s;
+      json.response.time_slots = json.response.time_slots.map((slot) => {
+        slot.start_time = slot.start;
+        slot.end_time = slot.end;
+        delete slot.start;
+        delete slot.end;
+        return slot;
       });
       return json.response;
     })
