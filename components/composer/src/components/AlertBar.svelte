@@ -14,11 +14,11 @@
 
 <style lang="scss">
   .alert-bar {
-    padding: var(--composer-outer-padding, 15px);
+    padding: var(--outer-padding);
     text-align: center;
-    font-size: var(--composer-font-size-small, 12px);
-    border-bottom-left-radius: var(--composer-border-color, #f7f7f7-radius);
-    border-bottom-right-radius: var(--composer-border-radius, 6px);
+    font-size: var(--font-size-small);
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
     &__container {
       display: flex;
       align-items: center;
@@ -44,39 +44,24 @@
     }
     // Modifiers
     &.success {
-      background: var(
-        --composer-success-light-color,
-        var(--composer-primary-color, #5c77ff)
-      );
-      color: var(
-        --composer-success-color,
-        var(--composer-background-color, white)
-      );
+      background: var(--success-light);
+      color: var(--success);
       .alert-bar__close {
-        color: var(
-          --composer-success-color,
-          var(--composer-background-color, white)
-        );
+        color: var(--success);
       }
     }
     &.danger {
-      background: var(--composer-danger-light-color, #ffe3e3);
-      color: var(--composer-danger-color, #ff5c5c);
+      background: var(--danger-light);
+      color: var(--danger);
       .alert-bar__close {
-        color: var(--composer-danger-color, #ff5c5c);
+        color: var(--danger);
       }
     }
     &.info {
-      background: var(
-        --composer-info-light-color,
-        var(--composer-primary-light-color, #f0f2ff)
-      );
-      color: var(--composer-info-color, var(--composer-primary-color, #5c77ff));
+      background: var(--info-light);
+      color: var(--info);
       .alert-bar__close {
-        color: var(
-          --composer-info-color,
-          var(--composer-primary-color, #5c77ff)
-        );
+        color: var(--info);
       }
     }
   }

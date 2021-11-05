@@ -912,6 +912,18 @@
   @import "../../theming/variables.scss";
 
   main {
+    --mainTextAndDeclinedEvents: #000000;
+    --calendarEventText: #ffffff;
+    --linesAndIcons: #d5d5d5;
+    --monthsOnMobileDropdown: #f1f1f1;
+    --primaryAndMainCalendar: #002db4;
+    --secondaryCalendar: #315df2;
+    --thirdCalendar: #078351;
+    --timeLine: #36d2ac;
+    --declinedEvent: #636671;
+    --alertWarningDeclined: #36d2ac;
+    --headerBackground: #ffffff;
+    --emptyEventBackground: #eeeeee;
     @import "./styles/agenda-themes.scss";
 
     text-align: center;

@@ -366,19 +366,46 @@
 
 <style lang="scss">
   .nylas-composer {
+    // Default composer theme (when theme property is not set)
+    --font: sans-serif;
+    --font-size: 14px;
+    --font-size-small: 12px;
+
+    // Colors
+    --background: white;
+    --background-muted: #f0f2ff;
+    --text: black;
+    --text-light: #6e6e7a;
+    --text-secondary: #2247ff;
+    --border: #f7f7f7;
+    --icons: #666774;
+    --header-background: var(--background);
+    --primary: #5c77ff;
+    --primary-light: #f0f2ff;
+    --primary-dark: #294dff;
+    --danger: #ff5c5c;
+    --danger-light: #ffe3e3;
+    --success: var(--background);
+    --success-light: var(--primary);
+    --info: var(--primary);
+    --info-light: var(--primary-light);
+
+    --border-radius: 6px;
+    --shadow: 0 1px 10px rgba(0, 0, 0, 0.11), 0 3px 36px rgba(0, 0, 0, 0.12);
+    --outer-padding: 15px;
+    --editor--max-height: 480px;
+    // Newly added
+    --button-active-text: #fff;
+
     width: var(--width, 100%);
     min-width: 300px;
     height: var(--height, 100%);
     min-height: 300px;
-    background: var(--composer-background-color, white);
-    border-radius: var(--composer-border-radius, 6px);
-    box-shadow: var(
-      --composer-shadow,
-      0 1px 10px rgba(0, 0, 0, 0.11),
-      0 3px 36px rgba(0, 0, 0, 0.12)
-    );
-    font-family: var(--composer-font, sans-serif);
-    font-size: var(--composer-font-size, 14px);
+    background: var(--background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    font-family: var(--font);
+    font-size: var(--font-size);
     position: relative;
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -392,11 +419,11 @@
       min-height: 0;
     }
     &__loader {
-      height: var(--composer-editor-max-height, 480px);
+      height: var(--editor--max-height);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--composer-text-light-color, #6e6e7a);
+      color: var(--text-light);
       box-shadow: none;
     }
     &__spinner {
@@ -405,7 +432,7 @@
       animation: rotate 2s linear infinite;
     }
     *:focus {
-      outline: 5px auto var(--composer-primary-color, #5c77ff);
+      outline: 5px auto var(--primary);
     }
   }
   @keyframes rotate {
@@ -418,30 +445,27 @@
     overflow: auto;
   }
   input {
-    font-family: var(--composer-font, sans-serif);
+    font-family: var(--font);
   }
   header {
-    border-top-left-radius: var(--composer-border-radius, 6px);
-    border-top-right-radius: var(--composer-border-radius, 6px);
-    border-bottom: 1px solid var(--composer-border-color, #f7f7f7);
-    color: var(--composer-text-color, black);
-    padding: 15px var(--composer-outer-padding, 15px);
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    padding: 15px var(--outer-padding);
     display: flex;
     font-weight: 600;
     align-items: center;
     justify-content: space-between;
-    background: var(
-      --composer-header-background-color,
-      var(--composer-background-color, white)
-    );
+    background: var(--header-background);
     &.minimized {
-      border-bottom-left-radius: var(--composer-border-radius, 6px);
-      border-bottom-right-radius: var(--composer-border-radius, 6px);
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: var(--border-radius);
     }
   }
   footer {
-    padding: 15px var(--composer-outer-padding, 15px);
-    border-top: 1px solid var(--composer-border-color, #f7f7f7);
+    padding: 15px var(--outer-padding);
+    border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -449,13 +473,13 @@
   }
   .send-btn {
     border: 0;
-    background: var(--composer-primary-color, #5c77ff);
+    background: var(--primary);
     color: white;
     cursor: pointer;
     padding: 10px 25px;
     font-weight: bold;
-    border-radius: var(--composer-border-radius, 6px);
-    font-family: var(--composer-font, sans-serif);
+    border-radius: var(--border-radius);
+    font-family: var(--font);
     transition: background-color 0.3s;
     // border-top-right-radius: 0;
     // border-bottom-right-radius: 0;
@@ -464,11 +488,11 @@
       opacity: 0.5;
     }
     &:hover {
-      background: var(--composer-primary-dark-color, #294dff);
+      background: var(--primary-dark);
     }
     &.send-later {
       padding: 10px 10px;
-      border-radius: var(--composer-border-radius, 6px);
+      border-radius: var(--border-radius);
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       margin-left: -4px;
@@ -477,15 +501,15 @@
 
   .subject {
     display: block;
-    font-size: var(--composer-font-size, 14px);
+    font-size: var(--font-size);
     border: none;
-    border-bottom: 1px solid var(--composer-border-color, #f7f7f7);
-    color: var(--composer-text-color, black);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
     width: 100%;
     background: var(--bg);
     font-weight: 600;
     box-sizing: border-box;
-    padding: 15px var(--composer-outer-padding, 15px);
+    padding: 15px var(--outer-padding);
     outline: 0;
     &::placeholer {
       font-weight: 500;
@@ -495,7 +519,7 @@
   .contacts-wrapper {
     position: relative;
     text-decoration: none;
-    color: var(--composer-text-color, black);
+    color: var(--text);
   }
   .close-btn {
     background: none;
@@ -509,10 +533,10 @@
     outline: 0;
     width: 28px;
     height: 28px;
-    border-radius: var(--composer-border-radius, 6px);
+    border-radius: var(--border-radius);
     cursor: pointer;
     &:hover {
-      background: var(--composer-background-muted-color, #f0f2ff);
+      background: var(--background-muted);
     }
   }
 
@@ -523,22 +547,22 @@
 
   .attachments-wrapper {
     display: flex;
-    padding: 15px var(--composer-outer-padding, 15px);
+    padding: 15px var(--outer-padding);
     flex-direction: column;
   }
   .addons {
-    font-size: var(--composer-font-size-small, 12px);
+    font-size: var(--font-size-small);
     letter-spacing: 1.2px;
     font-weight: 600;
     position: absolute;
     right: 10px;
     bottom: 16px;
-    color: var(--composer-text-light-color, #6e6e7a);
+    color: var(--text-light);
     button {
       background: transparent;
       box-shadow: none;
       border: none;
-      color: var(--composer-text-light-color, #6e6e7a);
+      color: var(--text-light);
       cursor: pointer;
       margin-right: 10px;
       padding: 5px;
@@ -556,9 +580,9 @@
     }
   }
   .attachments-caption {
-    font-size: var(--composer-font-size-small, 12px);
+    font-size: var(--font-size--small);
     margin-bottom: 5px;
-    color: var(--composer-text-light-color, #6e6e7a);
+    color: var(--text-light);
   }
   @media only screen and (max-width: 600px) {
     .nylas-composer {
@@ -572,21 +596,6 @@
       float: right;
       padding: 5px;
     }
-  }
-
-  [class$="Icon"] {
-    fill: var(--composer-icons-color, #666774);
-    width: 10px;
-    height: 10px;
-  }
-  .ExpandIcon {
-    transform: translateY(1px);
-  }
-  .MinimizeIcon {
-    transform: translateY(4px);
-  }
-  .AttachmentIcon {
-    margin-right: 15px;
   }
 </style>
 
@@ -616,17 +625,23 @@
           {#if show_minimize_button}
             {#if minimized}
               <button class="composer-btn" on:click={handleMinimize}>
-                <ExpandIcon class="ExpandIcon" />
+                <ExpandIcon
+                  style="fill: var(--icons); width: 10px; height: 10px; transform: translateY(1px)"
+                />
               </button>
             {:else}
               <button class="composer-btn" on:click={handleMinimize}>
-                <MinimizeIcon class="MinimizeIcon" />
+                <MinimizeIcon
+                  style="fill: var(--icons); width: 10px; height: 10px; transform: translateY(4px)"
+                />
               </button>
             {/if}
           {/if}
           {#if show_close_button}
             <button class="composer-btn" on:click={close}>
-              <CloseIcon class="CloseIcon" />
+              <CloseIcon
+                style="fill: var(--icons); width: 10px; height: 10px;"
+              />
             </button>
           {/if}
         </div>
@@ -686,7 +701,9 @@
               }}
               aria-label="remove carbon copy field"
             >
-              <CloseIcon class="CloseIcon" />
+              <CloseIcon
+                style="fill: var(--icons); width: 10px; height: 10px;"
+              />
             </button>
           </div>
         {/if}
@@ -707,7 +724,9 @@
               }}
               aria-label="remove blind carbon copy field"
             >
-              <CloseIcon class="CloseIcon" />
+              <CloseIcon
+                style="fill: var(--icons); width: 10px; height: 10px;"
+              />
             </button>
           </div>
         {/if}
@@ -753,7 +772,9 @@
             style="margin-right: 10px; width: 32px; height: 32px;"
             on:click={() => fileSelector.click()}
           >
-            <AttachmentIcon class="AttachmentIcon" />
+            <AttachmentIcon
+              style="fill: var(--icons); width: 16px; height: 16px; margin-right: 15px"
+            />
           </button>
         {/if}
         <div class="btn-group">
