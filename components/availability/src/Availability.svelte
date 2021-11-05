@@ -404,6 +404,7 @@
       .ticks(timeMinute.every(slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
       .map((time: Date) => {
+        console.log("--------------------------", time, "----------------");
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
@@ -424,8 +425,18 @@
                     available_calendars: t.available_calendars,
                   }))
                 : calendar.timeslots.map((t: TimeSlot) => ({
-                    start_time: timeMinute.offset(t.start_time, event_buffer),
-                    end_time: timeMinute.offset(t.end_time, -event_buffer),
+                    // Don't apply start-buffer to the first timeslot, nor end-buffer to the last timeslot.
+                    // Works across multiple days; you won't get a random buffer at 11:50 / 00:10
+                    start_time: timeMinute.offset(
+                      t.start_time,
+                      t === calendar.timeslots[0] ? 0 : event_buffer,
+                    ),
+                    end_time: timeMinute.offset(
+                      t.end_time,
+                      t === calendar.timeslots[calendar.timeslots.length - 1]
+                        ? 0
+                        : -event_buffer,
+                    ),
                     available_calendars: t.available_calendars,
                   }));
 
