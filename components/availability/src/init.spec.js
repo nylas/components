@@ -896,7 +896,7 @@ describe("availability component", () => {
         });
     });
   });
-  describe("Event Buffer", () => {
+  describe.only("Event Buffer", () => {
     it("With 0 min buffer time", () => {
       cy.get("nylas-availability")
         .as("availability")
@@ -913,8 +913,8 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.event_buffer = 15;
-          cy.get(".slot.busy").should("have.length", 7);
-          cy.get(".slot.free").should("have.length", 2);
+          cy.get(".slot.busy").should("have.length", 6);
+          cy.get(".slot.free").should("have.length", 3);
         });
     });
     it("Adds 30 min buffer time", () => {
@@ -923,8 +923,8 @@ describe("availability component", () => {
         .then((element) => {
           const component = element[0];
           component.event_buffer = 30;
-          cy.get(".slot.busy").should("have.length", 9);
-          cy.get(".slot.free").should("have.length", 0);
+          cy.get(".slot.busy").should("have.length", 7);
+          cy.get(".slot.free").should("have.length", 2);
         });
     });
   });
