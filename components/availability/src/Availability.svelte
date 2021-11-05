@@ -404,7 +404,6 @@
       .ticks(timeMinute.every(slot_size) as TimeInterval)
       .slice(0, -1) // dont show the 25th hour
       .map((time: Date) => {
-        console.log("--------------------------", time, "----------------");
         const endTime = timeMinute.offset(time, slot_size);
         const freeCalendars: string[] = [];
         let availability = AvailabilityStatus.FREE; // default
