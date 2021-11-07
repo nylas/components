@@ -862,6 +862,9 @@
   }
 
   let requiredParticipants: string[] = [];
+  $: requiredParticipants = [
+    ...new Set([...required_participants, booking_user_email]),
+  ];
 
   async function getAvailability(forceReload = false) {
     loading = true;
@@ -882,7 +885,6 @@
         email: booking_user_email,
         token: booking_user_token,
       });
-      requiredParticipants = [...required_participants, booking_user_email];
     }
 
     if (Array.isArray(calendarsToFetch) && calendarsToFetch.length > 0) {
