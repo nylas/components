@@ -896,7 +896,7 @@ describe("availability component", () => {
         });
     });
   });
-  describe.only("Event Buffer", () => {
+  describe("Event Buffer", () => {
     it("With 0 min buffer time", () => {
       cy.get("nylas-availability")
         .as("availability")

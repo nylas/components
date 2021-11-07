@@ -383,7 +383,7 @@
   $: endDay = dayRange[dayRange.length - 1];
 
   const allRequiredParticipantsIncluded = (calendars: string[]) => {
-    return required_participants.every((participant) =>
+    return requiredParticipants.every((participant) =>
       calendars.includes(participant),
     );
   };
@@ -861,6 +861,8 @@
     }, []);
   }
 
+  let requiredParticipants: string[] = [];
+
   async function getAvailability(forceReload = false) {
     loading = true;
     let freeBusyCalendars: any = [];
@@ -880,7 +882,7 @@
         email: booking_user_email,
         token: booking_user_token,
       });
-      required_participants.push(booking_user_email);
+      requiredParticipants = [...required_participants, booking_user_email];
     }
 
     if (Array.isArray(calendarsToFetch) && calendarsToFetch.length > 0) {
