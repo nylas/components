@@ -59,7 +59,6 @@
     actions_bar: [],
   };
 
-  let queryParams: ThreadsQuery;
   let openedEmailData: Thread | null;
   let hasComponentLoaded = false;
 
@@ -70,9 +69,6 @@
 
   onMount(async () => {
     await tick();
-    queryParams = Object.fromEntries(
-      new URLSearchParams(window.location.search),
-    );
 
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
@@ -127,13 +123,6 @@
     hasComponentLoaded = true;
   });
 
-  $: queryParams = {
-    ...queryParams,
-    ...Object.fromEntries(
-      new URLSearchParams(query_string?.replaceAll(" ", "&")),
-    ),
-  };
-
   let inboxThreads: Thread[]; // threads currently in the inbox
   $: if (threads) {
     inboxThreads = threads;
@@ -186,7 +175,9 @@
   $: query = {
     component_id: id,
     access_token,
-    query: queryParams,
+    query: Object.fromEntries(
+      new URLSearchParams(query_string?.replaceAll(" ", "&")),
+    ),
   };
 
   let queryKey: string;
