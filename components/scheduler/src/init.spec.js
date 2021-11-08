@@ -70,14 +70,42 @@ describe("scheduler component", () => {
           cy.get("#custom-fields").should("exist");
         });
     });
+
     it("shows a single email address field by default", () => {
       cy.get("nylas-scheduler")
         .as("scheduler")
         .then((element) => {
           const component = element[0];
           component.slots_to_book = slots_to_book;
-          cy.get("#custom-fields h3").should("have.length", 1);
-          cy.get("#custom-fields h3").contains("Email Address");
+          cy.get("#custom-fields strong").should("have.length", 2);
+          cy.get("#custom-fields strong").contains("Email Address");
+          cy.get("#custom-fields strong").contains("Your Name");
+        });
+    });
+
+    it("doesnt let you submit form with required fields unfulfilled", () => {
+      cy.get("nylas-scheduler")
+        .as("scheduler")
+        .then((element) => {
+          const component = element[0];
+          component.slots_to_book = slots_to_book;
+          cy.get("button.book").should("exist");
+          cy.get("button.book").should("have.attr", "disabled");
+          cy.get("#custom-fields label:eq(0) input").type("foo");
+          cy.get("button.book").should("have.attr", "disabled");
+        });
+    });
+
+    it("lets you submit once required fields are filled out", () => {
+      cy.get("nylas-scheduler")
+        .as("scheduler")
+        .then((element) => {
+          const component = element[0];
+          component.slots_to_book = slots_to_book;
+          cy.get("button.book").should("exist");
+          cy.get("button.book").should("have.attr", "disabled");
+          cy.get("#custom-fields label:eq(1) input").type("bar");
+          cy.get("button.book").should("not.have.attr", "disabled");
         });
     });
   });
