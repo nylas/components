@@ -101,11 +101,40 @@ main {
       }
     }
 
+    #custom-fields {
+      display: grid;
+      grid-auto-flow: row;
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      label {
+        display: grid;
+        grid-auto-flow: row;
+        gap: 0.5rem;
+        strong {
+          font-weight: bold;
+          font-size: 0.8rem;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+          padding: 0.25rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+
     button.book {
       background: var(--blue);
       color: white;
       padding: 0.5rem 2rem;
       cursor: pointer;
+
+      &:disabled {
+        background: var(--grey-dark);
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
   }
 }

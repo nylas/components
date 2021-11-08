@@ -72,9 +72,15 @@
     recurrence_cadence: ["none"],
     custom_fields: [
       {
+        title: "Your Name",
+        type: "text",
+        required: false,
+      },
+      {
         title: "Email Address",
         type: "text",
         required: true,
+        placeholder: "you@example.com",
       },
     ],
   };
@@ -242,7 +248,7 @@
   }
 
   // #region custom fields
-  let customFieldResponses: Record<string, string | boolean> = {};
+  let customFieldResponses: Record<string, any> = {}; // ideally "any" would be "string | boolean", but text inputs cast to many types
   $: if (
     !custom_fields.find((field) =>
       customFieldResponses.hasOwnProperty(field.title),
@@ -253,6 +259,15 @@
       return { ...responses, [field.title]: "" };
     }, {});
   }
+
+  $: requiredFieldsFilled = custom_fields
+    .filter((field) => field.required)
+    .every(
+      (field) =>
+        customFieldResponses[field.title] !== undefined &&
+        customFieldResponses[field.title] !== "",
+    );
+  $: console.log({ requiredFieldsFilled });
   $: console.log(customFieldResponses);
   // #endregion custom fields
 </script>
@@ -371,21 +386,31 @@
       {#if custom_fields.length}
         <div id="custom-fields">
           {#each custom_fields as field}
-            <label>
-              <h3>{field.title}</h3>
-              <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
-              {#if field.type === "text"}
+            {#if field.type === "email"}
+              <label>
+                <strong>{field.title}</strong>
+                <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
+                <input
+                  type="email"
+                  bind:value={customFieldResponses[field.title]}
+                />
+              </label>
+            {:else}
+              <label>
+                <strong>{field.title}</strong>
                 <input
                   type="text"
                   bind:value={customFieldResponses[field.title]}
                 />
-              {/if}
-            </label>
+              </label>
+            {/if}
           {/each}
         </div>
       {/if}
-      <button class="book" on:click={() => bookTimeSlots(slotsToBook)}
-        >{booking_label}</button
+      <button
+        disabled={!requiredFieldsFilled}
+        class="book"
+        on:click={() => bookTimeSlots(slotsToBook)}>{booking_label}</button
       >
     {:else}
       <p>
