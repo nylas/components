@@ -9,7 +9,7 @@
     getEventDispatcher,
   } from "@commons/methods/component";
 
-  import type { Manifest } from "@commons/types/Scheduler";
+  import type { Manifest, CustomField } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
@@ -51,6 +51,8 @@
     | "monthly"
   )[];
   export let recurrence_expiry: Date | string | null;
+
+  export let custom_fields: CustomField[]; // TODO
   // #endregion props
 
   //#region mount and prop initialization
@@ -68,6 +70,13 @@
     notification_subject: "Invitation",
     recurrence: "none",
     recurrence_cadence: ["none"],
+    custom_fields: [
+      {
+        title: "Email Address",
+        type: "text",
+        required: true,
+      },
+    ],
   };
 
   let internalProps: Manifest = <any>{};
@@ -114,6 +123,7 @@
     recurrence = internalProps.recurrence;
     recurrence_cadence = internalProps.recurrence_cadence;
     recurrence_expiry = internalProps.recurrence_expiry;
+    custom_fields = internalProps.custom_fields;
   }
 
   const dispatchEvent = getEventDispatcher(get_current_component());
@@ -230,6 +240,21 @@
     }
     availability_id = availability_id;
   }
+
+  // #region custom fields
+  let customFieldResponses: Record<string, string | boolean> = {};
+  $: if (
+    !custom_fields.find((field) =>
+      customFieldResponses.hasOwnProperty(field.title),
+    )
+  ) {
+    customFieldResponses = custom_fields.reduce((responses, field) => {
+      console.log("reca");
+      return { ...responses, [field.title]: "" };
+    }, {});
+  }
+  $: console.log(customFieldResponses);
+  // #endregion custom fields
 </script>
 
 <style lang="scss">
@@ -453,6 +478,22 @@
           </li>
         {/each}
       </ul>
+      {#if slotsToBook.length}
+        <div>
+          {#each custom_fields as field}
+            <label>
+              <h3>{field.title}</h3>
+              <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
+              {#if field.type === "text"}
+                <input
+                  type="text"
+                  bind:value={customFieldResponses[field.title]}
+                />
+              {/if}
+            </label>
+          {/each}
+        </div>
+      {/if}
       <button class="book" on:click={() => bookTimeSlots(slotsToBook)}
         >{booking_label}</button
       >
