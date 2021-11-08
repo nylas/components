@@ -4,12 +4,11 @@
   import {
     ConversationStore,
     ManifestStore,
-    fetchContactImage,
     sendMessage,
-    fetchContactsByQuery,
     fetchAccount,
     fetchCleanConversations,
     ErrorStore,
+    ContactStore,
   } from "@commons";
   import { afterUpdate } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
@@ -25,9 +24,10 @@
     Conversation,
     Account,
   } from "@commons/types/Nylas";
+  import type { ContactSearchQuery } from "@commons/types/Contacts";
   import "@commons/components/ErrorMessage.svelte";
+  import "@commons/components/ContactImage/ContactImage.svelte";
   import { getDate } from "@commons/methods/datetime";
-  import { getContactInitialForAvatar } from "@commons/methods/contact_strings";
   import ToggleIcon from "./assets/toggle.svg";
   import SendIcon from "./assets/send.svg";
 
@@ -146,30 +146,60 @@
   }
 
   //#region Contacts
-  $: {
-    if (participants.length) {
-      setContacts(participants);
+  let contacts: any = null;
+  let contact_query: ContactSearchQuery;
+  $: contact_query = {
+    component_id: id,
+    access_token,
+    query: "",
+  };
+
+  $: (async () => {
+    if (!contacts && conversation) {
+      await getContacts(conversation);
+    }
+  })();
+
+  async function getContacts(conversation: Conversation) {
+    const fromParticipants =
+      conversation.messages?.reduce<Record<string, Participant>>(
+        (participants, message) => {
+          const participant: Participant = message.from[0];
+          participants[participant.email] = participant;
+          return participants;
+        },
+        {},
+      ) || {};
+    const fromParticipantsArray =
+      Array.from(Object.values(fromParticipants)) || [];
+
+    for (const participant of fromParticipantsArray) {
+      const participantEmail = participant.email;
+      if (!contacts) {
+        contacts = {};
+      }
+
+      if (participantEmail && !contacts[participantEmail]) {
+        contacts[participantEmail] = await getContact(participant);
+      }
     }
   }
 
-  function setContacts(participants: Participant[]) {
-    participants
-      .filter((participant) => participant.contact === undefined) // only the ones that aren't yet hydrated
-      .forEach((participant) => {
-        fetchContactsByQuery({
-          component_id: id,
-          // contact_id: participant.id
-          query: `?email=${participant.email}`,
-          access_token,
-        }).then((contacts) => {
-          if (contacts.length) {
-            participant.contact = contacts[0];
-          } else {
-            participant.contact = null;
-          }
-        });
-      });
+  // #region get contact for ContactImage
+  async function getContact(participant: Participant) {
+    contact_query["query"] = `?email=${participant.email}`;
+
+    if (id) {
+      let contact = $ContactStore[JSON.stringify(contact_query)];
+      if (!contact) {
+        contact = await ContactStore.addContact(contact_query);
+      }
+      return contact[0] ?? participant;
+    } else {
+      return participant;
+    }
   }
+  // #endregion get contact for ContactImage
 
   //#endregion Contacts
 
@@ -261,7 +291,7 @@
     return true;
   }
 
-  function _sendMessage(e) {
+  function _sendMessage(e: any) {
     e.preventDefault();
     dispatchEvent("sendMessageClicked", {
       event: e,
@@ -620,62 +650,43 @@
     <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
       {#each conversationMessages as message, i}
         {#await message.from[0] then from}
-          {#await conversationMessages[i - 1] ? conversationMessages[i - 1].from[0] : { name: "", email: "" } then previousFrom}
+          {#await from.email === you.email_address then isYou}
             {#await participants.findIndex((p) => p.email === from.email && p.name === from.name) then participantIndex}
-              {#await from.email === you.email_address then isYou}
-                <article
-                  class="message member-{participantIndex + 1}"
-                  class:you={isYou}
-                >
-                  <div class="contact">
-                    {#await (participants[participantIndex] || {}).contact then contact}
-                      <div class="avatar">
-                        {#if contact}
-                          {#if contact.picture && contact.picture !== "loading"}
-                            <img
-                              alt={contact.emails[0].email}
-                              src="data:image/jpg;base64,{contact.picture}"
-                            />
-                          {:else if contact.picture_url}
-                            {#if !hideAvatars}
-                              {(contact.picture = "loading")}
-                              {fetchContactImage(query, contact.id).then(
-                                (image) => {
-                                  contact.picture = image;
-                                },
-                              )}
-                            {/if}
-                          {:else if contact.given_name && contact.surname}
-                            {contact.given_name[0] + contact.surname[0]}
-                          {:else}{contact.emails[0].email[0]}{/if}
-                        {:else if isYou}
-                          <span>{getContactInitialForAvatar(you)}</span>
-                        {:else}
-                          <span>{getContactInitialForAvatar(from)}</span>
-                        {/if}
-                      </div>
-                    {/await}
-                  </div>
-                  <div class="body">
-                    {#if message.conversation}
-                      <p>{message.conversation}</p>
-                      <!-- else if it's there but blank -->
-                    {:else if message.hasOwnProperty("conversation") && !message.conversation}
-                      <p>
-                        {@html message.body}
-                      </p>
-                    {:else if message.snippet.includes(" On ")}
-                      <p>{message.snippet.split("On ")[0]}</p>
-                      <p class="after">On {message.snippet.split("On ")[1]}</p>
-                    {:else}
-                      <p>{message.snippet}</p>
-                    {/if}
-                  </div>
-                  <div class="time">
-                    {getDate(new Date(message.date * 1000))}
-                  </div>
-                </article>
-              {/await}
+              <article
+                class="message member-{participantIndex + 1}"
+                class:you={isYou}
+              >
+                <div class="contact">
+                  {#await contacts[from.email] then contact}
+                    <div class="avatar">
+                      <nylas-contact-image
+                        {contact_query}
+                        {contact}
+                        height="40px"
+                        width="40px"
+                      />
+                    </div>
+                  {/await}
+                </div>
+                <div class="body">
+                  {#if message.conversation}
+                    <p>{message.conversation}</p>
+                    <!-- else if it's there but blank -->
+                  {:else if message.hasOwnProperty("conversation") && !message.conversation}
+                    <p>
+                      {@html message.body}
+                    </p>
+                  {:else if message.snippet.includes(" On ")}
+                    <p>{message.snippet.split("On ")[0]}</p>
+                    <p class="after">On {message.snippet.split("On ")[1]}</p>
+                  {:else}
+                    <p>{message.snippet}</p>
+                  {/if}
+                </div>
+                <div class="time">
+                  {getDate(new Date(message.date * 1000))}
+                </div>
+              </article>
             {/await}
           {/await}
         {/await}

@@ -129,7 +129,9 @@
         await getThreadContacts(activeThread);
       } else if (message) {
         const participant = message.from[0];
-        contacts = contacts || {};
+        if (!contacts) {
+          contacts = {};
+        }
         contacts[participant.email] = await getContact(participant);
       }
     }
@@ -150,8 +152,9 @@
 
     for (const participant of fromParticipantsArray) {
       const participantEmail = participant.email;
-      contacts = contacts || {};
-
+      if (!contacts) {
+        contacts = {};
+      }
       if (!contacts[participantEmail] && participantEmail) {
         contacts[participantEmail] = await getContact(participant);
       }
