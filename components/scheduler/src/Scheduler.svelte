@@ -384,7 +384,7 @@
         <div id="custom-fields">
           {#each custom_fields as field}
             {#if field.type === "email"}
-              <label>
+              <label data-required={field.required}>
                 <strong>{field.title}</strong>
                 <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
                 <input
@@ -393,7 +393,7 @@
                 />
               </label>
             {:else}
-              <label>
+              <label data-required={field.required}>
                 <strong>{field.title}</strong>
                 <input
                   type="text"
@@ -406,6 +406,9 @@
       {/if}
       <button
         disabled={!requiredFieldsFilled}
+        title={!requiredFieldsFilled
+          ? "Please complete all required fields"
+          : undefined}
         class="book"
         on:click={() => bookTimeSlots(slotsToBook)}>{booking_label}</button
       >

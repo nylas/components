@@ -116,6 +116,13 @@ main {
           font-size: 0.8rem;
         }
 
+        &[data-required="true"] strong:after {
+          content: " (required)";
+          font-weight: normal;
+          opacity: 0.75;
+          font-style: italic;
+        }
+
         input[type="text"],
         input[type="email"] {
           padding: 0.5rem;
