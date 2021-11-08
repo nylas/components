@@ -255,7 +255,6 @@
     )
   ) {
     customFieldResponses = custom_fields.reduce((responses, field) => {
-      console.log("reca");
       return { ...responses, [field.title]: "" };
     }, {});
   }
@@ -267,8 +266,6 @@
         customFieldResponses[field.title] !== undefined &&
         customFieldResponses[field.title] !== "",
     );
-  $: console.log({ requiredFieldsFilled });
-  $: console.log(customFieldResponses);
   // #endregion custom fields
 </script>
 
