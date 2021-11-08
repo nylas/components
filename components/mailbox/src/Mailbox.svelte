@@ -7,7 +7,7 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
-  import { MailboxStore } from "@commons/store/threads";
+  import { MailboxStore } from "@commons/store/mailbox";
   import "../../email/src/Email.svelte";
   import "./components/PaginationNav.svelte";
   import { fetchMessage } from "@commons/connections/messages";
@@ -801,7 +801,7 @@
         class="spinner"
         style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
       />
-      Loading component...
+      Loading...
     </div>
   {/if}
 </main>

@@ -3,7 +3,6 @@
 <script lang="ts">
   import {
     MailboxStore,
-    Threads,
     ManifestStore,
     fetchAccount,
     updateThread,
@@ -108,6 +107,7 @@
     }
   });
   let contacts: any = null;
+  let activeThreadContact = {};
   $: activeThreadContact =
     activeThread && contacts
       ? contacts[
@@ -241,37 +241,28 @@
   // #region thread intake and set
   // The trick is to always ensure that activeThread is in the store; that way if we need to do fetches to update its messages, it too will be updated for free.
   // TODO: this feels like it could be a "$: activeThread =" reactive prop declaration instead of a conditional block. -Phil
-  $: if (thread && thread.id) {
-    // Thread is being passed in directly. We won't need to do an initial fetch.
-    // Is it in the store already? (via <nylas-mailbox>, for example)
-    let foundThread = $Threads.find(
-      (storedThread) => storedThread && storedThread.id === thread?.id,
-    ) as Conversation;
-    if (!foundThread) {
-      // Thread does not exist in the store, assume it was passed in
-      activeThread = thread as Conversation;
-    } else {
-      // It's already in the store! Great.
-      activeThread = foundThread;
-    }
-    // This is for Email component demo purpose, where we want to show expanded threads by default on load.
-    if (show_expanded_email_view_onload) {
-      activeThread.expanded = show_expanded_email_view_onload;
-    }
-  } else if (thread_id) {
-    // We don't have a passed thread, but we do have a thread_id. Let's fetch it.
-    MailboxStore.getThread(query).then(() => {
-      let foundThread = $Threads.find(
-        (storedThread) => storedThread.id === thread_id,
-      ) as Conversation;
-      if (foundThread) {
-        activeThread = foundThread;
-        if (show_expanded_email_view_onload) {
-          activeThread.expanded = show_expanded_email_view_onload;
-        }
+  $: (async () => {
+    if (thread && thread.id) {
+      // Is it in the store already? (via <nylas-mailbox>, for example)
+      const localThread: Conversation =
+        (MailboxStore.getFlatThreads().find(
+          (storedThread) => storedThread && storedThread.id === thread?.id,
+        ) as Conversation) ?? thread;
+
+      // This is for Email component demo purpose, where we want to show expanded threads by default on load.
+      if (show_expanded_email_view_onload) {
+        localThread.expanded = show_expanded_email_view_onload;
       }
-    });
-  }
+      activeThread = localThread;
+    } else if (thread_id) {
+      const thread = await MailboxStore.getThread(query);
+
+      if (show_expanded_email_view_onload) {
+        thread.expanded = show_expanded_email_view_onload;
+      }
+      activeThread = thread as Conversation;
+    }
+  })();
 
   // #endregion thread intake and set
   let emailManuallyPassed: boolean;
@@ -1138,7 +1129,7 @@
 >
   {#if thread || thread_id}
     {#await activeThread}
-      Loading Component...
+      Loading...
     {:then thread}
       {#if thread && activeThread}
         {#if activeThread.expanded}
