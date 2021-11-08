@@ -911,22 +911,9 @@
       ).then(async (consolidatedAvailabilityForGivenDay) => {
         loading = false;
         for (const user of consolidatedAvailabilityForGivenDay) {
-          // TODO: Discussion, should we re-implement contact fetch here?
-          // We've pseudo-deprecated the contact hover.
-          // if (!user.firstName && !user.lastName) {
-          //   const contact = await getContact(user.email);
-          //   if (!!contact) {
-          //     user.account = {
-          //       firstName: contact.given_name,
-          //       lastName: contact.surname,
-          //     };
-          //   }
-          // }
-
           freeBusyCalendars.push({
             emailAddress: user.email,
             account: {
-              // ...user.account,
               emailAddress: user.email, // ¯\_(ツ)_/¯
             },
             availability: AvailabilityStatus.FREE,
