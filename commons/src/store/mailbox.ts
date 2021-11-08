@@ -1,4 +1,4 @@
-import { derived, writable } from "svelte/store";
+import { writable } from "svelte/store";
 import {
   fetchThread,
   fetchThreads,
@@ -73,7 +73,10 @@ function initializeThreads() {
         threads[queryKey] = threadsMap[queryKey];
         return { ...threads };
       });
-      return threadsMap[queryKey];
+      return threadsMap[queryKey][0];
+    },
+    getFlatThreads: () => {
+      return Object.values(threadsMap).flat();
     },
 
     reset: () => {
@@ -108,8 +111,3 @@ function initializeThreads() {
 }
 
 export const MailboxStore = initializeThreads();
-
-export const Threads = derived(MailboxStore, ($mailboxes) => {
-  // console.log('Threads deriving', $mailboxes);
-  return Object.values($mailboxes).flat();
-});
