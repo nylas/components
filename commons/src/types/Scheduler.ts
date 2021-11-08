@@ -4,6 +4,14 @@ import type {
 } from "@commons/types/Availability";
 import type { NotificationMode } from "@commons/enums/Scheduler";
 
+export interface CustomField {
+  title: string;
+  description?: string;
+  type: "text" | "checkbox" | "email";
+  required: boolean;
+  placeholder: string;
+}
+
 export interface Manifest extends AvailabilityManifest {
   availability_id: string;
   editor_id: string;
@@ -26,4 +34,5 @@ export interface Manifest extends AvailabilityManifest {
     | "monthly"
   )[];
   recurrence_expiry: Date | string | null;
+  custom_fields: CustomField[];
 }
