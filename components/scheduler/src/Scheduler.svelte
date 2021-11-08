@@ -478,8 +478,8 @@
           </li>
         {/each}
       </ul>
-      {#if slotsToBook.length}
-        <div>
+      {#if custom_fields.length}
+        <div id="custom-fields">
           {#each custom_fields as field}
             <label>
               <h3>{field.title}</h3>

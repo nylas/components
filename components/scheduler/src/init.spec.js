@@ -50,4 +50,35 @@ describe("scheduler component", () => {
       cy.get("h3").contains("Test-Passed Title:");
     });
   });
+
+  describe("Custom Fields", () => {
+    it("only shows custom fields when timeslots are selected", () => {
+      cy.visit("/components/scheduler/src/index.html");
+
+      cy.get("nylas-scheduler")
+        .as("scheduler")
+        .then((element) => {
+          const component = element[0];
+          component.slots_to_book = [];
+          cy.get("#custom-fields").should("not.exist");
+        });
+      cy.get("nylas-scheduler")
+        .as("scheduler")
+        .then((element) => {
+          const component = element[0];
+          component.slots_to_book = slots_to_book;
+          cy.get("#custom-fields").should("exist");
+        });
+    });
+    it("shows a single email address field by default", () => {
+      cy.get("nylas-scheduler")
+        .as("scheduler")
+        .then((element) => {
+          const component = element[0];
+          component.slots_to_book = slots_to_book;
+          cy.get("#custom-fields h3").should("have.length", 1);
+          cy.get("#custom-fields h3").contains("Email Address");
+        });
+    });
+  });
 });
