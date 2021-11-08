@@ -184,9 +184,7 @@
     }
   }
 
-  /*
-    Fetches contact for ContactImage component
-  */
+  // #region get contact for ContactImage
   async function getContact(participant: Participant) {
     contact_query["query"] = `?email=${participant.email}`;
 
