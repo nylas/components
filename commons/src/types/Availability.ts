@@ -105,8 +105,8 @@ export interface PreDatedTimeSlot
   extends Omit<TimeSlot, "start_time" | "end_time"> {
   start_time: number;
   end_time: number;
-  start: number;
-  end: number;
+  start?: number;
+  end?: number;
 }
 
 export interface AvailabilityResponse {
