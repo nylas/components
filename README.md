@@ -142,7 +142,6 @@ After installing, run `yarn start`, go to `http://localhost:8000` in your browse
 
 `yarn cy:open` will launch our end-to-end tests in a browser
 tests will automatically be run on push from push.yaml
-snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 
 ### Push some Code
 
