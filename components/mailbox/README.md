@@ -165,7 +165,6 @@ Please refer to our [Contributing Guidelines](CONTRIBUTING.md) for information a
 
 `yarn cy:open` will launch our end-to-end tests in a browser
 tests will automatically be run on push from push.yaml
-snapshot (visual) diff tests are fun using Percy by running `yarn snapshot`
 
 ## Additional Documentation
 

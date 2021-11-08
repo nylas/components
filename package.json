@@ -25,7 +25,6 @@
     "publish": "lerna publish",
     "release:canary": "lerna version prerelease --no-private",
     "release:stable": "lerna version --force-publish --no-private",
-    "snapshot": "build-storybook --quiet && percy-storybook --widths=320,1280",
     "start": "concurrently \"live-server . --host=0.0.0.0 --port=8000\" \"yarn dev\"",
     "start:ci": "sirv . --port 8000 public",
     "storybook": "start-storybook --quiet -p 6006 -s ./public",
@@ -40,8 +39,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
-    "@percy-io/in-percy": "^0.1.11",
-    "@percy/storybook": "^3.3.1",
     "@rollup/plugin-alias": "3.1.2",
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-json": "^4.1.0",
