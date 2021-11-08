@@ -5,13 +5,13 @@ import type {
   AvailabilityResponse,
 } from "@commons/types/Availability";
 
-type AvailabilityStore = Record<string, Promise<AvailabilityResponse[]>>;
+type AvailabilityStore = Record<string, Promise<AvailabilityResponse>>;
 
 function initialize(): Writable<AvailabilityStore> {
   const get = (
     target: AvailabilityStore,
     key: string,
-  ): Promise<AvailabilityResponse[]> | void => {
+  ): Promise<AvailabilityResponse> | void => {
     const accessor: AvailabilityQuery = JSON.parse(key);
     // Avoid saving forceReload property as part of store key
     const accessorCopy = { ...accessor };

@@ -41,6 +41,7 @@
     AvailabilityRule,
     AvailabilityResponse,
     Day,
+    PreDatedTimeSlot,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
@@ -137,9 +138,12 @@
    * @param {boolean} slotsBooked Used to indicate whether the component should assume the previously selected slots were booked. Defaults to false.
    */
   export async function reload(clearSelection = false, slotsBooked = false) {
+    await getAvailability(true);
+
     if (slotsBooked) {
       const selectedSlots: any = [];
       for (const day of days) {
+        // TODO: verify that this works now that API-fetched availability is of type "free" rather than "busy" (see status="busy" in selected slots below)
         selectedSlots.push(
           ...day?.slots
             .filter(
@@ -153,17 +157,9 @@
         );
       }
 
-      $AvailabilityStore[JSON.stringify(getAvailabilityQuery())] =
-        $AvailabilityStore[JSON.stringify(getAvailabilityQuery())].then(
-          (availability) => {
-            for (const calendar of availability) {
-              calendar.time_slots.push(...selectedSlots);
-            }
-            return availability;
-          },
-        );
-
-      await getAvailability();
+      for (const calendar of allCalendars) {
+        calendar.timeslots.push(...selectedSlots);
+      }
     }
 
     if (clearSelection && Array.isArray(days)) {
@@ -174,8 +170,6 @@
       }
       days = [...days];
     }
-
-    await getAvailability(true);
   }
 
   //#endregion props
@@ -389,7 +383,7 @@
   $: endDay = dayRange[dayRange.length - 1];
 
   const allRequiredParticipantsIncluded = (calendars: string[]) => {
-    return required_participants.every((participant) =>
+    return requiredParticipants.every((participant) =>
       calendars.includes(participant),
     );
   };
@@ -420,23 +414,54 @@
               end_time: endTime,
               available_calendars: [],
             };
+
+            // Adjust calendar.timeslots for buffers
             const timeslots =
               calendar.availability === AvailabilityStatus.BUSY
-                ? calendar.timeslots.map((t) => ({
+                ? calendar.timeslots.map((t: TimeSlot) => ({
                     start_time: timeMinute.offset(t.start_time, -event_buffer),
                     end_time: timeMinute.offset(t.end_time, event_buffer),
                     available_calendars: t.available_calendars,
                   }))
-                : calendar.timeslots;
-            const slotAvailability = overlap(timeslots, slot);
+                : calendar.timeslots.map((t: TimeSlot) => ({
+                    // Don't apply start-buffer to the first timeslot, nor end-buffer to the last timeslot.
+                    // Works across multiple days; you won't get a random buffer at 11:50 / 00:10
+                    start_time: timeMinute.offset(
+                      t.start_time,
+                      t === calendar.timeslots[0] ? 0 : event_buffer,
+                    ),
+                    end_time: timeMinute.offset(
+                      t.end_time,
+                      t === calendar.timeslots[calendar.timeslots.length - 1]
+                        ? 0
+                        : -event_buffer,
+                    ),
+                    available_calendars: t.available_calendars,
+                  }));
+
+            let concurrentSlotEventsForUser = 0;
+            if (calendar.availability === AvailabilityStatus.BUSY) {
+              // For Busy calendars, a timeslot is considered available if its calendar has no overlapping events
+              concurrentSlotEventsForUser = overlap(timeslots, slot);
+            } else if (calendar.availability === AvailabilityStatus.FREE) {
+              // For Free calendars, a timeslot is considered available if its calendar has a time that fully envelops it.
+              concurrentSlotEventsForUser = timeslots.some(
+                (blob: TimeSlot) =>
+                  slot.start_time >= blob.start_time &&
+                  slot.end_time <= blob.end_time,
+              )
+                ? 1
+                : 0;
+              // slot availability is when a given timeslot has all of its minutes represented in calendar.free timeslots
+            }
             if (calendar.availability === AvailabilityStatus.BUSY) {
               if (
                 capacity &&
                 capacity >= 1 &&
-                slotAvailability.concurrentEvents < capacity
+                concurrentSlotEventsForUser < capacity
               ) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
-              } else if (!slotAvailability.overlap) {
+              } else if (!concurrentSlotEventsForUser) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             } else if (
@@ -444,7 +469,7 @@
               !calendar.availability
             ) {
               // if a calendar is passed in without availability, assume the timeslots are available.
-              if (slotAvailability.overlap) {
+              if (concurrentSlotEventsForUser) {
                 freeCalendars.push(calendar?.account?.emailAddress || "");
               }
             }
@@ -776,21 +801,17 @@
 
   // https://derickbailey.com/2015/09/07/check-for-date-range-overlap-with-javascript-arrays-sorting-and-reducing/
   function overlap(events: TimeSlot[], slot: TimeSlot) {
-    return events.reduce(
-      (result, current) => {
-        const overlap =
-          slot.start_time < current.end_time &&
-          current.start_time < slot.end_time;
+    return events.reduce((result, current) => {
+      const overlap =
+        slot.start_time < current.end_time &&
+        current.start_time < slot.end_time;
 
-        if (overlap) {
-          result.overlap = true;
-          // store the amount of overlap
-          result.concurrentEvents++;
-        }
-        return result;
-      },
-      { overlap: false, concurrentEvents: 0 },
-    );
+      if (overlap) {
+        // store the amount of overlap
+        result++;
+      }
+      return result;
+    }, 0);
   }
   // #endregion timeSlot selection
 
@@ -801,6 +822,9 @@
     return {
       body: {
         emails: emailAddresses,
+        free_busy: [],
+        duration_minutes: 5, // minumum allowed duration/interval
+        interval_minutes: 5,
         start_time:
           timeHour(
             new Date(new Date(startDay).setHours(start_hour)),
@@ -814,7 +838,7 @@
     };
   }
 
-  $: newCalendarTimeslotsForGivenEmails = [];
+  let newCalendarTimeslotsForGivenEmails: any[] = [];
   $: (async () => {
     if (
       (Array.isArray(email_ids) && email_ids.length > 0) ||
@@ -824,58 +848,85 @@
     }
   })();
 
+  // If 2 slots bump up to each other consider them a single group of time
+  function groupConsecutiveTimeslots(slots: PreDatedTimeSlot[] = []) {
+    return slots.reduce((groups, slot) => {
+      const prevSlot: PreDatedTimeSlot = groups[groups.length - 1];
+      if (prevSlot && prevSlot.end_time === slot.start_time) {
+        prevSlot.end_time = slot.end_time;
+      } else {
+        groups.push({ ...slot }); // TODO: types ¯\_(ツ)_/¯
+      }
+      return groups;
+    }, []);
+  }
+
+  let requiredParticipants: string[] = [];
+  $: requiredParticipants = [
+    ...new Set([...required_participants, booking_user_email]),
+  ];
+
   async function getAvailability(forceReload = false) {
     loading = true;
     let freeBusyCalendars: any = [];
     // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
-    let consolidatedAvailabilityForGivenDay: AvailabilityResponse[] = [];
 
-    if (Array.isArray(email_ids) && email_ids.length > 0) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({ ...getAvailabilityQuery(), forceReload })
-          ],
-        );
-    }
+    type fetchableCalendarUser = { email: string; token?: string };
+    let calendarsToFetch: fetchableCalendarUser[] = email_ids.map((email) => {
+      return {
+        email,
+      };
+    });
+
+    // If the booking user and access token are passed in, fetch their calendars as well.
+    // TODO: dont include them in the main list, as they shouldn't contribute to partial slot availability.
     if (booking_user_email && booking_user_token) {
-      consolidatedAvailabilityForGivenDay =
-        consolidatedAvailabilityForGivenDay.concat(
-          await $AvailabilityStore[
-            JSON.stringify({
-              ...getAvailabilityQuery([booking_user_email], booking_user_token),
-              forceReload,
-            })
-          ],
-        );
-    }
-
-    loading = false;
-    for (const user of consolidatedAvailabilityForGivenDay) {
-      if (!user.firstName && !user.lastName) {
-        const contact = await getContact(user.email);
-        if (!!contact) {
-          user.account = {
-            firstName: contact.given_name,
-            lastName: contact.surname,
-          };
-        }
-      }
-
-      freeBusyCalendars.push({
-        emailAddress: user.email,
-        account: {
-          ...user.account,
-          emailAddress: user.email, // ¯\_(ツ)_/¯
-        },
-        availability: AvailabilityStatus.BUSY,
-        timeslots: user.time_slots.map((slot) => ({
-          start_time: new Date(slot.start_time * 1000),
-          end_time: new Date(slot.end_time * 1000),
-        })),
+      calendarsToFetch.push({
+        email: booking_user_email,
+        token: booking_user_token,
       });
     }
-    newCalendarTimeslotsForGivenEmails = freeBusyCalendars;
+
+    if (Array.isArray(calendarsToFetch) && calendarsToFetch.length > 0) {
+      // Note: we split our requests by email_id as calendars/availability doesn't support partial availability amongst a group
+      return Promise.all(
+        calendarsToFetch.map(async (user) => {
+          const { email, token } = user;
+          let availableTimeslots = await $AvailabilityStore[
+            JSON.stringify({
+              ...getAvailabilityQuery([email], token ? token : access_token),
+              forceReload,
+            })
+          ];
+
+          // Blob consecutive timeslots together for easier overlap logic elsewhere
+          let groupedSlots = groupConsecutiveTimeslots(
+            availableTimeslots.time_slots,
+          );
+          return {
+            email,
+            time_slots: groupedSlots,
+          };
+        }),
+      ).then(async (consolidatedAvailabilityForGivenDay) => {
+        loading = false;
+        for (const user of consolidatedAvailabilityForGivenDay) {
+          freeBusyCalendars.push({
+            emailAddress: user.email,
+            account: {
+              emailAddress: user.email, // ¯\_(ツ)_/¯
+            },
+            availability: AvailabilityStatus.FREE,
+            timeslots: user.time_slots.map((slot: PreDatedTimeSlot) => ({
+              start_time: new Date(slot.start_time * 1000),
+              end_time: new Date(slot.end_time * 1000),
+            })),
+          });
+        }
+        newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
+        return newCalendarTimeslotsForGivenEmails;
+      });
+    }
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.

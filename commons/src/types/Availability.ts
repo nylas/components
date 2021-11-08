@@ -85,17 +85,33 @@ export interface AvailabilityQuery extends CommonQuery {
     emails: string[];
     start_time: number;
     end_time: number;
+    free_busy: any[];
+    duration_minutes: number;
+    interval_minutes: number;
   };
   forceReload?: boolean;
 }
 
-export interface AvailabilityResponse {
+export interface FreeBusyResponse {
   object: "free_busy";
   time_slots: {
     start_time: number;
     end_time: number;
   }[];
   email: string;
+}
+
+export interface PreDatedTimeSlot
+  extends Omit<TimeSlot, "start_time" | "end_time"> {
+  start_time: number;
+  end_time: number;
+  start?: number;
+  end?: number;
+}
+
+export interface AvailabilityResponse {
+  object: "availability";
+  time_slots: PreDatedTimeSlot[];
 }
 
 export interface EventQuery extends CommonQuery {
