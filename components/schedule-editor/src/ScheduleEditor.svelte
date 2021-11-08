@@ -61,6 +61,7 @@
   export let start_hour: number;
   export let view_as: "schedule" | "list";
   export let timezone: string;
+  export let screen_bookings: boolean;
 
   const defaultValueMap = {
     allow_booking: false,
@@ -93,6 +94,7 @@
     start_hour: 9,
     view_as: "schedule",
     timezone: "",
+    screen_bookings: false,
   };
 
   //#region mount and prop initialization
@@ -157,6 +159,7 @@
     start_hour = internalProps.start_hour;
     view_as = internalProps.view_as;
     timezone = internalProps.timezone;
+    screen_bookings = internalProps.screen_bookings;
   }
 
   // Manifest properties requiring further manipulation:
@@ -598,6 +601,19 @@
               bind:value={internalProps.max_bookable_slots}
             />
           </label>
+          <div role="checkbox" aria-labelledby="screen_bookings">
+            <strong id="screen_bookings"
+              >Scheduling on this calendar requires manual confirmation</strong
+            >
+            <label>
+              <input
+                type="checkbox"
+                name="screen_bookings"
+                bind:checked={internalProps.screen_bookings}
+              />
+              Let the meeting host screen bookings before they're made official
+            </label>
+          </div>
           <label>
             <strong>Participant Threshold / Partial bookable ratio</strong>
             <input
