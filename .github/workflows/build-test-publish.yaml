@@ -1,7 +1,6 @@
 name: Build & Test
 on:
   push:
-  pull_request:
 env:
   API_GATEWAY: ${{secrets.API_GATEWAY}}
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
