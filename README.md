@@ -4,7 +4,7 @@ Nylas Components are a suite of UI building blocks that let you build user-facin
 
 ## Background
 
-Front-end UIs can often be time-consuming to build, even for simple functionality. The Nylas Components are designed to help developers more quickly add communications and scheduling functionality into their app.
+Front-end UIs can often be time-consuming to build, even for simple functionality. The Nylas Components are designed to help developers more quickly add communications and scheduling functionality into their app
 
 The Nylas Components include:
 
