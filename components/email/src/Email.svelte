@@ -847,7 +847,8 @@
           div.message-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: baseline;
+            gap: $spacing-xs;
           }
           div.message-date {
             display: flex;
@@ -878,13 +879,15 @@
               div.message-to {
                 color: gray;
                 max-width: 150px;
-                overflow: hidden;
-                text-overflow: ellipsis;
                 margin-left: calc(32px + 0.7rem);
-                span {
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
+                div {
+                  display: grid;
+                  grid-template-columns: 1fr 16px;
+
+                  span {
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                  }
                 }
               }
             }
@@ -1090,8 +1093,18 @@
                 div.message-from-to {
                   margin: $spacing-xs 0;
                   div.message-to {
-                    max-width: unset;
+                    max-width: inherit;
                     overflow: inherit;
+                    div {
+                      display: grid;
+                      grid-template-columns: 1fr 16px;
+                      align-items: center;
+
+                      span {
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                      }
+                    }
                   }
                 }
               }
@@ -1249,15 +1262,17 @@
                         </div>
                         <div class="message-to">
                           {#each message.to as to, i}
-                            <span>
+                            <div>
                               {#if to.name || to.email}
-                                to&colon;&nbsp;{userEmail &&
-                                to.email === userEmail
-                                  ? "me"
-                                  : to.name || to.email}
-                                {#if i !== message.to.length - 1}
-                                  &nbsp;&comma;
-                                {/if}
+                                <span
+                                  >to&colon;&nbsp;{userEmail &&
+                                  to.email === userEmail
+                                    ? "me"
+                                    : to.name || to.email}
+                                  {#if i !== message.to.length - 1}
+                                    &nbsp;&comma;
+                                  {/if}
+                                </span>
                                 <!-- tooltip component -->
                                 <nylas-tooltip
                                   on:toggleTooltip={setTooltip}
@@ -1267,7 +1282,7 @@
                                   content={to.email}
                                 />
                               {/if}
-                            </span>
+                            </div>
                           {/each}
                         </div>
                       </div>
@@ -1518,14 +1533,16 @@
 
               <div class="message-to">
                 {#each message.to as to, i}
-                  <span>
+                  <div>
                     {#if to.name || to.email}
-                      to&colon;&nbsp;{userEmail && to.email === userEmail
-                        ? "me"
-                        : to.name || to.email}
-                      {#if i !== message.to.length - 1}
-                        &nbsp;&comma;
-                      {/if}
+                      <span
+                        >to&colon;&nbsp;{userEmail && to.email === userEmail
+                          ? "me"
+                          : to.name || to.email}
+                        {#if i !== message.to.length - 1}
+                          &nbsp;&comma;
+                        {/if}
+                      </span>
                       <!-- tooltip component -->
                       <nylas-tooltip
                         on:toggleTooltip={setTooltip}
@@ -1535,7 +1552,7 @@
                         content={to.email}
                       />
                     {/if}
-                  </span>
+                  </div>
                 {/each}
               </div>
             </div>

@@ -9,7 +9,7 @@
 
 <style>
   div {
-    width: 100%;
+    width: inherit;
   }
 </style>
 
