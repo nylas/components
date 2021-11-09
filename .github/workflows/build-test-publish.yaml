@@ -6,9 +6,8 @@ on:
   pull_request:
     types: [opened, synchronize]
 env:
-  API_GATEWAY: ${{secrets.API_GATEWAY}}
+  API_GATEWAY: "web-components.nylas.com/middleware"
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
-  PERCY_TOKEN: ${{secrets.PERCY_TOKEN}}
 jobs:
   build:
     runs-on: ubuntu-latest
