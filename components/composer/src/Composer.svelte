@@ -348,7 +348,6 @@
       themeUrl = theme;
     } else if (theme) {
       themeUrl = `../themes/${theme}.css`;
-      // themeUrl = `https://unpkg.com/@nylas/components-composer@${pkg.version}/themes/${theme}.css`;
     }
   }
 
