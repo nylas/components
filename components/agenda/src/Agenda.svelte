@@ -249,7 +249,7 @@
 
   // Accept either comma-separated string, or array.
   let calendarIDs: string[] = [];
-  $: (calendarIDs = setCalendarIDs()), internalProps, calendar_id;
+  $: (calendarIDs = setCalendarIDs()), internalProps;
   function setCalendarIDs() {
     let IDList = internalProps.calendar_ids;
     if (typeof IDList === "string" && IDList.length) {
