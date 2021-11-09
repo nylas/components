@@ -153,7 +153,7 @@
     fetchContacts(query, offset, contacts_to_load).then(
       (results: Contact[]) => {
         if (results.length > 0) {
-          hydratedContacts = $ContactStore[queryKey];
+          hydratedContacts = $ContactStore[queryKey] ?? results;
           offset += contacts_to_load;
         }
         status = "loaded";
