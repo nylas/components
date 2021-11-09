@@ -1,6 +1,10 @@
 name: Build & Test
 on:
   push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    types: [opened, synchronize]
 env:
   API_GATEWAY: ${{secrets.API_GATEWAY}}
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
@@ -95,11 +99,13 @@ jobs:
   test-cypress:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3, 4]
+      fail-fast: true
     needs: build
     steps:
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
       - uses: actions/cache@v2
         id: restore-build
         with:
@@ -114,9 +120,8 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: .
-          record: ${{ env.CYPRESS_RECORD_KEY != '' }} # Disable recording if PR is from a forked repo
+          record: false
           install: false # disable npm install because we are already running it in previous step
-          parallel: ${{ env.CYPRESS_RECORD_KEY != '' }}
           start: npm run start:ci
           wait-on: http://localhost:8000
           wait-on-timeout: 30
