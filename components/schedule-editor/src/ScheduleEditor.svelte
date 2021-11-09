@@ -309,6 +309,7 @@
   function removeCustomField(field: CustomField) {
     customFields = customFields.filter((f: CustomField) => f !== field);
   }
+  let newCustomField = {};
   $: console.log({ customFields });
   $: console.log({ custom_fields });
   //#endregion custom fields
@@ -776,6 +777,22 @@
                     >
                   </tr>
                 {/each}
+                <tr class="add-new">
+                  <td
+                    ><input
+                      type="text"
+                      placeholder="Title"
+                      bind:value={newCustomField.title}
+                    /></td
+                  >
+                  <td
+                    ><input
+                      type="text"
+                      placeholder="Description"
+                      bind:value={newCustomField.description}
+                    /></td
+                  >
+                </tr>
               </tbody>
             </table>
           {/if}
