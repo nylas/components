@@ -374,6 +374,7 @@
     --border-radius: var(--composer-border-radius, 6px);
     --primary: var(--composer-primary-color, #5c77ff);
     --primary-light: var(--composer-primary-light-color, #f0f2ff);
+    --text-secondary: var(--composer-text-secondary-color, #2247ff);
 
     width: var(--width, 100%);
     min-width: 300px;

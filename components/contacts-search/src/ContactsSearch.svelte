@@ -217,7 +217,7 @@
     margin-bottom: 2px;
   }
   .contact-item > button {
-    color: var(--composer-text-secondary-color, #2247ff);
+    color: var(--text-secondary);
     border: none;
     background: none;
     padding: 2px 4px;
@@ -226,7 +226,7 @@
     cursor: pointer;
   }
   .contact-item__name {
-    color: var(--composer-text-secondary-color, #2247ff);
+    color: var(--text-secondary);
     font-size: 12px;
     padding-right: 0.75rem;
   }
