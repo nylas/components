@@ -1,7 +1,10 @@
 name: Build & Test
 on:
   push:
+    branches: [main]
+    tags: ["v*"]
   pull_request:
+    types: [opened, synchronize]
 env:
   API_GATEWAY: ${{secrets.API_GATEWAY}}
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
@@ -97,8 +100,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        containers: [1, 2, 3, 4]
     needs: build
     steps:
       - uses: actions/cache@v2
@@ -117,7 +118,6 @@ jobs:
           working-directory: .
           record: ${{ env.CYPRESS_RECORD_KEY != '' }} # Disable recording if PR is from a forked repo
           install: false # disable npm install because we are already running it in previous step
-          parallel: ${{ env.CYPRESS_RECORD_KEY != '' }}
           start: npm run start:ci
           wait-on: http://localhost:8000
           wait-on-timeout: 30
@@ -151,12 +151,10 @@ jobs:
           npm config set access public
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
-
       - name: Publish (canary)
         if: contains(github.ref, 'canary') == true
         run: |
           npm run lerna -- changed && npm run lerna -- publish from-git --no-git-reset --no-verify-access --dist-tag canary --canary --preid canary --yes
-
       - name: Publish (stable)
         if: contains(github.ref, 'canary') == false
         run: |
