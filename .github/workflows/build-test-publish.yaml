@@ -114,9 +114,9 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: .
-          record: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # Disable recording if PR is from a forked repo
+          record: ${{ env.CYPRESS_RECORD_KEY != '' }} # Disable recording if PR is from a forked repo
           install: false # disable npm install because we are already running it in previous step
-          parallel: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          parallel: ${{ env.CYPRESS_RECORD_KEY != '' }}
           start: npm run start:ci
           wait-on: http://localhost:8000
           wait-on-timeout: 30
