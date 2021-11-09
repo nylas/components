@@ -99,6 +99,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4]
     needs: build
     steps:
       - uses: actions/cache@v2
@@ -115,7 +117,8 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: .
-          record: ${{ env.CYPRESS_RECORD_KEY != '' }} # Disable recording if PR is from a forked repo
+          record: true
+          parallel: true
           install: false # disable npm install because we are already running it in previous step
           start: npm run start:ci
           wait-on: http://localhost:8000
