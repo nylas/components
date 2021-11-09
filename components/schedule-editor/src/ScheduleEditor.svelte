@@ -11,14 +11,13 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import { NotificationMode } from "@commons/enums/Scheduler";
-  // TODO: switch for local development
-  // import "@nylas/components-availability";
-  // import "../../availability";
+
+  import { DefaultCustomFields } from "@commons/constants/custom-fields";
+
   import "../../availability/src/Availability.svelte";
-  // import "@nylas/components-scheduler";
-  // import "../../scheduler";
   import "../../scheduler/src/Scheduler.svelte";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
+  import type { CustomField } from "@commons/types/Scheduler";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -62,6 +61,7 @@
   export let view_as: "schedule" | "list";
   export let timezone: string;
   export let screen_bookings: boolean;
+  export let custom_fields: CustomField[];
 
   const defaultValueMap = {
     allow_booking: false,
@@ -95,6 +95,7 @@
     view_as: "schedule",
     timezone: "",
     screen_bookings: false,
+    custom_fields: DefaultCustomFields,
   };
 
   //#region mount and prop initialization
@@ -160,6 +161,7 @@
     view_as = internalProps.view_as;
     timezone = internalProps.timezone;
     screen_bookings = internalProps.screen_bookings;
+    custom_fields = internalProps.custom_fields;
   }
 
   // Manifest properties requiring further manipulation:
@@ -180,10 +182,16 @@
     } else if (manifest.recurrence_cadence) {
       recurrenceCadence = manifest.recurrence_cadence;
     }
+    if (custom_fields) {
+      customFields = custom_fields;
+    } else if (manifest.custom_fields) {
+      customFields = manifest.custom_fields;
+    }
   }
   let emailIDs: string = "";
   let startDate: string = new Date().toLocaleDateString("en-CA");
   let recurrenceCadence: string[] = [];
+  let customFields: CustomField[];
 
   $: {
     internalProps.recurrence_cadence = <any>recurrenceCadence;
@@ -203,6 +211,8 @@
   $: {
     internalProps.open_hours = open_hours;
   }
+
+  $: internalProps.custom_fields = customFields;
   // #endregion mount and prop initialization
 
   function saveProperties() {
@@ -293,6 +303,15 @@
   let slots_to_book: TimeSlot;
   let mainElementWidth: number;
   $: showPreview = mainElementWidth > 600;
+
+  //#region custom fields
+  const customFieldKeys = ["title", "description", "type", "required"];
+  function removeCustomField(field: CustomField) {
+    customFields = customFields.filter((f: CustomField) => f !== field);
+  }
+  $: console.log({ customFields });
+  $: console.log({ custom_fields });
+  //#endregion custom fields
 </script>
 
 <style lang="scss">
@@ -728,6 +747,59 @@
         </div>
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
+
+      <section class="booking-details">
+        <h1>Custom Fields</h1>
+        <p class="intro">
+          Ask users to fill out a few details before booking an event with you.
+          By deafult, they will be asked for their name and email address.
+        </p>
+        <div class="contents">
+          {#if customFields}
+            <table>
+              <thead>
+                {#each customFieldKeys as key}
+                  <th>{key}</th>
+                {/each}
+                <th>Remove</th>
+              </thead>
+              <tbody>
+                {#each customFields as field}
+                  <tr>
+                    {#each customFieldKeys as key}
+                      <td>{field[key] || "—"}</td>
+                    {/each}
+                    <td
+                      ><button on:click={() => removeCustomField(field)}
+                        >Remove</button
+                      ></td
+                    >
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {/if}
+          <!-- <div role="checkbox">
+            <label>
+              <input
+                type="checkbox"
+                bind:checked={customFieldsIncludeNameAndEmail}
+              />
+              <span>Ask for Name and Email Address (default behaviour)</span>
+            </label>
+          </div>
+          <label>
+            <strong>Maximum slots that can be booked at once</strong>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              bind:value={internalProps.max_bookable_slots}
+            />
+          </label> -->
+        </div>
+      </section>
+
       <section class="Notification-details">
         <h1>Notification Details</h1>
         <div class="contents">
