@@ -367,6 +367,15 @@
 
 <style lang="scss">
   .nylas-composer {
+    // setting vars that contact-search uses
+    --outer-padding: var(--composer-outer-width, 15px);
+    --font-size-small: var(--composer-font-size-small, 12px);
+    --text-light: var(--composer-text-light-color, #6e6e7a);
+    --border: var(--composer-border-color, #f7f7f7);
+    --border-radius: var(--composer-border-radius, 6px);
+    --primary: var(--composer-primary-color, #5c77ff);
+    --primary-light: var(--composer-primary-light-color, #f0f2ff);
+
     width: var(--width, 100%);
     min-width: 300px;
     height: var(--height, 100%);
