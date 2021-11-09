@@ -1,25 +1,26 @@
 .nylas-composer {
-  --background: #fff;
-  --background-muted: #edf1ff;
-  --text: #00000;
-  --text-light: #6e6e7a;
-  --text-secondary: #ffffff;
-  --font: lato, sans-serif;
-  --font-size: 14px;
-  --font-size-small: 12px;
+  --composer-background-color: #fff;
+  --composer-background-muted-color: #edf1ff;
+  --composer-text-color: #00000;
+  --composer-text-light-color: #6e6e7a;
+  --composer-text-secondary-color: #ffffff;
+  --composer-font: lato, sans-serif;
+  --composer-font-size: 14px;
+  --composer-font-size-small: 12px;
 
-  --border: #f4f4f4;
-  --primary-light: #3f6bff;
-  --primary: #0037e5;
-  --icons: #a5a6b9;
-  --header-background: var(--background);
+  --composer-border-color: #f4f4f4;
+  --composer-primary-color: #0037e5;
+  --composer-primary-light-color: #3f6bff;
+  --composer-primary-dark-color: #00a88b;
+  --composer-icons-color: #a5a6b9;
+  --composer-header-background-color: var(--composer-background-color);
 
-  --success: white;
-  --success-light: var(--primary);
+  --composer-success-color: white;
+  --composer-success-light-color: var(--composer-primary-color);
 
-  --danger: #ffffff;
-  --danger-light: #ff5454;
+  --composer-danger-color: #ff0000;
+  --composer-danger-light-color: #ffdddd;
 
-  --info: var(--primary-light);
-  --info-light: #d2dcff;
+  --composer-info-color: var(--composer-primary-light-color);
+  --composer-info-light-color: #d2dcff;
 }
