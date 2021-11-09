@@ -179,6 +179,17 @@
         },
       };
 
+      if (customFieldResponses["Email Address"]) {
+        postableEvent.participants?.push({
+          email: customFieldResponses["Email Address"],
+          name: customFieldResponses["Your Name"],
+        });
+      }
+
+      if (Object.keys(customFieldResponses).length) {
+        postableEvent.metadata = customFieldResponses;
+      }
+
       if (event.recurrence_cadence && event.recurrence_cadence !== "none") {
         let rrule: string = "";
         if (event.recurrence_cadence === "daily") {
