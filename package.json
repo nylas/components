@@ -4,6 +4,10 @@
     "node": ">= 14.0.0",
     "yarn": ">= 1.20.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nylas/components.git"
+  },
   "scripts": {
     "build": "lerna run --parallel build",
     "build-storybook": "build-storybook -o ./storybook-static --quiet",
