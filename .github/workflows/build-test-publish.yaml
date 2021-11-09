@@ -120,7 +120,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: .
-          record: true
+          record: ${{ github.event.pull_request.head.repo.full_name == github.repository }} # Disable recording if PR is from a forked repo
           install: false # disable npm install because we are already running it in previous step
           start: npm run start:ci
           wait-on: http://localhost:8000
