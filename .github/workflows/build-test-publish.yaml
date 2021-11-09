@@ -4,6 +4,7 @@ on:
     branches: [main]
     tags: ["v*"]
   pull_request:
+    types: [opened]
 env:
   API_GATEWAY: ${{secrets.API_GATEWAY}}
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
