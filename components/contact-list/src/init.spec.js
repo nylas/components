@@ -142,6 +142,65 @@ describe("Contact List Interaction", () => {
       .find(".contact")
       .should("have.length.greaterThan", 1);
   });
+
+  describe("Custom data", () => {
+    it("Toggles between custom and Nylas data", () => {
+      cy.loadContacts();
+      cy.visit("/components/contact-list/src/index.html");
+      cy.get("nylas-contact-list").should("exist");
+      cy.wait("@contacts").then(() => {
+        cy.get("nylas-contact-list")
+          .as("contacts")
+          .then((element) => {
+            const contactlist = element[0];
+
+            // Check to make sure it's using Nylas data (Test user is a signifier)
+            cy.get("ul.contacts")
+              .find("li.contact .title:contains('Test User')")
+              .should("exist");
+
+            cy.loadContacts();
+            cy.wait("@contacts").then(() => {
+              // Set custom data
+              contactlist.contacts = [
+                {
+                  emails: [{ email: "tom@brightideas.com" }],
+                  given_name: "Thomas Edison",
+                },
+                {
+                  emails: [{ email: "alex@bell.com" }],
+                  given_name: "Alexander Graham Bell",
+                },
+                {
+                  emails: [{ email: "al@particletech.com" }],
+                  given_name: "Albert Einstein",
+                },
+              ];
+
+              // Check to make sure it's using custom data (not Nylas data)
+              cy.get("ul.contacts")
+                .find("li.contact .title")
+                .should("not.contain", "Test User");
+              cy.get("ul.contacts")
+                .find("li.contact .title:contains('Thomas Edison')")
+                .should("exist")
+                .then(() => {
+                  // Revert custom data
+                  contactlist.contacts = null;
+
+                  // Check to make sure it's using Nylas data again
+                  cy.get("ul.contacts")
+                    .find("li.contact .title")
+                    .should("contain", "Test User");
+                  cy.get("ul.contacts")
+                    .find("li.contact .title")
+                    .should("not.contain", "Thomas Edison");
+                });
+            });
+          });
+      });
+    });
+  });
 });
 
 describe("Optional Prop Handling", () => {

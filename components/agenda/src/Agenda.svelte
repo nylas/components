@@ -248,29 +248,26 @@
   // #region Data Flow
 
   // Accept either comma-separated string, or array.
-  $: calendarIDs = (() => {
+  let calendarIDs: string[] = [];
+  $: (calendarIDs = setCalendarIDs()), internalProps;
+  function setCalendarIDs() {
     let IDList = internalProps.calendar_ids;
-    if (
-      typeof internalProps.calendar_ids === "string" &&
-      internalProps.calendar_ids.length
-    ) {
-      IDList = IDList.split(",").map((id: string) => id.trim());
+    if (typeof IDList === "string" && IDList.length) {
+      return IDList.split(",").map((id: string) => id.trim());
     } else if (calendar_id) {
-      IDList = [calendar_id];
+      return [calendar_id];
     }
-    return IDList;
-  })();
+    return [];
+  }
 
   let query: EventQuery;
-  $: {
-    query = {
-      component_id: id,
-      access_token: access_token,
-      calendarIDs: calendarIDs,
-      starts_after: startOfDay,
-      ends_before: endOfDay,
-    };
-  }
+  $: query = {
+    component_id: id,
+    access_token: access_token,
+    calendarIDs: calendarIDs,
+    starts_after: startOfDay,
+    ends_before: endOfDay,
+  };
 
   // Sibling Queries: eagerly fetch the events on the previous and next days,
   // so when the user clicks them, the loading will seem instantaneous.
@@ -330,19 +327,22 @@
 
   // Try getting events from 3 sources: first, directly passed in, then, from our store; finally, by way of a fetch
   let calendarEvents: Event[] = [];
-  $: {
-    (async () => {
-      if (events) {
-        calendarEvents = events as Event[];
-      } else {
-        calendarEvents = (await EventStore.getEvents(query)) || [];
-        if (siblingQueries.length) {
-          siblingQueries.forEach((siblingQuery) =>
-            EventStore.getEvents(siblingQuery),
-          );
+  $: setCalendarEvents(), events, query;
+  async function setCalendarEvents() {
+    if (events && Array.isArray(events)) {
+      calendarEvents = events as Event[];
+    } else {
+      await EventStore.getEvents(query).then((nylasEvents) => {
+        if (!events) {
+          calendarEvents = nylasEvents || [];
+          if (siblingQueries.length) {
+            siblingQueries.forEach((siblingQuery) =>
+              EventStore.getEvents(siblingQuery),
+            );
+          }
         }
-      }
-    })();
+      });
+    }
   }
 
   $: allDayEvents = calendarEvents
@@ -1488,12 +1488,17 @@
                 class:expanded={expandedEventId === event.id}
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs.indexOf(event.calendar_id) + 1}
-                style="top: {event.relativeStartTime * 100}%; height: 
+                style="top: {event.relativeStartTime *
+                  100}%; height: 
               {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
-                  : `calc(${event.relativeRunTime * 100}%  - 4px)`};
-              left: {event.relativeOverlapOffset * 100}%; 
-              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
+                  : `calc(${
+                      event.relativeRunTime * 100
+                    }%  - 4px)`};
+              left: {event.relativeOverlapOffset *
+                  100}%; 
+              width: calc({event.relativeOverlapWidth *
+                  100}% - 4px)"
               >
                 <div
                   class="inner"
