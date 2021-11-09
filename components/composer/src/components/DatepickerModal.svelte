@@ -41,7 +41,7 @@
 
   /* The Close Button */
   .close {
-    color: var(composer-text-light-color, #6e6e7a);
+    color: var(--composer-text-light-color, #6e6e7a);
     float: right;
     padding-right: 10px;
     font-size: 28px;

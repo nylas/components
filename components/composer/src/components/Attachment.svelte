@@ -68,7 +68,7 @@
   .file-item__size {
     flex-shrink: 0;
     word-break: keep-all;
-    color: var(composer-text-light-color, #6e6e7a);
+    color: var(--composer-text-light-color, #6e6e7a);
     margin-left: 5px;
     font-size: var(--composer-font-size-small, 12px);
   }

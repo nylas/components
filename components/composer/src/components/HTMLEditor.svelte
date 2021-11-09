@@ -121,7 +121,7 @@
     padding: 0 calc(var(--composer-outer-padding, 15px) / 2);
 
     button {
-      color: var(composer-text-light-color, #6e6e7a);
+      color: var(--composer-text-light-color, #6e6e7a);
       background: none;
       border: 0;
       cursor: pointer;
@@ -143,12 +143,6 @@
       }
     }
   }
-
-  .icon {
-    fill: var(--composer-icons-color, #666774) !important;
-    width: 12px;
-    height: 12px;
-  }
 </style>
 
 <!-- Toolbar -->
@@ -161,7 +155,11 @@
           class={item.state && item.state() ? "active" : ""}
         >
           {#if item.icon}
-            <svelte:component this={item.icon} class="icon" />
+            <svelte:component
+              this={item.icon}
+              class="icon"
+              style="fill: var(--composer-icons-color, #666774) !important; width: 12px; height: 12px;"
+            />
           {:else}{item.title.charAt(0)}{/if}
         </button>
       {/each}
