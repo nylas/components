@@ -879,7 +879,6 @@
                 color: gray;
                 max-width: 150px;
                 overflow: hidden;
-                white-space: nowrap;
                 text-overflow: ellipsis;
                 margin-left: calc(32px + 0.7rem);
                 span {
@@ -1054,6 +1053,7 @@
           flex-direction: column;
           box-sizing: border-box;
           width: 100%;
+          overflow: hidden;
           header {
             padding: $spacing-m $spacing-xl;
           }
