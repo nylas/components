@@ -42,6 +42,50 @@ section {
     gap: 24px;
     margin-bottom: 24px;
 
+    table {
+      border-collapse: colapse;
+
+      tr.add-new td {
+        background-color: var(--grey-light);
+      }
+      th,
+      td {
+        text-align: left;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+        padding: 0.25rem;
+
+        input[type="text"],
+        select {
+          padding: 0.25rem;
+        }
+
+        label {
+          display: block;
+          white-space: nowrap;
+        }
+
+        button {
+          background-color: var(--red);
+          &.add-custom-field {
+            background-color: var(--blue);
+
+            &:disabled {
+              background-color: var(--grey-warm);
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
+      th {
+        text-transform: capitalize;
+        border-bottom: 2px solid black;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+    }
+
     label {
       display: flex;
       flex-direction: column;
@@ -65,18 +109,6 @@ section {
     }
   }
 
-  table {
-    th {
-      text-transform: capitalize;
-      border-bottom: 2px solid black;
-    }
-    th,
-    td {
-      text-align: left;
-      border-bottom: 1px soild rgba(0, 0, 0, 0.25);
-      padding: 0.25rem;
-    }
-  }
   button {
     align-self: flex-end;
     padding: 8px 16px;

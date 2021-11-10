@@ -9,7 +9,7 @@ export interface CustomField {
   description?: string;
   type: "text" | "checkbox" | "email";
   required: boolean;
-  placeholder: string;
+  placeholder?: string;
 }
 
 export interface Manifest extends AvailabilityManifest {

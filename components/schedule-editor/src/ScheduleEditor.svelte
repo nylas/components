@@ -306,12 +306,25 @@
 
   //#region custom fields
   const customFieldKeys = ["title", "description", "type", "required"];
+  const emptyCustomField: CustomField = {
+    title: "",
+    description: "",
+    type: "text",
+    required: false,
+  };
+
+  let newFieldTitleElement: HTMLElement;
+  let newCustomField: CustomField = { ...emptyCustomField };
+
   function removeCustomField(field: CustomField) {
     customFields = customFields.filter((f: CustomField) => f !== field);
   }
-  let newCustomField = {};
-  $: console.log({ customFields });
-  $: console.log({ custom_fields });
+
+  function addNewField(field: CustomField) {
+    customFields = [...customFields, field];
+    newCustomField = { ...emptyCustomField };
+    newFieldTitleElement.focus();
+  }
   //#endregion custom fields
 </script>
 
@@ -757,12 +770,12 @@
         </p>
         <div class="contents">
           {#if customFields}
-            <table>
+            <table cellspacing="0" cellpadding="0">
               <thead>
                 {#each customFieldKeys as key}
                   <th>{key}</th>
                 {/each}
-                <th>Remove</th>
+                <th />
               </thead>
               <tbody>
                 {#each customFields as field}
@@ -778,42 +791,47 @@
                   </tr>
                 {/each}
                 <tr class="add-new">
-                  <td
-                    ><input
+                  <td>
+                    <input
                       type="text"
                       placeholder="Title"
+                      bind:this={newFieldTitleElement}
                       bind:value={newCustomField.title}
-                    /></td
-                  >
-                  <td
-                    ><input
+                    />
+                  </td>
+                  <td>
+                    <input
                       type="text"
                       placeholder="Description"
                       bind:value={newCustomField.description}
-                    /></td
-                  >
+                    />
+                  </td>
+                  <td>
+                    <select bind:value={newCustomField.type}>
+                      <option value="text">Text</option>
+                      <option value="checkbox">Checkbox</option>
+                    </select>
+                  </td>
+                  <td>
+                    <label>
+                      <input
+                        type="checkbox"
+                        bind:checked={newCustomField.required}
+                      />
+                      <span>Required</span>
+                    </label>
+                  </td>
+                  <td>
+                    <button
+                      disabled={!newCustomField.title || !newCustomField.type}
+                      on:click={() => addNewField(newCustomField)}
+                      class="add-custom-field">Add Field</button
+                    >
+                  </td>
                 </tr>
               </tbody>
             </table>
           {/if}
-          <!-- <div role="checkbox">
-            <label>
-              <input
-                type="checkbox"
-                bind:checked={customFieldsIncludeNameAndEmail}
-              />
-              <span>Ask for Name and Email Address (default behaviour)</span>
-            </label>
-          </div>
-          <label>
-            <strong>Maximum slots that can be booked at once</strong>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              bind:value={internalProps.max_bookable_slots}
-            />
-          </label> -->
         </div>
       </section>
 
