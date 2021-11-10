@@ -25,7 +25,6 @@
     "list": "lerna list",
     "new-component": "node ./scripts/new.js",
     "postinstall": "husky install",
-    "prepublishOnly": "yarn run build",
     "publish": "lerna publish",
     "release:canary": "lerna version prerelease --no-private",
     "release:stable": "lerna version --force-publish --no-private",
