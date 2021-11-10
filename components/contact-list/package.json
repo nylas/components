@@ -1,6 +1,6 @@
 {
   "name": "@nylas/components-contact-list",
-  "version": "1.0.14",
+  "version": "1.0.15-canary.0",
   "repository": {
     "type": "git",
     "url": "github:nylas/components.git",
