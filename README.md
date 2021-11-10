@@ -55,7 +55,7 @@ Each Component can be used with a Nylas account or by passing in a JSON object. 
 
 To see an example of each, check out the [documentation](https://developer.nylas.com/docs/user-experience/components/).
 
-### Agenda Nylas Account
+### Agenda Nylas Account (React example)
 
 ```js
 import React from "react";
