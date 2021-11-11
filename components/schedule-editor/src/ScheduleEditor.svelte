@@ -795,6 +795,7 @@
                     <input
                       type="text"
                       placeholder="Title"
+                      aria-label="Title"
                       bind:this={newFieldTitleElement}
                       bind:value={newCustomField.title}
                     />
@@ -803,11 +804,15 @@
                     <input
                       type="text"
                       placeholder="Description"
+                      aria-label="Description"
                       bind:value={newCustomField.description}
                     />
                   </td>
                   <td>
-                    <select bind:value={newCustomField.type}>
+                    <select
+                      bind:value={newCustomField.type}
+                      aria-label="Input Type"
+                    >
                       <option value="text">Text</option>
                       <option value="checkbox">Checkbox</option>
                     </select>
@@ -816,6 +821,7 @@
                     <label>
                       <input
                         type="checkbox"
+                        aria-label="Required Field?"
                         bind:checked={newCustomField.required}
                       />
                       <span>Required</span>
