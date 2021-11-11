@@ -9,6 +9,8 @@
     getEventDispatcher,
   } from "@commons/methods/component";
 
+  import { DefaultCustomFields } from "@commons/constants/custom-fields";
+
   import type { Manifest, CustomField } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
@@ -70,19 +72,7 @@
     notification_subject: "Invitation",
     recurrence: "none",
     recurrence_cadence: ["none"],
-    custom_fields: [
-      {
-        title: "Your Name",
-        type: "text",
-        required: false,
-      },
-      {
-        title: "Email Address",
-        type: "text",
-        required: true,
-        placeholder: "you@example.com",
-      },
-    ],
+    custom_fields: DefaultCustomFields,
   };
 
   let internalProps: Manifest = <any>{};

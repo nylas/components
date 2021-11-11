@@ -1,6 +1,7 @@
 import type { Manifest as NylasManifest } from "@commons/types/Nylas";
 import type { NotificationMode } from "@commons/enums/Scheduler";
 import type { AvailabilityRule } from "@commons/types/Availability";
+import type { CustomField } from "./Scheduler";
 
 export interface Manifest extends NylasManifest {
   event_title: string;
@@ -43,4 +44,7 @@ export interface Manifest extends NylasManifest {
   show_preview: boolean;
   timezone: string;
   screen_bookings: boolean;
+  max_book_ahead_days: number;
+  min_book_ahead_days: number;
+  custom_fields: CustomField[];
 }
