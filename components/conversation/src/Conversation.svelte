@@ -34,44 +34,47 @@
 
   export let id: string = "";
   export let access_token: string = "";
-  export let thread_id: string = "";
+
   export let messages: Message[] = [];
-  export let theme: string;
   export let show_avatars: boolean | string;
   export let show_reply: boolean | string;
-  export let you: Partial<Account> = {};
+  export let theme: string;
+  export let thread_id: string;
+  export let you: Partial<Account>;
 
-  const defaultValueMap = {
-    theme: "theme-1",
+  const defaultValueMap: Partial<ConversationProperties> = {
     show_avatars: false,
     show_reply: false,
+    theme: "theme-1",
     thread_id: "",
+    you: {},
   };
 
+  let _this = <ConversationProperties>(
+    buildInternalProps({}, {}, defaultValueMap)
+  );
   let manifest: Partial<ConversationProperties> = {};
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
   let conversationManuallyPassed: boolean;
-  $: conversationManuallyPassed = !!messages && messages.length > 0;
+  $: conversationManuallyPassed = !!_this.messages && _this.messages.length > 0;
 
   onMount(async () => {
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ConversationProperties;
 
-    updateInternalProps(
-      buildInternalProps(
-        $$props,
-        manifest,
-        defaultValueMap,
-      ) as ConversationProperties,
-    );
+    _this = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as ConversationProperties;
 
     // Fetch Account
-    if (id && !you.id && !conversationManuallyPassed) {
-      you = await fetchAccount({
+    if (id && !_this.you?.id && !conversationManuallyPassed) {
+      _this.you = await fetchAccount({
         component_id: query.component_id,
         access_token,
       });
@@ -81,7 +84,7 @@
   $: hasError = Object.keys($ErrorStore).length ? true : false;
 
   $: conversationMessages = conversationManuallyPassed
-    ? messages
+    ? _this.messages
     : conversation?.messages || [];
 
   let participants: Participant[] = [];
@@ -89,37 +92,24 @@
 
   let main: Element;
 
-  let internalProps: ConversationProperties = <any>{};
+  let previousProps = $$props;
   $: {
-    const rebuiltProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as ConversationProperties;
-    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      updateInternalProps(rebuiltProps);
+    if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
+      _this = buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as ConversationProperties;
+      previousProps = $$props;
     }
   }
-
-  function updateInternalProps(updatedProps: ConversationProperties) {
-    internalProps = updatedProps;
-
-    theme = internalProps.theme;
-    show_avatars = internalProps.show_avatars;
-    show_reply = internalProps.show_reply;
-    const internalPropThreadID =
-      messages.length === 0 ? internalProps.thread_id : "";
-    thread_id = internalPropThreadID;
-  }
-
-  $: hideAvatars = show_avatars === false || show_avatars === "false"; // can be boolean or string, for developer experience reasons. Awkward for us, better for them.
 
   let query: ConversationQuery;
 
   $: query = {
     access_token,
     component_id: id,
-    thread_id: thread_id,
+    thread_id: _this.thread_id,
   };
 
   let queryKey: string;
@@ -129,7 +119,7 @@
   let status: "loading" | "loaded" | "error" = "loading";
 
   $: {
-    if (id && thread_id) {
+    if (id && _this.thread_id) {
       setConversation();
     } else if (conversationManuallyPassed) {
       status = "loaded";
@@ -226,12 +216,6 @@
   };
 
   let replyBody = "";
-
-  const handleContactsChange =
-    (field: "to" | "from" | "cc") => (data: Participant[]) => {
-      reply[field] = data;
-    };
-
   let lastMessage: Message;
   let lastMessageInitialised = false;
   $: if (conversationMessages) {
@@ -243,24 +227,24 @@
   // If someone else sent the last message, initialize your TO to the reply's FROM.
   $: if (lastMessage && lastMessageInitialised) {
     lastMessageInitialised = false;
-    if (you.email_address) {
-      if (lastMessage.from[0].email === you.email_address) {
+    if (_this.you?.email_address) {
+      if (lastMessage.from[0].email === _this.you?.email_address) {
         reply.to = lastMessage.to;
         reply.cc =
           lastMessage.cc.filter(
-            (recipient) => recipient.email !== you.email_address,
+            (recipient) => recipient.email !== _this.you?.email_address,
           ) || [];
       } else {
         reply.to = lastMessage.from;
         reply.cc = [...lastMessage.cc, ...lastMessage.to].filter(
-          (recipient) => recipient.email !== you.email_address,
+          (recipient) => recipient.email !== _this.you?.email_address,
         );
       }
     }
   }
 
-  $: if (you.email_address) {
-    reply.from = [{ name: you.name, email: you.email_address }];
+  $: if (_this.you?.email_address) {
+    reply.from = [{ name: _this.you?.name, email: _this.you?.email_address }];
   }
 
   let replyStatus: string = "";
@@ -292,10 +276,10 @@
     return true;
   }
 
-  function _sendMessage(e: any) {
-    e.preventDefault();
+  function _sendMessage(event: Event) {
+    event.preventDefault();
     dispatchEvent("sendMessageClicked", {
-      event: e,
+      event,
       message: { ...reply, body: replyBody },
     });
     if (!conversation && conversationManuallyPassed) {
@@ -648,10 +632,13 @@
         <span>cc: {reply.cc.map((p) => p.email).join(", ")} </span>
       {/if}
     </header>
-    <div class="messages {theme}" class:dont-show-avatars={hideAvatars}>
+    <div
+      class="messages {_this.theme}"
+      class:dont-show-avatars={_this.show_avatars}
+    >
       {#each conversationMessages as message, i}
         {#await message.from[0] then from}
-          {#await from.email === you.email_address then isYou}
+          {#await from.email === _this.you.email_address then isYou}
             {#await participants.findIndex((p) => p.email === from.email && p.name === from.name) then participantIndex}
               <article
                 class="message member-{participantIndex + 1}"
@@ -693,7 +680,7 @@
         {/await}
       {/each}
     </div>
-    {#if show_reply}
+    {#if _this.show_reply}
       <div class="reply-box">
         <form on:submit={_sendMessage}>
           <label for="send-response" class="sr-only">

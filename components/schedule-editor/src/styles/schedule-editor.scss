@@ -1,5 +1,16 @@
 @import "../../../theming/variables.scss";
 
+.loader {
+  width: calc(100% - 16px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  position: absolute;
+}
+
 main {
   font-family: system-ui, sans-serif;
   display: grid;

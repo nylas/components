@@ -63,6 +63,7 @@
 
   export let id: string | void;
   export let access_token: string = "";
+
   export let value: Message | void;
   export let to: ContactSearchCallback = [];
   export let from: ContactSearchCallback = [];
@@ -100,7 +101,7 @@
   export let beforeFileRemove: Function | null = null;
   export let afterFileRemove: Function | null = null;
 
-  const defaultValueMap = {
+  const defaultValueMap: Partial<ComposerProperties> = {
     show_to: true,
     show_from: true,
     minimized: false,
@@ -130,7 +131,7 @@
   };
 
   let isLoading = false;
-  let internalProps: ComposerProperties = <any>{};
+  let _this = <ComposerProperties>buildInternalProps({}, {}, defaultValueMap);
   let manifest: Partial<ComposerProperties>;
   let showDatepicker = false;
   let themeLoaded = false;
@@ -153,16 +154,16 @@
       if (account) {
         // Set "from" field from account
         update("from", [{ name: account.name, email: account.email_address }]);
-        show_from = false;
+        _this.show_from = false;
       }
     }
-    updateInternalProps(
-      buildInternalProps(
-        $$props,
-        manifest,
-        defaultValueMap,
-      ) as ComposerProperties,
-    );
+
+    _this = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as ComposerProperties;
+
     if (tracking) {
       // Set tracking on message object
       update("tracking", tracking);
@@ -172,42 +173,20 @@
     themeLoaded = true;
   });
 
+  let previousProps = $$props;
   $: {
-    const rebuiltProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as ComposerProperties;
-    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      updateInternalProps(rebuiltProps);
+    if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
+      _this = buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as ComposerProperties;
+      previousProps = $$props;
     }
   }
 
   $: if (value) {
     mergeMessage(value);
-  }
-
-  $: {
-  }
-
-  function updateInternalProps(updatedProps: ComposerProperties) {
-    internalProps = updatedProps;
-
-    show_to = internalProps.show_to;
-    show_from = internalProps.show_from;
-    minimized = internalProps.minimized;
-    reset_after_send = internalProps.reset_after_send;
-    show_header = internalProps.show_header;
-    show_subject = internalProps.show_subject;
-    show_close_button = internalProps.show_close_button;
-    show_minimize_button = internalProps.show_minimize_button;
-    show_cc = internalProps.show_cc;
-    show_bcc = internalProps.show_bcc;
-    show_cc_button = internalProps.show_cc_button;
-    show_bcc_button = internalProps.show_bcc_button;
-    show_attachment_button = internalProps.show_attachment_button;
-    show_editor_toolbar = internalProps.show_editor_toolbar;
-    theme = internalProps.theme;
   }
 
   const handleInputChange = (e: Event) => {
@@ -278,8 +257,14 @@
   };
 
   const handleMinimize = () => {
-    minimized = !minimized;
-    dispatchEvent(minimized ? "composerMinimized" : "composerMaximized", {});
+    _this.minimized = !_this.minimized;
+
+    dispatchEvent(
+      _this.minimized ? "composerMinimized" : "composerMaximized",
+      {},
+    );
+    previousProps = _this;
+    console.log("MINIMIZE", _this.minimized);
   };
 
   let sendPending = false;
@@ -308,7 +293,7 @@
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
-          if (reset_after_send) resetAfterSend($message.from);
+          if (_this.reset_after_send) resetAfterSend($message.from);
           sendPending = false;
           sendError = true;
         });
@@ -317,7 +302,7 @@
       sendMessage(id, msg, access_token)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
-          if (reset_after_send) resetAfterSend($message.from);
+          if (_this.reset_after_send) resetAfterSend($message.from);
           sendPending = false;
           sendSuccess = true;
         })
@@ -342,12 +327,12 @@
     ($message.to.length || $message.cc.length || $message.bcc.length);
 
   let themeUrl: string;
-  $: if (!!theme) {
-    if (theme.startsWith(".") || theme.startsWith("http")) {
+  $: if (!!_this.theme) {
+    if (_this.theme.startsWith(".") || _this.theme.startsWith("http")) {
       // If custom url supplied
-      themeUrl = theme;
-    } else if (theme) {
-      themeUrl = `https://unpkg.com/@nylas/components-composer@${pkg.version}/themes/${theme}.css`;
+      themeUrl = _this.theme;
+    } else if (_this.theme) {
+      themeUrl = `https://unpkg.com/@nylas/components-composer@${pkg.version}/themes/${_this.theme}.css`;
     }
   }
 
@@ -618,13 +603,13 @@
 {/if}
 
 {#if visible && themeLoaded && !isLoading}
-  <div class="nylas-composer" class:minimized>
-    {#if show_header}
-      <header class={minimized ? "minimized" : undefined}>
+  <div class="nylas-composer" class:minimized={_this.minimized}>
+    {#if _this.show_header}
+      <header class={_this.minimized ? "minimized" : undefined}>
         {$message.subject || "New Message"}
         <div>
-          {#if show_minimize_button}
-            {#if minimized}
+          {#if _this.show_minimize_button}
+            {#if _this.minimized}
               <button class="composer-btn" on:click={handleMinimize}>
                 <ExpandIcon class="ExpandIcon" />
               </button>
@@ -634,7 +619,7 @@
               </button>
             {/if}
           {/if}
-          {#if show_close_button}
+          {#if _this.show_close_button}
             <button class="composer-btn" on:click={close}>
               <CloseIcon class="CloseIcon" />
             </button>
@@ -642,11 +627,11 @@
         </div>
       </header>
     {/if}
-    {#if !minimized}
+    {#if !_this.minimized}
       <main>
         <!-- Search -->
         <div class="contacts-wrapper">
-          {#if show_from}
+          {#if _this.show_from}
             <nylas-contacts-search
               placeholder="From:"
               single={true}
@@ -655,7 +640,7 @@
               value={$message.from}
             />
           {/if}
-          {#if show_to}
+          {#if _this.show_to}
             <nylas-contacts-search
               placeholder="To:"
               change={handleContactsChange("to")}
@@ -667,19 +652,23 @@
             <button
               type="button"
               bind:this={ccField}
-              hidden={!show_cc && !!show_cc_button && !!show_to}
-              on:click={() => (show_cc = true)}>CC</button
+              hidden={!_this.show_cc &&
+                !!_this.show_cc_button &&
+                !!_this.show_to}
+              on:click={() => (_this.show_cc = true)}>CC</button
             >
 
             <button
               type="button"
               bind:this={bccField}
-              hidden={!show_bcc && !!show_bcc_button && !!show_to}
-              on:click={() => (show_bcc = true)}>BCC</button
+              hidden={!_this.show_bcc &&
+                !!_this.show_bcc_button &&
+                !!_this.show_to}
+              on:click={() => (_this.show_bcc = true)}>BCC</button
             >
           </div>
         </div>
-        {#if show_cc}
+        {#if _this.show_cc}
           <div class="cc-container">
             <nylas-contacts-search
               placeholder="CC:"
@@ -692,7 +681,7 @@
               class="composer-btn cc-btn"
               on:click={() => {
                 setFocus(ccField);
-                show_cc = false;
+                _this.show_cc = false;
               }}
               aria-label="remove carbon copy field"
             >
@@ -700,7 +689,7 @@
             </button>
           </div>
         {/if}
-        {#if show_bcc}
+        {#if _this.show_bcc}
           <div class="cc-container">
             <nylas-contacts-search
               placeholder="BCC:"
@@ -713,7 +702,7 @@
               class="composer-btn cc-btn"
               on:click={() => {
                 setFocus(bccField);
-                show_bcc = false;
+                _this.show_bcc = false;
               }}
               aria-label="remove blind carbon copy field"
             >
@@ -723,7 +712,7 @@
         {/if}
 
         <!-- Subject -->
-        {#if show_subject}
+        {#if _this.show_subject}
           <input
             type="text"
             placeholder="Subject"
@@ -738,8 +727,8 @@
         <nylas-html-editor
           html={$message.body || template}
           onchange={handleBodyChange}
-          {replace_fields}
-          {show_editor_toolbar}
+          replace_fields={_this.replace_fields}
+          show_editor_toolbar={_this.show_editor_toolbar}
         />
         {#if $attachments.length}
           <div class="nylas-attachments">
@@ -757,7 +746,7 @@
         {/if}
       </main>
       <footer>
-        {#if show_attachment_button && (id || uploadFile)}
+        {#if _this.show_attachment_button && (id || uploadFile)}
           <button
             class="composer-btn file-upload"
             style="margin-right: 10px; width: 32px; height: 32px;"

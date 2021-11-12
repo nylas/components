@@ -16,6 +16,7 @@ export interface Manifest extends AvailabilityManifest {
   availability_id: string;
   editor_id: string;
   booking_label: string;
+  custom_fields: CustomField[];
   event_title: string;
   event_description: string;
   event_location: string;
@@ -34,5 +35,4 @@ export interface Manifest extends AvailabilityManifest {
     | "monthly"
   )[];
   recurrence_expiry: Date | string | null;
-  custom_fields: CustomField[];
 }

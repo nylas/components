@@ -56,7 +56,7 @@ export interface ContactPhoneNumber {
   type: string;
 }
 
-export interface ContactsQuery extends CommonQuery {}
+export type ContactsQuery = CommonQuery;
 
 export interface ContactSearchQuery extends CommonQuery {
   query: string;

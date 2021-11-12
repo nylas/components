@@ -18,7 +18,13 @@ function initialize(): Writable<AvailabilityStore> {
     delete accessorCopy.forceReload;
     key = JSON.stringify(accessorCopy);
 
-    if (!accessor.component_id) return;
+    if (
+      !accessor.component_id ||
+      !accessor?.body?.start_time ||
+      !accessor?.body?.end_time
+    ) {
+      return;
+    }
 
     if (!target[key] || accessor.forceReload) {
       const fetchPromise = fetchAvailability(accessor);

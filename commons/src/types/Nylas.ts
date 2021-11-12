@@ -1,10 +1,12 @@
-import type { HydratedContact } from "@commons/types/Contacts";
 import type {
   AccountOrganizationUnit,
   AccountSyncState,
   EmailUnreadStatus,
   MailboxActions,
 } from "@commons/enums/Nylas";
+import type { Contact, HydratedContact } from "@commons/types/Contacts";
+import type { Event } from "@commons/types/Events";
+import type { ReplaceFields } from "./Composer";
 
 export interface CommonQuery {
   component_id: string;
@@ -19,7 +21,7 @@ export interface MailboxQuery extends CommonQuery {
   query: ThreadsQuery;
 }
 
-export interface AccountQuery extends CommonQuery {}
+export type AccountQuery = CommonQuery;
 
 export interface ThreadsQuery {
   limit?: number;
@@ -144,86 +146,100 @@ export interface Manifest {
 
 export interface AgendaProperties extends Manifest {
   allow_date_change: boolean;
+  allowed_dates: Date[] | string;
   allow_event_creation: boolean;
   auto_time_box: boolean;
+  calendar_id: string;
   calendar_ids: string;
   color_by: "event" | "calendar";
   condensed_view: boolean;
   eagerly_fetch_events: boolean;
+  events: Event[];
+  end_minute: number;
   event_snap_interval: number;
   header_type: "full" | "day" | "none";
   hide_all_day_events: boolean;
   hide_current_time: boolean;
   prevent_zoom: boolean;
+  selected_date: Date;
   show_as_busy: boolean;
   show_no_events_message: boolean;
+  start_minute: number;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   hide_ticks: boolean;
 }
 
 export interface EmailProperties extends Manifest {
+  clean_conversation: boolean;
+  click_action: "default" | "mailbox" | "custom";
+  message_id: string;
+  message: Message;
+  show_contact_avatar: boolean;
+  show_expanded_email_view_onload: boolean;
   show_number_of_messages: boolean;
   show_received_timestamp: boolean;
-  thread_id: string;
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  show_contact_avatar: boolean;
-  clean_conversation: boolean;
   show_star: boolean;
-  show_expanded_email_view_onload: boolean;
-  unread: boolean;
   show_thread_actions: boolean;
-  click_action: "default" | "mailbox" | "custom";
+  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  thread_id: string;
+  thread: Thread;
+  unread: boolean;
+  you: Partial<Account>;
 }
 
 export interface MailboxProperties extends Manifest {
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  show_star: boolean;
-  show_thread_checkbox: boolean;
-  unread_status: EmailUnreadStatus;
   actions_bar: MailboxActions[];
+  all_threads: Thread[];
   header: string;
+  items_per_page: number;
   keyword_to_search: string;
   query_string: string;
-  items_per_page: string;
+  show_star: boolean;
+  show_thread_checkbox: boolean;
+  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  unread_status: EmailUnreadStatus;
 }
 
 export interface ComposerProperties extends Manifest {
-  show_header?: boolean;
-  theme?: "light" | "dark";
-  mode?: "inline" | "popup";
-  show_from?: boolean;
-  show_to?: boolean;
-  show_cc?: boolean;
-  show_bcc?: boolean;
-  visible?: boolean;
-  minimized?: boolean;
+  minimized: boolean;
+  mode: "inline" | "popup";
+  replace_fields: ReplaceFields[];
   reset_after_send: boolean;
-  show_subject?: boolean;
-  show_close_button?: boolean;
-  show_minimize_button?: boolean;
-  show_cc_button?: boolean;
-  show_bcc_button?: boolean;
-  show_attachment_button?: boolean;
-  show_editor_toolbar?: boolean;
-  css_url?: string;
+  show_attachment_button: boolean;
+  show_bcc_button: boolean;
+  show_bcc: boolean;
+  show_cc_button: boolean;
+  show_cc: boolean;
+  show_close_button: boolean;
+  show_editor_toolbar: boolean;
+  show_from: boolean;
+  show_header: boolean;
+  show_minimize_button: boolean;
+  show_subject: boolean;
+  show_to: boolean;
+  theme: "string";
+  visible: boolean;
 }
 
 export interface ContactListProperties extends Manifest {
   click_action: "email" | "select";
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  sort_by: "last_emailed" | "name";
-  threads_to_load: number;
+  contacts: Contact[];
   contacts_to_load: number;
-  show_names: boolean;
-  show_filter: boolean;
   default_photo: string | null;
+  show_filter: boolean;
+  show_names: boolean;
+  sort_by: "last_emailed" | "name";
+  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  threads_to_load: number;
 }
 
 export interface ConversationProperties extends Manifest {
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4";
+  messages: Message[];
   show_avatars: boolean | string;
   show_reply: boolean | string;
+  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4";
   thread_id: string;
+  you: Partial<Account>;
 }
 
 export interface DayProperties extends Manifest {

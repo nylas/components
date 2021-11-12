@@ -8,6 +8,10 @@ import type { Day } from "@commons/types/Availability";
  */
 
 export function showDateRange(days: Day[]): string {
+  if (!Array.isArray(days) || days.length === 0) {
+    return "";
+  }
+
   const firstDay = days[0].timestamp;
   const lastDay = days[days.length - 1].timestamp;
 

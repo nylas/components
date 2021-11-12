@@ -29,44 +29,68 @@ export function debounce(
   };
 }
 
-export function buildInternalProps<T extends Manifest>(
-  properties: any,
-  manifest: Manifest,
-  defaultValueMap: Record<string, any>,
+export function buildInternalProps<T extends Partial<Manifest>>(
+  properties: T,
+  manifest: T,
+  defaultValueMap: T,
 ): T {
   return new Proxy(properties, {
-    get: (properties, name: keyof Manifest | "toJSON" | "toString") => {
+    get: (target, name: keyof Manifest | "toJSON" | "toString") => {
       if (name === "toString" || name === "toJSON") {
-        return () => JSON.stringify(properties);
+        return () => JSON.stringify(target);
       }
 
-      if (Reflect.get(properties, name) !== undefined) {
+      if (Reflect.get(target, name) !== undefined) {
         return getPropertyValue(
-          Reflect.get(properties, name),
+          Reflect.get(target, name),
           defaultValueMap[name],
         );
-      }
-
-      if (name in properties) {
-        return getPropertyValue(properties[name], defaultValueMap[name]);
       }
 
       if (manifest && name in manifest) {
-        return getPropertyValue(
-          manifest[<keyof Manifest>name],
-          defaultValueMap[name],
-        );
+        return getPropertyValue(manifest[name], defaultValueMap[name]);
       }
-      return defaultValueMap[name] ?? null;
+      return defaultValueMap[name];
+    },
+
+    ownKeys: (target) => {
+      const keys = new Set([
+        ...Reflect.ownKeys(target),
+        ...Object.keys(manifest),
+        ...Object.keys(defaultValueMap),
+      ]);
+      return Array.from(keys);
+    },
+
+    getOwnPropertyDescriptor: (target, prop) => {
+      let propDescriptor = Reflect.getOwnPropertyDescriptor(target, prop);
+      if (!propDescriptor) {
+        propDescriptor = (manifest &&
+          Object.getOwnPropertyDescriptor(manifest, prop)) ??
+          (defaultValueMap &&
+            Object.getOwnPropertyDescriptor(defaultValueMap, prop)) ?? {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+          };
+        Reflect.defineProperty(target, prop, propDescriptor);
+      }
+      return propDescriptor;
     },
   });
 }
 
 export function getPropertyValue<T>(propValue: any, defaultTo: T): T {
   if (propValue) {
-    return typeof defaultTo === "boolean"
-      ? (parseBoolean(propValue) as any)
-      : propValue;
+    if (typeof defaultTo === "boolean") {
+      return parseBoolean(propValue) as any;
+    }
+    if (typeof defaultTo === "number") {
+      return Number(propValue) as any;
+    }
+    if (defaultTo instanceof Date) {
+      return new Date(propValue) as any;
+    }
   }
 
   return propValue === undefined ? defaultTo ?? null : propValue;
