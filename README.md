@@ -104,6 +104,33 @@ export default function App() {
 </main>
 ```
 
+## Framework-specific workarounds
+
+### NextJS
+
+`nylas/components` leverages web components so for any server-side framework like [NextJS](), we should import components at runtime.
+
+```js
+// NylasAgenda.js
+export default function NylasAgenda() {
+  useEffect(() => import("@nylas/components-agenda"), []);
+
+  return <nylas-agenda id="c307b6e9-5da4-4efb-8095-08176ed8f361" />;
+}
+
+// App.js
+import NylasAgenda from "./NylasAgenda";
+
+export default function App() {
+  return (
+    <div className="App">
+      <h1>Nylas Agenda</h1>
+      <NylasAgenda />
+    </div>
+  );
+}
+```
+
 ## Contribute
 
 Please refer to our [Contributing Guidelines](CONTRIBUTING.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
