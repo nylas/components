@@ -35,6 +35,7 @@
         const scheduler = document.querySelector("nylas-scheduler");
 
         availability.email_ids = ["joanna.smith@nylas.com"];
+        availability.overbooked_threshold = 18; // allows for 3 30m meetings.
 
         availability.addEventListener("timeSlotChosen", (event) => {
           // determine if first timeslot is a 30m or 1h event
@@ -55,7 +56,9 @@
         scheduler.custom_fields = custom_fields;
 
         scheduler.addEventListener("bookedEvents", () => {
+          // this doesn't work!! it takes too long to update on the Nylas side.
           availability.reload(true, true);
+          window.location.reload();
         });
       });
     </script>
