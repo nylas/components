@@ -108,7 +108,7 @@ export default function App() {
 
 ### NextJS
 
-`nylas/components` leverages web components so for any server-side framework like [NextJS](), we should import components at runtime.
+`nylas/components` leverages web components so for any server-side framework like [NextJS](https://nextjs.org/), we should import components at runtime.
 
 ```js
 // NylasAgenda.js
