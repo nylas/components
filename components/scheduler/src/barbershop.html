@@ -14,6 +14,15 @@
         availability.email_ids = ["joanna.smith@nylas.com"];
 
         availability.addEventListener("timeSlotChosen", (event) => {
+          // determine if first timeslot is a 30m or 1h event
+          const minutesBetween = (event.detail.timeSlots[0].end_time - event.detail.timeSlots[0].start_time)/(60 * 1000);
+          if (minutesBetween === 30) {
+            scheduler.event_title = "Ninja Haircut";
+            scheduler.event_description = "Quick 30m snip snip";
+          } else if (minutesBetween === 60) {
+            scheduler.event_title = "Ninja Haircut & Beard Trim";
+            scheduler.event_description = "60m line up & face";
+          }
           scheduler.slots_to_book = event.detail.timeSlots;
         });
 
@@ -22,6 +31,7 @@
         });
       });
     </script>
+
     <style>
       body {
         padding: 0;
@@ -48,7 +58,7 @@
       <nylas-availability
         show_as_week="true"
         allow_booking="true"
-        id="71bdd4b8-b0b7-4ede-a208-34e96d68e735"
+        id="cf221443-2613-4191-8e28-0481bc258b66"
         slot_size="30"
         start_hour="9"
         end_hour="17"
@@ -58,7 +68,7 @@
       >
       </nylas-availability>
       <nylas-scheduler
-        id="fb16c1c5-1a84-4179-96bd-3becfeed8e69"
+        id="71bdd4b8-b0b7-4ede-a208-34e96d68e735"
         recurrence="none"
       >
       </nylas-scheduler>
