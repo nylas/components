@@ -82,6 +82,21 @@
         grid-template-rows: 100%;
         gap: 1rem;
       }
+
+      /* mobile */
+      @media (max-width: 600px) {
+        main {
+          display: flex;
+          flex-direction: column;
+          margin: 3rem 1rem;
+          gap: 3rem;
+          width: unset;
+          height: unset;
+        }
+        nylas-availability {
+          height: 50vh;
+        }
+      }
     </style>
   </head>
 
@@ -90,6 +105,7 @@
       <nylas-availability
         show_as_week="true"
         allow_booking="true"
+        booking_label="Schedule Ninja Barber"
         id="cf221443-2613-4191-8e28-0481bc258b66"
         slot_size="30"
         start_hour="9"
@@ -102,6 +118,7 @@
       <nylas-scheduler
         id="71bdd4b8-b0b7-4ede-a208-34e96d68e735"
         recurrence="none"
+        notification_mode="show_message"
       >
       </nylas-scheduler>
     </main>
