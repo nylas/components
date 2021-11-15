@@ -809,6 +809,11 @@
           box-sizing: border-box;
           padding: $spacing-xs;
 
+          div.message-body {
+            overflow: auto;
+            display: inline-flex;
+          }
+
           &.condensed {
             div.snippet {
               text-overflow: ellipsis;
