@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Scheduler Demo</title>
+    <script src="../index.js"></script>
+    <script src="../../availability/index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const availability = document.querySelector("nylas-availability");
+        const scheduler = document.querySelector("nylas-scheduler");
+
+        availability.email_ids = ["joanna.smith@nylas.com"];
+
+        availability.addEventListener("timeSlotChosen", (event) => {
+          scheduler.slots_to_book = event.detail.timeSlots;
+        });
+
+        scheduler.addEventListener("bookedEvents", () => {
+          availability.reload(true, true);
+        });
+      });
+    </script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        background: white;
+        color: black;
+      }
+
+      main {
+        width: 80vw;
+        margin-left: 10vw;
+        height: 80vh;
+        margin-top: 10vh;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: 100%;
+        gap: 1rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <nylas-availability
+        show_as_week="true"
+        allow_booking="true"
+        id="71bdd4b8-b0b7-4ede-a208-34e96d68e735"
+        slot_size="30"
+        start_hour="9"
+        end_hour="17"
+        show_hosts="hide"
+        max_bookable_slots="2"
+        closed_color="#999"
+      >
+      </nylas-availability>
+      <nylas-scheduler
+        id="fb16c1c5-1a84-4179-96bd-3becfeed8e69"
+        recurrence="none"
+      >
+      </nylas-scheduler>
+    </main>
+  </body>
+</html>
