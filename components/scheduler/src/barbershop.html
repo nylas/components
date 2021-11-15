@@ -7,6 +7,33 @@
     <script src="../index.js"></script>
     <script src="../../availability/index.js"></script>
     <script>
+      const custom_fields = [
+        {
+          required: true,
+          title:
+            "Location ('Downtown Barbershop' or 'West Toronto Barbershop')",
+          type: "text",
+        },
+        {
+          required: true,
+          title:
+            "Do you currently have one or more of the COVID-19 symptoms below that are new or worsening?  fever and/or chills, cough or barking cough (croup), shortness of breath, decrease or loss of smell or taste fatigue and/or muscle aches/joint pain (for adults), nausea/vomiting, and/or diarrhea (for <18 years of age) ('Yes' or 'No')",
+          type: "text",
+        },
+        {
+          required: true,
+          title:
+            "Has a doctor, health care provider, or public health unit told you that you should currently be isolating (staying at home)? ('Yes' or 'No')",
+          type: "text",
+        },
+        {
+          required: true,
+          title:
+            "Do you live with someone who has been told by a doctor, health care provider, or public health unit that they should currently be isolating? ('Yes' or 'No')",
+          type: "text",
+        },
+      ];
+
       document.addEventListener("DOMContentLoaded", function () {
         const availability = document.querySelector("nylas-availability");
         const scheduler = document.querySelector("nylas-scheduler");
@@ -15,7 +42,10 @@
 
         availability.addEventListener("timeSlotChosen", (event) => {
           // determine if first timeslot is a 30m or 1h event
-          const minutesBetween = (event.detail.timeSlots[0].end_time - event.detail.timeSlots[0].start_time)/(60 * 1000);
+          const minutesBetween =
+            (event.detail.timeSlots[0].end_time -
+              event.detail.timeSlots[0].start_time) /
+            (60 * 1000);
           if (minutesBetween === 30) {
             scheduler.event_title = "Ninja Haircut";
             scheduler.event_description = "Quick 30m snip snip";
@@ -25,6 +55,8 @@
           }
           scheduler.slots_to_book = event.detail.timeSlots;
         });
+
+        scheduler.custom_fields = custom_fields;
 
         scheduler.addEventListener("bookedEvents", () => {
           availability.reload(true, true);
