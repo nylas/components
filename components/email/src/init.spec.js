@@ -276,6 +276,27 @@ describe("Email component", () => {
         cy.get(component).find(".email-row.condensed").should("not.exist");
       });
   });
+  it("Sanitizes markup in the email body", (done) => {
+    const stub = cy.stub();
+    cy.on("window:alert", stub);
+
+    cy.on("window:alert", stub);
+    cy.get("nylas-email")
+      .as("email")
+      .then((element) => {
+        const component = element[3];
+        component.style = "position: absolute; top: 0";
+        component.message = {
+          ...SAMPLE_THREAD.messages[0],
+          body: `<img src=x onerror=alert(1)//>`,
+        };
+        setTimeout(() => {
+          expect(stub).not.to.be.called;
+          done();
+        }, 50);
+      });
+  });
+
   describe("Stars", () => {
     // TODO: stars aren't showing up when property is changed
     it("Shows no stars when show_star=false", () => {

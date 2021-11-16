@@ -2,34 +2,35 @@
 
 <script lang="ts">
   import {
+    ContactStore,
     ConversationStore,
-    ManifestStore,
-    sendMessage,
+    ErrorStore,
     fetchAccount,
     fetchCleanConversations,
-    ErrorStore,
-    ContactStore,
+    ManifestStore,
+    sendMessage,
   } from "@commons";
-  import { afterUpdate } from "svelte";
-  import { get_current_component, onMount } from "svelte/internal";
+  import "@commons/components/ContactImage/ContactImage.svelte";
+  import "@commons/components/ErrorMessage.svelte";
   import {
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
+  import { getDate } from "@commons/methods/datetime";
+  import type { ContactSearchQuery } from "@commons/types/Contacts";
   import type {
-    Participant,
+    Account,
+    Conversation,
     ConversationProperties,
     ConversationQuery,
     Message,
-    Conversation,
-    Account,
+    Participant,
   } from "@commons/types/Nylas";
-  import type { ContactSearchQuery } from "@commons/types/Contacts";
-  import "@commons/components/ErrorMessage.svelte";
-  import "@commons/components/ContactImage/ContactImage.svelte";
-  import { getDate } from "@commons/methods/datetime";
-  import ToggleIcon from "./assets/toggle.svg";
+  import DOMPurify from "dompurify";
+  import { afterUpdate } from "svelte";
+  import { get_current_component, onMount } from "svelte/internal";
   import SendIcon from "./assets/send.svg";
+  import ToggleIcon from "./assets/toggle.svg";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -674,7 +675,7 @@
                     <!-- else if it's there but blank -->
                   {:else if message.hasOwnProperty("conversation") && !message.conversation}
                     <p>
-                      {@html message.body}
+                      {@html DOMPurify.sanitize(message.body)}
                     </p>
                   {:else if message.snippet.includes(" On ")}
                     <p>{message.snippet.split("On ")[0]}</p>

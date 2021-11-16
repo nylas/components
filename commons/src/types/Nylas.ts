@@ -133,8 +133,9 @@ export interface MiddlewareResponse<T = unknown> {
   response: T;
 }
 
-export interface NError extends Error {
-  name: import("../components/NErrorMapping").NErrorType[number];
+export interface NError {
+  name?: string;
+  message?: Error;
 }
 
 export interface Manifest {

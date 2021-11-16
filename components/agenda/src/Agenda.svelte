@@ -13,6 +13,7 @@
   import { populatePositionMap, updateEventPosition } from "./methods/position";
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
   import type { AgendaProperties } from "@commons/types/Nylas";
+  import * as DOMPurify from "dompurify";
 
   import type {
     EventQuery,
@@ -1426,7 +1427,7 @@
                       </span>
                     {/if}
                     <p>
-                      {@html event.description || ""}
+                      {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
                   {/if}
                 </div>
@@ -1488,17 +1489,12 @@
                 class:expanded={expandedEventId === event.id}
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs.indexOf(event.calendar_id) + 1}
-                style="top: {event.relativeStartTime *
-                  100}%; height: 
+                style="top: {event.relativeStartTime * 100}%; height: 
               {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
-                  : `calc(${
-                      event.relativeRunTime * 100
-                    }%  - 4px)`};
-              left: {event.relativeOverlapOffset *
-                  100}%; 
-              width: calc({event.relativeOverlapWidth *
-                  100}% - 4px)"
+                  : `calc(${event.relativeRunTime * 100}%  - 4px)`};
+              left: {event.relativeOverlapOffset * 100}%; 
+              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
               >
                 <div
                   class="inner"
@@ -1530,7 +1526,7 @@
                       </span>
                     {/if}
                     <p>
-                      {@html event.description || ""}
+                      {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
                   {/if}
                 </div>

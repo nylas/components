@@ -1,15 +1,22 @@
 <svelte:options tag="nylas-error" immutable={true} />
 
 <script lang="ts">
-  import { NErrorExplanationMap } from "./NErrorMapping";
   import { ErrorStore } from "../index";
+  import type { NError } from "@commonstypes/Nylas";
 
   export let id: string; // component id
 
-  $: error = $ErrorStore[id] || { name: "" };
-  $: explanation = NErrorExplanationMap[errorName]();
-  $: errorName = !error.name ? error.message?.name : error.name;
-  const isDevEnv = window.location.href.includes("localhost");
+  let error: NError;
+  let errorName: string;
+
+  $: {
+    error = $ErrorStore[id] ?? { name: "" };
+    errorName = error.name ?? error.message?.name ?? "";
+  }
+
+  const isDevEnv =
+    window.location.href.includes("localhost") ||
+    window.location.href.includes("127.0.0.1");
 </script>
 
 <style>
@@ -40,20 +47,23 @@
 
 {#if errorName && isDevEnv}
   <div class="message-container">
-    {#if explanation.title}
+    {#if errorName === "HostDomainNotAllowedError"}
       <h3>
-        {@html explanation.title}
+        You are trying to access this component from&nbsp;
+        <code>{window.location.hostname}</code>. The component's settings do not
+        allow access from this domain.
       </h3>
-    {/if}
-    {#if explanation.subtitle}
       <h4>
-        {@html explanation.subtitle}
+        The list of allowed domains can be modified in your&nbsp;
+        <a href="https://dashboard.nylas.com">Dashboard</a>.
       </h4>
+    {:else if errorName === "IncompatibleProperties"}
+      <h3>Your component properties do not work with each other.</h3>
     {/if}
     <span class="details">Debug info:</span>
     <textarea class="details" readonly>
       {errorName}: {id}
-      {error.message.message ? error.message.message : ""}
+      {error.message?.message ?? ""}
     </textarea>
   </div>
 {/if}
