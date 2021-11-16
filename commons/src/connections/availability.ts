@@ -35,7 +35,6 @@ export const fetchFreeBusy = async (
 };
 
 export const fetchAvailability = async (
-  // TODO: rename
   query: AvailabilityQuery,
 ): Promise<AvailabilityResponse> => {
   return fetch(
