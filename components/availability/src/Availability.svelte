@@ -814,6 +814,7 @@
           timeHour(
             new Date(new Date(endDay).setHours(_this.end_hour)),
           ).getTime() / 1000,
+        round_robin: "max-availability",
       },
       component_id: id,
       access_token: accessToken,
@@ -864,6 +865,7 @@
 
     // If the booking user and access token are passed in, fetch their calendars as well.
     // TODO: dont include them in the main list, as they shouldn't contribute to partial slot availability.
+    // TODO: user booking_user_token instead of access_token for booking_user_email in calendarsToFetch
     if (_this.booking_user_email && _this.booking_user_token) {
       calendarsToFetch.push({
         email: _this.booking_user_email,
@@ -872,44 +874,47 @@
     }
 
     if (Array.isArray(calendarsToFetch) && calendarsToFetch.length > 0) {
-      // Note: we split our requests by email_id as calendars/availability doesn't support partial availability amongst a group
-      return Promise.all(
-        calendarsToFetch.map(async (user) => {
-          const { email, token } = user;
-          let availableTimeslots = await $AvailabilityStore[
-            JSON.stringify({
-              ...getAvailabilityQuery([email], token ?? access_token),
-              forceReload,
-            })
-          ];
+      const fetchedCalendars = await $AvailabilityStore[
+        JSON.stringify({
+          ...getAvailabilityQuery(
+            calendarsToFetch.map((x) => x.email),
+            access_token,
+          ),
+          forceReload,
+        })
+      ];
 
-          // Blob consecutive timeslots together for easier overlap logic elsewhere
-          let groupedSlots = groupConsecutiveTimeslots(
-            availableTimeslots.time_slots,
-          );
-          return {
-            email,
-            time_slots: groupedSlots,
-          };
-        }),
-      ).then(async (consolidatedAvailabilityForGivenDay) => {
-        loading = false;
-        for (const user of consolidatedAvailabilityForGivenDay) {
-          freeBusyCalendars.push({
-            emailAddress: user.email,
-            account: {
-              emailAddress: user.email, // ¯\_(ツ)_/¯
-            },
-            availability: AvailabilityStatus.FREE,
-            timeslots: user.time_slots.map((slot: PreDatedTimeSlot) => ({
+      loading = false;
+
+      const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
+
+      for (const user of fetchedCalendars?.order) {
+        timeSlotMap[user] = [];
+      }
+
+      for (const slot of fetchedCalendars.time_slots) {
+        slot.emails.forEach((e) => timeSlotMap[e].push(slot));
+      }
+
+      fetchedCalendars?.order.forEach((user: any) => {
+        freeBusyCalendars.push({
+          emailAddress: user,
+          account: {
+            emailAddress: user, // ¯\_(ツ)_/¯
+          },
+          availability: AvailabilityStatus.FREE,
+          timeslots: groupConsecutiveTimeslots(timeSlotMap[user]).map(
+            (slot: PreDatedTimeSlot) => ({
               start_time: new Date(slot.start_time * 1000),
               end_time: new Date(slot.end_time * 1000),
-            })),
-          });
-        }
-        newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
-        return newCalendarTimeslotsForGivenEmails;
+            }),
+          ),
+        });
       });
+
+      newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
+
+      return newCalendarTimeslotsForGivenEmails;
     }
   }
 

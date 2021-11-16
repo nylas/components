@@ -112,10 +112,12 @@ export interface PreDatedTimeSlot
   end_time: number;
   start?: number;
   end?: number;
+  emails: string[]; //present when round_robin property is set on request, which it always is in Availability
 }
 
 export interface AvailabilityResponse {
   object: "availability";
+  order: string[]; //present when round_robin property is set on request, which it always is in Availability
   time_slots: PreDatedTimeSlot[];
 }
 
