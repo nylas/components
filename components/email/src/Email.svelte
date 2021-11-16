@@ -41,41 +41,47 @@
   import { FolderStore } from "@commons/store/folders";
   import DOMPurify from "dompurify";
 
-  let manifest: Partial<EmailProperties> = {};
-
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
   export let id: string = "";
   export let access_token: string = "";
-  export let thread_id: string;
-  // export let messages: Message[] = [];
-  export let message_id: string = "";
-  export let theme: string;
-  export let show_received_timestamp: boolean;
-  export let show_number_of_messages: boolean;
-  export let thread: Thread | null;
-  export let message: Message | null;
-  export let click_action: "default" | "mailbox" | "custom" = "default";
-  export let show_star: boolean;
-  export let unread: boolean | null = null;
-  export let you: Partial<Account> = {};
-  export let show_contact_avatar: boolean;
-  export let clean_conversation: boolean;
-  export let show_expanded_email_view_onload: boolean;
-  export let show_thread_actions: boolean;
 
-  const defaultValueMap = {
-    theme: "theme-1",
-    show_received_timestamp: true,
-    show_number_of_messages: true,
-    show_star: false,
+  // export let messages: Message[] = [];
+  export let clean_conversation: boolean;
+  export let click_action: "default" | "mailbox" | "custom" = "default";
+  export let message_id: string;
+  export let message: Message;
+  export let show_contact_avatar: boolean;
+  export let show_expanded_email_view_onload: boolean;
+  export let show_number_of_messages: boolean;
+  export let show_received_timestamp: boolean;
+  export let show_star: boolean;
+  export let show_thread_actions: boolean;
+  export let theme: string;
+  export let thread_id: string;
+  export let thread: Thread;
+  export let unread: boolean;
+  export let you: Partial<Account>;
+
+  const defaultValueMap: Partial<EmailProperties> = {
+    clean_conversation: false,
     click_action: "default",
-    thread_id: "",
+    message_id: "",
     show_contact_avatar: true,
     show_expanded_email_view_onload: false,
-    clean_conversation: false,
+    show_number_of_messages: true,
+    show_received_timestamp: true,
+    show_star: false,
+    show_thread_actions: true,
+    theme: "theme-1",
+    thread_id: "",
+    unread: true,
+    you: {},
   };
+
+  let manifest: Partial<EmailProperties> = {};
+  let _this = <EmailProperties>buildInternalProps({}, {}, defaultValueMap);
 
   let userEmail: string | undefined;
   onMount(async () => {
@@ -84,42 +90,71 @@
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
 
-    updateInternalProps(
-      buildInternalProps($$props, manifest, defaultValueMap) as EmailProperties,
-    );
+    _this = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as EmailProperties;
+
+    transformPropertyValues();
 
     // Fetch Account
-    if (id && !you.id && !emailManuallyPassed) {
-      you = await fetchAccount({
+    if (id && !_this.you?.id && !emailManuallyPassed) {
+      _this.you = await fetchAccount({
         component_id: query.component_id,
         access_token,
       });
-      userEmail = <string>you.email_address;
+      userEmail = <string>_this.you?.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
         component_id: id,
         access_token,
       };
-      if (you?.organization_unit === AccountOrganizationUnit.Label) {
+      if (_this.you?.organization_unit === AccountOrganizationUnit.Label) {
         labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
-      } else if (you?.organization_unit === AccountOrganizationUnit.Folder) {
+      } else if (
+        _this.you?.organization_unit === AccountOrganizationUnit.Folder
+      ) {
         folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
       }
     }
   });
+
+  let previousProps = $$props;
+  $: {
+    if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
+      _this = buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as EmailProperties;
+
+      transformPropertyValues();
+      previousProps = $$props;
+    }
+  }
+
+  function transformPropertyValues() {
+    _this.thread_id = !thread && !message_id && !message ? _this.thread_id : "";
+
+    if (id && !_this.thread_id && !_this.thread && _this.message_id) {
+      fetchOneMessage();
+    }
+  }
+
   let contacts: any = null;
   let activeThreadContact = {};
   $: activeThreadContact =
     activeThread && contacts
       ? contacts[
-          activeThread.messages[activeThread.messages.length - 1].from[0].email
+          activeThread.messages[activeThread.messages.length - 1]?.from[0].email
         ]
       : null;
   $: activeMessageContact =
-    message && contacts ? contacts[message.from[0].email] : null;
+    _this.message && contacts ? contacts[_this.message?.from[0].email] : null;
 
   let threadIdChanged = false;
-  $: thread_id, (threadIdChanged = true);
+  $: _this.thread_id, (threadIdChanged = true);
 
   $: (async () => {
     if (threadIdChanged || !contacts) {
@@ -128,8 +163,8 @@
         await getThreadContacts(thread);
       } else if (activeThread) {
         await getThreadContacts(activeThread);
-      } else if (message) {
-        const participant = message.from[0];
+      } else if (_this.message) {
+        const participant = _this.message.from[0];
         if (!contacts) {
           contacts = {};
         }
@@ -182,43 +217,6 @@
       : null;
   // #endregion initialize label and folder vars (for trash)
 
-  let internalProps: EmailProperties = <any>{};
-  $: {
-    const rebuiltProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as EmailProperties;
-    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      updateInternalProps(rebuiltProps);
-    }
-  }
-
-  function updateInternalProps(updatedProps: EmailProperties) {
-    internalProps = updatedProps;
-
-    theme = internalProps.theme;
-    show_received_timestamp = internalProps.show_received_timestamp;
-    show_number_of_messages = internalProps.show_number_of_messages;
-    show_star = internalProps.show_star;
-    unread = internalProps.unread;
-    click_action = internalProps.click_action;
-
-    // Assign thread_id to threadID stored in the manifest only when passing a thread_id
-    const internalPropThreadID =
-      !thread && !message_id && !message ? internalProps.thread_id : "";
-    thread_id = internalPropThreadID;
-    show_contact_avatar = internalProps.show_contact_avatar;
-    show_expanded_email_view_onload =
-      internalProps.show_expanded_email_view_onload;
-    clean_conversation = internalProps.clean_conversation;
-
-    if (activeThread && click_action === "mailbox") {
-      // enables bulk starring action in mailbox to immediately reflect visually
-      activeThread = activeThread;
-    }
-  }
-
   let participants: Participant[] = [];
   $: {
     participants = activeThread ? activeThread.participants : [];
@@ -227,7 +225,7 @@
   $: query = {
     access_token,
     component_id: id,
-    thread_id,
+    thread_id: _this.thread_id,
   };
 
   let queryKey: string;
@@ -235,15 +233,11 @@
 
   let activeThread: Conversation;
 
-  $: if (!thread_id && !thread && id && message_id) {
-    fetchOneMessage();
-  }
-
   // #region thread intake and set
   // The trick is to always ensure that activeThread is in the store; that way if we need to do fetches to update its messages, it too will be updated for free.
   // TODO: this feels like it could be a "$: activeThread =" reactive prop declaration instead of a conditional block. -Phil
   $: (async () => {
-    if (thread && thread.id) {
+    if (_this.thread && _this.thread.id) {
       // Is it in the store already? (via <nylas-mailbox>, for example)
       const localThread: Conversation =
         (MailboxStore.getFlatThreads().find(
@@ -251,15 +245,15 @@
         ) as Conversation) ?? thread;
 
       // This is for Email component demo purpose, where we want to show expanded threads by default on load.
-      if (show_expanded_email_view_onload) {
-        localThread.expanded = show_expanded_email_view_onload;
+      if (_this.show_expanded_email_view_onload) {
+        localThread.expanded = _this.show_expanded_email_view_onload;
       }
       activeThread = localThread;
-    } else if (thread_id) {
+    } else if (_this.thread_id) {
       const thread = await MailboxStore.getThread(query);
 
-      if (show_expanded_email_view_onload) {
-        thread.expanded = show_expanded_email_view_onload;
+      if (_this.show_expanded_email_view_onload) {
+        thread.expanded = _this.show_expanded_email_view_onload;
       }
       activeThread = thread as Conversation;
     }
@@ -267,7 +261,7 @@
 
   // #endregion thread intake and set
   let emailManuallyPassed: boolean;
-  $: emailManuallyPassed = !!thread;
+  $: emailManuallyPassed = !!_this.thread;
 
   //#region Clean Conversation
   // If a user sets message_body_type to "clean", expand their message to clean conversation.
@@ -294,14 +288,14 @@
         });
         activeThread.messages = activeThread.messages;
       });
-    } else if (message) {
+    } else if (_this.message) {
       fetchCleanConversations({
         component_id: id,
-        message_id: [message.id],
+        message_id: [_this.message.id],
       }).then((results) => {
         results.forEach((msg: Message) => {
-          if (message) {
-            message.conversation = msg.conversation;
+          if (_this.message) {
+            _this.message.conversation = msg.conversation;
           }
         });
         activeThread.messages = activeThread.messages;
@@ -310,9 +304,9 @@
   }
 
   $: if (
-    clean_conversation &&
+    _this.clean_conversation &&
     ((activeThread && !activeThread.messages.some((m) => m.conversation)) ||
-      (message && !message.conversation))
+      (_this.message && !_this.message.conversation))
   )
     cleanConversation();
   //#endregion Clean Conversation
@@ -344,19 +338,23 @@
 
   async function saveActiveThread() {
     // if thread and if component_id (security)
-    if (activeThread && query.component_id && thread_id) {
+    if (activeThread && query.component_id && _this.thread_id) {
       await updateThread(query, activeThread).then((thread) => {
         $MailboxStore[queryKey] = [thread];
       });
     }
   }
 
-  async function handleThread(e: MouseEvent | KeyboardEvent) {
-    if (click_action === "default" || click_action === "mailbox") {
+  async function handleThread(event: MouseEvent | KeyboardEvent) {
+    if (_this.click_action === "default" || _this.click_action === "mailbox") {
       //#region read/unread
-      if (activeThread && activeThread.unread && click_action !== "mailbox") {
+      if (
+        activeThread &&
+        activeThread.unread &&
+        _this.click_action !== "mailbox"
+      ) {
         activeThread.unread = !activeThread.unread;
-        unread = activeThread.unread;
+        _this.unread = activeThread.unread;
         await saveActiveThread();
       }
       //#endregion read/unread
@@ -376,7 +374,7 @@
 
       activeThread.expanded = !activeThread.expanded;
       // Upon expansion / lastMessage existing, scroll to it
-      if (activeThread.expanded && click_action === "default") {
+      if (activeThread.expanded && _this.click_action === "default") {
         // Timeout here is to ensure the element is available before trying
         // to scroll it into view
         setTimeout(() => {
@@ -389,35 +387,35 @@
       //#endregion open thread + messages
     }
     dispatchEvent("threadClicked", {
-      event: e,
+      event,
       thread: activeThread,
     });
-    current_tooltip_id = "";
+    currentTooltipId = "";
   }
 
-  async function toggleUnreadStatus(e: MouseEvent | KeyboardEvent) {
+  async function toggleUnreadStatus(event: MouseEvent | KeyboardEvent) {
     if (activeThread) {
       dispatchEvent("toggleThreadUnreadStatus", {
-        event: e,
+        event,
         thread: activeThread,
       });
-      if (click_action !== "mailbox") {
+      if (_this.click_action !== "mailbox") {
         activeThread.unread = !activeThread.unread;
-        unread = activeThread.unread;
+        _this.unread = activeThread.unread;
         await saveActiveThread();
         return;
       }
       return;
     }
-    unread = !unread;
+    _this.unread = !_this.unread;
   }
 
-  async function deleteEmail(e: MouseEvent) {
+  async function deleteEmail(event: MouseEvent) {
     dispatchEvent("threadDeleted", {
-      event: e,
+      event,
       thread: activeThread,
     });
-    if (click_action !== "mailbox") {
+    if (_this.click_action !== "mailbox") {
       if (trashLabelID) {
         const existingLabelIds = activeThread.labels?.map((i) => i.id) || [];
         activeThread.label_ids = [...existingLabelIds, trashLabelID];
@@ -428,31 +426,39 @@
     }
   }
 
-  function handleThreadClick(e: MouseEvent) {
-    if (message && (!thread_id || !thread)) return;
-    else if (click_action === "mailbox" && activeThread.expanded) return;
-    e.preventDefault();
-    handleThread(e);
+  function handleThreadClick(event: MouseEvent) {
+    if (
+      (_this.message && (!_this.thread_id || !_this.thread)) ||
+      (_this.click_action === "mailbox" && activeThread.expanded)
+    ) {
+      return;
+    }
+    event.preventDefault();
+    handleThread(event);
   }
 
-  function returnToMailbox(e: MouseEvent | KeyboardEvent) {
+  function returnToMailbox(event: MouseEvent | KeyboardEvent) {
     dispatchEvent("returnToMailbox", {
-      event: e,
+      event,
       thread: activeThread,
     });
   }
 
-  function handleThreadKeypress(e: KeyboardEvent) {
-    if (message && (!thread_id || !thread)) return;
-    else if (click_action === "mailbox" && activeThread.expanded) return;
-    e.preventDefault();
-    if (e.code === "Enter") {
-      handleThread(e);
+  function handleThreadKeypress(event: KeyboardEvent) {
+    if (
+      (_this.message && (!_this.thread_id || !_this.thread)) ||
+      (_this.click_action === "mailbox" && activeThread.expanded)
+    ) {
+      return;
+    }
+    event.preventDefault();
+    if (event.code === "Enter") {
+      handleThread(event);
     }
   }
 
-  async function handleThreadStarClick(e: MouseEvent) {
-    e.stopImmediatePropagation();
+  async function handleThreadStarClick(event: MouseEvent) {
+    event.stopImmediatePropagation();
     //#region starred/unstarred
     if (activeThread) {
       activeThread.starred = !activeThread.starred;
@@ -461,21 +467,21 @@
     //#endregion starred/unstarred
 
     dispatchEvent("threadStarred", {
-      event: e,
+      event,
       thread: activeThread,
     });
   }
 
-  function handleEmailClick(e: MouseEvent, msgIndex: number) {
-    e.stopImmediatePropagation();
+  function handleEmailClick(event: MouseEvent, msgIndex: number) {
+    event.stopImmediatePropagation();
 
     if (msgIndex === activeThread.messages.length - 1) {
-      doNothing(e);
+      doNothing(event);
     } else {
       activeThread.messages[msgIndex].expanded =
         !activeThread.messages[msgIndex].expanded;
       dispatchEvent("messageClicked", {
-        event: e,
+        event,
         message: activeThread.messages[msgIndex],
         thread: activeThread,
       });
@@ -485,11 +491,11 @@
     }
   }
 
-  function handleEmailKeypress(e: KeyboardEvent, msgIndex: number) {
-    e.stopImmediatePropagation();
-    if (e.code === "Enter") {
+  function handleEmailKeypress(event: KeyboardEvent, msgIndex: number) {
+    event.stopImmediatePropagation();
+    if (event.code === "Enter") {
       if (msgIndex === activeThread.messages.length - 1) {
-        doNothing(e);
+        doNothing(event);
       } else {
         activeThread.messages[msgIndex].expanded =
           !activeThread.messages[msgIndex].expanded;
@@ -513,8 +519,12 @@
 
   // For cases when someone wants to show just a single email message, rather than the full thread.
   function fetchOneMessage() {
-    fetchEmail({ access_token, component_id: id, message_id }).then((json) => {
-      message = json;
+    fetchEmail({
+      access_token,
+      component_id: id,
+      message_id: _this.message_id,
+    }).then((json) => {
+      _this.message = json;
       messageLoadStatus[0] = "loaded";
     });
   }
@@ -590,9 +600,9 @@
     );
   }
 
-  let current_tooltip_id: string = "";
-  function setTooltip(e: any) {
-    current_tooltip_id = e.detail.tooltipID;
+  let currentTooltipId: string = "";
+  function setTooltip(event: any) {
+    currentTooltipId = event.detail.tooltipID;
   }
 
   function showFirstFromParticipant(messages: Message[]) {
@@ -600,7 +610,7 @@
       messages &&
       participants &&
       messages.length > 0 &&
-      messages[messages.length - 1].from.length
+      messages[messages.length - 1]?.from.length
     );
   }
 
@@ -613,8 +623,8 @@
       participants &&
       messages.length > 1 &&
       participants.length >= 2 &&
-      messages[0].from.length &&
-      participants[0].email !== messages[messages.length - 1].from[0].email
+      messages[0]?.from.length &&
+      participants[0].email !== messages[messages.length - 1]?.from[0].email
     );
   }
 </script>
@@ -1141,23 +1151,23 @@
   tabindex="0"
   on:keypress={handleThreadKeypress}
 >
-  {#if thread || thread_id}
+  {#if _this.thread || _this.thread_id}
     {#await activeThread}
       Loading...
     {:then thread}
       {#if thread && activeThread}
         {#if activeThread.expanded}
           <div
-            class="email-row expanded {click_action === 'mailbox'
+            class="email-row expanded {_this.click_action === 'mailbox'
               ? 'expanded-mailbox-thread'
               : ''}"
           >
             <header
               class="subject-title"
-              class:mailbox={click_action === "mailbox"}
+              class:mailbox={_this.click_action === "mailbox"}
             >
               <div>
-                {#if click_action === "mailbox"}
+                {#if _this.click_action === "mailbox"}
                   <button
                     title={"Return to Mailbox"}
                     aria-label={"Return to Mailbox"}
@@ -1166,7 +1176,7 @@
                     <LeftArrowLineIcon />
                   </button>
                 {/if}
-                <h1>{thread.subject}</h1>
+                <h1>{thread?.subject}</h1>
               </div>
               <div role="toolbar">
                 <div class="delete">
@@ -1178,7 +1188,7 @@
                     <TrashIcon />
                   </button>
                 </div>
-                {#if show_star}
+                {#if _this.show_star}
                   <div class="starred">
                     <button
                       class={thread.starred ? "starred" : ""}
@@ -1194,20 +1204,20 @@
                 <div class="read-status">
                   <button
                     title={`Mark thread as ${
-                      unread ||
-                      (activeThread.unread && click_action !== "mailbox")
+                      _this.unread ||
+                      (activeThread.unread && _this.click_action !== "mailbox")
                         ? ""
                         : "un"
                     }read`}
                     aria-label={`Mark thread as ${
-                      unread ||
-                      (activeThread.unread && click_action !== "mailbox")
+                      _this.unread ||
+                      (activeThread.unread && _this.click_action !== "mailbox")
                         ? ""
                         : "un"
                     }read`}
                     on:click|stopPropagation={toggleUnreadStatus}
                   >
-                    {#if unread || (activeThread.unread && click_action !== "mailbox")}
+                    {#if _this.unread || (activeThread.unread && _this.click_action !== "mailbox")}
                       <MarkReadIcon aria-hidden="true" />
                     {:else}
                       <MarkUnreadIcon aria-hidden="true" />
@@ -1236,37 +1246,37 @@
                     <div class="message-head">
                       <div class="message-from-to">
                         <div class="avatar-from">
-                          {#if show_contact_avatar}
+                          {#if _this.show_contact_avatar}
                             <div class="default-avatar">
                               <nylas-contact-image
                                 {contact_query}
-                                contact={contacts[message.from[0].email]}
+                                contact={contacts[message?.from[0].email]}
                               />
                             </div>
                           {/if}
                           <div class="message-from">
-                            <span class="name"
-                              >{userEmail && message.from[0].email === userEmail
+                            <span class="name">
+                              {userEmail && message?.from[0].email === userEmail
                                 ? "me"
-                                : message.from[0].name ||
-                                  message.from[0].email}</span
-                            >
+                                : message?.from[0].name ||
+                                  message?.from[0].email}
+                            </span>
                             <!-- tooltip component -->
                             <nylas-tooltip
                               on:toggleTooltip={setTooltip}
-                              id={message.id.slice(0, 3)}
-                              {current_tooltip_id}
+                              id={message?.id.slice(0, 3)}
+                              current_tooltip_id={currentTooltipId}
                               icon={DropdownSymbol}
-                              content={message.from[0].email}
+                              content={message?.from[0].email}
                             />
                           </div>
                         </div>
                         <div class="message-to">
-                          {#each message.to as to, i}
+                          {#each message?.to as to, i}
                             <div>
                               {#if to.name || to.email}
-                                <span
-                                  >to&colon;&nbsp;{userEmail &&
+                                <span>
+                                  to&colon;&nbsp;{userEmail &&
                                   to.email === userEmail
                                     ? "me"
                                     : to.name || to.email}
@@ -1277,8 +1287,8 @@
                                 <!-- tooltip component -->
                                 <nylas-tooltip
                                   on:toggleTooltip={setTooltip}
-                                  id={message.id.slice(0, 4)}
-                                  {current_tooltip_id}
+                                  id={message?.id.slice(0, 4)}
+                                  current_tooltip_id={currentTooltipId}
                                   icon={DropdownSymbol}
                                   content={to.email}
                                 />
@@ -1296,7 +1306,7 @@
                       </div>
                     </div>
                     <div class="message-body">
-                      {#if clean_conversation && message.conversation}
+                      {#if _this.clean_conversation && message.conversation}
                         {@html DOMPurify.sanitize(message.conversation)}
                       {:else if message.body}
                         <nylas-message-body {message} />
@@ -1307,28 +1317,28 @@
                   {:else}
                     <div class="message-head">
                       <div class="avatar-from">
-                        {#if show_contact_avatar}
+                        {#if _this.show_contact_avatar}
                           <div class="default-avatar">
                             <nylas-contact-image
                               {contact_query}
-                              contact={contacts[message.from[0].email]}
+                              contact={contacts[message?.from[0].email]}
                             />
                           </div>
                         {/if}
                         <div class="message-from">
                           <span class="name"
-                            >{userEmail && message.from[0].email === userEmail
+                            >{userEmail && message?.from[0].email === userEmail
                               ? "me"
-                              : message.from[0].name ||
-                                message.from[0].email}</span
+                              : message?.from[0].name ||
+                                message?.from[0].email}</span
                           >
                           <!-- tooltip component -->
                           <nylas-tooltip
                             on:toggleTooltip={setTooltip}
-                            id={message.id.slice(0, 3)}
-                            {current_tooltip_id}
+                            id={message?.id.slice(0, 3)}
+                            current_tooltip_id={currentTooltipId}
                             icon={DropdownSymbol}
-                            content={message.from[0].email}
+                            content={message?.from[0].email}
                           />
                         </div>
                       </div>
@@ -1353,26 +1363,26 @@
         {:else}
           <div
             class="email-row condensed"
-            class:show_star
-            class:unread={unread ||
-              (activeThread.unread && click_action !== "mailbox")}
+            class:show_star={_this.show_star}
+            class:unread={_this.unread ||
+              (activeThread.unread && _this.click_action !== "mailbox")}
           >
-            <div class="from{show_star ? '-star' : ''}">
-              {#if show_star}
+            <div class="from{_this.show_star ? '-star' : ''}">
+              {#if _this.show_star}
                 <div class="starred">
                   <button
-                    id={`thread-star-${thread_id}`}
+                    id={`thread-star-${_this.thread_id}`}
                     class={activeThread.starred ? "starred" : ""}
-                    value={thread_id}
+                    value={_this.thread_id}
                     role="switch"
                     aria-checked={activeThread.starred}
                     on:click|preventDefault={handleThreadStarClick}
-                    aria-label={`Star button for thread ${thread_id}`}
+                    aria-label={`Star button for thread ${_this.thread_id}`}
                   />
                 </div>
               {/if}
               <div class="from-message-count">
-                {#if show_contact_avatar}
+                {#if _this.show_contact_avatar}
                   <div class="default-avatar">
                     <nylas-contact-image
                       {contact_query}
@@ -1389,14 +1399,13 @@
                     )}
                   >
                     {#if showFirstFromParticipant(activeThread.messages)}
-                      <span class="from-sub-section"
-                        >{activeThread.messages[
-                          activeThread.messages.length - 1
-                        ].from[0].name ||
+                      <span class="from-sub-section">
+                        {activeThread.messages[activeThread.messages.length - 1]
+                          ?.from[0].name ||
                           activeThread.messages[
                             activeThread.messages.length - 1
-                          ].from[0].email}</span
-                      >
+                          ]?.from[0].email}
+                      </span>
                     {/if}
                     {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
                       <span class="from-sub-section second"
@@ -1426,7 +1435,7 @@
                     {/if}
                   </div>
                 </div>
-                {#if activeThread.messages.length > 1 && show_number_of_messages}
+                {#if activeThread.messages.length > 1 && _this.show_number_of_messages}
                   <span class="thread-message-count"
                     >{activeThread.messages.length}</span
                   >
@@ -1435,17 +1444,17 @@
             </div>
             <div class="subject-snippet-date">
               <div class="desktop-subject-snippet">
-                <span class="subject">{thread.subject}</span><span
+                <span class="subject">{thread?.subject}</span><span
                   class="snippet"
                 >
                   {thread.snippet}</span
                 >
               </div>
               <div
-                class:date={show_received_timestamp}
-                class:action-icons={show_thread_actions}
+                class:date={_this.show_received_timestamp}
+                class:action-icons={_this.show_thread_actions}
               >
-                {#if show_thread_actions}
+                {#if _this.show_thread_actions}
                   <div class="delete">
                     <button
                       title="Delete thread"
@@ -1458,27 +1467,29 @@
                   <div class="read-status">
                     <button
                       title={`Mark thread as ${
-                        unread ||
-                        (activeThread.unread && click_action !== "mailbox")
+                        _this.unread ||
+                        (activeThread.unread &&
+                          _this.click_action !== "mailbox")
                           ? ""
                           : "un"
                       }read`}
                       aria-label={`Mark thread as ${
-                        unread ||
-                        (activeThread.unread && click_action !== "mailbox")
+                        _this.unread ||
+                        (activeThread.unread &&
+                          _this.click_action !== "mailbox")
                           ? ""
                           : "un"
                       }read`}
                       on:click|stopPropagation={toggleUnreadStatus}
                     >
-                      {#if unread || (activeThread.unread && click_action !== "mailbox")}
+                      {#if _this.unread || (activeThread.unread && _this.click_action !== "mailbox")}
                         <MarkReadIcon aria-hidden="true" />
                       {:else}
                         <MarkUnreadIcon aria-hidden="true" />
                       {/if}</button
                     >
                   </div>
-                {:else if show_received_timestamp}
+                {:else if _this.show_received_timestamp}
                   <span>
                     {formatPreviewDate(
                       new Date(thread.last_message_timestamp * 1000),
@@ -1489,7 +1500,7 @@
             </div>
 
             <div class="mobile-subject-snippet">
-              <span class="subject">{thread.subject}</span><span
+              <span class="subject">{thread?.subject}</span><span
                 class="snippet"
               >
                 {thread.snippet}</span
@@ -1499,15 +1510,15 @@
         {/if}
       {/if}
     {/await}
-  {:else if message}
-    {#if Object.keys(message).length > 0}
+  {:else if _this.message}
+    {#if Object.keys(_this.message).length > 0}
       <div class="email-row expanded singular">
-        <header>{message.subject}</header>
+        <header>{_this.message?.subject}</header>
         <div class="individual-message expanded">
           <div class="message-head">
             <div class="message-from-to">
               <div class="avatar-from">
-                {#if show_contact_avatar}
+                {#if _this.show_contact_avatar}
                   <div class="default-avatar">
                     <nylas-contact-image
                       {contact_query}
@@ -1517,55 +1528,58 @@
                 {/if}
                 <div class="message-from">
                   <span class="name"
-                    >{userEmail && message.from[0].email === userEmail
+                    >{userEmail && message?.from[0].email === userEmail
                       ? "me"
-                      : message.from[0].name || message.from[0].email}</span
+                      : _this.message?.from[0].name ||
+                        message?.from[0].email}</span
                   >
                   <!-- tooltip component -->
                   <nylas-tooltip
                     on:toggleTooltip={setTooltip}
-                    id={message.id}
-                    {current_tooltip_id}
+                    id={_this.message?.id}
+                    current_tooltip_id={currentTooltipId}
                     icon={DropdownSymbol}
-                    content={message.from[0].email}
+                    content={_this.message?.from[0].email}
                   />
                 </div>
               </div>
 
               <div class="message-to">
-                {#each message.to as to, i}
+                {#each _this.message?.to as to, i}
                   <div>
                     {#if to.name || to.email}
-                      <span
-                        >to&colon;&nbsp;{userEmail && to.email === userEmail
+                      <span>
+                        to&colon;&nbsp;{userEmail && to.email === userEmail
                           ? "me"
                           : to.name || to.email}
-                        {#if i !== message.to.length - 1}
-                          &nbsp;&comma;
-                        {/if}
                       </span>
                       <!-- tooltip component -->
                       <nylas-tooltip
                         on:toggleTooltip={setTooltip}
-                        id={message.id.slice(0, 3)}
-                        {current_tooltip_id}
+                        id={_this.message.id.slice(0, 3)}
+                        current_tooltip_id={currentTooltipId}
                         icon={DropdownSymbol}
                         content={to.email}
                       />
+                      {#if i !== _this.message?.to.length - 1}
+                        &nbsp;&comma;
+                      {/if}
                     {/if}
                   </div>
                 {/each}
               </div>
             </div>
             <div class="message-date">
-              <span> {formatPreviewDate(new Date(message.date * 1000))}</span>
+              <span>
+                {formatPreviewDate(new Date(_this.message.date * 1000))}</span
+              >
             </div>
           </div>
           <div class="message-body">
-            {#if clean_conversation && message.conversation}
-              {@html DOMPurify.sanitize(message.conversation)}
-            {:else if message.body}
-              <nylas-message-body {message} />
+            {#if _this.clean_conversation && message.conversation}
+              {@html DOMPurify.sanitize(_this.message.conversation)}
+            {:else if _this.message.body}
+              <nylas-message-body message={_this.message} />
             {/if}
           </div>
         </div>

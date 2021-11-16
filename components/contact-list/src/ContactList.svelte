@@ -21,25 +21,27 @@
     ContactsQuery,
   } from "@commons/types/Contacts";
   import type { ContactListProperties } from "@commons/types/Nylas";
+  import { sortingPredicates } from "../lib/sorting";
 
   export let id: string = "";
   export let access_token: string = "";
-  export let contacts: HydratedContact[] | null = null;
-  export let theme: string = "theme-1";
-  export let click_action: "email" | "select";
-  export let sort_by: "last_emailed" | "name";
-  export let contacts_to_load: number;
-  export let show_names: boolean;
-  export let default_photo: string | null;
-  export let show_filter: boolean = false;
 
-  const defaultValueMap = {
-    theme: "theme-1",
+  export let click_action: "email" | "select";
+  export let contacts_to_load: number;
+  export let contacts: HydratedContact[];
+  export let default_photo: string | null;
+  export let show_filter: boolean;
+  export let show_names: boolean;
+  export let sort_by: "last_emailed" | "name";
+  export let theme: string = "theme-1";
+
+  const defaultValueMap: Partial<ContactListProperties> = {
     click_action: "email",
-    sort_by: "name",
-    show_filter: true,
-    show_names: true,
     contacts_to_load: 100,
+    show_filter: false,
+    show_names: true,
+    sort_by: "name",
+    theme: "theme-1",
   };
 
   let filterValue: string = "";
@@ -52,9 +54,9 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
-  import { sortingPredicates } from "../lib/sorting";
-
-  let internalProps: ContactListProperties = <any>{};
+  let _this = <ContactListProperties>(
+    buildInternalProps({}, {}, defaultValueMap)
+  );
   let manifest: Partial<ContactListProperties> = {};
   let main: Element;
   let clientHeight: number = 0;
@@ -72,48 +74,56 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as ContactListProperties;
-    updateInternalProps(
-      buildInternalProps(
-        $$props,
-        manifest,
-        defaultValueMap,
-      ) as ContactListProperties,
-    );
-  });
 
-  $: dispatchEvent("manifestLoaded", manifest);
-
-  $: {
-    const rebuiltProps = buildInternalProps(
+    _this = buildInternalProps(
       $$props,
       manifest,
       defaultValueMap,
     ) as ContactListProperties;
-    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      updateInternalProps(rebuiltProps);
+
+    if (_this.contacts) {
+      hydratedContacts = _this.contacts as HydratedContact[];
+      status = "loaded";
+    } else {
+      if ($ContactStore[queryKey]) {
+        hydratedContacts = $ContactStore[queryKey];
+        status = "loaded";
+      } else if (query.component_id) {
+        setContacts();
+      }
+    }
+  });
+
+  $: dispatchEvent("manifestLoaded", manifest);
+
+  let previousProps = $$props;
+  $: {
+    if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
+      _this = buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as ContactListProperties;
+      previousProps = $$props;
     }
   }
 
-  function updateInternalProps(updatedProps: ContactListProperties) {
-    internalProps = updatedProps;
-
-    theme = internalProps.theme;
-    click_action = internalProps.click_action;
-    sort_by = internalProps.sort_by;
-    show_filter = internalProps.show_filter;
-    default_photo = internalProps.default_photo;
-    show_names = internalProps.show_names;
-    contacts_to_load = internalProps.contacts_to_load;
-  }
-
   let themeUrl: string;
-  $: if (!!theme && (theme.startsWith(".") || theme.startsWith("http"))) {
+  $: if (
+    !!_this.theme &&
+    (_this.theme.startsWith(".") || _this.theme.startsWith("http"))
+  ) {
     // If the theme is a file path or a URL
-    themeUrl = theme;
+    themeUrl = _this.theme;
   }
 
   // sanitization to conform with Nylas API maximums
-  $: Math.max(Math.min(contacts_to_load, 1000), 1);
+  $: {
+    _this.contacts_to_load = Math.max(
+      Math.min(_this.contacts_to_load, 1000),
+      1,
+    );
+  }
 
   // #region setting contacts
   let query: ContactsQuery;
@@ -150,11 +160,11 @@
   */
   function setContacts() {
     status = "loading";
-    fetchContacts(query, offset, contacts_to_load).then(
+    fetchContacts(query, offset, _this.contacts_to_load).then(
       (results: Contact[]) => {
         if (results.length > 0) {
           hydratedContacts = $ContactStore[queryKey] ?? results;
-          offset += contacts_to_load;
+          offset += _this.contacts_to_load;
         }
         status = "loaded";
       },
@@ -200,7 +210,7 @@
 
     const sortedFiltered = hydratedContacts
       .filter(filterPredicates[selectedFilterType])
-      .sort(sortingPredicates[sort_by]);
+      .sort(sortingPredicates[_this.sort_by]);
 
     // noinspection UnnecessaryLocalVariableJS
     const deduplicatedContacts = Object.values(
@@ -213,8 +223,11 @@
   }
 
   $: {
-    if ($ContactStore[queryKey] && contacts_to_load !== lastNumContactsLoaded) {
-      lastNumContactsLoaded = contacts_to_load;
+    if (
+      $ContactStore[queryKey] &&
+      _this.contacts_to_load !== lastNumContactsLoaded
+    ) {
+      lastNumContactsLoaded = _this.contacts_to_load;
       offset = 0;
       setContacts();
     }
@@ -226,10 +239,10 @@
     event: MouseEvent | KeyboardEvent,
     contact: HydratedContact,
   ) {
-    if (click_action === "email") {
+    if (_this.click_action === "email") {
       window.location.href = `mailto:${contact.emails[0].email}`;
     }
-    if (click_action === "select") {
+    if (_this.click_action === "select") {
       contact.selected = !contact.selected;
       dispatchEvent("contactClicked", {
         event,
@@ -457,10 +470,10 @@
 
 <main
   bind:this={main}
-  on:scroll={contacts ? () => {} : debounceScroll}
+  on:scroll={_this.contacts ? () => {} : debounceScroll}
   bind:clientHeight
   bind:clientWidth
-  class={!!themeUrl ? "custom" : theme}
+  class={!!themeUrl ? "custom" : _this.theme}
 >
   {#if status === "loading" && hydratedContacts.length <= 0}
     <div class="loader" />
@@ -481,7 +494,7 @@
     </div>
   {/if}
   {#await displayedContacts then results}
-    {#if status === "loading" && results.length >= contacts_to_load}
+    {#if status === "loading" && results.length >= _this.contacts_to_load}
       <span
         class="loading"
         style="--height: {clientHeight}px; --width: {clientWidth}px"
@@ -490,7 +503,7 @@
       </span>
     {/if}
 
-    {#if show_filter && status !== "loading"}
+    {#if _this.show_filter && status !== "loading"}
       <label class="entry filter">
         Filter by email: <input
           id="show-filter-input"
@@ -513,11 +526,11 @@
           class="entry contact"
           data-cy={i}
           data-last-contacted-date={contact.last_contacted_date || -1}
-          class:selectable={click_action === "select"}
+          class:selectable={_this.click_action === "select"}
           class:selected={contact.selected}
         >
           <span class="checkbox">
-            {#if click_action === "select"}
+            {#if _this.click_action === "select"}
               <input
                 type="checkbox"
                 bind:checked={contact.selected}
@@ -548,8 +561,8 @@
                 alt={contact.emails[0].email}
                 data-cy="default_set_by_user"
               />
-            {:else if default_photo}
-              {(contact.default_picture = default_photo)}
+            {:else if _this.default_photo}
+              {(contact.default_picture = _this.default_photo)}
             {:else}
               <div class="default">
                 {contact.given_name && contact.surname
@@ -559,7 +572,7 @@
             {/if}
           </span>
           <span class="title">
-            {#if show_names}
+            {#if _this.show_names}
               {#if contact.given_name}{contact.given_name}{/if}
               {#if contact.surname}{contact.surname}{/if}
               {#if !contact.given_name && !contact.surname}
@@ -567,7 +580,7 @@
               {/if}
             {:else}{contact.emails[0].email}{/if}
           </span>
-          {#if show_names}
+          {#if _this.show_names}
             <span class="email">
               {contact.emails[0].email}
               {#if contact.emails.length > 1}

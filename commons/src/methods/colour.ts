@@ -1,4 +1,8 @@
 export function lightenHexColour(H: string, lightness: number): string {
+  if (!H) {
+    return "";
+  }
+
   // Convert hex to RGB first
   let r: any = 0,
     g: any = 0,

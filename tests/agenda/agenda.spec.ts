@@ -41,12 +41,15 @@ describe("Agenda Props", () => {
   });
   afterAll(() => jest.restoreAllMocks());
 
-  it("should load an Agenda component with events passed as props", () => {
+  it("should load an Agenda component with events passed as props", (done) => {
     const { container: agenda } = render(Agenda, {
       events: mockEvents,
     });
 
-    expect(agenda.querySelectorAll(".event").length).toBe(mockEvents.length);
+    setTimeout(() => {
+      expect(agenda.querySelectorAll(".event").length).toBe(mockEvents.length);
+      done();
+    });
   });
 
   it("should call a custom function passed in as the click_action", async (done) => {
@@ -60,151 +63,182 @@ describe("Agenda Props", () => {
       events: mockEvents,
       click_action: clickHandler,
     });
-
-    await fireEvent.click(getByText(<string>mockEvents[0].title));
+    setTimeout(
+      async () => await fireEvent.click(getByText(<string>mockEvents[0].title)),
+    );
   });
 
-  it("should show the date change arrows only if allow_date_change is set to true", () => {
+  it("should show the date change arrows only if allow_date_change is set to true", (done) => {
     const { container: agenda, component } = render(Agenda, {
       events: mockEvents,
       allow_date_change: true,
     });
+    setTimeout(() => {
+      expect(agenda.querySelectorAll(".change-date").length).toBe(2);
 
-    expect(agenda.querySelectorAll(".change-date").length).toBe(2);
-
-    component.allow_date_change = false;
-    expect(agenda.querySelectorAll(".change-date").length).toBe(0);
+      component.allow_date_change = false;
+      expect(agenda.querySelectorAll(".change-date").length).toBe(0);
+      done();
+    });
   });
 
-  it("should change to the next day when the next arrow is clicked", async () => {
+  it("should change to the next day when the next arrow is clicked", async (done) => {
     const { container: agenda } = render(Agenda, {
       events: mockEvents,
       allow_date_change: true,
     });
 
-    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+    setTimeout(async () => {
+      const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
 
-    // Assume that default is current date
-    await fireEvent.click(agenda.querySelector(".change-date.next") as Element);
+      // Assume that default is current date
+      await fireEvent.click(
+        agenda.querySelector(".change-date.next") as Element,
+      );
 
-    const nextMonth = (agenda.querySelector("header .month h1") as Element)
-      .textContent;
-    const nextDay = (agenda.querySelector("header .day") as Element)
-      .textContent;
-    const nextDate = new Date(`${nextDay} ${nextMonth}`);
+      const nextMonth = (agenda.querySelector("header .month h1") as Element)
+        .textContent;
+      const nextDay = (agenda.querySelector("header .day") as Element)
+        .textContent;
+      const nextDate = new Date(`${nextDay} ${nextMonth}`);
 
-    expect(nextDate.toDateString()).toBe(tomorrow.toDateString());
+      expect(nextDate.toDateString()).toBe(tomorrow.toDateString());
+      done();
+    });
   });
 
-  it("should change to the previous day when the previous arrow is clicked", async () => {
+  it("should change to the previous day when the previous arrow is clicked", async (done) => {
     const { container: agenda } = render(Agenda, {
       events: mockEvents,
       allow_date_change: true,
     });
 
-    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+    setTimeout(async () => {
+      const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 
-    // Assume that default is current date
-    await fireEvent.click(agenda.querySelector(".change-date.prev") as Element);
+      // Assume that default is current date
+      await fireEvent.click(
+        agenda.querySelector(".change-date.prev") as Element,
+      );
 
-    const prevMonth = (agenda.querySelector("header .month h1") as Element)
-      .textContent;
-    const prevDay = (agenda.querySelector("header .day") as Element)
-      .textContent;
-    const prevDate = new Date(`${prevDay} ${prevMonth}`);
+      const prevMonth = (agenda.querySelector("header .month h1") as Element)
+        .textContent;
+      const prevDay = (agenda.querySelector("header .day") as Element)
+        .textContent;
+      const prevDate = new Date(`${prevDay} ${prevMonth}`);
 
-    expect(prevDate.toDateString()).toBe(yesterday.toDateString());
+      expect(prevDate.toDateString()).toBe(yesterday.toDateString());
+      done();
+    });
   });
 
-  it("should not allow changing the zoom level if the component is at the max zoom", async () => {
+  it("should not allow changing the zoom level if the component is at the max zoom", async (done) => {
     const { container: agenda } = render(Agenda, {
       events: mockEvents,
       prevent_zoom: false,
       auto_time_box: false,
     });
 
-    const zoomableEvent = agenda.querySelector(".event") as Element;
-    const initialZoomLevel = zoomableEvent.getAttribute("style");
+    setTimeout(async () => {
+      const zoomableEvent = agenda.querySelector(".event") as Element;
+      const initialZoomLevel = zoomableEvent.getAttribute("style");
 
-    // Zooming in shouldn't work, because we are at max zoom by default
-    await fireEvent.wheel(zoomableEvent, { deltaY: 5 });
-    expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
+      // Zooming in shouldn't work, because we are at max zoom by default
+      await fireEvent.wheel(zoomableEvent, { deltaY: 5 });
+      expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
 
-    // Zooming out should still work
-    await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
-    expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
+      // Zooming out should still work
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
+      done();
+    });
   });
 
-  it("should change the zoom level when scrolling only if prevent_zoom is false", async () => {
+  it("should change the zoom level when scrolling only if prevent_zoom is false", async (done) => {
     const { container: agenda, component } = render(Agenda, {
       events: mockEvents,
       prevent_zoom: true,
     });
 
-    const zoomableEvent = agenda.querySelector(".event") as Element;
-    const initialZoomLevel = zoomableEvent.getAttribute("style");
+    setTimeout(async () => {
+      const zoomableEvent = agenda.querySelector(".event") as Element;
+      const initialZoomLevel = zoomableEvent.getAttribute("style");
 
-    await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
-    expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
 
-    component.prevent_zoom = false;
+      component.prevent_zoom = false;
 
-    await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
-    expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
+      done();
+    });
   });
 
-  it("should change the zoom level when scrolling only if condensed_view is false", async () => {
+  it("should change the zoom level when scrolling only if condensed_view is false", async (done) => {
     const { container: agenda, component } = render(Agenda, {
       events: mockEvents,
       condensed_view: true,
     });
 
-    const zoomableEvent = agenda.querySelector(".event") as Element;
-    const initialZoomLevel = zoomableEvent.getAttribute("style");
+    setTimeout(async () => {
+      const zoomableEvent = agenda.querySelector(".event") as Element;
+      const initialZoomLevel = zoomableEvent.getAttribute("style");
 
-    await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
-    expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
 
-    component.condensed_view = false;
+      component.condensed_view = false;
 
-    await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
-    expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
+      done();
+    });
   });
 
-  it("should hide the header if header_type is none", () => {
+  it("should hide the header if header_type is none", (done) => {
     const { container: agenda, component } = render(Agenda, {
       events: mockEvents,
       header_type: "none",
     });
 
-    expect(agenda.querySelector(".headless")).toBeTruthy();
+    setTimeout(() => {
+      expect(agenda.querySelector(".headless")).toBeTruthy();
 
-    component.header_type = "full";
-    expect(agenda.querySelector(".headless")).toBeFalsy();
+      component.header_type = "full";
+      expect(agenda.querySelector(".headless")).toBeFalsy();
+      done();
+    });
   });
 
-  it("should hide the month if header_type is day", () => {
+  it("should hide the month if header_type is day", (done) => {
     const { container: agenda, component } = render(Agenda, {
       events: mockEvents,
       header_type: "full",
     });
 
-    expect(agenda.querySelector("header .month")).toBeTruthy();
+    setTimeout(() => {
+      expect(agenda.querySelector("header .month")).toBeTruthy();
 
-    component.header_type = "day";
-    expect(agenda.querySelector("header .month")).toBeFalsy();
+      component.header_type = "day";
+      expect(agenda.querySelector("header .month")).toBeFalsy();
+      done();
+    });
   });
 
-  it("should show the current time marker when hide_current_time is false", () => {
+  it("should show the current time marker when hide_current_time is false", (done) => {
     const { container: agenda, component } = render(Agenda, {
       events: mockEvents,
       hide_current_time: false,
     });
 
-    expect(agenda.querySelector("span.now")).toBeTruthy();
+    setTimeout(async () => {
+      expect(agenda.querySelector("span.now")).toBeTruthy();
 
-    component.hide_current_time = true;
-    expect(agenda.querySelector("span.now")).toBeFalsy();
+      component.hide_current_time = true;
+      expect(agenda.querySelector("span.now")).toBeFalsy();
+      done();
+    });
   });
 });
 

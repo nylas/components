@@ -1,65 +1,65 @@
 <svelte:options tag="nylas-mailbox" />
 
 <script lang="ts">
-  import { ManifestStore, fetchAccount } from "@commons";
-  import { get_current_component, onMount, tick } from "svelte/internal";
-  import {
-    buildInternalProps,
-    getEventDispatcher,
-  } from "@commons/methods/component";
-  import { MailboxStore } from "@commons/store/mailbox";
-  import "../../email/src/Email.svelte";
-  import "./components/PaginationNav.svelte";
+  import { fetchAccount, ManifestStore } from "@commons";
   import { fetchMessage } from "@commons/connections/messages";
-  import LoadingIcon from "./assets/loading.svg";
-  import TrashIcon from "./assets/trash-alt.svg";
-  import MarkReadIcon from "./assets/envelope-open-text.svg";
-  import MarkUnreadIcon from "./assets/envelope.svg";
-  import type {
-    Thread,
-    ThreadsQuery,
-    MailboxQuery,
-    Message,
-    Account,
-    Label,
-    Folder,
-    MailboxProperties,
-  } from "@commons/types/Nylas";
   import {
     AccountOrganizationUnit,
     MailboxActions,
   } from "@commons/enums/Nylas";
-  import { LabelStore } from "@commons/store/labels";
+  import {
+    buildInternalProps,
+    getEventDispatcher,
+  } from "@commons/methods/component";
   import { FolderStore } from "@commons/store/folders";
-
-  let manifest: Partial<MailboxProperties> = {};
+  import { LabelStore } from "@commons/store/labels";
+  import { MailboxStore } from "@commons/store/mailbox";
+  import type {
+    Account,
+    Folder,
+    Label,
+    MailboxProperties,
+    MailboxQuery,
+    Message,
+    Thread,
+  } from "@commons/types/Nylas";
+  import { get_current_component, onMount, tick } from "svelte/internal";
+  import "../../email/src/Email.svelte";
+  import MarkReadIcon from "./assets/envelope-open-text.svg";
+  import MarkUnreadIcon from "./assets/envelope.svg";
+  import LoadingIcon from "./assets/loading.svg";
+  import TrashIcon from "./assets/trash-alt.svg";
+  import "./components/PaginationNav.svelte";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
   export let id: string = "";
   export let access_token: string = "";
-  export let all_threads: Thread[];
-  export let show_star: boolean;
-  export let show_thread_checkbox: boolean = true;
-  export let unread_status: "read" | "unread" | "default";
-  export let header: string | null;
-  export let actions_bar: MailboxActions[];
-  export let keyword_to_search: string | null;
-  // query_string format => "in=trash from=phil.r@nylas.com"
-  export let query_string: string | null; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
-  export let items_per_page: number = 13;
-  export let onSelectThread: (
-    event: MouseEvent,
-    t: Thread,
-  ) => void = onSelectOne;
 
-  const defaultValueMap = {
-    show_star: false,
-    unread_status: "default",
-    items_per_page: 13,
+  export let actions_bar: MailboxActions[];
+  export let all_threads: Thread[];
+  export let header: string;
+  export let items_per_page: number;
+  export let keyword_to_search: string;
+  export let onSelectThread: (event: MouseEvent, t: Thread) => void =
+    onSelectOne;
+  // query_string format => "in=trash from=phil.r@nylas.com"
+  export let query_string: string; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
+  export let show_star: boolean;
+  export let show_thread_checkbox: boolean;
+  export let unread_status: "read" | "unread" | "default";
+
+  const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
+    items_per_page: 13,
+    show_star: false,
+    show_thread_checkbox: true,
+    unread_status: "default",
   };
+
+  let manifest: Partial<MailboxProperties> = {};
+  let _this = <MailboxProperties>buildInternalProps({}, {}, defaultValueMap);
 
   let openedEmailData: Thread | null;
   let hasComponentLoaded = false;
@@ -75,16 +75,15 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as MailboxProperties;
-    updateInternalProps(
-      buildInternalProps(
-        $$props,
-        manifest,
-        defaultValueMap,
-      ) as MailboxProperties,
-    );
+
+    _this = buildInternalProps(
+      $$props,
+      manifest,
+      defaultValueMap,
+    ) as MailboxProperties;
 
     // Fetch Account
-    if (id && !you.id && !all_threads) {
+    if (id && !you.id && !_this.all_threads) {
       you = await fetchAccount({
         component_id: query.component_id,
         access_token,
@@ -102,12 +101,12 @@
       folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
     }
 
-    if (all_threads) {
-      threads = all_threads as Thread[];
-    } else if (keyword_to_search) {
+    if (_this.all_threads) {
+      threads = _this.all_threads as Thread[];
+    } else if (_this.keyword_to_search) {
       threads = await MailboxStore.getThreadsWithSearchKeyword({
         ...accountOrganizationUnitQuery,
-        keyword_to_search,
+        keyword_to_search: _this.keyword_to_search,
       });
     } else {
       threads = (await MailboxStore.getThreads(query)) || [];
@@ -115,15 +114,31 @@
 
     inboxThreads = threads; // TODO: filter out threads in trash folder
     starredThreads = new Set(inboxThreads.filter((thread) => thread.starred));
-    if (unread_status === "unread") {
+    if (_this.unread_status === "unread") {
       unreadThreads = new Set(inboxThreads);
-    } else if (unread_status === "default") {
+    } else if (_this.unread_status === "default") {
       unreadThreads = new Set(inboxThreads.filter((thread) => thread.unread));
     }
-    paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
-    lastPage = Math.ceil(inboxThreads?.length / items_per_page);
+    paginatedThreads = paginate(
+      inboxThreads,
+      currentPage,
+      _this.items_per_page,
+    );
+    lastPage = Math.ceil(inboxThreads?.length / _this.items_per_page);
     hasComponentLoaded = true;
   });
+
+  let previousProps = $$props;
+  $: {
+    if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
+      _this = buildInternalProps(
+        $$props,
+        manifest,
+        defaultValueMap,
+      ) as MailboxProperties;
+      previousProps = $$props;
+    }
+  }
 
   let inboxThreads: Thread[]; // threads currently in the inbox
   $: if (threads) {
@@ -133,41 +148,21 @@
     if (!inboxThreads) {
       inboxThreads = threads;
     } // TODO: filter out threads in trash folder
-    lastPage = Math.ceil(inboxThreads?.length / items_per_page);
+    lastPage = Math.ceil(inboxThreads?.length / _this.items_per_page);
     if (currentPage > lastPage && lastPage !== 0) {
       currentPage = lastPage;
     }
   }
 
-  $: paginatedThreads = paginate(inboxThreads, currentPage, items_per_page);
-
-  let internalProps: MailboxProperties = <any>{};
-  $: {
-    const rebuiltProps = buildInternalProps(
-      $$props,
-      manifest,
-      defaultValueMap,
-    ) as MailboxProperties;
-    if (JSON.stringify(rebuiltProps) !== JSON.stringify(internalProps)) {
-      updateInternalProps(rebuiltProps);
-    }
-  }
-
-  function updateInternalProps(updatedProps: MailboxProperties) {
-    internalProps = updatedProps;
-
-    show_star = internalProps.show_star;
-    unread_status = internalProps.unread_status;
-    items_per_page = parseInt(internalProps.items_per_page);
-    header = internalProps.header;
-    query_string = internalProps.query_string;
-    keyword_to_search = internalProps.keyword_to_search;
-    actions_bar = internalProps.actions_bar;
-  }
+  $: paginatedThreads = paginate(
+    inboxThreads,
+    currentPage,
+    _this.items_per_page,
+  );
 
   // Reactive statement to continuously fetch all_threads
-  $: if (all_threads) {
-    threads = all_threads as Thread[];
+  $: if (_this.all_threads) {
+    threads = _this.all_threads as Thread[];
     inboxThreads = threads; // TODO: filter out those in trash folder
   }
 
@@ -178,7 +173,7 @@
     component_id: id,
     access_token,
     query: Object.fromEntries(
-      new URLSearchParams(query_string?.replaceAll(" ", "&")),
+      new URLSearchParams(_this.query_string?.replaceAll(" ", "&")),
     ),
   };
 
@@ -262,7 +257,7 @@
     console.debug("thread clicked from mailbox", event.detail);
     dispatchEvent("threadClicked", { event, thread: event.detail.thread });
     openedEmailData = event.detail.thread;
-    if (!all_threads && event.detail.thread?.expanded) {
+    if (!_this.all_threads && event.detail.thread?.expanded) {
       if (event.detail.thread.unread) {
         event.detail.thread.unread = false;
         await updateThreadStatus(event.detail.thread);
@@ -277,12 +272,12 @@
   async function refreshClicked(event: MouseEvent) {
     refreshingMailbox = true;
     dispatchEvent("refreshClicked", { event });
-    if (!all_threads) {
-      if (keyword_to_search) {
+    if (!_this.all_threads) {
+      if (_this.keyword_to_search) {
         threads = await MailboxStore.getThreadsWithSearchKeyword({
           component_id: query.component_id,
           access_token: query.access_token,
-          keyword_to_search,
+          keyword_to_search: _this.keyword_to_search,
         });
       } else {
         threads = (await MailboxStore.getThreads(query, true)) || [];
@@ -639,10 +634,10 @@
           clean_conversation={false}
           thread={openedEmailData}
           {you}
-          {show_star}
+          show_star={_this.show_star}
           click_action="mailbox"
           unread={unreadThreads.has(openedEmailData) ||
-            (openedEmailData.unread && unread_status === "default")}
+            (openedEmailData.unread && _this.unread_status === "default")}
           on:threadClicked={threadClicked}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
@@ -653,7 +648,7 @@
         />
       </div>
     {:else}
-      {#if header}
+      {#if _this.header}
         <header>
           <button on:click={refreshClicked}>
             <svg
@@ -670,13 +665,13 @@
           <h1>{header}</h1>
         </header>
       {/if}
-      {#if actions_bar.length}
+      {#if _this.actions_bar.length}
         <div
           role="toolbar"
           aria-label="Bulk actions"
           aria-controls="mailboxlist"
         >
-          {#if show_thread_checkbox && actions_bar.includes(MailboxActions.SELECTALL)}<div
+          {#if _this.show_thread_checkbox && _this.actions_bar.includes(MailboxActions.SELECTALL)}<div
               class="thread-checkbox"
             >
               {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
@@ -691,7 +686,7 @@
             </div>
           {/if}
           {#if selectedThreads.size}
-            {#if actions_bar.includes(MailboxActions.DELETE)}
+            {#if _this.actions_bar.includes(MailboxActions.DELETE)}
               <div class="delete">
                 <button
                   title="Delete selected email(s)"
@@ -700,7 +695,7 @@
                 >
               </div>
             {/if}
-            {#if show_star && actions_bar.includes(MailboxActions.STAR)}
+            {#if _this.show_star && _this.actions_bar.includes(MailboxActions.STAR)}
               <div class="starred">
                 {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
                   <button
@@ -713,7 +708,7 @@
                   />
                 {/each}
               </div>{/if}
-            {#if actions_bar.includes(MailboxActions.UNREAD)}
+            {#if _this.actions_bar.includes(MailboxActions.UNREAD)}
               <div class="read-status">
                 {#if areAllSelectedUnread}
                   <button
@@ -743,10 +738,10 @@
           {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
               class:unread={unreadThreads.has(thread) ||
-                (thread.unread && unread_status === "default")}
+                (thread.unread && _this.unread_status === "default")}
               class:checked={selectedThreads.has(thread)}
             >
-              {#if show_thread_checkbox}<div
+              {#if _this.show_thread_checkbox}<div
                   class="checkbox-container thread-checkbox"
                 >
                   <input
@@ -762,10 +757,10 @@
                   clean_conversation={false}
                   {thread}
                   {you}
-                  {show_star}
+                  show_star={_this.show_star}
                   click_action="mailbox"
                   unread={unreadThreads.has(thread) ||
-                    (thread.unread && unread_status === "default")}
+                    (thread.unread && _this.unread_status === "default")}
                   on:threadClicked={threadClicked}
                   on:messageClicked={messageClicked}
                   on:threadStarred={threadStarred}
@@ -780,7 +775,7 @@
           {/each}
         {:else}
           <div class="mailbox-empty">
-            {#if header}
+            {#if _this.header}
               {header}
             {:else}
               Your Mailbox

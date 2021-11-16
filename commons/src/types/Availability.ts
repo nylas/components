@@ -10,6 +10,8 @@ export interface Manifest extends NylasManifest {
   allow_booking: boolean;
   allow_date_change: boolean;
   attendees_to_show: number;
+  booking_user_email: string;
+  booking_user_token: string;
   busy_color: string;
   calendars: Calendar[];
   capacity: number | null;
@@ -70,6 +72,9 @@ export interface TimeSlot {
   end_time: Date;
   available_calendars: string[];
   calendar_id?: string;
+  expirySelection: string;
+  recurrence_cadence: string;
+  recurrence_expiry: string;
 }
 
 export interface SelectableSlot extends TimeSlot {
