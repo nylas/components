@@ -39,6 +39,7 @@
   import { AccountOrganizationUnit } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
+  import DOMPurify from "dompurify";
 
   let manifest: Partial<EmailProperties> = {};
 
@@ -1296,7 +1297,7 @@
                     </div>
                     <div class="message-body">
                       {#if clean_conversation && message.conversation}
-                        {@html message.conversation}
+                        {@html DOMPurify.sanitize(message.conversation)}
                       {:else if message.body}
                         <nylas-message-body {message} />
                       {:else}
@@ -1562,7 +1563,7 @@
           </div>
           <div class="message-body">
             {#if clean_conversation && message.conversation}
-              {@html message.conversation}
+              {@html DOMPurify.sanitize(message.conversation)}
             {:else if message.body}
               <nylas-message-body {message} />
             {/if}
