@@ -874,8 +874,7 @@
     }
 
     if (Array.isArray(calendarsToFetch) && calendarsToFetch.length > 0) {
-      // Note: we split our requests by email_id as calendars/availability doesn't support partial availability amongst a group
-      let fetchedCalendars = await $AvailabilityStore[
+      const fetchedCalendars = await $AvailabilityStore[
         JSON.stringify({
           ...getAvailabilityQuery(
             calendarsToFetch.map((x) => x.email),
@@ -884,35 +883,37 @@
           forceReload,
         })
       ];
+
       loading = false;
 
-      fetchedCalendars.order
-        .map((email) => {
-          const freeSlotsForUser = fetchedCalendars.time_slots.filter((ts) =>
-            ts.emails.includes(email),
-          );
-          // Blob consecutive timeslots together for easier overlap logic elsewhere
-          let groupedSlots = groupConsecutiveTimeslots(freeSlotsForUser);
+      const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
 
-          return {
-            email,
-            time_slots: groupedSlots,
-          };
-        })
-        .forEach((user: any) => {
-          freeBusyCalendars.push({
-            emailAddress: user.email,
-            account: {
-              emailAddress: user.email, // ¯\_(ツ)_/¯
-            },
-            availability: AvailabilityStatus.FREE,
-            timeslots: user.time_slots.map((slot: PreDatedTimeSlot) => ({
+      for (const user of fetchedCalendars?.order) {
+        timeSlotMap[user] = [];
+      }
+
+      for (const slot of fetchedCalendars.time_slots) {
+        slot.emails.forEach((e) => timeSlotMap[e].push(slot));
+      }
+
+      fetchedCalendars?.order.forEach((user: any) => {
+        freeBusyCalendars.push({
+          emailAddress: user,
+          account: {
+            emailAddress: user, // ¯\_(ツ)_/¯
+          },
+          availability: AvailabilityStatus.FREE,
+          timeslots: groupConsecutiveTimeslots(timeSlotMap[user]).map(
+            (slot: PreDatedTimeSlot) => ({
               start_time: new Date(slot.start_time * 1000),
               end_time: new Date(slot.end_time * 1000),
-            })),
-          });
+            }),
+          ),
         });
+      });
+
       newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
+
       return newCalendarTimeslotsForGivenEmails;
     }
   }
