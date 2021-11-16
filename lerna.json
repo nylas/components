@@ -1,6 +1,6 @@
 {
   "packages": ["components/*"],
-  "version": "1.0.15-canary.1",
+  "version": "1.0.15-canary.2",
   "npmClient": "npm",
   "preid": "canary",
   "command": {
