@@ -1,85 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta content="width=device-width,initial-scale=1" name="viewport" />
-    <meta charset="UTF-8" />
-    <title>Agenda Demo</title>
-    <link rel="shortcut icon" href="data:;base64,=" />
-    <script src="../index.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const saveEventModal = document.querySelector("div.save-event");
-        const agenda = document.querySelector("nylas-agenda");
-        const titleInput = document.querySelector("input#title");
-        const startTimeInput = document.querySelector("input#start-time");
-        const endTimeInput = document.querySelector("input#end-time");
 
-        let newEvent, save, cancel, update;
-        agenda.event_created = (event, saveEvent, cancelEvent, updateEvent) => {
-          saveEventModal.style.display = "block";
-          newEvent = event;
-          titleInput.value = newEvent.title;
-          startTimeInput.value = new Date(
-            newEvent.when.start_time * 1000,
-          ).toLocaleString("en-US", {
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-          });
-          endTimeInput.value = new Date(
-            newEvent.when.end_time * 1000,
-          ).toLocaleString("en-US", {
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-          });
-          save = saveEvent;
-          cancel = cancelEvent;
-          update = updateEvent;
-        };
+<head>
+  <meta content="width=device-width,initial-scale=1" name="viewport" />
+  <meta charset="UTF-8" />
+  <title>Agenda Demo</title>
+  <link rel="shortcut icon" href="data:;base64,=" />
+  <script src="../index.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const saveEventModal = document.querySelector("div.save-event");
+      const agenda = document.querySelector("nylas-agenda");
+      const titleInput = document.querySelector("input#title");
+      const startTimeInput = document.querySelector("input#start-time");
+      const endTimeInput = document.querySelector("input#end-time");
 
-        function convertTimeTo24h(time12h) {
-          const [time, modifier] = time12h.split(" ");
-          let [hours, minutes] = time.split(":");
-          if (hours === "12") {
-            hours = "00";
-          }
-          if (modifier === "PM") {
-            hours = parseInt(hours, 10) + 12;
-          }
+      let newEvent, save, cancel, update;
+      agenda.selected_date = new Date('2021-12-24');
+      agenda.event_created = (event, saveEvent, cancelEvent, updateEvent) => {
+        saveEventModal.style.display = "block";
+        newEvent = event;
+        titleInput.value = newEvent.title;
+        startTimeInput.value = new Date(
+          newEvent.when.start_time * 1000,
+        ).toLocaleString("en-US", {
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        });
+        endTimeInput.value = new Date(
+          newEvent.when.end_time * 1000,
+        ).toLocaleString("en-US", {
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        });
+        save = saveEvent;
+        cancel = cancelEvent;
+        update = updateEvent;
+      };
 
-          return { hours, minutes };
+      function convertTimeTo24h(time12h) {
+        const [time, modifier] = time12h.split(" ");
+        let [hours, minutes] = time.split(":");
+        if (hours === "12") {
+          hours = "00";
+        }
+        if (modifier === "PM") {
+          hours = parseInt(hours, 10) + 12;
         }
 
-        function convertEventTimes() {
-          const currentDay = new Date(newEvent.when.start_time * 1000);
-          const startTime24h = convertTimeTo24h(startTimeInput.value);
-          const endTime24h = convertTimeTo24h(endTimeInput.value);
+        return { hours, minutes };
+      }
 
-          if (
-            !startTime24h.hours ||
-            startTime24h.hours > 24 ||
-            !startTime24h.minutes ||
-            startTime24h.minutes > 59 ||
-            !endTime24h.hours ||
-            endTime24h.hours > 24 ||
-            !endTime24h.minutes ||
-            endTime24h.minutes > 59 ||
-            isNaN(
-              new Date(
-                new Date().setHours(
-                  startTime24h.hours,
-                  startTime24h.minutes,
-                  0,
-                  0,
-                ),
-              ).getTime(),
-            ) ||
-            isNaN(
-              new Date(
-                new Date().setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
-              ).getTime(),
-            ) ||
+      function convertEventTimes() {
+        const currentDay = new Date(newEvent.when.start_time * 1000);
+        const startTime24h = convertTimeTo24h(startTimeInput.value);
+        const endTime24h = convertTimeTo24h(endTimeInput.value);
+
+        if (
+          !startTime24h.hours ||
+          startTime24h.hours > 24 ||
+          !startTime24h.minutes ||
+          startTime24h.minutes > 59 ||
+          !endTime24h.hours ||
+          endTime24h.hours > 24 ||
+          !endTime24h.minutes ||
+          endTime24h.minutes > 59 ||
+          isNaN(
             new Date(
               new Date().setHours(
                 startTime24h.hours,
@@ -87,244 +75,242 @@
                 0,
                 0,
               ),
-            ).getTime() >=
-              new Date(
-                new Date().setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
-              ).getTime()
-          ) {
-            return false;
-          }
-
-          newEvent.when.start_time = new Date(
-            currentDay.setHours(startTime24h.hours, startTime24h.minutes, 0, 0),
-          );
-          newEvent.when.end_time = new Date(
-            currentDay.setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
-          );
-          return true;
+            ).getTime(),
+          ) ||
+          isNaN(
+            new Date(
+              new Date().setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
+            ).getTime(),
+          ) ||
+          new Date(
+            new Date().setHours(
+              startTime24h.hours,
+              startTime24h.minutes,
+              0,
+              0,
+            ),
+          ).getTime() >=
+          new Date(
+            new Date().setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
+          ).getTime()
+        ) {
+          return false;
         }
 
-        saveEventModal.addEventListener("click", (event) => {
-          if (event.target.matches("button.save")) {
-            newEvent.title = titleInput.value;
-            convertEventTimes();
-            save(newEvent);
+        newEvent.when.start_time = new Date(
+          currentDay.setHours(startTime24h.hours, startTime24h.minutes, 0, 0),
+        );
+        newEvent.when.end_time = new Date(
+          currentDay.setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
+        );
+        return true;
+      }
 
-            saveEventModal.style.display = "none";
-          } else if (event.target.matches("button.cancel")) {
-            cancel();
-            saveEventModal.style.display = "none";
-          }
-        });
-
-        titleInput.addEventListener("input", (event) => {
+      saveEventModal.addEventListener("click", (event) => {
+        if (event.target.matches("button.save")) {
           newEvent.title = titleInput.value;
-          const shouldUpdate = convertEventTimes();
-          if (shouldUpdate) {
-            update(newEvent);
-          }
-        });
+          convertEventTimes();
+          save(newEvent);
 
-        startTimeInput.addEventListener("input", (event) => {
-          const shouldUpdate = convertEventTimes();
-          if (shouldUpdate) {
-            update(newEvent);
-          }
-        });
-
-        endTimeInput.addEventListener("input", (event) => {
-          const shouldUpdate = convertEventTimes();
-          if (shouldUpdate) {
-            update(newEvent);
-          }
-        });
-
-        document.querySelectorAll("nylas-agenda").forEach((element, i) => {
-          element.addEventListener("manifestLoaded", (event) => {
-            let { detail } = event;
-            console.log("manifest loaded", detail);
-          });
-          element.addEventListener("eventsLoaded", (event) => {
-            let { detail } = event;
-            console.log("events loaded", detail);
-          });
-          element.addEventListener("dateChange", (newDate) => {
-            let { detail } = event;
-            console.log("date changed", detail);
-          });
-        });
-
-        let i = document.querySelector("input.start");
-        let i2 = document.querySelector("input.end");
-        let checkbox = document.querySelector("input.auto-time");
-        let condensedBox = document.querySelector("input.condensed-view");
-        let tickBox = document.querySelector("input.hide-ticks");
-
-        i.addEventListener(
-          "input",
-          function () {
-            document.querySelectorAll("nylas-agenda").forEach((element) => {
-              element.start_minute = i.value;
-            });
-            document.querySelector("span.start").innerHTML = new Date(
-              new Date().setHours(0, i.value, 0, 0),
-            ).toLocaleTimeString();
-          },
-          false,
-        );
-
-        i2.addEventListener(
-          "input",
-          function () {
-            document.querySelectorAll("nylas-agenda").forEach((element) => {
-              element.end_minute = i2.value;
-            });
-            document.querySelector("span.end").innerHTML = new Date(
-              new Date().setHours(0, i2.value, 0, 0),
-            ).toLocaleTimeString();
-          },
-          false,
-        );
-
-        checkbox.addEventListener(
-          "input",
-          function () {
-            document.querySelectorAll("nylas-agenda").forEach((element) => {
-              element.auto_time_box = checkbox.checked;
-            });
-          },
-          false,
-        );
-
-        condensedBox.addEventListener(
-          "input",
-          function () {
-            document.querySelectorAll("nylas-agenda").forEach((element) => {
-              element.condensed_view = condensedBox.checked;
-            });
-          },
-          false,
-        );
-        tickBox.addEventListener(
-          "input",
-          function () {
-            document.querySelectorAll("nylas-agenda").forEach((element) => {
-              element.hide_ticks = tickBox.checked;
-            });
-          },
-          false,
-        );
+          saveEventModal.style.display = "none";
+        } else if (event.target.matches("button.cancel")) {
+          cancel();
+          saveEventModal.style.display = "none";
+        }
       });
-    </script>
-    <style>
-      body {
-        overflow: hidden;
-        padding: 0;
-        margin: 0;
-        height: 100vh;
-      }
 
-      aside.controls {
-        position: fixed;
-        z-index: 2;
-        top: 0;
-        right: 0;
-        width: 250px;
-        background: #333;
-        padding: 0.5rem;
-        color: white;
-      }
+      titleInput.addEventListener("input", (event) => {
+        newEvent.title = titleInput.value;
+        const shouldUpdate = convertEventTimes();
+        if (shouldUpdate) {
+          update(newEvent);
+        }
+      });
 
-      aside.controls label {
-        display: block;
-      }
+      startTimeInput.addEventListener("input", (event) => {
+        const shouldUpdate = convertEventTimes();
+        if (shouldUpdate) {
+          update(newEvent);
+        }
+      });
 
-      div.save-event {
-        display:none;
-        padding: 5px;
-        position: fixed;
-        z-index: 2;
-        top: 40%;
-        right: 40%;
-        width: 20%;
-        min-width: 240px;
-        background: #333;
-        padding: 0.5rem;
-        color: white;
-      }
-      div.save-event>div{
-        display:flex;
-        flex-direction: row;
-        justify-content: space-between;
-      }
-    </style>
-  </head>
+      endTimeInput.addEventListener("input", (event) => {
+        const shouldUpdate = convertEventTimes();
+        if (shouldUpdate) {
+          update(newEvent);
+        }
+      });
 
-  <body>
-    <aside class="controls">
-      <label>
-        <strong>Start Time</strong>
-        <input
-          class="start"
-          type="range"
-          min="0"
-          max="1440"
-          step="1"
-          value="1"
-        />
-        <span class="start"></span>
-      </label>
-      <label>
-        <strong>End Time</strong>
-        <input
-          class="end"
-          type="range"
-          min="0"
-          max="1440"
-          step="1"
-          value="1440"
-        />
-        <span class="end"></span>
-      </label>
-      <hr />
-      <strong>Automatically determine start/end</strong>
-      <input type="checkbox" class="auto-time" />
-      <hr />
-      <strong>Hide ticks</strong>
-      <input type="checkbox" class="hide-ticks" />
-      <hr />
-      <strong>Condensed View</strong>
-      <input type="checkbox" class="condensed-view" />
-    </aside>
+      document.querySelectorAll("nylas-agenda").forEach((element, i) => {
+        element.addEventListener("manifestLoaded", (event) => {
+          let { detail } = event;
+          console.log("manifest loaded", detail);
+        });
+        element.addEventListener("eventsLoaded", (event) => {
+          let { detail } = event;
+          console.log("events loaded", detail);
+        });
+        element.addEventListener("dateChange", (newDate) => {
+          let { detail } = event;
+          console.log("date changed", detail);
+        });
+      });
 
-    <div class="save-event">
-      <h3>Save Event</h3>
-      <hr />
-      <div>
-        <span>Event Name</span>
-        <input id="title" />
-      </div>
-      <div>
-        <span>Start Time</span>
-        <input id="start-time" />
-      </div>
-      <div>
-        <span>End Time</span>
-        <input id="end-time" />
-      </div>
-      <hr />
-      <div>
-        <button class="save">Save</button>
-        <button class="cancel">Cancel</button>
-      </div>
+      let i = document.querySelector("input.start");
+      let i2 = document.querySelector("input.end");
+      let checkbox = document.querySelector("input.auto-time");
+      let condensedBox = document.querySelector("input.condensed-view");
+      let tickBox = document.querySelector("input.hide-ticks");
+
+      i.addEventListener(
+        "input",
+        function () {
+          document.querySelectorAll("nylas-agenda").forEach((element) => {
+            element.start_minute = i.value;
+          });
+          document.querySelector("span.start").innerHTML = new Date(
+            new Date().setHours(0, i.value, 0, 0),
+          ).toLocaleTimeString();
+        },
+        false,
+      );
+
+      i2.addEventListener(
+        "input",
+        function () {
+          document.querySelectorAll("nylas-agenda").forEach((element) => {
+            element.end_minute = i2.value;
+          });
+          document.querySelector("span.end").innerHTML = new Date(
+            new Date().setHours(0, i2.value, 0, 0),
+          ).toLocaleTimeString();
+        },
+        false,
+      );
+
+      checkbox.addEventListener(
+        "input",
+        function () {
+          document.querySelectorAll("nylas-agenda").forEach((element) => {
+            element.auto_time_box = checkbox.checked;
+          });
+        },
+        false,
+      );
+
+      condensedBox.addEventListener(
+        "input",
+        function () {
+          document.querySelectorAll("nylas-agenda").forEach((element) => {
+            element.condensed_view = condensedBox.checked;
+          });
+        },
+        false,
+      );
+      tickBox.addEventListener(
+        "input",
+        function () {
+          document.querySelectorAll("nylas-agenda").forEach((element) => {
+            element.hide_ticks = tickBox.checked;
+          });
+        },
+        false,
+      );
+    });
+  </script>
+  <style>
+    body {
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+      height: 100vh;
+    }
+
+    aside.controls {
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      right: 0;
+      width: 250px;
+      background: #333;
+      padding: 0.5rem;
+      color: white;
+    }
+
+    aside.controls label {
+      display: block;
+    }
+
+    div.save-event {
+      display: none;
+      padding: 5px;
+      position: fixed;
+      z-index: 2;
+      top: 40%;
+      right: 40%;
+      width: 20%;
+      min-width: 240px;
+      background: #333;
+      padding: 0.5rem;
+      color: white;
+    }
+
+    div.save-event>div {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="controls">
+    <label>
+      <strong>Start Time</strong>
+      <input class="start" type="range" min="0" max="1440" step="1" value="1" />
+      <span class="start"></span>
+    </label>
+    <label>
+      <strong>End Time</strong>
+      <input class="end" type="range" min="0" max="1440" step="1" value="1440" />
+      <span class="end"></span>
+    </label>
+    <hr />
+    <strong>Automatically determine start/end</strong>
+    <input type="checkbox" class="auto-time" />
+    <hr />
+    <strong>Hide ticks</strong>
+    <input type="checkbox" class="hide-ticks" />
+    <hr />
+    <strong>Condensed View</strong>
+    <input type="checkbox" class="condensed-view" />
+  </aside>
+
+  <div class="save-event">
+    <h3>Save Event</h3>
+    <hr />
+    <div>
+      <span>Event Name</span>
+      <input id="title" />
     </div>
+    <div>
+      <span>Start Time</span>
+      <input id="start-time" />
+    </div>
+    <div>
+      <span>End Time</span>
+      <input id="end-time" />
+    </div>
+    <hr />
+    <div>
+      <button class="save">Save</button>
+      <button class="cancel">Cancel</button>
+    </div>
+  </div>
 
-    <nylas-agenda
-      id="demo-agenda"
-      auto_time_box="false"
-      allow_event_creation="true"
-      allow_date_change="true"
-    >
-    </nylas-agenda>
-  </body>
+  <nylas-agenda id="bf2e8676-cf3e-4c48-844d-db5f0d388579" auto_time_box="false" allow_event_creation="true"
+    allow_date_change="true" eagerly_fetch_events="true">
+  </nylas-agenda>
+</body>
+
 </html>

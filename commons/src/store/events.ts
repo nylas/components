@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 import { createEvent, fetchEvents } from "../connections/events";
 import type { EventQuery, Event } from "@commons/types/Events";
 
@@ -23,6 +23,8 @@ function initializeEvents() {
             return { ...events };
           });
         }
+        console.log('!!!!!!!1', await eventsMap[queryKey]);
+
         return await eventsMap[queryKey];
       }
     },
@@ -55,3 +57,9 @@ function initializeEvents() {
 }
 
 export const EventStore = initializeEvents();
+
+export const AllDayEvents = derived(EventStore, async ($events) => {
+  return await Promise.all(Object.values($events)).then(x => {
+    return x.flat().filter((event) => event.when?.date);
+  })
+})

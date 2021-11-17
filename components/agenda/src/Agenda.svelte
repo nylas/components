@@ -4,7 +4,12 @@
   import { tick } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
   import { spring } from "svelte/motion";
-  import { CalendarStore, EventStore, ManifestStore } from "@commons";
+  import {
+    CalendarStore,
+    EventStore,
+    ManifestStore,
+    AllDayEvents,
+  } from "@commons";
   import {
     buildInternalProps,
     getEventDispatcher,
@@ -14,6 +19,7 @@
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
   import type { AgendaProperties } from "@commons/types/Nylas";
   import * as DOMPurify from "dompurify";
+  import { timeDay } from "d3-time";
 
   import type {
     EventQuery,
@@ -276,8 +282,8 @@
       previousDate = allowedDates[dateSpot - 1] || selectedDate;
       nextDate = allowedDates[dateSpot + 1] || selectedDate;
     } else {
-      previousDate = new Date(new Date().setDate(selectedDate.getDate() - 1));
-      nextDate = new Date(new Date().setDate(selectedDate.getDate() + 1));
+      previousDate = timeDay.offset(selectedDate, -1);
+      nextDate = timeDay.offset(selectedDate, 1);
     }
 
     siblingQueries = [
@@ -332,6 +338,17 @@
   $: allDayEvents = calendarEvents
     ?.filter((event): event is DateEvent => "date" in event.when)
     ?.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+
+  let StoredAllDayEvents = [];
+  $: Promise.all(Object.values($EventStore)).then((x) => {
+    StoredAllDayEvents = x.flat().filter((event) => event.when?.date);
+  });
+
+  $: console.log({ "80v": StoredAllDayEvents });
+
+  $: console.log({ allDayEvents });
+  $: console.log({ startOfDay }, new Date(startOfDay * 1000));
+  $: console.log({ store: Object.values($EventStore) });
 
   $: timespanEvents = calendarEvents
     ?.filter((event): event is TimespanEvent => "start_time" in event.when)
@@ -478,7 +495,7 @@
       );
       selectedDate = allowedDates[dateSpot + 1] || selectedDate;
     } else {
-      selectedDate = new Date(new Date().setDate(selectedDate.getDate() + 1));
+      selectedDate = timeDay.offset(selectedDate, 1);
     }
     dispatchEvent(
       "dateChange",
@@ -496,7 +513,7 @@
       );
       selectedDate = allowedDates[dateSpot - 1] || selectedDate;
     } else {
-      selectedDate = new Date(new Date().setDate(selectedDate.getDate() - 1));
+      selectedDate = timeDay.offset(selectedDate, -1);
     }
     dispatchEvent(
       "dateChange",
