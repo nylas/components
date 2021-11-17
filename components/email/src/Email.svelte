@@ -213,7 +213,7 @@
   let folders: Folder[] = [];
   $: trashFolderID =
     folders && folders.length
-      ? labels.find((folder) => folder.name === "trash")?.id
+      ? folders.find((folder) => folder.name === "trash")?.id
       : null;
   // #endregion initialize label and folder vars (for trash)
 
