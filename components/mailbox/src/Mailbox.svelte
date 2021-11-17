@@ -61,7 +61,7 @@
   let manifest: Partial<MailboxProperties> = {};
   let _this = <MailboxProperties>buildInternalProps({}, {}, defaultValueMap);
 
-  let openedEmailData: Thread | null;
+  let currentlySelectedThread: Thread;
   let hasComponentLoaded = false;
 
   // paginations vars
@@ -143,6 +143,11 @@
   let inboxThreads: Thread[]; // threads currently in the inbox
   $: if (threads) {
     inboxThreads = threads;
+    paginatedThreads = paginate(
+      inboxThreads,
+      currentPage,
+      _this.items_per_page,
+    );
   }
   $: {
     if (!inboxThreads) {
@@ -154,19 +159,10 @@
     }
   }
 
-  $: paginatedThreads = paginate(
-    inboxThreads,
-    currentPage,
-    _this.items_per_page,
-  );
-
   // Reactive statement to continuously fetch all_threads
   $: if (_this.all_threads) {
     threads = _this.all_threads as Thread[];
-    inboxThreads = threads; // TODO: filter out those in trash folder
   }
-
-  let main: Element;
 
   let query: MailboxQuery;
   $: query = {
@@ -180,7 +176,6 @@
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
 
-  // Try getting events from 3 sources: first, directly passed in, then, from our store; finally, by way of a fetch
   let threads: Thread[] = [];
 
   let labels: Label[] = [];
@@ -221,10 +216,16 @@
   );
 
   async function messageClicked(event: CustomEvent) {
-    // console.debug("message clicked from mailbox", event.detail);
-    if (event.detail.message?.expanded) {
-      let message = await fetchIndividualMessage(event.detail.message);
-      threads = await MailboxStore.hydrateMessageInThread(message, query);
+    const message = event.detail.message;
+
+    if (message && currentlySelectedThread) {
+      threads = await MailboxStore.hydrateMessageInThread(
+        await fetchIndividualMessage(message),
+        query,
+      );
+      currentlySelectedThread = <Thread>(
+        threads.find((updatedThread) => updatedThread.id === message.thread_id)
+      );
     }
   }
 
@@ -254,18 +255,22 @@
   }
 
   async function threadClicked(event: CustomEvent) {
-    console.debug("thread clicked from mailbox", event.detail);
     dispatchEvent("threadClicked", { event, thread: event.detail.thread });
-    openedEmailData = event.detail.thread;
-    if (!_this.all_threads && event.detail.thread?.expanded) {
-      if (event.detail.thread.unread) {
-        event.detail.thread.unread = false;
-        await updateThreadStatus(event.detail.thread);
+    const thread = event.detail.thread;
+    currentlySelectedThread = thread;
+
+    if (!_this.all_threads && thread?.expanded) {
+      if (thread.unread) {
+        thread.unread = false;
+        await updateThreadStatus(thread);
       }
       let message = await fetchIndividualMessage(
-        event.detail.thread.messages[event.detail.thread.messages.length - 1],
+        thread.messages[thread.messages.length - 1],
       );
       threads = await MailboxStore.hydrateMessageInThread(message, query);
+      currentlySelectedThread = <Thread>(
+        threads.find((updatedThread) => updatedThread.id === thread.id)
+      );
     }
   }
   let refreshingMailbox = false;
@@ -378,14 +383,14 @@
   }
 
   function returnToMailbox() {
-    if (openedEmailData) {
-      openedEmailData.unread = false;
-      openedEmailData.expanded = false;
+    if (currentlySelectedThread) {
+      currentlySelectedThread.unread = false;
+      currentlySelectedThread.expanded = false;
 
-      if (unreadThreads.has(openedEmailData)) {
-        unreadThreads.delete(openedEmailData);
+      if (unreadThreads.has(currentlySelectedThread)) {
+        unreadThreads.delete(currentlySelectedThread);
       }
-      openedEmailData = null;
+      currentlySelectedThread = null;
     }
     return (unreadThreads = unreadThreads);
   }
@@ -404,16 +409,18 @@
     dispatchEvent("onDeleteSelected", {
       event,
       selectedThreads,
-      thread: openedEmailData,
+      thread: currentlySelectedThread,
     });
     if (trashLabelID || trashFolderID) {
-      if (openedEmailData) {
-        threads = inboxThreads.filter((thread) => thread !== openedEmailData);
-        starredThreads.delete(openedEmailData);
-        unreadThreads.delete(openedEmailData);
-        selectedThreads.delete(openedEmailData);
-        await deleteThread(openedEmailData);
-        openedEmailData = null;
+      if (currentlySelectedThread) {
+        threads = inboxThreads.filter(
+          (thread) => thread !== currentlySelectedThread,
+        );
+        starredThreads.delete(currentlySelectedThread);
+        unreadThreads.delete(currentlySelectedThread);
+        selectedThreads.delete(currentlySelectedThread);
+        await deleteThread(currentlySelectedThread);
+        currentlySelectedThread = null;
       } else {
         selectedThreads.forEach(async (thread) => {
           starredThreads.delete(thread);
@@ -626,25 +633,25 @@
   }
 </style>
 
-<main bind:this={main}>
+<main>
   {#if hasComponentLoaded}
-    {#if openedEmailData}
+    {#if currentlySelectedThread}
       <div class="email-container">
         <nylas-email
           clean_conversation={false}
-          thread={openedEmailData}
+          thread={currentlySelectedThread}
           {you}
           show_star={_this.show_star}
           click_action="mailbox"
-          unread={unreadThreads.has(openedEmailData) ||
-            (openedEmailData.unread && _this.unread_status === "default")}
-          on:threadClicked={threadClicked}
+          unread={unreadThreads.has(currentlySelectedThread) ||
+            (currentlySelectedThread.unread &&
+              _this.unread_status === "default")}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
           on:threadDeleted={onDeleteSelected}
-          is_starred={starredThreads.has(openedEmailData)}
+          is_starred={starredThreads.has(currentlySelectedThread)}
         />
       </div>
     {:else}
