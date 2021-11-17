@@ -13,6 +13,7 @@
   import { onMount, tick } from "svelte";
   import timezones from "timezones-list";
   import { ManifestStore } from "../../../commons/src";
+  import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
   import "../../scheduler/src/Scheduler.svelte";
 
@@ -143,11 +144,19 @@
   }
   // #endregion mount and prop initialization
 
+  console.log({ _this });
+
   function saveProperties() {
     console.log("Saving the following properties:");
     Object.entries(_this).forEach(([k, v]) => {
       console.log(k, v);
     });
+    let savedManifest = saveManifest({
+      id,
+      access_token,
+      manifest: { settings: JSON.parse(_this) },
+    });
+    console.log({ savedManifest });
   }
 
   // #region unpersisted variables
