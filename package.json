@@ -122,7 +122,6 @@
     "@nylas/components-schedule-editor": "file:components/schedule-editor",
     "@nylas/components-scheduler": "file:components/scheduler",
     "@nylas/components-theming": "file:components/theming",
-    "concurrently": "6.0.0",
-    "dompurify": "^2.3.3"
+    "concurrently": "6.0.0"
   }
 }
