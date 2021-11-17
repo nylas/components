@@ -64,7 +64,7 @@
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
     attendees_to_show: 5,
-    capacity: 1,
+    capacity: null,
     custom_fields: DefaultCustomFields,
     dates_to_show: 1,
     email_ids: [],
