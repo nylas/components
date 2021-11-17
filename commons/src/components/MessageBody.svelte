@@ -5,6 +5,7 @@
   does not affect the global component enclosing it -->
 <script>
   import * as DOMPurify from "dompurify";
+
   export let message;
 </script>
 
