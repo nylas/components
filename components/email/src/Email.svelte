@@ -39,7 +39,7 @@
   import { AccountOrganizationUnit } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
-  import DOMPurify from "dompurify";
+  import * as DOMPurify from "dompurify";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
