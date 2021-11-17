@@ -791,12 +791,14 @@ describe("availability component", () => {
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.partial_color = "#000";
+          component.partial_color = "#222";
+          component.busy_color = "#000";
+          component.free_color = "#444";
           cy.get(".epoch.partial .inner").should(
             "have.css",
             "background-color",
-            "rgb(0, 0, 0)",
-          );
+            "rgb(45, 45, 45)",
+          ); // 45: 2/3 availability = 2/3 distance between 000 and 444 in base RGB.
         });
     });
   });

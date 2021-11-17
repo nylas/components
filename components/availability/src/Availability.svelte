@@ -21,7 +21,7 @@
   } from "@commons/methods/component";
   import type { TimeInterval } from "d3-time";
   import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
-  import { scaleTime } from "d3-scale";
+  import { scaleTime, scaleLinear } from "d3-scale";
   import throttle from "just-throttle";
   import type { CalendarQuery } from "@commons/types/Events";
   import { lightenHexColour } from "@commons/methods/colour";
@@ -1456,6 +1456,13 @@
       },
     };
   }
+
+  //#region colours
+  // Show partial availability as a gradient, rather than as categorically "partial"
+  $: partialScale = scaleLinear()
+    .domain([0, allCalendars?.length / 2, allCalendars?.length])
+    .range([_this.busy_color, _this.partial_color, _this.free_color]);
+  //#endregion colours
 </script>
 
 <style lang="scss">
@@ -1575,7 +1582,12 @@
                   data-start-time={new Date(epoch.start_time).toLocaleString()}
                   data-end-time={new Date(epoch.end_time).toLocaleString()}
                 >
-                  <div class="inner">
+                  <div
+                    class="inner"
+                    style="background-color: {partialScale(
+                      epoch.available_calendars.length,
+                    )}"
+                  >
                     {#if _this.show_hosts === "show"}
                       <div class="available-calendars">
                         <span
