@@ -190,7 +190,7 @@
 
   let folders: Folder[] = [];
   $: trashFolderID = folders.length
-    ? labels.find((folder) => folder.name === "trash")?.id
+    ? folders.find((folder) => folder.name === "trash")?.id
     : null;
 
   let you: Partial<Account> = {};
