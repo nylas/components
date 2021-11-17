@@ -26,7 +26,7 @@
     Message,
     Participant,
   } from "@commons/types/Nylas";
-  import * as DOMPurify from "dompurify";
+  import DOMPurify from "dompurify";
   import { afterUpdate } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
   import SendIcon from "./assets/send.svg";

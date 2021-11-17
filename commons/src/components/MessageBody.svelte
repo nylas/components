@@ -4,7 +4,7 @@
   This is to ensure the styles in the html message body are encapsulated and 
   does not affect the global component enclosing it -->
 <script>
-  import * as DOMPurify from "dompurify";
+  import DOMPurify from "dompurify";
 
   export let message;
 </script>
