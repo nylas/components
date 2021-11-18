@@ -223,7 +223,7 @@
     });
     const eventBookings = await Promise.all(bookings);
 
-    dispatchEvent("bookedEvents", {});
+    dispatchEvent("bookedEvents", { eventBookings });
 
     if (notification_mode === NotificationMode.SEND_MESSAGE) {
       eventBookings.map((event, i) => {

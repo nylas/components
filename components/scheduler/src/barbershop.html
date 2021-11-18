@@ -9,6 +9,17 @@
     <script>
       const custom_fields = [
         {
+          title: "Your Name",
+          type: "text",
+          required: false,
+        },
+        {
+          title: "Email Address",
+          type: "text",
+          required: true,
+          placeholder: "you@example.com",
+        },
+        {
           required: true,
           title: "Location ('Downtown'/'West Toronto')",
           type: "text",
@@ -30,6 +41,47 @@
         },
       ];
 
+      function saveToDB() {
+        let url =
+          "https://api.sheety.co/1bd4ee1b211e35fa28d936baa287c1c6/schedulerDogfoodingBarbershopQ4/sheet1";
+        eventBookings.map((event) => {
+          return {
+            title: event.title,
+            start_time: event.when.start_time,
+            end_time: event.when.end_time,
+            duration:
+              (event.when.end_time - event.when.start_time) / (60 * 1000) + "m",
+            email: event.participants.find(
+              (p) => p.email !== "joanna.smith@nylas.com",
+            ).email,
+            name: event.participants.find(
+              (p) => p.email !== "joanna.smith@nylas.com",
+            ).name,
+          };
+        });
+        console.log(eventBookings);
+
+        eventBookings.forEach((event) => {
+          let body = {
+            sheet1: {
+              title: "hi",
+            },
+          };
+          fetch(url, {
+            method: "POST",
+            body: JSON.stringify({ sheet1: { hi: "hi" } }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((json) => {
+              // Do something with object
+              console.log(json.sheet1);
+            });
+        });
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const availability = document.querySelector("nylas-availability");
         const scheduler = document.querySelector("nylas-scheduler");
@@ -39,6 +91,7 @@
 
         availability.addEventListener("timeSlotChosen", (event) => {
           // determine if first timeslot is a 30m or 1h event
+          // user can only choose 2 30m slots - if the 1st is 30m, 2nd will be too
           const minutesBetween =
             (event.detail.timeSlots[0].end_time -
               event.detail.timeSlots[0].start_time) /
@@ -51,14 +104,19 @@
             scheduler.event_description = "60m line up & face";
           }
           scheduler.slots_to_book = event.detail.timeSlots;
+          saveToDB();
         });
 
         scheduler.custom_fields = custom_fields;
 
-        scheduler.addEventListener("bookedEvents", () => {
+        scheduler.addEventListener("bookedEvents", (event) => {
+          let eventBookings = event.detail.eventBookings;
+
+          // save booked events to see a list of them
+          saveToDB(eventBookings);
+
           // this doesn't work!! it takes too long to update on the Nylas side.
           availability.reload(true, true);
-          window.location.reload();
         });
       });
     </script>
