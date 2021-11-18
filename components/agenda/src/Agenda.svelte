@@ -4,12 +4,7 @@
   import { tick } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
   import { spring } from "svelte/motion";
-  import {
-    CalendarStore,
-    EventStore,
-    ManifestStore,
-    AllDayEvents,
-  } from "@commons";
+  import { CalendarStore, EventStore, ManifestStore } from "@commons";
   import {
     buildInternalProps,
     getEventDispatcher,
@@ -74,6 +69,7 @@
   export let show_no_events_message: boolean;
   export let start_minute: number;
   export let theme: string;
+  export let timezone_agnostic_all_day_events: boolean;
 
   const defaultValueMap: Partial<AgendaProperties> = {
     allow_date_change: false,
@@ -95,6 +91,7 @@
     show_no_events_message: false,
     start_minute: 0,
     theme: "theme-1",
+    timezone_agnostic_all_day_events: true,
   };
 
   let _this = <AgendaProperties>buildInternalProps({}, {}, defaultValueMap);
@@ -335,20 +332,23 @@
     }
   })();
 
-  $: allDayEvents = calendarEvents
-    ?.filter((event): event is DateEvent => "date" in event.when)
-    ?.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-
-  let StoredAllDayEvents = [];
-  $: Promise.all(Object.values($EventStore)).then((x) => {
-    StoredAllDayEvents = x.flat().filter((event) => event.when?.date);
+  let StoredAllDayEvents: DateEvent[] = [];
+  $: Promise.all(Object.values($EventStore)).then((days: DateEvent[][]) => {
+    StoredAllDayEvents = days.flat().filter((event) => event.when?.date);
   });
 
-  $: console.log({ "80v": StoredAllDayEvents });
-
-  $: console.log({ allDayEvents });
-  $: console.log({ startOfDay }, new Date(startOfDay * 1000));
-  $: console.log({ store: Object.values($EventStore) });
+  $: allDayEvents = StoredAllDayEvents?.filter((event: DateEvent) => {
+    if (_this.timezone_agnostic_all_day_events) {
+      return (
+        convertToUTC(new Date(event.when.date)).valueOf() ===
+        selectedDate.valueOf()
+      );
+    } else {
+      return (
+        new Date(event.when.date).toDateString() === selectedDate.toDateString()
+      );
+    }
+  })?.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   $: timespanEvents = calendarEvents
     ?.filter((event): event is TimespanEvent => "start_time" in event.when)

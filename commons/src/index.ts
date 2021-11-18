@@ -25,7 +25,7 @@ export { CalendarStore } from "./store/calendars";
 export { ContactStore } from "./store/contacts";
 export { ContactAvatarStore } from "./store/contact-avatar";
 export { ConversationStore } from "./store/conversations";
-export { EventStore, AllDayEvents } from "./store/events";
+export { EventStore } from "./store/events";
 export { MailboxStore } from "./store/mailbox";
 export { MessageStore } from "./store/messages";
 export { ManifestStore } from "./store/manifest";

@@ -167,6 +167,7 @@ export interface AgendaProperties extends Manifest {
   start_minute: number;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   hide_ticks: boolean;
+  timezone_agnostic_all_day_events: boolean;
 }
 
 export interface EmailProperties extends Manifest {
