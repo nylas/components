@@ -14,5 +14,11 @@
     "start": "echo 'Nothing to start'"
   },
   "main": "index.js",
-  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c"
+  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c",
+  "dependencies": {
+    "dompurify": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^2.3.1"
+  }
 }

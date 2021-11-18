@@ -2322,41 +2322,41 @@
     rimraf "^3.0.2"
 
 "@nylas/components-agenda@file:components/agenda":
-  version "1.0.15-canary.0"
+  version "1.0.15-canary.2"
 
 "@nylas/components-availability@file:components/availability":
-  version "1.0.14"
+  version "1.0.15-canary.3"
   dependencies:
     d3-scale "^4.0.0"
     d3-time "^3.0.0"
     just-throttle "^2.3.1"
 
 "@nylas/components-composer@file:components/composer":
-  version "1.0.15-canary.0"
+  version "1.0.15-canary.2"
 
 "@nylas/components-contact-list@file:components/contact-list":
-  version "1.0.15-canary.0"
+  version "1.0.15-canary.2"
 
 "@nylas/components-contacts-search@file:components/contacts-search":
   version "1.0.12"
 
 "@nylas/components-conversation@file:components/conversation":
-  version "1.0.14"
+  version "1.0.15-canary.3"
 
 "@nylas/components-datepicker@file:components/datepicker":
   version "1.0.12"
 
 "@nylas/components-email@file:components/email":
-  version "1.0.15-canary.1"
+  version "1.0.15-canary.3"
 
 "@nylas/components-mailbox@file:components/mailbox":
-  version "1.0.15-canary.0"
+  version "1.0.15-canary.2"
 
 "@nylas/components-schedule-editor@file:components/schedule-editor":
-  version "1.0.15-canary.0"
+  version "1.0.15-canary.2"
 
 "@nylas/components-scheduler@file:components/scheduler":
-  version "1.0.15-canary.0"
+  version "1.0.15-canary.2"
 
 "@nylas/components-theming@file:components/theming":
   version "1.0.0"
@@ -7184,11 +7184,6 @@ domhandler@^4.0.0, domhandler@^4.2.0:
   integrity sha512-zk7sgt970kzPks2Bf+dwT/PLzghLnsivb9CcxkvR8Mzr66Olr0Ofd8neSbglHJHaHa2MadfoSdNlKYAaafmWfA==
   dependencies:
     domelementtype "^2.2.0"
-
-dompurify@^2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.3.3.tgz#c1af3eb88be47324432964d8abc75cf4b98d634c"
-  integrity sha512-dqnqRkPMAjOZE0FogZ+ceJNM2dZ3V/yNOuFB7+39qpO93hHhfRpHw3heYQC7DPK9FqbQTfBKUJhiSfz4MvXYwg==
 
 domutils@^1.7.0:
   version "1.7.0"
