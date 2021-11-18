@@ -13,6 +13,7 @@
   import { onMount, tick } from "svelte";
   import timezones from "timezones-list";
   import { ManifestStore } from "../../../commons/src";
+  import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
   import "../../scheduler/src/Scheduler.svelte";
 
@@ -63,7 +64,7 @@
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
     attendees_to_show: 5,
-    capacity: 1,
+    capacity: null,
     custom_fields: DefaultCustomFields,
     dates_to_show: 1,
     email_ids: [],
@@ -144,9 +145,10 @@
   // #endregion mount and prop initialization
 
   function saveProperties() {
-    console.log("Saving the following properties:");
-    Object.entries(_this).forEach(([k, v]) => {
-      console.log(k, v);
+    saveManifest({
+      id,
+      access_token,
+      manifest: { settings: { ..._this } },
     });
   }
 
