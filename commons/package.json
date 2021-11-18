@@ -9,5 +9,11 @@
     "start": "echo 'Nothing to start'"
   },
   "main": "index.js",
-  "gitHead": "85943c305ebb44cfe2b8623776e2e4d5eabc9f2f"
+  "gitHead": "85943c305ebb44cfe2b8623776e2e4d5eabc9f2f",
+  "dependencies": {
+    "dompurify": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^2.3.1"
+  }
 }
