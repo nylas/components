@@ -1,4 +1,4 @@
-import { derived, writable } from "svelte/store";
+import { writable } from "svelte/store";
 import { createEvent, fetchEvents } from "../connections/events";
 import type { EventQuery, Event } from "@commons/types/Events";
 

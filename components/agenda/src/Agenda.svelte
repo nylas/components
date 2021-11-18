@@ -333,8 +333,10 @@
   })();
 
   let StoredAllDayEvents: DateEvent[] = [];
-  $: Promise.all(Object.values($EventStore)).then((days: DateEvent[][]) => {
-    StoredAllDayEvents = days.flat().filter((event) => event.when?.date);
+  $: Promise.all(Object.values($EventStore)).then((days: Event[][]) => {
+    StoredAllDayEvents = (<DateEvent[][]>days)
+      .flat()
+      .filter((event) => event.when?.date);
   });
 
   $: allDayEvents = StoredAllDayEvents?.filter((event: DateEvent) => {
