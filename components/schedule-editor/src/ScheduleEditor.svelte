@@ -148,7 +148,7 @@
     saveManifest({
       id,
       access_token,
-      manifest: { settings: JSON.parse(_this) },
+      manifest: { settings: { ..._this } },
     });
   }
 
