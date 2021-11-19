@@ -79,6 +79,7 @@ export const updateThread = async (
     getFetchConfig({
       method: "PUT",
       component_id: query.component_id,
+      access_token: query.access_token,
       body: {
         unread: updatedThread.unread,
         starred: updatedThread.starred,
