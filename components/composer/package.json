@@ -1,6 +1,6 @@
 {
   "name": "@nylas/components-composer",
-  "version": "1.0.15-canary.2",
+  "version": "1.0.15",
   "repository": {
     "type": "git",
     "url": "github:nylas/components.git",
