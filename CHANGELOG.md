@@ -1,3 +1,43 @@
+# 2021-11-19
+
+## 1.0.15
+
+- General bug fixes related to Email and Mailbox components
+- Fixed css variables for style overrides and custom data handling
+- Sanitize svelte @html bindings to prevent XSS [Pull Request](https://github.com/nylas/components/pull/200)
+- Refactored internal component properties to be accessed through internal \_this object [Pull Request](https://github.com/nylas/components/pull/195)
+
+### Bug Fixes
+
+- Email: Added overflow auto to the message body for cases where the body of the html content exceeds the parent width [Pull request](https://github.com/nylas/components/pull/198)
+- Email: Component thread's message body overflows container [Pull Request](https://github.com/nylas/components/pull/187)
+- Mailbox: Fixed not able to delete threads in outlook accounts issue [Pull Request](https://github.com/nylas/components/pull/207)
+- Mailbox: Fixed displayed message body not being updated once it has been fetched [Pull Request](https://github.com/nylas/components/pull/208)
+
+# 2021-11-08
+
+## 1.0.14
+
+- General bug fixes related to Email and Mailbox components
+- Conversation: Refactored to use nylas-contact-image and fixed multiple avatar fetches [Pull Request](https://github.com/nylas/components/pull/174)
+
+### Bug Fixes
+
+- Mailbox: Removed query params from window url in the requests for threads [Pull request](https://github.com/nylas/components/pull/181)
+- Email: Fixed emails height sometimes causing content to overflow [Pull Request](https://github.com/nylas/components/pull/179)
+- Email: Fixed case where creating a new email component in the same parent app as a fully loaded email would cause an infinite loop [Pull Request](https://github.com/nylas/components/pull/178)
+
+# 2021-11-04
+
+## 1.0.13
+
+- Package updates and general improvements with setting manifest properties
+- Mailbox: Style improvements for refreshing mailbox [Pull Request](https://github.com/nylas/components/pull/140)
+
+### Bug Fixes
+
+- Ensure access_token props are always passed through to request headers [Pull request](https://github.com/nylas/components/pull/166)
+
 # 2021-10-28
 
 ## 1.0.12
