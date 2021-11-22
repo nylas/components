@@ -334,7 +334,7 @@
   $tabletBreakpoint: 768px;
   $desktopBreakpoint: 1140px;
   $contactWidth: 32px;
-  $avatar-size: 40px;
+  $avatar-size: 32px;
   $headerHorizontalSpacing: 32px;
   $avatar-horizontal-space: 1rem;
 
@@ -641,7 +641,7 @@
     </header>
     <div
       class="messages {_this.theme}"
-      class:dont-show-avatars={_this.show_avatars}
+      class:dont-show-avatars={!_this.show_avatars}
     >
       {#each conversationMessages as message, i}
         {#await message.from[0] then from}
@@ -657,8 +657,8 @@
                       <nylas-contact-image
                         {contact_query}
                         {contact}
-                        height="40px"
-                        width="40px"
+                        height="32px"
+                        width="32px"
                       />
                     </div>
                   {/await}
