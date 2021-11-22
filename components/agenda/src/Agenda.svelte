@@ -14,6 +14,7 @@
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
   import type { AgendaProperties } from "@commons/types/Nylas";
   import * as DOMPurify from "dompurify";
+  import { timeDay } from "d3-time";
 
   import type {
     EventQuery,
@@ -68,6 +69,7 @@
   export let show_no_events_message: boolean;
   export let start_minute: number;
   export let theme: string;
+  export let timezone_agnostic_all_day_events: boolean;
 
   const defaultValueMap: Partial<AgendaProperties> = {
     allow_date_change: false,
@@ -89,6 +91,7 @@
     show_no_events_message: false,
     start_minute: 0,
     theme: "theme-1",
+    timezone_agnostic_all_day_events: true,
   };
 
   let _this = <AgendaProperties>buildInternalProps({}, {}, defaultValueMap);
@@ -276,8 +279,8 @@
       previousDate = allowedDates[dateSpot - 1] || selectedDate;
       nextDate = allowedDates[dateSpot + 1] || selectedDate;
     } else {
-      previousDate = new Date(new Date().setDate(selectedDate.getDate() - 1));
-      nextDate = new Date(new Date().setDate(selectedDate.getDate() + 1));
+      previousDate = timeDay.offset(selectedDate, -1);
+      nextDate = timeDay.offset(selectedDate, 1);
     }
 
     siblingQueries = [
@@ -329,9 +332,25 @@
     }
   })();
 
-  $: allDayEvents = calendarEvents
-    ?.filter((event): event is DateEvent => "date" in event.when)
-    ?.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  let StoredAllDayEvents: DateEvent[] = [];
+  $: Promise.all(Object.values($EventStore)).then((days: Event[][]) => {
+    StoredAllDayEvents = (<DateEvent[][]>days)
+      .flat()
+      .filter((event) => event.when?.date);
+  });
+
+  $: allDayEvents = StoredAllDayEvents?.filter((event: DateEvent) => {
+    if (_this.timezone_agnostic_all_day_events) {
+      return (
+        convertToUTC(new Date(event.when.date)).valueOf() ===
+        selectedDate.valueOf()
+      );
+    } else {
+      return (
+        new Date(event.when.date).toDateString() === selectedDate.toDateString()
+      );
+    }
+  })?.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
   $: timespanEvents = calendarEvents
     ?.filter((event): event is TimespanEvent => "start_time" in event.when)
@@ -478,7 +497,7 @@
       );
       selectedDate = allowedDates[dateSpot + 1] || selectedDate;
     } else {
-      selectedDate = new Date(new Date().setDate(selectedDate.getDate() + 1));
+      selectedDate = timeDay.offset(selectedDate, 1);
     }
     dispatchEvent(
       "dateChange",
@@ -496,7 +515,7 @@
       );
       selectedDate = allowedDates[dateSpot - 1] || selectedDate;
     } else {
-      selectedDate = new Date(new Date().setDate(selectedDate.getDate() - 1));
+      selectedDate = timeDay.offset(selectedDate, -1);
     }
     dispatchEvent(
       "dateChange",
