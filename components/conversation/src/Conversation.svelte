@@ -372,7 +372,7 @@
     color: var(--black);
     font-size: var(--fs-14);
     position: sticky;
-    width: 100%;
+    width: calc(100% - 64px);
     top: 0;
     z-index: 1;
     &.loading {
