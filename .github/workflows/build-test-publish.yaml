@@ -156,9 +156,9 @@ jobs:
       - name: Publish (canary)
         if: contains(github.ref, 'canary') == true
         run: |
-          npm run lerna -- publish from-git --no-git-reset --no-verify-access --dist-tag canary --canary --preid canary --yes
+          npm run lerna -- publish from-package --no-git-reset --no-verify-access --dist-tag canary --canary --preid canary --yes
 
       - name: Publish (stable)
         if: contains(github.ref, 'canary') == false
         run: |
-          npm run lerna -- publish from-git --no-git-reset --no-verify-access --yes
+          npm run lerna -- publish from-package --no-git-reset --no-verify-access --yes
