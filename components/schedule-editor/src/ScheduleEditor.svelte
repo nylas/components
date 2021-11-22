@@ -255,6 +255,22 @@
     newFieldTitleElement.focus();
   }
   //#endregion custom fields
+
+  //#region consecutive events
+  const eventTemplate = {
+    event_title: "",
+    event_description: "",
+  };
+  Object.freeze(eventTemplate);
+
+  let consecutiveEvents: any[] = [{ ...eventTemplate }]; // TODO: type
+
+  $: _this.events = consecutiveEvents;
+  $: console.log({ evnts: _this.events });
+  function addConsecutiveEvent() {
+    console.log("adding a consecutive event");
+  }
+  //#endregion consecutive events
 </script>
 
 <style lang="scss">
@@ -273,58 +289,77 @@
     <div class="settings">
       <section class="basic-details">
         <h1>Event Details</h1>
+        <p>
+          Edit the details for your meeting. You can add consecutive meetings to
+          allow users to book back-to-back events.
+        </p>
         <div class="contents">
-          <label>
-            <strong>Event Title</strong>
-            <input type="text" bind:value={_this.event_title} />
-          </label>
-          <label>
-            <strong>Event Description</strong>
-            <input type="text" bind:value={_this.event_description} />
-          </label>
-          <label>
-            <strong>Event Location</strong>
-            <input type="text" bind:value={_this.event_location} />
-          </label>
-          <label>
-            <strong>Event Conferencing</strong>
-            <input type="url" bind:value={_this.event_conferencing} />
-          </label>
-          <div role="radiogroup" aria-labelledby="show_hosts">
-            <strong id="show_hosts">Show meeting hosts to the end-user?</strong>
+          {#each consecutiveEvents as event}
             <label>
-              <input
-                type="radio"
-                name="show_hosts"
-                value={"show"}
-                bind:group={_this.show_hosts}
-              />
-              <span>Show Hosts</span>
+              <strong>Event Title</strong>
+              <input type="text" bind:value={event.event_title} />
             </label>
             <label>
-              <input
-                type="radio"
-                name="show_hosts"
-                value={"hide"}
-                bind:group={_this.show_hosts}
-              />
-              <span>Hide Hosts</span>
+              <strong>Event Description</strong>
+              <input type="text" bind:value={event.event_description} />
             </label>
-          </div>
-          <div>
-            <div>
-              <strong id="email_ids">Email Ids to include for scheduling</strong
-              >
+            <label>
+              <strong>Event Location</strong>
+              <input type="text" bind:value={_this.event_location} />
+            </label>
+            <label>
+              <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
+              <input type="url" bind:value={_this.event_conferencing} />
+            </label>
+            <div role="radiogroup" aria-labelledby="slot_size">
+              <strong id="slot_size">Meeting Length</strong>
+              <label>
+                <input
+                  type="radio"
+                  name="slot_size"
+                  value={15}
+                  bind:group={_this.slot_size}
+                />
+                <span>15 minutes</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="slot_size"
+                  value={30}
+                  bind:group={_this.slot_size}
+                />
+                <span>30 minutes</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="slot_size"
+                  value={60}
+                  bind:group={_this.slot_size}
+                />
+                <span>60 minutes</span>
+              </label>
             </div>
-            <label>
-              <textarea
-                name="email_ids"
-                on:input={debounceEmailInput}
-                value={emailIDs}
-              />
-            </label>
-          </div>
+            <div>
+              <div>
+                <strong id="email_ids"
+                  >Email Ids to include for scheduling</strong
+                >
+              </div>
+              <label>
+                <textarea
+                  name="email_ids"
+                  on:input={debounceEmailInput}
+                  value={emailIDs}
+                />
+              </label>
+            </div>
+          {/each}
         </div>
+        <button class="add-event" on:click={addConsecutiveEvent}
+          >Add a follow-up event</button
+        >
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
       <section class="time-date-details">
@@ -355,36 +390,6 @@
               />
             </label>
             {_this.end_hour}:00
-          </div>
-          <div role="radiogroup" aria-labelledby="slot_size">
-            <strong id="slot_size">Timeslot size</strong>
-            <label>
-              <input
-                type="radio"
-                name="slot_size"
-                value={15}
-                bind:group={_this.slot_size}
-              />
-              <span>15 minutes</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="slot_size"
-                value={30}
-                bind:group={_this.slot_size}
-              />
-              <span>30 minutes</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="slot_size"
-                value={60}
-                bind:group={_this.slot_size}
-              />
-              <span>60 minutes</span>
-            </label>
           </div>
           <label>
             <strong>Start Date</strong>
