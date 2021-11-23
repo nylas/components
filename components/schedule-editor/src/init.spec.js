@@ -3,4 +3,14 @@ describe("schedule-editor component", () => {
     cy.visit("/components/schedule-editor/src/index.html");
     cy.get("nylas-schedule-editor").should("exist");
   });
+
+  describe("Allows for multiple meetings", () => {
+    it("Allows the user to add consecutive meetings", () => {
+      cy.get(".basic-details fieldset").should("have.length", 1);
+      cy.get(".basic-details button.add-event").click();
+      cy.get(".basic-details fieldset").should("have.length", 2);
+      cy.get(".basic-details button.add-event").click();
+      cy.get(".basic-details fieldset").should("have.length", 3);
+    });
+  });
 });

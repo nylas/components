@@ -47,4 +47,5 @@ export interface Manifest extends NylasManifest {
   max_book_ahead_days: number;
   min_book_ahead_days: number;
   custom_fields: CustomField[];
+  events: any[]; // TODO
 }

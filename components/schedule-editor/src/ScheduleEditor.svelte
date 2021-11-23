@@ -50,7 +50,6 @@
     | "monthly"
   )[];
   export let show_as_week: boolean;
-  export let show_hosts: "show" | "hide";
   export let show_preview: boolean;
   export let show_ticks: boolean;
   export let show_weekends: boolean;
@@ -60,6 +59,16 @@
   export let view_as: "schedule" | "list";
   export let screen_bookings: boolean;
   export let timezone: string;
+
+  const eventTemplate = {
+    event_title: "",
+    event_description: "",
+    slot_size: 15,
+    event_location: "",
+    event_conferencing: "",
+    emailIDs: "",
+    email_ids: "",
+  };
 
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
@@ -85,7 +94,6 @@
     recurrence_cadence: ["none"],
     recurrence: "none",
     show_as_week: false,
-    show_hosts: "show",
     show_ticks: true,
     show_weekends: true,
     slot_size: 15,
@@ -94,6 +102,7 @@
     view_as: "schedule",
     screen_bookings: false,
     timezone: "",
+    events: [{ ...eventTemplate }],
   };
 
   //#region mount and prop initialization
@@ -219,11 +228,12 @@
   }
 
   let debouncedInputTimer: number;
-  function debounceEmailInput(e: HTMLInputElement) {
+  function debounceEmailInput(e: HTMLInputElement, event) {
     const emailString = e.target.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      emailIDs = emailString;
+      event.email_ids = emailString;
+      _this.events = [..._this.events];
     }, 1000);
   }
 
@@ -257,18 +267,14 @@
   //#endregion custom fields
 
   //#region consecutive events
-  const eventTemplate = {
-    event_title: "",
-    event_description: "",
-  };
-  Object.freeze(eventTemplate);
+  // Object.freeze(eventTemplate);
 
-  let consecutiveEvents: any[] = [{ ...eventTemplate }]; // TODO: type
+  // let consecutiveEvents: any[] = [{ ...eventTemplate }]; // TODO: type
 
-  $: _this.events = consecutiveEvents;
   $: console.log({ evnts: _this.events });
   function addConsecutiveEvent() {
     console.log("adding a consecutive event");
+    _this.events = [..._this.events, { ...eventTemplate }];
   }
   //#endregion consecutive events
 </script>
@@ -294,67 +300,54 @@
           allow users to book back-to-back events.
         </p>
         <div class="contents">
-          {#each consecutiveEvents as event}
-            <label>
-              <strong>Event Title</strong>
-              <input type="text" bind:value={event.event_title} />
-            </label>
-            <label>
-              <strong>Event Description</strong>
-              <input type="text" bind:value={event.event_description} />
-            </label>
-            <label>
-              <strong>Event Location</strong>
-              <input type="text" bind:value={_this.event_location} />
-            </label>
-            <label>
-              <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
-              <input type="url" bind:value={_this.event_conferencing} />
-            </label>
-            <div role="radiogroup" aria-labelledby="slot_size">
-              <strong id="slot_size">Meeting Length</strong>
+          {#each _this.events as event, iter}
+            <fieldset>
               <label>
-                <input
-                  type="radio"
-                  name="slot_size"
-                  value={15}
-                  bind:group={_this.slot_size}
-                />
-                <span>15 minutes</span>
+                <strong>Event Title</strong>
+                <input type="text" bind:value={event.event_title} />
               </label>
               <label>
-                <input
-                  type="radio"
-                  name="slot_size"
-                  value={30}
-                  bind:group={_this.slot_size}
-                />
-                <span>30 minutes</span>
+                <strong>Event Description</strong>
+                <input type="text" bind:value={event.event_description} />
               </label>
               <label>
-                <input
-                  type="radio"
-                  name="slot_size"
-                  value={60}
-                  bind:group={_this.slot_size}
-                />
-                <span>60 minutes</span>
+                <strong>Event Location</strong>
+                <input type="text" bind:value={event.event_location} />
               </label>
-            </div>
-            <div>
-              <div>
-                <strong id="email_ids"
-                  >Email Ids to include for scheduling</strong
-                >
+              <label>
+                <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
+                <input type="url" bind:value={event.event_conferencing} />
+              </label>
+              <div role="radiogroup" aria-labelledby="slot_size">
+                <strong id="slot_size">Meeting Length</strong>
+                <label>
+                  <input type="radio" value={15} bind:group={event.slot_size} />
+                  <span>15 minutes</span>
+                </label>
+                <label>
+                  <input type="radio" value={30} bind:group={event.slot_size} />
+                  <span>30 minutes</span>
+                </label>
+                <label>
+                  <input type="radio" value={60} bind:group={event.slot_size} />
+                  <span>60 minutes</span>
+                </label>
               </div>
-              <label>
-                <textarea
-                  name="email_ids"
-                  on:input={debounceEmailInput}
-                  value={emailIDs}
-                />
-              </label>
-            </div>
+              <div>
+                <div>
+                  <strong id="email_ids"
+                    >Email Ids to include for scheduling</strong
+                  >
+                </div>
+                <label>
+                  <textarea
+                    name="email_ids"
+                    on:input={(e) => debounceEmailInput(e, event)}
+                    value={event.email_ids}
+                  />
+                </label>
+              </div>
+            </fieldset>
           {/each}
         </div>
         <button class="add-event" on:click={addConsecutiveEvent}

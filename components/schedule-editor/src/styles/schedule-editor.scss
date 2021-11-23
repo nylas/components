@@ -129,6 +129,17 @@ section {
     border: none;
     font-weight: 600;
   }
+
+  &.basic-details .contents {
+    grid-template-columns: 1fr;
+    & > fieldset {
+      border: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+  }
 }
 .availability-container {
   overflow: auto;
