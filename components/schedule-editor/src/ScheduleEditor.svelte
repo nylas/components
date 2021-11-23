@@ -73,6 +73,16 @@
     },
   };
 
+  const eventTemplate = {
+    event_title: "",
+    event_description: "",
+    slot_size: 15,
+    event_location: "",
+    event_conferencing: "",
+    emailIDs: "",
+    email_ids: "",
+  };
+
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
     attendees_to_show: 5,

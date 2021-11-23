@@ -147,6 +147,7 @@ section {
       padding: 0;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+<<<<<<< HEAD
       padding: 1rem;
       gap: 1rem;
       background-color: var(--grey-background);
@@ -165,6 +166,11 @@ section {
   color: var(--black);
   padding: 0.5rem;
   font-size: 0.9rem;
+=======
+      gap: 24px;
+    }
+  }
+>>>>>>> 464f387 (Multiple events)
 }
 
 .availability-container {
