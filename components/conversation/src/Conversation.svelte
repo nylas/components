@@ -334,7 +334,7 @@
   $tabletBreakpoint: 768px;
   $desktopBreakpoint: 1140px;
   $contactWidth: 32px;
-  $avatar-size: 40px;
+  $avatar-size: 32px;
   $headerHorizontalSpacing: 32px;
   $avatar-horizontal-space: 1rem;
 
@@ -345,7 +345,7 @@
     overflow: auto;
     position: relative;
     font-family: sans-serif;
-    background-color: var(--grey-light);
+    background-color: var(--conversation-background, var(--grey-light));
   }
   .loading {
     @include progress-bar(
@@ -365,14 +365,14 @@
   }
   header {
     display: flex;
-    background: white;
+    background: var(--conversation-header-background, var(--white));
     min-height: var(--fs-14);
     padding: 15px $headerHorizontalSpacing;
     gap: $headerHorizontalSpacing;
-    color: var(--black);
+    color: var(--conversation-header-color, var(--black));
     font-size: var(--fs-14);
     position: sticky;
-    width: 100%;
+    width: calc(100% - 64px);
     top: 0;
     z-index: 1;
     &.loading {
@@ -448,8 +448,11 @@
       }
       .body {
         border-radius: 8px;
-        background-color: white;
-        color: var(--black);
+        background-color: var(
+          --conversation-peer-message-background,
+          var(--white)
+        );
+        color: var(--conversation-peer-message-color, var(--black));
         max-height: 50vh;
         overflow: auto;
         position: relative;
@@ -518,8 +521,11 @@
         .body {
           order: 1;
           grid-column: 1 / 1;
-          color: var(--white);
-          background-color: var(--blue);
+          color: var(--conversation-your-message-color, var(--white));
+          background-color: var(
+            --conversation-your-message-background,
+            var(--blue)
+          );
           p.after {
             color: var(--grey);
           }
@@ -576,9 +582,10 @@
         padding: 12px 1rem;
         width: 100%;
         font-size: var(--fs-16);
-        color: var(--grey-black);
+        color: var(--conversation-reply-color, var(--grey-black));
+        background-color: var(--conversation-reply-background, var(--white));
         &::placeholder {
-          color: var(--grey);
+          color: var(--conversation-reply-color, var(--grey));
         }
       }
     }
@@ -634,7 +641,7 @@
     </header>
     <div
       class="messages {_this.theme}"
-      class:dont-show-avatars={_this.show_avatars}
+      class:dont-show-avatars={!_this.show_avatars}
     >
       {#each conversationMessages as message, i}
         {#await message.from[0] then from}
@@ -650,8 +657,8 @@
                       <nylas-contact-image
                         {contact_query}
                         {contact}
-                        height="40px"
-                        width="40px"
+                        height="32px"
+                        width="32px"
                       />
                     </div>
                   {/await}
