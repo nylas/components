@@ -70,7 +70,8 @@
   export let closed_color: string;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let dates_to_show: number;
-  export let email_ids: string[];
+  export let email_ids: string[]; // Deprecated. Use participants instead.
+  export let participants: string[];
   export let end_hour: number;
   export let event_buffer: number;
   export let free_color: string;
@@ -105,6 +106,7 @@
     date_format: "full",
     dates_to_show: 1,
     email_ids: [],
+    participants: [],
     end_hour: 24,
     event_buffer: 0,
     free_color: "#078351cc",
@@ -227,6 +229,8 @@
       access_token,
     });
     manifest = (await $ManifestStore[storeKey]) || {};
+
+    participants = email_ids; // handles deprecated email_ids prop
 
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
 
@@ -797,7 +801,7 @@
   // #endregion timeSlot selection
 
   function getAvailabilityQuery(
-    emailAddresses = _this.email_ids,
+    emailAddresses = _this.participants,
     accessToken = access_token,
   ): AvailabilityQuery {
     return {
@@ -824,7 +828,7 @@
   let newCalendarTimeslotsForGivenEmails: any[] = [];
   $: (async () => {
     if (
-      (Array.isArray(_this.email_ids) && _this.email_ids.length > 0) ||
+      (Array.isArray(_this.participants) && _this.participants.length > 0) ||
       (_this.booking_user_email && _this.booking_user_token)
     ) {
       await getAvailability();
@@ -852,10 +856,10 @@
   async function getAvailability(forceReload = false) {
     loading = true;
     let freeBusyCalendars: any = [];
-    // Free-Busy endpoint returns busy timeslots for given email_ids between start_time & end_time
+    // Free-Busy endpoint returns busy timeslots for given participants between start_time & end_time
 
     type fetchableCalendarUser = { email: string; token?: string };
-    let calendarsToFetch: fetchableCalendarUser[] = _this.email_ids.map(
+    let calendarsToFetch: fetchableCalendarUser[] = _this.participants.map(
       (email) => {
         return {
           email,
@@ -1423,12 +1427,12 @@
   //#endregion slot interaction handlers
 
   // #region error
-  $: if (id && _this.email_ids.length && _this.capacity) {
+  $: if (id && _this.participants.length && _this.capacity) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
         message:
-          "Setting `capacity` currently does not work with `email_ids`. Please use `calendars` to use `capacity`.",
+          "Setting `capacity` currently does not work with `participants`. Please use `calendars` to use `capacity`.",
       });
     } catch (error) {
       console.error(error);
@@ -1483,14 +1487,12 @@
   @import "./styles/availability.scss";
 </style>
 
-<!-- <svelte:window
-  on:resize={() => {
-    shouldUpdateDayPositions = true;
-    shouldUpdateSlotPositions = true;
-  }}
-/> -->
 {#if manifest && manifest.error}
   <nylas-error {id} />
+{:else if _this.participants.length === 0}
+  <nylas-message-error
+    error_message="Please enter participants to see availability."
+  />
 {:else}
   <main
     bind:this={main}
