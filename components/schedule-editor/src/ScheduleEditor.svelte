@@ -2,7 +2,6 @@
 
 <script lang="ts">
   import throttle from "just-throttle";
-  import { flip } from "svelte/animate";
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import parseStringToArray, {
@@ -182,8 +181,6 @@
     });
   }
 
-  $: console.log({ ..._this });
-
   // #region unpersisted variables
   function availabilityChosen(event: any) {
     _this.open_hours = event.detail.timeSlots.map((slot: TimeSlot) => {
@@ -265,11 +262,12 @@
   $: showPreview = mainElementWidth > 600;
 
   //#region custom fields
-  const emptyCustomField: CustomField = {
+  const emptyCustomField: CustomFieldWithId = {
     title: "",
     description: "",
     type: "text",
     required: false,
+    id: "",
   };
   const customFieldKeys: Array<keyof CustomField> = [
     "title",
@@ -279,7 +277,7 @@
   ];
 
   let newFieldTitleElement: HTMLElement;
-  let newCustomField: CustomField = { ...emptyCustomField };
+  let newCustomField: CustomFieldWithId = { ...emptyCustomField };
 
   function removeCustomField(field: CustomField) {
     _this.custom_fields = _this.custom_fields.filter(
@@ -288,8 +286,14 @@
   }
 
   function addNewField(field: CustomField) {
-    _this.custom_fields = [..._this.custom_fields, field];
+    const fieldWithId = {
+      ...field,
+      id: String(_this.custom_fields.length),
+    };
+    _this.custom_fields = [..._this.custom_fields, fieldWithId];
+
     newCustomField = { ...emptyCustomField };
+
     newFieldTitleElement.focus();
   }
 
@@ -300,7 +304,7 @@
   let tablecellRect: DOMRect[] = []; // To replicate cell dimensions on drag-placeholder
   let dragPreviewRef: HTMLElement;
   type CustomFieldRefs = Record<string, HTMLElement>;
-  let customFieldRefs: CustomFieldRefs = {};
+  let customFieldRefs: CustomFieldRefs = {}; // store the refs to dom nodes once so we can recalculate sizes on the fly
   let customFieldDomRects: DOMRect[] = [];
   let customFieldIdOrder: string[] = [];
   let maxDragTop: number;
@@ -907,7 +911,6 @@
               <tbody>
                 {#each _this.custom_fields as field, i (field.id)}
                   <tr
-                    animate:flip
                     class:drag-active={field.id === draggedField?.id}
                     use:storeRef={{ id: field.id }}
                   >

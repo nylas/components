@@ -1983,7 +1983,7 @@
   dependencies:
     d3-scale "^4.0.0"
     d3-time "^3.0.0"
-    just-throttle "^2.3.1"
+    just-throttle "2.3.1"
 
 "@nylas/components-composer@file:components/composer":
   version "1.0.15"
@@ -7290,12 +7290,7 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-junk@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.npmjs.org/junk/-/junk-3.1.0.tgz"
-  integrity sha512-pBxcB3LFc8QVgdggvZWyeys+hnrNWg4OcZIU/1X59k5jQdLBlCsYGRQaz234SqoRLTCgMH00fY0xRJH+F9METQ==
-
-just-throttle@2.3.1, just-throttle@^2.3.1:
+just-throttle@2.3.1:
   version "2.3.1"
   resolved "https://registry.npmjs.org/just-throttle/-/just-throttle-2.3.1.tgz"
   integrity sha512-0H4miIAWZYpnpg7oD/Y/PBb77ISSHAETif5xK9EnwIgYCO6oC8ErkJxDumMUTR44shSOwptRIArRuvNuvN/hOw==
