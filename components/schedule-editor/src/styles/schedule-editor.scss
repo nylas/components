@@ -134,13 +134,24 @@ section {
     grid-template-columns: 1fr;
     & > fieldset {
       border: none;
+      border-bottom: 1px solid var(--grey);
       padding: 0;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
+      padding-bottom: 2rem;
+      gap: 2rem;
     }
   }
 }
+
+.warning {
+  background-color: var(--red-lighter);
+  border: 1px solid var(--red);
+  color: var(--black);
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
 .availability-container {
   overflow: auto;
   height: 300px;

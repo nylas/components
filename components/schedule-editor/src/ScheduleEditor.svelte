@@ -271,7 +271,6 @@
 
   // let consecutiveEvents: any[] = [{ ...eventTemplate }]; // TODO: type
 
-  $: console.log({ evnts: _this.events });
   function addConsecutiveEvent() {
     console.log("adding a consecutive event");
     _this.events = [..._this.events, { ...eventTemplate }];
@@ -332,6 +331,15 @@
                   <input type="radio" value={60} bind:group={event.slot_size} />
                   <span>60 minutes</span>
                 </label>
+                {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
+                  <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
+                  <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
+                  <p class="warning">
+                    Note: different meeting lengths in a conecutive chain are
+                    not currently supported; all meetings in this chain will
+                    fall back to {_this.events[0].slot_size} minutes.
+                  </p>
+                {/if}
               </div>
               <div>
                 <div>
