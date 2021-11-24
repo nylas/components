@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import {
-    MailboxStore,
+    EmailStore,
     ManifestStore,
     fetchAccount,
     updateThread,
@@ -10,8 +10,9 @@
     fetchEmail,
     ContactStore,
     fetchCleanConversations,
+    fetchThread,
   } from "@commons";
-  import type { ContactSearchQuery } from "@commons/types/Contacts";
+  import type { Contact, ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
@@ -40,6 +41,7 @@
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
+  import Conversation from "components/conversation/src/Conversation.svelte";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -61,7 +63,6 @@
   export let theme: string;
   export let thread_id: string;
   export let thread: Thread;
-  export let unread: boolean;
   export let you: Partial<Account>;
 
   const defaultValueMap: Partial<EmailProperties> = {
@@ -76,7 +77,6 @@
     show_thread_actions: true,
     theme: "theme-1",
     thread_id: "",
-    unread: true,
     you: {},
   };
 
@@ -142,16 +142,17 @@
     }
   }
 
-  let contacts: any = null;
+  let contacts: Record<string, Contact> = {};
   let activeThreadContact = {};
+
   $: activeThreadContact =
     activeThread && contacts
       ? contacts[
           activeThread.messages[activeThread.messages.length - 1]?.from[0].email
         ]
-      : null;
+      : {};
   $: activeMessageContact =
-    _this.message && contacts ? contacts[_this.message?.from[0].email] : null;
+    _this.message && contacts ? contacts[_this.message?.from[0].email] : {};
 
   let threadIdChanged = false;
   $: _this.thread_id, (threadIdChanged = true);
@@ -165,9 +166,6 @@
         await getThreadContacts(activeThread);
       } else if (_this.message) {
         const participant = _this.message.from[0];
-        if (!contacts) {
-          contacts = {};
-        }
         contacts[participant.email] = await getContact(participant);
       }
     }
@@ -188,9 +186,6 @@
 
     for (const participant of fromParticipantsArray) {
       const participantEmail = participant.email;
-      if (!contacts) {
-        contacts = {};
-      }
       if (!contacts[participantEmail] && participantEmail) {
         contacts[participantEmail] = await getContact(participant);
       }
@@ -240,9 +235,10 @@
     if (_this.thread && _this.thread.id) {
       // Is it in the store already? (via <nylas-mailbox>, for example)
       const localThread: Conversation =
-        (MailboxStore.getFlatThreads().find(
-          (storedThread) => storedThread && storedThread.id === thread?.id,
-        ) as Conversation) ?? thread;
+        $EmailStore[queryKey]?.find(
+          (storedThread: Conversation) =>
+            storedThread && storedThread.id === thread?.id,
+        ) ?? (_this.thread as Conversation);
 
       // This is for Email component demo purpose, where we want to show expanded threads by default on load.
       if (_this.show_expanded_email_view_onload) {
@@ -250,7 +246,7 @@
       }
       activeThread = localThread;
     } else if (_this.thread_id) {
-      const thread = await MailboxStore.getThread(query);
+      const thread = await fetchThread(query);
 
       if (_this.show_expanded_email_view_onload) {
         thread.expanded = _this.show_expanded_email_view_onload;
@@ -339,9 +335,7 @@
   async function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && _this.thread_id) {
-      await updateThread(query, activeThread).then((thread) => {
-        $MailboxStore[queryKey] = [thread];
-      });
+      await updateThread(query, activeThread);
     }
   }
 
@@ -354,7 +348,6 @@
         _this.click_action !== "mailbox"
       ) {
         activeThread.unread = !activeThread.unread;
-        _this.unread = activeThread.unread;
         await saveActiveThread();
       }
       //#endregion read/unread
@@ -395,26 +388,17 @@
 
   async function toggleUnreadStatus(event: MouseEvent | KeyboardEvent) {
     if (activeThread) {
+      activeThread = { ...activeThread, unread: !activeThread.unread };
+      await saveActiveThread();
       dispatchEvent("toggleThreadUnreadStatus", {
         event,
         thread: activeThread,
       });
-      if (_this.click_action !== "mailbox") {
-        activeThread.unread = !activeThread.unread;
-        _this.unread = activeThread.unread;
-        await saveActiveThread();
-        return;
-      }
       return;
     }
-    _this.unread = !_this.unread;
   }
 
   async function deleteEmail(event: MouseEvent) {
-    dispatchEvent("threadDeleted", {
-      event,
-      thread: activeThread,
-    });
     if (_this.click_action !== "mailbox") {
       if (trashLabelID) {
         const existingLabelIds = activeThread.labels?.map((i) => i.id) || [];
@@ -424,6 +408,10 @@
       }
       await saveActiveThread();
     }
+    dispatchEvent("threadDeleted", {
+      event,
+      thread: activeThread,
+    });
   }
 
   function handleThreadClick(event: MouseEvent) {
@@ -461,7 +449,7 @@
     event.stopImmediatePropagation();
     //#region starred/unstarred
     if (activeThread) {
-      activeThread.starred = !activeThread.starred;
+      activeThread = { ...activeThread, starred: !activeThread.starred };
       await saveActiveThread();
     }
     //#endregion starred/unstarred
@@ -1209,25 +1197,19 @@
                 <div class="read-status">
                   <button
                     title={`Mark thread as ${
-                      _this.unread ||
-                      (activeThread.unread && _this.click_action !== "mailbox")
-                        ? ""
-                        : "un"
+                      activeThread.unread ? "" : "un"
                     }read`}
                     aria-label={`Mark thread as ${
-                      _this.unread ||
-                      (activeThread.unread && _this.click_action !== "mailbox")
-                        ? ""
-                        : "un"
+                      activeThread.unread ? "" : "un"
                     }read`}
                     on:click|stopPropagation={toggleUnreadStatus}
                   >
-                    {#if _this.unread || (activeThread.unread && _this.click_action !== "mailbox")}
+                    {#if activeThread.unread}
                       <MarkReadIcon aria-hidden="true" />
                     {:else}
                       <MarkUnreadIcon aria-hidden="true" />
-                    {/if}</button
-                  >
+                    {/if}
+                  </button>
                 </div>
               </div>
             </header>
@@ -1349,10 +1331,8 @@
                       </div>
                       <div class="message-date">
                         <span>
-                          {formatExpandedDate(
-                            new Date(message.date * 1000),
-                          )}</span
-                        >
+                          {formatExpandedDate(new Date(message.date * 1000))}
+                        </span>
                       </div>
                     </div>
                     <div class="snippet">
@@ -1369,8 +1349,7 @@
           <div
             class="email-row condensed"
             class:show_star={_this.show_star}
-            class:unread={_this.unread ||
-              (activeThread.unread && _this.click_action !== "mailbox")}
+            class:unread={activeThread.unread}
           >
             <div class="from{_this.show_star ? '-star' : ''}">
               {#if _this.show_star}
@@ -1415,35 +1394,35 @@
                     {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
                       <span class="from-sub-section second"
                         >, {activeThread.participants[0].name ||
-                          activeThread.participants[0].email}</span
-                      >
+                          activeThread.participants[0].email}
+                      </span>
                     {/if}
                   </div>
                   <div class="participants-count">
                     {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
                       <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
                       {#if activeThread.participants.length >= 2}
-                        <span class="show-on-mobile"
-                          >&nbsp;&plus;{activeThread.participants.length -
-                            MAX_MOBILE_PARTICIPANTS}</span
-                        >
+                        <span class="show-on-mobile">
+                          &nbsp;&plus;{activeThread.participants.length -
+                            MAX_MOBILE_PARTICIPANTS}
+                        </span>
                       {/if}
                       <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
                     Note that this might not be exactly correct if the name of the first participant is too long 
                     and occupies entire width -->
                       {#if activeThread.participants.length > 2}
-                        <span class="show-on-desktop"
-                          >&nbsp; &plus; {activeThread.participants.length -
-                            MAX_DESKTOP_PARTICIPANTS}</span
-                        >
+                        <span class="show-on-desktop">
+                          &nbsp; &plus; {activeThread.participants.length -
+                            MAX_DESKTOP_PARTICIPANTS}
+                        </span>
                       {/if}
                     {/if}
                   </div>
                 </div>
                 {#if activeThread.messages.length > 1 && _this.show_number_of_messages}
                   <span class="thread-message-count"
-                    >{activeThread.messages.length}</span
-                  >
+                    >{activeThread.messages.length}
+                  </span>
                 {/if}
               </div>
             </div>
@@ -1452,8 +1431,8 @@
                 <span class="subject">{thread?.subject}</span><span
                   class="snippet"
                 >
-                  {thread.snippet}</span
-                >
+                  {thread.snippet}
+                </span>
               </div>
               <div
                 class:date={_this.show_received_timestamp}
@@ -1472,22 +1451,14 @@
                   <div class="read-status">
                     <button
                       title={`Mark thread as ${
-                        _this.unread ||
-                        (activeThread.unread &&
-                          _this.click_action !== "mailbox")
-                          ? ""
-                          : "un"
+                        activeThread.unread ? "" : "un"
                       }read`}
                       aria-label={`Mark thread as ${
-                        _this.unread ||
-                        (activeThread.unread &&
-                          _this.click_action !== "mailbox")
-                          ? ""
-                          : "un"
+                        activeThread.unread ? "" : "un"
                       }read`}
                       on:click|stopPropagation={toggleUnreadStatus}
                     >
-                      {#if _this.unread || (activeThread.unread && _this.click_action !== "mailbox")}
+                      {#if activeThread.unread}
                         <MarkReadIcon aria-hidden="true" />
                       {:else}
                         <MarkUnreadIcon aria-hidden="true" />
@@ -1576,13 +1547,13 @@
             </div>
             <div class="message-date">
               <span>
-                {formatPreviewDate(new Date(_this.message.date * 1000))}</span
-              >
+                {formatPreviewDate(new Date(_this.message.date * 1000))}
+              </span>
             </div>
           </div>
           <div class="message-body">
             {#if _this.clean_conversation && message.conversation}
-              {@html DOMPurify.sanitize(_this.message.conversation)}
+              {@html DOMPurify.sanitize(_this.message?.conversation ?? "")}
             {:else if _this.message.body}
               <nylas-message-body message={_this.message} />
             {/if}

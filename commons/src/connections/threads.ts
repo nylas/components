@@ -11,12 +11,17 @@ import type {
   Conversation,
   MiddlewareResponse,
   SearchResultThreadsQuery,
+  CommonQuery,
 } from "@commons/types/Nylas";
 
-export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
+export const fetchThreads = async (
+  query: MailboxQuery,
+  limit: number,
+  offset: number,
+): Promise<Thread[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
-  )}/threads?view=expanded&not_in=trash`;
+  )}/threads?view=expanded&not_in=trash&limit=${limit}&offset=${offset}`;
   if (query.query) {
     Object.entries(query.query).forEach(
       (param) => (queryString = queryString.concat(`&${param[0]}=${param[1]}`)),
@@ -24,20 +29,35 @@ export const fetchThreads = async (query: MailboxQuery): Promise<Thread[]> => {
   }
   return await fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
-    .then((json) => {
-      return json.response.filter((thread) =>
-        thread && thread.messages ? thread?.messages?.length > 0 : false,
-      );
-    })
+    .then((json) => json.response)
     .catch((error) => handleError(query.component_id, error));
 };
 
+export async function fetchThreadCount(query: MailboxQuery) {
+  let queryString = `${getMiddlewareApiUrl(
+    query.component_id,
+  )}/threads?view=expanded&not_in=trash&view=count`;
+  if (query.query) {
+    Object.entries(query.query).forEach(
+      (param) => (queryString = queryString.concat(`&${param[0]}=${param[1]}`)),
+    );
+  }
+
+  if (query.keywordToSearch) {
+    queryString += `&q=${query.keywordToSearch}`;
+  }
+
+  return await fetch(queryString, getFetchConfig(query))
+    .then((response) => handleResponse<MiddlewareResponse<any>>(response))
+    .then((json) => json.response.count);
+}
+
 export const fetchSearchResultThreads = async (
-  query: SearchResultThreadsQuery,
+  query: MailboxQuery,
 ): Promise<Thread[]> => {
   const queryString = `${getMiddlewareApiUrl(
     query.component_id,
-  )}/threads/search?q=${query.keyword_to_search}&view=expanded`;
+  )}/threads/search?q=${query.keywordToSearch}&view=expanded`;
   return await fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then(async (json) => {

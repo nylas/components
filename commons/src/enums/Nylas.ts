@@ -9,12 +9,6 @@ export enum AccountSyncState {
   STOPPED = "stopped",
 }
 
-export enum EmailUnreadStatus {
-  READ = "read",
-  UNREAD = "unread",
-  DEFAULT = "default",
-}
-
 export enum MailboxActions {
   SELECTALL = "selectall",
   DELETE = "delete",

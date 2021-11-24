@@ -79,13 +79,6 @@
     "value": false
   },
   {
-    "label": "unread",
-    "title": "Show a thread as unread by overriding the thread's default value",
-    "type": "boolean",
-    "options": [true, false],
-    "value": false
-  },
-  {
     "label": "click_action",
     "title": "This option allows to specify the type of click action",
     "type": "string",

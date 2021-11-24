@@ -1,8 +1,10 @@
 <svelte:options tag="pagination-nav" />
 
 <script lang="ts">
-  export let current_page: number = 1;
-  export let last_page: number = 1;
+  export let current_page: number = 0;
+  export let items_per_page: number;
+  export let num_pages: number = 1;
+  export let num_items: number;
 
   import { getEventDispatcher } from "@commons/methods/component";
   import { get_current_component } from "svelte/internal";
@@ -16,7 +18,7 @@
 
   function changePage(newPage: number) {
     dispatchEvent("changePage", {
-      newPage: newPage,
+      newPage,
     });
   }
 </script>
@@ -27,13 +29,19 @@
     --font: -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     align-items: center;
+
+    .page-indicator {
+      color: #454954;
+      height: 38px;
+      margin: 2em 1em 0 1em;
+    }
   }
 
   button {
+    margin-top: 1em;
     text-align: center;
     min-width: 38px;
     min-height: 38px;
-    margin-top: 25px;
     border: #e3e8ee solid 1px;
     margin-right: -1px;
     font-family: var(--font);
@@ -41,14 +49,12 @@
     color: #454954;
     cursor: pointer;
 
-    /*&:disabled {
-      background-color: var(--disabled);
-      color: var(--disabled-text);
-    }*/
-
     &.current {
       background-color: white;
       color: #2c2e2e;
+    }
+    &:disabled {
+      cursor: default;
     }
   }
 
@@ -58,43 +64,45 @@
 </style>
 
 <nav class="pagination-nav">
-  {#if last_page > 1}
+  <span class="page-indicator">
+    <span class="page-start">
+      {current_page * items_per_page + 1}
+    </span>
+    -
+    <span class="page-end">
+      {Math.min((current_page + 1) * items_per_page, num_items)}
+    </span>
+    of
+    <span class="total">{num_items}</span>
+  </span>
+  {#if num_pages > 1}
     <button
       class="paginate-btn first-btn"
-      on:click={() => changePage(1)}
-      disabled={current_page === 1}
+      on:click={() => changePage(0)}
+      disabled={current_page === 0}
     >
       <FirstIcon style="width: 24px; height: 24px;" />
     </button>
     <button
       class="paginate-btn back-btn"
       on:click={() => changePage(current_page - 1)}
-      disabled={current_page === 1}
+      disabled={current_page === 0}
     >
       <BackIcon style="width: 24px; height: 24px;" />
     </button>
   {/if}
-  <div class="page-numbers">
-    {#each { length: last_page } as _, i}
-      <button
-        class="paginate-btn {current_page === i + 1 ? 'current' : ''}"
-        on:click={() => changePage(i + 1)}
-        disabled={current_page === i + 1}>{i + 1}</button
-      >
-    {/each}
-  </div>
-  {#if last_page > 1}
+  {#if num_pages > 1}
     <button
       class="paginate-btn next-btn"
       on:click={() => changePage(current_page + 1)}
-      disabled={current_page === last_page}
+      disabled={current_page === num_pages - 1}
     >
       <NextIcon style="height:24px;width:24px;" />
     </button>
     <button
       class="paginate-btn last-btn"
-      on:click={() => changePage(last_page)}
-      disabled={current_page === last_page}
+      on:click={() => changePage(num_pages - 1)}
+      disabled={current_page === num_pages - 1}
     >
       <LastIcon style="height:24px;width:24px;" />
     </button>
