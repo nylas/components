@@ -26,13 +26,6 @@
     "value": false
   },
   {
-    "label": "unread_status",
-    "title": "Show read/unread status of emails",
-    "options": ["read", "unread", "default"],
-    "type": "string",
-    "value": "default"
-  },
-  {
     "label": "header",
     "title": "Shows the header passed in the Mailbox",
     "type": "string",
@@ -55,7 +48,7 @@
     "label": "query_string",
     "title": "Filter your threads",
     "type": "string",
-    "value": null
+    "value": "in=inbox"
   },
   {
     "label": "actions_bar",

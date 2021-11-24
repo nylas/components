@@ -344,8 +344,9 @@ describe("Email component", () => {
         .as("email")
         .then((element) => {
           const component = element[0];
+          component.thread = { ...SAMPLE_THREAD, unread: false };
           cy.get(component).find(".unread").should("not.exist");
-          component.unread = "true";
+          component.thread = { ...component.thread, unread: true };
           cy.get(component).find(".unread").should("exist");
         });
     });

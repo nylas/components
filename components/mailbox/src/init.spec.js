@@ -24,7 +24,6 @@ describe("MailBox  component", () => {
         .then((element) => {
           const component = element[0];
           component.all_threads = threads;
-          component.unread_status = "default";
 
           cy.get(component).find("nylas-email").should("have.length", 2);
           cy.get(component)
@@ -38,8 +37,10 @@ describe("MailBox  component", () => {
         .as("mailbox")
         .then((element) => {
           const component = element[0];
-          component.all_threads = threads;
-          component.unread_status = "unread";
+          component.all_threads = threads.map((thread) => ({
+            ...thread,
+            unread: true,
+          }));
 
           cy.get(component).find("nylas-email").should("have.length", 2);
           cy.get(component)
@@ -53,9 +54,10 @@ describe("MailBox  component", () => {
         .as("mailbox")
         .then((element) => {
           const component = element[0];
-          component.all_threads = threads;
-          component.unread_status = "read";
-
+          component.all_threads = threads.map((thread) => ({
+            ...thread,
+            unread: false,
+          }));
           cy.get(component).find("li").should("have.length", 2);
           cy.get(component).find("li.unread").should("have.length", 0);
         });
@@ -66,8 +68,10 @@ describe("MailBox  component", () => {
         .as("mailbox")
         .then((element) => {
           const component = element[0];
-          component.all_threads = threads;
-          component.unread_status = "read";
+          component.all_threads = threads.map((thread) => ({
+            ...thread,
+            unread: false,
+          }));
 
           cy.get(component)
             .find(".email-row.condensed.unread")
@@ -114,8 +118,10 @@ describe("MailBox  component", () => {
         .as("mailbox")
         .then((element) => {
           const component = element[0];
-          component.all_threads = threads;
-          component.unread_status = "unread";
+          component.all_threads = threads.map((thread) => ({
+            ...thread,
+            unread: true,
+          }));
 
           cy.get(component)
             .find(".email-row.condensed.unread")
@@ -275,12 +281,6 @@ describe("MailBox  component", () => {
           component.items_per_page = 1;
 
           cy.get(component).find("nylas-email").should("have.length", 1);
-          cy.get(component)
-            .get("pagination-nav")
-            .get(".page-numbers")
-            .find(".paginate-btn")
-            .should("have.length", 2);
-
           cy.get(component).get("pagination-nav").get(".next-btn").click();
           cy.get(component).find("nylas-email").should("have.length", 1);
         });
@@ -294,6 +294,33 @@ describe("MailBox  component", () => {
       cy.get("pagination-nav").get(".first-btn").click();
       cy.get("pagination-nav").get(".first-btn").should("be.disabled");
       cy.get("pagination-nav").get(".back-btn").should("be.disabled");
+    });
+
+    it("Should display correct number of items on the last page", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const itemsPerPage = 10;
+          const component = element[0];
+          component.items_per_page = itemsPerPage;
+
+          cy.get("pagination-nav").get(".last-btn").click();
+          cy.get("pagination-nav")
+            .get(".page-indicator .page-end")
+            .then((pageEndElem) => {
+              const pageEnd = pageEndElem.text();
+              cy.get("pagination-nav")
+                .get(".page-indicator .total")
+                .then((totalElem) => {
+                  const total = totalElem.text();
+                  expect(total).to.equal(pageEnd);
+
+                  cy.get(component)
+                    .find("nylas-email", { timeout: 10000 })
+                    .should("have.length", Number(total) % itemsPerPage);
+                });
+            });
+        });
     });
   });
 
@@ -322,30 +349,6 @@ describe("MailBox  component", () => {
   });
 
   describe("Bulk actions", () => {
-    it("Should only show Mailbox actions when an email is selected", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.actions_bar = ["selectall", "unread", "delete", "star"];
-          cy.get(component)
-            .get("div[role='toolbar']")
-            .find("div")
-            .should("have.length", 1);
-
-          cy.get(component)
-            .find("div.checkbox-container")
-            .first()
-            .find("input")
-            .check();
-          cy.get(component)
-            .get("div[role='toolbar']")
-            .find("div")
-            .should("have.length", 4);
-        });
-    });
-
     it("Should mark all unread then read", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")
@@ -368,6 +371,24 @@ describe("MailBox  component", () => {
 
           cy.get(component)
             .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-unread]")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .click();
+          cy.get(component)
+            .find(".email-row")
+            .each((email) => {
+              cy.wrap(email).should("not.have.class", "unread");
+            });
+
+          cy.get(component)
+            .find("div[role='toolbar']")
             .find("div.read-status button[data-cy=mark-unread]")
             .should("exist");
           cy.get(component)
@@ -383,23 +404,6 @@ describe("MailBox  component", () => {
             .each((email) => {
               cy.wrap(email).should("have.class", "unread");
             });
-
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-unread]")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .click();
-          cy.get(component)
-            .find("nylas-email")
-            .find(".email-row.condensed.unread")
-            .should("not.exist");
         });
     });
 
@@ -455,6 +459,30 @@ describe("MailBox  component", () => {
             .find("div.starred")
             .find("button.starred")
             .should("not.exist");
+        });
+    });
+
+    it("Should only show Mailbox actions when an email is selected", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          // component.actions_bar = ["selectall", "unread", "delete", "star"];
+          cy.get(component)
+            .get("div[role='toolbar']")
+            .find("div")
+            .should("have.length", 1);
+
+          cy.get(component)
+            .find("div.checkbox-container")
+            .first()
+            .find("input")
+            .check();
+          cy.get(component)
+            .get("div[role='toolbar']")
+            .find("div")
+            .should("have.length", 4);
         });
     });
 

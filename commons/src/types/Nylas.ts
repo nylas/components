@@ -1,7 +1,6 @@
 import type {
   AccountOrganizationUnit,
   AccountSyncState,
-  EmailUnreadStatus,
   MailboxActions,
 } from "@commons/enums/Nylas";
 import type { Contact, HydratedContact } from "@commons/types/Contacts";
@@ -19,6 +18,7 @@ export interface ConversationQuery extends CommonQuery {
 
 export interface MailboxQuery extends CommonQuery {
   query: ThreadsQuery;
+  keywordToSearch?: string;
 }
 
 export type AccountQuery = CommonQuery;
@@ -184,7 +184,6 @@ export interface EmailProperties extends Manifest {
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   thread_id: string;
   thread: Thread;
-  unread: boolean;
   you: Partial<Account>;
 }
 
@@ -198,7 +197,6 @@ export interface MailboxProperties extends Manifest {
   show_star: boolean;
   show_thread_checkbox: boolean;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  unread_status: EmailUnreadStatus;
 }
 
 export interface ComposerProperties extends Manifest {
@@ -271,6 +269,7 @@ export interface Thread {
   folders?: Folder[]; //to be changed to Folder[];
   folder_id?: string;
   label_ids?: string[];
+  selected?: boolean;
 }
 export interface Conversation extends Thread {
   messages: Message[];

@@ -5,7 +5,12 @@ export {
   fetchContactImage,
   fetchContactThreads,
 } from "./connections/contacts";
-export { fetchThreads, fetchThread, updateThread } from "./connections/threads";
+export {
+  fetchThreads,
+  fetchThreadCount,
+  fetchThread,
+  updateThread,
+} from "./connections/threads";
 export { fetchManifest } from "./connections/manifest";
 export {
   sendMessage,
@@ -26,7 +31,7 @@ export { ContactStore } from "./store/contacts";
 export { ContactAvatarStore } from "./store/contact-avatar";
 export { ConversationStore } from "./store/conversations";
 export { EventStore } from "./store/events";
-export { MailboxStore } from "./store/mailbox";
+export { MailboxStore, EmailStore } from "./store/mailbox";
 export { MessageStore } from "./store/messages";
 export { ManifestStore } from "./store/manifest";
 export {

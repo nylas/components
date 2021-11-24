@@ -48,26 +48,26 @@
   export let query_string: string; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
   export let show_star: boolean;
   export let show_thread_checkbox: boolean;
-  export let unread_status: "read" | "unread" | "default";
 
   const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
     items_per_page: 13,
+    query_string: "in=inbox",
     show_star: false,
     show_thread_checkbox: true,
-    unread_status: "default",
   };
 
   let manifest: Partial<MailboxProperties> = {};
   let _this = <MailboxProperties>buildInternalProps({}, {}, defaultValueMap);
 
-  let currentlySelectedThread: Thread;
+  let currentlySelectedThread: Thread | null;
   let hasComponentLoaded = false;
+  let displayedThreadsPromise: Promise<Thread[]>;
 
   // paginations vars
-  let paginatedThreads: Thread[] = [];
-  let currentPage: number = 1;
-  let lastPage: number = 1;
+  let currentPage: number = 0;
+  let numPages: number = 1;
+  let numThreads: number = 0;
 
   onMount(async () => {
     await tick();
@@ -101,30 +101,8 @@
       folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
     }
 
-    if (_this.all_threads) {
-      threads = _this.all_threads as Thread[];
-    } else if (_this.keyword_to_search) {
-      threads = await MailboxStore.getThreadsWithSearchKeyword({
-        ...accountOrganizationUnitQuery,
-        keyword_to_search: _this.keyword_to_search,
-      });
-    } else {
-      threads = (await MailboxStore.getThreads(query)) || [];
-    }
+    await updateDisplayedThreads();
 
-    inboxThreads = threads; // TODO: filter out threads in trash folder
-    starredThreads = new Set(inboxThreads.filter((thread) => thread.starred));
-    if (_this.unread_status === "unread") {
-      unreadThreads = new Set(inboxThreads);
-    } else if (_this.unread_status === "default") {
-      unreadThreads = new Set(inboxThreads.filter((thread) => thread.unread));
-    }
-    paginatedThreads = paginate(
-      inboxThreads,
-      currentPage,
-      _this.items_per_page,
-    );
-    lastPage = Math.ceil(inboxThreads?.length / _this.items_per_page);
     hasComponentLoaded = true;
   });
 
@@ -140,38 +118,36 @@
     }
   }
 
-  let inboxThreads: Thread[]; // threads currently in the inbox
-  $: if (threads) {
-    inboxThreads = threads;
-    paginatedThreads = paginate(
-      inboxThreads,
-      currentPage,
-      _this.items_per_page,
-    );
-  }
-  $: {
-    if (!inboxThreads) {
-      inboxThreads = threads;
-    } // TODO: filter out threads in trash folder
-    lastPage = Math.ceil(inboxThreads?.length / _this.items_per_page);
-    if (currentPage > lastPage && lastPage !== 0) {
-      currentPage = lastPage;
+  $: (async () => {
+    if (!_this.all_threads && _this.items_per_page && hasComponentLoaded) {
+      await updateDisplayedThreads(true);
     }
-  }
+  })();
 
-  // Reactive statement to continuously fetch all_threads
-  $: if (_this.all_threads) {
-    threads = _this.all_threads as Thread[];
+  $: if (Array.isArray(_this.all_threads)) {
+    numThreads = _this.all_threads.length;
+    numPages = Math.ceil(numThreads / _this.items_per_page);
+
+    const pageStart = currentPage * _this.items_per_page;
+    threads = _this.all_threads.slice(
+      pageStart,
+      pageStart + _this.items_per_page,
+    );
   }
 
   let query: MailboxQuery;
-  $: query = {
-    component_id: id,
-    access_token,
-    query: Object.fromEntries(
-      new URLSearchParams(_this.query_string?.replaceAll(" ", "&")),
-    ),
-  };
+  $: {
+    query = {
+      component_id: id,
+      access_token,
+      query: Object.fromEntries(
+        new URLSearchParams(_this.query_string?.replaceAll(" ", "&")),
+      ),
+    };
+    if (_this.keyword_to_search) {
+      query.keywordToSearch = _this.keyword_to_search;
+    }
+  }
 
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
@@ -199,21 +175,47 @@
     });
   }
 
+  async function updateDisplayedThreads(forceRefresh = false) {
+    if (displayedThreadsPromise) {
+      await displayedThreadsPromise;
+    }
+
+    if (!_this.all_threads && id) {
+      if (_this.keyword_to_search) {
+        displayedThreadsPromise = MailboxStore.getThreadsWithSearchKeyword(
+          query,
+          forceRefresh,
+        );
+        threads = (await displayedThreadsPromise) ?? [];
+      } else {
+        displayedThreadsPromise = MailboxStore.getThreads(
+          query,
+          currentPage,
+          _this.items_per_page,
+          forceRefresh,
+        );
+        threads = (await displayedThreadsPromise) ?? [];
+        numThreads = await MailboxStore.getNumberOfItems(query);
+        numPages = Math.ceil(numThreads / _this.items_per_page);
+      }
+    }
+  }
+
   //#endregion methods
 
   //#region actions
-  let selectedThreads = new Set<Thread>();
-  $: areAllSelected = selectedThreads.size >= inboxThreads?.length;
-  let starredThreads = new Set<Thread>();
-  $: areAllSelectedStarred = checkIfSelectionBelongsToSet(
-    selectedThreads,
-    starredThreads,
-  );
-  let unreadThreads = new Set<Thread>();
-  $: areAllSelectedUnread = checkIfSelectionBelongsToSet(
-    selectedThreads,
-    unreadThreads,
-  );
+  let areAllSelected = false;
+  $: areAllSelected = threads.some((thread) => thread.selected);
+
+  let areAllSelectedStarred = false;
+  $: areAllSelectedStarred = threads
+    .filter((thread) => thread.selected)
+    .some((thread) => thread.starred);
+
+  let areAllSelectedUnread = false;
+  $: areAllSelectedUnread = threads
+    .filter((thread) => thread.selected)
+    .some((thread) => thread.unread);
 
   async function messageClicked(event: CustomEvent) {
     const message = event.detail.message;
@@ -222,237 +224,206 @@
       threads = await MailboxStore.hydrateMessageInThread(
         await fetchIndividualMessage(message),
         query,
-      );
-      currentlySelectedThread = <Thread>(
-        threads.find((updatedThread) => updatedThread.id === message.thread_id)
+        currentPage,
       );
     }
   }
 
   async function updateThreadStatus(updatedThread: any) {
     if (id && updatedThread && updatedThread.id) {
-      const threadQuery = {
-        access_token,
-        component_id: id,
-        thread_id: updatedThread.id,
-      };
-      await MailboxStore.updateThread(threadQuery, queryKey, updatedThread);
+      await MailboxStore.updateThread(
+        {
+          access_token,
+          component_id: id,
+          thread_id: updatedThread.id,
+        },
+        queryKey,
+        updatedThread,
+        currentPage,
+        _this.items_per_page,
+      );
     }
-  }
-
-  function toggleThreadUnreadStatus(event: CustomEvent) {
-    if (selectedThreads.has(event.detail.thread)) {
-      dispatchEvent("onChangeSelectedReadStatus", { event, selectedThreads });
-    }
-    event.detail.thread.unread = !event.detail.thread.unread;
-    updateThreadStatus(event.detail.thread);
-    if (event.detail.thread.unread) {
-      unreadThreads.add(event.detail.thread);
-    } else {
-      unreadThreads.delete(event.detail.thread);
-    }
-    return (unreadThreads = unreadThreads);
   }
 
   async function threadClicked(event: CustomEvent) {
-    dispatchEvent("threadClicked", { event, thread: event.detail.thread });
     const thread = event.detail.thread;
+
+    dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
+    thread.unread = false;
 
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {
-        thread.unread = false;
         await updateThreadStatus(thread);
       }
       let message = await fetchIndividualMessage(
         thread.messages[thread.messages.length - 1],
       );
-      threads = await MailboxStore.hydrateMessageInThread(message, query);
-      currentlySelectedThread = <Thread>(
-        threads.find((updatedThread) => updatedThread.id === thread.id)
+      threads = await MailboxStore.hydrateMessageInThread(
+        message,
+        query,
+        currentPage,
       );
     }
   }
+
   let refreshingMailbox = false;
   async function refreshClicked(event: MouseEvent) {
     refreshingMailbox = true;
     dispatchEvent("refreshClicked", { event });
-    if (!_this.all_threads) {
-      if (_this.keyword_to_search) {
-        threads = await MailboxStore.getThreadsWithSearchKeyword({
-          component_id: query.component_id,
-          access_token: query.access_token,
-          keyword_to_search: _this.keyword_to_search,
-        });
-      } else {
-        threads = (await MailboxStore.getThreads(query, true)) || [];
-      }
-    }
+    await updateDisplayedThreads(true);
     refreshingMailbox = false;
   }
 
   function onSelectOne(event: MouseEvent, thread: Thread) {
-    dispatchEvent("onSelectOneClicked", { event, thread });
-    if (selectedThreads.has(thread)) {
-      selectedThreads.delete(thread);
+    if (Array.isArray(_this.all_threads)) {
+      thread.selected = !thread.selected;
+      threads = [...threads];
     } else {
-      selectedThreads.add(thread);
+      threads = MailboxStore.updateThreadSelection(
+        JSON.stringify(query),
+        currentPage,
+        thread.id,
+      );
     }
-    return (selectedThreads = selectedThreads);
+    dispatchEvent("onSelectOneClicked", { event, thread });
   }
 
   function onSelectAll(event: MouseEvent) {
-    dispatchEvent("onSelectAllClicked", { event, selectedThreads });
-    if (areAllSelected) {
-      selectedThreads.clear();
+    if (Array.isArray(_this.all_threads)) {
+      threads = threads.map((thread) => {
+        return { ...thread, selected: !areAllSelected };
+      });
     } else {
-      threads.forEach((t) => selectedThreads.add(t));
+      threads = MailboxStore.updateThreadSelection(
+        JSON.stringify(query),
+        currentPage,
+      );
     }
-    return (selectedThreads = selectedThreads);
+    dispatchEvent("onSelectAllClicked", {
+      event,
+      selectedThreads: threads.filter((thread) => thread.selected),
+    });
   }
 
   async function threadStarred(event: CustomEvent) {
+    const thread = event.detail.thread;
+    if (!Array.isArray(_this.all_threads)) {
+      await updateThreadStatus(thread);
+      threads = $MailboxStore[queryKey][currentPage].threads;
+    }
+
     dispatchEvent("onStarSelected", {
       event,
-      selectedThreads: event.detail.thread,
+      starredThreads: [thread],
     });
-    if (starredThreads.has(event.detail.thread)) {
-      starredThreads.delete(event.detail.thread);
-      event.detail.thread.starred = false;
-    } else {
-      starredThreads.add(event.detail.thread);
-      event.detail.thread.starred = true;
-    }
-    await updateThreadStatus(event.detail.thread);
-    return (starredThreads = starredThreads);
   }
 
-  function onStarSelected(event: MouseEvent) {
-    dispatchEvent("onStarSelected", { event, selectedThreads });
-    if (areAllSelectedStarred) {
-      selectedThreads.forEach(async (t) => {
-        starredThreads.delete(t);
-        t.starred = false;
-        await updateThreadStatus(t);
+  async function onStarSelected(event: MouseEvent) {
+    if (Array.isArray(_this.all_threads)) {
+      threads = threads.map((thread) => {
+        return { ...thread, starred: !areAllSelectedStarred };
       });
     } else {
-      selectedThreads.forEach(async (t) => {
-        starredThreads.add(t);
-        t.starred = true;
-        await updateThreadStatus(t);
-      });
-    }
-    return (starredThreads = starredThreads);
-  }
-
-  function checkIfSelectionBelongsToSet(
-    selection: Set<Thread>,
-    superset: Set<Thread>,
-  ): boolean {
-    if (
-      selection.size > superset.size ||
-      selection.size === 0 ||
-      superset.size === 0
-    ) {
-      return false;
-    }
-    for (let setThread of selection) {
-      if (!superset.has(setThread)) {
-        return false;
+      const starThreadsPromises = [];
+      for (const thread of threads.filter((thread) => thread.selected)) {
+        thread.starred = !areAllSelectedStarred;
+        starThreadsPromises.push(updateThreadStatus(thread));
       }
+      await Promise.all(starThreadsPromises);
+      threads = $MailboxStore[queryKey][currentPage].threads;
     }
-    return true;
+
+    dispatchEvent("onStarSelected", {
+      event,
+      selectedThreads: threads.filter((threads) => threads.selected),
+    });
   }
 
-  function onChangeSelectedReadStatus(event: MouseEvent) {
-    dispatchEvent("onChangeSelectedReadStatus", { event, selectedThreads });
-    if (areAllSelectedUnread) {
-      selectedThreads.forEach(async (t) => {
-        unreadThreads.delete(t);
-        t.unread = false;
-        await updateThreadStatus(t);
+  async function toggleThreadUnreadStatus(event: CustomEvent) {
+    if (Array.isArray(_this.all_threads)) {
+      threads = [...threads];
+    } else {
+      await updateThreadStatus(event.detail.thread);
+      threads = $MailboxStore[queryKey][currentPage].threads;
+    }
+  }
+
+  async function onChangeSelectedReadStatus(event: MouseEvent) {
+    if (Array.isArray(_this.all_threads)) {
+      threads = threads.map((thread) => {
+        if (thread.selected) {
+          thread.unread = !areAllSelectedUnread;
+        }
+        return { ...thread };
       });
     } else {
-      selectedThreads.forEach(async (t) => {
-        unreadThreads.add(t);
-        t.unread = true;
-        await updateThreadStatus(t);
-      });
+      const readStatusPromises = [];
+      for (const thread of threads.filter((thread) => thread.selected)) {
+        thread.unread = !areAllSelectedUnread;
+        readStatusPromises.push(updateThreadStatus(thread));
+      }
+      await Promise.all(readStatusPromises);
+      threads = $MailboxStore[queryKey][currentPage].threads;
     }
-    return (unreadThreads = unreadThreads), (selectedThreads = selectedThreads);
+    dispatchEvent("onChangeSelectedReadStatus", {
+      event,
+      selectedThreads: threads.filter((threads) => threads.selected),
+    });
+  }
+
+  async function deleteThread(event: CustomEvent) {
+    const thread = event.detail.thread;
+
+    if (Array.isArray(_this.all_threads)) {
+      threads = threads.filter(
+        (currentThread) => currentThread.id !== thread.id,
+      );
+    } else {
+      if (trashLabelID) {
+        const existingLabelIds =
+          thread.labels?.map((label: any) => label.id) || [];
+        thread.label_ids = [...existingLabelIds, trashLabelID];
+      } else if (trashFolderID) {
+        thread.folder_id = trashFolderID;
+      }
+      await updateThreadStatus(thread);
+      await updateDisplayedThreads(true);
+    }
+    returnToMailbox();
+  }
+
+  async function onDeleteSelected(event: MouseEvent) {
+    if (Array.isArray(_this.all_threads)) {
+      const selectedThreads = threads.filter((thread) => thread.selected);
+      threads = threads.filter((thread) => !selectedThreads.includes(thread));
+    } else if (trashLabelID || trashFolderID) {
+      const deleteThreadsPromise = [];
+      for (const thread of threads.filter((thread) => thread.selected)) {
+        deleteThreadsPromise.push(deleteThread(<any>{ detail: { thread } }));
+      }
+      await Promise.all(deleteThreadsPromise);
+    }
+    dispatchEvent("onDeleteSelected", {
+      event,
+      deletedThreads: currentlySelectedThread
+        ? [currentlySelectedThread]
+        : threads,
+    });
   }
 
   function returnToMailbox() {
     if (currentlySelectedThread) {
-      currentlySelectedThread.unread = false;
       currentlySelectedThread.expanded = false;
-
-      if (unreadThreads.has(currentlySelectedThread)) {
-        unreadThreads.delete(currentlySelectedThread);
-      }
       currentlySelectedThread = null;
     }
-    return (unreadThreads = unreadThreads);
-  }
-
-  async function deleteThread(thread: Thread) {
-    if (trashLabelID) {
-      const existingLabelIds = thread.labels?.map((i) => i.id) || [];
-      thread.label_ids = [...existingLabelIds, trashLabelID];
-    } else if (trashFolderID) {
-      thread.folder_id = trashFolderID;
-    }
-    await updateThreadStatus(thread);
-  }
-
-  async function onDeleteSelected(event: MouseEvent) {
-    dispatchEvent("onDeleteSelected", {
-      event,
-      selectedThreads,
-      thread: currentlySelectedThread,
-    });
-    if (trashLabelID || trashFolderID) {
-      if (currentlySelectedThread) {
-        threads = inboxThreads.filter(
-          (thread) => thread !== currentlySelectedThread,
-        );
-        starredThreads.delete(currentlySelectedThread);
-        unreadThreads.delete(currentlySelectedThread);
-        selectedThreads.delete(currentlySelectedThread);
-        await deleteThread(currentlySelectedThread);
-        currentlySelectedThread = null;
-      } else {
-        selectedThreads.forEach(async (thread) => {
-          starredThreads.delete(thread);
-          unreadThreads.delete(thread);
-          await deleteThread(thread);
-        });
-        threads = inboxThreads.filter((thread) => !selectedThreads.has(thread));
-        selectedThreads.clear();
-      }
-    }
-
-    return (
-      (inboxThreads = inboxThreads),
-      (selectedThreads = selectedThreads),
-      (threads = threads)
-    );
   }
   //#endregion actions
 
   //#region pagination
-  function paginate(
-    items: Thread[],
-    activePage: number,
-    pageSize: number,
-  ): Thread[] {
-    let start: number = (activePage - 1) * pageSize;
-    let end: number = start + pageSize;
-    return items.slice(start, end);
-  }
-
-  function changePage(event: CustomEvent) {
+  async function changePage(event: CustomEvent) {
     currentPage = event.detail.newPage;
+    await updateDisplayedThreads();
   }
   //#endregion pagination
 </script>
@@ -643,15 +614,11 @@
           {you}
           show_star={_this.show_star}
           click_action="mailbox"
-          unread={unreadThreads.has(currentlySelectedThread) ||
-            (currentlySelectedThread.unread &&
-              _this.unread_status === "default")}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-          on:threadDeleted={onDeleteSelected}
-          is_starred={starredThreads.has(currentlySelectedThread)}
+          on:threadDeleted={deleteThread}
         />
       </div>
     {:else}
@@ -687,12 +654,12 @@
                   aria-label={selectAllTitle}
                   type="checkbox"
                   checked={areAllSelected}
-                  on:click={(e) => onSelectAll(e)}
+                  on:click={onSelectAll}
                 />
               {/each}
             </div>
           {/if}
-          {#if selectedThreads.size}
+          {#if threads.filter((thread) => thread.selected).length}
             {#if _this.actions_bar.includes(MailboxActions.DELETE)}
               <div class="delete">
                 <button
@@ -714,7 +681,8 @@
                     on:click={(e) => onStarSelected(e)}
                   />
                 {/each}
-              </div>{/if}
+              </div>
+            {/if}
             {#if _this.actions_bar.includes(MailboxActions.UNREAD)}
               <div class="read-status">
                 {#if areAllSelectedUnread}
@@ -737,46 +705,42 @@
                   </button>
                 {/if}
               </div>
-            {/if}{/if}
+            {/if}
+          {/if}
         </div>
       {/if}
       <ul id="mailboxlist" class:refreshing={refreshingMailbox}>
-        {#each paginatedThreads as thread}
-          {#each [selectedThreads.has(thread) ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
-            <li
-              class:unread={unreadThreads.has(thread) ||
-                (thread.unread && _this.unread_status === "default")}
-              class:checked={selectedThreads.has(thread)}
-            >
-              {#if _this.show_thread_checkbox}<div
-                  class="checkbox-container thread-checkbox"
-                >
+        {#each threads as thread}
+          {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
+            <li class:unread={thread.unread} class:checked={thread.selected}>
+              {#if _this.show_thread_checkbox}
+                <div class="checkbox-container thread-checkbox">
                   <input
                     title={selectTitle}
                     aria-label={selectTitle}
                     type="checkbox"
-                    checked={selectedThreads.has(thread)}
+                    checked={thread.selected}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
-                </div>{/if}
+                </div>
+              {/if}
               <div class="email-container">
-                <nylas-email
-                  clean_conversation={false}
-                  {thread}
-                  {you}
-                  show_star={_this.show_star}
-                  click_action="mailbox"
-                  unread={unreadThreads.has(thread) ||
-                    (thread.unread && _this.unread_status === "default")}
-                  on:threadClicked={threadClicked}
-                  on:messageClicked={messageClicked}
-                  on:threadStarred={threadStarred}
-                  on:returnToMailbox={returnToMailbox}
-                  on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-                  on:threadDeleted={onDeleteSelected}
-                  is_starred={starredThreads.has(thread)}
-                  show_thread_actions={selectedThreads.has(thread)}
-                />
+                {#key thread.id}
+                  <nylas-email
+                    clean_conversation={false}
+                    {thread}
+                    {you}
+                    show_star={_this.show_star}
+                    click_action="mailbox"
+                    on:threadClicked={threadClicked}
+                    on:messageClicked={messageClicked}
+                    on:threadStarred={threadStarred}
+                    on:returnToMailbox={returnToMailbox}
+                    on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
+                    on:threadDeleted={deleteThread}
+                    show_thread_actions={thread.selected}
+                  />
+                {/key}
               </div>
             </li>
           {/each}
@@ -789,10 +753,12 @@
             {/if} is empty!
           </div>
         {/each}
-        {#if threads && threads.length > 0 && paginatedThreads}
+        {#if !_this.keyword_to_search && threads && threads.length > 0}
           <pagination-nav
             current_page={currentPage}
-            last_page={lastPage}
+            items_per_page={_this.items_per_page}
+            num_pages={numPages}
+            num_items={numThreads}
             visible={true}
             on:changePage={changePage}
           />
