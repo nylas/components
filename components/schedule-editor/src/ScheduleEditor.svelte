@@ -8,7 +8,10 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
-  import type { Manifest } from "@commons/types/ScheduleEditor";
+  import type {
+    Manifest,
+    EventDefinition,
+  } from "@commons/types/ScheduleEditor";
   import type { CustomField } from "@commons/types/Scheduler";
   import { onMount, tick } from "svelte";
   import timezones from "timezones-list";
@@ -25,12 +28,7 @@
   export let capacity: number | null;
   export let custom_fields: CustomField[];
   export let dates_to_show: number;
-  export let email_ids: string[];
   export let end_hour: number;
-  export let event_conferencing: string;
-  export let event_description: string;
-  export let event_location: string;
-  export let event_title: string;
   export let mandate_top_of_hour: boolean;
   export let max_bookable_slots: number;
   export let max_book_ahead_days: number;
@@ -53,21 +51,23 @@
   export let show_preview: boolean;
   export let show_ticks: boolean;
   export let show_weekends: boolean;
-  export let slot_size: number; // in minutes
   export let start_date: Date;
   export let start_hour: number;
   export let view_as: "schedule" | "list";
   export let screen_bookings: boolean;
   export let timezone: string;
+  export let events: EventDefinition[];
 
-  const eventTemplate = {
+  const eventTemplate: EventDefinition = {
     event_title: "",
     event_description: "",
     slot_size: 15,
     event_location: "",
     event_conferencing: "",
-    emailIDs: "",
-    email_ids: "",
+    email_ids: [],
+    host_rules: {
+      method: "all",
+    },
   };
 
   const defaultValueMap: Partial<Manifest> = {
@@ -76,12 +76,7 @@
     capacity: null,
     custom_fields: DefaultCustomFields,
     dates_to_show: 1,
-    email_ids: [],
     end_hour: 17,
-    event_conferencing: "",
-    event_description: "",
-    event_location: "",
-    event_title: "Meeting",
     mandate_top_of_hour: false,
     max_bookable_slots: 1,
     max_book_ahead_days: 30,
@@ -96,7 +91,6 @@
     show_as_week: false,
     show_ticks: true,
     show_weekends: true,
-    slot_size: 15,
     start_date: new Date(),
     start_hour: 9,
     view_as: "schedule",
@@ -232,7 +226,7 @@
     const emailString = e.target.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      event.email_ids = emailString;
+      event.email_ids = parseStringToArray(emailString);
       _this.events = [..._this.events];
     }, 1000);
   }
