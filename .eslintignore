@@ -6,5 +6,4 @@ svelte.config.js
 static
 node_modules
 **/public/build/
-**/storybook-static
 **/public/**/*

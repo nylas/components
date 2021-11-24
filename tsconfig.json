@@ -13,7 +13,7 @@
     "noEmit": true,
     "types": ["svelte", "jest", "cypress"],
     "baseUrl": ".",
-    "rootDirs": ["components", ".storybook", "commons"],
+    "rootDirs": ["components", "commons"],
     "paths": {
       "@nylas/components-*": ["./components/*/src"],
       "@commons*": ["./commons/src/*"],
@@ -28,7 +28,6 @@
     "node_modules/**/*",
     "**/node_modules/**/*",
     "**/public",
-    "**/storybook-static",
     "**/rollup*.config.js",
     "**/vue-composer-demo/**/*"
   ]
