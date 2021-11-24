@@ -11,12 +11,9 @@ describe("schedule-editor component", () => {
       cy.get(".basic-details fieldset").should("have.length", 2);
       cy.get(".basic-details button.add-event").click();
       cy.get(".basic-details fieldset").should("have.length", 3);
-<<<<<<< HEAD
       cy.get(".basic-details button.remove-event").eq(0).click();
       cy.get(".basic-details button.remove-event").eq(0).click();
       cy.get(".basic-details fieldset").should("have.length", 1);
-=======
->>>>>>> 464f387 (Multiple events)
     });
   });
 });

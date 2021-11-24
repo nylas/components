@@ -42,7 +42,6 @@ export interface Manifest extends NylasManifest {
   min_book_ahead_days: number;
   custom_fields: CustomField[];
   events: any[]; // TODO
-<<<<<<< HEAD
 }
 
 export interface EventDefinition {
@@ -58,6 +57,4 @@ export interface EventDefinition {
 interface HostRules {
   method: "all" | "user_determined" | "random";
   host_count?: number;
-=======
->>>>>>> 464f387 (Multiple events)
 }
