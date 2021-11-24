@@ -127,16 +127,10 @@
   }
 
   // Properties requiring further manipulation:
-  let emailIDs: string = "";
   let startDate: string = new Date().toLocaleDateString("en-CA");
 
   function transformPropertyValues() {
-    emailIDs = _this.email_ids?.join(", ") ?? "";
     startDate = _this.start_date?.toLocaleDateString("en-CA");
-  }
-
-  $: {
-    _this.email_ids = parseStringToArray(emailIDs);
   }
 
   $: {
@@ -814,11 +808,12 @@
         <h1>Preview</h1>
         <nylas-availability
           {..._this}
+          {..._this.events[0]}
           capacity={null}
           on:timeSlotChosen={(event) => {
             slots_to_book = event.detail.timeSlots;
           }}
-          calendars={!_this.email_ids
+          calendars={!_this.events[0]?.email_ids
             ? [
                 {
                   availability: "busy",
@@ -832,7 +827,7 @@
           {slots_to_book}
           {..._this}
           capacity={null}
-          calendars={!_this.email_ids
+          calendars={!_this.events[0]?.email_ids
             ? [
                 {
                   availability: "busy",
