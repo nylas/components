@@ -134,12 +134,17 @@ section {
     grid-template-columns: 1fr;
     & > fieldset {
       border: none;
-      border-bottom: 1px solid var(--grey);
       padding: 0;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      padding-bottom: 2rem;
-      gap: 2rem;
+      padding: 1rem;
+      gap: 1rem;
+      background-color: var(--grey-background);
+
+      .remove-event {
+        grid-column: -1 / 1;
+        justify-self: end;
+      }
     }
   }
 }

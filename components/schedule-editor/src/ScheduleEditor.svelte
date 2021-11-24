@@ -255,14 +255,15 @@
   //#endregion custom fields
 
   //#region consecutive events
-  // Object.freeze(eventTemplate);
-
-  // let consecutiveEvents: any[] = [{ ...eventTemplate }]; // TODO: type
 
   function addConsecutiveEvent() {
-    console.log("adding a consecutive event");
     _this.events = [..._this.events, { ...eventTemplate }];
   }
+
+  function removeConsecutiveEvent(event: EventDefinition) {
+    _this.events = _this.events.filter((e) => e !== event);
+  }
+
   //#endregion consecutive events
 </script>
 
@@ -289,6 +290,14 @@
         <div class="contents">
           {#each _this.events as event, iter}
             <fieldset>
+              {#if _this.events.length > 1}
+                <button
+                  class="remove-event"
+                  on:click={() => removeConsecutiveEvent(event)}
+                >
+                  Remove this event
+                </button>
+              {/if}
               <label>
                 <strong>Event Title</strong>
                 <input type="text" bind:value={event.event_title} />
