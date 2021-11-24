@@ -5,6 +5,7 @@ import type {
 import type { NotificationMode } from "@commons/enums/Scheduler";
 
 export interface CustomField {
+  id?: string;
   title: string;
   description?: string;
   type: "text" | "checkbox" | "email";

@@ -7,6 +7,9 @@
     "tscheck": "tsc && svelte-check",
     "start": "echo 'Nothing to start'"
   },
+  "dependencies": {
+    "just-throttle": "2.3.1"
+  },
   "main": "index.js",
   "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c"
 }

@@ -2014,6 +2014,8 @@
 
 "@nylas/components-schedule-editor@file:components/schedule-editor":
   version "1.0.15"
+  dependencies:
+    just-throttle "2.3.1"
 
 "@nylas/components-scheduler@file:components/scheduler":
   version "1.0.15"
@@ -4650,7 +4652,7 @@ domexception@^2.0.1:
 
 dompurify@^2.3.3:
   version "2.3.3"
-  resolved "https://registry.npmjs.org/dompurify/-/dompurify-2.3.3.tgz"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.3.3.tgz#c1af3eb88be47324432964d8abc75cf4b98d634c"
   integrity sha512-dqnqRkPMAjOZE0FogZ+ceJNM2dZ3V/yNOuFB7+39qpO93hHhfRpHw3heYQC7DPK9FqbQTfBKUJhiSfz4MvXYwg==
 
 domutils@^1.7.0:
@@ -7288,7 +7290,12 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-just-throttle@^2.3.1:
+junk@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.npmjs.org/junk/-/junk-3.1.0.tgz"
+  integrity sha512-pBxcB3LFc8QVgdggvZWyeys+hnrNWg4OcZIU/1X59k5jQdLBlCsYGRQaz234SqoRLTCgMH00fY0xRJH+F9METQ==
+
+just-throttle@2.3.1, just-throttle@^2.3.1:
   version "2.3.1"
   resolved "https://registry.npmjs.org/just-throttle/-/just-throttle-2.3.1.tgz"
   integrity sha512-0H4miIAWZYpnpg7oD/Y/PBb77ISSHAETif5xK9EnwIgYCO6oC8ErkJxDumMUTR44shSOwptRIArRuvNuvN/hOw==

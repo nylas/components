@@ -1,3 +1,4 @@
+@import "../../../components/theming/reset.scss";
 @import "../../../theming/variables.scss";
 
 .loader {
@@ -75,8 +76,13 @@ section {
           white-space: nowrap;
         }
 
+        &.cta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
         button {
-          background-color: var(--red);
           &.add-custom-field {
             background-color: var(--blue);
 
@@ -85,8 +91,12 @@ section {
               cursor: not-allowed;
             }
           }
+          &.remove {
+            background-color: var(--red);
+          }
         }
       }
+
       th {
         text-transform: capitalize;
         border-bottom: 2px solid black;
@@ -160,4 +170,57 @@ section {
 .availability-container {
   overflow: auto;
   height: 300px;
+}
+
+// Drag states
+.custom-fields {
+  tr {
+    box-shadow: 0 0px 0px #00000040;
+    opacity: 1;
+    transition: box-shadow 0.15s ease-in, opacity 0 none 0.2s; // transition box-shadow instead
+  }
+  .drag-active {
+    box-shadow: 0 2px 8px #00000040;
+    opacity: 0;
+  }
+}
+.drag-preview {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  z-index: 5;
+
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: 0 2px 8px #00000040;
+
+  .drag-preview-cell {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0.25rem;
+    box-sizing: border-box;
+
+    &:nth-last-of-type(1) {
+      margin-left: auto;
+    }
+  }
+}
+
+button.drag {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: transparent;
+  border: 1px solid var(--grey-warm);
+  border-radius: 4px;
+
+  &svg:nth-last-of-type(1) {
+    margin-left: 0.5rem;
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
 }
