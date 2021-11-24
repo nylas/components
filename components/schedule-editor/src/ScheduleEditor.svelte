@@ -73,14 +73,16 @@
     },
   };
 
-  const eventTemplate = {
+  const eventTemplate: EventDefinition = {
     event_title: "",
     event_description: "",
     slot_size: 15,
     event_location: "",
     event_conferencing: "",
-    emailIDs: "",
-    email_ids: "",
+    email_ids: [],
+    host_rules: {
+      method: "all",
+    },
   };
 
   const defaultValueMap: Partial<Manifest> = {
