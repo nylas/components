@@ -865,7 +865,7 @@
 
     // If the booking user and access token are passed in, fetch their calendars as well.
     // TODO: dont include them in the main list, as they shouldn't contribute to partial slot availability.
-    // TODO: user booking_user_token instead of access_token for booking_user_email in calendarsToFetch
+    // TODO: use booking_user_token instead of access_token for booking_user_email in calendarsToFetch
     if (_this.booking_user_email && _this.booking_user_token) {
       calendarsToFetch.push({
         email: _this.booking_user_email,
@@ -885,6 +885,20 @@
       ];
 
       loading = false;
+
+      // A user can load several queries in quick succession, and their variable latency can lead to race conditions.
+      // This condition checks to see if the returned schedule's date and the component active date are the same.
+      // If not, circuit break.
+      if (
+        timeDay(
+          new Date(getAvailabilityQuery().body.start_time * 1000),
+        ).getTime() !==
+        timeDay(
+          new Date(fetchedCalendars.time_slots[0]?.start_time * 1000),
+        ).getTime()
+      ) {
+        return;
+      }
 
       const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
 
