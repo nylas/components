@@ -300,11 +300,13 @@
   }
 
   $: if (
+    id &&
     _this.clean_conversation &&
     ((activeThread && !activeThread.messages.some((m) => m.conversation)) ||
       (_this.message && !_this.message.conversation))
-  )
+  ) {
     cleanConversation();
+  }
   //#endregion Clean Conversation
 
   // #region get contact for ContactImage
