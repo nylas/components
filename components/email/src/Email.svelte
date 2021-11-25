@@ -1066,7 +1066,7 @@
           flex-direction: column;
           box-sizing: border-box;
           width: 100%;
-          overflow: hidden;
+          overflow-x: hidden;
           header {
             padding: $spacing-m $spacing-xl;
           }
