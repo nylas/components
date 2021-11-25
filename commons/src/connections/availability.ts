@@ -63,3 +63,35 @@ export const fetchAvailability = async (
     })
     .catch((error) => handleError(query.component_id, error));
 };
+
+export const fetchConsecutiveAvailability = async (
+  query: AvailabilityQuery,
+): Promise<TimeSlot[][]> => {
+  return fetch(
+    `${getMiddlewareApiUrl(
+      query.component_id,
+    )}/calendars/availability/consecutive`,
+    getFetchConfig({
+      method: "POST",
+      component_id: query.component_id,
+      access_token: query.access_token,
+      body: query.body,
+    }),
+  )
+    .then(async (apiResponse) => {
+      const json = await handleResponse<MiddlewareResponse<TimeSlot[][]>>(
+        apiResponse,
+      );
+      json.response =
+        json.response?.map((blockSlot) => {
+          blockSlot = blockSlot.map((slot: any) => {
+            slot.start_time = new Date(slot.start_time * 1000);
+            slot.end_time = new Date(slot.end_time * 1000);
+            return slot;
+          });
+          return blockSlot;
+        }) || [];
+      return json.response;
+    })
+    .catch((error) => handleError(query.component_id, error));
+};

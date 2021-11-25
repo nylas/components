@@ -8,14 +8,16 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
-
+  import { ConsecutiveAvailabilityStore } from "../../../commons/src";
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
-
+  import { timeHour, timeWeek, timeDay } from "d3-time";
+  import { scaleTime } from "d3-scale";
   import type { Manifest, CustomField } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
+  import { fetchConsecutiveAvailability } from "@commonsconnections/availability";
 
   interface BookableSlot extends TimeSlot {
     recurrence_cadence?:
@@ -96,6 +98,60 @@
       previousProps = $$props;
     }
   }
+
+  let startDay: Date = timeDay.floor(new Date()); // the first day column shown; depends on show_as_week
+
+  function showNextDay() {
+    startDay = timeDay.offset(startDay, 1);
+  }
+
+  function showPreviousDay() {
+    startDay = timeDay.offset(startDay, -1);
+  }
+
+  let currentIndexOfConsecutiveAvailableSlots = 0;
+  $: console.log(startDay);
+
+  $: (async () => {
+    if (Array.isArray(_this.events) && _this.events.length > 0) {
+      const emailsList = _this.events.reduce((emails, event) => {
+        emails.push(event.email_ids);
+        return emails;
+      }, []);
+
+      // Pick the duration_minutes from the first block slot
+      // TODO: Need to be updated when API can handle different slot size per meeting
+      const duration_minutes = _this.events[0].slot_size;
+      const eventDetails = {
+        duration_minutes,
+        interval_minutes: 10,
+        start_time:
+          timeHour(
+            new Date(new Date(startDay).setHours(_this.start_hour)),
+          ).getTime() / 1000,
+        end_time:
+          timeHour(
+            new Date(new Date(startDay).setHours(_this.end_hour)),
+          ).getTime() / 1000,
+        free_busy: [],
+        emails: emailsList,
+      };
+      const fecthedAvailabileSlots = await $ConsecutiveAvailabilityStore[
+        JSON.stringify({
+          ...{ body: eventDetails, component_id: id, access_token },
+          forceReload: true,
+        })
+      ];
+      console.log(fecthedAvailabileSlots);
+
+      if (fecthedAvailabileSlots.length) {
+        slotsToBook =
+          fecthedAvailabileSlots[currentIndexOfConsecutiveAvailableSlots];
+      } else {
+        slotsToBook = [];
+      }
+    }
+  })();
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   // #endregion mount and prop initialization
@@ -395,6 +451,8 @@
         before you book)
       </p>
     {/if}
+    <button class="book" on:click={showNextDay}>Show Next Day</button>
+    <button class="book" on:click={showPreviousDay}>Show Previous Day</button>
     {#if showSuccessNotification}
       <p>{_this.notification_message}</p>
     {/if}

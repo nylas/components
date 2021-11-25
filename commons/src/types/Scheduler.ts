@@ -35,4 +35,5 @@ export interface Manifest extends AvailabilityManifest {
     | "monthly"
   )[];
   recurrence_expiry: Date | string | null;
+  events?: any[]; // TODO
 }
