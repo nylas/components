@@ -8,7 +8,10 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
-  import type { Manifest } from "@commons/types/ScheduleEditor";
+  import type {
+    Manifest,
+    EventDefinition,
+  } from "@commons/types/ScheduleEditor";
   import type { CustomField } from "@commons/types/Scheduler";
   import { onMount, tick } from "svelte";
   import timezones from "timezones-list";
@@ -25,12 +28,7 @@
   export let capacity: number | null;
   export let custom_fields: CustomField[];
   export let dates_to_show: number;
-  export let email_ids: string[];
   export let end_hour: number;
-  export let event_conferencing: string;
-  export let event_description: string;
-  export let event_location: string;
-  export let event_title: string;
   export let mandate_top_of_hour: boolean;
   export let max_bookable_slots: number;
   export let max_book_ahead_days: number;
@@ -50,16 +48,27 @@
     | "monthly"
   )[];
   export let show_as_week: boolean;
-  export let show_hosts: "show" | "hide";
   export let show_preview: boolean;
   export let show_ticks: boolean;
   export let show_weekends: boolean;
-  export let slot_size: number; // in minutes
   export let start_date: Date;
   export let start_hour: number;
   export let view_as: "schedule" | "list";
   export let screen_bookings: boolean;
   export let timezone: string;
+  export let events: EventDefinition[];
+
+  const eventTemplate: EventDefinition = {
+    event_title: "",
+    event_description: "",
+    slot_size: 15,
+    event_location: "",
+    event_conferencing: "",
+    email_ids: [],
+    host_rules: {
+      method: "all",
+    },
+  };
 
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
@@ -67,12 +76,7 @@
     capacity: null,
     custom_fields: DefaultCustomFields,
     dates_to_show: 1,
-    email_ids: [],
     end_hour: 17,
-    event_conferencing: "",
-    event_description: "",
-    event_location: "",
-    event_title: "Meeting",
     mandate_top_of_hour: false,
     max_bookable_slots: 1,
     max_book_ahead_days: 30,
@@ -85,15 +89,14 @@
     recurrence_cadence: ["none"],
     recurrence: "none",
     show_as_week: false,
-    show_hosts: "show",
     show_ticks: true,
     show_weekends: true,
-    slot_size: 15,
     start_date: new Date(),
     start_hour: 9,
     view_as: "schedule",
     screen_bookings: false,
     timezone: "",
+    events: [{ ...eventTemplate }],
   };
 
   //#region mount and prop initialization
@@ -124,16 +127,10 @@
   }
 
   // Properties requiring further manipulation:
-  let emailIDs: string = "";
   let startDate: string = new Date().toLocaleDateString("en-CA");
 
   function transformPropertyValues() {
-    emailIDs = _this.email_ids?.join(", ") ?? "";
     startDate = _this.start_date?.toLocaleDateString("en-CA");
-  }
-
-  $: {
-    _this.email_ids = parseStringToArray(emailIDs);
   }
 
   $: {
@@ -219,11 +216,12 @@
   }
 
   let debouncedInputTimer: number;
-  function debounceEmailInput(e: HTMLInputElement) {
+  function debounceEmailInput(e: HTMLInputElement, event) {
     const emailString = e.target.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      emailIDs = emailString;
+      event.email_ids = parseStringToArray(emailString);
+      _this.events = [..._this.events];
     }, 1000);
   }
 
@@ -255,6 +253,18 @@
     newFieldTitleElement.focus();
   }
   //#endregion custom fields
+
+  //#region consecutive events
+
+  function addConsecutiveEvent() {
+    _this.events = [..._this.events, { ...eventTemplate }];
+  }
+
+  function removeConsecutiveEvent(event: EventDefinition) {
+    _this.events = _this.events.filter((e) => e !== event);
+  }
+
+  //#endregion consecutive events
 </script>
 
 <style lang="scss">
@@ -273,58 +283,81 @@
     <div class="settings">
       <section class="basic-details">
         <h1>Event Details</h1>
+        <p>
+          Edit the details for your meeting. You can add consecutive meetings to
+          allow users to book back-to-back events.
+        </p>
         <div class="contents">
-          <label>
-            <strong>Event Title</strong>
-            <input type="text" bind:value={_this.event_title} />
-          </label>
-          <label>
-            <strong>Event Description</strong>
-            <input type="text" bind:value={_this.event_description} />
-          </label>
-          <label>
-            <strong>Event Location</strong>
-            <input type="text" bind:value={_this.event_location} />
-          </label>
-          <label>
-            <strong>Event Conferencing</strong>
-            <input type="url" bind:value={_this.event_conferencing} />
-          </label>
-          <div role="radiogroup" aria-labelledby="show_hosts">
-            <strong id="show_hosts">Show meeting hosts to the end-user?</strong>
-            <label>
-              <input
-                type="radio"
-                name="show_hosts"
-                value={"show"}
-                bind:group={_this.show_hosts}
-              />
-              <span>Show Hosts</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="show_hosts"
-                value={"hide"}
-                bind:group={_this.show_hosts}
-              />
-              <span>Hide Hosts</span>
-            </label>
-          </div>
-          <div>
-            <div>
-              <strong id="email_ids">Email Ids to include for scheduling</strong
-              >
-            </div>
-            <label>
-              <textarea
-                name="email_ids"
-                on:input={debounceEmailInput}
-                value={emailIDs}
-              />
-            </label>
-          </div>
+          {#each _this.events as event, iter}
+            <fieldset>
+              {#if _this.events.length > 1}
+                <button
+                  class="remove-event"
+                  on:click={() => removeConsecutiveEvent(event)}
+                >
+                  Remove this event
+                </button>
+              {/if}
+              <label>
+                <strong>Event Title</strong>
+                <input type="text" bind:value={event.event_title} />
+              </label>
+              <label>
+                <strong>Event Description</strong>
+                <input type="text" bind:value={event.event_description} />
+              </label>
+              <label>
+                <strong>Event Location</strong>
+                <input type="text" bind:value={event.event_location} />
+              </label>
+              <label>
+                <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
+                <input type="url" bind:value={event.event_conferencing} />
+              </label>
+              <div role="radiogroup" aria-labelledby="slot_size">
+                <strong id="slot_size">Meeting Length</strong>
+                <label>
+                  <input type="radio" value={15} bind:group={event.slot_size} />
+                  <span>15 minutes</span>
+                </label>
+                <label>
+                  <input type="radio" value={30} bind:group={event.slot_size} />
+                  <span>30 minutes</span>
+                </label>
+                <label>
+                  <input type="radio" value={60} bind:group={event.slot_size} />
+                  <span>60 minutes</span>
+                </label>
+                {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
+                  <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
+                  <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
+                  <p class="warning">
+                    Note: different meeting lengths in a conecutive chain are
+                    not currently supported; all meetings in this chain will
+                    fall back to {_this.events[0].slot_size} minutes.
+                  </p>
+                {/if}
+              </div>
+              <div>
+                <div>
+                  <strong id="email_ids"
+                    >Email Ids to include for scheduling</strong
+                  >
+                </div>
+                <label>
+                  <textarea
+                    name="email_ids"
+                    on:input={(e) => debounceEmailInput(e, event)}
+                    value={event.email_ids}
+                  />
+                </label>
+              </div>
+            </fieldset>
+          {/each}
         </div>
+        <button class="add-event" on:click={addConsecutiveEvent}
+          >Add a follow-up event</button
+        >
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
       <section class="time-date-details">
@@ -355,36 +388,6 @@
               />
             </label>
             {_this.end_hour}:00
-          </div>
-          <div role="radiogroup" aria-labelledby="slot_size">
-            <strong id="slot_size">Timeslot size</strong>
-            <label>
-              <input
-                type="radio"
-                name="slot_size"
-                value={15}
-                bind:group={_this.slot_size}
-              />
-              <span>15 minutes</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="slot_size"
-                value={30}
-                bind:group={_this.slot_size}
-              />
-              <span>30 minutes</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="slot_size"
-                value={60}
-                bind:group={_this.slot_size}
-              />
-              <span>60 minutes</span>
-            </label>
           </div>
           <label>
             <strong>Start Date</strong>
@@ -814,11 +817,12 @@
         <h1>Preview</h1>
         <nylas-availability
           {..._this}
+          {..._this.events[0]}
           capacity={null}
           on:timeSlotChosen={(event) => {
             slots_to_book = event.detail.timeSlots;
           }}
-          calendars={!_this.email_ids
+          calendars={!_this.events[0]?.email_ids
             ? [
                 {
                   availability: "busy",
@@ -832,7 +836,7 @@
           {slots_to_book}
           {..._this}
           capacity={null}
-          calendars={!_this.email_ids
+          calendars={!_this.events[0]?.email_ids
             ? [
                 {
                   availability: "busy",

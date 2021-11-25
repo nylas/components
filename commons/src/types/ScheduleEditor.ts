@@ -4,18 +4,12 @@ import type { AvailabilityRule } from "@commons/types/Availability";
 import type { CustomField } from "./Scheduler";
 
 export interface Manifest extends NylasManifest {
-  event_title: string;
-  event_description: string;
   show_hosts: "show" | "hide";
-  event_location: string;
-  event_conferencing: string;
   start_hour: number;
   end_hour: number;
-  slot_size: 15 | 30 | 60;
   start_date: Date;
   dates_to_show: number;
   show_ticks: boolean;
-  email_ids: string[];
   allow_booking: boolean;
   max_bookable_slots: number;
   partial_bookable_ratio: number;
@@ -47,4 +41,20 @@ export interface Manifest extends NylasManifest {
   max_book_ahead_days: number;
   min_book_ahead_days: number;
   custom_fields: CustomField[];
+  events: any[]; // TODO
+}
+
+export interface EventDefinition {
+  event_title: string;
+  event_description: string;
+  event_location: string;
+  event_conferencing: string;
+  slot_size: 15 | 30 | 60;
+  email_ids: string[];
+  host_rules: HostRules;
+}
+
+interface HostRules {
+  method: "all" | "user_determined" | "random";
+  host_count?: number;
 }
