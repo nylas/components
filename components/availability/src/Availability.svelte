@@ -12,6 +12,7 @@
     ErrorStore,
     ContactStore,
   } from "../../../commons/src";
+  import { ConsecutiveAvailabilityStore } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
   import { onMount, afterUpdate, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
@@ -54,6 +55,7 @@
   import BackIcon from "./assets/left-arrow.svg";
   import NextIcon from "./assets/right-arrow.svg";
   import { isAvailable, isUnavailable } from "./method/slot";
+  import type { EventDefinition } from "@commonstypes/ScheduleEditor";
 
   //#region props
   export let id: string = "";
@@ -95,6 +97,7 @@
   export let start_hour: number;
   export let timezone: string;
   export let view_as: "schedule" | "list";
+  export let events: EventDefinition[];
 
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
@@ -130,6 +133,7 @@
     start_hour: 0,
     timezone: "",
     view_as: "schedule",
+    events: [],
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
@@ -1481,6 +1485,61 @@
     .domain([0, allCalendars?.length / 2, allCalendars?.length])
     .range([_this.busy_color, _this.partial_color, _this.free_color]);
   //#endregion colours
+  $: console.log("eventy", _this.events);
+
+  //#region Consecutive Events
+  // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
+  $: (async () => {
+    if (Array.isArray(_this.events) && _this.events.length > 0 && startDay) {
+      console.log("yeah yes", _this.events, startDay);
+      const emailsList = _this.events.reduce((emails, event) => {
+        emails.push(event.email_ids);
+        return emails;
+      }, []);
+
+      console.log({ emailsList });
+
+      // Pick the duration_minutes from the first block slot
+      // TODO: Need to be updated when API can handle different slot size per meeting
+      const duration_minutes = _this.events[0].slot_size;
+      const eventDetails = {
+        duration_minutes,
+        interval_minutes: _this.events[0].slot_size,
+        start_time:
+          timeHour(
+            new Date(new Date(startDay).setHours(_this.start_hour)),
+          ).getTime() / 1000,
+        end_time:
+          timeHour(
+            new Date(new Date(endDay).setHours(_this.end_hour)),
+          ).getTime() / 1000,
+        free_busy: [],
+        // TODO: add open_hours here: https://developer.nylas.com/docs/connectivity/calendar/calendar-availability/#open-hours
+        emails: emailsList,
+      };
+      const fetchedAvailableSlots = await $ConsecutiveAvailabilityStore[
+        JSON.stringify({
+          ...{ body: eventDetails, component_id: id, access_token },
+          forceReload: true,
+        })
+      ];
+      console.log({ fetchedAvailableSlots });
+
+      if (fetchedAvailableSlots.length) {
+        console.log("okay figuring");
+        dispatchEvent("eventOptionsReady", {
+          slots: fetchedAvailableSlots,
+        });
+
+        // slotsToBook =
+        //   fetchedAvailableSlots[currentIndexOfConsecutiveAvailableSlots];
+      } else {
+        // slotsToBook = [];
+      }
+    }
+  })();
+
+  //#endregion Consecutive Events
 </script>
 
 <style lang="scss">

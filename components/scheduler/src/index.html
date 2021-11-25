@@ -74,6 +74,11 @@
           scheduler.slots_to_book = event.detail.timeSlots;
         });
 
+        availability.addEventListener("eventOptionsReady", (event) => {
+          console.log("theys ready", event.detail.slots);
+          scheduler.event_options = event.detail.slots;
+        });
+
         scheduler.addEventListener("bookedEvents", () => {
           availability.reload(true, true);
         });
@@ -107,7 +112,7 @@
       <nylas-availability
         show_as_week="true"
         allow_booking="true"
-        id="demo-availability"
+        id="phils-availability"
         slot_size="15"
         start_hour="9"
         end_hour="17"
@@ -116,7 +121,7 @@
         closed_color="#999"
       >
       </nylas-availability>
-      <nylas-scheduler id="demo-scheduler" recurrence="optional">
+      <nylas-scheduler id="phils-scheduler" recurrence="optional">
       </nylas-scheduler>
     </main>
   </body>

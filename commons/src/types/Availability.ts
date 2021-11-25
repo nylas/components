@@ -6,6 +6,9 @@ import type {
   CommonQuery,
   Manifest as NylasManifest,
 } from "@commons/types/Nylas";
+
+import type { EventDefinition } from "./ScheduleEditor";
+
 export interface Manifest extends NylasManifest {
   allow_booking: boolean;
   allow_date_change: boolean;
@@ -43,6 +46,7 @@ export interface Manifest extends NylasManifest {
   start_hour: number;
   view_as: "schedule" | "list";
   timezone: string;
+  events?: EventDefinition[];
 }
 
 export interface AvailabilityRule {

@@ -17,7 +17,7 @@
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
-  import { fetchConsecutiveAvailability } from "@commonsconnections/availability";
+  // import { fetchConsecutiveAvailability } from "@commonsconnections/availability";
 
   interface BookableSlot extends TimeSlot {
     recurrence_cadence?:
@@ -55,6 +55,7 @@
     | "monthly"
   )[];
   export let recurrence_expiry: Date | string | null;
+  export let event_options: any[]; // TODO: type
   // #endregion props
 
   //#region mount and prop initialization
@@ -71,6 +72,7 @@
     notification_subject: "Invitation",
     recurrence: "none",
     recurrence_cadence: ["none"],
+    event_options: [],
   };
 
   let _this: Manifest = <Manifest>buildInternalProps({}, {}, defaultValueMap);
@@ -98,60 +100,6 @@
       previousProps = $$props;
     }
   }
-
-  let startDay: Date = timeDay.floor(new Date()); // the first day column shown; depends on show_as_week
-
-  function showNextDay() {
-    startDay = timeDay.offset(startDay, 1);
-  }
-
-  function showPreviousDay() {
-    startDay = timeDay.offset(startDay, -1);
-  }
-
-  let currentIndexOfConsecutiveAvailableSlots = 0;
-  $: console.log(startDay);
-
-  $: (async () => {
-    if (Array.isArray(_this.events) && _this.events.length > 0 && startDay) {
-      const emailsList = _this.events.reduce((emails, event) => {
-        emails.push(event.email_ids);
-        return emails;
-      }, []);
-
-      // Pick the duration_minutes from the first block slot
-      // TODO: Need to be updated when API can handle different slot size per meeting
-      const duration_minutes = _this.events[0].slot_size;
-      const eventDetails = {
-        duration_minutes,
-        interval_minutes: 10,
-        start_time:
-          timeHour(
-            new Date(new Date(startDay).setHours(_this.start_hour)),
-          ).getTime() / 1000,
-        end_time:
-          timeHour(
-            new Date(new Date(startDay).setHours(_this.end_hour)),
-          ).getTime() / 1000,
-        free_busy: [],
-        emails: emailsList,
-      };
-      const fecthedAvailabileSlots = await $ConsecutiveAvailabilityStore[
-        JSON.stringify({
-          ...{ body: eventDetails, component_id: id, access_token },
-          forceReload: true,
-        })
-      ];
-      console.log(fecthedAvailabileSlots);
-
-      if (fecthedAvailabileSlots.length) {
-        slotsToBook =
-          fecthedAvailabileSlots[currentIndexOfConsecutiveAvailableSlots];
-      } else {
-        slotsToBook = [];
-      }
-    }
-  })();
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   // #endregion mount and prop initialization
@@ -299,6 +247,7 @@
         customFieldResponses[field.title] !== "",
     );
   // #endregion custom fields
+  $: console.log("event options", event_options);
 </script>
 
 <style lang="scss">
@@ -308,153 +257,177 @@
 <nylas-error {id} />
 <main>
   <section class="booker">
-    <h2>Your Appointment Bookings</h2>
-    {#if slotsToBook.length}
-      <p>Do you want to book the following?</p>
+    {#if _this.event_options.length}
+      <h2>Select an option</h2>
       <ul class="timeslots">
-        {#each slotsToBook as timeSlot}
+        {#each _this.event_options as option}
           <li>
             <h3>{_this.event_title}: {_this.event_description}</h3>
             <span class="time"
-              >{timeSlot.start_time.toLocaleTimeString([], {
+              >{option[0].start_time.toLocaleTimeString([], {
                 timeStyle: "short",
               })}
               -
-              {timeSlot.end_time.toLocaleTimeString([], {
+              {option[option.length - 1].end_time.toLocaleTimeString([], {
                 timeStyle: "short",
               })}</span
             >
-            <span class="date"
-              >{timeSlot.start_time.toLocaleDateString("default", {
-                dateStyle: "full",
-              })}</span
-            >
-            {#if _this.recurrence !== "none"}
-              <footer>
-                {#if _this.recurrence === "optional"}
-                  <strong>How often should this event repeat?</strong>
-                  <div class="cadences">
-                    <label
-                      class:checked={timeSlot.recurrence_cadence === "none"}
-                    >
-                      <input
-                        type="radio"
-                        value="none"
-                        bind:group={timeSlot.recurrence_cadence}
-                      />
-                      <span>never</span>
-                    </label>
-                    {#each _this.recurrence_cadence as cadence}
-                      <label
-                        class:checked={timeSlot.recurrence_cadence === cadence}
-                      >
-                        <input
-                          type="radio"
-                          value={cadence}
-                          bind:group={timeSlot.recurrence_cadence}
-                        />
-                        <span>{cadence}</span>
-                      </label>
-                    {/each}
-                  </div>
-                {:else if _this.recurrence === "required"}
-                  <strong>Repeating {timeSlot.recurrence_cadence}</strong>
-                {/if}
-                {#if timeSlot.recurrence_cadence !== "none" && !_this.recurrence_expiry}
-                  <strong>Ends</strong>
-                  <div class="expiry">
-                    <label class:checked={timeSlot.expirySelection === "none"}>
-                      <input
-                        type="radio"
-                        value="none"
-                        bind:group={timeSlot.expirySelection}
-                      />
-                      <span>never</span>
-                    </label>
-                    <label class:checked={timeSlot.expirySelection === "after"}>
-                      <input
-                        type="radio"
-                        value="after"
-                        bind:group={timeSlot.expirySelection}
-                      />
-                      <span>After</span>
-                      {#if timeSlot.expirySelection === "after"}
-                        <input
-                          class="after"
-                          type="number"
-                          min="1"
-                          bind:value={timeSlot.recurrence_expiry}
-                        />
-                        <span>occurrences</span>
-                      {/if}
-                    </label>
-                    <label class:checked={timeSlot.expirySelection === "on"}>
-                      <input
-                        type="radio"
-                        value="on"
-                        bind:group={timeSlot.expirySelection}
-                      />
-                      <span>On</span>
-                      {#if timeSlot.expirySelection === "on"}
-                        <input
-                          type="date"
-                          min={timeSlot.start_time
-                            .toISOString()
-                            .substring(0, 10)}
-                          bind:value={timeSlot.recurrence_expiry}
-                        />
-                      {/if}
-                    </label>
-                  </div>
-                {/if}
-              </footer>
-            {/if}
+            {console.log({ option })}
           </li>
         {/each}
       </ul>
-      {#if _this.custom_fields.length}
-        <div id="custom-fields">
-          {#each _this.custom_fields as field}
-            {#if field.type === "email"}
-              <label data-required={field.required}>
-                <strong>{field.title}</strong>
-                <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
-                <input
-                  type="email"
-                  bind:value={customFieldResponses[field.title]}
-                />
-              </label>
-            {:else}
-              <label data-required={field.required}>
-                <strong>{field.title}</strong>
-                <input
-                  type="text"
-                  bind:value={customFieldResponses[field.title]}
-                />
-              </label>
-            {/if}
-          {/each}
-        </div>
-      {/if}
-      <button
-        disabled={!requiredFieldsFilled}
-        title={!requiredFieldsFilled
-          ? "Please complete all required fields"
-          : undefined}
-        class="book"
-        on:click={() => bookTimeSlots(slotsToBook)}
-        >{_this.booking_label}</button
-      >
     {:else}
-      <p>
-        Select timeslots to view event information (You'll be able to review
-        before you book)
-      </p>
-    {/if}
-    <button class="book" on:click={showNextDay}>Show Next Day</button>
-    <button class="book" on:click={showPreviousDay}>Show Previous Day</button>
-    {#if showSuccessNotification}
-      <p>{_this.notification_message}</p>
+      <h2>Your Appointment Bookings</h2>
+      {#if slotsToBook.length}
+        <p>Do you want to book the following?</p>
+        <ul class="timeslots">
+          {#each slotsToBook as timeSlot}
+            <li>
+              <h3>{_this.event_title}: {_this.event_description}</h3>
+              <span class="time"
+                >{timeSlot.start_time.toLocaleTimeString([], {
+                  timeStyle: "short",
+                })}
+                -
+                {timeSlot.end_time.toLocaleTimeString([], {
+                  timeStyle: "short",
+                })}</span
+              >
+              <span class="date"
+                >{timeSlot.start_time.toLocaleDateString("default", {
+                  dateStyle: "full",
+                })}</span
+              >
+              {#if _this.recurrence !== "none"}
+                <footer>
+                  {#if _this.recurrence === "optional"}
+                    <strong>How often should this event repeat?</strong>
+                    <div class="cadences">
+                      <label
+                        class:checked={timeSlot.recurrence_cadence === "none"}
+                      >
+                        <input
+                          type="radio"
+                          value="none"
+                          bind:group={timeSlot.recurrence_cadence}
+                        />
+                        <span>never</span>
+                      </label>
+                      {#each _this.recurrence_cadence as cadence}
+                        <label
+                          class:checked={timeSlot.recurrence_cadence ===
+                            cadence}
+                        >
+                          <input
+                            type="radio"
+                            value={cadence}
+                            bind:group={timeSlot.recurrence_cadence}
+                          />
+                          <span>{cadence}</span>
+                        </label>
+                      {/each}
+                    </div>
+                  {:else if _this.recurrence === "required"}
+                    <strong>Repeating {timeSlot.recurrence_cadence}</strong>
+                  {/if}
+                  {#if timeSlot.recurrence_cadence !== "none" && !_this.recurrence_expiry}
+                    <strong>Ends</strong>
+                    <div class="expiry">
+                      <label
+                        class:checked={timeSlot.expirySelection === "none"}
+                      >
+                        <input
+                          type="radio"
+                          value="none"
+                          bind:group={timeSlot.expirySelection}
+                        />
+                        <span>never</span>
+                      </label>
+                      <label
+                        class:checked={timeSlot.expirySelection === "after"}
+                      >
+                        <input
+                          type="radio"
+                          value="after"
+                          bind:group={timeSlot.expirySelection}
+                        />
+                        <span>After</span>
+                        {#if timeSlot.expirySelection === "after"}
+                          <input
+                            class="after"
+                            type="number"
+                            min="1"
+                            bind:value={timeSlot.recurrence_expiry}
+                          />
+                          <span>occurrences</span>
+                        {/if}
+                      </label>
+                      <label class:checked={timeSlot.expirySelection === "on"}>
+                        <input
+                          type="radio"
+                          value="on"
+                          bind:group={timeSlot.expirySelection}
+                        />
+                        <span>On</span>
+                        {#if timeSlot.expirySelection === "on"}
+                          <input
+                            type="date"
+                            min={timeSlot.start_time
+                              .toISOString()
+                              .substring(0, 10)}
+                            bind:value={timeSlot.recurrence_expiry}
+                          />
+                        {/if}
+                      </label>
+                    </div>
+                  {/if}
+                </footer>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+        {#if _this.custom_fields.length}
+          <div id="custom-fields">
+            {#each _this.custom_fields as field}
+              {#if field.type === "email"}
+                <label data-required={field.required}>
+                  <strong>{field.title}</strong>
+                  <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
+                  <input
+                    type="email"
+                    bind:value={customFieldResponses[field.title]}
+                  />
+                </label>
+              {:else}
+                <label data-required={field.required}>
+                  <strong>{field.title}</strong>
+                  <input
+                    type="text"
+                    bind:value={customFieldResponses[field.title]}
+                  />
+                </label>
+              {/if}
+            {/each}
+          </div>
+        {/if}
+        <button
+          disabled={!requiredFieldsFilled}
+          title={!requiredFieldsFilled
+            ? "Please complete all required fields"
+            : undefined}
+          class="book"
+          on:click={() => bookTimeSlots(slotsToBook)}
+          >{_this.booking_label}</button
+        >
+      {:else}
+        <p>
+          Select timeslots to view event information (You'll be able to review
+          before you book)
+        </p>
+      {/if}
+      {#if showSuccessNotification}
+        <p>{_this.notification_message}</p>
+      {/if}
     {/if}
   </section>
 </main>
