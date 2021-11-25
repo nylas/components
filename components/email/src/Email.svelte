@@ -42,6 +42,7 @@
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
+  import LoadingIcon from "./assets/loading.svg";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -358,8 +359,9 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded =
-        !activeThread.messages[lastMsgIndex].expanded;
+      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
+        lastMsgIndex
+      ].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
@@ -471,8 +473,9 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
     } else {
-      activeThread.messages[msgIndex].expanded =
-        !activeThread.messages[msgIndex].expanded;
+      activeThread.messages[msgIndex].expanded = !activeThread.messages[
+        msgIndex
+      ].expanded;
       dispatchEvent("messageClicked", {
         event,
         message: activeThread.messages[msgIndex],
@@ -490,8 +493,9 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(event);
       } else {
-        activeThread.messages[msgIndex].expanded =
-          !activeThread.messages[msgIndex].expanded;
+        activeThread.messages[msgIndex].expanded = !activeThread.messages[
+          msgIndex
+        ].expanded;
       }
     }
   }
@@ -1125,6 +1129,18 @@
               }
             }
           }
+
+          .email-loader {
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          @keyframes rotate {
+            to {
+              transform: rotate(360deg);
+            }
+          }
         }
 
         .subject-snippet-date {
@@ -1309,7 +1325,13 @@
                       {:else if message.body}
                         <nylas-message-body {message} />
                       {:else}
-                        {message.snippet}
+                        <div class="email-loader">
+                          <LoadingIcon
+                            class="spinner"
+                            style="height:18px; animation: rotate 2s linear infinite; margin-right:10px;"
+                          />
+                          Loading...
+                        </div>
                       {/if}
                     </div>
                   {:else}
