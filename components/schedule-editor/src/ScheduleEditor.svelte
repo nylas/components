@@ -20,7 +20,9 @@
   import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
   import "../../scheduler/src/Scheduler.svelte";
-  import DragIcon from "./icons/DragIcon.svg";
+  import DragIcon from "./assets/drag-icon.svg";
+  import "./components/DragItemPlaceholder.svelte";
+  import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -302,7 +304,6 @@
   let draggedFieldIndex: number;
   let tablerowRect: DOMRect;
   let tablecellRect: DOMRect[] = []; // To replicate cell dimensions on drag-placeholder
-  let dragPreviewRef: HTMLElement;
   type CustomFieldRefs = Record<string, HTMLElement>;
   let customFieldRefs: CustomFieldRefs = {}; // store the refs to dom nodes once so we can recalculate sizes on the fly
   let customFieldDomRects: DOMRect[] = [];
@@ -310,6 +311,10 @@
   let maxDragTop: number;
   let maxDragBottom: number;
   let dragBegins: boolean = false;
+  let dragPlaceholder = {
+    left: 0,
+    top: 0,
+  };
 
   type CustomFieldDrag = {
     event: MouseEvent;
@@ -319,7 +324,7 @@
 
   function handleCustomFieldDrag({ event, field, i }: CustomFieldDrag) {
     if (!dragBegins) {
-      customFieldDomRects = recalibrateCustomFieldPositions();
+      customFieldDomRects = getDomRects(customFieldRefs);
       dragBegins = true;
     }
 
@@ -380,10 +385,11 @@
     }
 
     // set initial position of drag preview
-    dragPreviewRef.style.left = `${tablerowRect.x}px`;
-    dragPreviewRef.style.top = `${
-      previewTopPosition ?? dragRowPosition - rowHeightOffset
-    }px`;
+    dragPlaceholder = {
+      ...dragPlaceholder,
+      left: tablerowRect.x,
+      top: previewTopPosition ?? dragRowPosition - rowHeightOffset,
+    };
   };
 
   $: if (customFieldDomRects) {
@@ -402,17 +408,6 @@
     }
   }
 
-  const setRowSizes = (node: Element | HTMLElement) => {
-    tablerowRect = node.getBoundingClientRect();
-
-    // Store DOMRects of each custom field row and one rows cells
-    let tdRects: DOMRect[] = [];
-    node.querySelectorAll("td").forEach((td: HTMLElement) => {
-      tdRects.push(td.getBoundingClientRect());
-    });
-    tablecellRect = tdRects;
-  };
-
   function handleCustomFieldDragMove(e: MouseEvent) {
     if (draggedField) {
       setDragRowPosition(e);
@@ -424,11 +419,22 @@
     customFieldRefs[params.id] = node;
 
     if (!tablerowRect) {
-      setRowSizes(node);
+      const { parentRect, childRects } = getDomRectsFromParentAndChildren(
+        node,
+        "td",
+      );
+      tablerowRect = parentRect;
+      tablecellRect = childRects;
 
       // Watches row element if it changes size
       new ResizeObserver(([observerEntry]) => {
-        setRowSizes(observerEntry.target);
+        const { parentRect, childRects } = getDomRectsFromParentAndChildren(
+          observerEntry.target,
+          "td",
+        );
+        tablerowRect = parentRect;
+        tablecellRect = childRects;
+
         dragBegins = false; // reset on next start of drag
       }).observe(node);
     }
@@ -441,15 +447,6 @@
     };
   }
 
-  function recalibrateCustomFieldPositions() {
-    return Object.values(customFieldRefs).reduce<DOMRect[]>(
-      (allPositions, node) => {
-        const domRect = node.getBoundingClientRect();
-        return allPositions.concat([domRect]);
-      },
-      [],
-    );
-  }
   //#endregion custom fields
 
   //#region consecutive events
@@ -1064,12 +1061,12 @@
     {/if}
 
     {#if tablerowRect && tablecellRect.length}
-      <div
-        bind:this={dragPreviewRef}
-        class="drag-preview"
-        style="height: {tablerowRect.height}px; width: {tablerowRect.width}px; visibility: {draggedField
-          ? 'visible'
-          : 'hidden'}"
+      <nylas-schedule-editor-drag-item-placeholder
+        left={dragPlaceholder.left}
+        top={dragPlaceholder.top}
+        height={tablerowRect.height}
+        width={tablerowRect.width}
+        visible={!!draggedField}
       >
         {#each customFieldKeys as key, i}
           <div
@@ -1080,12 +1077,7 @@
             {(draggedField && draggedField[key]) || "—"}
           </div>
         {/each}
-        <div class="drag-preview-cell">
-          <button class="drag">
-            <DragIcon />
-          </button>
-        </div>
-      </div>
+      </nylas-schedule-editor-drag-item-placeholder>
     {/if}
   </main>
 {/if}

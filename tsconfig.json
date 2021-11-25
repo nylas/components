@@ -23,7 +23,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["commons/**/*", "components/**/*", "tests", "mocks"],
+  "include": ["commons/**/*", "components/**/**/*", "tests", "mocks"],
   "exclude": [
     "node_modules/**/*",
     "**/node_modules/**/*",
