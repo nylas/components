@@ -1489,7 +1489,7 @@
 
 {#if manifest && manifest.error}
   <nylas-error {id} />
-{:else if _this.participants.length === 0}
+{:else if _this.participants.length === 0 && _this.calendars.length === 0}
   <nylas-message-error
     error_message="Please enter participants to see availability."
   />
