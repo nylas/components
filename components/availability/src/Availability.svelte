@@ -865,7 +865,7 @@
 
     // If the booking user and access token are passed in, fetch their calendars as well.
     // TODO: dont include them in the main list, as they shouldn't contribute to partial slot availability.
-    // TODO: user booking_user_token instead of access_token for booking_user_email in calendarsToFetch
+    // TODO: use booking_user_token instead of access_token for booking_user_email in calendarsToFetch
     if (_this.booking_user_email && _this.booking_user_token) {
       calendarsToFetch.push({
         email: _this.booking_user_email,
@@ -884,8 +884,53 @@
         })
       ];
 
-      loading = false;
+      console.log(
+        "-------",
+        new Date(
+          getAvailabilityQuery(
+            calendarsToFetch.map((x) => x.email),
+            access_token,
+          )?.body.start_time * 1000,
+        ),
+      );
+      await $AvailabilityStore[
+        JSON.stringify({
+          ...getAvailabilityQuery(
+            calendarsToFetch.map((x) => x.email),
+            access_token,
+          ),
+          forceReload,
+        })
+      ].then((ful) => {
+        console.log(
+          "fetchedCals",
+          new Date(fetchedCalendars.time_slots[0]?.start_time * 1000),
+          new Date(ful.time_slots[0]?.start_time * 1000),
+        );
+      });
 
+      // Object.keys($AvailabilityStore).map(async (x) => {
+      //   await $AvailabilityStore[x].then((y) => {
+      //     console.log({
+      //       keyDate: new Date(JSON.parse(x).body.start_time * 1000),
+      //       dataDate: new Date(y.time_slots[0]?.start_time * 1000),
+      //     });
+      //   });
+      // });
+
+      loading = false;
+      console.log(
+        "just stop at this point",
+        fetchedCalendars,
+        timeDay(new Date(getAvailabilityQuery().body.start_time * 1000)),
+        timeDay(new Date(fetchedCalendars.time_slots[0]?.start_time * 1000)),
+        timeDay(
+          new Date(getAvailabilityQuery().body.start_time * 1000),
+        ).getTime() ===
+          timeDay(
+            new Date(fetchedCalendars.time_slots[0]?.start_time * 1000),
+          ).getTime(),
+      );
       const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
 
       for (const user of fetchedCalendars?.order) {
