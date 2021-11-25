@@ -300,7 +300,7 @@
   }
 
   $: if (
-    id &&
+    !_this.thread &&
     _this.clean_conversation &&
     ((activeThread && !activeThread.messages.some((m) => m.conversation)) ||
       (_this.message && !_this.message.conversation))
