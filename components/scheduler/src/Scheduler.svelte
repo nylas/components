@@ -113,7 +113,7 @@
   $: console.log(startDay);
 
   $: (async () => {
-    if (Array.isArray(_this.events) && _this.events.length > 0) {
+    if (Array.isArray(_this.events) && _this.events.length > 0 && startDay) {
       const emailsList = _this.events.reduce((emails, event) => {
         emails.push(event.email_ids);
         return emails;
