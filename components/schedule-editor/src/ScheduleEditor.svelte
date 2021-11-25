@@ -73,18 +73,6 @@
     },
   };
 
-  const eventTemplate: EventDefinition = {
-    event_title: "",
-    event_description: "",
-    slot_size: 15,
-    event_location: "",
-    event_conferencing: "",
-    email_ids: [],
-    host_rules: {
-      method: "all",
-    },
-  };
-
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
     attendees_to_show: 5,
