@@ -647,9 +647,9 @@
         position: relative;
       }
       .default-avatar {
-        background: #002db4;
+        background: var(--nylas-default-avatar-background, var(--blue));
         border-radius: 50%;
-        color: #fff;
+        color: var(--nylas-default-avatar-color, var(--white));
         font-family: sans-serif;
         font-size: 1rem;
         font-weight: bold;
@@ -698,27 +698,33 @@
             white-space: nowrap;
             display: block;
             max-width: 90vw;
-            color: var(--grey);
+            color: var(--nylas-email-snippet-color, var(--grey));
             margin-top: 4px;
           }
         }
 
         .thread-message-count {
-          color: var(--grey-light);
+          color: var(
+            --nylas-email-thread-message-count-color,
+            var(--grey-light)
+          );
           font-size: 12px;
           align-self: center;
         }
         &.unread {
-          background: var(--nylas-email-background, white);
+          background: var(--nylas-email-unread-background, white);
 
           .from-message-count,
           .date,
           .subject {
             font-weight: 600;
-            color: var(--black);
+            color: var(--nylas-email-subject-color, var(--black));
 
             .thread-message-count {
-              color: var(--blue);
+              color: var(
+                --nylas-email-unread-thread-message-count-color,
+                var(--blue)
+              );
             }
           }
         }
@@ -736,19 +742,19 @@
             content: "\2605";
             display: inline-block;
             font-size: 1em;
-            color: #ccc;
+            color: var(--nylas-email-unstarred-star-button-color, #ccc);
             -webkit-user-select: none;
             -moz-user-select: none;
             user-select: none;
           }
 
           &.starred:before {
-            color: #ffc107;
+            color: var(--nylas-email-star-button-color, #ffc107);
           }
         }
       }
       &.expanded {
-        background: var(--white);
+        background: var(--nylas-email-body-background, var(--white));
         padding: 0;
         $outline-style: 1px solid var(--grey-lighter);
         @mixin barStyle {
@@ -820,7 +826,7 @@
               white-space: nowrap;
               display: block;
               max-width: 90vw;
-              color: var(--grey);
+              color: var(--nylas-email-snippet-color, var(--grey));
               margin-top: $spacing-xs;
             }
             div.message-head {
@@ -856,7 +862,7 @@
           }
           div.message-date {
             display: flex;
-            color: gray;
+            color: var(--nylas-email-message-date-color, var(--grey));
             font-size: 12px;
           }
 
@@ -881,7 +887,7 @@
                 gap: $spacing-s;
               }
               div.message-to {
-                color: gray;
+                color: var(--nylas-email-message-to-color, var(--grey));
                 max-width: 150px;
                 margin-left: calc(32px + 0.7rem);
                 div {
@@ -907,7 +913,7 @@
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
-              color: var(--grey);
+              color: var(--nylas-email-snippet-color, var(--grey));
               span.initial {
                 display: none;
               }
@@ -957,14 +963,14 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           span.snippet {
-            color: var(--grey);
+            color: var(--nylas-email-snippet-color, var(--grey));
           }
           &.date {
             display: flex;
             justify-content: flex-end;
             width: 100%;
             font-size: 14px;
-            color: var(--grey);
+            color: var(--nylas-email-message-date-color, var(--grey));
           }
           &.action-icons {
             display: flex;
@@ -1016,7 +1022,7 @@
                 position: absolute;
                 bottom: 0;
                 right: 0;
-                background: #fff;
+                background: var(--nylas-email-body-background, var(--white));
               }
             }
             .participants-count {
@@ -1045,7 +1051,7 @@
           div.starred {
             button {
               &:hover:before {
-                color: #ffc107;
+                color: var(--nylas-email-star-button-hover-color, #ffc107);
               }
             }
           }
