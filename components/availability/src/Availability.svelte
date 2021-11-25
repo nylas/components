@@ -884,53 +884,22 @@
         })
       ];
 
-      console.log(
-        "-------",
-        new Date(
-          getAvailabilityQuery(
-            calendarsToFetch.map((x) => x.email),
-            access_token,
-          )?.body.start_time * 1000,
-        ),
-      );
-      await $AvailabilityStore[
-        JSON.stringify({
-          ...getAvailabilityQuery(
-            calendarsToFetch.map((x) => x.email),
-            access_token,
-          ),
-          forceReload,
-        })
-      ].then((ful) => {
-        console.log(
-          "fetchedCals",
-          new Date(fetchedCalendars.time_slots[0]?.start_time * 1000),
-          new Date(ful.time_slots[0]?.start_time * 1000),
-        );
-      });
-
-      // Object.keys($AvailabilityStore).map(async (x) => {
-      //   await $AvailabilityStore[x].then((y) => {
-      //     console.log({
-      //       keyDate: new Date(JSON.parse(x).body.start_time * 1000),
-      //       dataDate: new Date(y.time_slots[0]?.start_time * 1000),
-      //     });
-      //   });
-      // });
-
       loading = false;
-      console.log(
-        "just stop at this point",
-        fetchedCalendars,
-        timeDay(new Date(getAvailabilityQuery().body.start_time * 1000)),
-        timeDay(new Date(fetchedCalendars.time_slots[0]?.start_time * 1000)),
+
+      // A user can load several queries in quick succession, and their variable latency can lead to race conditions.
+      // This condition checks to see if the returned schedule's date and the component active date are the same.
+      // If not, circuit break.
+      if (
         timeDay(
           new Date(getAvailabilityQuery().body.start_time * 1000),
-        ).getTime() ===
-          timeDay(
-            new Date(fetchedCalendars.time_slots[0]?.start_time * 1000),
-          ).getTime(),
-      );
+        ).getTime() !==
+        timeDay(
+          new Date(fetchedCalendars.time_slots[0]?.start_time * 1000),
+        ).getTime()
+      ) {
+        return;
+      }
+
       const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
 
       for (const user of fetchedCalendars?.order) {

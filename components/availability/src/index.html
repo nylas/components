@@ -69,9 +69,7 @@
           },
         ];
 
-        // component.calendars = calendars;
-        component.email_ids = ["phil.r@nylas.com"];
-        component.start_date = new Date();
+        component.calendars = calendars;
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
@@ -675,7 +673,7 @@
         <nylas-availability
           allow_booking="true"
           max_bookable_slots="8"
-          id="phils-availability"
+          id="demo-availability"
         >
         </nylas-availability>
       </div>
