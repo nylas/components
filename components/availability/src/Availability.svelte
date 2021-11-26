@@ -554,7 +554,6 @@
         // Handle the Consecutive Events model, where a slot if busy if it falls within a consecutive timeslot.
         // None of the other above rules should apply, except (maybe!) Buffer and Open Hours.
         if (_this.events?.length > 1 && consecutiveOptions.length) {
-          console.log("truecase");
           let existsWithinConsecutiveBlock = consecutiveOptions.some(
             (event) => {
               return (
@@ -760,7 +759,6 @@
     const slots = checkOverbooked(
       generateDaySlots(timestamp, _this.start_hour, _this.end_hour),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
-    console.log("slots2", slots);
 
     const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime();
     const dayOffset = Math.ceil(
@@ -809,16 +807,10 @@
   $: {
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
-      console.log(
-        "break into pieces here if",
-        sortedSlots,
-        selectedConsecutiveEventBlock,
-      );
       let dispatchableSlots = sortedSlots;
       // TODO, discussion:should the splitting happen here, or in the scheduler component?
       if (selectedConsecutiveEventBlock && sortedSlots.length === 1) {
         dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
-          console.log("sortie", event);
           return { ...sortedSlots[0], ...event };
         });
       }
@@ -1328,7 +1320,6 @@
   }
 
   function endDrag(day: Day | null) {
-    console.log("endDrag", draggedBlockSlots, day);
     // Mode: Drag-moving an existing block
     if (draggingExistingBlock) {
       if (day) {
@@ -1606,7 +1597,6 @@
   let selectedConsecutiveEventBlock: ConsecutiveEvent[] = [];
 
   $: if (event_to_select) {
-    console.log("event to", event_to_select);
     selectedConsecutiveEventBlock = event_to_select;
     days
       .flatMap((d) => d.slots)
