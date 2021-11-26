@@ -36,4 +36,11 @@ export interface Manifest extends AvailabilityManifest {
   )[];
   recurrence_expiry: Date | string | null;
   events?: any[]; // TODO
+  event_options: ConsecutiveEvent[][];
+}
+
+interface ConsecutiveEvent {
+  emails: string[];
+  start_time: Date;
+  end_time: Date;
 }

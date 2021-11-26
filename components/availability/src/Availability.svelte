@@ -1488,7 +1488,6 @@
     .domain([0, allCalendars?.length / 2, allCalendars?.length])
     .range([_this.busy_color, _this.partial_color, _this.free_color]);
   //#endregion colours
-  $: console.log("eventy", _this.events);
 
   //#region Consecutive Events
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
@@ -1530,6 +1529,7 @@
       );
 
       // emit the awaited events list
+      console.log("consec", consecutiveSlots);
       dispatchEvent("eventOptionsReady", {
         slots: consecutiveSlots,
       });

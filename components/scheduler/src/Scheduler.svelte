@@ -247,7 +247,6 @@
         customFieldResponses[field.title] !== "",
     );
   // #endregion custom fields
-  $: console.log("event options", event_options);
 </script>
 
 <style lang="scss">
@@ -277,8 +276,8 @@
               {#each option as subevent, iter}
                 <span class="sub-event">
                   <h4>
-                    {_this.events[iter].event_title}: {_this.events[iter]
-                      .event_description}
+                    {_this.events[iter].event_title}:
+                    {_this.events[iter].event_description}
                   </h4>
                   {subevent.start_time.toLocaleTimeString([], {
                     timeStyle: "short",

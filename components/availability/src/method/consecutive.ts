@@ -34,6 +34,5 @@ export async function createConsecutiveSlots(
       forceReload: true,
     })
   ];
-  console.log({ fetchedAvailableSlots });
   return fetchedAvailableSlots;
 }
