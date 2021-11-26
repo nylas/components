@@ -59,10 +59,41 @@
   import { convertHourAssumptionsToOpenHours } from "./method/openhours";
   import { createConsecutiveSlots } from "./method/consecutive";
   import type { EventDefinition } from "@commonstypes/ScheduleEditor";
+  import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
   //#region props
   export let id: string = "";
   export let access_token: string = "";
+
+  export let event_to_hover: ConsecutiveEvent[] | null = null;
+  export let event_to_select: ConsecutiveEvent[] | null = null;
+
+  $: if (event_to_hover) {
+    days
+      .flatMap((d) => d.slots)
+      .filter((slot) => {
+        return (
+          slot.start_time >= event_to_hover[0].start_time &&
+          slot.end_time <= event_to_hover[event_to_hover.length - 1].end_time
+        );
+      })
+      .forEach((slot) => (slot.selectionPending = true));
+  }
+
+  $: if (event_to_select) {
+    days
+      .flatMap((d) => d.slots)
+      .filter((slot) => {
+        return (
+          slot.start_time >= event_to_select[0].start_time &&
+          slot.end_time <= event_to_select[event_to_select.length - 1].end_time
+        );
+      })
+      .forEach((slot) => {
+        slot.selectionPending = false;
+        slot.selectionStatus = SelectionStatus.SELECTED;
+      });
+  }
 
   export let allow_booking: boolean;
   export let allow_date_change: boolean;
@@ -1500,9 +1531,9 @@
       startDay
     ) {
       // On date change, dispatch an empty list to let parent app trigger a loading state
-      dispatchEvent("eventOptionsReady", {
-        slots: [],
-      });
+      // dispatchEvent("eventOptionsReady", {
+      //   slots: [],
+      // });
 
       // the availability/consecutive endpoint eagerly returns open timeslots;
       // establish open hours so the user isn't overburdened with the horrible freedom of choice.
@@ -1518,7 +1549,7 @@
           _this.events,
         );
       }
-      const consecutiveSlots = await createConsecutiveSlots(
+      const consecutiveSlotOptions = await createConsecutiveSlots(
         _this.events,
         startDay,
         endDay,
@@ -1529,9 +1560,8 @@
       );
 
       // emit the awaited events list
-      console.log("consec", consecutiveSlots);
       dispatchEvent("eventOptionsReady", {
-        slots: consecutiveSlots,
+        slots: consecutiveSlotOptions,
       });
     }
   })();

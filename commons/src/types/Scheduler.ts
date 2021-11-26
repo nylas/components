@@ -39,7 +39,7 @@ export interface Manifest extends AvailabilityManifest {
   event_options: ConsecutiveEvent[][];
 }
 
-interface ConsecutiveEvent {
+export interface ConsecutiveEvent {
   emails: string[];
   start_time: Date;
   end_time: Date;

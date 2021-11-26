@@ -82,6 +82,21 @@
           availability.reload(true, true);
         });
 
+        scheduler.addEventListener("eventOptionHovered", (event) => {
+          console.log("hovered", event.detail.event);
+          availability.event_to_hover = event.detail.event;
+        });
+        scheduler.addEventListener("eventOptionUnhovered", (event) => {
+          console.log("unhovered", event.detail.event);
+          availability.event_to_hover = event.detail.event;
+        });
+        scheduler.addEventListener("eventOptionSelected", (event) => {
+          console.log("selected", event.detail.event);
+          availability.event_to_select = event.detail.event;
+
+          // availability.reload(true, true);
+        });
+
         scheduler.recurrence_cadence = ["daily", "weekdays", "weekly"];
       });
     </script>

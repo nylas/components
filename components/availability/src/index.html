@@ -1,683 +1,612 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta content="width=device-width,initial-scale=1" name="viewport" />
-    <meta charset="UTF-8" />
-    <title>Availability Demo</title>
-    <script src="../index.js"></script>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const component = document.querySelector("nylas-availability");
-        const startTimeInput = document.querySelector("input#start-time");
-        const endTimeInput = document.querySelector("input#end-time");
-        const daysInput = document.querySelector("input#days-to-show");
-        const overbookedThresholdInput = document.querySelector(
-          "input#overbooked-threshold",
-        );
+<head>
+  <meta content="width=device-width,initial-scale=1" name="viewport" />
+  <meta charset="UTF-8" />
+  <title>Availability Demo</title>
+  <script src="../index.js"></script>
 
-        const calendars = [
-          {
-            availability: "busy",
-            timeslots: [
-              {
-                start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(6, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(15, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "person@name.com",
-              firstName: "Jim",
-              lastName: "Person",
-              avatarUrl: "",
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const component = document.querySelector("nylas-availability");
+      const startTimeInput = document.querySelector("input#start-time");
+      const endTimeInput = document.querySelector("input#end-time");
+      const daysInput = document.querySelector("input#days-to-show");
+      const overbookedThresholdInput = document.querySelector(
+        "input#overbooked-threshold",
+      );
+
+      const calendars = [
+        {
+          availability: "busy",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(3, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(6, 0, 0, 0)),
             },
-          },
-          {
-            availability: "busy",
-            timeslots: [
-              {
-                start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "thelonious@nylas.com",
-              firstName: "Thelonious",
-              lastName: "",
-              avatarUrl: "",
+            {
+              start_time: new Date(new Date().setHours(9, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(15, 0, 0, 0)),
             },
+          ],
+          account: {
+            emailAddress: "person@name.com",
+            firstName: "Jim",
+            lastName: "Person",
+            avatarUrl: "",
           },
-          {
+        },
+        {
+          availability: "busy",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(4, 0, 0, 0)),
+              end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+            },
+          ],
+          account: {
+            emailAddress: "thelonious@nylas.com",
+            firstName: "Thelonious",
+            lastName: "",
+            avatarUrl: "",
+          },
+        },
+        {
+          emailAddress: "booker@nylas.com",
+          availability: "free",
+          timeslots: [
+            {
+              start_time: new Date(new Date().setHours(5, 15, 0, 0)),
+              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+            },
+          ],
+          account: {
             emailAddress: "booker@nylas.com",
-            availability: "free",
-            timeslots: [
-              {
-                start_time: new Date(new Date().setHours(5, 15, 0, 0)),
-                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "booker@nylas.com",
-              firstName: "Bill",
-              lastName: "Ooker",
-              avatarUrl: "",
-            },
+            firstName: "Bill",
+            lastName: "Ooker",
+            avatarUrl: "",
           },
-        ];
+        },
+      ];
 
-        component.calendars = calendars;
-        component.participants = [];
+      component.calendars = calendars;
+      component.participants = [];
 
-        component.addEventListener("timeSlotChosen", (event) => {
-          console.log(event.detail.timeSlots);
-        });
-
-        startTimeInput.addEventListener("input", (event) => {
-          component.start_hour = parseInt(event.target.value);
-        });
-
-        endTimeInput.addEventListener("input", (event) => {
-          component.end_hour = parseInt(event.target.value);
-        });
-
-        daysInput.addEventListener("input", (event) => {
-          component.dates_to_show = parseInt(event.target.value);
-        });
-
-        overbookedThresholdInput.addEventListener("input", (event) => {
-          component.overbooked_threshold = parseInt(event.target.value);
-        });
-
-        document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
-          elem.addEventListener("input", function (event) {
-            component.slot_size = event.target.value;
-          });
-        });
-
-        document
-          .querySelectorAll('input[name="event-buffer"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.event_buffer = event.target.value;
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="show-ticks"]')
-          .forEach((elem) => {
-            elem.addEventListener("change", function (event) {
-              component.show_ticks = JSON.parse(event.target.value);
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="allow-booking"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.allow_booking = JSON.parse(event.target.value);
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="show-header"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.show_header = JSON.parse(event.target.value);
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="date-format"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.date_format = event.target.value;
-            });
-          });
-
-        document
-          .querySelectorAll('input[id="partial_bookable_ratio"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.partial_bookable_ratio = JSON.parse(event.target.value);
-            });
-          });
-
-        document.querySelectorAll('input[name="max-slots"]').forEach((elem) => {
-          elem.addEventListener("input", function (event) {
-            component.max_bookable_slots = JSON.parse(event.target.value);
-          });
-        });
-
-        document
-          .querySelectorAll('input[name="max-book-ahead"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.max_book_ahead_days = JSON.parse(event.target.value);
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="min-book-ahead"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.min_book_ahead_days = JSON.parse(event.target.value);
-            });
-          });
-
-        document
-          .querySelector('input[name="capacity"]')
-          .addEventListener("input", (event) => {
-            component.capacity = JSON.parse(event.target.value);
-          });
-
-        document.querySelectorAll('input[name="week-view"]').forEach((elem) => {
-          elem.addEventListener("input", function (event) {
-            component.show_as_week = JSON.parse(event.target.value);
-          });
-        });
-
-        document
-          .querySelectorAll('input[name="show-weekends"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.show_weekends = JSON.parse(event.target.value);
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="allow-date-change"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.allow_date_change = JSON.parse(event.target.value);
-            });
-          });
-
-        document.querySelectorAll('input[name^="color-"]').forEach((elem) => {
-          elem.addEventListener("input", function (event) {
-            const type = elem.getAttribute("data-type");
-            component[type] = event.target.value;
-          });
-        });
-
-        document.querySelectorAll('input[name="view-as"]').forEach((elem) => {
-          elem.addEventListener("input", function (event) {
-            component.view_as = event.target.value;
-          });
-        });
-
-        document
-          .querySelectorAll('input[name="block-lunch"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              console.log("ya", event.target.value);
-              if (event.target.value === "none") {
-                component.open_hours = [];
-              } else if (event.target.value === "everyday") {
-                component.open_hours = [
-                  {
-                    startHour: 8,
-                    startMinute: 0,
-                    endHour: 12,
-                    endMinute: 0,
-                  },
-                  {
-                    startHour: 13,
-                    startMinute: 0,
-                    endHour: 19,
-                    endMinute: 0,
-                  },
-                ];
-              } else if ((event.target.value = "weekdays")) {
-                component.open_hours = [
-                  {
-                    startWeekday: 1,
-                    startHour: 0,
-                    startMinute: 0,
-                    endWeekday: 1,
-                    endHour: 12,
-                    endMinute: 0,
-                  },
-                  // Check it out: this next open_hours object spans across the midnight barrier (the rest all end at midnight)
-                  {
-                    startWeekday: 1,
-                    startHour: 13,
-                    startMinute: 0,
-                    endWeekday: 2,
-                    endHour: 12,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 2,
-                    startHour: 13,
-                    startMinute: 0,
-                    endWeekday: 2,
-                    endHour: 24,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 3,
-                    startHour: 0,
-                    startMinute: 0,
-                    endWeekday: 3,
-                    endHour: 12,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 3,
-                    startHour: 13,
-                    startMinute: 0,
-                    endWeekday: 3,
-                    endHour: 24,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 4,
-                    startHour: 0,
-                    startMinute: 0,
-                    endWeekday: 4,
-                    endHour: 12,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 4,
-                    startHour: 13,
-                    startMinute: 0,
-                    endWeekday: 4,
-                    endHour: 24,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 5,
-                    startHour: 0,
-                    startMinute: 0,
-                    endWeekday: 5,
-                    endHour: 12,
-                    endMinute: 0,
-                  },
-                  {
-                    startWeekday: 5,
-                    startHour: 13,
-                    startMinute: 0,
-                    endWeekday: 5,
-                    endHour: 24,
-                    endMinute: 0,
-                  },
-                ];
-              }
-            });
-          });
-
-        document
-          .querySelectorAll('input[name="mandate-top-of-hour"]')
-          .forEach((elem) => {
-            elem.addEventListener("input", function (event) {
-              component.mandate_top_of_hour = JSON.parse(event.target.value);
-            });
-          });
+      component.addEventListener("timeSlotChosen", (event) => {
+        console.log(event.detail.timeSlots);
       });
-    </script>
-    <style>
-      body {
-        padding: 0;
-        margin: 0;
-      }
 
-      aside {
-        position: fixed;
-        z-index: 2;
-        top: 0;
-        right: 0;
-        width: 250px;
-        background: #333;
-        padding: 0.5rem;
-        color: white;
-        max-height: 100%;
-        overflow: auto;
-      }
+      startTimeInput.addEventListener("input", (event) => {
+        component.start_hour = parseInt(event.target.value);
+      });
 
-      aside label {
-        display: block;
-      }
+      endTimeInput.addEventListener("input", (event) => {
+        component.end_hour = parseInt(event.target.value);
+      });
 
-      .demo-box {
-        width: calc(80vw - 250px);
-        margin-left: 10vw;
-        height: 80vh;
-        margin-top: 10vh;
-      }
-    </style>
-  </head>
+      daysInput.addEventListener("input", (event) => {
+        component.dates_to_show = parseInt(event.target.value);
+      });
 
-  <body>
-    <aside class="controls">
+      overbookedThresholdInput.addEventListener("input", (event) => {
+        component.overbooked_threshold = parseInt(event.target.value);
+      });
+
+      document.querySelectorAll('input[name="slot-size"]').forEach((elem) => {
+        elem.addEventListener("input", function (event) {
+          component.slot_size = event.target.value;
+        });
+      });
+
+      document
+        .querySelectorAll('input[name="event-buffer"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.event_buffer = event.target.value;
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="show-ticks"]')
+        .forEach((elem) => {
+          elem.addEventListener("change", function (event) {
+            component.show_ticks = JSON.parse(event.target.value);
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="allow-booking"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.allow_booking = JSON.parse(event.target.value);
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="show-header"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.show_header = JSON.parse(event.target.value);
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="date-format"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.date_format = event.target.value;
+          });
+        });
+
+      document
+        .querySelectorAll('input[id="partial_bookable_ratio"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.partial_bookable_ratio = JSON.parse(event.target.value);
+          });
+        });
+
+      document.querySelectorAll('input[name="max-slots"]').forEach((elem) => {
+        elem.addEventListener("input", function (event) {
+          component.max_bookable_slots = JSON.parse(event.target.value);
+        });
+      });
+
+      document
+        .querySelectorAll('input[name="max-book-ahead"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.max_book_ahead_days = JSON.parse(event.target.value);
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="min-book-ahead"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.min_book_ahead_days = JSON.parse(event.target.value);
+          });
+        });
+
+      document
+        .querySelector('input[name="capacity"]')
+        .addEventListener("input", (event) => {
+          component.capacity = JSON.parse(event.target.value);
+        });
+
+      document.querySelectorAll('input[name="week-view"]').forEach((elem) => {
+        elem.addEventListener("input", function (event) {
+          component.show_as_week = JSON.parse(event.target.value);
+        });
+      });
+
+      document
+        .querySelectorAll('input[name="show-weekends"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.show_weekends = JSON.parse(event.target.value);
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="allow-date-change"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.allow_date_change = JSON.parse(event.target.value);
+          });
+        });
+
+      document.querySelectorAll('input[name^="color-"]').forEach((elem) => {
+        elem.addEventListener("input", function (event) {
+          const type = elem.getAttribute("data-type");
+          component[type] = event.target.value;
+        });
+      });
+
+      document.querySelectorAll('input[name="view-as"]').forEach((elem) => {
+        elem.addEventListener("input", function (event) {
+          component.view_as = event.target.value;
+        });
+      });
+
+      document
+        .querySelectorAll('input[name="block-lunch"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            console.log("ya", event.target.value);
+            if (event.target.value === "none") {
+              component.open_hours = [];
+            } else if (event.target.value === "everyday") {
+              component.open_hours = [
+                {
+                  startHour: 8,
+                  startMinute: 0,
+                  endHour: 12,
+                  endMinute: 0,
+                },
+                {
+                  startHour: 13,
+                  startMinute: 0,
+                  endHour: 19,
+                  endMinute: 0,
+                },
+              ];
+            } else if ((event.target.value = "weekdays")) {
+              component.open_hours = [
+                {
+                  startWeekday: 1,
+                  startHour: 0,
+                  startMinute: 0,
+                  endWeekday: 1,
+                  endHour: 12,
+                  endMinute: 0,
+                },
+                // Check it out: this next open_hours object spans across the midnight barrier (the rest all end at midnight)
+                {
+                  startWeekday: 1,
+                  startHour: 13,
+                  startMinute: 0,
+                  endWeekday: 2,
+                  endHour: 12,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 2,
+                  startHour: 13,
+                  startMinute: 0,
+                  endWeekday: 2,
+                  endHour: 24,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 3,
+                  startHour: 0,
+                  startMinute: 0,
+                  endWeekday: 3,
+                  endHour: 12,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 3,
+                  startHour: 13,
+                  startMinute: 0,
+                  endWeekday: 3,
+                  endHour: 24,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 4,
+                  startHour: 0,
+                  startMinute: 0,
+                  endWeekday: 4,
+                  endHour: 12,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 4,
+                  startHour: 13,
+                  startMinute: 0,
+                  endWeekday: 4,
+                  endHour: 24,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 5,
+                  startHour: 0,
+                  startMinute: 0,
+                  endWeekday: 5,
+                  endHour: 12,
+                  endMinute: 0,
+                },
+                {
+                  startWeekday: 5,
+                  startHour: 13,
+                  startMinute: 0,
+                  endWeekday: 5,
+                  endHour: 24,
+                  endMinute: 0,
+                },
+              ];
+            }
+          });
+        });
+
+      document
+        .querySelectorAll('input[name="mandate-top-of-hour"]')
+        .forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            component.mandate_top_of_hour = JSON.parse(event.target.value);
+          });
+        });
+    });
+  </script>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    aside {
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      right: 0;
+      width: 250px;
+      background: #333;
+      padding: 0.5rem;
+      color: white;
+      max-height: 100%;
+      overflow: auto;
+    }
+
+    aside label {
+      display: block;
+    }
+
+    .demo-box {
+      width: calc(80vw - 250px);
+      margin-left: 10vw;
+      height: 80vh;
+      margin-top: 10vh;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="controls">
+    <label>
+      Days to show
+      <input id="days-to-show" class="days" type="range" min="1" max="7" step="1" value="1" />
+      <span class="days"></span>
+    </label>
+
+    <label>
+      Start Time
+      <input id="start-time" class="start" type="range" min="0" max="24" step="1" value="0" />
+      <span class="start"></span>
+    </label>
+    <label>
+      End Time
+      <input id="end-time" class="end" type="range" min="0" max="24" step="1" value="24" />
+      <span class="end"></span>
+    </label>
+
+    <fieldset>
+      <legend>Timeslot size</legend>
       <label>
-        Days to show
-        <input
-          id="days-to-show"
-          class="days"
-          type="range"
-          min="1"
-          max="7"
-          step="1"
-          value="1"
-        />
-        <span class="days"></span>
-      </label>
-
-      <label>
-        Start Time
-        <input
-          id="start-time"
-          class="start"
-          type="range"
-          min="0"
-          max="24"
-          step="1"
-          value="0"
-        />
-        <span class="start"></span>
+        <input checked type="radio" name="slot-size" value="15" />
+        15 minutes
       </label>
       <label>
-        End Time
-        <input
-          id="end-time"
-          class="end"
-          type="range"
-          min="0"
-          max="24"
-          step="1"
-          value="24"
-        />
-        <span class="end"></span>
+        <input type="radio" name="slot-size" value="30" />
+        30 minutes
       </label>
+      <label>
+        <input type="radio" name="slot-size" value="60" />
+        60 minutes
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Timeslot size</legend>
-        <label>
-          <input checked type="radio" name="slot-size" value="15" />
-          15 minutes
-        </label>
-        <label>
-          <input type="radio" name="slot-size" value="30" />
-          30 minutes
-        </label>
-        <label>
-          <input type="radio" name="slot-size" value="60" />
-          60 minutes
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Event Buffer</legend>
+      <label>
+        <input checked type="radio" name="event-buffer" value="0" checked />
+        0 minutes
+      </label>
+      <label>
+        <input type="radio" name="event-buffer" value="10" />
+        10 minutes
+      </label>
+      <label>
+        <input type="radio" name="event-buffer" value="15" />
+        15 minutes
+      </label>
+      <label>
+        <input type="radio" name="event-buffer" value="30" />
+        30 minutes
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Event Buffer</legend>
-        <label>
-          <input checked type="radio" name="event-buffer" value="0" checked />
-          0 minutes
-        </label>
-        <label>
-          <input type="radio" name="event-buffer" value="10" />
-          10 minutes
-        </label>
-        <label>
-          <input type="radio" name="event-buffer" value="15" />
-          15 minutes
-        </label>
-        <label>
-          <input type="radio" name="event-buffer" value="30" />
-          30 minutes
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Overbooked Threshold</legend>
+      <label>
+        <input id="overbooked-threshold" type="range" min="0" max="100" step="1" value="100" />
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Overbooked Threshold</legend>
-        <label>
-          <input
-            id="overbooked-threshold"
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value="100"
-          />
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Show Ticks</legend>
+      <label>
+        <input checked type="radio" name="show-ticks" value="true" />
+        True
+      </label>
+      <label>
+        <input type="radio" name="show-ticks" value="false" />
+        False
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Show Ticks</legend>
-        <label>
-          <input checked type="radio" name="show-ticks" value="true" />
-          True
-        </label>
-        <label>
-          <input type="radio" name="show-ticks" value="false" />
-          False
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Allow Booking</legend>
+      <label>
+        <input type="radio" name="allow-booking" value="true" />
+        True
+      </label>
+      <label>
+        <input checked type="radio" name="allow-booking" value="false" />
+        False
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Allow Booking</legend>
-        <label>
-          <input type="radio" name="allow-booking" value="true" />
-          True
-        </label>
-        <label>
-          <input checked type="radio" name="allow-booking" value="false" />
-          False
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Show Header</legend>
+      <label>
+        <input checked type="radio" name="show-header" value="true" />
+        True
+      </label>
+      <label>
+        <input type="radio" name="show-header" value="false" />
+        False
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Show Header</legend>
-        <label>
-          <input checked type="radio" name="show-header" value="true" />
-          True
-        </label>
-        <label>
-          <input type="radio" name="show-header" value="false" />
-          False
-        </label>
-      </fieldset>
+    <fieldset>
+      <label>
+        Max Bookable Slots
+        <input type="number" name="max-slots" min="1" value="1" />
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <label>
-          Max Bookable Slots
-          <input type="number" name="max-slots" min="1" value="1" />
-        </label>
-      </fieldset>
+    <fieldset>
+      <label>
+        Max Book Ahead Days
+        <input type="number" name="max-book-ahead" min="1" value="30" />
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <label>
-          Max Book Ahead Days
-          <input type="number" name="max-book-ahead" min="1" value="30" />
-        </label>
-      </fieldset>
+    <fieldset>
+      <label>
+        Min Book Ahead Days
+        <input type="number" name="min-book-ahead" min="0" value="0" />
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <label>
-          Min Book Ahead Days
-          <input type="number" name="min-book-ahead" min="0" value="0" />
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Mandate Top of Hour</legend>
+      <label>
+        <input type="radio" name="mandate-top-of-hour" value="true" />
+        True
+      </label>
+      <label>
+        <input checked type="radio" name="mandate-top-of-hour" value="false" />
+        False
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Mandate Top of Hour</legend>
-        <label>
-          <input type="radio" name="mandate-top-of-hour" value="true" />
-          True
-        </label>
-        <label>
-          <input
-            checked
-            type="radio"
-            name="mandate-top-of-hour"
-            value="false"
-          />
-          False
-        </label>
-      </fieldset>
+    <fieldset>
+      <label>
+        Event Capacity
+        <input type="number" name="capacity" min="1" value="1" />
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <label>
-          Event Capacity
-          <input type="number" name="capacity" min="1" value="1" />
-        </label>
-      </fieldset>
+    <fieldset>
+      <label>
+        Participant Threshold
+        <input id="partial_bookable_ratio" class="end" type="range" min="0" max="1" step="0.01" value="0" />
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <label>
-          Participant Threshold
-          <input
-            id="partial_bookable_ratio"
-            class="end"
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value="0"
-          />
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Week View</legend>
+      <label>
+        <input checked type="radio" name="week-view" value="false" />
+        Start from Today
+      </label>
+      <label>
+        <input type="radio" name="week-view" value="true" />
+        Start with Week
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Week View</legend>
-        <label>
-          <input checked type="radio" name="week-view" value="false" />
-          Start from Today
-        </label>
-        <label>
-          <input type="radio" name="week-view" value="true" />
-          Start with Week
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Weekends</legend>
+      <label>
+        <input checked type="radio" name="show-weekends" value="true" />
+        Include weekends
+      </label>
+      <label>
+        <input type="radio" name="show-weekends" value="false" />
+        Do not include weekends
+      </label>
+    </fieldset>
+    <fieldset>
+      <legend>Date Change</legend>
+      <label>
+        <input checked type="radio" name="allow-date-change" value="true" />
+        Allowed
+      </label>
+      <label>
+        <input type="radio" name="allow-date-change" value="false" />
+        Not allowed
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Weekends</legend>
-        <label>
-          <input checked type="radio" name="show-weekends" value="true" />
-          Include weekends
-        </label>
-        <label>
-          <input type="radio" name="show-weekends" value="false" />
-          Do not include weekends
-        </label>
-      </fieldset>
-      <fieldset>
-        <legend>Date Change</legend>
-        <label>
-          <input checked type="radio" name="allow-date-change" value="true" />
-          Allowed
-        </label>
-        <label>
-          <input type="radio" name="allow-date-change" value="false" />
-          Not allowed
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Colours</legend>
+      <label>
+        <input type="color" name="color-busy" data-type="busy_color" value="#EE3248" />
+        Busy color
+      </label>
+      <label>
+        <input type="color" name="color-partial" data-type="partial_color" value="#FECA7C" />
+        Partial color
+      </label>
+      <label>
+        <input type="color" name="color-free" data-type="free_color" value="#078351" />
+        Free color
+      </label>
+      <label>
+        <input type="color" name="color-selected" data-type="selected_color" value="#002db4" />
+        Selected color
+      </label>
+      <label>
+        <input type="color" name="color-closed" data-type="closed_color" value="#EE3248" />
+        Closed color
+      </label>
+    </fieldset>
+    <fieldset>
+      <legend>View As</legend>
+      <label>
+        <input checked type="radio" name="view-as" value="schedule" />
+        Schedule
+      </label>
+      <label>
+        <input type="radio" name="view-as" value="list" />
+        List
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Colours</legend>
-        <label>
-          <input
-            type="color"
-            name="color-busy"
-            data-type="busy_color"
-            value="#EE3248"
-          />
-          Busy color
-        </label>
-        <label>
-          <input
-            type="color"
-            name="color-partial"
-            data-type="partial_color"
-            value="#FECA7C"
-          />
-          Partial color
-        </label>
-        <label>
-          <input
-            type="color"
-            name="color-free"
-            data-type="free_color"
-            value="#078351"
-          />
-          Free color
-        </label>
-        <label>
-          <input
-            type="color"
-            name="color-selected"
-            data-type="selected_color"
-            value="#002db4"
-          />
-          Selected color
-        </label>
-        <label>
-          <input
-            type="color"
-            name="color-closed"
-            data-type="closed_color"
-            value="#EE3248"
-          />
-          Closed color
-        </label>
-      </fieldset>
-      <fieldset>
-        <legend>View As</legend>
-        <label>
-          <input checked type="radio" name="view-as" value="schedule" />
-          Schedule
-        </label>
-        <label>
-          <input type="radio" name="view-as" value="list" />
-          List
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Date Format</legend>
+      <label>
+        <input checked type="radio" name="date-format" value="full" />
+        Full
+      </label>
+      <label>
+        <input type="radio" name="date-format" value="weekday" />
+        Weekday Only
+      </label>
+      <label>
+        <input type="radio" name="date-format" value="date" />
+        Date Only
+      </label>
+    </fieldset>
 
-      <fieldset>
-        <legend>Date Format</legend>
-        <label>
-          <input checked type="radio" name="date-format" value="full" />
-          Full
-        </label>
-        <label>
-          <input type="radio" name="date-format" value="weekday" />
-          Weekday Only
-        </label>
-        <label>
-          <input type="radio" name="date-format" value="date" />
-          Date Only
-        </label>
-      </fieldset>
+    <fieldset>
+      <legend>Block off lunch hour</legend>
+      <label>
+        <input checked type="radio" name="block-lunch" value="none" />
+        Don't block
+      </label>
+      <label>
+        <input type="radio" name="block-lunch" value="weekdays" />
+        Block on all weekdays
+      </label>
+      <label>
+        <input type="radio" name="block-lunch" value="everyday" />
+        Block every day
+      </label>
+    </fieldset>
+  </aside>
 
-      <fieldset>
-        <legend>Block off lunch hour</legend>
-        <label>
-          <input checked type="radio" name="block-lunch" value="none" />
-          Don't block
-        </label>
-        <label>
-          <input type="radio" name="block-lunch" value="weekdays" />
-          Block on all weekdays
-        </label>
-        <label>
-          <input type="radio" name="block-lunch" value="everyday" />
-          Block every day
-        </label>
-      </fieldset>
-    </aside>
+  <main>
+    <div class="demo-box">
+      <nylas-availability allow_booking="true" max_bookable_slots="8" id="phils-availability">
+      </nylas-availability>
+    </div>
+  </main>
+</body>
 
-    <main>
-      <div class="demo-box">
-        <nylas-availability
-          allow_booking="true"
-          max_bookable_slots="8"
-          id="demo-availability"
-        >
-        </nylas-availability>
-      </div>
-    </main>
-  </body>
 </html>

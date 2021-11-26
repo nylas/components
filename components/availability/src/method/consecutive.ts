@@ -31,7 +31,6 @@ export async function createConsecutiveSlots(
   const fetchedAvailableSlots = await store[
     JSON.stringify({
       ...{ body: eventDetails, component_id: id, access_token },
-      forceReload: true,
     })
   ];
   return fetchedAvailableSlots;
