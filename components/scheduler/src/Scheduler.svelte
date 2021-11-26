@@ -129,6 +129,7 @@
 
   async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
+      console.log("events", events);
       let postableEvent: Partial<TimespanEvent> = {
         title: _this.event_title,
         description: _this.event_description,
@@ -442,6 +443,7 @@
               {#each option as subevent, iter}
                 <span class="sub-event">
                   <h4>
+                    <!-- TODO: the order of an event.option doesn't necessarily match _this.events[iter] -->
                     {_this.events[iter].event_title}:
                     {_this.events[iter].event_description}
                   </h4>

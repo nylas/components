@@ -26,6 +26,7 @@ export async function createConsecutiveSlots(
     free_busy: [],
     open_hours: open_hours,
     emails: emailsList,
+    events,
   };
 
   const fetchedAvailableSlots = await store[

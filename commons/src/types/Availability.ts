@@ -102,6 +102,19 @@ export interface AvailabilityQuery extends CommonQuery {
   forceReload?: boolean;
 }
 
+export interface ConsecutiveAvailabilityQuery extends CommonQuery {
+  body: {
+    emails: string[];
+    start_time: number;
+    end_time: number;
+    free_busy: any[];
+    duration_minutes: number;
+    interval_minutes: number;
+    events: EventDefinition[];
+  };
+  forceReload?: boolean;
+}
+
 export interface FreeBusyResponse {
   object: "free_busy";
   time_slots: {

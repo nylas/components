@@ -74,27 +74,22 @@
           scheduler.slots_to_book = event.detail.timeSlots;
         });
 
-        availability.addEventListener("eventOptionsReady", (event) => {
-          scheduler.event_options = event.detail.slots;
-        });
-
         scheduler.addEventListener("bookedEvents", () => {
           availability.reload(true, true);
         });
 
+        availability.addEventListener("eventOptionsReady", (event) => {
+          scheduler.event_options = event.detail.slots;
+        });
+
         scheduler.addEventListener("eventOptionHovered", (event) => {
-          console.log("hovered", event.detail.event);
           availability.event_to_hover = event.detail.event;
         });
         scheduler.addEventListener("eventOptionUnhovered", (event) => {
-          console.log("unhovered", event.detail.event);
           availability.event_to_hover = event.detail.event;
         });
         scheduler.addEventListener("eventOptionSelected", (event) => {
-          console.log("selected", event.detail.event);
           availability.event_to_select = event.detail.event;
-
-          // availability.reload(true, true);
         });
 
         scheduler.recurrence_cadence = ["daily", "weekdays", "weekly"];
@@ -135,8 +130,7 @@
         closed_color="#999"
       >
       </nylas-availability>
-      <nylas-scheduler id="phils-scheduler" recurrence="optional">
-      </nylas-scheduler>
+      <nylas-scheduler id="phils-scheduler"> </nylas-scheduler>
     </main>
   </body>
 </html>

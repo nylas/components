@@ -68,33 +68,6 @@
   export let event_to_hover: ConsecutiveEvent[] | null = null;
   export let event_to_select: ConsecutiveEvent[] | null = null;
 
-  $: if (event_to_hover) {
-    days
-      .flatMap((d) => d.slots)
-      .filter((slot) => {
-        return (
-          slot.start_time >= event_to_hover[0].start_time &&
-          slot.end_time <= event_to_hover[event_to_hover.length - 1].end_time
-        );
-      })
-      .forEach((slot) => (slot.selectionPending = true));
-  }
-
-  $: if (event_to_select) {
-    days
-      .flatMap((d) => d.slots)
-      .filter((slot) => {
-        return (
-          slot.start_time >= event_to_select[0].start_time &&
-          slot.end_time <= event_to_select[event_to_select.length - 1].end_time
-        );
-      })
-      .forEach((slot) => {
-        slot.selectionPending = false;
-        slot.selectionStatus = SelectionStatus.SELECTED;
-      });
-  }
-
   export let allow_booking: boolean;
   export let allow_date_change: boolean;
   export let attendees_to_show: number;
@@ -815,8 +788,21 @@
   $: {
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
+      console.log(
+        "break into pieces here if",
+        sortedSlots,
+        selectedConsecutiveEventBlock,
+      );
+      let dispatchableSlots = sortedSlots;
+      // TODO, discussion:should the splitting happen here, or in the scheduler component?
+      if (selectedConsecutiveEventBlock && sortedSlots.length === 1) {
+        dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
+          console.log("sortie", event);
+          return { ...sortedSlots[0], ...event };
+        });
+      }
       dispatchEvent("timeSlotChosen", {
-        timeSlots: sortedSlots.map((slot) => Object.assign({}, slot)),
+        timeSlots: dispatchableSlots.map((slot) => Object.assign({}, slot)),
       });
       lastDispatchedSlots = sortedSlots;
     }
@@ -1312,14 +1298,15 @@
   }
 
   function endDrag(day: Day | null) {
+    console.log("endDrag", draggedBlockSlots, day);
     // Mode: Drag-moving an existing block
     if (draggingExistingBlock) {
       if (day) {
         // day is optional; endDrag with no "day" passed means user left the canvas / we should un-pend and reset our initially-dragged event
         // Set all slots in our initially dragged block to unselected
-        draggedBlockSlots?.forEach(
-          (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
-        );
+        draggedBlockSlots?.forEach((slot) => {
+          slot.selectionStatus = SelectionStatus.UNSELECTED;
+        });
         // Set all our pending slots to Selected
         // (This is effectively the "Move" function)
         days.forEach((day) =>
@@ -1565,6 +1552,44 @@
       });
     }
   })();
+
+  // React to hovered or clicked events; respond by highlighting or selecting their slots
+  $: if (event_to_hover) {
+    days
+      .flatMap((d) => d.slots)
+      .filter((slot) => {
+        return (
+          slot.start_time >= event_to_hover[0].start_time &&
+          slot.end_time <= event_to_hover[event_to_hover.length - 1].end_time
+        );
+      })
+      .forEach((slot) => (slot.selectionPending = true));
+    days = [...days];
+    event_to_hover = null;
+  }
+
+  let selectedConsecutiveEventBlock: ConsecutiveEvent[] = [];
+
+  $: if (event_to_select) {
+    console.log("event to", event_to_select);
+    selectedConsecutiveEventBlock = event_to_select;
+    days
+      .flatMap((d) => d.slots)
+      .filter((slot) => {
+        return (
+          slot.start_time >= event_to_select[0].start_time &&
+          slot.end_time <= event_to_select[event_to_select.length - 1].end_time
+        );
+      })
+      .forEach((slot) => {
+        slot.selectionPending = false;
+        slot.selectionStatus = SelectionStatus.SELECTED;
+      });
+    days = [...days];
+    event_to_select = null;
+  }
+
+  $: console.log({ sortedSlots });
 
   //#endregion Consecutive Events
 </script>
