@@ -262,17 +262,33 @@
       <ul class="timeslots">
         {#each _this.event_options as option}
           <li>
-            <h3>{_this.event_title}: {_this.event_description}</h3>
             <span class="time"
-              >{option[0].start_time.toLocaleTimeString([], {
+              >{option[0].start_time.toLocaleString([], {
+                dateStyle: "medium",
                 timeStyle: "short",
               })}
               -
-              {option[option.length - 1].end_time.toLocaleTimeString([], {
+              {option[option.length - 1].end_time.toLocaleString([], {
+                dateStyle: "medium",
                 timeStyle: "short",
               })}</span
             >
-            {console.log({ option })}
+            <div class="sub-events">
+              {#each option as subevent, iter}
+                <span class="sub-event">
+                  <h4>
+                    {_this.events[iter].event_title}: {_this.events[iter]
+                      .event_description}
+                  </h4>
+                  {subevent.start_time.toLocaleTimeString([], {
+                    timeStyle: "short",
+                  })} - {subevent.end_time.toLocaleTimeString([], {
+                    timeStyle: "short",
+                  })}
+                  with {subevent.emails.join(", ")}
+                </span>
+              {/each}
+            </div>
           </li>
         {/each}
       </ul>

@@ -11,8 +11,8 @@
     CalendarStore,
     ErrorStore,
     ContactStore,
+    ConsecutiveAvailabilityStore,
   } from "../../../commons/src";
-  import { ConsecutiveAvailabilityStore } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
   import { onMount, afterUpdate, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
@@ -42,6 +42,7 @@
     AvailabilityRule,
     Day,
     PreDatedTimeSlot,
+    OpenHours,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
@@ -55,6 +56,8 @@
   import BackIcon from "./assets/left-arrow.svg";
   import NextIcon from "./assets/right-arrow.svg";
   import { isAvailable, isUnavailable } from "./method/slot";
+  import { convertHourAssumptionsToOpenHours } from "./method/openhours";
+  import { createConsecutiveSlots } from "./method/consecutive";
   import type { EventDefinition } from "@commonstypes/ScheduleEditor";
 
   //#region props
@@ -1489,53 +1492,47 @@
 
   //#region Consecutive Events
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
+
   $: (async () => {
-    if (Array.isArray(_this.events) && _this.events.length > 0 && startDay) {
-      console.log("yeah yes", _this.events, startDay);
-      const emailsList = _this.events.reduce((emails, event) => {
-        emails.push(event.email_ids);
-        return emails;
-      }, []);
+    if (
+      id &&
+      Array.isArray(_this.events) &&
+      _this.events.length > 0 &&
+      startDay
+    ) {
+      // On date change, dispatch an empty list to let parent app trigger a loading state
+      dispatchEvent("eventOptionsReady", {
+        slots: [],
+      });
 
-      console.log({ emailsList });
-
-      // Pick the duration_minutes from the first block slot
-      // TODO: Need to be updated when API can handle different slot size per meeting
-      const duration_minutes = _this.events[0].slot_size;
-      const eventDetails = {
-        duration_minutes,
-        interval_minutes: _this.events[0].slot_size,
-        start_time:
-          timeHour(
-            new Date(new Date(startDay).setHours(_this.start_hour)),
-          ).getTime() / 1000,
-        end_time:
-          timeHour(
-            new Date(new Date(endDay).setHours(_this.end_hour)),
-          ).getTime() / 1000,
-        free_busy: [],
-        // TODO: add open_hours here: https://developer.nylas.com/docs/connectivity/calendar/calendar-availability/#open-hours
-        emails: emailsList,
-      };
-      const fetchedAvailableSlots = await $ConsecutiveAvailabilityStore[
-        JSON.stringify({
-          ...{ body: eventDetails, component_id: id, access_token },
-          forceReload: true,
-        })
-      ];
-      console.log({ fetchedAvailableSlots });
-
-      if (fetchedAvailableSlots.length) {
-        console.log("okay figuring");
-        dispatchEvent("eventOptionsReady", {
-          slots: fetchedAvailableSlots,
-        });
-
-        // slotsToBook =
-        //   fetchedAvailableSlots[currentIndexOfConsecutiveAvailableSlots];
-      } else {
-        // slotsToBook = [];
+      // the availability/consecutive endpoint eagerly returns open timeslots;
+      // establish open hours so the user isn't overburdened with the horrible freedom of choice.
+      let openHours: OpenHours[] = [];
+      if (false && _this.open_hours.length) {
+        // TODO: conversion from component open hours format to Nylas events open hours format
+        // openHours = _this.open_hours;
+      } else if (_this.start_hour && _this.end_hour) {
+        // We can build an open hours array in the Nylas format from assumptions given start_hour and end_hour
+        openHours = convertHourAssumptionsToOpenHours(
+          _this.start_hour,
+          _this.end_hour,
+          _this.events,
+        );
       }
+      const consecutiveSlots = await createConsecutiveSlots(
+        _this.events,
+        startDay,
+        endDay,
+        openHours,
+        $ConsecutiveAvailabilityStore,
+        id,
+        access_token,
+      );
+
+      // emit the awaited events list
+      dispatchEvent("eventOptionsReady", {
+        slots: consecutiveSlots,
+      });
     }
   })();
 

@@ -142,3 +142,12 @@ export interface Day {
   slots: SelectableSlot[];
   timestamp: Date;
 }
+
+export interface OpenHours {
+  emails: string[];
+  days: number[];
+  start: string;
+  end: string;
+  timezone: string;
+  object_type: "open_hours";
+}
