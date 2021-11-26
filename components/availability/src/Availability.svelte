@@ -79,7 +79,6 @@
   export let closed_color: string;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let dates_to_show: number;
-  export let email_ids: string[]; // Deprecated. Use participants instead.
   export let participants: string[];
   export let end_hour: number;
   export let event_buffer: number;
@@ -552,6 +551,27 @@
           }
         }
 
+        // Handle the Consecutive Events model, where a slot if busy if it falls within a consecutive timeslot.
+        // None of the other above rules should apply, except (maybe!) Buffer and Open Hours.
+        if (_this.events?.length > 1 && consecutiveOptions.length) {
+          console.log("truecase");
+          let existsWithinConsecutiveBlock = consecutiveOptions.some(
+            (event) => {
+              return (
+                time >= event[0].start_time &&
+                endTime <= event[event.length - 1].end_time
+              );
+            },
+          );
+          if (existsWithinConsecutiveBlock) {
+            availability = AvailabilityStatus.FREE;
+            freeCalendars.length = participants.length;
+          } else {
+            availability = AvailabilityStatus.BUSY;
+            freeCalendars.length = 0;
+          }
+        }
+
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           calendar_id: calendarID,
@@ -740,6 +760,7 @@
     const slots = checkOverbooked(
       generateDaySlots(timestamp, _this.start_hour, _this.end_hour),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
+    console.log("slots2", slots);
 
     const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime();
     const dayOffset = Math.ceil(
@@ -824,6 +845,11 @@
   }
   // #endregion timeSlot selection
 
+  let participants: string[] = [];
+  $: if (_this.events?.length) {
+    participants = _this.events?.flatMap((e) => e.email_ids);
+  }
+
   function getAvailabilityQuery(
     emailAddresses = _this.participants,
     accessToken = access_token,
@@ -850,10 +876,14 @@
   }
 
   let newCalendarTimeslotsForGivenEmails: any[] = [];
+
+  // Only make an availability request if you have a single event;
+  // Otherwise, assume consecutive.
   $: (async () => {
     if (
-      (Array.isArray(_this.participants) && _this.participants.length > 0) ||
-      (_this.booking_user_email && _this.booking_user_token)
+      ((Array.isArray(participants) && participants.length > 0) ||
+        (_this.booking_user_email && _this.booking_user_token)) &&
+      _this.events?.length === 1
     ) {
       await getAvailability();
     }
@@ -883,7 +913,7 @@
     // Free-Busy endpoint returns busy timeslots for given participants between start_time & end_time
 
     type fetchableCalendarUser = { email: string; token?: string };
-    let calendarsToFetch: fetchableCalendarUser[] = _this.participants.map(
+    let calendarsToFetch: fetchableCalendarUser[] = participants.map(
       (email) => {
         return {
           email,
@@ -1452,12 +1482,12 @@
   //#endregion slot interaction handlers
 
   // #region error
-  $: if (id && _this.participants.length && _this.capacity) {
+  $: if (id && participants.length && _this.capacity) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
         message:
-          "Setting `capacity` currently does not work with `participants`. Please use `calendars` to use `capacity`.",
+          "Setting `capacity` currently does not work when fetching availability directly from Nylas. Please pass `calendars` data directly to use `capacity`.",
       });
     } catch (error) {
       console.error(error);
@@ -1509,7 +1539,7 @@
 
   //#region Consecutive Events
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
-
+  let consecutiveOptions = [];
   $: (async () => {
     if (
       id &&
@@ -1544,12 +1574,17 @@
         $ConsecutiveAvailabilityStore,
         id,
         access_token,
-      );
+      ).then((results) => {
+        consecutiveOptions = results;
+        return results;
+      });
 
       // emit the awaited events list
       dispatchEvent("eventOptionsReady", {
         slots: consecutiveSlotOptions,
       });
+
+      return consecutiveSlotOptions;
     }
   })();
 
@@ -1588,8 +1623,6 @@
     days = [...days];
     event_to_select = null;
   }
-
-  $: console.log({ sortedSlots });
 
   //#endregion Consecutive Events
 </script>
