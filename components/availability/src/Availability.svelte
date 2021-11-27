@@ -140,6 +140,7 @@
     timezone: "",
     view_as: "schedule",
     events: [],
+    event_to_hover: null,
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
@@ -1340,15 +1341,20 @@
         );
       }
     } else {
-      // Mode: Drag-creating a new event
-      days.forEach((day) =>
-        day.slots.forEach((slot) => {
-          if (slot.selectionPending) {
-            slot.selectionStatus = SelectionStatus.SELECTED;
-            slot.hovering = false;
-          }
-        }),
-      );
+      if (_this.events.length > 1) {
+        // deselect when in consecutive mode
+        event_to_hover = null;
+      } else {
+        // Mode: Drag-creating a new event
+        days.forEach((day) =>
+          day.slots.forEach((slot) => {
+            if (slot.selectionPending) {
+              slot.selectionStatus = SelectionStatus.SELECTED;
+              slot.hovering = false;
+            }
+          }),
+        );
+      }
     }
     days = [...days]; // re-render
     resetDragState();
@@ -1390,11 +1396,15 @@
   }
 
   function handleSlotHover({ event, slot, day }: SlotInteractionHandler) {
-    if (slot) {
-      addToDrag(slot, day);
+    if (_this.events.length > 1) {
+      inspectConsecutiveBlock(slot);
+    } else {
+      if (slot) {
+        addToDrag(slot, day);
 
-      if (!mouseIsDown && slot.selectionStatus !== SelectionStatus.SELECTED)
-        if (event instanceof MouseEvent) slot.hovering = true;
+        if (!mouseIsDown && slot.selectionStatus !== SelectionStatus.SELECTED)
+          if (event instanceof MouseEvent) slot.hovering = true;
+      }
     }
   }
 
@@ -1524,7 +1534,7 @@
   //#region colours
   // Show partial availability as a gradient, rather than as categorically "partial"
   $: partialScale = scaleLinear()
-    .domain([0, allCalendars?.length / 2, allCalendars?.length])
+    .domain([0, participants.length / 2, participants.length])
     .range([_this.busy_color, _this.partial_color, _this.free_color]);
   //#endregion colours
 
@@ -1535,7 +1545,7 @@
     if (
       id &&
       Array.isArray(_this.events) &&
-      _this.events.length > 0 &&
+      _this.events.length > 1 &&
       startDay
     ) {
       // On date change, dispatch an empty list to let parent app trigger a loading state
@@ -1581,6 +1591,7 @@
 
   // React to hovered or clicked events; respond by highlighting or selecting their slots
   $: if (event_to_hover) {
+    console.log("eth", event_to_hover);
     days
       .flatMap((d) => d.slots)
       .filter((slot) => {
@@ -1591,7 +1602,7 @@
       })
       .forEach((slot) => (slot.selectionPending = true));
     days = [...days];
-    event_to_hover = null;
+    // event_to_hover = null;
   }
 
   let selectedConsecutiveEventBlock: ConsecutiveEvent[] = [];
@@ -1611,7 +1622,28 @@
         slot.selectionStatus = SelectionStatus.SELECTED;
       });
     days = [...days];
-    event_to_select = null;
+    // event_to_select = null;
+  }
+
+  // Expand hovered / clicked time slots to show the full consecutive event span
+  function inspectConsecutiveBlock(slot: TimeSlot) {
+    // console.log("slot", slot, consecutiveOptions);
+    let consecutiveBlockContainingSlot = consecutiveOptions.find(
+      (block) =>
+        slot.start_time >= block[0].start_time &&
+        slot.end_time <= block[block.length - 1].end_time,
+    );
+
+    console.log("consecutiveblock", consecutiveBlockContainingSlot);
+
+    // Deselect any others
+    days
+      .flatMap((d) => d.slots)
+      .forEach((slot) => {
+        slot.selectionPending = false;
+      });
+
+    event_to_hover = consecutiveBlockContainingSlot;
   }
 
   //#endregion Consecutive Events
