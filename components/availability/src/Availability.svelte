@@ -1342,6 +1342,7 @@
       }
     } else {
       if (_this.events.length > 1) {
+        // TODO: variablize events.length > 1 as hasConsecutiveMeetings or something
         // deselect when in consecutive mode
         event_to_hover = null;
       } else {
@@ -1383,21 +1384,45 @@
     day,
   }: SlotInteractionHandler) {
     if (slot) {
-      if (
-        slotSelection.length < _this.max_bookable_slots ||
-        slot.selectionStatus === SelectionStatus.SELECTED
-      ) {
-        if (event instanceof MouseEvent) mouseIsDown = true;
-        else if (event instanceof TouchEvent) touchIsDown = true;
-      }
+      if (_this.events.length > 1) {
+        // Deselect any others
+        days
+          .flatMap((d) => d.slots)
+          .forEach((slot) => {
+            slot.selectionPending = false;
+            slot.selectionStatus = SelectionStatus.UNSELECTED;
+          });
 
-      startDrag(slot, day);
+        if (event_to_select === inspectConsecutiveBlock(slot)) {
+          event_to_select = null;
+          days = [...days];
+        } else {
+          event_to_select = inspectConsecutiveBlock(slot);
+        }
+      } else {
+        if (
+          slotSelection.length < _this.max_bookable_slots ||
+          slot.selectionStatus === SelectionStatus.SELECTED
+        ) {
+          if (event instanceof MouseEvent) mouseIsDown = true;
+          else if (event instanceof TouchEvent) touchIsDown = true;
+        }
+
+        startDrag(slot, day);
+      }
     }
   }
 
   function handleSlotHover({ event, slot, day }: SlotInteractionHandler) {
     if (_this.events.length > 1) {
-      inspectConsecutiveBlock(slot);
+      // Deselect any others
+      days
+        .flatMap((d) => d.slots)
+        .forEach((slot) => {
+          slot.selectionPending = false;
+        });
+
+      event_to_hover = inspectConsecutiveBlock(slot);
     } else {
       if (slot) {
         addToDrag(slot, day);
@@ -1410,8 +1435,9 @@
 
   function handleSlotInteractionEnd(day: Day | null) {
     if (mouseIsDown || touchIsDown) {
-      if (document.activeElement instanceof HTMLElement)
+      if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
+      }
 
       endDrag(day);
     }
@@ -1634,16 +1660,7 @@
         slot.end_time <= block[block.length - 1].end_time,
     );
 
-    console.log("consecutiveblock", consecutiveBlockContainingSlot);
-
-    // Deselect any others
-    days
-      .flatMap((d) => d.slots)
-      .forEach((slot) => {
-        slot.selectionPending = false;
-      });
-
-    event_to_hover = consecutiveBlockContainingSlot;
+    return consecutiveBlockContainingSlot;
   }
 
   //#endregion Consecutive Events
@@ -1865,11 +1882,7 @@
                       }
 
                       if (slot !== currentTouchedSlot) {
-                        handleSlotInteractionEnd({
-                          event,
-                          slot: currentTouchedSlot,
-                          day,
-                        });
+                        handleSlotInteractionEnd(day);
                       }
                     }
                   }}
