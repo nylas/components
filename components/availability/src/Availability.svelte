@@ -678,7 +678,7 @@
           }
         } else if (
           numFreeCalendars > 0 &&
-          numFreeCalendars !== allCalendars.length
+          numFreeCalendars < allCalendars.length
         ) {
           status = "partial";
         }
@@ -810,7 +810,7 @@
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
       let dispatchableSlots = sortedSlots;
       // TODO, discussion:should the splitting happen here, or in the scheduler component?
-      if (selectedConsecutiveEventBlock && sortedSlots.length === 1) {
+      if (selectedConsecutiveEventBlock.length && sortedSlots.length === 1) {
         dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
           return { ...sortedSlots[0], ...event };
         });
@@ -1363,11 +1363,28 @@
 
   // Click action for un-draggable slot-list buttons (list view)
   function toggleSlot(slot: SelectableSlot) {
-    if (slot.selectionStatus === SelectionStatus.SELECTED) {
-      slot.selectionStatus = SelectionStatus.UNSELECTED;
-    } else if (slotSelection.length < _this.max_bookable_slots) {
-      slot.selectionStatus = SelectionStatus.SELECTED;
+    if (_this.events.length > 1) {
+      if (slot.selectionStatus === SelectionStatus.SELECTED) {
+        event_to_select = null;
+      } else {
+        event_to_select = inspectConsecutiveBlock(slot);
+      }
+
+      // Deselect any others
+      days
+        .flatMap((d) => d.slots)
+        .forEach((slot) => {
+          slot.selectionPending = false;
+          slot.selectionStatus = SelectionStatus.UNSELECTED;
+        });
+    } else {
+      if (slot.selectionStatus === SelectionStatus.SELECTED) {
+        slot.selectionStatus = SelectionStatus.UNSELECTED;
+      } else if (slotSelection.length < _this.max_bookable_slots) {
+        slot.selectionStatus = SelectionStatus.SELECTED;
+      }
     }
+
     days = [...days];
   }
   //#endregion dragging
@@ -1617,7 +1634,6 @@
 
   // React to hovered or clicked events; respond by highlighting or selecting their slots
   $: if (event_to_hover) {
-    console.log("eth", event_to_hover);
     days
       .flatMap((d) => d.slots)
       .filter((slot) => {
@@ -1653,7 +1669,6 @@
 
   // Expand hovered / clicked time slots to show the full consecutive event span
   function inspectConsecutiveBlock(slot: TimeSlot) {
-    // console.log("slot", slot, consecutiveOptions);
     let consecutiveBlockContainingSlot = consecutiveOptions.find(
       (block) =>
         slot.start_time >= block[0].start_time &&
@@ -1662,6 +1677,24 @@
 
     return consecutiveBlockContainingSlot;
   }
+
+  // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,
+  // a user can only book several in a row. We should, therefore, only show those slots that kick off a consecutive series
+  $: listViewOptions = (day: Day): SelectableSlot[] => {
+    if (_this.events.length > 1) {
+      return day.slots.filter((slot) =>
+        consecutiveOptions.find((block: ConsecutiveEvent[]) =>
+          inspectConsecutiveBlock(slot),
+        ),
+      );
+    } else {
+      return day.slots.filter(
+        (slot) =>
+          slot.availability === AvailabilityStatus.FREE ||
+          slot.availability === AvailabilityStatus.PARTIAL,
+      );
+    }
+  };
 
   //#endregion Consecutive Events
 </script>
@@ -1902,7 +1935,7 @@
             </div>
           {:else if _this.view_as === "list"}
             <div class="slot-list">
-              {#each day.slots.filter((slot) => slot.availability === AvailabilityStatus.FREE || slot.availability === AvailabilityStatus.PARTIAL) as slot}
+              {#each listViewOptions(day) as slot}
                 <button
                   data-available-calendars={slot.available_calendars.toString()}
                   aria-label="{getTimeString(
