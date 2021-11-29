@@ -540,7 +540,7 @@
         background: var(--grey-lightest);
       }
       &.unread {
-        background: white;
+        background: var(--nylas-email-background);
       }
       // #endregion define background styles
 
