@@ -643,7 +643,7 @@
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--nylas-email-border-style, 1px solid var(--grey-lighter));
-      border-left: var(--nylas-email-border-left-style, 1px solid);
+      border-left-width: var(--nylas-email-border-left-width, 1px);
       &:hover {
         $hover-outline-width: 1px;
         outline: $hover-outline-width solid var(--grey-warm);
@@ -722,8 +722,7 @@
             --nylas-email-border-style,
             1px solid var(--grey-lighter)
           );
-          border-left: var(--nylas-email-border-left-style, 1px solid);
-
+          border-left-width: var(--nylas-email-border-left-width, 1px);
           .from-message-count,
           .date,
           .subject {

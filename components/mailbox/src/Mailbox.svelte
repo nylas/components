@@ -534,7 +534,7 @@
 
       // #region define background styles
       --nylas-email-background: transparent;
-      --nylas-email-border-left-style: none;
+      --nylas-email-border-left-width: 0px;
 
       &:not(.unread) {
         background: var(--grey-lightest);
