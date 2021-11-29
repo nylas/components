@@ -39,7 +39,7 @@
 
   export let actions_bar: MailboxActions[];
   export let all_threads: Thread[];
-  export let header: string;
+  export let header: string = "Mailbox";
   export let items_per_page: number;
   export let keyword_to_search: string;
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
@@ -534,6 +534,8 @@
 
       // #region define background styles
       --nylas-email-background: transparent;
+      --nylas-email-border-left-style: none;
+
       &:not(.unread) {
         background: var(--grey-lightest);
       }
