@@ -191,10 +191,6 @@ section {
   align-items: center;
   padding: 0.25rem;
   box-sizing: border-box;
-
-  &:nth-last-of-type(1) {
-    margin-left: auto;
-  }
 }
 
 button.drag {

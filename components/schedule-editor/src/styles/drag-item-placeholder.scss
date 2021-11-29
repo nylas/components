@@ -10,6 +10,7 @@
   border-radius: 4px;
   background-color: white;
   box-shadow: 0 2px 8px #00000040;
+  pointer-events: none;
 
   .drag-preview-cell {
     display: flex;

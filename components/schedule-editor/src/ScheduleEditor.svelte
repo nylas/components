@@ -1,7 +1,6 @@
 <svelte:options tag="nylas-schedule-editor" />
 
 <script lang="ts">
-  import throttle from "just-throttle";
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import parseStringToArray, {
@@ -132,6 +131,10 @@
   onDestroy(() => {
     main.removeEventListener("mousemove", handleCustomFieldDragMove);
     main.removeEventListener("mouseup", handleCustomFieldDragRelease);
+
+    if (rowResizeObserver) {
+      rowResizeObserver.disconnect();
+    }
   });
 
   $: if (main) {
@@ -310,71 +313,64 @@
   let customFieldIdOrder: string[] = [];
   let maxDragTop: number;
   let maxDragBottom: number;
-  let dragBegins: boolean = false;
+  let dragBegins = false;
   let dragPlaceholder = {
     left: 0,
     top: 0,
   };
+  let rowResizeObserver: ResizeObserver;
 
   type CustomFieldDrag = {
     event: MouseEvent;
-    field: CustomFieldWithId;
-    i: number;
+    fieldProperties: CustomFieldWithId;
+    fieldIndex: number;
   };
 
-  function handleCustomFieldDrag({ event, field, i }: CustomFieldDrag) {
+  function handleCustomFieldDrag({
+    event,
+    fieldProperties,
+    fieldIndex,
+  }: CustomFieldDrag) {
     if (!dragBegins) {
       customFieldDomRects = getDomRects(customFieldRefs);
       dragBegins = true;
     }
 
-    draggedFieldIndex = i;
-    draggedField = field;
+    draggedFieldIndex = fieldIndex;
+    draggedField = fieldProperties;
 
     setDragRowPosition(event);
   }
 
   function handleCustomFieldDragRelease() {
-    if (draggedField) {
-      draggedField = null;
-    }
+    draggedField = null;
   }
 
-  function swapHoveredWithDraggedFields(e: MouseEvent) {
-    const hoveredFieldIndex = customFieldDomRects.findIndex(
-      (domRect) => domRect.top < e.clientY && e.clientY < domRect.bottom,
+  function swapDraggedWithHovered(hoveredFieldIndex: number) {
+    let updatedFieldOrder = [..._this.custom_fields] as CustomFieldWithId[];
+
+    // Swap the current hovered field with the dragged field
+    let temp = updatedFieldOrder[hoveredFieldIndex];
+    updatedFieldOrder[hoveredFieldIndex] = updatedFieldOrder[draggedFieldIndex];
+    updatedFieldOrder[draggedFieldIndex] = temp;
+
+    // update custom fields to reflect the drag order
+    _this.custom_fields = updatedFieldOrder;
+    customFieldIdOrder = updatedFieldOrder.map((field) => field.id);
+
+    // current dragged index is now what was hovered
+    draggedFieldIndex = updatedFieldOrder.findIndex(
+      (customField) => customField.id === draggedField?.id,
     );
-
-    const hoveredFieldId = customFieldIdOrder[hoveredFieldIndex];
-
-    const fieldSwapRequired =
-      hoveredFieldIndex >= 0 && hoveredFieldId !== draggedField?.id;
-
-    if (fieldSwapRequired) {
-      let updatedFieldOrder = [..._this.custom_fields] as CustomFieldWithId[];
-
-      // Swap the current hovered field with the dragged field
-      let temp = updatedFieldOrder[hoveredFieldIndex];
-      updatedFieldOrder[hoveredFieldIndex] =
-        updatedFieldOrder[draggedFieldIndex];
-      updatedFieldOrder[draggedFieldIndex] = temp;
-
-      // update custom fields to reflect the drag order
-      _this.custom_fields = updatedFieldOrder;
-      customFieldIdOrder = updatedFieldOrder.map((field) => field.id);
-
-      // current dragged index is now what was hovered
-      draggedFieldIndex = updatedFieldOrder.findIndex(
-        (customField) => customField.id === draggedField?.id,
-      );
-    }
   }
 
-  const throttledDraggedFieldSwap = throttle(swapHoveredWithDraggedFields, 100);
-
-  const setDragRowPosition = (e: MouseEvent) => {
+  /**
+   * Sets position for the drag preview row
+   * @param event
+   */
+  const setDragRowPosition = (event: MouseEvent) => {
     const rowHeightOffset = tablerowRect.height / 2;
-    const dragRowPosition = e.pageY;
+    const dragRowPosition = event.pageY;
 
     // stick the drag preview if cursor is beyond max top and max bottom
     let previewTopPosition: number | null = null;
@@ -386,7 +382,6 @@
 
     // set initial position of drag preview
     dragPlaceholder = {
-      ...dragPlaceholder,
       left: tablerowRect.x,
       top: previewTopPosition ?? dragRowPosition - rowHeightOffset,
     };
@@ -411,7 +406,6 @@
   function handleCustomFieldDragMove(e: MouseEvent) {
     if (draggedField) {
       setDragRowPosition(e);
-      throttledDraggedFieldSwap(e);
     }
   }
 
@@ -427,7 +421,7 @@
       tablecellRect = childRects;
 
       // Watches row element if it changes size
-      new ResizeObserver(([observerEntry]) => {
+      rowResizeObserver = new ResizeObserver(([observerEntry]) => {
         const { parentRect, childRects } = getDomRectsFromParentAndChildren(
           observerEntry.target,
           "td",
@@ -436,7 +430,9 @@
         tablecellRect = childRects;
 
         dragBegins = false; // reset on next start of drag
-      }).observe(node);
+      });
+
+      rowResizeObserver.observe(node);
     }
 
     return {
@@ -909,6 +905,11 @@
                 {#each _this.custom_fields as field, i (field.id)}
                   <tr
                     class:drag-active={field.id === draggedField?.id}
+                    on:mouseenter={() => {
+                      if (draggedField && i !== draggedFieldIndex) {
+                        swapDraggedWithHovered(i);
+                      }
+                    }}
                     use:storeRef={{ id: field.id }}
                   >
                     {#each customFieldKeys as key}
@@ -924,7 +925,11 @@
                       <button
                         class="drag"
                         on:mousedown={(event) => {
-                          handleCustomFieldDrag({ event, field, i });
+                          handleCustomFieldDrag({
+                            event,
+                            fieldProperties: field,
+                            fieldIndex: i,
+                          });
                         }}
                       >
                         <span class="sr-only">Reorder custom field</span>
