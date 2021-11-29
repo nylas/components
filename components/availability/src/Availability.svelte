@@ -817,7 +817,6 @@
           return { ...sortedSlots[0], ...event };
         });
       }
-      console.log({ dispatchableSlots });
       dispatchEvent("timeSlotChosen", {
         timeSlots: dispatchableSlots.map((slot) => Object.assign({}, slot)),
       });
@@ -1592,8 +1591,9 @@
       id &&
       Array.isArray(_this.events) &&
       _this.events.length > 1 &&
-      startDay
+      dayRange.length
     ) {
+      // debugger;
       // On date change, dispatch an empty list to let parent app trigger a loading state
       // Update: maybe not, though. Funky behaviour. TODO.
       // dispatchEvent("eventOptionsReady", {
@@ -1614,15 +1614,23 @@
           _this.events,
         );
       }
-      const consecutiveSlotOptions = await createConsecutiveSlots(
-        _this.events,
-        startDay,
-        endDay,
+
+      const consecutiveSlotsQuery = {
+        events: _this.events,
+        dayRange,
+        startHour: start_hour,
+        endHour: end_hour,
         openHours,
-        $ConsecutiveAvailabilityStore,
-        id,
-        access_token,
-      ).then((results) => {
+      };
+
+      let consecutiveSlotsQueryKey = await createConsecutiveSlots(
+        consecutiveSlotsQuery,
+      );
+      const consecutiveSlotOptions = await $ConsecutiveAvailabilityStore[
+        JSON.stringify({
+          ...{ body: consecutiveSlotsQueryKey, component_id: id, access_token },
+        })
+      ].then((results) => {
         consecutiveOptions = results;
         return results;
       });

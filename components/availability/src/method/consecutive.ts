@@ -2,15 +2,21 @@ import type { OpenHours, TimeSlot } from "@commons/types/Availability";
 import type { EventDefinition } from "@commonstypes/ScheduleEditor";
 import { timeHour } from "d3-time";
 
+export interface createConsecutiveSlotsQuery {
+  events: EventDefinition[];
+  dayRange: Date[];
+  startHour: number;
+  endHour: number;
+  openHours: OpenHours[];
+}
+
 export async function createConsecutiveSlots(
-  events: EventDefinition[],
-  startDay: Date,
-  endDay: Date,
-  open_hours: OpenHours[],
-  store: Record<string, Promise<TimeSlot[][]>>,
-  id: string,
-  access_token?: string,
+  query: createConsecutiveSlotsQuery,
 ) {
+  const { events, dayRange, startHour, endHour, openHours } = query;
+  const startDay = dayRange[0];
+  const endDay = dayRange[dayRange.length - 1];
+
   const emailsList = events.reduce((emails, event) => {
     emails.push(event.email_ids); // TODO: why are we typed to "never" here?
     return emails;
@@ -21,18 +27,15 @@ export async function createConsecutiveSlots(
   const eventDetails = {
     duration_minutes,
     interval_minutes: events[0].slot_size,
-    start_time: timeHour(new Date(startDay)).getTime() / 1000,
-    end_time: timeHour(new Date(endDay)).getTime() / 1000,
+    start_time:
+      timeHour(new Date(new Date(startDay).setHours(startHour))).getTime() /
+      1000,
+    end_time:
+      timeHour(new Date(new Date(endDay).setHours(endHour))).getTime() / 1000,
     free_busy: [],
-    open_hours: open_hours,
+    open_hours: openHours,
     emails: emailsList,
     events,
   };
-
-  const fetchedAvailableSlots = await store[
-    JSON.stringify({
-      ...{ body: eventDetails, component_id: id, access_token },
-    })
-  ];
-  return fetchedAvailableSlots;
+  return eventDetails;
 }

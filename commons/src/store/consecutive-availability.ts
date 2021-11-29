@@ -20,7 +20,6 @@ function initialize(): Writable<ConsecutiveAvailabilityStore> {
       !accessor?.body?.start_time ||
       !accessor?.body?.end_time
     ) {
-      console.log("am I getting here?: ", accessor.body);
       return;
     }
 

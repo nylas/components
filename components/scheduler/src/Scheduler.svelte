@@ -8,10 +8,7 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
-  import { ConsecutiveAvailabilityStore } from "../../../commons/src";
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
-  import { timeHour, timeWeek, timeDay } from "d3-time";
-  import { scaleTime } from "d3-scale";
   import type {
     Manifest,
     CustomField,
