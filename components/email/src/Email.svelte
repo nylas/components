@@ -715,11 +715,7 @@
         }
         &.unread {
           background: var(--nylas-email-unread-background, white);
-          border: var(
-            --nylas-email-border-style,
-            1px solid var(--grey-lighter)
-          );
-          border-left-width: var(--nylas-email-border-left-width, 1px);
+
           .from-message-count,
           .date,
           .subject {
