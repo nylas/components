@@ -41,7 +41,6 @@
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
-  import Conversation from "components/conversation/src/Conversation.svelte";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
