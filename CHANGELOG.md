@@ -1,3 +1,17 @@
+# 2021-11-29
+
+## 1.1.0
+
+- Mailbox: Supports server-side pagination [Pull Request](https://github.com/nylas/components/pull/217)
+- Agenda: Supports timezone agnostic all day events [Pull Request](https://github.com/nylas/components/pull/210)
+- Conversation: Supports custom styling using css variables [Pull Request](https://github.com/nylas/components/pull/216)
+- Email: Supports custom styling using css variables [Pull Request](https://github.com/nylas/components/pull/224)
+
+### Deprecated
+
+- Mailbox: `unread_status` prop has been deprecated
+- Email: `unread` prop has been deprecated
+
 # 2021-11-19
 
 ## 1.0.15
