@@ -1,5 +1,14 @@
 # 2021-11-29
 
+## 1.1.1
+
+### Bug Fixes
+
+- Email / Mailbox: Removed invalid import which was breaking the component [Pull Request](https://github.com/nylas/components/pull/231)
+- Mailbox: Fixed border style regression [Pull Request](https://github.com/nylas/components/pull/232)
+
+# 2021-11-29
+
 ## 1.1.0
 
 - Mailbox: Supports server-side pagination [Pull Request](https://github.com/nylas/components/pull/217)
