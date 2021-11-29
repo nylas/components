@@ -131,14 +131,14 @@
     const bookings = events.map(async (event) => {
       console.log("events", events);
       let postableEvent: Partial<TimespanEvent> = {
-        title: _this.event_title,
-        description: _this.event_description,
-        location: _this.event_location,
-        conferencing: _this.event_conferencing
+        title: event.event_title,
+        description: event.event_description,
+        location: event.event_location,
+        conferencing: event.event_conferencing
           ? {
               provider: "Zoom Meeting", // TODO: make this dynamic
               details: {
-                url: _this.event_conferencing,
+                url: event.event_conferencing,
               },
             }
           : undefined,
@@ -288,7 +288,7 @@
       <ul class="timeslots">
         {#each slotsToBook as timeSlot}
           <li>
-            <h3>{_this.event_title}: {_this.event_description}</h3>
+            <h3>{timeSlot.event_title}: {timeSlot.event_description}</h3>
             <span class="time"
               >{timeSlot.start_time.toLocaleTimeString([], {
                 timeStyle: "short",

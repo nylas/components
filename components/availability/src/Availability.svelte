@@ -812,9 +812,12 @@
       // TODO, discussion:should the splitting happen here, or in the scheduler component?
       if (selectedConsecutiveEventBlock.length && sortedSlots.length === 1) {
         dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
+          event.available_calendars = event.emails; // slot.available_calendars is a little convoluted with freeCalendars above. TODO: refactor freeCalendars in generateDaySlots()
+          console.log("checking event", event);
           return { ...sortedSlots[0], ...event };
         });
       }
+      console.log({ dispatchableSlots });
       dispatchEvent("timeSlotChosen", {
         timeSlots: dispatchableSlots.map((slot) => Object.assign({}, slot)),
       });
@@ -1592,6 +1595,7 @@
       startDay
     ) {
       // On date change, dispatch an empty list to let parent app trigger a loading state
+      // Update: maybe not, though. Funky behaviour. TODO.
       // dispatchEvent("eventOptionsReady", {
       //   slots: [],
       // });
