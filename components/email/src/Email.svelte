@@ -624,7 +624,6 @@
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
 
-  $border-style: 1px solid #ebebeb;
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
   $mobile-collapsed-height: fit-content;
@@ -642,7 +641,8 @@
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
-      border: var(--nylas-email-border, #{$border-style});
+      border: var(--nylas-email-border-style, 1px solid var(--grey-lighter));
+      border-left-width: var(--nylas-email-border-left-width, 1px);
 
       nylas-tooltip {
         position: relative;
