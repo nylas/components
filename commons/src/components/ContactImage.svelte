@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-contact-image" />
-
 <script>
   import { ContactAvatarStore } from "@commons";
   import { beforeUpdate } from "svelte/internal";

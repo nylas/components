@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-datepicker" immutable={true} />
-
 <script lang="ts">
   import { tick } from "svelte";
   const months: string[] = [
@@ -286,8 +284,9 @@
   }
   $: currentMonth = currentDate.getMonth();
   $: currentYear = currentDate.getFullYear();
-  $: selectableMonth = dates.filter((d) => d.activeMonth && !d.isDisabled)
-    .length;
+  $: selectableMonth = dates.filter(
+    (d) => d.activeMonth && !d.isDisabled,
+  ).length;
   $: if (value || min || max || timepicker) {
     populate();
 

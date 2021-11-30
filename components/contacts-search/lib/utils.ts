@@ -1,4 +1,4 @@
-import type { CallbackDebounceFunction } from "@commons/types/ContactsSearch";
+import type { CallbackDebounceFunction } from "@commons/types/ContactsSearch.ts";
 
 export const debounce = (
   func: CallbackDebounceFunction,

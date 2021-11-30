@@ -10,8 +10,8 @@
     ManifestStore,
     sendMessage,
   } from "@commons";
-  import "@commons/components/ContactImage/ContactImage.svelte";
-  import "@commons/components/ErrorMessage.svelte";
+  import ContactImage from "@commons/components/ContactImage.svelte";
+  import ErrorMessage from "@commons/components/ErrorMessage.svelte";
   import {
     buildInternalProps,
     getEventDispatcher,
@@ -592,10 +592,10 @@
   }
 </style>
 
-<nylas-error {id} />
+<NError {id} />
 <main bind:this={main}>
   {#if hasError}
-    <nylas-message-error error_message={$ErrorStore[id].message} />
+    <ErrorMessage error_message={$ErrorStore[id].message} />
   {/if}
   {#await conversation}
     <div class="loading status" />
@@ -654,7 +654,7 @@
                 <div class="contact">
                   {#await contacts[from.email] then contact}
                     <div class="avatar">
-                      <nylas-contact-image
+                      <ContactImage
                         {contact_query}
                         {contact}
                         height="32px"
@@ -712,6 +712,6 @@
       </div>
     {/if}
   {:catch error}
-    <nylas-message-error error_message={error.message} />
+    <ErrorMessage error_message={error.message} />
   {/await}
 </main>

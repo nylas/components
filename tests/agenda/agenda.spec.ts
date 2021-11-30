@@ -3,7 +3,7 @@ import * as connections from "../../commons/src/";
 import { CalendarStore } from "../../commons/src/store/calendars";
 import { EventStore } from "../../commons/src/store/events";
 import { ManifestStore } from "../../commons/src/store/manifest";
-import Agenda from "../../components/agenda/src/Agenda.svelte";
+import Agenda from "../../components/agenda/src/agenda.svelte";
 import { mockAgendaCalendar } from "../mocks/MockCalendars";
 import { mockEvents } from "../mocks/MockEvents";
 import { mockAgendaManifest } from "../mocks/MockManifests";

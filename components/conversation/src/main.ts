@@ -1,4 +1,4 @@
 import "@commons/define-component-patch";
-import Conversation from "./Conversation.svelte";
+import Conversation from "./conversation.svelte";
 
 export default Conversation;

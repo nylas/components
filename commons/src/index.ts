@@ -44,5 +44,5 @@ export { ErrorStore } from "./store/error";
  * Esbuild tree shakes NError, however it is used in each component
  * This code prevents Esbuild from tree-shaking NError
  */
-import _ from "./components/NError.svelte";
-void _;
+import NError from "./components/NError.svelte";
+void NError;

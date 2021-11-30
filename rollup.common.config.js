@@ -8,6 +8,7 @@ import json from "@rollup/plugin-json";
 import alias from "@rollup/plugin-alias";
 import path from "path";
 import dotenv from "dotenv";
+import svelte from "rollup-plugin-svelte";
 import esbuild from "rollup-plugin-esbuild";
 const ROOT = "../..";
 dotenv.config({ path: path.resolve(ROOT, ".env") });
@@ -69,16 +70,29 @@ if (process.env.ROLLUP_WATCH) {
 
 export default config;
 
-export const svelteConfig = {
-  dev: !production,
+const svelteBaseConfig = {
   preprocess: autoPreprocess({
     scss: {
       includePaths: [`${ROOT}/node_modules`],
     },
   }),
   emitCss: false,
+};
+
+export const svelteWebComponentsConfig = svelte({
+  ...svelteBaseConfig,
+  include: /\/[a-z][^/]+\.svelte$/,
   compilerOptions: {
     dev: !production,
     customElement: true,
   },
-};
+});
+
+export const svelteComponentsConfig = svelte({
+  ...svelteBaseConfig,
+  include: /\/[A-Z][^/]+\.svelte$/,
+  compilerOptions: {
+    dev: !production,
+    customElement: false,
+  },
+});

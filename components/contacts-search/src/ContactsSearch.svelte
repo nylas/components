@@ -1,14 +1,12 @@
-<svelte:options tag="nylas-contacts-search" immutable={true} />
-
 <script lang="ts">
-  import { debounce, isValidEmail } from "../lib/utils";
+  import { debounce, isValidEmail } from "../lib/utils.ts";
   import { tick } from "svelte";
-  import type { Participant } from "@commons/types/Nylas";
+  import type { Participant } from "@commons/types/Nylas.ts";
   import type {
     FetchContactsCallback,
     ChangeCallback,
     BlurOptions,
-  } from "@commons/types/ContactsSearch";
+  } from "@commons/types/ContactsSearch.ts";
   export let contacts: Participant[] | FetchContactsCallback;
 
   export let value: Participant[] = [];

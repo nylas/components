@@ -11,7 +11,7 @@
     CalendarStore,
     ErrorStore,
     ContactStore,
-  } from "../../../commons/src";
+  } from "@commons";
   import { handleError } from "@commons/methods/api";
   import { onMount, afterUpdate, tick } from "svelte";
   import { get_current_component } from "svelte/internal";
@@ -42,8 +42,8 @@
     Day,
     PreDatedTimeSlot,
   } from "@commons/types/Availability";
-  import "@commons/components/ContactImage/ContactImage.svelte";
-  import "@commons/components/ErrorMessage.svelte";
+  import ContactImage from "@commons/components/ContactImage.svelte";
+  import ErrorMessage from "@commons/components/ErrorMessage.svelte";
   import {
     getTimeString,
     getCondensedTimeString,
@@ -1488,9 +1488,9 @@
 </style>
 
 {#if manifest && manifest.error}
-  <nylas-error {id} />
+  <NError {id} />
 {:else if _this.participants.length === 0 && _this.calendars.length === 0}
-  <nylas-message-error
+  <ErrorMessage
     error_message="Please enter participants to see availability."
   />
 {:else}
@@ -1760,7 +1760,7 @@
         {#each displayedAttendees as attendee, idx}
           <div class={getAttendeeClass(attendee, idx)}>
             <div class="default-avatar">
-              <nylas-contact-image contact={attendee} />
+              <ContactImage contact={attendee} />
             </div>
             <div class="contact-details">
               <span class="name">
@@ -1785,7 +1785,7 @@
       </div>
     </div>
     {#if hasError}
-      <nylas-message-error />
+      <ErrorMessage />
     {/if}
   </main>
 {/if}

@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-error" immutable={true} />
-
 <script lang="ts">
   import { ErrorStore } from "../store/error";
   import type { NError } from "@commons/types/Nylas";

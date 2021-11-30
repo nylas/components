@@ -34,9 +34,9 @@
     Label,
     Folder,
   } from "@commons/types/Nylas";
-  import "@commons/components/ContactImage/ContactImage.svelte";
-  import "@commons/components/MessageBody.svelte";
-  import "@commons/components/Tooltip.svelte";
+  import ContactImage from "@commons/components/ContactImage.svelte";
+  import MessageBody from "@commons/components/MessageBody.svelte";
+  import Tooltip from "@commons/components/Tooltip.svelte";
   import { AccountOrganizationUnit } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
@@ -1144,7 +1144,7 @@
   }
 </style>
 
-<nylas-error {id} />
+<NError {id} />
 <main
   bind:this={main}
   on:click={handleThreadClick}
@@ -1242,7 +1242,7 @@
                         <div class="avatar-from">
                           {#if _this.show_contact_avatar}
                             <div class="default-avatar">
-                              <nylas-contact-image
+                              <ContactImage
                                 {contact_query}
                                 contact={contacts[message?.from[0].email]}
                               />
@@ -1256,7 +1256,7 @@
                                   message?.from[0].email}
                             </span>
                             <!-- tooltip component -->
-                            <nylas-tooltip
+                            <Tooltip
                               on:toggleTooltip={setTooltip}
                               id={message?.id.slice(0, 3)}
                               current_tooltip_id={currentTooltipId}
@@ -1279,7 +1279,7 @@
                                   {/if}
                                 </span>
                                 <!-- tooltip component -->
-                                <nylas-tooltip
+                                <Tooltip
                                   on:toggleTooltip={setTooltip}
                                   id={message?.id.slice(0, 4)}
                                   current_tooltip_id={currentTooltipId}
@@ -1313,7 +1313,7 @@
                       <div class="avatar-from">
                         {#if _this.show_contact_avatar}
                           <div class="default-avatar">
-                            <nylas-contact-image
+                            <ContactImage
                               {contact_query}
                               contact={contacts[message?.from[0].email]}
                             />
@@ -1327,7 +1327,7 @@
                                 message?.from[0].email}</span
                           >
                           <!-- tooltip component -->
-                          <nylas-tooltip
+                          <Tooltip
                             on:toggleTooltip={setTooltip}
                             id={message?.id.slice(0, 3)}
                             current_tooltip_id={currentTooltipId}
@@ -1375,7 +1375,7 @@
               <div class="from-message-count">
                 {#if _this.show_contact_avatar}
                   <div class="default-avatar">
-                    <nylas-contact-image
+                    <ContactImage
                       {contact_query}
                       contact={activeThreadContact}
                     />
@@ -1503,7 +1503,7 @@
               <div class="avatar-from">
                 {#if _this.show_contact_avatar}
                   <div class="default-avatar">
-                    <nylas-contact-image
+                    <ContactImage
                       {contact_query}
                       contact={activeMessageContact}
                     />
@@ -1517,7 +1517,7 @@
                         message?.from[0].email}</span
                   >
                   <!-- tooltip component -->
-                  <nylas-tooltip
+                  <Tooltip
                     on:toggleTooltip={setTooltip}
                     id={_this.message?.id}
                     current_tooltip_id={currentTooltipId}
@@ -1537,7 +1537,7 @@
                           : to.name || to.email}
                       </span>
                       <!-- tooltip component -->
-                      <nylas-tooltip
+                      <Tooltip
                         on:toggleTooltip={setTooltip}
                         id={_this.message.id.slice(0, 3)}
                         current_tooltip_id={currentTooltipId}

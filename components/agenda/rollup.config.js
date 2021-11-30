@@ -1,10 +1,8 @@
-import config, { svelteConfig } from "../../rollup.common.config";
-import svelte from "rollup-plugin-svelte";
+import config, {
+  svelteWebComponentsConfig,
+  svelteComponentsConfig,
+} from "../../rollup.common.config";
 
-config.plugins.unshift(
-  svelte({
-    ...svelteConfig,
-  }),
-);
+config.plugins.unshift(svelteWebComponentsConfig, svelteComponentsConfig);
 
 export default { ...config, input: "src/main.ts" };

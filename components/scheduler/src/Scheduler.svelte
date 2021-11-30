@@ -249,7 +249,7 @@
   @import "./styles/scheduler.scss";
 </style>
 
-<nylas-error {id} />
+<NError {id} />
 <main>
   <section class="booker">
     <h2>Your Appointment Bookings</h2>

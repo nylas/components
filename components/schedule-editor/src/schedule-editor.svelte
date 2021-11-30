@@ -15,10 +15,10 @@
   import type { CustomField } from "@commons/types/Scheduler";
   import { onDestroy, onMount, tick } from "svelte";
   import timezones from "timezones-list";
-  import { ManifestStore } from "../../../commons/src";
+  import { ManifestStore } from "@commons";
   import { saveManifest } from "@commons/connections/manifest";
-  import "../../availability/src/Availability.svelte";
-  import "../../scheduler/src/Scheduler.svelte";
+  import "../../availability/src/availability.svelte";
+  import "../../scheduler/src/scheduler.svelte";
   import DragIcon from "./assets/drag-icon.svg";
   import "./components/DragItemPlaceholder.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";

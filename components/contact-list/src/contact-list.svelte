@@ -457,7 +457,7 @@
   }
 </style>
 
-<nylas-error {id} />
+<NError {id} />
 
 {#if themeUrl}
   <link rel="stylesheet" href={themeUrl} />

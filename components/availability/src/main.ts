@@ -1,4 +1,4 @@
 import "@commons/define-component-patch";
-import availability from "./Availability.svelte";
+import availability from "./availability.svelte";
 
 export default availability;

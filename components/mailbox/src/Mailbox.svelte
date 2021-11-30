@@ -24,7 +24,7 @@
     Thread,
   } from "@commons/types/Nylas";
   import { get_current_component, onMount, tick } from "svelte/internal";
-  import "../../email/src/Email.svelte";
+  import "../../email/src/email.svelte";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
   import MarkUnreadIcon from "./assets/envelope.svg";
   import LoadingIcon from "./assets/loading.svg";

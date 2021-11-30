@@ -1,15 +1,15 @@
-import config, { svelteConfig } from "../../rollup.common.config";
-import svelte from "rollup-plugin-svelte";
+import config, {
+  svelteWebComponentsConfig,
+  svelteComponentsConfig,
+} from "../../rollup.common.config";
 import svelteSVG from "rollup-plugin-svelte-svg";
 import json from "@rollup/plugin-json";
 
-config.plugins.unshift(svelteSVG());
-
 config.plugins.unshift(
-  svelte({
-    ...svelteConfig,
-  }),
+  json(),
+  svelteSVG(),
+  svelteWebComponentsConfig,
+  svelteComponentsConfig,
 );
-config.plugins.unshift(json());
 
 export default { ...config, input: "src/main.ts" };

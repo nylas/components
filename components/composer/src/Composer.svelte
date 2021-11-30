@@ -4,8 +4,8 @@
   import "./components/HTMLEditor.svelte";
   import "./components/AlertBar.svelte";
   import "./components/Attachment.svelte";
-  import "./components/DatepickerModal.svelte";
-  import "../../contacts-search/src/ContactsSearch.svelte";
+  import DatepickerModal from "./components/DatepickerModal.svelte";
+  import ContactsSearch from "../../contacts-search/src/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
   import {
     ManifestStore,
@@ -585,7 +585,7 @@
   }
 </style>
 
-<nylas-error {id} />
+<NError {id} />
 
 {#if themeUrl}
   <link
@@ -632,7 +632,7 @@
         <!-- Search -->
         <div class="contacts-wrapper">
           {#if _this.show_from}
-            <nylas-contacts-search
+            <ContactSearch
               placeholder="From:"
               single={true}
               change={handleContactsChange("from")}
@@ -641,7 +641,7 @@
             />
           {/if}
           {#if _this.show_to}
-            <nylas-contacts-search
+            <ContactSearch
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
@@ -670,7 +670,7 @@
         </div>
         {#if _this.show_cc}
           <div class="cc-container">
-            <nylas-contacts-search
+            <ContactSearch
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
@@ -691,7 +691,7 @@
         {/if}
         {#if _this.show_bcc}
           <div class="cc-container">
-            <nylas-contacts-search
+            <ContactSearch
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}
@@ -783,7 +783,7 @@
       </footer>
       <!-- Date Picker Component -->
       {#if showDatepicker}
-        <nylas-composer-datepicker-modal close={datePickerClose} {schedule} />
+        <DatepickerModal close={datePickerClose} {schedule} />
       {/if}
       <!-- Datepicker Alert (if message is scheduled) -->
       {#if $message.send_at && !sendError && !sendSuccess}

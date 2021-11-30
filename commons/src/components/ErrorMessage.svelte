@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-message-error" />
-
 <script>
   export let error_message = "Uh oh! Looks like an error occurred";
 </script>

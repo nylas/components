@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-tooltip" />
-
 <script lang="ts">
   import { get_current_component } from "svelte/internal";
   import { getEventDispatcher } from "@commons/methods/component";

@@ -9,9 +9,9 @@
   <body>
     <script src="../index.js"></script>
 
-    <nylas-contacts-search></nylas-contacts-search>
+    <ContactSearch />
     <script>
-      const el = document.querySelector("nylas-contacts-search");
+      const el = document.querySelector("div.dropdown");
       el.onChange = () => {
         console.log("change handler");
       };
