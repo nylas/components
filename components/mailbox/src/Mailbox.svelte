@@ -443,9 +443,12 @@
     position: relative;
     display: grid;
     grid-auto-rows: max-content;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(
+      --mailbox-font-family,
+      "-apple-system, BlinkMacSystemFont, sans-serif"
+    );
 
-    $outline-style: 1px solid var(--grey-lighter);
+    $outline-style: 1px solid var(--mailbox-border-color, var(--grey-lighter));
     @mixin barStyle {
       outline: $outline-style;
       display: flex;
@@ -498,14 +501,14 @@
           content: "\2605";
           display: inline-block;
           font-size: 1em;
-          color: #ccc;
+          color: var(--mailbox-starred-disabled-color, #ccc);
           -webkit-user-select: none;
           -moz-user-select: none;
           user-select: none;
         }
 
         &.starred:before {
-          color: #ffc107;
+          color: var(--mailbox-starred-enabled-color, #ffc107);
         }
       }
     }
@@ -523,7 +526,8 @@
 
       &:hover {
         $hover-outline-width: 1px;
-        outline: $hover-outline-width solid var(--grey-warm);
+        outline: $hover-outline-width solid
+          var(--mailbox-grey-warm-color, var(--grey-warm));
         cursor: pointer;
       }
 
@@ -538,17 +542,17 @@
       --nylas-email-unread-background: transparent;
 
       &:not(.unread) {
-        background: var(--grey-lightest);
+        background: var(--mailbox-read-color, var(--grey-lightest));
       }
       &.unread {
-        background: var(--nylas-email-background);
+        background: var(--mailbox-unread-color, var(--nylas-email-background));
       }
       // #endregion define background styles
 
       // #region define checked styles
       &.checked {
-        border-left: 4px solid var(--blue);
-        background: var(--blue-lighter);
+        border-left: 4px solid var(--mailbox-checked-border-color, var(--blue));
+        background: var(--mailbox-checked-bg-color, var(--blue-lighter));
 
         .checkbox-container.thread-checkbox {
           padding-left: 13px;
@@ -599,7 +603,7 @@
       div.starred {
         button {
           &:hover:before {
-            color: #ffc107;
+            color: var(--mailbox-starred-enabled-color, #ffc107);
           }
         }
       }
