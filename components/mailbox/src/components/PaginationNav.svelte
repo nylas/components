@@ -1,5 +1,3 @@
-<svelte:options tag="pagination-nav" />
-
 <script lang="ts">
   export let current_page: number = 0;
   export let items_per_page: number;

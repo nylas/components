@@ -1,9 +1,9 @@
 <svelte:options tag="nylas-composer" immutable />
 
 <script lang="ts">
-  import "./components/HTMLEditor.svelte";
-  import "./components/AlertBar.svelte";
-  import "./components/Attachment.svelte";
+  import HTMLEditor from "./components/HTMLEditor.svelte";
+  import AlertBar from "./components/AlertBar.svelte";
+  import Attachment from "./components/Attachment.svelte";
   import DatepickerModal from "./components/DatepickerModal.svelte";
   import ContactsSearch from "../../contacts-search/src/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
@@ -632,7 +632,7 @@
         <!-- Search -->
         <div class="contacts-wrapper">
           {#if _this.show_from}
-            <ContactSearch
+            <ContactsSearch
               placeholder="From:"
               single={true}
               change={handleContactsChange("from")}
@@ -641,7 +641,7 @@
             />
           {/if}
           {#if _this.show_to}
-            <ContactSearch
+            <ContactsSearch
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
@@ -670,7 +670,7 @@
         </div>
         {#if _this.show_cc}
           <div class="cc-container">
-            <ContactSearch
+            <ContactsSearch
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
@@ -691,7 +691,7 @@
         {/if}
         {#if _this.show_bcc}
           <div class="cc-container">
-            <ContactSearch
+            <ContactsSearch
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}
@@ -724,7 +724,7 @@
         {/if}
 
         <!-- HTML Editor -->
-        <nylas-html-editor
+        <HTMLEditor
           html={$message.body || template}
           onchange={handleBodyChange}
           replace_fields={_this.replace_fields}
@@ -736,7 +736,7 @@
               <div class="attachments-caption">Attachments:</div>
 
               {#each $attachments as fileAttachment}
-                <nylas-composer-attachment
+                <Attachment
                   attachment={fileAttachment}
                   remove={handleRemoveFile}
                 />
@@ -787,25 +787,21 @@
       {/if}
       <!-- Datepicker Alert (if message is scheduled) -->
       {#if $message.send_at && !sendError && !sendSuccess}
-        <nylas-composer-alert-bar
-          type="info"
-          dismissible={true}
-          ondismiss={removeSchedule}
-        >
+        <AlertBar type="info" dismissible={true} ondismiss={removeSchedule}>
           Send scheduled for
           <span>{formatDate(new Date(datepickerTimestamp))}</span>
-        </nylas-composer-alert-bar>
+        </AlertBar>
       {/if}
       <!-- Alerts -->
       {#if sendError}
-        <nylas-composer-alert-bar type="danger" dismissible={true}>
+        <AlertBar type="danger" dismissible={true}>
           Error: Failed to send the message.
-        </nylas-composer-alert-bar>
+        </AlertBar>
       {/if}
       {#if sendSuccess}
-        <nylas-composer-alert-bar type="success" dismissible={true}>
+        <AlertBar type="success" dismissible={true}>
           Message sent successfully!
-        </nylas-composer-alert-bar>
+        </AlertBar>
       {/if}
     {/if}
   </div>

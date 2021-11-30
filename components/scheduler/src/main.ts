@@ -1,4 +1,4 @@
 import "@commons/define-component-patch";
-import scheduler from "./scheduler.svelte";
+import Scheduler from "./scheduler.svelte";
 
-export default scheduler;
+export default Scheduler;

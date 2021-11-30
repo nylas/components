@@ -29,7 +29,7 @@
   import MarkUnreadIcon from "./assets/envelope.svg";
   import LoadingIcon from "./assets/loading.svg";
   import TrashIcon from "./assets/trash-alt.svg";
-  import "./components/PaginationNav.svelte";
+  import PaginationNav from "./components/PaginationNav.svelte";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -761,7 +761,7 @@
           </div>
         {/each}
         {#if !_this.keyword_to_search && threads && threads.length > 0}
-          <pagination-nav
+          <PaginationNav
             current_page={currentPage}
             items_per_page={_this.items_per_page}
             num_pages={numPages}

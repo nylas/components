@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-composer-attachment" />
-
 <script lang="ts">
   import CloseIcon from "../assets/close.svg";
   import LoadingIcon from "../assets/loading.svg";

@@ -20,7 +20,7 @@
   import "../../availability/src/availability.svelte";
   import "../../scheduler/src/scheduler.svelte";
   import DragIcon from "./assets/drag-icon.svg";
-  import "./components/DragItemPlaceholder.svelte";
+  import DragItemPlaceholder from "./components/DragItemPlaceholder.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
 
   export let id: string = "";
@@ -1068,7 +1068,7 @@
     {/if}
 
     {#if tablerowRect && tablecellRect.length}
-      <nylas-schedule-editor-drag-item-placeholder
+      <DragItemPlaceholder
         left={dragPlaceholder.left}
         top={dragPlaceholder.top}
         height={tablerowRect.height}
@@ -1084,7 +1084,7 @@
             {(draggedField && draggedField[key]) || "—"}
           </div>
         {/each}
-      </nylas-schedule-editor-drag-item-placeholder>
+      </DragItemPlaceholder>
     {/if}
   </main>
 {/if}

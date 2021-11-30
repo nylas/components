@@ -1,4 +1,4 @@
 import "@commons/define-component-patch";
-import agenda from "./agenda.svelte";
+import Agenda from "./agenda.svelte";
 
-export default agenda;
+export default Agenda;

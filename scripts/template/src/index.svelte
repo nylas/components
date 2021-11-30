@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-$NAME$" />
 
 <script lang="ts">
-  import { ManifestStore } from "../../../commons/src";
+  import { ManifestStore } from "@commons";
   import { onMount, tick } from "svelte";
 
   export let id: string = "";

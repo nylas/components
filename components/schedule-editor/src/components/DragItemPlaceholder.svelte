@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-schedule-editor-drag-item-placeholder" immutable />
-
 <script lang="ts">
   import DragIcon from "../assets/drag-icon.svg";
 
