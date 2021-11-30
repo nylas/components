@@ -5,7 +5,7 @@
   import AlertBar from "./components/AlertBar.svelte";
   import Attachment from "./components/Attachment.svelte";
   import DatepickerModal from "./components/DatepickerModal.svelte";
-  import ContactsSearch from "../../contacts-search/src/ContactsSearch.svelte";
+  import ContactsSearch from "@commons/components/contacts-search/src/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
   import {
     ManifestStore,

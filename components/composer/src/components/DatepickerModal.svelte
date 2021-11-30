@@ -1,5 +1,5 @@
 <script type="ts">
-  import Datepicker from "../../../datepicker/src/Datepicker.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
+  import Datepicker from "@commons/components/datepicker/src/Datepicker.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
   import CloseIcon from "../assets/close.svg";
   import type {
     DatepickerCallback,
