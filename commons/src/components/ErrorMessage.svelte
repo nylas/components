@@ -34,7 +34,7 @@
 
 <div>
   <p>{error_message}</p>
-  <button type="button" on:click={() => location.reload()}
-    >Refresh your page</button
-  >
+  <button type="button" on:click={() => location.reload()}>
+    Refresh your page
+  </button>
 </div>

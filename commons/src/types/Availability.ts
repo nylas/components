@@ -19,6 +19,7 @@ export interface Manifest extends NylasManifest {
   date_format: "full" | "weekday" | "date" | "none";
   dates_to_show: number;
   email_ids: string[];
+  participants: string[];
   end_hour: number;
   event_buffer: number;
   free_color: string;
