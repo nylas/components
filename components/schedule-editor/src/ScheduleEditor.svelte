@@ -300,6 +300,8 @@
     newCustomField = { ...emptyCustomField };
 
     newFieldTitleElement.focus();
+
+    customFieldDomRects = getDomRects(customFieldRefs);
   }
 
   type CustomFieldWithId = CustomField & { id: string };
@@ -389,13 +391,13 @@
 
   $: if (customFieldDomRects) {
     // Set max top and bottom for drag
-    if (customFieldDomRects[0] && !maxDragTop) {
+    if (customFieldDomRects[0]) {
       maxDragTop =
         document.documentElement.scrollTop +
         customFieldDomRects[0].top +
         tablerowRect.height / 2;
     }
-    if (customFieldDomRects[customFieldDomRects.length - 1] && !maxDragBottom) {
+    if (customFieldDomRects[customFieldDomRects.length - 1]) {
       maxDragBottom =
         document.documentElement.scrollTop +
         customFieldDomRects[customFieldDomRects.length - 1].top +
