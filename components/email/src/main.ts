@@ -1,4 +1,4 @@
 import "@commons/define-component-patch";
-import Email from "./email.svelte";
+import email from "./email.svelte";
 
-export default Email;
+export default email;

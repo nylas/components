@@ -1,4 +1,4 @@
 import "@commons/define-component-patch";
-import ContactList from "./contact-list.svelte";
+import contactList from "./contact-list.svelte";
 
-export default ContactList;
+export default contactList;
