@@ -13,12 +13,15 @@
     EventDefinition,
   } from "@commons/types/ScheduleEditor";
   import type { CustomField } from "@commons/types/Scheduler";
-  import { onMount, tick } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import timezones from "timezones-list";
   import { ManifestStore } from "../../../commons/src";
   import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
   import "../../scheduler/src/Scheduler.svelte";
+  import DragIcon from "./assets/drag-icon.svg";
+  import "./components/DragItemPlaceholder.svelte";
+  import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -99,6 +102,8 @@
     events: [{ ...eventTemplate }],
   };
 
+  let main: HTMLElement;
+
   //#region mount and prop initialization
   let _this = <Manifest>buildInternalProps({}, {}, defaultValueMap);
   let initialized = false;
@@ -111,7 +116,31 @@
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
     transformPropertyValues();
     initialized = true;
+
+    // Setup temporary ids for custom fields for drag reorder functionality
+    _this.custom_fields = _this.custom_fields.map((field, i) => {
+      customFieldIdOrder = customFieldIdOrder.concat(String(i));
+
+      return {
+        ...field,
+        id: String(i),
+      };
+    });
   });
+
+  onDestroy(() => {
+    main.removeEventListener("mousemove", handleCustomFieldDragMove);
+    main.removeEventListener("mouseup", handleCustomFieldDragRelease);
+
+    if (rowResizeObserver) {
+      rowResizeObserver.disconnect();
+    }
+  });
+
+  $: if (main) {
+    main.addEventListener("mouseup", handleCustomFieldDragRelease);
+    main.addEventListener("mousemove", handleCustomFieldDragMove);
+  }
 
   let previousProps = $$props;
   $: {
@@ -142,10 +171,18 @@
   // #endregion mount and prop initialization
 
   function saveProperties() {
+    const cleanedProps = {
+      ..._this,
+      custom_fields: _this.custom_fields.map((field) => {
+        delete field["id"]; // used only for drag reorder interactions
+        return field;
+      }),
+    };
+
     saveManifest({
       id,
       access_token,
-      manifest: { settings: { ..._this } },
+      manifest: { settings: cleanedProps },
     });
   }
 
@@ -230,16 +267,22 @@
   $: showPreview = mainElementWidth > 600;
 
   //#region custom fields
-  const customFieldKeys = ["title", "description", "type", "required"];
-  const emptyCustomField: CustomField = {
+  const emptyCustomField: CustomFieldWithId = {
     title: "",
     description: "",
     type: "text",
     required: false,
+    id: "",
   };
+  const customFieldKeys: Array<keyof CustomField> = [
+    "title",
+    "description",
+    "type",
+    "required",
+  ];
 
   let newFieldTitleElement: HTMLElement;
-  let newCustomField: CustomField = { ...emptyCustomField };
+  let newCustomField: CustomFieldWithId = { ...emptyCustomField };
 
   function removeCustomField(field: CustomField) {
     _this.custom_fields = _this.custom_fields.filter(
@@ -248,10 +291,160 @@
   }
 
   function addNewField(field: CustomField) {
-    _this.custom_fields = [..._this.custom_fields, field];
+    const fieldWithId = {
+      ...field,
+      id: String(_this.custom_fields.length),
+    };
+    _this.custom_fields = [..._this.custom_fields, fieldWithId];
+
     newCustomField = { ...emptyCustomField };
+
     newFieldTitleElement.focus();
+
+    customFieldDomRects = getDomRects(customFieldRefs);
   }
+
+  type CustomFieldWithId = CustomField & { id: string };
+  let draggedField: CustomFieldWithId | null = null;
+  let draggedFieldIndex: number;
+  let tablerowRect: DOMRect;
+  let tablecellRect: DOMRect[] = []; // To replicate cell dimensions on drag-placeholder
+  type CustomFieldRefs = Record<string, HTMLElement>;
+  let customFieldRefs: CustomFieldRefs = {}; // store the refs to dom nodes once so we can recalculate sizes on the fly
+  let customFieldDomRects: DOMRect[] = [];
+  let customFieldIdOrder: string[] = [];
+  let maxDragTop: number;
+  let maxDragBottom: number;
+  let dragBegins = false;
+  let dragPlaceholder = {
+    left: 0,
+    top: 0,
+  };
+  let rowResizeObserver: ResizeObserver;
+
+  type CustomFieldDrag = {
+    event: MouseEvent;
+    fieldProperties: CustomFieldWithId;
+    fieldIndex: number;
+  };
+
+  function handleCustomFieldDrag({
+    event,
+    fieldProperties,
+    fieldIndex,
+  }: CustomFieldDrag) {
+    if (!dragBegins) {
+      customFieldDomRects = getDomRects(customFieldRefs);
+      dragBegins = true;
+    }
+
+    draggedFieldIndex = fieldIndex;
+    draggedField = fieldProperties;
+
+    setDragRowPosition(event);
+  }
+
+  function handleCustomFieldDragRelease() {
+    draggedField = null;
+  }
+
+  function swapDraggedWithHovered(hoveredFieldIndex: number) {
+    let updatedFieldOrder = [..._this.custom_fields] as CustomFieldWithId[];
+
+    // Swap the current hovered field with the dragged field
+    let temp = updatedFieldOrder[hoveredFieldIndex];
+    updatedFieldOrder[hoveredFieldIndex] = updatedFieldOrder[draggedFieldIndex];
+    updatedFieldOrder[draggedFieldIndex] = temp;
+
+    // update custom fields to reflect the drag order
+    _this.custom_fields = updatedFieldOrder;
+    customFieldIdOrder = updatedFieldOrder.map((field) => field.id);
+
+    // current dragged index is now what was hovered
+    draggedFieldIndex = updatedFieldOrder.findIndex(
+      (customField) => customField.id === draggedField?.id,
+    );
+  }
+
+  /**
+   * Sets position for the drag preview row
+   * @param event
+   */
+  const setDragRowPosition = (event: MouseEvent) => {
+    const rowHeightOffset = tablerowRect.height / 2;
+    const dragRowPosition = event.pageY;
+
+    // stick the drag preview if cursor is beyond max top and max bottom
+    let previewTopPosition: number | null = null;
+    if (dragRowPosition <= maxDragTop) {
+      previewTopPosition = maxDragTop - rowHeightOffset;
+    } else if (dragRowPosition >= maxDragBottom) {
+      previewTopPosition = maxDragBottom - rowHeightOffset;
+    }
+
+    // set initial position of drag preview
+    dragPlaceholder = {
+      left: tablerowRect.x,
+      top: previewTopPosition ?? dragRowPosition - rowHeightOffset,
+    };
+  };
+
+  $: if (customFieldDomRects) {
+    // Set max top and bottom for drag
+    if (customFieldDomRects[0]) {
+      maxDragTop =
+        document.documentElement.scrollTop +
+        customFieldDomRects[0].top +
+        tablerowRect.height / 2;
+    }
+    if (customFieldDomRects[customFieldDomRects.length - 1]) {
+      maxDragBottom =
+        document.documentElement.scrollTop +
+        customFieldDomRects[customFieldDomRects.length - 1].top +
+        tablerowRect.height / 2;
+    }
+  }
+
+  function handleCustomFieldDragMove(e: MouseEvent) {
+    if (draggedField) {
+      setDragRowPosition(e);
+    }
+  }
+
+  function storeRef(node: HTMLElement, params: { id: string }) {
+    customFieldRefs[params.id] = node;
+
+    if (!tablerowRect) {
+      const { parentRect, childRects } = getDomRectsFromParentAndChildren(
+        node,
+        "td",
+      );
+      tablerowRect = parentRect;
+      tablecellRect = childRects;
+
+      // Watches row element if it changes size
+      rowResizeObserver = new ResizeObserver(([observerEntry]) => {
+        const { parentRect, childRects } = getDomRectsFromParentAndChildren(
+          observerEntry.target,
+          "td",
+        );
+        tablerowRect = parentRect;
+        tablecellRect = childRects;
+
+        dragBegins = false; // reset on next start of drag
+      });
+
+      rowResizeObserver.observe(node);
+    }
+
+    return {
+      destroy() {
+        // clean up customFieldIdOrder hashmap
+        delete customFieldRefs[params.id];
+      },
+    };
+  }
+
   //#endregion custom fields
 
   //#region consecutive events
@@ -279,6 +472,7 @@
     on:mousemove={adjustColumns}
     on:mouseup={() => (adjustingPreviewPane = false)}
     bind:clientWidth={mainElementWidth}
+    bind:this={main}
   >
     <div class="settings">
       <section class="basic-details">
@@ -694,7 +888,7 @@
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
 
-      <section class="booking-details">
+      <section class="custom-fields">
         <h1>Custom Fields</h1>
         <p class="intro">
           Ask users to fill out a few details before booking an event with you.
@@ -710,16 +904,40 @@
                 <th />
               </thead>
               <tbody>
-                {#each _this.custom_fields as field}
-                  <tr>
+                {#each _this.custom_fields as field, i (field.id)}
+                  <tr
+                    class:drag-active={field.id === draggedField?.id}
+                    on:mouseenter={() => {
+                      if (draggedField && i !== draggedFieldIndex) {
+                        swapDraggedWithHovered(i);
+                      }
+                    }}
+                    use:storeRef={{ id: field.id }}
+                  >
                     {#each customFieldKeys as key}
                       <td>{field[key] || "—"}</td>
                     {/each}
-                    <td
-                      ><button on:click={() => removeCustomField(field)}
-                        >Remove</button
-                      ></td
-                    >
+                    <td class="cta">
+                      <button
+                        class="remove"
+                        on:click={() => removeCustomField(field)}
+                      >
+                        Remove
+                      </button>
+                      <button
+                        class="drag"
+                        on:mousedown={(event) => {
+                          handleCustomFieldDrag({
+                            event,
+                            fieldProperties: field,
+                            fieldIndex: i,
+                          });
+                        }}
+                      >
+                        <span class="sr-only">Reorder custom field</span>
+                        <DragIcon />
+                      </button>
+                    </td>
                   </tr>
                 {/each}
                 <tr class="add-new">
@@ -847,6 +1065,26 @@
           {id}
         />
       </aside>
+    {/if}
+
+    {#if tablerowRect && tablecellRect.length}
+      <nylas-schedule-editor-drag-item-placeholder
+        left={dragPlaceholder.left}
+        top={dragPlaceholder.top}
+        height={tablerowRect.height}
+        width={tablerowRect.width}
+        visible={!!draggedField}
+      >
+        {#each customFieldKeys as key, i}
+          <div
+            class="drag-preview-cell"
+            style="width: {tablecellRect[i].width}px; height: {tablecellRect[i]
+              .height}px;"
+          >
+            {(draggedField && draggedField[key]) || "—"}
+          </div>
+        {/each}
+      </nylas-schedule-editor-drag-item-placeholder>
     {/if}
   </main>
 {/if}

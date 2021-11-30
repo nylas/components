@@ -16,7 +16,7 @@
   "dependencies": {
     "d3-scale": "^4.0.0",
     "d3-time": "^3.0.0",
-    "just-throttle": "^2.3.1"
+    "just-throttle": "2.3.1"
   },
   "devDependencies": {
     "@types/d3-scale": "^4.0.1",
