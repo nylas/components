@@ -8,12 +8,6 @@ function initializeLabels() {
 
   return {
     subscribe,
-    addLabels: (incomingLabels: StoredLabels) => {
-      update((labels) => {
-        labels[incomingLabels.queryKey] = incomingLabels.data;
-        return { ...labels };
-      });
-    },
     getLabels: async (query: CommonQuery, forceRefresh = false) => {
       const queryKey = JSON.stringify(query);
       if (

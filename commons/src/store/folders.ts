@@ -8,12 +8,6 @@ function initializeFolders() {
 
   return {
     subscribe,
-    addFolders: (incomingFolders: StoredFolders) => {
-      update((folders) => {
-        folders[incomingFolders.queryKey] = incomingFolders.data;
-        return { ...folders };
-      });
-    },
     getFolders: async (query: CommonQuery, forceRefresh = false) => {
       const queryKey = JSON.stringify(query);
       if (
