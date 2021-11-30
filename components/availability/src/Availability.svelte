@@ -809,11 +809,9 @@
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
       let dispatchableSlots = sortedSlots;
-      // TODO, discussion:should the splitting happen here, or in the scheduler component?
       if (selectedConsecutiveEventBlock.length && sortedSlots.length === 1) {
         dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
           event.available_calendars = event.emails; // slot.available_calendars is a little convoluted with freeCalendars above. TODO: refactor freeCalendars in generateDaySlots()
-          console.log("checking event", event);
           return { ...sortedSlots[0], ...event };
         });
       }
@@ -1151,6 +1149,12 @@
     } else {
       _this.start_date = timeDay.offset(endDay, 1);
     }
+    // On date change, dispatch an empty list to let parent app trigger a loading state
+    if (Array.isArray(_this.events) && _this.events.length > 1) {
+      dispatchEvent("eventOptionsReady", {
+        slots: [],
+      });
+    }
   }
   function goToPreviousDate() {
     if (_this.show_as_week && !tooSmallForWeek) {
@@ -1165,6 +1169,12 @@
         true,
       );
       _this.start_date = previousRange[0];
+    }
+    // On date change, dispatch an empty list to let parent app trigger a loading state
+    if (Array.isArray(_this.events) && _this.events.length > 1) {
+      dispatchEvent("eventOptionsReady", {
+        slots: [],
+      });
     }
   }
   // #endregion Date Change
@@ -1593,13 +1603,6 @@
       _this.events.length > 1 &&
       dayRange.length
     ) {
-      // debugger;
-      // On date change, dispatch an empty list to let parent app trigger a loading state
-      // Update: maybe not, though. Funky behaviour. TODO.
-      // dispatchEvent("eventOptionsReady", {
-      //   slots: [],
-      // });
-
       // the availability/consecutive endpoint eagerly returns open timeslots;
       // establish open hours so the user isn't overburdened with the horrible freedom of choice.
       let openHours: OpenHours[] = [];
