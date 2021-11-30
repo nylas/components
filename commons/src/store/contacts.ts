@@ -1,26 +1,69 @@
 import { writable } from "svelte/store";
-import { fetchContactsByQuery } from "@commons";
+import {
+  fetchContacts,
+  fetchContactsByQuery,
+} from "@commons/connections/contacts";
 import type {
-  StoredContacts,
   Contact,
+  ContactEmail,
   ContactSearchQuery,
+  ContactsQuery,
 } from "@commons/types/Contacts";
 
-const contactsMap: Record<string, Contact[]> = {};
+let contactsMap: Record<string, Contact[]> = {};
+
+function filterContacts(contacts: Contact[]) {
+  return contacts
+    .filter(
+      (contact) =>
+        !!contact.given_name ||
+        !!contact.surname ||
+        (Array.isArray(contact.emails) && contact.emails.length > 0),
+    )
+    .map((contact) => {
+      // Ensure each contact has at least one "email" to load
+      if (!Array.isArray(contact.emails) || contact.emails.length === 0) {
+        contact.emails = [{ email: "" } as ContactEmail];
+      }
+
+      return contact;
+    });
+}
 
 function initializeContacts() {
   const { subscribe, set, update } = writable<Record<string, Contact[]>>({});
   return {
     subscribe,
-    addContacts: (incomingContacts: StoredContacts) => {
-      update((contacts) => {
-        contacts[incomingContacts.queryKey] = contacts[
-          incomingContacts.queryKey
-        ]
-          ? [...contacts[incomingContacts.queryKey], ...incomingContacts.data]
-          : incomingContacts.data;
-        return contacts;
-      });
+    addContacts: async (
+      query: ContactsQuery,
+      offset: number,
+      limit: number,
+    ) => {
+      const queryKey = JSON.stringify(query);
+      if (
+        !contactsMap[queryKey] &&
+        (query.component_id || query.access_token)
+      ) {
+        if (offset === 0) {
+          // Ensure the store is empty if our offset is 0
+          ContactStore.reset();
+        }
+
+        const contacts =
+          (await fetchContacts(query, offset, limit)
+            .then((contacts) => filterContacts(contacts))
+            .catch(() => [])) ?? [];
+
+        contactsMap[queryKey] = contactsMap[queryKey]
+          ? [...contactsMap[queryKey], ...contacts]
+          : contacts;
+
+        update((contacts) => {
+          contacts[queryKey] = contactsMap[queryKey];
+          return { ...contacts };
+        });
+        return contactsMap[queryKey];
+      }
     },
     addContact: async (query: ContactSearchQuery) => {
       const queryKey = JSON.stringify(query);
@@ -28,15 +71,14 @@ function initializeContacts() {
         !contactsMap[queryKey] &&
         (query.component_id || query.access_token)
       ) {
-        contactsMap[queryKey] = await fetchContactsByQuery(query)
-          .then((res) => {
-            if (res.length) {
-              return res;
-            } else {
-              return [];
-            }
-          })
-          .catch(() => []);
+        const contacts =
+          (await fetchContactsByQuery(query)
+            .then((contacts) => filterContacts(contacts))
+            .catch(() => [])) ?? [];
+
+        contactsMap[queryKey] = contactsMap[queryKey]
+          ? [...contactsMap[queryKey], ...contacts]
+          : contacts;
         update((contacts) => {
           contacts[queryKey] = contactsMap[queryKey];
           return { ...contacts };
@@ -44,7 +86,10 @@ function initializeContacts() {
       }
       return contactsMap[queryKey];
     },
-    reset: () => set({}),
+    reset: () => {
+      contactsMap = {};
+      set({});
+    },
   };
 }
 

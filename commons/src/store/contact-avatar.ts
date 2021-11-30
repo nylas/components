@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import { fetchContactImage } from "@commons";
+import { fetchContactImage } from "@commons/connections/contacts";
 import type { ContactsQuery } from "@commons/types/Contacts";
 
 const contactAvatarMap: Record<string, string> = {};

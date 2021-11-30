@@ -1,4 +1,3 @@
-import { ContactStore } from "../store/contacts";
 import {
   getFetchConfig,
   handleError,
@@ -8,7 +7,6 @@ import {
 import type {
   ContactsQuery,
   Contact,
-  ContactEmail,
   ContactSearchQuery,
 } from "@commons/types/Contacts";
 import type { MiddlewareResponse, Thread } from "@commons/types/Nylas";
@@ -32,33 +30,7 @@ export const fetchContacts = async (
       return json.response;
     })
     .catch((error) => handleError(query.component_id, error));
-
-  if (offset === 0) {
-    // Ensure the store is empty if our offset is 0
-    ContactStore.reset();
-  }
-
-  ContactStore.addContacts({
-    queryKey: JSON.stringify(query),
-    data: contacts
-      // Filter out any contacts without a name or email
-      .filter(
-        (contact) =>
-          !!contact.given_name ||
-          !!contact.surname ||
-          (Array.isArray(contact.emails) && contact.emails.length > 0),
-      )
-      .map((contact) => {
-        // Ensure each contact has at least one "email" to load
-        if (!Array.isArray(contact.emails) || contact.emails.length === 0) {
-          contact.emails = [{ email: "" } as ContactEmail];
-        }
-
-        return contact;
-      }),
-  });
-
-  return contacts;
+  return contacts ?? [];
 };
 
 // query.query should be a queryString as defined at https://docs.nylas.com/reference#contacts-1
@@ -78,26 +50,7 @@ export const fetchContactsByQuery = async (
     })
     .catch((error) => handleError(query.component_id, error));
 
-  ContactStore.addContacts({
-    queryKey: JSON.stringify(query),
-    data: contacts
-      // Filter out any contacts without a name or email
-      .filter(
-        (contact) =>
-          !!contact.given_name ||
-          !!contact.surname ||
-          (Array.isArray(contact.emails) && contact.emails.length > 0),
-      )
-      .map((contact) => {
-        // Ensure each contact has at least one "email" to load
-        if (!Array.isArray(contact.emails) || contact.emails.length === 0) {
-          contact.emails = [{ email: "" } as ContactEmail];
-        }
-        return contact;
-      }),
-  });
-
-  return contacts;
+  return contacts ?? [];
 };
 
 export const fetchContactImage = async (
