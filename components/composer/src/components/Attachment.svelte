@@ -18,6 +18,7 @@
 </script>
 
 <style lang="scss">
+  @import "../../../theming/variables.scss";
   .wrapper {
     padding: 0.3rem 0;
   }
@@ -39,18 +40,14 @@
     cursor: pointer;
     margin-left: 10px;
     flex-shrink: 0;
-  }
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-height: 10px;
+    max-width: 10px;
   }
 
   .file-info {
     display: flex;
     color: var(--composer-text-color, black);
-    align-items: center;
-    max-width: 90%;
+    flex-direction: column;
     &__error {
       color: var(--composer-danger-color, #ff5c5c);
       font-size: var(--composer-font-size-small, 12px);
@@ -69,7 +66,7 @@
     flex-shrink: 0;
     word-break: keep-all;
     color: var(--composer-text-light-color, #6e6e7a);
-    margin-left: 5px;
+    margin-top: 10px;
     font-size: var(--composer-font-size-small, 12px);
   }
 
@@ -79,16 +76,15 @@
     }
   }
 
-  .LoadingIcon {
-    fill: var(--composer-icons-color, #666774);
-    width: 15px;
-    height: 15px;
-    animation: rotate 0.5s infinite linear;
-  }
-  .CloseIcon {
-    fill: var(--composer-icons-color, #666774);
-    width: 10px;
-    height: 10px;
+  @media #{$desktop} {
+    .file-info {
+      flex-direction: row;
+      align-items: center;
+      max-width: 90%;
+    }
+    .file-item__size {
+      margin: 0 0 0 5px;
+    }
   }
 </style>
 
@@ -96,12 +92,14 @@
   <div class="wrapper">
     <div class="file-item">
       <div class="file-info">
-        <div class="ellipsis">{attachment.filename}</div>
+        <div>{attachment.filename}</div>
         <span class="file-item__size">{prettySize(attachment.size)}</span>
       </div>
       <div class="file-info__right">
         {#if attachment.loading}
-          <LoadingIcon class="LoadingIcon" />
+          <LoadingIcon
+            style="fill: var(--composer-icons-color, #666774); width: 15px; height: 15px; animation: rotate 0.5s infinite linear;"
+          />
         {/if}
         {#if attachment.error}<span class="file-info__error">Error</span>{/if}
         {#if !attachment.loading}
