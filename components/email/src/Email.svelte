@@ -23,6 +23,7 @@
   import TrashIcon from "./assets/trash-alt.svg";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
   import MarkUnreadIcon from "./assets/envelope.svg";
+  import AttachmentIcon from "./assets/attachment.svg";
   import LeftArrowLineIcon from "./assets/arrow-line.svg";
   import type {
     EmailProperties,
@@ -34,6 +35,7 @@
     Account,
     Label,
     Folder,
+    File,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/MessageBody.svelte";
@@ -43,6 +45,7 @@
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
   import LoadingIcon from "./assets/loading.svg";
+  import { downloadFile } from "@commons/connections/files";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -75,7 +78,7 @@
     show_number_of_messages: true,
     show_received_timestamp: true,
     show_star: false,
-    show_thread_actions: true,
+    show_thread_actions: false,
     theme: "theme-1",
     thread_id: "",
     you: {},
@@ -372,19 +375,17 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
-        lastMsgIndex
-      ].expanded;
+      activeThread.messages[lastMsgIndex].expanded =
+        !activeThread.messages[lastMsgIndex].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
         if (!activeThread.messages[lastMsgIndex].body) {
-          activeThread.messages[
-            lastMsgIndex
-          ].body = await fetchIndividualMessage(
-            lastMsgIndex,
-            activeThread.messages[lastMsgIndex].id,
-          );
+          activeThread.messages[lastMsgIndex].body =
+            await fetchIndividualMessage(
+              lastMsgIndex,
+              activeThread.messages[lastMsgIndex].id,
+            );
         }
       }
 
@@ -491,9 +492,8 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
     } else {
-      activeThread.messages[msgIndex].expanded = !activeThread.messages[
-        msgIndex
-      ].expanded;
+      activeThread.messages[msgIndex].expanded =
+        !activeThread.messages[msgIndex].expanded;
       dispatchEvent("messageClicked", {
         event,
         message: activeThread.messages[msgIndex],
@@ -513,9 +513,8 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(event);
       } else {
-        activeThread.messages[msgIndex].expanded = !activeThread.messages[
-          msgIndex
-        ].expanded;
+        activeThread.messages[msgIndex].expanded =
+          !activeThread.messages[msgIndex].expanded;
       }
     }
   }
@@ -644,6 +643,51 @@
       messages[0]?.from.length &&
       participants[0].email !== messages[messages.length - 1]?.from[0].email
     );
+  }
+
+  let attachedFiles: Record<string, File[]> = {};
+  console.log(attachedFiles);
+  $: {
+    if (activeThread) {
+      attachedFiles = activeThread.messages.reduce((files, message) => {
+        for (const [fileIndex, file] of message.files.entries()) {
+          if (file.content_disposition === "attachment") {
+            if (!files[message.id]) {
+              files[message.id] = [];
+            }
+            files[message.id].push(message.files[fileIndex]);
+          }
+        }
+        return files;
+      }, {});
+    }
+  }
+
+  async function downloadSelectedFile(event, file) {
+    event.stopImmediatePropagation();
+    if (activeThread && id && _this.thread_id) {
+      console.log("This should not be printed");
+      const downloadedFileData = await downloadFile({
+        file_id: file.id,
+        component_id: id,
+        access_token,
+      });
+      var a = document.createElement("a");
+      a.href = `data:${file.content_type};base64,${downloadedFileData}`;
+      a.setAttribute("download", `${file.filename}`);
+      a.click();
+      a.remove();
+    }
+    dispatchEvent("downloadClicked", {
+      event,
+      thread: activeThread,
+      file,
+    });
+  }
+
+  async function handleDownloadFromMessage(event: CustomEvent) {
+    const file = event.detail.file;
+    downloadSelectedFile(event, file);
   }
 </script>
 
@@ -998,6 +1042,7 @@
           &.date {
             display: flex;
             justify-content: flex-end;
+            gap: $spacing-xs;
             width: 100%;
             font-size: 14px;
             color: var(--nylas-email-message-date-color, var(--grey));
@@ -1075,8 +1120,9 @@
           padding: 0 $spacing-xs;
           display: grid;
           column-gap: $spacing-m;
-          height: $collapsed-height;
+          // min-height: $collapsed-height;
           grid-template-columns: fit-content(350px) 1fr;
+          padding: $spacing-xs 0;
           justify-content: initial;
           div.starred {
             button {
@@ -1168,11 +1214,33 @@
           display: grid;
           grid-template-columns: 1fr fit-content(120px);
           gap: 1rem;
+          padding: $spacing-xs;
           .desktop-subject-snippet {
             display: block;
 
             .subject {
               margin-right: $spacing-xs;
+            }
+          }
+          .snippet-attachment-container {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-xs;
+          }
+
+          .attachment {
+            gap: 1rem;
+            display: flex;
+
+            button {
+              padding: 0.3rem 1rem;
+              border: 1px solid var(--grey);
+              border-radius: 30px;
+              background: white;
+              cursor: pointer;
+              &:hover {
+                background: var(--grey-light);
+              }
             }
           }
 
@@ -1344,7 +1412,10 @@
                       {#if _this.clean_conversation && message.conversation}
                         {@html DOMPurify.sanitize(message.conversation)}
                       {:else if message.body}
-                        <nylas-message-body {message} />
+                        <nylas-message-body
+                          {message}
+                          on:downloadClicked={handleDownloadFromMessage}
+                        />
                       {:else}
                         <div class="email-loader">
                           <LoadingIcon
@@ -1481,17 +1552,36 @@
               </div>
             </div>
             <div class="subject-snippet-date">
-              <div class="desktop-subject-snippet">
-                <span class="subject">{thread?.subject}</span><span
-                  class="snippet"
-                >
-                  {thread.snippet}
-                </span>
+              <div class="snippet-attachment-container">
+                <div class="desktop-subject-snippet">
+                  <span class="subject">{thread?.subject}</span><span
+                    class="snippet"
+                  >
+                    {thread.snippet}
+                  </span>
+                </div>
+                {#if Object.keys(attachedFiles).length > 0}
+                  <div class="attachment">
+                    {#each Object.values(attachedFiles) as files}
+                      {#each files as file}
+                        <button
+                          on:click|stopPropagation={(e) =>
+                            downloadSelectedFile(e, file)}
+                        >
+                          {file.filename || file.id}
+                        </button>
+                      {/each}
+                    {/each}
+                  </div>
+                {/if}
               </div>
               <div
                 class:date={_this.show_received_timestamp}
                 class:action-icons={_this.show_thread_actions}
               >
+                {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
+                  <span><AttachmentIcon /></span>
+                {/if}
                 {#if _this.show_thread_actions}
                   <div class="delete">
                     <button
@@ -1609,7 +1699,10 @@
             {#if _this.clean_conversation && message.conversation}
               {@html DOMPurify.sanitize(_this.message?.conversation ?? "")}
             {:else if _this.message.body}
-              <nylas-message-body message={_this.message} />
+              <nylas-message-body
+                message={_this.message}
+                on:downloadClicked={handleDownloadFromMessage}
+              />
             {/if}
           </div>
         </div>

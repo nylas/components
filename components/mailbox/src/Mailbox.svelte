@@ -23,6 +23,7 @@
     Message,
     Thread,
   } from "@commons/types/Nylas";
+  import { downloadFile } from "@commons/connections/files";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import "../../email/src/Email.svelte";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
@@ -392,6 +393,20 @@
     returnToMailbox();
   }
 
+  async function downloadSelectedFile(event: CustomEvent) {
+    const file = event.detail.file;
+    const downloadedFileData = await downloadFile({
+      file_id: file.id,
+      component_id: id,
+      access_token,
+    });
+    var a = document.createElement("a");
+    a.href = `data:${file.content_type};base64,${downloadedFileData}`;
+    a.setAttribute("download", `${file.filename}`);
+    a.click();
+    a.remove();
+  }
+
   async function onDeleteSelected(event: MouseEvent) {
     if (Array.isArray(_this.all_threads)) {
       const selectedThreads = threads.filter((thread) => thread.selected);
@@ -625,6 +640,7 @@
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
           on:threadDeleted={deleteThread}
+          on:downloadClicked={downloadSelectedFile}
         />
       </div>
     {:else}
@@ -743,6 +759,7 @@
                     on:returnToMailbox={returnToMailbox}
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
                     on:threadDeleted={deleteThread}
+                    on:downloadClicked={downloadSelectedFile}
                     show_thread_actions={thread.selected}
                   />
                 {/key}
