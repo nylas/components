@@ -92,8 +92,10 @@
   <div class="wrapper">
     <div class="file-item">
       <div class="file-info">
-        <div>{attachment.filename}</div>
-        <span class="file-item__size">{prettySize(attachment.size)}</span>
+        {#if !attachment.error}
+          <div>{attachment.filename}</div>
+          <span class="file-item__size">{prettySize(attachment.size)}</span>
+        {/if}
       </div>
       <div class="file-info__right">
         {#if attachment.loading}
@@ -101,7 +103,11 @@
             style="fill: var(--composer-icons-color, #666774); width: 15px; height: 15px; animation: rotate 0.5s infinite linear;"
           />
         {/if}
-        {#if attachment.error}<span class="file-info__error">Error</span>{/if}
+        {#if attachment.error}
+          <span class="file-info__error"
+            >Error: Please try attaching the file again.</span
+          >
+        {/if}
         {#if !attachment.loading}
           <button class="close-btn" on:click={() => remove(attachment)}>
             <CloseIcon class="CloseIcon" />
