@@ -1,3 +1,5 @@
+<svelte:options tag="nylas-datepicker" immutable={true} />
+
 <script lang="ts">
   import { tick } from "svelte";
   const months: string[] = [

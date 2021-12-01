@@ -5,8 +5,8 @@
   import AlertBar from "./components/AlertBar.svelte";
   import Attachment from "./components/Attachment.svelte";
   import DatepickerModal from "./components/DatepickerModal.svelte";
-  import ContactsSearch from "@commons/components/contacts-search/src/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
+  import "../../contacts-search/src/contacts-search.svelte";
   import {
     ManifestStore,
     sendMessage,
@@ -632,7 +632,7 @@
         <!-- Search -->
         <div class="contacts-wrapper">
           {#if _this.show_from}
-            <ContactsSearch
+            <nylas-contacts-search
               placeholder="From:"
               single={true}
               change={handleContactsChange("from")}
@@ -641,7 +641,7 @@
             />
           {/if}
           {#if _this.show_to}
-            <ContactsSearch
+            <nylas-contacts-search
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
@@ -670,7 +670,7 @@
         </div>
         {#if _this.show_cc}
           <div class="cc-container">
-            <ContactsSearch
+            <nylas-contacts-search
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
@@ -691,7 +691,7 @@
         {/if}
         {#if _this.show_bcc}
           <div class="cc-container">
-            <ContactsSearch
+            <nylas-contacts-search
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}

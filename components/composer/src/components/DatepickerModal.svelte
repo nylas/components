@@ -1,5 +1,5 @@
 <script type="ts">
-  import Datepicker from "@commons/components/datepicker/src/Datepicker.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
+  import "../../../datepicker/src/datepicker.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
   import CloseIcon from "../assets/close.svg";
   import type {
     DatepickerCallback,
@@ -93,7 +93,7 @@
     <span class="close" on:click={close}>
       <CloseIcon class="CloseIcon" />
     </span>
-    <Datepicker {change} timepicker={true} min={new Date()} />
+    <nylas-datepicker {change} timepicker={true} min={new Date()} />
     <button class="save-btn" on:click={submit}> Schedule send </button>
   </div>
 </div>
