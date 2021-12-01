@@ -12,7 +12,19 @@
         const scheduler = document.querySelector("nylas-scheduler");
 
         // availability.participants = ["nylascypresstest@gmail.com"];
-        // availability.events = [{ email_ids: ["phil.r@nylas.com", "chantal.l@nylas.com", "hazik.a@nylas.com"] }];
+        availability.events = [
+          {
+            event_title: "My Intro Meeting",
+            event_description: "My test desc",
+            slot_size: 15,
+            email_ids: [
+              "phil.r@nylas.com",
+              "chantal.l@nylas.com",
+              "hazik.a@nylas.com",
+            ],
+          },
+          // { event_title: "My Intro Meeting2", event_description: "My test desc", slot_size: 15, email_ids: ["hazik.a@nylas.com"] }
+        ];
         availability.open_hours = [
           {
             startWeekday: 0,

@@ -565,7 +565,7 @@
           );
           if (existsWithinConsecutiveBlock) {
             availability = AvailabilityStatus.FREE;
-            freeCalendars.length = participants.length;
+            freeCalendars.length = consecutiveParticipants.length;
           } else {
             availability = AvailabilityStatus.BUSY;
             freeCalendars.length = 0;
@@ -809,11 +809,18 @@
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
       let dispatchableSlots = sortedSlots;
-      if (selectedConsecutiveEventBlock.length && sortedSlots.length === 1) {
-        dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
-          event.available_calendars = event.emails; // slot.available_calendars is a little convoluted with freeCalendars above. TODO: refactor freeCalendars in generateDaySlots()
-          return { ...sortedSlots[0], ...event };
-        });
+      console.log("bout to dispatch", selectedConsecutiveEventBlock);
+      if (sortedSlots.length === 1) {
+        if (selectedConsecutiveEventBlock.length) {
+          dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
+            event.available_calendars = event.emails; // slot.available_calendars is a little convoluted with freeCalendars above. TODO: refactor freeCalendars in generateDaySlots()
+            return { ...sortedSlots[0], ...event };
+          });
+        } else {
+          dispatchableSlots = dispatchableSlots.map((slot) => {
+            return { ..._this.events[0], ...slot };
+          });
+        }
       }
       dispatchEvent("timeSlotChosen", {
         timeSlots: dispatchableSlots.map((slot) => Object.assign({}, slot)),
@@ -838,13 +845,18 @@
   }
   // #endregion timeSlot selection
 
-  let participants: string[] = [];
-  $: if (_this.events?.length) {
-    participants = _this.events?.flatMap((e) => e.email_ids);
+  let consecutiveParticipants: string[] = [];
+  let singleEventParticipants: string[] = [];
+
+  $: console.log("events", _this.events);
+  $: if (_this.events?.length && _this.events?.length > 1) {
+    consecutiveParticipants = _this.events?.flatMap((e) => e.email_ids);
+  } else if (_this.events?.length === 1) {
+    singleEventParticipants = _this.events?.flatMap((e) => e.email_ids);
   }
 
   function getAvailabilityQuery(
-    emailAddresses = _this.participants,
+    emailAddresses = singleEventParticipants,
     accessToken = access_token,
   ): AvailabilityQuery {
     return {
@@ -874,7 +886,8 @@
   // Otherwise, assume consecutive.
   $: (async () => {
     if (
-      ((Array.isArray(participants) && participants.length > 0) ||
+      ((Array.isArray(singleEventParticipants) &&
+        singleEventParticipants.length > 0) ||
         (_this.booking_user_email && _this.booking_user_token)) &&
       _this.events?.length === 1
     ) {
@@ -906,10 +919,10 @@
     // Free-Busy endpoint returns busy timeslots for given participants between start_time & end_time
 
     type fetchableCalendarUser = { email: string; token?: string };
-    let calendarsToFetch: fetchableCalendarUser[] = participants.map(
-      (email) => {
+    let calendarsToFetch: fetchableCalendarUser[] = singleEventParticipants.map(
+      (emailAddress) => {
         return {
-          email,
+          email: emailAddress,
         };
       },
     );
@@ -1042,7 +1055,23 @@
     // TODO: consider merging these 2 into just calendars
     ...(_this.calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
+    ...consecutiveParticipants.map((email) => {
+      return {
+        emailAddress: email,
+        account: {
+          emailAddress: email,
+        },
+        availability: AvailabilityStatus.FREE,
+        timeslots: [],
+      };
+    }),
   ];
+
+  $: console.log("thiscal", _this.calendars);
+  $: console.log("newcal", newCalendarTimeslotsForGivenEmails);
+  $: console.log("events", _this.events);
+  $: console.log({ allCalendars });
+  // $: console.log({ participants });
 
   //#region Attendee Overlay
   let attendeeOverlay: HTMLElement;
@@ -1538,7 +1567,7 @@
   //#endregion slot interaction handlers
 
   // #region error
-  $: if (id && participants.length && _this.capacity) {
+  $: if (id && consecutiveParticipants.length && _this.capacity) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
@@ -1589,7 +1618,7 @@
   //#region colours
   // Show partial availability as a gradient, rather than as categorically "partial"
   $: partialScale = scaleLinear()
-    .domain([0, participants.length / 2, participants.length])
+    .domain([0, allCalendars.length / 2, allCalendars.length])
     .range([_this.busy_color, _this.partial_color, _this.free_color]);
   //#endregion colours
 
@@ -1665,6 +1694,7 @@
   let selectedConsecutiveEventBlock: ConsecutiveEvent[] = [];
 
   $: if (event_to_select) {
+    console.log("event_to_select is firing", event_to_select);
     selectedConsecutiveEventBlock = event_to_select;
     days
       .flatMap((d) => d.slots)
@@ -1681,6 +1711,8 @@
     days = [...days];
     // event_to_select = null;
   }
+
+  $: console.log({ consecutiveOptions });
 
   // Expand hovered / clicked time slots to show the full consecutive event span
   function inspectConsecutiveBlock(slot: TimeSlot) {

@@ -285,6 +285,7 @@
       <ul class="timeslots">
         {#each slotsToBook as timeSlot}
           <li>
+            {console.log({ timeSlot })}
             <h3>{timeSlot.event_title}: {timeSlot.event_description}</h3>
             <span class="time"
               >{timeSlot.start_time.toLocaleTimeString([], {
