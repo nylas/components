@@ -250,10 +250,9 @@
 
     dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
-    thread.unread = false;
-
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {
+        thread.unread = false;
         await updateThreadStatus(thread);
       }
       let message = await fetchIndividualMessage(
