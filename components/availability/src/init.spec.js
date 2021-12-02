@@ -191,13 +191,13 @@ describe("availability component", () => {
           const component = element[0];
           component.calendars = calendars;
           cy.get(
-            `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 a.m.']`,
+            `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
           )
             .should("have.class", "partial")
             .then(() => {
               component.required_participants = [calendars[1].emailAddress];
               cy.get(
-                `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 a.m.']`,
+                `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
               ).should("have.class", "busy");
             });
         });
