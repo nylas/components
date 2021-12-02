@@ -37,14 +37,21 @@
 <style lang="scss">
   div {
     width: inherit;
-    button {
-      padding: 0.3rem 1rem;
-      border: 1px solid var(--grey);
-      border-radius: 30px;
-      background: white;
-      cursor: pointer;
-      &:hover {
-        background: var(--grey-light);
+
+    div.attachment {
+      margin: 1rem 0 0 0;
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        padding: 0.3rem 1rem;
+        border: 1px solid var(--grey);
+        border-radius: 30px;
+        background: white;
+        cursor: pointer;
+        &:hover {
+          background: var(--grey-light);
+        }
       }
     }
   }
@@ -53,14 +60,14 @@
 <div>
   {#if message && message.body}
     {@html DOMPurify.sanitize(message.body)}
-    <div>
+    <div class="attachment">
       {#await attachedFiles then files}
         {#if files && Array.isArray(files) && files.length > 0}
           {#each files as file}
             <button
               on:click|stopPropagation={(e) => downloadSelectedFile(e, file)}
             >
-              {file.filename}
+              {file.filename || file.id}
             </button>
           {/each}
         {/if}
