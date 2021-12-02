@@ -1,6 +1,5 @@
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
-  import { get_current_component } from "svelte/internal";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
 
   export let onchange = (_html: string) => Promise.resolve({});
@@ -12,7 +11,7 @@
   let toolbar: ToolbarItem[] = defaultActions;
 
   $: if (html) {
-    const selection = get_current_component().shadowRoot.getSelection();
+    const selection = window.getSelection();
     if (typeof replace_fields === "string") {
       replace_fields = JSON.parse(replace_fields);
     }
