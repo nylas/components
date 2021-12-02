@@ -1375,7 +1375,6 @@
       }
     } else {
       if (isConsecutive) {
-        // TODO: variablize events.length > 1 as hasConsecutiveMeetings or something
         // deselect when in consecutive mode
         event_to_hover = null;
       } else {
