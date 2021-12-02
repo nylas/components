@@ -46,7 +46,7 @@ export interface Manifest extends NylasManifest {
   start_hour: number;
   view_as: "schedule" | "list";
   timezone: string;
-  events?: EventDefinition[];
+  events: EventDefinition[];
 }
 
 export interface AvailabilityRule {

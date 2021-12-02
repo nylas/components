@@ -848,7 +848,6 @@
   let consecutiveParticipants: string[] = [];
   let singleEventParticipants: string[] = [];
 
-  $: console.log("events", _this.events);
   $: if (_this.events?.length && _this.events?.length > 1) {
     consecutiveParticipants = _this.events?.flatMap((e) => e.email_ids);
   } else if (_this.events?.length === 1) {
@@ -1173,7 +1172,7 @@
       _this.start_date = timeDay.offset(endDay, 1);
     }
     // On date change, dispatch an empty list to let parent app trigger a loading state
-    if (Array.isArray(_this.events) && _this.events.length > 1) {
+    if (isConsecutive) {
       dispatchEvent("eventOptionsReady", {
         slots: [],
       });
@@ -1194,7 +1193,7 @@
       _this.start_date = previousRange[0];
     }
     // On date change, dispatch an empty list to let parent app trigger a loading state
-    if (Array.isArray(_this.events) && _this.events.length > 1) {
+    if (isConsecutive) {
       dispatchEvent("eventOptionsReady", {
         slots: [],
       });
@@ -1376,7 +1375,7 @@
         );
       }
     } else {
-      if (_this.events.length > 1) {
+      if (isConsecutive) {
         // TODO: variablize events.length > 1 as hasConsecutiveMeetings or something
         // deselect when in consecutive mode
         event_to_hover = null;
@@ -1398,7 +1397,7 @@
 
   // Click action for un-draggable slot-list buttons (list view)
   function toggleSlot(slot: SelectableSlot) {
-    if (_this.events.length > 1) {
+    if (isConsecutive) {
       if (slot.selectionStatus === SelectionStatus.SELECTED) {
         event_to_select = null;
       } else {
@@ -1436,7 +1435,7 @@
     day,
   }: SlotInteractionHandler) {
     if (slot) {
-      if (_this.events.length > 1) {
+      if (isConsecutive) {
         // Deselect any others
         days
           .flatMap((d) => d.slots)
@@ -1466,7 +1465,7 @@
   }
 
   function handleSlotHover({ event, slot, day }: SlotInteractionHandler) {
-    if (_this.events.length > 1) {
+    if (isConsecutive) {
       // Deselect any others
       days
         .flatMap((d) => d.slots)
@@ -1617,15 +1616,14 @@
   //#endregion colours
 
   //#region Consecutive Events
+
+  let isConsecutive: boolean = false;
+  $: isConsecutive = _this.events.length > 1;
+
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
   let consecutiveOptions = [];
   $: (async () => {
-    if (
-      id &&
-      Array.isArray(_this.events) &&
-      _this.events.length > 1 &&
-      dayRange.length
-    ) {
+    if (id && Array.isArray(_this.events) && isConsecutive && dayRange.length) {
       // the availability/consecutive endpoint eagerly returns open timeslots;
       // establish open hours so the user isn't overburdened with the horrible freedom of choice.
       let openHours: OpenHours[] = [];
@@ -1719,7 +1717,7 @@
   // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,
   // a user can only book several in a row. We should, therefore, only show those slots that kick off a consecutive series
   $: listViewOptions = (day: Day): SelectableSlot[] => {
-    if (_this.events.length > 1) {
+    if (isConsecutive) {
       return day.slots.filter((slot) =>
         consecutiveOptions.find((block: ConsecutiveEvent[]) =>
           inspectConsecutiveBlock(slot),
