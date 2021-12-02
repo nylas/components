@@ -19,7 +19,7 @@ export function debounce(
   fn: (args: unknown) => unknown,
   time: number,
 ): () => void {
-  let timeoutId: number;
+  let timeoutId: ReturnType<typeof setTimeout>;
   return (): void => {
     if (timeoutId) {
       clearTimeout(timeoutId);
