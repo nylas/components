@@ -1,11 +1,16 @@
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
-
+  import setShadowStyle from "@commons/methods/appendStyles";
   export let onchange = (_html: string) => Promise.resolve({});
   export let html = "";
   export let show_editor_toolbar = true;
   export let replace_fields: ReplaceFields[] | null = null;
+
+  const composer = document.querySelector("nylas-composer");
+  if (composer) {
+    setShadowStyle(composer, '@import "./styles/htmleditor.css"');
+  }
 
   let container: HTMLElement;
   let toolbar: ToolbarItem[] = defaultActions;
@@ -85,62 +90,6 @@
     });
   }
 </script>
-
-<style lang="scss">
-  .html-editor {
-    min-height: var(--composer-editor-min-height, 220px);
-    max-height: var(--composer-editor-max-height, 480px);
-    *:focus {
-      outline: 5px auto var(--composer-primary-color, #5c77ff);
-    }
-  }
-  a {
-    color: var(--composer-primary-color, #5c77ff);
-    &:hover {
-      color: var(--composer-primary-dark-color, #294dff);
-    }
-  }
-  [contenteditable] {
-    padding: var(--composer-outer-padding, 15px)
-      var(--composer-outer-padding, 15px);
-    margin: 0;
-    outline: 0;
-    line-height: 1.3;
-    color: var(--composer-text-color, black);
-    overflow-y: auto;
-  }
-  .toolbar {
-    display: flex;
-    font-size: 10px;
-    align-items: center;
-    justify-content: flex-start;
-    border-bottom: 1px solid var(--composer-border-color, #f7f7f7);
-    padding: 0 calc(var(--composer-outer-padding, 15px) / 2);
-
-    button {
-      color: var(--composer-text-light-color, #6e6e7a);
-      background: none;
-      border: 0;
-      cursor: pointer;
-      display: flex;
-      padding: 8px;
-      margin: 2px;
-      outline: 0;
-      border-radius: calc(var(--composer-border-radius, 6px) / 2);
-      transition: background-color 0.3s;
-
-      &.active {
-        background: var(--composer-background-muted-color, #f0f2ff);
-      }
-      &:first-child {
-        margin-left: 0;
-      }
-      &:hover {
-        background: var(--composer-background-muted-color, #f0f2ff);
-      }
-    }
-  }
-</style>
 
 <!-- Toolbar -->
 <div class="html-editor">

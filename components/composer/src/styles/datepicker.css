@@ -1,0 +1,57 @@
+.modal-content {
+  display: block; /* Hidden by default */
+  box-shadow: var(
+    --composer-shadow,
+    0 1px 10px rgba(0, 0, 0, 0.11),
+    0 3px 36px rgba(0, 0, 0, 0.12)
+  );
+  border-radius: var(--composer-border-radius, 6px);
+}
+
+/* The Close Button */
+.close {
+  color: var(--composer-text-light-color, #6e6e7a);
+  float: right;
+  padding-right: 10px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: var(--composer-text-color, black);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.save-btn {
+  border: 0;
+  background: var(--composer-primary-color, #5c77ff);
+  width: 100%;
+  color: white;
+  cursor: pointer;
+  padding: 10px 25px;
+  font-weight: bold;
+  border-radius: 0 0 var(--composer-border-radius, 6px)
+    var(--composer-border-radius, 6px);
+  font-family: var(--composer-font, sans-serif);
+}
+.save-btn:disabled {
+  opacity: 0.5;
+}
+.save-btn:hover {
+  background: var(--composer-primary-dark-color, #294dff);
+}
+
+.datepicker-modal {
+  position: absolute;
+  bottom: calc(var(--composer-outer-padding, 15px) * 0.85);
+  right: calc(var(--composer-outer-padding, 15px) * 0.85);
+  left: calc(var(--composer-outer-padding, 15px) * 0.85);
+}
+
+.CloseIcon {
+  fill: var(--composer-icons-color, #666774);
+  width: 10px;
+  height: 10px;
+}

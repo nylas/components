@@ -1,7 +1,6 @@
 .html-editor {
   min-height: var(--composer-editor-min-height, 220px);
   max-height: var(--composer-editor-max-height, 480px);
-  background: red !important;
 }
 .html-editor *:focus {
   outline: 5px auto var(--composer-primary-color, #5c77ff);
