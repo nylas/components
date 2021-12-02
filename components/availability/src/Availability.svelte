@@ -43,6 +43,7 @@
     Day,
     PreDatedTimeSlot,
     OpenHours,
+    ConsecutiveAvailabilityQuery,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
@@ -140,7 +141,6 @@
     timezone: "",
     view_as: "schedule",
     events: [],
-    event_to_hover: null,
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
@@ -809,7 +809,6 @@
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
       let dispatchableSlots = sortedSlots;
-      console.log("bout to dispatch", selectedConsecutiveEventBlock);
       if (sortedSlots.length === 1) {
         if (selectedConsecutiveEventBlock.length) {
           dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
@@ -857,7 +856,7 @@
   function getAvailabilityQuery(
     emailAddresses = singleEventParticipants,
     accessToken = access_token,
-  ): AvailabilityQuery {
+  ): ConsecutiveAvailabilityQuery {
     return {
       body: {
         emails: emailAddresses,
@@ -1621,7 +1620,7 @@
   $: isConsecutive = _this.events.length > 1;
 
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
-  let consecutiveOptions = [];
+  let consecutiveOptions: ConsecutiveEvent[][] = [];
   $: (async () => {
     if (id && Array.isArray(_this.events) && isConsecutive && dayRange.length) {
       // the availability/consecutive endpoint eagerly returns open timeslots;
@@ -1674,6 +1673,7 @@
       .flatMap((d) => d.slots)
       .filter((slot) => {
         return (
+          event_to_hover &&
           slot.start_time >= event_to_hover[0].start_time &&
           slot.end_time <= event_to_hover[event_to_hover.length - 1].end_time
         );
@@ -1691,6 +1691,7 @@
       .flatMap((d) => d.slots)
       .filter((slot) => {
         return (
+          event_to_select &&
           slot.start_time >= event_to_select[0].start_time &&
           slot.end_time <= event_to_select[event_to_select.length - 1].end_time
         );
@@ -1711,7 +1712,7 @@
         slot.end_time <= block[block.length - 1].end_time,
     );
 
-    return consecutiveBlockContainingSlot;
+    return consecutiveBlockContainingSlot || null;
   }
 
   // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,

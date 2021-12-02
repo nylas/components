@@ -126,7 +126,6 @@
 
   async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
-      console.log("events", events);
       let postableEvent: Partial<TimespanEvent> = {
         title: event.event_title,
         description: event.event_description,
@@ -209,7 +208,6 @@
 
     if (_this.notification_mode === NotificationMode.SEND_MESSAGE) {
       eventBookings.map((event, i) => {
-        console.log(`event ${i}`, event);
         const event_participants = event.participants?.map((participant) => {
           const { email, name } = participant;
           let to: { email: string; name?: string } = { email };
@@ -285,7 +283,6 @@
       <ul class="timeslots">
         {#each slotsToBook as timeSlot}
           <li>
-            {console.log({ timeSlot })}
             <h3>{timeSlot.event_title}: {timeSlot.event_description}</h3>
             <span class="time"
               >{timeSlot.start_time.toLocaleTimeString([], {

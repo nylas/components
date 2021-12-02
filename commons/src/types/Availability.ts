@@ -110,7 +110,8 @@ export interface ConsecutiveAvailabilityQuery extends CommonQuery {
     free_busy: any[];
     duration_minutes: number;
     interval_minutes: number;
-    events: EventDefinition[];
+    events?: EventDefinition[];
+    round_robin: "max-availability" | "max-fairness";
   };
   forceReload?: boolean;
 }

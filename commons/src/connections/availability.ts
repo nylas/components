@@ -9,17 +9,11 @@ import type {
   AvailabilityQuery,
   AvailabilityResponse,
   FreeBusyResponse,
-  TimeSlot,
   PreDatedTimeSlot,
 } from "@commons/types/Availability";
 import type { MiddlewareResponse } from "@commons/types/Nylas";
 import type { EventDefinition } from "@commons/types/ScheduleEditor";
-
-interface HydratedTimeSlot
-  extends Omit<PreDatedTimeSlot, "start_time" | "end_time"> {
-  start_time: Date;
-  end_time: Date;
-}
+import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
 // TODO: deprecate if we find /calendars/availability to be fully sufficient
 export const fetchFreeBusy = async (
@@ -75,7 +69,7 @@ export const fetchAvailability = async (
 
 export const fetchConsecutiveAvailability = async (
   query: ConsecutiveAvailabilityQuery,
-): Promise<HydratedTimeSlot[][]> => {
+): Promise<ConsecutiveEvent[][]> => {
   return fetch(
     `${getMiddlewareApiUrl(
       query.component_id,
@@ -87,11 +81,11 @@ export const fetchConsecutiveAvailability = async (
       body: query.body,
     }),
   )
-    .then(async (apiResponse) => {
+    .then(async (apiResponse): Promise<ConsecutiveEvent[][]> => {
       const json = await handleResponse<
-        MiddlewareResponse<HydratedTimeSlot[][]>
+        MiddlewareResponse<PreDatedTimeSlot[][]>
       >(apiResponse);
-      let response =
+      let response: PreDatedTimeSlot[][] =
         json.response?.map((blockSlot) => {
           blockSlot = blockSlot.map((slot: any) => {
             slot.start_time = new Date(slot.start_time * 1000);
@@ -100,9 +94,13 @@ export const fetchConsecutiveAvailability = async (
           });
           return blockSlot;
         }) || [];
-      response = hydrateSlotsToEvents(response, query.body.events);
-      response = removeSimultaneousAvailabilityOptions(response);
-      return response;
+      const hydratedResponse = hydrateSlotsToEvents(
+        response,
+        query.body.events,
+      );
+      const dedupedResponse =
+        removeSimultaneousAvailabilityOptions(hydratedResponse);
+      return dedupedResponse;
     })
     .catch((error) => handleError(query.component_id, error));
 };
@@ -111,9 +109,9 @@ export const fetchConsecutiveAvailability = async (
 // and start/end times. This means that if we have to events (EventDefinitions) with the same email addresses? We're shooting in the dark about which is which.
 // TODO: allow for an indicator on the API side
 function hydrateSlotsToEvents(
-  availabilities: HydratedTimeSlot[][],
+  availabilities: PreDatedTimeSlot[][],
   events: EventDefinition[],
-) {
+): ConsecutiveEvent[][] {
   return availabilities.map((block) => {
     return block.map((subevent) => {
       return {
@@ -127,14 +125,14 @@ function hydrateSlotsToEvents(
         ),
       };
     });
-  });
+  }) as any[][]; // TODO: How to best coerce PreDatedTimeSlot[][] to ConsecutiveEvent[][]? spread-combined return handles it.
 }
 
 // We don't want to overburden our users with too much sweet horrible freedom of choice;
 // the /calendars/availability/consecutive endpoint returns order permutations with same time slots;
 // Cull them down to just the first that exists per timeslot.
 function removeSimultaneousAvailabilityOptions(
-  availabilities: HydratedTimeSlot[][],
+  availabilities: ConsecutiveEvent[][],
 ) {
   return availabilities.filter((block, index, self) => {
     let foundIndex = self.findIndex((otherBlock) => {

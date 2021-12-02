@@ -43,4 +43,8 @@ export interface ConsecutiveEvent {
   emails: string[];
   start_time: Date;
   end_time: Date;
+  available_calendars: string[];
+  event_description: string;
+  event_title: string;
+  slot_size: number;
 }
