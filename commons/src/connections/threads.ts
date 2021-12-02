@@ -14,8 +14,8 @@ import type {
 
 export const fetchThreads = (
   query: MailboxQuery,
-  limit: number,
   offset: number,
+  limit: number,
 ): Promise<Thread[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
