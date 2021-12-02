@@ -113,9 +113,9 @@ main {
     &.loading {
       @include progress-bar(
         top,
-        118px,
+        36px,
         left,
-        95px,
+        0,
         var(--blue),
         var(--blue-lighter)
       );
@@ -127,7 +127,7 @@ main {
       }
     }
     &.loading.error {
-      @include progress-bar(top, 118px, left, 95px, var(--red), var(--red));
+      @include progress-bar(top, 36px, left, 0, var(--red), var(--red));
       animation: none;
     }
 
