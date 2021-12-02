@@ -3,6 +3,7 @@ import type {
   TimeSlot,
 } from "@commons/types/Availability";
 import type { NotificationMode } from "@commons/enums/Scheduler";
+import type { EventDefinition } from "./ScheduleEditor";
 
 export interface CustomField {
   title: string;
@@ -35,7 +36,7 @@ export interface Manifest extends AvailabilityManifest {
     | "monthly"
   )[];
   recurrence_expiry: Date | string | null;
-  events?: any[]; // TODO
+  events: EventDefinition[];
   event_options: ConsecutiveEvent[][];
 }
 
