@@ -314,10 +314,13 @@ describe("MailBox  component", () => {
                 .then((totalElem) => {
                   const total = totalElem.text();
                   expect(total).to.equal(pageEnd);
-
+                  const lastPageitems = Number(total) % itemsPerPage;
                   cy.get(component)
                     .find("nylas-email", { timeout: 10000 })
-                    .should("have.length", Number(total) % itemsPerPage);
+                    .should(
+                      "have.length",
+                      lastPageitems === 0 ? itemsPerPage : lastPageitems,
+                    );
                 });
             });
         });
