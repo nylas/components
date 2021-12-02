@@ -32,6 +32,26 @@ describe("MailBox  component", () => {
         });
     });
 
+    it.only("Shows attached file", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          cy.get(component)
+            .find("nylas-email")
+            .then((element) => {
+              const email = element[0];
+              cy.get(email)
+                .find(".email-row.condensed .attachment")
+                .should("exist");
+              cy.get(email)
+                .find(".email-row.condensed .attachment.desktop button")
+                .should("have.text", "invoice_2062.pdf ");
+            });
+        });
+    });
+
     it("Shows Mailbox with unread status as unread", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")

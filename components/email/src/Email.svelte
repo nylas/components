@@ -646,7 +646,7 @@
   }
 
   let attachedFiles: Record<string, File[]> = {};
-  console.log(attachedFiles);
+
   $: {
     if (activeThread) {
       attachedFiles = activeThread.messages.reduce((files, message) => {
@@ -666,7 +666,6 @@
   async function downloadSelectedFile(event, file) {
     event.stopImmediatePropagation();
     if (activeThread && id && _this.thread_id) {
-      console.log("This should not be printed");
       const downloadedFileData = await downloadFile({
         file_id: file.id,
         component_id: id,

@@ -30,7 +30,17 @@ const SAMPLE_THREAD = {
       bcc: [],
       cc: [],
       date: 1613494375,
-      files: [],
+      files: [
+        {
+          content_disposition: "attachment",
+          content_id:
+            "61a72e5c7646b_103f96c4ab17fc31973866b@emaily-consumer-5945b858d7-xcmvp.mail",
+          content_type: "application/pdf",
+          filename: "invoice_2062.pdf",
+          id: "d1fop1j6savk2dqex9uvwvclt",
+          size: 27174,
+        },
+      ],
       from: [
         {
           email: "hazik.a@nylas.com",
@@ -474,6 +484,21 @@ describe("Email component", () => {
               .should("eq", "true");
           });
       });
+    });
+    it.only("Shows attached file when condensed", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          component.show_expanded_email_view_onload = false;
+          component.thread = SAMPLE_THREAD;
+          cy.get(component)
+            .find(".email-row.condensed .attachment")
+            .should("exist");
+          cy.get(component)
+            .find(".email-row.condensed .attachment.desktop button")
+            .should("have.text", "invoice_2062.pdf ");
+        });
     });
     it("Accessibility attributes change when tooltip trigger is clicked", () => {
       cy.get("nylas-email").then((element) => {
