@@ -441,9 +441,8 @@
               {#each option as subevent, iter}
                 <span class="sub-event">
                   <h4>
-                    <!-- TODO: the order of an event.option doesn't necessarily match _this.events[iter] -->
-                    {_this.events[iter].event_title}:
-                    {_this.events[iter].event_description}
+                    {subevent.event_title}:
+                    {subevent.event_description}
                   </h4>
                   {subevent.start_time.toLocaleTimeString([], {
                     timeStyle: "short",

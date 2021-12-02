@@ -1067,12 +1067,6 @@
     }),
   ];
 
-  $: console.log("thiscal", _this.calendars);
-  $: console.log("newcal", newCalendarTimeslotsForGivenEmails);
-  $: console.log("events", _this.events);
-  $: console.log({ allCalendars });
-  // $: console.log({ participants });
-
   //#region Attendee Overlay
   let attendeeOverlay: HTMLElement;
   let selectedAttendees: (CalendarAccount & { isAvailable: boolean })[] = [];
@@ -1694,7 +1688,6 @@
   let selectedConsecutiveEventBlock: ConsecutiveEvent[] = [];
 
   $: if (event_to_select) {
-    console.log("event_to_select is firing", event_to_select);
     selectedConsecutiveEventBlock = event_to_select;
     days
       .flatMap((d) => d.slots)
@@ -1711,8 +1704,6 @@
     days = [...days];
     // event_to_select = null;
   }
-
-  $: console.log({ consecutiveOptions });
 
   // Expand hovered / clicked time slots to show the full consecutive event span
   function inspectConsecutiveBlock(slot: TimeSlot) {
