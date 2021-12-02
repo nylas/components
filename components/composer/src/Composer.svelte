@@ -7,6 +7,7 @@
   import DatepickerModal from "./components/DatepickerModal.svelte";
   import LoadingIcon from "./assets/loading.svg";
   import "../../contacts-search/src/contacts-search.svelte";
+  import NError from "@commons/components/NError.svelte";
   import {
     ManifestStore,
     sendMessage,

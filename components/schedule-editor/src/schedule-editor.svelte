@@ -20,6 +20,7 @@
   import "../../availability/src/availability.svelte";
   import "../../scheduler/src/scheduler.svelte";
   import DragIcon from "./assets/drag-icon.svg";
+  import NError from "@commons/components/NError.svelte";
   import DragItemPlaceholder from "./components/DragItemPlaceholder.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
 

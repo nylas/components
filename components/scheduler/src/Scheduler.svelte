@@ -14,6 +14,7 @@
   import type { Manifest, CustomField } from "@commons/types/Scheduler";
   import type { TimeSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
+  import NError from "@commons/components/NError.svelte";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
 

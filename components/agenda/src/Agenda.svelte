@@ -10,6 +10,7 @@
     getEventDispatcher,
   } from "@commons/methods/component";
   import type { EventPosition } from "./methods/position";
+  import NError from "@commons/components/NError.svelte";
   import { populatePositionMap, updateEventPosition } from "./methods/position";
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
   import type { AgendaProperties } from "@commons/types/Nylas";

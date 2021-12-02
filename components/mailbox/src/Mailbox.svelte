@@ -11,6 +11,7 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
+  import NError from "@commons/components/NError.svelte";
   import { FolderStore } from "@commons/store/folders";
   import { LabelStore } from "@commons/store/labels";
   import { MailboxStore } from "@commons/store/mailbox";

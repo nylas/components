@@ -44,6 +44,7 @@
   } from "@commons/types/Availability";
   import ContactImage from "@commons/components/ContactImage.svelte";
   import ErrorMessage from "@commons/components/ErrorMessage.svelte";
+  import NError from "@commons/components/NError.svelte";
   import {
     getTimeString,
     getCondensedTimeString,

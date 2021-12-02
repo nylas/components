@@ -6,6 +6,7 @@
   import { get_current_component, onMount } from "svelte/internal";
   import { tick } from "svelte";
   import { debounce } from "@commons/methods/component";
+  import NError from "@commons/components/NError.svelte";
   import {
     buildInternalProps,
     getEventDispatcher,

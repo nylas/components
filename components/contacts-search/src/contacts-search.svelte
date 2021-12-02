@@ -4,6 +4,7 @@
   import { debounce, isValidEmail } from "../lib/utils.ts";
   import { tick } from "svelte";
   import type { Participant } from "@commons/types/Nylas.ts";
+  import NError from "@commons/components/NError.svelte";
   import type {
     FetchContactsCallback,
     ChangeCallback,

@@ -2,6 +2,7 @@
 
 <script lang="ts">
   import { tick } from "svelte";
+  import NError from "@commons/components/NError.svelte";
   const months: string[] = [
     "January",
     "February",
