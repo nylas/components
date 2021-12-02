@@ -10,7 +10,7 @@ export async function handleResponse<T = unknown>(
       .then((json: { message: string; name: string }) => json);
     const error = new Error(passedError.message);
     error.name = passedError.name;
-    throw { message: error, statusCode: response.status };
+    return Promise.reject({ message: error, statusCode: response.status });
   }
   return response.json();
 }
@@ -62,3 +62,5 @@ export function getMiddlewareApiUrl(id: string): string {
   const API_GATEWAY = `https://${region}${process.env.API_GATEWAY}`;
   return API_GATEWAY;
 }
+
+export function silence(error: Error) {}

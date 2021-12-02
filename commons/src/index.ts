@@ -39,6 +39,7 @@ export {
   getEventDispatcher,
   parseBoolean,
 } from "./methods/component";
+export { silence } from "./methods/api";
 export { ErrorStore } from "./store/error";
 /**
  * Esbuild tree shakes NError, however it is used in each component

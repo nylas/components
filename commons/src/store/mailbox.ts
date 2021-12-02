@@ -12,6 +12,7 @@ import type {
   Message,
   Conversation,
 } from "@commons/types/Nylas";
+import { silence } from "@commons";
 
 interface PaginatedThreads {
   isLoaded: boolean;
@@ -47,12 +48,17 @@ function initializeThreads() {
       forceRefresh = false,
     ) => {
       const queryKey = JSON.stringify(query);
+
       if (!query.component_id && !query.access_token) {
         return [];
       }
 
       if (totalItems === undefined || forceRefresh) {
-        totalItems = await fetchThreadCount(query);
+        const threadCount = await fetchThreadCount(query).catch(silence);
+
+        if (threadCount) {
+          totalItems = threadCount;
+        }
       }
 
       if (!Array.isArray(threadsMap[queryKey]) || forceRefresh) {
@@ -60,19 +66,24 @@ function initializeThreads() {
         threadsMap[queryKey] = await initializePaginatedThreads(totalPages);
       }
 
-      if (!threadsMap[queryKey][currentPage].isLoaded) {
-        threadsMap[queryKey][currentPage].threads = await fetchThreads(
-          query,
-          pageSize,
-          currentPage * pageSize,
+      if (typeof threadsMap[queryKey][currentPage] === "undefined") {
+        return [];
+      } else if (!threadsMap[queryKey][currentPage].isLoaded) {
+        const threads = await fetchThreads(query, currentPage, pageSize).catch(
+          silence,
         );
-        threadsMap[queryKey][currentPage].isLoaded = true;
+
+        if (threads) {
+          threadsMap[queryKey][currentPage].threads = threads;
+          threadsMap[queryKey][currentPage].isLoaded = true;
+        }
       }
 
       update((threads) => {
         threads[queryKey] = threadsMap[queryKey];
         return { ...threads };
       });
+
       return threadsMap[queryKey][currentPage].threads;
     },
     getNumberOfItems: async (query: MailboxQuery) => {
@@ -80,8 +91,12 @@ function initializeThreads() {
         return 0;
       }
 
-      if (totalItems === undefined) {
-        totalItems = await fetchThreadCount(query);
+      if (typeof totalItems === "undefined") {
+        const threadCount = await fetchThreadCount(query).catch(silence);
+
+        if (threadCount) {
+          totalItems = threadCount;
+        }
       }
       return totalItems;
     },
@@ -100,8 +115,14 @@ function initializeThreads() {
       }
 
       if (!threadsMap[queryKey][0].isLoaded || forceRefresh) {
-        threadsMap[queryKey][0].threads = await fetchSearchResultThreads(query);
-        threadsMap[queryKey][0].isLoaded = true;
+        const searchResultThreads = await fetchSearchResultThreads(query).catch(
+          silence,
+        );
+
+        if (searchResultThreads) {
+          threadsMap[queryKey][0].threads = searchResultThreads;
+          threadsMap[queryKey][0].isLoaded = true;
+        }
       }
       update((threads) => {
         threads[queryKey] = threadsMap[queryKey];
@@ -116,20 +137,27 @@ function initializeThreads() {
       currentPage: number,
       pageSize: number,
     ) => {
-      const thread = await updateThread(threadQuery, updatedThread);
+      const thread = await updateThread(threadQuery, updatedThread).catch(
+        silence,
+      );
+
       if (!threadsMap[queryKey][currentPage].isLoaded) {
-        threadsMap[queryKey][currentPage].threads = await fetchThreads(
+        const threads = await fetchThreads(
           JSON.parse(queryKey),
           pageSize,
           currentPage * pageSize,
-        );
-        threadsMap[queryKey][currentPage].isLoaded = true;
+        ).catch(silence);
+
+        if (threads) {
+          threadsMap[queryKey][currentPage].threads = threads;
+          threadsMap[queryKey][currentPage].isLoaded = true;
+        }
       }
 
       threadsMap[queryKey][currentPage].threads = threadsMap[queryKey][
         currentPage
       ].threads.map((initialThread) => {
-        if (initialThread.id === thread.id) {
+        if (thread && initialThread.id === thread.id) {
           initialThread = Object.assign(initialThread, thread);
         }
         return initialThread;
@@ -177,7 +205,7 @@ function initializeThreads() {
     ) => {
       const queryKey = JSON.stringify(query);
 
-      const foundThread = threadsMap[queryKey][currentPage]?.threads.find(
+      const foundThread = threadsMap[queryKey][currentPage]?.threads?.find(
         (thread) => thread.id === incomingMessage.thread_id,
       );
       if (foundThread) {
@@ -200,6 +228,7 @@ function initializeThreads() {
           });
         }
       }
+
       return threadsMap[queryKey][currentPage].threads;
     },
   };
