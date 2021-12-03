@@ -101,6 +101,10 @@
   onMount(async () => {
     await tick();
     clientHeight = agendaElement?.getBoundingClientRect().height;
+    if (clientHeight === 0) {
+      agendaElement.style.height = "300px";
+    }
+
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as AgendaProperties;
@@ -559,7 +563,7 @@
     return (minutesInDayBeforeNow / minutesInVisibleDay) * 100;
   };
 
-  let agendaElement: Element;
+  let agendaElement: HTMLElement;
   let clientHeight: number;
 
   $: condensed = _this.condensed_view || (clientHeight && clientHeight < 500);
