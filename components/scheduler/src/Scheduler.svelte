@@ -68,7 +68,7 @@
     event_conferencing: "",
     event_location: "",
     slots_to_book: [],
-    notification_mode: NotificationMode.SHOW_MESSAGE,
+    notification_mode: NotificationMode.SEND_MESSAGE,
     notification_message: "Thank you for scheduling!",
     notification_subject: "Invitation",
     recurrence: "none",
@@ -283,7 +283,10 @@
       <ul class="timeslots">
         {#each slotsToBook as timeSlot}
           <li>
-            <h3>{timeSlot.event_title}: {timeSlot.event_description}</h3>
+            <h3>
+              {timeSlot.event_title || _this.event_title}: {timeSlot.event_description ||
+                _this.event_description}
+            </h3>
             <span class="time"
               >{timeSlot.start_time.toLocaleTimeString([], {
                 timeStyle: "short",
@@ -419,6 +422,7 @@
       <ul class="timeslots">
         {#each _this.event_options as option}
           <li
+            aria-role="button"
             on:mouseenter={() => hoverOption(option)}
             on:mouseleave={() => unhoverOption(option)}
             on:click={() => selectOption(option)}

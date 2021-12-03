@@ -118,8 +118,8 @@ function hydrateSlotsToEvents(
         ...subevent,
         ...events.find(
           (eventdef) =>
-            eventdef.email_ids.length === subevent.emails.length &&
-            eventdef.email_ids.every((email) =>
+            eventdef.participants.length === subevent.emails.length &&
+            eventdef.participants.every((email) =>
               subevent.emails.includes(email),
             ),
         ),

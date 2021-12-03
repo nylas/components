@@ -18,7 +18,7 @@ export async function createConsecutiveSlots(
   const endDay = dayRange[dayRange.length - 1];
 
   const emailsList = events.reduce((emails, event) => {
-    emails.push(event.email_ids); // TODO: why are we typed to "never" here?
+    emails.push(event.participants); // TODO: why are we typed to "never" here?
     return emails;
   }, []);
   // Pick the duration_minutes from the first block slot

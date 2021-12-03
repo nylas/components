@@ -17,17 +17,13 @@
             event_title: "My Intro Meeting",
             event_description: "My test desc",
             slot_size: 15,
-            email_ids: [
-              "phil.r@nylas.com",
-              "chantal.l@nylas.com",
-              "hazik.a@nylas.com",
-            ],
+            participants: ["nylascypresstest@gmail.com"],
           },
           {
             event_title: "My Intro Meeting2",
             event_description: "My test desc",
             slot_size: 15,
-            email_ids: ["hazik.a@nylas.com"],
+            participants: ["arjun.k@nylas.com"],
           },
         ];
         availability.open_hours = [
@@ -89,6 +85,7 @@
           },
         ];
         availability.addEventListener("timeSlotChosen", (event) => {
+          console.log("ay", event.detail.timeSlots);
           scheduler.slots_to_book = event.detail.timeSlots;
         });
 
@@ -97,6 +94,7 @@
         });
 
         availability.addEventListener("eventOptionsReady", (event) => {
+          console.log({ eventoptions: event.detail.slots });
           scheduler.event_options = event.detail.slots;
         });
 
@@ -139,7 +137,7 @@
       <nylas-availability
         show_as_week="true"
         allow_booking="true"
-        id="phils-availability"
+        id="demo-availability"
         slot_size="15"
         start_hour="9"
         end_hour="17"
@@ -148,7 +146,7 @@
         closed_color="#999"
       >
       </nylas-availability>
-      <nylas-scheduler id="phils-scheduler"> </nylas-scheduler>
+      <nylas-scheduler id="demo-scheduler"> </nylas-scheduler>
     </main>
   </body>
 </html>

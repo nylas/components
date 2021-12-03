@@ -115,7 +115,6 @@
     closed_color: "#EE3248cc",
     date_format: "full",
     dates_to_show: 1,
-    email_ids: [],
     participants: [],
     end_hour: 24,
     event_buffer: 0,
@@ -240,8 +239,6 @@
       access_token,
     });
     manifest = (await $ManifestStore[storeKey]) || {};
-
-    participants = email_ids; // handles deprecated email_ids prop
 
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
 
@@ -848,15 +845,15 @@
   let singleEventParticipants: string[] = [];
 
   $: if (_this.events?.length && _this.events?.length > 1) {
-    consecutiveParticipants = _this.events?.flatMap((e) => e.email_ids);
+    consecutiveParticipants = _this.events?.flatMap((e) => e.participants);
   } else if (_this.events?.length === 1) {
-    singleEventParticipants = _this.events?.flatMap((e) => e.email_ids);
+    singleEventParticipants = _this.events?.flatMap((e) => e.participants);
   }
 
   function getAvailabilityQuery(
     emailAddresses = singleEventParticipants,
     accessToken = access_token,
-  ): ConsecutiveAvailabilityQuery {
+  ): AvailabilityQuery {
     return {
       body: {
         emails: emailAddresses,
@@ -1741,9 +1738,9 @@
 
 {#if manifest && manifest.error}
   <nylas-error {id} />
-{:else if _this.participants.length === 0 && _this.calendars.length === 0}
+{:else if _this.events.length === 0}
   <nylas-message-error
-    error_message="Please enter participants to see availability."
+    error_message="Please enter at least one event to see availability."
   />
 {:else}
   <main

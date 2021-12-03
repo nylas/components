@@ -50,7 +50,7 @@ export interface EventDefinition {
   event_location: string;
   event_conferencing: string;
   slot_size: 15 | 30 | 60;
-  email_ids: string[];
+  participants: string[];
   host_rules: HostRules;
 }
 

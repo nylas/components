@@ -67,7 +67,7 @@
     slot_size: 15,
     event_location: "",
     event_conferencing: "",
-    email_ids: [],
+    participants: [],
     host_rules: {
       method: "all",
     },
@@ -257,7 +257,7 @@
     const emailString = e.target.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      event.email_ids = parseStringToArray(emailString);
+      event.participants = parseStringToArray(emailString);
       _this.events = [..._this.events];
     }, 1000);
   }
@@ -534,15 +534,15 @@
               </div>
               <div>
                 <div>
-                  <strong id="email_ids"
+                  <strong id="participants"
                     >Email Ids to include for scheduling</strong
                   >
                 </div>
                 <label>
                   <textarea
-                    name="email_ids"
+                    name="participants"
                     on:input={(e) => debounceEmailInput(e, event)}
-                    value={event.email_ids}
+                    value={event.participants}
                   />
                 </label>
               </div>
@@ -1040,7 +1040,7 @@
           on:timeSlotChosen={(event) => {
             slots_to_book = event.detail.timeSlots;
           }}
-          calendars={!_this.events[0]?.email_ids
+          calendars={!_this.events[0]?.participants
             ? [
                 {
                   availability: "busy",
@@ -1054,7 +1054,7 @@
           {slots_to_book}
           {..._this}
           capacity={null}
-          calendars={!_this.events[0]?.email_ids
+          calendars={!_this.events[0]?.participants
             ? [
                 {
                   availability: "busy",

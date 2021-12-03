@@ -8,7 +8,7 @@ export function convertHourAssumptionsToOpenHours(
 ): OpenHours[] {
   return [
     {
-      emails: events.flatMap((e) => e.email_ids),
+      emails: events.flatMap((e) => e.participants),
       days: [...Array(7).keys()],
       start: `${start_hour}:00`,
       end: `${end_hour}:00`,
