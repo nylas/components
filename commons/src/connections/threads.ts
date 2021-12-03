@@ -10,14 +10,12 @@ import type {
   ConversationQuery,
   Conversation,
   MiddlewareResponse,
-  SearchResultThreadsQuery,
-  CommonQuery,
 } from "@commons/types/Nylas";
 
-export const fetchThreads = async (
+export const fetchThreads = (
   query: MailboxQuery,
-  limit: number,
   offset: number,
+  limit: number,
 ): Promise<Thread[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
@@ -27,13 +25,13 @@ export const fetchThreads = async (
       (param) => (queryString = queryString.concat(`&${param[0]}=${param[1]}`)),
     );
   }
-  return await fetch(queryString, getFetchConfig(query))
+  return fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
     .then((json) => json.response)
     .catch((error) => handleError(query.component_id, error));
 };
 
-export async function fetchThreadCount(query: MailboxQuery) {
+export function fetchThreadCount(query: MailboxQuery): Promise<number> {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
   )}/threads?view=expanded&not_in=trash&view=count`;
@@ -47,22 +45,23 @@ export async function fetchThreadCount(query: MailboxQuery) {
     queryString += `&q=${query.keywordToSearch}`;
   }
 
-  return await fetch(queryString, getFetchConfig(query))
+  return fetch(queryString, getFetchConfig(query))
     .then((response) => handleResponse<MiddlewareResponse<any>>(response))
     .then((json) => json.response.count);
 }
 
-export const fetchSearchResultThreads = async (
+export const fetchSearchResultThreads = (
   query: MailboxQuery,
 ): Promise<Thread[]> => {
   const queryString = `${getMiddlewareApiUrl(
     query.component_id,
   )}/threads/search?q=${query.keywordToSearch}&view=expanded`;
-  return await fetch(queryString, getFetchConfig(query))
-    .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
-    .then(async (json) => {
-      return json.response;
-    })
+
+  return fetch(queryString, getFetchConfig(query))
+    .then(async (response) =>
+      handleResponse<MiddlewareResponse<Thread[]>>(response),
+    )
+    .then((json) => json.response)
     .catch((error) => handleError(query.component_id, error));
 };
 
@@ -81,15 +80,13 @@ export const fetchThread = async (
     .then((response) =>
       handleResponse<MiddlewareResponse<Conversation>>(response),
     )
-    .then((json) => {
-      return json.response;
-    })
+    .then((json) => json.response)
     .catch((error) => handleError(query.component_id, error));
 
   return thread;
 };
 
-export const updateThread = async (
+export const updateThread = (
   query: ConversationQuery,
   updatedThread: Conversation,
 ): Promise<Conversation> => {
@@ -111,8 +108,6 @@ export const updateThread = async (
     .then((response) =>
       handleResponse<MiddlewareResponse<Conversation>>(response),
     )
-    .then((json) => {
-      return json.response;
-    })
+    .then((json) => json.response)
     .catch((error) => handleError(query.component_id, error));
 };

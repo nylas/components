@@ -11,6 +11,7 @@
     ContactStore,
     fetchCleanConversations,
     fetchThread,
+    silence,
   } from "@commons";
   import type { Contact, ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
@@ -245,12 +246,15 @@
       }
       activeThread = localThread;
     } else if (_this.thread_id) {
-      const thread = await fetchThread(query);
+      const thread = await fetchThread(query).catch(silence);
 
-      if (_this.show_expanded_email_view_onload) {
-        thread.expanded = _this.show_expanded_email_view_onload;
+      if (thread) {
+        if (_this.show_expanded_email_view_onload) {
+          thread.expanded = _this.show_expanded_email_view_onload;
+        }
+
+        activeThread = thread;
       }
-      activeThread = thread as Conversation;
     }
   })();
 
@@ -336,7 +340,7 @@
   async function saveActiveThread() {
     // if thread and if component_id (security)
     if (activeThread && query.component_id && _this.thread_id) {
-      await updateThread(query, activeThread);
+      await updateThread(query, activeThread).catch(silence);
     }
   }
 

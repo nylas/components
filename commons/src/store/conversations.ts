@@ -6,6 +6,7 @@ import type {
   ConversationQuery,
   StoredMessage,
 } from "@commons/types/Nylas";
+import { silence } from "@commons";
 
 function initializeConversations() {
   const { subscribe, set, update } = writable<Record<string, Conversation>>({});
@@ -18,11 +19,16 @@ function initializeConversations() {
     getConversation: async (query: ConversationQuery) => {
       const queryKey = JSON.stringify(query);
       if (!threadsMap[queryKey] && (query.component_id || query.access_token)) {
-        threadsMap[queryKey] = await fetchThread(query);
-        update((threads) => {
-          threads[queryKey] = threadsMap[queryKey];
-          return { ...threads };
-        });
+        const thread = await fetchThread(query).catch(silence);
+
+        if (thread) {
+          threadsMap[queryKey] = thread;
+
+          update((threads) => {
+            threads[queryKey] = threadsMap[queryKey];
+            return { ...threads };
+          });
+        }
       }
       return await threadsMap[queryKey];
     },

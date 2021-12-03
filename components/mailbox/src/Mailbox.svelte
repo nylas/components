@@ -651,9 +651,8 @@
           aria-label="Bulk actions"
           aria-controls="mailboxlist"
         >
-          {#if _this.show_thread_checkbox && _this.actions_bar.includes(MailboxActions.SELECTALL)}<div
-              class="thread-checkbox"
-            >
+          {#if _this.show_thread_checkbox && _this.actions_bar.includes(MailboxActions.SELECTALL)}
+            <div class="thread-checkbox">
               {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
                 <input
                   title={selectAllTitle}
