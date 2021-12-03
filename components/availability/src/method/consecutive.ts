@@ -10,7 +10,7 @@ export interface createConsecutiveSlotsQuery {
   openHours: OpenHours[];
 }
 
-export async function createConsecutiveSlots(
+export async function createConsecutiveQueryKey(
   query: createConsecutiveSlotsQuery,
 ) {
   const { events, dayRange, startHour, endHour, openHours } = query;

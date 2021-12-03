@@ -85,7 +85,6 @@
           },
         ];
         availability.addEventListener("timeSlotChosen", (event) => {
-          console.log("ay", event.detail.timeSlots);
           scheduler.slots_to_book = event.detail.timeSlots;
         });
 
@@ -94,7 +93,6 @@
         });
 
         availability.addEventListener("eventOptionsReady", (event) => {
-          console.log({ eventoptions: event.detail.slots });
           scheduler.event_options = event.detail.slots;
         });
 

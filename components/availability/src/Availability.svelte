@@ -58,7 +58,7 @@
   import NextIcon from "./assets/right-arrow.svg";
   import { isAvailable, isUnavailable } from "./method/slot";
   import { convertHourAssumptionsToOpenHours } from "./method/openhours";
-  import { createConsecutiveSlots } from "./method/consecutive";
+  import { createConsecutiveQueryKey } from "./method/consecutive";
   import type { EventDefinition } from "@commonstypes/ScheduleEditor";
   import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
@@ -1642,7 +1642,7 @@
         openHours,
       };
 
-      let consecutiveSlotsQueryKey = await createConsecutiveSlots(
+      let consecutiveSlotsQueryKey = await createConsecutiveQueryKey(
         consecutiveSlotsQuery,
       );
       const consecutiveSlotOptions = await $ConsecutiveAvailabilityStore[
@@ -1712,7 +1712,7 @@
   }
 
   // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,
-  // a user can only book several in a row. We should, therefore, only show those slots that kick off a consecutive series
+  // a user can only book several in a row. We should, therefore, only show those slots that exist within a consecutive series
   $: listViewOptions = (day: Day): SelectableSlot[] => {
     if (isConsecutive) {
       return day.slots.filter((slot) =>
@@ -1724,7 +1724,7 @@
       return day.slots.filter(
         (slot) =>
           slot.availability === AvailabilityStatus.FREE ||
-          slot.availability === AvailabilityStatus.PARTIAL,
+          slot.availability === AvailabilityStatus.PARTIAL, // TODO: does this observe partial_bookable_ratio?
       );
     }
   };

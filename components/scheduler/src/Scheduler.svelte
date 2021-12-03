@@ -18,7 +18,6 @@
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
-  // import { fetchConsecutiveAvailability } from "@commonsconnections/availability";
 
   interface BookableSlot extends TimeSlot {
     recurrence_cadence?:
@@ -68,7 +67,7 @@
     event_conferencing: "",
     event_location: "",
     slots_to_book: [],
-    notification_mode: NotificationMode.SEND_MESSAGE,
+    notification_mode: NotificationMode.SHOW_MESSAGE,
     notification_message: "Thank you for scheduling!",
     notification_subject: "Invitation",
     recurrence: "none",
