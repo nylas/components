@@ -161,37 +161,40 @@ describe("scheduler component", () => {
     });
 
     it("selects a timeslot on availability when a scheduler item is clicked", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.show_weekends = false;
-          component.start_date = CONSECUTIVE_START_DATE;
-        });
       cy.intercept({
         method: "POST",
         url: "/middleware/calendars/availability/consecutive",
       }).as("getConsecutive");
 
-      cy.wait("@getConsecutive").then(() => {
-        cy.get("nylas-scheduler")
-          .as("scheduler")
-          .then((element) => {
-            cy.get("ul.timeslots li:eq(0)").click();
-          });
-      });
-
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
           const component = element[0];
-          component.show_weekends = false;
+          // component.show_weekends = false;
           component.start_date = CONSECUTIVE_START_DATE;
-          cy.get(".slot.busy").should("have.length", 36);
-          cy.get(".slot.free").should("have.length", 124);
-          cy.get(".slot.selected").should("have.length", 2);
         });
+      cy.wait("@getConsecutive").then(() => {
+        cy.get("nylas-scheduler")
+          .as("scheduler")
+          .then((element) => {
+            cy.get("ul.timeslots li").should("have.length", 162);
+            cy.get("ul.timeslots li:eq(0)").click();
+            cy.get(".timeslot-options").should("not.exist");
+            cy.get(".booker ul.timeslots li").should("have.length", 2);
+          });
+        cy.get("nylas-availability")
+          .as("availability")
+          .then((element) => {
+            cy.get(".slot.busy").should("have.length", 40);
+            cy.get(".slot.free").should("have.length", 184);
+            cy.get(".slot.selected").should("have.length", 2);
+          });
+      });
     });
+
+    // TODO: test time/reorder deduplication (same time, different ordering)
+    // TODO: test slot-click, emitted-event
+    // TODO: test slot de-select, scheduler back to options list
   });
 
   describe("Inherits and passes properties", () => {

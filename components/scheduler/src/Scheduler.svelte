@@ -419,7 +419,7 @@
       >
     {:else if _this.event_options.length}
       <h2>Select an option</h2>
-      <ul class="timeslots">
+      <ul class="timeslots timeslot-options">
         {#each _this.event_options as option}
           <li
             aria-role="button"
