@@ -110,7 +110,7 @@ describe("scheduler component", () => {
 
   const CONSECUTIVE_START_DATE = new Date("2021-11-01 GMT -0400");
 
-  describe.only("Consecutive Availability", () => {
+  describe("Consecutive Availability", () => {
     beforeEach(() => {
       cy.visit("/components/scheduler/src/index.html");
     });
@@ -160,7 +160,7 @@ describe("scheduler component", () => {
         });
     });
 
-    it.only("selects a timeslot on availability when a scheduler item is clicked", () => {
+    it("selects a timeslot on availability when a scheduler item is clicked", () => {
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
