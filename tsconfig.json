@@ -11,7 +11,7 @@
     "allowJs": false,
     "checkJs": false,
     "noEmit": true,
-    "types": ["svelte", "jest", "cypress", "node"],
+    "types": ["svelte", "jest", "cypress"],
     "baseUrl": ".",
     "rootDirs": ["components", "commons"],
     "paths": {
