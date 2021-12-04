@@ -19,7 +19,7 @@ export const fetchThreads = (
 ): Promise<Thread[]> => {
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
-  )}/threads?view=expanded&not_in=trash&limit=${limit}&offset=${offset}`;
+  )}/threads?view=expanded&not_in=trash&not_in=drafts&limit=${limit}&offset=${offset}`;
   if (query.query) {
     Object.entries(query.query).forEach(
       (param) => (queryString = queryString.concat(`&${param[0]}=${param[1]}`)),
