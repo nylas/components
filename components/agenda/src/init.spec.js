@@ -170,6 +170,7 @@ describe("Timeboxing", () => {
       // 10/4 = 2.5.
       // We thus expect the "concealed before" viewport to be 250% of our active view,
       // in otherwords, a top of -250% (or, against our viewport, -1760px)
+      // (viewport height: 800px; .ticks container: 704px. 704 x 2.5 = 1760)
       cy.get(".ticks").get(".tick:eq(0)").should("have.css", "top", "-1760px");
     });
   });
