@@ -29,7 +29,7 @@
     "release:canary": "lerna version prerelease --no-private",
     "release:stable": "lerna version --force-publish --no-private",
     "start": "concurrently \"live-server . --host=0.0.0.0 --port=8000\" \"yarn dev\"",
-    "start:ci": "sirv . --port 8000 public",
+    "start:ci": "TZ=America/Toronto sirv . --port 8000 public",
     "test": "jest --no-cache --verbose --run-in-band",
     "test-coverage": "yarn test --coverage",
     "tscheck": "lerna run --parallel tscheck",
