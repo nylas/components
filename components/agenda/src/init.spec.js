@@ -143,7 +143,7 @@ describe("Custom data", () => {
   });
 });
 
-describe.only("Timeboxing", () => {
+describe("Timeboxing", () => {
   it("scales midnight to midnight by default", () => {
     cy.visit("/components/agenda/src/index.html");
     cy.get("nylas-agenda").should("exist");
@@ -171,6 +171,31 @@ describe.only("Timeboxing", () => {
       // We thus expect the "concealed before" viewport to be 250% of our active view,
       // in otherwords, a top of -250% (or, against our viewport, -1760px)
       cy.get(".ticks").get(".tick:eq(0)").should("have.css", "top", "-1760px");
+    });
+  });
+  it("updates auto_time_box view when events are updated externally", () => {
+    cy.visit("/components/agenda/src/index.html");
+    cy.get("nylas-agenda").then((element) => {
+      const agenda = element[0];
+      agenda.events = AGENDA_EVENTS;
+      agenda.auto_time_box = true;
+      cy.get(".ticks")
+        .get(".tick:eq(0)")
+        .should("have.css", "top", "-1760px")
+        .then(() => {
+          agenda.events = [
+            ...AGENDA_EVENTS.map((slot, i) => {
+              if (i === 0) {
+                slot.when.start_time = 1600444800; // 12:00
+                slot.when.end_time = 1600446600; // 12:30
+              }
+              return slot;
+            }),
+          ];
+          cy.get(".ticks")
+            .get(".tick:eq(0)")
+            .should("have.css", "top", "-4224px");
+        });
     });
   });
 });
