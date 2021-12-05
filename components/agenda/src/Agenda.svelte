@@ -78,7 +78,7 @@
     auto_time_box: false,
     calendar_id: "",
     calendar_ids: "",
-    color_by: "calendar",
+    color_by: "event",
     condensed_view: false,
     eagerly_fetch_events: true,
     end_minute: 1440,
