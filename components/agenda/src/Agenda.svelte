@@ -356,19 +356,6 @@
     })
     .sort((a, b) => a.when.start_time - b.when.start_time);
 
-  // Adjust start/end minute (zoom) events are loaded
-  $: {
-    startMinute =
-      _this.auto_time_box && timespanEvents?.length
-        ? getDynamicStartTime(timespanEvents[0])
-        : _this.start_minute;
-
-    endMinute =
-      _this.auto_time_box && timespanEvents?.length
-        ? getDynamicEndTime(timespanEvents[timespanEvents.length - 1])
-        : _this.end_minute;
-  }
-
   // Only fired if no events prop was passed in
   $: if (!_this.events) {
     dispatchEvent("eventsLoaded", calendarEvents);
@@ -624,6 +611,19 @@
       }
     }
   };
+
+  // Adjust start/end minute (zoom) events are loaded
+  $: {
+    startMinute =
+      _this.auto_time_box && timespanEvents?.length
+        ? getDynamicStartTime(timespanEvents[0])
+        : _this.start_minute;
+
+    endMinute =
+      _this.auto_time_box && timespanEvents?.length
+        ? getDynamicEndTime(timespanEvents[timespanEvents.length - 1])
+        : _this.end_minute;
+  }
 
   // #endregion position and zoom
 

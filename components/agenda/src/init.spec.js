@@ -1,3 +1,26 @@
+const AGENDA_EVENTS = [
+  {
+    title: "Some event that I am manipulating outside of the context of Nylas",
+    description: "Passed in from HTML!",
+    participants: [],
+    when: {
+      end_time: 1600444800,
+      object: "timespan",
+      start_time: 1600437600,
+    },
+  },
+  {
+    title: "Some I got from elsewhere",
+    description: "Passed in from HTML!",
+    participants: [],
+    when: {
+      end_time: 1600452000,
+      object: "timespan",
+      start_time: 1600448400,
+    },
+  },
+];
+
 describe("Restricting Dates", () => {
   it("handles allowed_dates as an array of dates ", () => {
     cy.visit("/components/agenda/src/index.html");
@@ -94,29 +117,7 @@ describe("Custom data", () => {
         .should("exist")
         .then(() => {
           // Set custom data
-          agenda.events = [
-            {
-              title:
-                "Some event that I am manipulating outside of the context of Nylas",
-              description: "Passed in from HTML!",
-              participants: [],
-              when: {
-                end_time: 1600444800,
-                object: "timespan",
-                start_time: 1600438500,
-              },
-            },
-            {
-              title: "Some I got from elsewhere",
-              description: "Passed in from HTML!",
-              participants: [],
-              when: {
-                end_time: 1600449999,
-                object: "timespan",
-                start_time: 1600448500,
-              },
-            },
-          ];
+          agenda.events = AGENDA_EVENTS;
 
           // Check to make sure it's using custom data (not Nylas data)
           cy.get("ul.events")
@@ -138,6 +139,38 @@ describe("Custom data", () => {
                 .should("not.contain", "Some I got from elsewhere");
             });
         });
+    });
+  });
+});
+
+describe.only("Timeboxing", () => {
+  it("scales midnight to midnight by default", () => {
+    cy.visit("/components/agenda/src/index.html");
+    cy.get("nylas-agenda").should("exist");
+    cy.get("nylas-agenda").then((element) => {
+      const agenda = element[0];
+      agenda.events = AGENDA_EVENTS;
+      agenda.auto_time_box = false;
+      // First tick is 12 AM regardless of auto_time_box;
+      cy.get(".ticks").get(".tick:eq(0)").should("contain", "12 AM");
+      // it gets its height offset into the negative if we're timeboxed. Test that.
+      cy.get(".ticks").get(".tick:eq(0)").should("have.css", "top", "0px");
+    });
+  });
+  it("correctly scales view to start and end when events do", () => {
+    cy.visit("/components/agenda/src/index.html");
+    cy.get("nylas-agenda").then((element) => {
+      const agenda = element[0];
+      agenda.events = AGENDA_EVENTS;
+      agenda.auto_time_box = true;
+      // first event starts at 10:00am; or 600 minutes into a 1440 minute day.
+      // last event ends at 2:00pm, or 840 minutes into a 1440 minute day
+      // so we're zooming to between 10a-2p, or 600-840, showing 240/1440 minutes.
+      // Our active view therefore shows 4 hours, and are concealing 10 hours before;
+      // 10/4 = 2.5.
+      // We thus expect the "concealed before" viewport to be 250% of our active view,
+      // in otherwords, a top of -250% (or, against our viewport, -1760px)
+      cy.get(".ticks").get(".tick:eq(0)").should("have.css", "top", "-1760px");
     });
   });
 });
