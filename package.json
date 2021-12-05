@@ -10,8 +10,8 @@
   },
   "scripts": {
     "build": "lerna run --parallel build",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
+    "cy:open": "TZ=America/Toronto cypress open",
+    "cy:run": "TZ=America/Toronto cypress run",
     "dev": "lerna run --parallel dev --concurrency 8",
     "dev:scoped": "concurrently \"live-server . --host=localhost --port=8000\" \"lerna run --parallel dev --scope=@nylas/components-{mailbox}\"",
     "lerna": "lerna",
