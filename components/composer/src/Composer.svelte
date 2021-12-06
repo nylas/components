@@ -154,7 +154,6 @@
       if (account) {
         // Set "from" field from account
         update("from", [{ name: account.name, email: account.email_address }]);
-        _this.show_from = false;
       }
     }
 
@@ -264,7 +263,6 @@
       {},
     );
     previousProps = _this;
-    console.log("MINIMIZE", _this.minimized);
   };
 
   let sendPending = false;
@@ -384,10 +382,11 @@
       z-index: var(--z-index, 1000);
     }
     &.minimized {
+      height: auto;
       min-height: 0;
     }
     &__loader {
-      height: var(--composer-editor-max-height, 480px);
+      min-height: var(--composer-editor-max-height, 480px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -759,15 +758,6 @@
           <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
             {#if sendPending}Sending{:else}Send{/if}
           </button>
-          <!-- <button
-            class="send-btn send-later"
-            disabled={!isSendable}
-            on:click={() => (showDatepicker = !showDatepicker)}
-          >
-            <SendLaterIcon
-              style="fill: var(--bg); width: 10px; height: 10px; transform: scale(1.5) translateY(1px);"
-            />
-          </button> -->
         </div>
 
         <form action="" enctype="multipart/form-data">
