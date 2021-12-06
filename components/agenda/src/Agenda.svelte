@@ -1478,12 +1478,12 @@
         on:pointerup={agendaMouseUp}
         on:mouseleave={agendaMouseUp}
       >
-        <div class="hour-ticks">
-          {#each ticks as tick}
-            <span style="top: {tick.relativeTickPosition * 100}%" />
-          {/each}
-        </div>
-        {#if Array.isArray(loadedEvents)}
+        {#if Array.isArray(loadedEvents) && loadedEvents.length}
+          <div class="hour-ticks">
+            {#each ticks as tick}
+              <span style="top: {tick.relativeTickPosition * 100}%" />
+            {/each}
+          </div>
           {#each [...loadedEvents, newEvent] as event}
             {#if event && event.relativeStartTime !== undefined}
               <li
