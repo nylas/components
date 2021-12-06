@@ -76,9 +76,25 @@ export interface TimeSlot {
   end_time: Date;
   available_calendars: string[];
   calendar_id?: string;
+  expirySelection?: string;
+  recurrence_cadence?: string;
+  recurrence_expiry?: Date | string;
+}
+
+export interface BookableSlot extends TimeSlot {
+  event_conferencing: string;
+  event_description: string;
+  event_location: string;
+  event_title: string;
   expirySelection: string;
-  recurrence_cadence: string;
-  recurrence_expiry: string;
+  recurrence_cadence?:
+    | "none"
+    | "daily"
+    | "weekdays"
+    | "biweekly"
+    | "weekly"
+    | "monthly";
+  recurrence_expiry?: Date | string;
 }
 
 export interface SelectableSlot extends TimeSlot {
@@ -97,6 +113,7 @@ export interface AvailabilityQuery extends CommonQuery {
     free_busy: any[];
     duration_minutes: number;
     interval_minutes: number;
+    round_robin?: string;
   };
   forceReload?: boolean;
 }

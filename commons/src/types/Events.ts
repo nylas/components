@@ -2,25 +2,26 @@ import type { Participant } from "@commons/types/Nylas";
 import type { EventStatus } from "@commons/enums/Events";
 
 interface _Event {
-  title?: string;
-  description?: string;
-  participants?: Participant[];
-  owner: string;
-  id: string;
-  calendar_id: string;
   account_id: string;
   busy: boolean;
-  status?: EventStatus;
-  relativeStartTime: number;
-  relativeRunTime: number;
+  calendar_id: string;
+  id: string;
+  owner: string;
+  recurrence: EventRecurrence;
   relativeOverlapOffset: number;
   relativeOverlapWidth: number;
+  relativeRunTime: number;
+  relativeStartTime: number;
+  attendeeStatus?: "yes" | "no" | "noreply" | "maybe";
+  conferencing?: EventConferencing;
+  description?: string;
+  isNewEvent?: boolean;
   location?: string;
   locationString?: string;
-  attendeeStatus?: "yes" | "no" | "noreply" | "maybe";
-  isNewEvent?: boolean;
-  conferencing?: EventConferencing;
-  recurrence: EventRecurrence;
+  metadata?: Record<string, any>;
+  participants?: Participant[];
+  status?: EventStatus;
+  title?: string;
 }
 
 export interface EventRecurrence {

@@ -22,6 +22,7 @@
   import DragIcon from "./assets/drag-icon.svg";
   import "./components/DragItemPlaceholder.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
+  import type { TimespanEvent } from "@commonstypes/Events";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -174,16 +175,12 @@
     const cleanedProps = {
       ..._this,
       custom_fields: _this.custom_fields.map((field) => {
-        delete field["id"]; // used only for drag reorder interactions
+        delete field.id; // used only for drag reorder interactions
         return field;
       }),
     };
 
-    saveManifest({
-      id,
-      access_token,
-      manifest: { settings: cleanedProps },
-    });
+    saveManifest(id, cleanedProps, access_token);
   }
 
   // #region unpersisted variables
@@ -253,11 +250,13 @@
   }
 
   let debouncedInputTimer: number;
-  function debounceEmailInput(e: HTMLInputElement, event) {
-    const emailString = e.target.value;
+  function debounceEmailInput(e: Event, event: TimespanEvent) {
+    const emailString = (e.target as HTMLTextAreaElement)?.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      event.participants = parseStringToArray(emailString);
+      event.participants = parseStringToArray(emailString).map((email) => ({
+        email,
+      }));
       _this.events = [..._this.events];
     }, 1000);
   }

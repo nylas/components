@@ -391,12 +391,6 @@
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
-            const slot = {
-              start_time: time,
-              end_time: endTime,
-              available_calendars: [],
-            };
-
             // Adjust calendar.timeslots for buffers
             const timeslots =
               calendar.availability === AvailabilityStatus.BUSY
@@ -426,6 +420,12 @@
                     ),
                     available_calendars: slot.available_calendars,
                   }));
+
+            const slot: TimeSlot = {
+              start_time: time,
+              end_time: endTime,
+              available_calendars: [],
+            };
 
             let concurrentSlotEventsForUser = 0;
             if (calendar.availability === AvailabilityStatus.BUSY) {
@@ -892,8 +892,8 @@
 
   // If 2 slots bump up to each other consider them a single group of time
   function groupConsecutiveTimeslots(slots: PreDatedTimeSlot[] = []) {
-    return slots.reduce((groups, slot) => {
-      const prevSlot: PreDatedTimeSlot = groups[groups.length - 1];
+    return slots.reduce((groups: PreDatedTimeSlot[], slot) => {
+      const prevSlot = groups[groups.length - 1];
       if (prevSlot && prevSlot.end_time === slot.start_time) {
         prevSlot.end_time = slot.end_time;
       } else {
@@ -1038,7 +1038,7 @@
   }
 
   //#region event query
-  let query: EventQuery;
+  let query;
   $: query = {
     component_id: id,
     access_token: access_token,
@@ -1468,7 +1468,9 @@
           slot.selectionPending = false;
         });
 
-      event_to_hover = inspectConsecutiveBlock(slot);
+      if (slot) {
+        event_to_hover = inspectConsecutiveBlock(slot);
+      }
     } else {
       if (slot) {
         addToDrag(slot, day);

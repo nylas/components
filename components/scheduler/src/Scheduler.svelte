@@ -14,22 +14,10 @@
     CustomField,
     ConsecutiveEvent,
   } from "@commons/types/Scheduler";
-  import type { TimeSlot } from "@commons/types/Availability";
+  import type { BookableSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
-
-  interface BookableSlot extends TimeSlot {
-    recurrence_cadence?:
-      | "none"
-      | "daily"
-      | "weekdays"
-      | "biweekly"
-      | "weekly"
-      | "monthly";
-    recurrence_expiry?: Date | string | undefined;
-    expirySelection: string;
-  }
 
   // #region props
   export let id: string = "";
