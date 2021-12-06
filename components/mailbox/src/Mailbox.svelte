@@ -9,6 +9,7 @@
   } from "@commons/enums/Nylas";
   import {
     buildInternalProps,
+    downloadAttachedFile,
     getEventDispatcher,
   } from "@commons/methods/component";
   import { FolderStore } from "@commons/store/folders";
@@ -400,18 +401,7 @@
       component_id: id,
       access_token,
     });
-    const buffer = Uint8Array.from(atob(downloadedFileData), (c) =>
-      c.charCodeAt(0),
-    );
-    var blob = new Blob([buffer], { type: file.content_type });
-    var blobFile = window.URL.createObjectURL(blob);
-
-    var a = document.createElement("a");
-    a.href = blobFile;
-    a.download = file.filename;
-    a.target = "_blank";
-    a.click();
-    a.remove();
+    downloadAttachedFile(downloadedFileData, file);
   }
 
   async function onDeleteSelected(event: MouseEvent) {

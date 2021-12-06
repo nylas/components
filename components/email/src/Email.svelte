@@ -17,6 +17,7 @@
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
     buildInternalProps,
+    downloadAttachedFile,
     getEventDispatcher,
   } from "@commons/methods/component";
   import DropdownSymbol from "./assets/chevron-down.svg";
@@ -664,25 +665,13 @@
   }
 
   async function downloadSelectedFile(event: CustomEvent, file: File) {
-    event.stopImmediatePropagation();
     if (activeThread && id && _this.thread_id) {
       const downloadedFileData = await downloadFile({
         file_id: file.id,
         component_id: id,
         access_token,
       });
-      const buffer = Uint8Array.from(atob(downloadedFileData), (c) =>
-        c.charCodeAt(0),
-      );
-      var blob = new Blob([buffer], { type: file.content_type });
-      var blobFile = window.URL.createObjectURL(blob);
-
-      var a = document.createElement("a");
-      a.href = blobFile;
-      a.download = file.filename;
-      a.target = "_blank";
-      a.click();
-      a.remove();
+      downloadAttachedFile(downloadedFileData, file);
     }
     dispatchEvent("downloadClicked", {
       event,

@@ -1,4 +1,4 @@
-import type { Manifest } from "@commons/types/Nylas";
+import type { File, Manifest } from "@commons/types/Nylas";
 
 export function getEventDispatcher(component: {
   dispatchEvent?: (e: Event) => boolean;
@@ -118,4 +118,17 @@ export default function parseStringToArray(parseStr: string) {
   }
 
   return [parseStr.trim()];
+}
+
+export function downloadAttachedFile(fileData: string, file: File): void {
+  const buffer = Uint8Array.from(atob(fileData), (c) => c.charCodeAt(0));
+  const blob = new Blob([buffer], { type: file.content_type });
+  const blobFile = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = blobFile;
+  a.download = file.filename ?? file.id;
+  a.target = "_blank";
+  a.click();
+  a.remove();
 }
