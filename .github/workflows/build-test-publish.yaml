@@ -2,7 +2,9 @@ name: Build & Test
 on:
   push:
     branches: [main]
-    tags: ["v*"]
+    tags: 
+      - release/*
+      - prerelease/*
   pull_request:
     types: [opened, synchronize]
 env:
@@ -128,7 +130,7 @@ jobs:
   publish:
     needs: [build, lint, test-unit, type-check, test-cypress]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/prerelease') || startsWith(github.ref, 'refs/tags/release')
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # This is how we have to set the NPM_TOKEN because the `actions/setup-node@v1` requires it.
     steps:
@@ -154,11 +156,11 @@ jobs:
           echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN  }}' > ${{ github.workspace }}/.npmrc
 
       - name: Publish (canary)
-        if: contains(github.ref, 'canary') == true
+        if: contains(github.ref, 'prerelease') == true
         run: |
-          npm run lerna -- publish from-package --no-git-reset --no-verify-access --dist-tag canary --canary --preid canary --yes
+          npm run lerna -- publish from-git --no-verify-access --no-git-reset --dist-tag canary --canary --preid canary --yes
 
       - name: Publish (stable)
-        if: contains(github.ref, 'canary') == false
+        if: contains(github.ref, 'prerelease') == false
         run: |
-          npm run lerna -- publish from-package --no-git-reset --no-verify-access --yes
+          npm run lerna -- publish from-git --no-verify-access --no-git-reset --yes
