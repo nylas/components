@@ -98,46 +98,72 @@ describe("scheduler component", () => {
     ],
   ];
 
+  const CONSECUTIVE_START_DATE = new Date(
+    new Date().setDate(new Date().getDate() + 7),
+  );
+  const TWO = Math.round(
+    new Date(CONSECUTIVE_START_DATE).setHours(14, 0, 0) / 1000,
+  );
+  const TWO_FIFTEEN = Math.round(
+    new Date(CONSECUTIVE_START_DATE).setHours(14, 15, 0) / 1000,
+  );
+  const TWO_THIRTY = Math.round(
+    new Date(CONSECUTIVE_START_DATE).setHours(14, 30, 0) / 1000,
+  );
+  const TWO_FORTY_FIVE = Math.round(
+    new Date(CONSECUTIVE_START_DATE).setHours(14, 45, 0) / 1000,
+  );
+  const COMPONENT_RESPONSE = {
+    component: {
+      theming: {
+        contacts_to_load: 100,
+        show_filter: true,
+        theme: "theme-1",
+        sort_by: "name",
+        click_action: "select",
+        show_names: true,
+      },
+    },
+  };
+
   const CONSEC_RESPONSE = [
     [
       {
         emails: ["nylascypresstest@gmail.com"],
-        end_time: 1638108900,
-        start_time: 1638108000,
+        end_time: TWO_FIFTEEN,
+        start_time: TWO,
       },
       {
         emails: ["arjun.k@nylas.com"],
-        end_time: 1638109800,
-        start_time: 1638108900,
+        end_time: TWO_THIRTY,
+        start_time: TWO_FIFTEEN,
       },
     ],
     [
       {
         emails: ["arjun.k@nylas.com"],
-        end_time: 1638108900,
-        start_time: 1638108000,
+        end_time: TWO_FIFTEEN,
+        start_time: TWO,
       },
       {
         emails: ["nylascypresstest@gmail.com"],
-        end_time: 1638109800,
-        start_time: 1638108900,
+        end_time: TWO_THIRTY,
+        start_time: TWO_FIFTEEN,
       },
     ],
     [
       {
         emails: ["arjun.k@nylas.com"],
-        end_time: 1638109800,
-        start_time: 1638108900,
+        end_time: TWO_THIRTY,
+        start_time: TWO_FIFTEEN,
       },
       {
         emails: ["nylascypresstest@gmail.com"],
-        end_time: 1638110700,
-        start_time: 1638109800,
+        end_time: TWO_FORTY_FIVE,
+        start_time: TWO_THIRTY,
       },
     ],
   ];
-
-  const CONSECUTIVE_START_DATE = new Date("2021-11-01 GMT -0400");
 
   describe("Consecutive Availability", () => {
     beforeEach(() => {
@@ -188,43 +214,41 @@ describe("scheduler component", () => {
             .should("contain", "My Intro Meeting:");
         });
     });
+  });
 
+  describe("Choosing a slot from consecutive event list", () => {
     it.only("selects a timeslot on availability when a scheduler item is clicked", () => {
       cy.intercept(
-        {
-          method: "POST",
-          url: "/middleware/calendars/availability/consecutive",
-        },
-        CONSEC_RESPONSE,
-      ).as("getConsecutive");
-
+        "POST",
+        "/middleware/calendars/availability/consecutive",
+        (req) =>
+          req.reply({ ...COMPONENT_RESPONSE, response: CONSEC_RESPONSE }),
+      );
+      cy.visit("/components/scheduler/src/index.html");
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
           const component = element[0];
-          // component.show_weekends = false;
+          component.show_weekends = false;
           component.start_date = CONSECUTIVE_START_DATE;
-        });
-      cy.wait("@getConsecutive").then((intercept) => {
-        console.log("interceptus", intercept.response.body);
-      });
-      cy.get("nylas-scheduler")
-        .as("scheduler")
-        .then((element) => {
-          cy.get("ul.timeslots li").should("have.length", 162);
-          cy.get("ul.timeslots li:eq(0)").click();
-          cy.get(".timeslot-options").should("not.exist");
-          cy.get(".booker ul.timeslots li").should("have.length", 2);
-        });
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          cy.get(".slot.busy").should("have.length", 40);
-          cy.get(".slot.free").should("have.length", 184);
-          cy.get(".slot.selected").should("have.length", 2);
+          cy.get("nylas-scheduler")
+            .as("scheduler")
+            .then(() => {
+              cy.get("ul.timeslots li").should("have.length", 2);
+              cy.get("ul.timeslots li:eq(0)").click();
+              cy.get(".timeslot-options").should("not.exist");
+              cy.get(".booker ul.timeslots li").should("have.length", 2);
+
+              cy.get("nylas-availability")
+                .as("availability")
+                .then(() => {
+                  cy.get(".slot.free").should("have.length", 3);
+                  cy.get(".slot.busy").should("have.length", 157);
+                  cy.get(".slot.selected").should("have.length", 2);
+                });
+            });
         });
     });
-
     // TODO: test time/reorder deduplication (same time, different ordering)
     // TODO: test slot-click, emitted-event
     // TODO: test slot de-select, scheduler back to options list
