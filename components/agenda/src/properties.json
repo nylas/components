@@ -51,7 +51,7 @@
     "title": "Color items by",
     "type": "string",
     "options": ["calendar", "event"],
-    "value": "calendar"
+    "value": "event"
   },
   {
     "label": "hide_all_day_events",
