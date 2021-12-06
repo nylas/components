@@ -56,8 +56,6 @@
   } from "@commons/types/Nylas";
   import type { FetchContactsCallback as ContactsSearchFetchContactsCallback } from "@commons/types/ContactsSearch";
 
-  let fileSelector: HTMLInputElement;
-
   type ContactSearchCallback =
     | Participant[]
     | ContactsSearchFetchContactsCallback;
@@ -211,10 +209,9 @@
     showDatepicker = false;
   };
 
-  const handleFilesChange = async () => {
-    if (!fileSelector?.files) {
-      return;
-    }
+  async function handleFilesChange(fileChanged: any) {
+    const fileSelector = fileChanged.target;
+    if (!fileSelector?.files) return;
 
     const file = fileSelector.files[0];
 
@@ -229,6 +226,10 @@
       fileSelector.value = "";
       if (beforeFileUpload) beforeFileUpload(file);
 
+      if (file.size >= 5000000) {
+        throw "Error: File size is too large.";
+      }
+
       const result = uploadFile
         ? await uploadFile(file)
         : id && (await nylasUploadFile(id, file, access_token));
@@ -239,10 +240,14 @@
         mergeMessage({ file_ids: [...$message.file_ids, result.id] });
       if (afterFileUploadSuccess) afterFileUploadSuccess(result);
     } catch (e) {
-      updateAttachment(file.name, { loading: false, error: true });
+      updateAttachment(file.name, {
+        loading: false,
+        error: true,
+        errorMessage: typeof e === "string" ? e : undefined,
+      });
       if (afterFileUploadError) afterFileUploadError(e);
     }
-  };
+  }
 
   const handleRemoveFile = (attachment: Attachment) => {
     if (beforeFileRemove) beforeFileRemove(attachment);
@@ -795,8 +800,6 @@
           <input
             hidden
             type="file"
-            name=""
-            bind:this={fileSelector}
             id="file-upload"
             on:change={handleFilesChange}
           />

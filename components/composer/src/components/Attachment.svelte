@@ -40,8 +40,6 @@
     cursor: pointer;
     margin-left: 10px;
     flex-shrink: 0;
-    max-height: 10px;
-    max-width: 10px;
   }
 
   .file-info {
@@ -104,9 +102,13 @@
           />
         {/if}
         {#if attachment.error}
-          <span class="file-info__error"
-            >Error: Please try attaching the file again.</span
-          >
+          {#if attachment.errorMessage}
+            <span class="file-info__error">{attachment.errorMessage}</span>
+          {:else}
+            <span class="file-info__error"
+              >Error: Please try attaching the file again.</span
+            >
+          {/if}
         {/if}
         {#if !attachment.loading}
           <button class="close-btn" on:click={() => remove(attachment)}>

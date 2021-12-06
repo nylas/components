@@ -65,6 +65,7 @@ export interface Attachment {
   object?: string;
   loading?: boolean;
   error?: boolean;
+  errorMessage?: string;
 }
 
 export interface AttachmentUpdate {
@@ -76,6 +77,7 @@ export interface AttachmentUpdate {
   object?: string;
   loading?: boolean;
   error?: boolean;
+  errorMessage?: string;
 }
 
 export interface SendCallback {
