@@ -1,7 +1,20 @@
+let testScheduleEditor;
+
+beforeEach(() => {
+  cy.visit("/components/schedule-editor/src/index.html");
+  cy.get("nylas-schedule-editor").should("exist");
+  cy.get("nylas-schedule-editor").then((element) => {
+    const component = element[0];
+    component.setAttribute("id", "test-schedule-editor");
+    testScheduleEditor = component;
+  });
+});
+
 describe("schedule-editor component", () => {
   it("Renders", () => {
-    cy.visit("/components/schedule-editor/src/index.html");
-    cy.get("nylas-schedule-editor").should("exist");
+    cy.get(testScheduleEditor)
+      .should("have.prop", "id")
+      .and("equal", "test-schedule-editor");
   });
 
   describe("Allows for multiple meetings", () => {

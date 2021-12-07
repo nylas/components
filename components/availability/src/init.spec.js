@@ -1,23 +1,34 @@
+let testAvailabilityComponent;
+beforeEach(() => {
+  cy.visit("/components/availability/src/index.html");
+  cy.get("nylas-availability").then((element) => {
+    const component = element[0];
+    component.setAttribute("id", "test-availability");
+    testAvailabilityComponent = component;
+    cy.get(testAvailabilityComponent)
+      .should("have.prop", "id")
+      .and("equal", "test-availability");
+  });
+});
+
 describe("availability component", () => {
   beforeEach(() => {
     cy.intercept({
       method: "POST",
       url: "/middleware/calendars/availability",
     });
-
-    cy.visit("/components/availability/src/index.html");
   });
 
   describe("available times", () => {
     beforeEach(() => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
     });
 
     it("observes available times", () => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.calendars = [];
         cy.get(".slot.busy").should("not.exist");
@@ -39,14 +50,14 @@ describe("availability component", () => {
         },
       ];
 
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.calendars = calendars;
         cy.get(".slot.busy").should("exist");
         cy.get(".slot.free").should("have.length", 40);
       });
 
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.slot_size = 30;
         cy.get(".slot.free").should("have.length", 20);
@@ -54,19 +65,17 @@ describe("availability component", () => {
     });
 
     it("available time slot toggles (un)selected class", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_booking = true;
-          cy.get(".slot.free").first().should("have.class", "unselected");
-          cy.get(".slot.free").first().click();
-          cy.get(".slot.free").first().should("have.class", "selected");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_booking = true;
+        cy.get(".slot.free").first().should("have.class", "unselected");
+        cy.get(".slot.free").first().click();
+        cy.get(".slot.free").first().should("have.class", "selected");
+      });
     });
 
     it("should not show confirm button when multiple time slots are selected", () => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         element[0].participants = ["nylascypresstest@gmail.com"];
       });
 
@@ -81,13 +90,11 @@ describe("availability component", () => {
 
   describe("unavailable times", () => {
     it("observes unavailable times", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = [];
-          cy.get(".slot.busy").should("not.exist");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = [];
+        cy.get(".slot.busy").should("not.exist");
+      });
 
       const calendars = [
         {
@@ -105,22 +112,18 @@ describe("availability component", () => {
         },
       ];
 
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          cy.get(".slot.busy").should("exist");
-          cy.get(".slot.free").should("have.length", 56);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        cy.get(".slot.busy").should("exist");
+        cy.get(".slot.free").should("have.length", 56);
+      });
 
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.slot_size = 30;
-          cy.get(".slot.free").should("have.length", 28);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.slot_size = 30;
+        cy.get(".slot.free").should("have.length", 28);
+      });
     });
   });
 
@@ -163,44 +166,38 @@ describe("availability component", () => {
     ];
 
     beforeEach(() => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.participants = ["nylascypresstest@gmail.com"];
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.participants = ["nylascypresstest@gmail.com"];
+      });
     });
 
     it("observes multiple availabilites", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          cy.get(".slot.partial").should("exist");
-          cy.get(".slot.partial").should("have.length", 42);
-          cy.get(".slot.busy").should("have.length", 10);
-          cy.get(".slot.free").should("have.length", 44);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        cy.get(".slot.partial").should("exist");
+        cy.get(".slot.partial").should("have.length", 42);
+        cy.get(".slot.busy").should("have.length", 10);
+        cy.get(".slot.free").should("have.length", 44);
+      });
     });
 
     it("requires certain participants be present for booking", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          cy.get(
-            `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
-          )
-            .should("have.class", "partial")
-            .then(() => {
-              component.required_participants = [calendars[1].emailAddress];
-              cy.get(
-                `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
-              ).should("have.class", "busy");
-            });
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        cy.get(
+          `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+        )
+          .should("have.class", "partial")
+          .then(() => {
+            component.required_participants = [calendars[1].emailAddress];
+            cy.get(
+              `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+            ).should("have.class", "busy");
+          });
+      });
     });
   });
 
@@ -222,35 +219,31 @@ describe("availability component", () => {
     });
 
     it("Updates start_hour via component prop", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.start_hour = 8;
-          const start_time = new Date();
-          start_time.setHours(component.start_hour, 0, 0);
-          cy.get(".slot").should("have.length", 64);
-          cy.get(".slot")
-            .first()
-            .invoke("attr", "data-start-time")
-            .should("eq", start_time.toLocaleString());
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.start_hour = 8;
+        const start_time = new Date();
+        start_time.setHours(component.start_hour, 0, 0);
+        cy.get(".slot").should("have.length", 64);
+        cy.get(".slot")
+          .first()
+          .invoke("attr", "data-start-time")
+          .should("eq", start_time.toLocaleString());
+      });
     });
 
     it("Updates end_hour via component prop", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.end_hour = 8;
-          const end_time = new Date();
-          end_time.setHours(8, 0, 0);
-          cy.get(".slot").should("have.length", 32);
-          cy.get(".slot")
-            .last()
-            .invoke("attr", "data-end-time")
-            .should("eq", end_time.toLocaleString());
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.end_hour = 8;
+        const end_time = new Date();
+        end_time.setHours(8, 0, 0);
+        cy.get(".slot").should("have.length", 32);
+        cy.get(".slot")
+          .last()
+          .invoke("attr", "data-end-time")
+          .should("eq", end_time.toLocaleString());
+      });
     });
   });
 
@@ -260,13 +253,11 @@ describe("availability component", () => {
     });
 
     it("Updates slot_size via component prop", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.slot_size = 60;
-          cy.get(".slot").should("have.length", 24);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.slot_size = 60;
+        cy.get(".slot").should("have.length", 24);
+      });
     });
   });
 
@@ -283,22 +274,20 @@ describe("availability component", () => {
     });
 
     it("Updates start_date via component prop", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          const nextWeek = new Date();
-          nextWeek.setDate(nextWeek.getDate() + 7);
-          component.start_date = nextWeek;
-          cy.get("div.day")
-            .first()
-            .get("header h2")
-            .contains(
-              nextWeek.toLocaleString("default", {
-                day: "numeric",
-              }),
-            );
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        component.start_date = nextWeek;
+        cy.get("div.day")
+          .first()
+          .get("header h2")
+          .contains(
+            nextWeek.toLocaleString("default", {
+              day: "numeric",
+            }),
+          );
+      });
     });
   });
 
@@ -309,19 +298,17 @@ describe("availability component", () => {
 
     it("Updates dates_to_show via component prop", () => {
       cy.viewport(1500, 550);
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.dates_to_show = 7;
-          cy.get("div.day").should("have.length", 7);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.dates_to_show = 7;
+        cy.get("div.day").should("have.length", 7);
+      });
     });
   });
 
   describe("axis ticks", () => {
     beforeEach(() => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -332,7 +319,7 @@ describe("availability component", () => {
     });
 
     it("allows you to disable ticks column", () => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.show_ticks = false;
         cy.get("ul.ticks").should("not.exist");
@@ -365,9 +352,9 @@ describe("availability component", () => {
     });
 
     it("dynamically skips ticks with slot size 60", () => {
-      cy.get("nylas-availability").invoke("attr", "slot_size", 60);
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 60);
 
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -375,13 +362,13 @@ describe("availability component", () => {
     });
 
     it("dynamically skips ticks with slot size 30", () => {
-      cy.get("nylas-availability").invoke("attr", "slot_size", 30);
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
       cy.get("button.slot").should("have.length", 48);
     });
 
     it("dynamically skips ticks with slot size 15", () => {
-      cy.get("nylas-availability").invoke("attr", "slot_size", 15);
-      cy.get("nylas-availability").invoke("attr", "end_hour", 8);
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 15);
+      cy.get(testAvailabilityComponent).invoke("attr", "end_hour", 8);
       cy.viewport(550, 1500);
       cy.get("button.slot").should("have.length", 32);
     });
@@ -399,7 +386,7 @@ describe("availability component", () => {
 
       selectedTimeslots = [];
 
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
 
         availabilityComponent = component;
@@ -660,72 +647,64 @@ describe("availability component", () => {
   describe("weeks and weekends", () => {
     beforeEach(() => {
       cy.viewport(1500, 550);
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
     });
 
     it("Handles week_view false", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.start_date = new Date("2021-04-06 00:00");
-          component.show_as_week = false;
-          cy.get("div.day:eq(0) header h2").contains("Tue");
-          cy.get("div.day:eq(2)").should("not.exist");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.start_date = new Date("2021-04-06 00:00");
+        component.show_as_week = false;
+        cy.get("div.day:eq(0) header h2").contains("Tue");
+        cy.get("div.day:eq(2)").should("not.exist");
+      });
     });
 
     it("Handles week_view true", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.start_date = new Date("2021-04-06 00:00");
-          component.show_as_week = true;
-          cy.wait(100);
-          cy.get("div.day:eq(0) header h2").contains("Sun");
-          cy.get("div.day:eq(6) header h2").contains("Sat");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.start_date = new Date("2021-04-06 00:00");
+        component.show_as_week = true;
+        cy.wait(100);
+        cy.get("div.day:eq(0) header h2").contains("Sun");
+        cy.get("div.day:eq(6) header h2").contains("Sat");
+      });
     });
 
     it("Drops weekends like a bad habit: today view", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.start_date = new Date("2021-04-06 00:00");
-          component.dates_to_show = 7;
-          component.show_as_week = false;
-          component.show_weekends = false;
-          cy.get("div.day:eq(0) header h2").contains("Tue");
-          cy.get("div.day:eq(4) header h2").contains("Mon");
-          cy.get("div.day:eq(5) header h2").contains("Tue");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.start_date = new Date("2021-04-06 00:00");
+        component.dates_to_show = 7;
+        component.show_as_week = false;
+        component.show_weekends = false;
+        cy.get("div.day:eq(0) header h2").contains("Tue");
+        cy.get("div.day:eq(4) header h2").contains("Mon");
+        cy.get("div.day:eq(5) header h2").contains("Tue");
+      });
     });
 
     it("Drops weekends like a bad habit: week view", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.start_date = new Date("2021-04-06 00:00");
-          component.dates_to_show = 7;
-          component.show_as_week = true;
-          component.show_weekends = false;
-          cy.wait(100);
-          cy.get("div.day:eq(0) header h2").contains("Mon");
-          cy.get("div.day:eq(4) header h2").contains("Fri");
-          cy.get("div.day:eq(5) header h2").should("not.exist");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.start_date = new Date("2021-04-06 00:00");
+        component.dates_to_show = 7;
+        component.show_as_week = true;
+        component.show_weekends = false;
+        cy.wait(100);
+        cy.get("div.day:eq(0) header h2").contains("Mon");
+        cy.get("div.day:eq(4) header h2").contains("Fri");
+        cy.get("div.day:eq(5) header h2").should("not.exist");
+      });
     });
   });
 
   describe("date changes", () => {
     beforeEach(() => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -735,119 +714,107 @@ describe("availability component", () => {
       cy.get("div.change-dates").should("exist");
     });
     it("Does not show date change header when date change is disallowed", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_date_change = false;
-          cy.get("div.change-dates").should("not.exist");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_date_change = false;
+        cy.get("div.change-dates").should("not.exist");
+      });
     });
     it("Does not show date change header when date change is allowed", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_date_change = true;
-          cy.get("div.change-dates").should("exist");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_date_change = true;
+        cy.get("div.change-dates").should("exist");
+      });
     });
     it("Moves me from Fri to Monday when weekends are disallowed", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_date_change = true;
-          component.show_weekends = true;
-          const Fri = new Date("May 14 2021");
-          component.start_date = Fri;
-          cy.get("div.change-dates").should("exist");
-          cy.get(".change-dates button:eq(1)").click();
-          cy.get("header h2")
-            .contains(15)
-            .then(() => {
-              component.show_weekends = false;
-              cy.get("header h2").contains(17);
-            });
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_date_change = true;
+        component.show_weekends = true;
+        const Fri = new Date("May 14 2021");
+        component.start_date = Fri;
+        cy.get("div.change-dates").should("exist");
+        cy.get(".change-dates button:eq(1)").click();
+        cy.get("header h2")
+          .contains(15)
+          .then(() => {
+            component.show_weekends = false;
+            cy.get("header h2").contains(17);
+          });
+      });
     });
     it("Moves me from Monday to Fri on prev click when weekends are disallowed", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_date_change = true;
-          component.show_weekends = true;
-          const monday = new Date("May 17 2021");
-          component.start_date = monday;
-          cy.get("div.change-dates").should("exist");
-          cy.get(".change-dates button:eq(0)").click();
-          cy.get("header h2")
-            .contains(16)
-            .then(() => {
-              component.show_weekends = false;
-              cy.get(".change-dates button:eq(0)").click();
-              cy.get("header h2").contains(14);
-            });
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_date_change = true;
+        component.show_weekends = true;
+        const monday = new Date("May 17 2021");
+        component.start_date = monday;
+        cy.get("div.change-dates").should("exist");
+        cy.get(".change-dates button:eq(0)").click();
+        cy.get("header h2")
+          .contains(16)
+          .then(() => {
+            component.show_weekends = false;
+            cy.get(".change-dates button:eq(0)").click();
+            cy.get("header h2").contains(14);
+          });
+      });
     });
     it("Moves multiple-shown-dates when weekends are disallowed", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_date_change = true;
-          component.show_weekends = false;
-          component.dates_to_show = 3;
-          const monday = new Date("May 17 2021");
-          component.start_date = monday;
-          cy.get("div.change-dates").should("exist");
-          cy.get(".change-dates button:eq(1)").click();
-          cy.get(".day:eq(0) header h2").contains("Thu");
-          cy.get(".day:eq(1) header h2").contains("Fri");
-          cy.get(".day:eq(2) header h2")
-            .contains("Mon")
-            .then(() => {
-              cy.get(".change-dates button:eq(1)").click();
-              cy.get(".day:eq(0) header h2").contains("Tue");
-              cy.get(".day:eq(1) header h2").contains("Wed");
-              cy.get(".day:eq(2) header h2").contains("Thu");
-            });
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_date_change = true;
+        component.show_weekends = false;
+        component.dates_to_show = 3;
+        const monday = new Date("May 17 2021");
+        component.start_date = monday;
+        cy.get("div.change-dates").should("exist");
+        cy.get(".change-dates button:eq(1)").click();
+        cy.get(".day:eq(0) header h2").contains("Thu");
+        cy.get(".day:eq(1) header h2").contains("Fri");
+        cy.get(".day:eq(2) header h2")
+          .contains("Mon")
+          .then(() => {
+            cy.get(".change-dates button:eq(1)").click();
+            cy.get(".day:eq(0) header h2").contains("Tue");
+            cy.get(".day:eq(1) header h2").contains("Wed");
+            cy.get(".day:eq(2) header h2").contains("Thu");
+          });
+      });
     });
     it("Moves a full week on prev/next push", () => {
       cy.viewport(1500, 550);
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.allow_date_change = true;
-          component.show_weekends = false;
-          component.show_as_week = true;
-          const monday = new Date("May 17 2021");
-          component.start_date = monday;
-          cy.get("div.change-dates").should("exist");
-          cy.get(".change-dates button:eq(1)").click();
-          cy.get(".day").should("have.length", 5);
-          cy.get(".day:eq(0) header h2").contains("Mon");
-          cy.get(".day:eq(0) header h2").contains("24");
-          cy.get(".day:eq(1) header h2").contains("Tue");
-          cy.get(".day:eq(4) header h2")
-            .contains("Fri")
-            .then(() => {
-              cy.get(".change-dates button:eq(0)").click();
-              cy.get(".change-dates button:eq(0)").click();
-              cy.get(".day:eq(0) header h2").contains("Mon");
-              cy.get(".day:eq(0) header h2").contains("10");
-              cy.get(".day:eq(4) header h2").contains("Fri");
-            });
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.allow_date_change = true;
+        component.show_weekends = false;
+        component.show_as_week = true;
+        const monday = new Date("May 17 2021");
+        component.start_date = monday;
+        cy.get("div.change-dates").should("exist");
+        cy.get(".change-dates button:eq(1)").click();
+        cy.get(".day").should("have.length", 5);
+        cy.get(".day:eq(0) header h2").contains("Mon");
+        cy.get(".day:eq(0) header h2").contains("24");
+        cy.get(".day:eq(1) header h2").contains("Tue");
+        cy.get(".day:eq(4) header h2")
+          .contains("Fri")
+          .then(() => {
+            cy.get(".change-dates button:eq(0)").click();
+            cy.get(".change-dates button:eq(0)").click();
+            cy.get(".day:eq(0) header h2").contains("Mon");
+            cy.get(".day:eq(0) header h2").contains("10");
+            cy.get(".day:eq(4) header h2").contains("Fri");
+          });
+      });
     });
   });
 
   describe("change colours", () => {
     beforeEach(() => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -859,149 +826,131 @@ describe("availability component", () => {
         "background-color",
         "rgb(0, 0, 0)",
       );
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.partial_color = "#222";
-          component.busy_color = "#000";
-          component.free_color = "#444";
-          cy.get(".epoch.partial .inner").should(
-            "have.css",
-            "background-color",
-            "rgb(45, 45, 45)",
-          ); // 45: 2/3 availability = 2/3 distance between 000 and 444 in base RGB.
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.partial_color = "#222";
+        component.busy_color = "#000";
+        component.free_color = "#444";
+        cy.get(".epoch.partial .inner").should(
+          "have.css",
+          "background-color",
+          "rgb(45, 45, 45)",
+        ); // 45: 2/3 availability = 2/3 distance between 000 and 444 in base RGB.
+      });
     });
   });
 
   describe("list view", () => {
     it("Shows scheduler view by default", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then(() => {
-          cy.get(".epochs").should("exist");
-          cy.get(".slots").should("exist");
-          cy.get(".slot-list").should("not.exist");
-        });
+      cy.get(testAvailabilityComponent).then(() => {
+        cy.get(".epochs").should("exist");
+        cy.get(".slots").should("exist");
+        cy.get(".slot-list").should("not.exist");
+      });
     });
     it("Shows list view by passed property", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.view_as = "list";
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.view_as = "list";
 
-          cy.get(".epochs").should("not.exist");
-          cy.get(".slots").should("not.exist");
-          cy.get(".slot-list").should("exist");
-        });
+        cy.get(".epochs").should("not.exist");
+        cy.get(".slots").should("not.exist");
+        cy.get(".slot-list").should("exist");
+      });
     });
   });
 
   describe("Limiting screen size", () => {
     it("Cuts off the number of days if they drop below 100px in width", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.dates_to_show = 7;
-          cy.viewport(1500, 550);
-          cy.wait(100);
-          cy.get(".days .day").should("have.length", 7);
-          cy.viewport(1200, 550);
-          cy.get(".days .day").should("have.length", 6);
-          cy.viewport(600, 550);
-          cy.get(".days .day").should("have.length", 1);
-          cy.viewport(3000, 550);
-          cy.get(".days .day").should("have.length", 7);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.dates_to_show = 7;
+        cy.viewport(1500, 550);
+        cy.wait(100);
+        cy.get(".days .day").should("have.length", 7);
+        cy.viewport(1200, 550);
+        cy.get(".days .day").should("have.length", 6);
+        cy.viewport(600, 550);
+        cy.get(".days .day").should("have.length", 1);
+        cy.viewport(3000, 550);
+        cy.get(".days .day").should("have.length", 7);
+      });
     });
     it("Allows you to navigate a squashed schedule", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.participants = [];
-          component.dates_to_show = 7;
-          component.start_date = new Date("2021-04-06 00:00");
-          component.show_as_week = false;
-          cy.viewport(800, 550);
-          cy.get("div.day:eq(0) header h2").contains("Tue");
-          cy.get("div.day:eq(2) header h2").contains("Thu");
-          cy.get("div.day:eq(3)").should("not.exist");
-          cy.get(".change-dates button:eq(1)").click();
-          cy.get(".day:eq(0) header h2").contains("Fri");
-          cy.get(".day:eq(1) header h2").contains("Sat");
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.participants = [];
+        component.dates_to_show = 7;
+        component.start_date = new Date("2021-04-06 00:00");
+        component.show_as_week = false;
+        cy.viewport(800, 550);
+        cy.get("div.day:eq(0) header h2").contains("Tue");
+        cy.get("div.day:eq(2) header h2").contains("Thu");
+        cy.get("div.day:eq(3)").should("not.exist");
+        cy.get(".change-dates button:eq(1)").click();
+        cy.get(".day:eq(0) header h2").contains("Fri");
+        cy.get(".day:eq(1) header h2").contains("Sat");
+      });
     });
     it("Handles show_as_week gracefully when squashed", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.dates_to_show = 7;
-          component.start_date = new Date("2021-04-06 00:00");
-          component.show_as_week = true;
-          cy.viewport(1800, 550);
-          cy.wait(100);
-          cy.get("div.day:eq(0) header h2").contains("Sun");
-          cy.get("div.day:eq(0) header h2").contains("4");
-          cy.get("div.day:eq(2) header h2").contains("Tue");
-          cy.get(".days .day").should("have.length", 7);
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.dates_to_show = 7;
+        component.start_date = new Date("2021-04-06 00:00");
+        component.show_as_week = true;
+        cy.viewport(1800, 550);
+        cy.wait(100);
+        cy.get("div.day:eq(0) header h2").contains("Sun");
+        cy.get("div.day:eq(0) header h2").contains("4");
+        cy.get("div.day:eq(2) header h2").contains("Tue");
+        cy.get(".days .day").should("have.length", 7);
 
-          cy.viewport(800, 550);
-          cy.wait(100); // we need to arbitrarily wait so viewport finishes resizing
-          cy.get("div.day:eq(0) header h2").contains("Tue");
-          cy.get(".days .day").should("have.length", 3);
-          cy.get(".change-dates button:eq(1)").click();
-          cy.get(".day:eq(0) header h2").contains("Fri");
-          cy.get(".day:eq(1) header h2").contains("Sat");
-          cy.get(".change-dates button:eq(0)").click();
-          cy.get(".change-dates button:eq(0)").click();
-          cy.get(".day:eq(0) header h2").contains("Sat");
-          cy.get(".day:eq(1) header h2").contains("Sun");
-          cy.get(".days .day").should("have.length", 3);
+        cy.viewport(800, 550);
+        cy.wait(100); // we need to arbitrarily wait so viewport finishes resizing
+        cy.get("div.day:eq(0) header h2").contains("Tue");
+        cy.get(".days .day").should("have.length", 3);
+        cy.get(".change-dates button:eq(1)").click();
+        cy.get(".day:eq(0) header h2").contains("Fri");
+        cy.get(".day:eq(1) header h2").contains("Sat");
+        cy.get(".change-dates button:eq(0)").click();
+        cy.get(".change-dates button:eq(0)").click();
+        cy.get(".day:eq(0) header h2").contains("Sat");
+        cy.get(".day:eq(1) header h2").contains("Sun");
+        cy.get(".days .day").should("have.length", 3);
 
-          cy.viewport(1800, 550);
-          cy.wait(100);
-          cy.get("div.day:eq(0) header h2").contains("Sun");
-          cy.get("div.day:eq(0) header h2").contains("28");
-          cy.get("div.day:eq(2) header h2").contains("Tue");
-        });
+        cy.viewport(1800, 550);
+        cy.wait(100);
+        cy.get("div.day:eq(0) header h2").contains("Sun");
+        cy.get("div.day:eq(0) header h2").contains("28");
+        cy.get("div.day:eq(2) header h2").contains("Tue");
+      });
     });
   });
 
   describe("Event Buffer", () => {
     it("With 0 min buffer time", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.event_buffer = 0;
-          cy.get(".slot.busy").should("have.length", 5);
-          cy.get(".slot.free").should("have.length", 4);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.event_buffer = 0;
+        cy.get(".slot.busy").should("have.length", 5);
+        cy.get(".slot.free").should("have.length", 4);
+      });
     });
     it("Adds 15 min buffer time", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.event_buffer = 15;
-          cy.get(".slot.busy").should("have.length", 6);
-          cy.get(".slot.free").should("have.length", 3);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.event_buffer = 15;
+        cy.get(".slot.busy").should("have.length", 6);
+        cy.get(".slot.free").should("have.length", 3);
+      });
     });
     it("Adds 30 min buffer time", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.event_buffer = 30;
-          cy.get(".slot.busy").should("have.length", 7);
-          cy.get(".slot.free").should("have.length", 2);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.event_buffer = 30;
+        cy.get(".slot.busy").should("have.length", 7);
+        cy.get(".slot.free").should("have.length", 2);
+      });
     });
   });
 
@@ -1040,62 +989,52 @@ describe("availability component", () => {
     ];
 
     it("shows busy when slots booked over threshold", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          component.overbooked_threshold = 100;
-          cy.get(".slot.partial").should("exist");
-          cy.get(".slot.busy").should("have.length", 4);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        component.overbooked_threshold = 100;
+        cy.get(".slot.partial").should("exist");
+        cy.get(".slot.busy").should("have.length", 4);
+      });
 
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          component.overbooked_threshold = 24;
-          cy.get(".slot.partial").should("not.exist");
-          cy.get(".slot.busy").should("have.length", 96);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        component.overbooked_threshold = 24;
+        cy.get(".slot.partial").should("not.exist");
+        cy.get(".slot.busy").should("have.length", 96);
+      });
 
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          component.overbooked_threshold = 25;
-          cy.get(".slot.partial").should("exist");
-          cy.get(".slot.partial").should("have.length", 72);
-          cy.get(".slot.busy").should("have.length", 24);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        component.overbooked_threshold = 25;
+        cy.get(".slot.partial").should("exist");
+        cy.get(".slot.partial").should("have.length", 72);
+        cy.get(".slot.busy").should("have.length", 24);
+      });
     });
 
     it("handles overbooked_threshold correctly with reduced hours", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          component.start_hour = 0;
-          component.end_hour = 12;
-          component.overbooked_threshold = 50;
-          cy.get(".slot.partial").should("exist");
-          cy.get(".slot.partial").should("have.length", 24);
-          cy.get(".slot.busy").should("have.length", 24);
-        });
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.calendars = calendars;
-          component.start_hour = 0;
-          component.end_hour = 12;
-          component.overbooked_threshold = 49;
-          cy.get(".slot.partial").should("have.length", 0);
-          cy.get(".slot.busy").should("have.length", 48);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        component.start_hour = 0;
+        component.end_hour = 12;
+        component.overbooked_threshold = 50;
+        cy.get(".slot.partial").should("exist");
+        cy.get(".slot.partial").should("have.length", 24);
+        cy.get(".slot.busy").should("have.length", 24);
+      });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.calendars = calendars;
+        component.start_hour = 0;
+        component.end_hour = 12;
+        component.overbooked_threshold = 49;
+        cy.get(".slot.partial").should("have.length", 0);
+        cy.get(".slot.busy").should("have.length", 48);
+      });
     });
   });
 
@@ -1117,37 +1056,33 @@ describe("availability component", () => {
       },
     ];
     it("should have busy for 1 event with capacity 1", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.capacity = 1;
-          component.calendars = calendar;
-          cy.get(".slot.busy").should("have.length", 12);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.capacity = 1;
+        component.calendars = calendar;
+        cy.get(".slot.busy").should("have.length", 12);
+      });
     });
     it("should have free for 1 event with capacity 2", () => {
-      cy.get("nylas-availability")
-        .as("availability")
-        .then((element) => {
-          const component = element[0];
-          component.capacity = 2;
-          calendar[0].timeslots.concat([timeSlot]);
-          expect(calendar[0].timeslots.length === 2);
-          component.calendars = calendar;
-          cy.get(".slot.busy").should("have.length", 0);
-        });
+      cy.get(testAvailabilityComponent).then((element) => {
+        const component = element[0];
+        component.capacity = 2;
+        calendar[0].timeslots.concat([timeSlot]);
+        expect(calendar[0].timeslots.length === 2);
+        component.calendars = calendar;
+        cy.get(".slot.busy").should("have.length", 0);
+      });
     });
   });
 
   describe("Top-of-hour requirement", () => {
     it("should remove the ability to book slots that don't start at :00", () => {
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
         cy.get(".slot.busy").should("have.length", 5);
       });
-      cy.get("nylas-availability").then((element) => {
+      cy.get(testAvailabilityComponent).then((element) => {
         const component = element[0];
         component.mandate_top_of_hour = true;
         cy.get(".slot.busy").should("have.length", 74);
