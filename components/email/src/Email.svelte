@@ -529,12 +529,11 @@
     messageID: string,
   ): Promise<string | null> {
     messageLoadStatus[msgIndex] = "loading";
-    return fetchMessage(query, messageID).then((json) => {
+    return fetchMessage(query, messageID).then(async (json) => {
       messageLoadStatus[msgIndex] = "loaded";
       if (FilesStore.hasInlineFiles(json)) {
         const messageWithInlineFiles = await getMessageWithInlineFiles(json);
-        json.body = messageWithInlineFiles;
-        // activeThread.messages[msgIndex] = messageWithInlineFiles;
+        return messageWithInlineFiles.body;
       }
       return json.body;
     });
