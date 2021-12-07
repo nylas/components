@@ -19,7 +19,7 @@ export async function createConsecutiveQueryKey(
 
   const emailsList = events.reduce(
     (emails: string[][], event: EventDefinition) => {
-      emails.push(event.participants); // TODO: why are we typed to "never" here?
+      emails.push(event.participants);
       return emails;
     },
     [],
