@@ -12,6 +12,7 @@
     fetchCleanConversations,
     fetchThread,
     silence,
+    FilesStore,
   } from "@commons";
   import type { Contact, ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
@@ -527,6 +528,11 @@
     messageLoadStatus[msgIndex] = "loading";
     return fetchMessage(query, messageID).then((json) => {
       messageLoadStatus[msgIndex] = "loaded";
+      if (FilesStore.hasInlineFiles(json)) {
+        const messageWithInlineFiles = await getMessageWithInlineFiles(json);
+        json.body = messageWithInlineFiles;
+        // activeThread.messages[msgIndex] = messageWithInlineFiles;
+      }
       return json.body;
     });
   }
@@ -541,9 +547,13 @@
       access_token,
       component_id: id,
       message_id: _this.message_id,
-    }).then((json) => {
+    }).then(async (json) => {
       _this.message = json;
       messageLoadStatus[0] = "loaded";
+      if (FilesStore.hasInlineFiles(_this.message)) {
+        const message = await getMessageWithInlineFiles(_this.message);
+        _this.message = message;
+      }
     });
   }
 
@@ -650,18 +660,37 @@
 
   $: {
     if (activeThread) {
-      attachedFiles = activeThread.messages.reduce((files, message) => {
-        for (const [fileIndex, file] of message.files.entries()) {
-          if (file.content_disposition === "attachment") {
-            if (!files[message.id]) {
-              files[message.id] = [];
+      attachedFiles = activeThread.messages.reduce(
+        (files: Record<string, File[]>, message) => {
+          for (const [fileIndex, file] of message.files.entries()) {
+            if (file.content_disposition === "attachment") {
+              if (!files[message.id]) {
+                files[message.id] = [];
+              }
+              files[message.id].push(message.files[fileIndex]);
             }
-            files[message.id].push(message.files[fileIndex]);
           }
-        }
-        return files;
-      }, {});
+          return files;
+        },
+        {},
+      );
     }
+  }
+
+  async function getMessageWithInlineFiles(message: Message): Promise<Message> {
+    const fetchedFiles = await FilesStore.getFilesForMessage(message, {
+      component_id: id,
+      access_token,
+    });
+    for (const file of Object.values(fetchedFiles)) {
+      if (message.body) {
+        message.body = message.body?.replaceAll(
+          `src="cid:${file.content_id}"`,
+          `src="data:${file.content_type};base64,${file.data}"`,
+        );
+      }
+    }
+    return message;
   }
 
   async function downloadSelectedFile(event: CustomEvent, file: File) {
@@ -1432,9 +1461,10 @@
                     <div class="message-body">
                       {#if _this.clean_conversation && message.conversation}
                         {@html DOMPurify.sanitize(message.conversation)}
-                      {:else if message.body}
+                      {:else if message && message.body}
                         <nylas-message-body
                           {message}
+                          body={message.body}
                           on:downloadClicked={handleDownloadFromMessage}
                         />
                       {:else}
@@ -1735,6 +1765,7 @@
             {:else if _this.message.body}
               <nylas-message-body
                 message={_this.message}
+                body={_this.message.body}
                 on:downloadClicked={handleDownloadFromMessage}
               />
             {/if}

@@ -9,6 +9,7 @@
   import { get_current_component, onMount } from "svelte/internal";
 
   export let message;
+  export let body;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
 
@@ -58,8 +59,8 @@
 </style>
 
 <div>
-  {#if message && message.body}
-    {@html DOMPurify.sanitize(message.body)}
+  {#if message && body}
+    {@html DOMPurify.sanitize(body)}
     <div class="attachment">
       {#await attachedFiles then files}
         {#if files && Array.isArray(files) && files.length > 0}
