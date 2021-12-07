@@ -209,8 +209,8 @@
     showDatepicker = false;
   };
 
-  async function handleFilesChange(fileChanged: any) {
-    const fileSelector = fileChanged.target;
+  async function handleFilesChange(fileChangedEvent: Event) {
+    const fileSelector = fileChangedEvent.target as HTMLInputElement;
     if (!fileSelector?.files) return;
 
     const file = fileSelector.files[0];

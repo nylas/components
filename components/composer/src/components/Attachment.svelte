@@ -102,13 +102,10 @@
           />
         {/if}
         {#if attachment.error}
-          {#if attachment.errorMessage}
-            <span class="file-info__error">{attachment.errorMessage}</span>
-          {:else}
-            <span class="file-info__error"
-              >Error: Please try attaching the file again.</span
-            >
-          {/if}
+          <span class="file-info__error">
+            {attachment.errorMessage ??
+              "Error: Please try attaching the file again."}
+          </span>
         {/if}
         {#if !attachment.loading}
           <button class="close-btn" on:click={() => remove(attachment)}>
