@@ -90,6 +90,8 @@
   let _this = <EmailProperties>buildInternalProps({}, {}, defaultValueMap);
 
   let userEmail: string | undefined;
+  const PARTICIPANTS_TO_TRUNCATE = 1;
+
   onMount(async () => {
     await tick();
     manifest = ((await $ManifestStore[
@@ -719,6 +721,33 @@
   async function handleDownloadFromMessage(event: CustomEvent) {
     const file = event.detail.file;
     downloadSelectedFile(event, file);
+  }
+
+  type FormatParticipantOptions = {
+    format?: "full";
+    self?: boolean;
+  };
+
+  function formatParticipant(
+    participant: Participant,
+    options: FormatParticipantOptions = { format: "full", self: false },
+  ) {
+    let { format, self } = options;
+    let participantString: string;
+
+    switch (format) {
+      case "full":
+      default:
+        participantString = `${participant?.name ? participant.name : ""} &lt;${
+          participant.email
+        }&gt;`;
+    }
+
+    if (self) {
+      participantString = `Me ${participantString}`;
+    }
+
+    return participantString;
   }
 </script>
 
@@ -1455,29 +1484,37 @@
                           </div>
                         </div>
                         <div class="message-to">
-                          {#each message?.to as to, i}
+                          {#each message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
                             <div>
-                              {#if to.name || to.email}
+                              {#if _this.you && to?.email === _this.you.email_address}
                                 <span>
-                                  to&colon;&nbsp;{userEmail &&
-                                  to.email === userEmail
-                                    ? "me"
-                                    : to.name || to.email}
-                                  {#if i !== message.to.length - 1}
-                                    &nbsp;&comma;
-                                  {/if}
+                                  {i === 0 ? "to " : ""}
+                                  {@html formatParticipant(to, { self: true })}
                                 </span>
-                                <!-- tooltip component -->
-                                <nylas-tooltip
-                                  on:toggleTooltip={setTooltip}
-                                  id={message?.id.slice(0, 4)}
-                                  current_tooltip_id={currentTooltipId}
-                                  icon={DropdownSymbol}
-                                  content={to.email}
-                                />
+                              {:else}
+                                <span>
+                                  {i === 0 ? "to " : ""}
+                                  {@html formatParticipant(to)}
+                                </span>
                               {/if}
                             </div>
                           {/each}
+                          {#if message.to?.length > PARTICIPANTS_TO_TRUNCATE}
+                            <div>
+                              <nylas-tooltip
+                                on:toggleTooltip={setTooltip}
+                                id={`show-more-participants-${message.id}`}
+                                current_tooltip_id={currentTooltipId}
+                                icon={DropdownSymbol}
+                                text={`<p style="color: var(--nylas-email-message-to-color, var(--grey));">And ${
+                                  message.to?.length - PARTICIPANTS_TO_TRUNCATE
+                                } more</p>`}
+                                content={`${message.to
+                                  .map((t) => `<p>${formatParticipant(t)}</p>`)
+                                  .join("\n")}`}
+                              />
+                            </div>
+                          {/if}
                         </div>
                       </div>
                       <div class="message-date">
@@ -1776,28 +1813,37 @@
               </div>
 
               <div class="message-to">
-                {#each _this.message?.to as to, i}
+                {#each message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
                   <div>
-                    {#if to.name || to.email}
+                    {#if _this.you && to?.email === _this.you.email_address}
                       <span>
-                        to&colon;&nbsp;{userEmail && to.email === userEmail
-                          ? "me"
-                          : to.name || to.email}
+                        {i === 0 ? "to " : ""}
+                        {@html formatParticipant(to, { self: true })}
                       </span>
-                      <!-- tooltip component -->
-                      <nylas-tooltip
-                        on:toggleTooltip={setTooltip}
-                        id={_this.message.id.slice(0, 3)}
-                        current_tooltip_id={currentTooltipId}
-                        icon={DropdownSymbol}
-                        content={to.email}
-                      />
-                      {#if i !== _this.message?.to.length - 1}
-                        &nbsp;&comma;
-                      {/if}
+                    {:else}
+                      <span>
+                        {i === 0 ? "to " : ""}
+                        {@html formatParticipant(to)}
+                      </span>
                     {/if}
                   </div>
                 {/each}
+                {#if message.to?.length > PARTICIPANTS_TO_TRUNCATE}
+                  <div>
+                    <nylas-tooltip
+                      on:toggleTooltip={setTooltip}
+                      id={`show-more-participants-${message.id}`}
+                      current_tooltip_id={currentTooltipId}
+                      icon={DropdownSymbol}
+                      text={`<p style="color: var(--nylas-email-message-to-color, var(--grey));">And ${
+                        message.to?.length - PARTICIPANTS_TO_TRUNCATE
+                      } more</p>`}
+                      content={`${message.to
+                        .map((t) => `<p>${formatParticipant(t)}</p>`)
+                        .join("\n")}`}
+                    />
+                  </div>
+                {/if}
               </div>
             </div>
             <div class="message-date">
