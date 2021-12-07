@@ -12,7 +12,6 @@
   export let contacts: Participant[] | FetchContactsCallback;
 
   export let value: Participant[] = [];
-  // export let componentId: any = null;
   export let placeholder: string = "To";
   export let single: boolean = false;
   export let change: ChangeCallback | void;
@@ -23,7 +22,6 @@
   let currentContactIndex = 0;
   let loading = false;
   let searchField: HTMLInputElement;
-  let dropdown: HTMLInputElement;
   let contactsList: Participant[] = [];
   let isOpen = false;
 
@@ -180,14 +178,6 @@
 </script>
 
 <style lang="scss">
-  .nylas-contacts {
-    --background: white;
-    --text: black;
-    --text-light: #6e6e7a;
-    --font: sans-serif;
-    --font-size: 14px;
-    --border: #f7f7f7;
-  }
   :root {
     font-family: sans-serif;
   }
@@ -241,7 +231,6 @@
     position: absolute;
     max-height: 350px;
     background: var(--background);
-    // min-width: 98%;
     left: calc(var(--outer-padding) / 2);
     right: calc(var(--outer-padding) / 2);
     overflow-y: auto;
@@ -255,6 +244,8 @@
     cursor: pointer;
     padding: var(--outer-padding);
     font-size: var(--font-size-small);
+    background: var(--primary-light);
+
     &.active {
       background-color: var(--primary);
       color: white;
@@ -279,7 +270,7 @@
     border: none;
     color: var(--text);
     background: var(--bg);
-    width: 1px;
+    min-width: 100%;
     &:focus {
       width: 100px;
     }
@@ -289,6 +280,7 @@
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     align-items: center;
+    min-width: 320px;
   }
 
   .contacts-results {
@@ -305,7 +297,7 @@
   }
 </style>
 
-<div class="dropdown" bind:this={dropdown}>
+<div class="dropdown">
   <div class="contacts-container" on:click={focusSearch}>
     <div class="contacts-results">
       <div class="contacts-placeholder">{placeholder}</div>
@@ -328,20 +320,7 @@
       </div>
     </div>
 
-    {#if single && !selectedContacts.length}
-      <form on:submit|preventDefault={handleSubmit} class="search-form">
-        <input
-          type="text"
-          name="email"
-          autocomplete="off"
-          class="search-field"
-          bind:this={searchField}
-          on:keydown={handleKeydown}
-          on:blur={() => blurSearch({ addContact: true })}
-          bind:value={term}
-        />
-      </form>
-    {:else if !single}
+    {#if (single && !selectedContacts.length) || !single}
       <form on:submit|preventDefault={handleSubmit} class="search-form">
         <input
           type="text"
@@ -358,13 +337,10 @@
   </div>
   {#if isOpen && show_dropdown}
     <div class="dropdown-content">
-      <!-- <p class="active">{email}</p> -->
       {#if loading && !filteredContacts.length}
         <p class="dropdown-item">Loading...</p>
       {/if}
-      {#if !loading && !filteredContacts.length}
-        <p class="dropdown-item">No results found</p>
-      {:else}
+      {#if !loading && filteredContacts.length}
         {#each filteredContacts as contact, i}
           <div
             class="dropdown-item"
