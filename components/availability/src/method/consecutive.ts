@@ -1,4 +1,4 @@
-import type { OpenHours, TimeSlot } from "@commons/types/Availability";
+import type { OpenHours } from "@commons/types/Availability";
 import type { EventDefinition } from "@commonstypes/ScheduleEditor";
 import { timeHour } from "d3-time";
 
@@ -17,10 +17,13 @@ export async function createConsecutiveQueryKey(
   const startDay = dayRange[0];
   const endDay = dayRange[dayRange.length - 1];
 
-  const emailsList = events.reduce((emails, event) => {
-    emails.push(event.participants); // TODO: why are we typed to "never" here?
-    return emails;
-  }, []);
+  const emailsList = events.reduce(
+    (emails: string[][], event: EventDefinition) => {
+      emails.push(event.participants); // TODO: why are we typed to "never" here?
+      return emails;
+    },
+    [],
+  );
   // Pick the duration_minutes from the first block slot
   // TODO: Need to be updated when API can handle different slot size per meeting
   const duration_minutes = events[0].slot_size;
