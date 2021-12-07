@@ -20,6 +20,19 @@ const AGENDA_EVENTS = [
     },
   },
 ];
+let testAgendaComponent;
+
+beforeEach(() => {
+  cy.visit("/components/agenda/src/index.html");
+  cy.get("nylas-agenda").then((component) => {
+    const agenda = component[0];
+    agenda.setAttribute("id", "test-agenda");
+    testAgendaComponent = agenda;
+    cy.get(testAgendaComponent)
+      .should("have.prop", "id")
+      .and("equal", "test-agenda");
+  });
+});
 
 describe("Restricting Dates", () => {
   it("handles allowed_dates as an array of dates ", () => {

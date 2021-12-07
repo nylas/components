@@ -1,4 +1,17 @@
 /* eslint-disable no-console */
+let testComposerComponent;
+
+beforeEach(() => {
+  cy.visit("/components/composer/src/index.html");
+  cy.get("nylas-composer").then((component) => {
+    const composer = component[0];
+    composer.setAttribute("id", "test-composer");
+    testComposerComponent = composer;
+    cy.get(testComposerComponent)
+      .should("have.prop", "id")
+      .and("equal", "test-composer");
+  });
+});
 
 describe("Composer loading state", () => {
   it("displays loading screen", () => {

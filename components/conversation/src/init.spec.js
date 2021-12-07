@@ -1,3 +1,17 @@
+let testConversationComponent;
+
+beforeEach(() => {
+  cy.visit("/components//src/index.html");
+  cy.get("nylas-").then((component) => {
+    const conversation = component[0];
+    conversation.setAttribute("id", "test-conversation");
+    testConversationComponent = conversation;
+    cy.get(testConversationComponent)
+      .should("have.prop", "id")
+      .and("equal", "test-conversation");
+  });
+});
+
 describe("Conversation component (Svelte)", () => {
   beforeEach(() => {
     cy.visit("/components/conversation/src/index.html");

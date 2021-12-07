@@ -1,5 +1,19 @@
 import { defaultPhoto } from "./default_photo.js";
 
+let testContactListComponent;
+
+beforeEach(() => {
+  cy.visit("/components/contact-list/src/index.html");
+  cy.get("nylas-").then((component) => {
+    const contactList = component[0];
+    contactList.setAttribute("id", "test-contact-list");
+    testContactListComponent = contactList;
+    cy.get(testContactListComponent)
+      .should("have.prop", "id")
+      .and("equal", "test-contact-list");
+  });
+});
+
 describe("Contact List initial states and thread/contact counts", () => {
   it("Loads 100 contacts by default", () => {
     cy.loadContacts();

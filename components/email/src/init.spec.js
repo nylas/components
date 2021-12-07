@@ -1,3 +1,17 @@
+let testEmailComponent;
+
+beforeEach(() => {
+  cy.visit("/components/email/src/index.html");
+  cy.get("nylas-email").then((component) => {
+    const email = component[0];
+    email.setAttribute("id", "test-email");
+    testEmailComponent = email;
+    cy.get(testEmailComponent)
+      .should("have.prop", "id")
+      .and("equal", "test-email");
+  });
+});
+
 const SAMPLE_THREAD = {
   account_id: "cou6r5tjgubx9rswikzvz9afb",
   drafts: [],
