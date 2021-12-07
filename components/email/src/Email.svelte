@@ -244,6 +244,10 @@
       // This is for Email component demo purpose, where we want to show expanded threads by default on load.
       if (_this.show_expanded_email_view_onload) {
         localThread.expanded = _this.show_expanded_email_view_onload;
+
+        // get body for last message in open thread
+        const lastMsg = localThread.messages[localThread.messages.length - 1];
+        lastMsg.body = lastMsg.body ?? lastMsg.snippet;
       }
       activeThread = localThread;
     } else if (_this.thread_id) {
@@ -254,11 +258,13 @@
           thread.expanded = _this.show_expanded_email_view_onload;
 
           // get body for last message in open thread
-          const lastMsgIndex = thread.messages.length - 1;
-          thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
-            lastMsgIndex,
-            thread.messages[lastMsgIndex].id,
-          );
+          if (thread.messages.length) {
+            const lastMsgIndex = thread.messages.length - 1;
+            thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
+              lastMsgIndex,
+              thread.messages[lastMsgIndex].id,
+            );
+          }
         }
 
         activeThread = thread;
