@@ -364,6 +364,9 @@
   }
 
   async function handleThread(event: MouseEvent | KeyboardEvent) {
+    if (activeThread.messages.length <= 0) {
+      return;
+    }
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
       //#region read/unread
       if (
@@ -771,6 +774,9 @@
         gap: $spacing-xs;
         align-items: center;
         grid-template-columns: fit-content(350px) 1fr;
+        &.disable-click {
+          cursor: not-allowed;
+        }
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
@@ -1526,6 +1532,8 @@
             class="email-row condensed"
             class:show_star={_this.show_star}
             class:unread={activeThread.unread}
+            class:disable-click={activeThread &&
+              activeThread.messages.length <= 0}
           >
             <div class="from{_this.show_star ? '-star' : ''}">
               {#if _this.show_star}
