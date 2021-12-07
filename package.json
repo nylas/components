@@ -109,7 +109,6 @@
     "@nylas/components-availability": "file:components/availability",
     "@nylas/components-composer": "file:components/composer",
     "@nylas/components-contact-list": "file:components/contact-list",
-    "@nylas/components-contacts-search": "file:components/contacts-search",
     "@nylas/components-conversation": "file:components/conversation",
     "@nylas/components-datepicker": "file:components/datepicker",
     "@nylas/components-email": "file:components/email",
