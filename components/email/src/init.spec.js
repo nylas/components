@@ -207,9 +207,7 @@ describe("Email component", () => {
 
   it("Shows Email with demo id and thread", () => {
     cy.get("nylas-email").find(".subject").should("exist");
-    cy.get("nylas-email")
-      .find(".subject")
-      .should("contain", "Welcome to Nylas!");
+    cy.get("nylas-email").find(".subject").should("contain", "Test");
   });
   it("Shows Email with passed thread", () => {
     cy.get("nylas-email")
@@ -485,7 +483,7 @@ describe("Email component", () => {
           });
       });
     });
-    it.only("Shows attached file when condensed", () => {
+    it("Shows attached file when condensed", () => {
       cy.get("nylas-email")
         .as("email")
         .then((element) => {
