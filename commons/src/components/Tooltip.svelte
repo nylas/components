@@ -92,6 +92,6 @@
 </button>
 {#if isTooltipVisible}
   <p {id} role="tooltip" tabindex="0" class="tooltip">
-    {content}
+    {@html content}
   </p>
 {/if}
