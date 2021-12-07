@@ -98,6 +98,8 @@ jobs:
 
   test-cypress:
     runs-on: ubuntu-latest
+    environment:
+      TZ: 'America/Toronto'
     strategy:
       fail-fast: false
       matrix:
