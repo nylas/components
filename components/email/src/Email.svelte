@@ -42,6 +42,7 @@
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
+  import LoadingIcon from "./assets/loading.svg";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -243,6 +244,10 @@
       // This is for Email component demo purpose, where we want to show expanded threads by default on load.
       if (_this.show_expanded_email_view_onload) {
         localThread.expanded = _this.show_expanded_email_view_onload;
+
+        // get body for last message in open thread
+        const lastMsg = localThread.messages[localThread.messages.length - 1];
+        lastMsg.body = lastMsg.body ?? lastMsg.snippet;
       }
       activeThread = localThread;
     } else if (_this.thread_id) {
@@ -251,6 +256,15 @@
       if (thread) {
         if (_this.show_expanded_email_view_onload) {
           thread.expanded = _this.show_expanded_email_view_onload;
+
+          // get body for last message in open thread
+          if (thread.messages.length) {
+            const lastMsgIndex = thread.messages.length - 1;
+            thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
+              lastMsgIndex,
+              thread.messages[lastMsgIndex].id,
+            );
+          }
         }
 
         activeThread = thread;
@@ -358,13 +372,19 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded =
-        !activeThread.messages[lastMsgIndex].expanded;
+      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
+        lastMsgIndex
+      ].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
         if (!activeThread.messages[lastMsgIndex].body) {
-          fetchIndividualMessage(lastMsgIndex);
+          activeThread.messages[
+            lastMsgIndex
+          ].body = await fetchIndividualMessage(
+            lastMsgIndex,
+            activeThread.messages[lastMsgIndex].id,
+          );
         }
       }
 
@@ -471,16 +491,19 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
     } else {
-      activeThread.messages[msgIndex].expanded =
-        !activeThread.messages[msgIndex].expanded;
+      activeThread.messages[msgIndex].expanded = !activeThread.messages[
+        msgIndex
+      ].expanded;
       dispatchEvent("messageClicked", {
         event,
         message: activeThread.messages[msgIndex],
         thread: activeThread,
       });
-      if (!emailManuallyPassed && !activeThread.messages[msgIndex].body) {
-        fetchIndividualMessage(msgIndex);
-      }
+      fetchIndividualMessage(msgIndex, activeThread.messages[msgIndex].id).then(
+        (res) => {
+          activeThread.messages[msgIndex].body = res;
+        },
+      );
     }
   }
 
@@ -490,19 +513,21 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(event);
       } else {
-        activeThread.messages[msgIndex].expanded =
-          !activeThread.messages[msgIndex].expanded;
+        activeThread.messages[msgIndex].expanded = !activeThread.messages[
+          msgIndex
+        ].expanded;
       }
     }
   }
 
-  function fetchIndividualMessage(msgIndex: number) {
-    const messageID = activeThread.messages[msgIndex].id;
-
+  function fetchIndividualMessage(
+    msgIndex: number,
+    messageID: string,
+  ): Promise<string | null> {
     messageLoadStatus[msgIndex] = "loading";
-    fetchMessage(query, messageID).then((json) => {
-      activeThread.messages[msgIndex].body = json.body;
+    return fetchMessage(query, messageID).then((json) => {
       messageLoadStatus[msgIndex] = "loaded";
+      return json.body;
     });
   }
 
@@ -1125,6 +1150,18 @@
               }
             }
           }
+
+          .email-loader {
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          @keyframes rotate {
+            to {
+              transform: rotate(360deg);
+            }
+          }
         }
 
         .subject-snippet-date {
@@ -1309,7 +1346,13 @@
                       {:else if message.body}
                         <nylas-message-body {message} />
                       {:else}
-                        {message.snippet}
+                        <div class="email-loader">
+                          <LoadingIcon
+                            class="spinner"
+                            style="height:18px; animation: rotate 2s linear infinite; margin-right:10px;"
+                          />
+                          Loading...
+                        </div>
                       {/if}
                     </div>
                   {:else}
