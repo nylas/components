@@ -32,7 +32,7 @@ describe("MailBox  component", () => {
         });
     });
 
-    it.only("Shows attached file", () => {
+    it("Shows attached file", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")
         .then((element) => {
