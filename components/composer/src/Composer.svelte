@@ -110,8 +110,8 @@
     show_subject: false,
     show_close_button: true,
     show_minimize_button: true,
-    show_cc: false,
-    show_bcc: false,
+    show_cc: true,
+    show_bcc: true,
     show_cc_button: true,
     show_bcc_button: true,
     show_attachment_button: true,
@@ -651,19 +651,25 @@
             <button
               type="button"
               bind:this={ccField}
-              hidden={!_this.show_cc &&
+              hidden={_this.show_cc &&
                 !!_this.show_cc_button &&
                 !!_this.show_to}
-              on:click={() => (_this.show_cc = true)}>CC</button
+              on:click={() => {
+                _this.show_cc = true;
+                previousProps = _this;
+              }}>CC</button
             >
 
             <button
               type="button"
               bind:this={bccField}
-              hidden={!_this.show_bcc &&
+              hidden={_this.show_bcc &&
                 !!_this.show_bcc_button &&
                 !!_this.show_to}
-              on:click={() => (_this.show_bcc = true)}>BCC</button
+              on:click={() => {
+                _this.show_bcc = true;
+                previousProps = _this;
+              }}>BCC</button
             >
           </div>
         </div>
@@ -681,6 +687,7 @@
               on:click={() => {
                 setFocus(ccField);
                 _this.show_cc = false;
+                previousProps = _this;
               }}
               aria-label="remove carbon copy field"
             >
@@ -702,6 +709,7 @@
               on:click={() => {
                 setFocus(bccField);
                 _this.show_bcc = false;
+                previousProps = _this;
               }}
               aria-label="remove blind carbon copy field"
             >
