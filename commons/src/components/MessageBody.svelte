@@ -59,7 +59,7 @@
 </style>
 
 <div>
-  {#if message && body}
+  {#if message && typeof body === "string"}
     {@html DOMPurify.sanitize(body)}
     <div class="attachment">
       {#await attachedFiles then files}

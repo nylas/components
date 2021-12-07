@@ -1461,7 +1461,7 @@
                     <div class="message-body">
                       {#if _this.clean_conversation && message.conversation}
                         {@html DOMPurify.sanitize(message.conversation)}
-                      {:else if message && message.body}
+                      {:else if message && typeof message.body === "string"}
                         <nylas-message-body
                           {message}
                           body={message.body}
@@ -1762,7 +1762,7 @@
           <div class="message-body">
             {#if _this.clean_conversation && message.conversation}
               {@html DOMPurify.sanitize(_this.message?.conversation ?? "")}
-            {:else if _this.message.body}
+            {:else if typeof _this.message.body === "string"}
               <nylas-message-body
                 message={_this.message}
                 body={_this.message.body}
