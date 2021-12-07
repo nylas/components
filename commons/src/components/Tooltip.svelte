@@ -69,7 +69,7 @@
   class="tooltip-trigger"
   class:reverse-icon={isTooltipVisible}
   aria-expanded={isTooltipVisible ? "true" : "false"}
-  id={id ? `button-${id.slice(0, 3)}` : ""}
+  id={id ? `tooltip-trigger-${id}` : ""}
   aria-describedby={id}
   aria-label={isTooltipVisible ? "hide email" : "show email"}
   on:click|stopPropagation={(e) => toggleTooltipVisibility(e)}
