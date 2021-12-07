@@ -498,6 +498,40 @@ describe("Email component", () => {
             .should("have.text", "invoice_2062.pdf ");
         });
     });
+
+    it("Renders inline file appropriately", () => {
+      // Wait for the component to load
+      cy.wait(3000);
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[0];
+          component.show_expanded_email_view_onload = false;
+          // Replace thread id of the first email component
+          component.thread_id = "c5xjcjlhzldqctpud8zeufa6t";
+          // Wait for the new thread id to be loaded
+          cy.wait(3000);
+          cy.get(component).find(".email-row.condensed").click();
+          cy.get("nylas-message-body")
+            .as("messageBody")
+            .then((bodyElement) => {
+              const messageBodyComponent = bodyElement[0];
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("exist");
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("not.have.attr", "src", "cid:ii_kwwc5np40");
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("have.attr", "src")
+                .and(($div) => {
+                  expect($div).to.contain("data:image/jpeg");
+                });
+            });
+        });
+    });
+
     it("Accessibility attributes change when tooltip trigger is clicked", () => {
       cy.get("nylas-email").then((element) => {
         const component = element[2];
