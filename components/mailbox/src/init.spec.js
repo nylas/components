@@ -60,8 +60,8 @@ describe("MailBox  component", () => {
           // Assumes that this returns only 1 thread for this keyword
           component.keyword_to_search = "Inline image rendering";
           cy.get(component).find(".email-row.condensed").click();
-          cy.get("nylas-message-body")
-            .as("messageBody")
+          cy.get(component)
+            .find("nylas-message-body")
             .then((bodyElement) => {
               const messageBodyComponent = bodyElement[0];
               cy.get(messageBodyComponent)

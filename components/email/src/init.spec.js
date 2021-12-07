@@ -512,8 +512,8 @@ describe("Email component", () => {
           // Wait for the new thread id to be loaded
           cy.wait(3000);
           cy.get(component).find(".email-row.condensed").click();
-          cy.get("nylas-message-body")
-            .as("messageBody")
+          cy.get(component)
+            .find("nylas-message-body")
             .then((bodyElement) => {
               const messageBodyComponent = bodyElement[0];
               cy.get(messageBodyComponent)
