@@ -323,6 +323,7 @@
     {#if (single && !selectedContacts.length) || !single}
       <form on:submit|preventDefault={handleSubmit} class="search-form">
         <input
+          data-cy="contacts-search-field"
           type="text"
           name="email"
           autocomplete="off"

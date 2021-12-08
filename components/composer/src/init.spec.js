@@ -4,7 +4,7 @@ describe("Composer Dispatching Events", () => {
   it("passes events up to parent application", () => {
     cy.visit("/components/composer/src/index.html");
     cy.get("nylas-composer").should("exist");
-    let eventsFired = {
+    const eventsFired = {
       minimized: false,
       maximized: false,
       opened: false,
@@ -71,7 +71,6 @@ describe("Composer html", () => {
       ];
 
       el.to = (term) => {
-        console.log("term", term);
         return fetch(`https://jsonplaceholder.typicode.com/users`)
           .then((res) => res.json())
           .then((res) => {
@@ -158,31 +157,31 @@ describe("Composer html", () => {
       cy.get("@composer").then((el) => {
         const component = el[0];
         component.send = send;
-        // component.beforeSend = beforeSend;
       });
       cy.get("input[name=subject]").should("have.value", "Sample subject");
       cy.get("header").contains("Sample subject");
       cy.get(".contact-item button").first().click();
-      cy.get(".search-field[name=email]")
+
+      cy.get("[data-cy=composer-to]")
+        .get("[data-cy=contacts-search-field]")
         .first()
-        .type("{downarrow}{downarrow}{enter}", { force: true });
-      cy.get(".search-field[name=email]").type("Seco", { force: true });
+        .type("{downarrow}{downarrow}{enter}", {
+          force: true,
+        });
+      cy.get("[data-cy=composer-to]")
+        .get("[data-cy=contacts-search-field]")
+        .first()
+        .type("Seco", { force: true });
       cy.wait("@getAsyncContacts");
       cy.get(".addons button:first").click({ force: true });
-      cy.get(".search-field[name=email]")
-        .last()
+      cy.get("[data-cy=composer-to]")
+        .get("[data-cy=contacts-search-field]")
+        .first()
         .type("tester@nylas.com{enter}", { force: true });
       cy.get(".addons button:first").click({ force: true });
       cy.get(".html-editor[contenteditable=true]")
         .click({ force: true })
         .type("{selectall}", { force: true });
-      // cy.get(".toolbar > button:first").click();
-      // cy.get(".html-editor[contenteditable=true]").then(() =>
-      //   cy.get("b").should("exist"));
-
-      // cy.get(".toolbar > button:first").click();
-      // cy.get(".html-editor[contenteditable=true]").then(() =>
-      //   cy.get("b").should("not.exist"))
 
       cy.get(".send-btn").contains("Send").click();
       cy.get("nylas-composer-alert-bar")
@@ -203,7 +202,6 @@ describe("Composer html", () => {
           cy.get(".html-editor[contenteditable=true]")
             .invoke("prop", "innerHTML")
             .then((html) => {
-              console.log(html);
               expect(html).to.include(
                 "Hey what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
               );
@@ -251,7 +249,7 @@ describe("Composer html", () => {
       cy.contains("Message sent successfully");
     });
 
-    it("Replace to field with array or callback", () => {
+    it("Replace to field with array", () => {
       cy.get("nylas-composer").should("exist").as("composer");
       cy.get("header"); // wait for component to render
 
@@ -260,9 +258,17 @@ describe("Composer html", () => {
         const component = el[0];
         component.to = [{ name: "test", email: "test@test.com" }];
       });
-      cy.wait(75);
-      cy.get(".contacts-container").last().click().as("fromField");
+      cy.wait(100);
+      cy.get("[data-cy=composer-from]")
+        .get("[data-cy=contacts-search-field]")
+        .first()
+        .click();
       cy.contains("test@test.com");
+    });
+
+    it("Replace to field with callback", () => {
+      cy.get("nylas-composer").should("exist").as("composer");
+      cy.get("header"); // wait for component to render
 
       // Promise (function)
       cy.get("@composer").then((el) => {
@@ -274,7 +280,11 @@ describe("Composer html", () => {
             }, 5);
           });
       });
-      cy.wait(75);
+      cy.wait(100);
+      cy.get("[data-cy=composer-from]")
+        .get("[data-cy=contacts-search-field]")
+        .first()
+        .click();
       cy.contains("async@test.com");
     });
 
@@ -364,12 +374,13 @@ describe("Composer html", () => {
           // Check after applying options
           cy.get(".html-editor").should("exist");
           const component = el[0];
-          component.setAttribute("show_header", "false");
-          component.setAttribute("show_from", "false");
-          component.setAttribute("show_to", "false");
-          component.setAttribute("show_subject", "false");
-          component.setAttribute("show_editor_toolbar", "false");
-          cy.get(".contacts-placeholder").should("not.exist"); // from, to
+          component.show_header = false;
+          component.show_from = false;
+          component.show_to = false;
+          component.show_subject = false;
+          component.show_editor_toolbar = false;
+          cy.get("[data-cy=composer-from]").should("not.exist");
+          cy.get("[data-cy=composer-to]").should("not.exist");
           cy.get(".subject").should("not.exist");
           cy.get(".html-editor>.toolbar").should("not.exist");
           cy.get("header").should("not.exist");
@@ -381,8 +392,8 @@ describe("Composer html", () => {
         .as("composer")
         .then((el) => {
           const component = el[0];
-          component.setAttribute("show_cc_button", "true");
-          component.setAttribute("show_bcc_button", "true");
+          component.show_cc_button = true;
+          component.show_bcc_button = true;
           cy.get(".addons > button").should("have.length", 2);
         });
     });
@@ -392,8 +403,8 @@ describe("Composer html", () => {
         .as("composer")
         .then((el) => {
           const component = el[0];
-          component.setAttribute("show_cc_button", "false");
-          component.setAttribute("show_bcc_button", "false");
+          component.show_cc_button = false;
+          component.show_bcc_button = false;
           cy.get(".addons > button").should("have.length", 0);
         });
     });
@@ -403,8 +414,8 @@ describe("Composer html", () => {
         .as("composer")
         .then((el) => {
           const component = el[0];
-          component.setAttribute("show_cc", "true");
-          component.setAttribute("show_bcc", "true");
+          component.show_cc = true;
+          component.show_bcc = true;
           cy.get("main > nylas-contacts-search").should("have.length", 0);
         });
     });
@@ -414,8 +425,8 @@ describe("Composer html", () => {
         .as("composer")
         .then((el) => {
           const component = el[0];
-          component.setAttribute("show_cc", "true");
-          component.setAttribute("show_bcc", "true");
+          component.show_cc = true;
+          component.show_bcc = true;
           cy.get("main > div.cc-container > nylas-contacts-search").should(
             "have.length",
             2,
@@ -450,11 +461,9 @@ describe("Composer html", () => {
             "replace_fields",
             '[{"from": "[hi]", "to": "Hello"}]',
           );
-          console.log(component);
           cy.get(".html-editor[contenteditable=true]")
             .invoke("prop", "innerHTML")
             .then((html) => {
-              console.log(html);
               expect(html).to.equal(
                 "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
               );
@@ -475,11 +484,9 @@ describe("Composer html", () => {
         .then((el) => {
           const component = el[0];
           component.replace_fields = [{ from: "[hi]", to: "Hello" }];
-          console.log(component);
           cy.get(".html-editor[contenteditable=true]")
             .invoke("prop", "innerHTML")
             .then((html) => {
-              console.log(html);
               expect(html).to.include(
                 "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
               );

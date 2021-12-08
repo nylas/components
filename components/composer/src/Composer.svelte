@@ -632,6 +632,7 @@
         <div class="contacts-wrapper">
           {#if _this.show_from}
             <nylas-contacts-search
+              data-cy="composer-from"
               placeholder="From:"
               single={true}
               change={handleContactsChange("from")}
@@ -641,6 +642,7 @@
           {/if}
           {#if _this.show_to}
             <nylas-contacts-search
+              data-cy="composer-to"
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
