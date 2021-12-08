@@ -699,7 +699,8 @@
   }
 
   async function downloadSelectedFile(event: CustomEvent, file: File) {
-    if (activeThread && id && _this.thread_id) {
+    event.stopImmediatePropagation();
+    if (id && ((activeThread && _this.thread_id) || _this.message_id)) {
       const downloadedFileData = await downloadFile({
         file_id: file.id,
         component_id: id,
@@ -1495,7 +1496,9 @@
                           body={message.body}
                           on:downloadClicked={handleDownloadFromMessage}
                         />
-                      {:else if _this.thread}
+                        <!-- If a thread is being passed manually and there is no body, 
+                          we will keep loading, so the below is our fallback -->
+                      {:else if !!_this.thread && !_this.thread_id && click_action != "mailbox"}
                         {message.body ?? message.snippet}
                         {#await attachedFiles[message.id] then files}
                           {#if files && Array.isArray(files) && files.length > 0}
@@ -1664,10 +1667,7 @@
                   <div class="attachment desktop">
                     {#each Object.values(attachedFiles) as files}
                       {#each files as file}
-                        <button
-                          on:click|stopPropagation={(e) =>
-                            downloadSelectedFile(e, file)}
-                        >
+                        <button on:click={(e) => downloadSelectedFile(e, file)}>
                           {file.filename || file.id}
                         </button>
                       {/each}
@@ -1728,10 +1728,7 @@
                 <div class="attachment mobile">
                   {#each Object.values(attachedFiles) as files}
                     {#each files as file}
-                      <button
-                        on:click|stopPropagation={(e) =>
-                          downloadSelectedFile(e, file)}
-                      >
+                      <button on:click={(e) => downloadSelectedFile(e, file)}>
                         {file.filename || file.id}
                       </button>
                     {/each}
