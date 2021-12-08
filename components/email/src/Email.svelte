@@ -504,11 +504,14 @@
         message: activeThread.messages[msgIndex],
         thread: activeThread,
       });
-      fetchIndividualMessage(msgIndex, activeThread.messages[msgIndex].id).then(
-        (res) => {
+      if (!_this.thread) {
+        fetchIndividualMessage(
+          msgIndex,
+          activeThread.messages[msgIndex].id,
+        ).then((res) => {
           activeThread.messages[msgIndex].body = res;
-        },
-      );
+        });
+      }
     }
   }
 
@@ -812,6 +815,8 @@
             overflow-x: scroll;
 
             button {
+              height: fit-content;
+              width: max-content;
               padding: 0.3rem 1rem;
               border: 1px solid var(--grey);
               border-radius: 30px;
@@ -934,20 +939,34 @@
           }
         }
         div.individual-message {
-          width: 100%;
           box-sizing: border-box;
           padding: $spacing-xs;
 
           div.message-body {
             overflow: auto;
             display: inline-flex;
+            flex-direction: column;
+            div.attachment {
+              overflow-x: scroll;
+              button {
+                margin: $spacing-xs;
+                height: fit-content;
+                padding: 0.3rem 1rem;
+                border: 1px solid var(--grey);
+                border-radius: 30px;
+                background: white;
+                cursor: pointer;
+                &:hover {
+                  background: var(--grey-light);
+                }
+              }
+            }
           }
 
           &.condensed {
             div.snippet {
               text-overflow: ellipsis;
               overflow: hidden;
-              white-space: nowrap;
               display: block;
               max-width: inherit;
               color: var(--nylas-email-snippet-color, var(--grey));
@@ -1204,12 +1223,16 @@
             flex-direction: column;
             align-items: center;
             padding: $spacing-m 0;
-
+            width: inherit;
             div.message-head,
             div.message-body {
               width: 100%;
               box-sizing: border-box;
               padding: 0 $spacing-xl;
+            }
+            div.message-body {
+              display: flex;
+              flex-direction: column;
             }
 
             &.condensed {
@@ -1472,6 +1495,25 @@
                           body={message.body}
                           on:downloadClicked={handleDownloadFromMessage}
                         />
+                      {:else if _this.thread}
+                        {message.body ?? message.snippet}
+                        {#await attachedFiles[message.id] then files}
+                          {#if files && Array.isArray(files) && files.length > 0}
+                            <div class="attachment">
+                              {#each files as file}
+                                <button
+                                  on:click|stopPropagation={(e) =>
+                                    dispatchEvent("fileClicked", {
+                                      event: e,
+                                      file: file,
+                                    })}
+                                >
+                                  {file.filename || file.id}
+                                </button>
+                              {/each}
+                            </div>
+                          {/if}
+                        {/await}
                       {:else}
                         <div class="email-loader">
                           <LoadingIcon
@@ -1769,7 +1811,7 @@
           <div class="message-body">
             {#if _this.clean_conversation && message.conversation}
               {@html DOMPurify.sanitize(_this.message?.conversation ?? "")}
-            {:else if typeof _this.message.body === "string"}
+            {:else if _this.message}
               <nylas-message-body
                 message={_this.message}
                 body={_this.message.body}

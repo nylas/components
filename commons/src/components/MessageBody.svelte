@@ -45,6 +45,8 @@
       gap: 0.5rem;
 
       button {
+        height: fit-content;
+        width: max-content;
         padding: 0.3rem 1rem;
         border: 1px solid var(--grey);
         border-radius: 30px;
@@ -59,8 +61,10 @@
 </style>
 
 <div>
-  {#if message && typeof body === "string"}
-    {@html DOMPurify.sanitize(body)}
+  {#if message}
+    {#if typeof body === "string"}
+      {@html DOMPurify.sanitize(body)}
+    {/if}
     <div class="attachment">
       {#await attachedFiles then files}
         {#if files && Array.isArray(files) && files.length > 0}
