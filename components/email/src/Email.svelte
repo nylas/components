@@ -1760,8 +1760,8 @@
                   <span class="name"
                     >{userEmail && message?.from[0].email === userEmail
                       ? "me"
-                      : _this.message?.from[0].name ||
-                        message?.from[0].email}</span
+                      : _this.message?.from[0]?.name ||
+                        _this.message?.from[0]?.email}</span
                   >
                   <!-- tooltip component -->
                   <nylas-tooltip
