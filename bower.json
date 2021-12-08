@@ -21,7 +21,6 @@
     "@nylas/components-agenda": "nylas/nylas-components/components/agenda",
     "@nylas/components-composer": "nylas/nylas-components/components/composer",
     "@nylas/components-contact-list": "nylas/nylas-components/components/contact-list",
-    "@nylas/components-contacts-search": "nylas/nylas-components/components/contacts-search",
     "@nylas/components-conversation": "nylas/nylas-components/components/conversation",
     "@nylas/components-datepicker": "nylas/nylas-components/components/datepicker",
     "@nylas/components-email": "nylas/nylas-components/components/email",

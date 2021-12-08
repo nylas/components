@@ -1,4 +1,4 @@
-import { isValidEmail } from "../../../components/contacts-search/lib/utils";
+import { isValidEmail } from "../../../components/composer/src/lib/utils";
 
 describe("Validates emil", () => {
   it("Invalid email returns false", () => {
