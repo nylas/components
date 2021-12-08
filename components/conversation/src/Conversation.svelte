@@ -291,15 +291,19 @@
       if (!conversation) {
         return;
       }
-      sendMessage(id, {
-        from: reply.from,
-        to: reply.to,
-        body: `${replyBody} <br /><br /> --Sent with Nylas`,
-        subject: conversation.subject,
-        cc: reply.cc,
-        reply_to_message_id: lastMessage.id,
-        bcc: [],
-      }).then((res) => {
+      sendMessage(
+        id,
+        {
+          from: reply.from,
+          to: reply.to,
+          body: `${replyBody} <br /><br /> --Sent with Nylas`,
+          subject: conversation.subject,
+          cc: reply.cc,
+          reply_to_message_id: lastMessage.id,
+          bcc: [],
+        },
+        access_token,
+      ).then((res) => {
         const conversationQuery = { queryKey: queryKey, data: res };
         ConversationStore.addMessageToThread(conversationQuery);
         replyStatus = "";
