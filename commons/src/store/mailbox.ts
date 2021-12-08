@@ -69,9 +69,11 @@ function initializeThreads() {
       if (typeof threadsMap[queryKey][currentPage] === "undefined") {
         return [];
       } else if (!threadsMap[queryKey][currentPage].isLoaded) {
-        const threads = await fetchThreads(query, currentPage, pageSize).catch(
-          silence,
-        );
+        const threads = await fetchThreads(
+          query,
+          pageSize,
+          currentPage * pageSize,
+        ).catch(silence);
 
         if (threads) {
           threadsMap[queryKey][currentPage].threads = threads;
