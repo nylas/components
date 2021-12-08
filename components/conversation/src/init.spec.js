@@ -1,8 +1,8 @@
 let testConversationComponent;
 
 beforeEach(() => {
-  cy.visit("/components//src/index.html");
-  cy.get("nylas-").then((component) => {
+  cy.visit("/components/conversation/src/index.html");
+  cy.get("nylas-conversation").then((component) => {
     const conversation = component[0];
     conversation.setAttribute("id", "test-conversation");
     testConversationComponent = conversation;
@@ -14,7 +14,6 @@ beforeEach(() => {
 
 describe("Conversation component (Svelte)", () => {
   beforeEach(() => {
-    cy.visit("/components/conversation/src/index.html");
     cy.get("nylas-conversation")
       .should("exist")
       .as("conversation")
