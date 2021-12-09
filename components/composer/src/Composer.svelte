@@ -226,7 +226,7 @@
       fileSelector.value = "";
       if (beforeFileUpload) beforeFileUpload(file);
 
-      if (file.size >= 5000000) {
+      if (file.size >= 4000000) {
         throw "Error: File size is too large.";
       }
 
