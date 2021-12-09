@@ -69,6 +69,10 @@
     top: 8px;
     transform: translate(-50%, 0);
     width: max-content;
+    max-width: 240px;
+    max-height: 240px;
+    overflow-y: scroll;
+    word-break: break-word;
     z-index: 1;
   }
 </style>
@@ -82,7 +86,7 @@
   on:click|stopPropagation={(e) => toggleTooltipVisibility(e)}
 >
   {#if text}
-    <p>{@html text}</p>
+    <p>{text}</p>
   {/if}
   {#if icon}
     <div class="icon-container" class:reverse-icon={icon && isTooltipVisible}>
@@ -92,6 +96,7 @@
 </button>
 {#if isTooltipVisible}
   <p {id} role="tooltip" tabindex="0" class="tooltip">
-    {@html content}
+    {content}
+    <!-- {@html content} -->
   </p>
 {/if}
