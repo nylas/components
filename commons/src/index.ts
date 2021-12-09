@@ -34,6 +34,7 @@ export { EventStore } from "./store/events";
 export { MailboxStore, EmailStore } from "./store/mailbox";
 export { MessageStore } from "./store/messages";
 export { ManifestStore } from "./store/manifest";
+export { FilesStore } from "./store/files";
 export {
   debounce,
   getEventDispatcher,

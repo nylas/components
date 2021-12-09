@@ -30,7 +30,17 @@ const SAMPLE_THREAD = {
       bcc: [],
       cc: [],
       date: 1613494375,
-      files: [],
+      files: [
+        {
+          content_disposition: "attachment",
+          content_id:
+            "61a72e5c7646b_103f96c4ab17fc31973866b@emaily-consumer-5945b858d7-xcmvp.mail",
+          content_type: "application/pdf",
+          filename: "invoice_2062.pdf",
+          id: "d1fop1j6savk2dqex9uvwvclt",
+          size: 27174,
+        },
+      ],
       from: [
         {
           email: "hazik.a@nylas.com",
@@ -197,9 +207,7 @@ describe("Email component", () => {
 
   it("Shows Email with demo id and thread", () => {
     cy.get("nylas-email").find(".subject").should("exist");
-    cy.get("nylas-email")
-      .find(".subject")
-      .should("contain", "Welcome to Nylas!");
+    cy.get("nylas-email").find(".subject").should("contain", "Test");
   });
   it("Shows Email with passed thread", () => {
     cy.get("nylas-email")
@@ -475,6 +483,55 @@ describe("Email component", () => {
           });
       });
     });
+    it("Shows attached file when condensed", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          component.show_expanded_email_view_onload = false;
+          component.thread = SAMPLE_THREAD;
+          cy.get(component)
+            .find(".email-row.condensed .attachment")
+            .should("exist");
+          cy.get(component)
+            .find(".email-row.condensed .attachment.desktop button")
+            .should("have.text", "invoice_2062.pdf ");
+        });
+    });
+
+    it("Renders inline file appropriately", () => {
+      // Wait for the component to load
+      cy.wait(3000);
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[0];
+          component.show_expanded_email_view_onload = false;
+          // Replace thread id of the first email component
+          component.thread_id = "c5xjcjlhzldqctpud8zeufa6t";
+          // Wait for the new thread id to be loaded
+          cy.wait(3000);
+          cy.get(component).find(".email-row.condensed").click();
+          cy.get(component)
+            .find("nylas-message-body")
+            .then((bodyElement) => {
+              const messageBodyComponent = bodyElement[0];
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("exist");
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("not.have.attr", "src", "cid:ii_kwwc5np40");
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("have.attr", "src")
+                .and(($div) => {
+                  expect($div).to.contain("data:image/jpeg");
+                });
+            });
+        });
+    });
+
     it("Accessibility attributes change when tooltip trigger is clicked", () => {
       cy.get("nylas-email").then((element) => {
         const component = element[2];

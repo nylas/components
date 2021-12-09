@@ -32,6 +32,54 @@ describe("MailBox  component", () => {
         });
     });
 
+    it("Shows attached file", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          cy.get(component)
+            .find("nylas-email")
+            .then((element) => {
+              const email = element[0];
+              cy.get(email)
+                .find(".email-row.condensed .attachment")
+                .should("exist");
+              cy.get(email)
+                .find(".email-row.condensed .attachment.desktop button")
+                .should("have.text", "invoice_2062.pdf ");
+            });
+        });
+    });
+
+    it("Renders inline file appropriately", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          // Assumes that this returns only 1 thread for this keyword
+          component.keyword_to_search = "Inline image rendering";
+          cy.get(component).find(".email-row.condensed").click();
+          cy.get(component)
+            .find("nylas-message-body")
+            .then((bodyElement) => {
+              const messageBodyComponent = bodyElement[0];
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("exist");
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("not.have.attr", "src", "cid:ii_kwwc5np40");
+              cy.get(messageBodyComponent)
+                .find('img[alt="Streams Automation.jpg"]')
+                .should("have.attr", "src")
+                .and(($div) => {
+                  expect($div).to.contain("data:image/jpeg");
+                });
+            });
+        });
+    });
+
     it("Shows Mailbox with unread status as unread", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")

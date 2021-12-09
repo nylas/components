@@ -16,7 +16,17 @@ var thread1 = {
       bcc: [],
       cc: [],
       date: 1629832405,
-      files: [],
+      files: [
+        {
+          content_disposition: "attachment",
+          content_id:
+            "61a72e5c7646b_103f96c4ab17fc31973866b@emaily-consumer-5945b858d7-xcmvp.mail",
+          content_type: "application/pdf",
+          filename: "invoice_2062.pdf",
+          id: "d1fop1j6savk2dqex9uvwvclt",
+          size: 27174,
+        },
+      ],
       from: [{ email: "tips@nylas.com", name: "J Valdivia" }],
       id: "3ozrqu3obfwzmsltxj72ll86m",
       labels: [

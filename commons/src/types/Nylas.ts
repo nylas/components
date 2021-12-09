@@ -53,6 +53,10 @@ export interface MessagesQuery extends CommonQuery {
   received_after?: number;
 }
 
+export interface FileQuery extends CommonQuery {
+  file_id: string;
+}
+
 export interface CleanConversationQuery extends CommonQuery {
   message_id: string[]; // Note: singular name but expects array
 }
@@ -112,6 +116,7 @@ export interface Message {
   date: number;
   expanded?: boolean;
   thread_id?: string;
+  files: File[];
 }
 
 export interface RadialMessage extends Message {
@@ -121,11 +126,14 @@ export interface RadialMessage extends Message {
 
 export interface File {
   id: string;
-  account_id: string;
+  account_id?: string;
   content_type: string;
   filename: string;
   object: "file";
   size: number;
+  content_disposition: string;
+  content_id?: string;
+  data?: string;
 }
 
 export interface MiddlewareResponse<T = unknown> {
