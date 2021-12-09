@@ -48,6 +48,7 @@
   import * as DOMPurify from "dompurify";
   import LoadingIcon from "./assets/loading.svg";
   import { downloadFile } from "@commons/connections/files";
+  import { DisallowedContentTypes } from "@commons/constants/attachment-content-types";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -670,7 +671,10 @@
     attachedFiles = activeThread.messages.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
-          if (file.content_disposition === "attachment") {
+          if (
+            file.content_disposition === "attachment" &&
+            !DisallowedContentTypes.includes(file.content_type)
+          ) {
             if (!files[message.id]) {
               files[message.id] = [];
             }
