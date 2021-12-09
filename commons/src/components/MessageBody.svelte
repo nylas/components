@@ -62,7 +62,7 @@
 
 <div>
   {#if message}
-    {#if typeof body === "string"}
+    {#if typeof body !== null}
       {@html DOMPurify.sanitize(body)}
     {/if}
     <div class="attachment">

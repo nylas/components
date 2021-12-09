@@ -17,15 +17,13 @@ function initializeFilesForMessage() {
       if (!filesMap[incomingMessage.id]) {
         const inlineFiles: Record<string, File> = {};
         for (const file of incomingMessage.files.values()) {
-          if (file.content_disposition === "inline") {
-            if (!inlineFiles[file.id]) {
-              inlineFiles[file.id] = file;
-              inlineFiles[file.id].data = await downloadFile({
-                file_id: file.id,
-                component_id: query.component_id,
-                access_token: query.access_token,
-              });
-            }
+          if (file.content_disposition === "inline" && !inlineFiles[file.id]) {
+            inlineFiles[file.id] = file;
+            inlineFiles[file.id].data = await downloadFile({
+              file_id: file.id,
+              component_id: query.component_id,
+              access_token: query.access_token,
+            });
           }
         }
         filesMap[incomingMessage.id] = inlineFiles;
@@ -37,13 +35,9 @@ function initializeFilesForMessage() {
       return filesMap[incomingMessage.id];
     },
     hasInlineFiles: (incomingMessage: Message): boolean => {
-      let hasInline = false;
-      for (const file of incomingMessage.files.values()) {
-        if (file.content_disposition === "inline") {
-          hasInline = true;
-        }
-      }
-      return hasInline;
+      return incomingMessage?.files?.some(
+        (file) => file.content_disposition === "inline",
+      );
     },
     reset: () => set({}),
   };

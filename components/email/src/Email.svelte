@@ -504,6 +504,7 @@
         message: activeThread.messages[msgIndex],
         thread: activeThread,
       });
+      // Don't fetch message when thread is being passed manually
       if (!_this.thread) {
         fetchIndividualMessage(
           msgIndex,
@@ -663,23 +664,23 @@
 
   let attachedFiles: Record<string, File[]> = {};
 
-  $: {
-    if (activeThread) {
-      attachedFiles = activeThread.messages.reduce(
-        (files: Record<string, File[]>, message) => {
-          for (const [fileIndex, file] of message.files.entries()) {
-            if (file.content_disposition === "attachment") {
-              if (!files[message.id]) {
-                files[message.id] = [];
-              }
-              files[message.id].push(message.files[fileIndex]);
+  $: activeThread, activeThread ? initializeAttachedFiles() : "";
+
+  function initializeAttachedFiles() {
+    attachedFiles = activeThread.messages.reduce(
+      (files: Record<string, File[]>, message) => {
+        for (const [fileIndex, file] of message.files.entries()) {
+          if (file.content_disposition === "attachment") {
+            if (!files[message.id]) {
+              files[message.id] = [];
             }
+            files[message.id].push(message.files[fileIndex]);
           }
-          return files;
-        },
-        {},
-      );
-    }
+        }
+        return files;
+      },
+      {},
+    );
   }
 
   async function getMessageWithInlineFiles(message: Message): Promise<Message> {
@@ -1490,7 +1491,7 @@
                     <div class="message-body">
                       {#if _this.clean_conversation && message.conversation}
                         {@html DOMPurify.sanitize(message.conversation)}
-                      {:else if message && typeof message.body === "string"}
+                      {:else if message && message.body != null}
                         <nylas-message-body
                           {message}
                           body={message.body}
