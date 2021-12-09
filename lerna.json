@@ -12,5 +12,5 @@
       "message": "publish"
     }
   },
-  "ignoreChanges": ["**/*.md", "**/node_modules/**"]
+  "ignoreChanges": ["**/*.md", "**/node_modules/**", "**/*.spec.js", "tests/**"]
 }
