@@ -40,6 +40,10 @@
         composer.addEventListener("composerOpened", function (event) {
           console.log("Composer Opened", event.detail);
         });
+        composer.to = () =>
+          new Promise((resolve) => {
+            resolve([{ name: "async", email: "async@test.com" }]);
+          });
       });
     </script>
     <style>

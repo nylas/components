@@ -17,6 +17,7 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
+  import { silence } from "@commons/methods/api";
   import { onMount, tick, get_current_component } from "svelte/internal";
   import pkg from "../package.json";
 
@@ -147,10 +148,11 @@
       ]) || {};
 
     if (manifest && id) {
-      const account: Account = await fetchAccount({
+      const account: Account | void = await fetchAccount({
         component_id: id,
         access_token,
-      });
+      }).catch(silence);
+
       if (account) {
         // Set "from" field from account
         update("from", [{ name: account.name, email: account.email_address }]);
@@ -255,14 +257,14 @@
     if (afterFileRemove) afterFileRemove(attachment);
   };
 
-  const handleMinimize = () => {
-    _this.minimized = !_this.minimized;
+  const handleMinimize = (isMinimized: boolean) => {
+    _this.minimized = isMinimized;
+    previousProps = _this;
 
     dispatchEvent(
       _this.minimized ? "composerMinimized" : "composerMaximized",
       {},
     );
-    previousProps = _this;
   };
 
   let sendPending = false;
@@ -348,6 +350,8 @@
 </script>
 
 <style lang="scss">
+  @import "../../theming/reset.scss";
+
   .nylas-composer {
     // setting vars that contact-search uses
     --outer-padding: var(--composer-outer-width, 15px);
@@ -605,21 +609,30 @@
   <div class="nylas-composer" class:minimized={_this.minimized}>
     {#if _this.show_header}
       <header class={_this.minimized ? "minimized" : undefined}>
-        {$message.subject || "New Message"}
+        {$message.subject}
         <div>
           {#if _this.show_minimize_button}
             {#if _this.minimized}
-              <button class="composer-btn" on:click={handleMinimize}>
+              <button
+                class="composer-btn"
+                on:click={() => handleMinimize(false)}
+              >
+                <span class="sr-only">Expand Composer</span>
                 <ExpandIcon class="ExpandIcon" />
               </button>
             {:else}
-              <button class="composer-btn" on:click={handleMinimize}>
+              <button
+                class="composer-btn"
+                on:click={() => handleMinimize(true)}
+              >
+                <span class="sr-only">Collapse Composer</span>
                 <MinimizeIcon class="MinimizeIcon" />
               </button>
             {/if}
           {/if}
           {#if _this.show_close_button}
             <button class="composer-btn" on:click={close}>
+              <span class="sr-only">Close Composer</span>
               <CloseIcon class="CloseIcon" />
             </button>
           {/if}
@@ -632,7 +645,7 @@
         <div class="contacts-wrapper">
           {#if _this.show_from}
             <nylas-contacts-search
-              data-cy="composer-from"
+              data-cy="from-field"
               placeholder="From:"
               single={true}
               change={handleContactsChange("from")}
@@ -642,7 +655,7 @@
           {/if}
           {#if _this.show_to}
             <nylas-contacts-search
-              data-cy="composer-to"
+              data-cy="to-field"
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
@@ -651,11 +664,10 @@
           {/if}
           <div class="addons">
             <button
+              data-cy="toggle-cc-field-btn"
               type="button"
               bind:this={ccField}
-              hidden={_this.show_cc &&
-                !!_this.show_cc_button &&
-                !!_this.show_to}
+              hidden={_this.show_cc && !_this.show_cc_button && !!_this.show_to}
               on:click={() => {
                 _this.show_cc = true;
                 previousProps = _this;
@@ -663,10 +675,11 @@
             >
 
             <button
+              data-cy="toggle-bcc-field-btn"
               type="button"
               bind:this={bccField}
               hidden={_this.show_bcc &&
-                !!_this.show_bcc_button &&
+                !_this.show_bcc_button &&
                 !!_this.show_to}
               on:click={() => {
                 _this.show_bcc = true;
@@ -678,6 +691,7 @@
         {#if _this.show_cc}
           <div class="cc-container">
             <nylas-contacts-search
+              data-cy="cc-field"
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
@@ -700,6 +714,7 @@
         {#if _this.show_bcc}
           <div class="cc-container">
             <nylas-contacts-search
+              data-cy="bcc-field"
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}
@@ -722,18 +737,22 @@
 
         <!-- Subject -->
         {#if _this.show_subject}
-          <input
-            type="text"
-            placeholder="Subject"
-            class="subject"
-            value={$message.subject}
-            name="subject"
-            on:input={handleInputChange}
-          />
+          <label>
+            <span class="sr-only">Email subject</span>
+            <input
+              type="text"
+              placeholder="Subject"
+              class="subject"
+              value={$message.subject}
+              name="subject"
+              on:input={handleInputChange}
+            />
+          </label>
         {/if}
 
         <!-- HTML Editor -->
         <nylas-html-editor
+          data-cy="html-editor"
           html={$message.body || template}
           onchange={handleBodyChange}
           replace_fields={_this.replace_fields}
@@ -761,6 +780,7 @@
             style="margin-right: 10px; width: 32px; height: 32px;"
             on:click={() => fileSelector.click()}
           >
+            <span class="sr-only">Attach Files</span>
             <AttachmentIcon class="AttachmentIcon" />
           </button>
         {/if}

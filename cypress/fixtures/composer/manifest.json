@@ -1,0 +1,17 @@
+{
+  "component": {
+    "theming": {
+      "mode": "inline",
+      "show_header": true,
+      "show_close_button": true,
+      "show_editor_toolbar": true,
+      "visible": true,
+      "show_minimize_button": true,
+      "theme": "light",
+      "show_attachment_button": true,
+      "show_from": true,
+      "minimized": false,
+      "show_subject": true
+    }
+  }
+}
