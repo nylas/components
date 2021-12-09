@@ -9,6 +9,7 @@
   import { get_current_component, onMount } from "svelte/internal";
 
   export let message;
+  export let body;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
 
@@ -44,6 +45,8 @@
       gap: 0.5rem;
 
       button {
+        height: fit-content;
+        width: max-content;
         padding: 0.3rem 1rem;
         border: 1px solid var(--grey);
         border-radius: 30px;
@@ -58,8 +61,10 @@
 </style>
 
 <div>
-  {#if message && message.body}
-    {@html DOMPurify.sanitize(message.body)}
+  {#if message}
+    {#if typeof body !== null}
+      {@html DOMPurify.sanitize(body)}
+    {/if}
     <div class="attachment">
       {#await attachedFiles then files}
         {#if files && Array.isArray(files) && files.length > 0}

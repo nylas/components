@@ -12,6 +12,7 @@
     fetchCleanConversations,
     fetchThread,
     silence,
+    FilesStore,
   } from "@commons";
   import type { Contact, ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
@@ -363,6 +364,9 @@
   }
 
   async function handleThread(event: MouseEvent | KeyboardEvent) {
+    if (activeThread.messages.length <= 0) {
+      return;
+    }
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
       //#region read/unread
       if (
@@ -500,11 +504,15 @@
         message: activeThread.messages[msgIndex],
         thread: activeThread,
       });
-      fetchIndividualMessage(msgIndex, activeThread.messages[msgIndex].id).then(
-        (res) => {
+      // Don't fetch message when thread is being passed manually
+      if (!_this.thread) {
+        fetchIndividualMessage(
+          msgIndex,
+          activeThread.messages[msgIndex].id,
+        ).then((res) => {
           activeThread.messages[msgIndex].body = res;
-        },
-      );
+        });
+      }
     }
   }
 
@@ -525,8 +533,12 @@
     messageID: string,
   ): Promise<string | null> {
     messageLoadStatus[msgIndex] = "loading";
-    return fetchMessage(query, messageID).then((json) => {
+    return fetchMessage(query, messageID).then(async (json) => {
       messageLoadStatus[msgIndex] = "loaded";
+      if (FilesStore.hasInlineFiles(json)) {
+        const messageWithInlineFiles = await getMessageWithInlineFiles(json);
+        return messageWithInlineFiles.body;
+      }
       return json.body;
     });
   }
@@ -541,9 +553,13 @@
       access_token,
       component_id: id,
       message_id: _this.message_id,
-    }).then((json) => {
+    }).then(async (json) => {
       _this.message = json;
       messageLoadStatus[0] = "loaded";
+      if (FilesStore.hasInlineFiles(_this.message)) {
+        const message = await getMessageWithInlineFiles(_this.message);
+        _this.message = message;
+      }
     });
   }
 
@@ -648,9 +664,11 @@
 
   let attachedFiles: Record<string, File[]> = {};
 
-  $: {
-    if (activeThread) {
-      attachedFiles = activeThread.messages.reduce((files, message) => {
+  $: activeThread, activeThread ? initializeAttachedFiles() : "";
+
+  function initializeAttachedFiles() {
+    attachedFiles = activeThread.messages.reduce(
+      (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
           if (file.content_disposition === "attachment") {
             if (!files[message.id]) {
@@ -660,12 +678,30 @@
           }
         }
         return files;
-      }, {});
+      },
+      {},
+    );
+  }
+
+  async function getMessageWithInlineFiles(message: Message): Promise<Message> {
+    const fetchedFiles = await FilesStore.getFilesForMessage(message, {
+      component_id: id,
+      access_token,
+    });
+    for (const file of Object.values(fetchedFiles)) {
+      if (message.body) {
+        message.body = message.body?.replaceAll(
+          `src="cid:${file.content_id}"`,
+          `src="data:${file.content_type};base64,${file.data}"`,
+        );
+      }
     }
+    return message;
   }
 
   async function downloadSelectedFile(event: CustomEvent, file: File) {
-    if (activeThread && id && _this.thread_id) {
+    event.stopImmediatePropagation();
+    if (id && ((activeThread && _this.thread_id) || _this.message_id)) {
       const downloadedFileData = await downloadFile({
         file_id: file.id,
         component_id: id,
@@ -742,6 +778,9 @@
         gap: $spacing-xs;
         align-items: center;
         grid-template-columns: fit-content(350px) 1fr;
+        &.disable-click {
+          cursor: not-allowed;
+        }
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
@@ -778,6 +817,8 @@
             overflow-x: scroll;
 
             button {
+              height: fit-content;
+              width: max-content;
               padding: 0.3rem 1rem;
               border: 1px solid var(--grey);
               border-radius: 30px;
@@ -900,20 +941,34 @@
           }
         }
         div.individual-message {
-          width: 100%;
           box-sizing: border-box;
           padding: $spacing-xs;
 
           div.message-body {
             overflow: auto;
             display: inline-flex;
+            flex-direction: column;
+            div.attachment {
+              overflow-x: scroll;
+              button {
+                margin: $spacing-xs;
+                height: fit-content;
+                padding: 0.3rem 1rem;
+                border: 1px solid var(--grey);
+                border-radius: 30px;
+                background: white;
+                cursor: pointer;
+                &:hover {
+                  background: var(--grey-light);
+                }
+              }
+            }
           }
 
           &.condensed {
             div.snippet {
               text-overflow: ellipsis;
               overflow: hidden;
-              white-space: nowrap;
               display: block;
               max-width: inherit;
               color: var(--nylas-email-snippet-color, var(--grey));
@@ -1170,12 +1225,16 @@
             flex-direction: column;
             align-items: center;
             padding: $spacing-m 0;
-
+            width: inherit;
             div.message-head,
             div.message-body {
               width: 100%;
               box-sizing: border-box;
               padding: 0 $spacing-xl;
+            }
+            div.message-body {
+              display: flex;
+              flex-direction: column;
             }
 
             &.condensed {
@@ -1432,11 +1491,33 @@
                     <div class="message-body">
                       {#if _this.clean_conversation && message.conversation}
                         {@html DOMPurify.sanitize(message.conversation)}
-                      {:else if message.body}
+                      {:else if message && message.body != null}
                         <nylas-message-body
                           {message}
+                          body={message.body}
                           on:downloadClicked={handleDownloadFromMessage}
                         />
+                        <!-- If a thread is being passed manually and there is no body, 
+                          we will keep loading, so the below is our fallback -->
+                      {:else if !!_this.thread && !_this.thread_id && click_action != "mailbox"}
+                        {message.body ?? message.snippet}
+                        {#await attachedFiles[message.id] then files}
+                          {#if files && Array.isArray(files) && files.length > 0}
+                            <div class="attachment">
+                              {#each files as file}
+                                <button
+                                  on:click|stopPropagation={(e) =>
+                                    dispatchEvent("fileClicked", {
+                                      event: e,
+                                      file: file,
+                                    })}
+                                >
+                                  {file.filename || file.id}
+                                </button>
+                              {/each}
+                            </div>
+                          {/if}
+                        {/await}
                       {:else}
                         <div class="email-loader">
                           <LoadingIcon
@@ -1496,6 +1577,8 @@
             class="email-row condensed"
             class:show_star={_this.show_star}
             class:unread={activeThread.unread}
+            class:disable-click={activeThread &&
+              activeThread.messages.length <= 0}
           >
             <div class="from{_this.show_star ? '-star' : ''}">
               {#if _this.show_star}
@@ -1585,10 +1668,7 @@
                   <div class="attachment desktop">
                     {#each Object.values(attachedFiles) as files}
                       {#each files as file}
-                        <button
-                          on:click|stopPropagation={(e) =>
-                            downloadSelectedFile(e, file)}
-                        >
+                        <button on:click={(e) => downloadSelectedFile(e, file)}>
                           {file.filename || file.id}
                         </button>
                       {/each}
@@ -1649,10 +1729,7 @@
                 <div class="attachment mobile">
                   {#each Object.values(attachedFiles) as files}
                     {#each files as file}
-                      <button
-                        on:click|stopPropagation={(e) =>
-                          downloadSelectedFile(e, file)}
-                      >
+                      <button on:click={(e) => downloadSelectedFile(e, file)}>
                         {file.filename || file.id}
                       </button>
                     {/each}
@@ -1684,8 +1761,8 @@
                   <span class="name"
                     >{userEmail && message?.from[0].email === userEmail
                       ? "me"
-                      : _this.message?.from[0].name ||
-                        message?.from[0].email}</span
+                      : _this.message?.from[0]?.name ||
+                        _this.message?.from[0]?.email}</span
                   >
                   <!-- tooltip component -->
                   <nylas-tooltip
@@ -1732,9 +1809,10 @@
           <div class="message-body">
             {#if _this.clean_conversation && message.conversation}
               {@html DOMPurify.sanitize(_this.message?.conversation ?? "")}
-            {:else if _this.message.body}
+            {:else if _this.message}
               <nylas-message-body
                 message={_this.message}
+                body={_this.message.body}
                 on:downloadClicked={handleDownloadFromMessage}
               />
             {/if}

@@ -116,6 +116,7 @@ export interface Message {
   date: number;
   expanded?: boolean;
   thread_id?: string;
+  files: File[];
 }
 
 export interface RadialMessage extends Message {
@@ -131,6 +132,8 @@ export interface File {
   object: "file";
   size: number;
   content_disposition: string;
+  content_id?: string;
+  data?: string;
 }
 
 export interface MiddlewareResponse<T = unknown> {

@@ -23,6 +23,7 @@
     MailboxQuery,
     Message,
     Thread,
+    File,
   } from "@commons/types/Nylas";
   import { downloadFile } from "@commons/connections/files";
   import { get_current_component, onMount, tick } from "svelte/internal";
@@ -32,6 +33,7 @@
   import LoadingIcon from "./assets/loading.svg";
   import TrashIcon from "./assets/trash-alt.svg";
   import "./components/PaginationNav.svelte";
+  import { FilesStore } from "@commons/store/files";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -220,14 +222,23 @@
     .some((thread) => thread.unread);
 
   async function messageClicked(event: CustomEvent) {
-    const message = event.detail.message;
+    let message = event.detail.message;
 
     if (message && currentlySelectedThread) {
-      threads = await MailboxStore.hydrateMessageInThread(
-        await fetchIndividualMessage(message),
+      message = await fetchIndividualMessage(message);
+      threads = MailboxStore.hydrateMessageInThread(
+        message,
         query,
         currentPage,
       );
+      if (FilesStore.hasInlineFiles(message)) {
+        message = await getMessageWithInlineFiles(message);
+        threads = MailboxStore.hydrateMessageInThread(
+          message,
+          query,
+          currentPage,
+        );
+      }
     }
   }
 
@@ -260,12 +271,36 @@
       let message = await fetchIndividualMessage(
         thread.messages[thread.messages.length - 1],
       );
-      threads = await MailboxStore.hydrateMessageInThread(
+      threads = MailboxStore.hydrateMessageInThread(
         message,
         query,
         currentPage,
       );
+      if (FilesStore.hasInlineFiles(message)) {
+        message = await getMessageWithInlineFiles(message);
+        threads = MailboxStore.hydrateMessageInThread(
+          message,
+          query,
+          currentPage,
+        );
+      }
     }
+  }
+
+  async function getMessageWithInlineFiles(message: Message): Promise<Message> {
+    const fetchedFiles = await FilesStore.getFilesForMessage(message, {
+      component_id: id,
+      access_token,
+    });
+    for (const file of Object.values(fetchedFiles)) {
+      if (message.body) {
+        message.body = message.body?.replaceAll(
+          `src="cid:${file.content_id}"`,
+          `src="data:${file.content_type};base64,${file.data}"`,
+        );
+      }
+    }
+    return message;
   }
 
   let refreshingMailbox = false;
