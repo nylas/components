@@ -10,6 +10,7 @@ on:
 env:
   API_GATEWAY: "web-components.nylas.com/middleware"
   CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
+  TZ: "America/Toronto"
 jobs:
   build:
     runs-on: ubuntu-latest

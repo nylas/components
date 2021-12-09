@@ -174,17 +174,6 @@
       new Date().toLocaleDateString() != selectedDate.toLocaleDateString();
 
     allowedDates = getAllowedDates();
-
-    startMinute =
-      _this.auto_time_box && timespanEvents?.length
-        ? getDynamicStartTime(timespanEvents[0])
-        : _this.start_minute;
-
-    endMinute =
-      _this.auto_time_box && timespanEvents?.length
-        ? getDynamicEndTime(timespanEvents[timespanEvents.length - 1])
-        : _this.end_minute;
-
     calendarIDs = setCalendarIDs();
   }
 
@@ -622,6 +611,19 @@
       }
     }
   };
+
+  // Adjust start/end minute (zoom) events are loaded
+  $: {
+    startMinute =
+      _this.auto_time_box && timespanEvents?.length
+        ? getDynamicStartTime(timespanEvents[0])
+        : _this.start_minute;
+
+    endMinute =
+      _this.auto_time_box && timespanEvents?.length
+        ? getDynamicEndTime(timespanEvents[timespanEvents.length - 1])
+        : _this.end_minute;
+  }
 
   // #endregion position and zoom
 
