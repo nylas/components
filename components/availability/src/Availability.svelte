@@ -845,9 +845,9 @@
   let singleEventParticipants: string[] = [];
 
   $: if (_this.events?.length && _this.events?.length > 1) {
-    consecutiveParticipants = _this.events?.flatMap((e) => e.participants);
+    consecutiveParticipants = _this.events?.flatMap((e) => e.participantEmails);
   } else if (_this.events?.length === 1) {
-    singleEventParticipants = _this.events?.flatMap((e) => e.participants);
+    singleEventParticipants = _this.events?.flatMap((e) => e.participantEmails);
   }
 
   function getAvailabilityQuery(

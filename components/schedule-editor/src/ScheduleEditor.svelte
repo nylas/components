@@ -68,7 +68,7 @@
     slot_size: 15,
     event_location: "",
     event_conferencing: "",
-    participants: [],
+    participantEmails: [],
     host_rules: {
       method: "all",
     },
