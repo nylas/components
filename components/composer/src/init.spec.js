@@ -1,53 +1,493 @@
 /* eslint-disable no-console */
 
-describe("Composer Dispatching Events", () => {
-  it("passes events up to parent application", () => {
+describe("Composer loading state", () => {
+  it("displays loading screen", () => {
     cy.visit("/components/composer/src/index.html");
-    cy.get("nylas-composer").should("exist");
-    let eventsFired = {
-      minimized: false,
-      maximized: false,
-      opened: false,
-      closed: false,
-    };
-    cy.document().then((document) => {
-      document
-        .getElementsByTagName("nylas-composer")[0]
-        .addEventListener("composerMinimized", () => {
+
+    cy.get("div").contains("Loading");
+  });
+});
+
+describe("Composer dispatches events", () => {
+  const eventsFired = {
+    minimized: false,
+    maximized: false,
+    opened: false,
+    closed: false,
+  };
+
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/index.html");
+
+    cy.get("nylas-composer")
+      .should("exist")
+      .as("composer")
+      .then((el) => {
+        // Set defaults
+        const component = el[0];
+        component.show_header = true;
+
+        component.addEventListener("composerMinimized", () => {
           eventsFired.minimized = true;
         });
-      document
-        .getElementsByTagName("nylas-composer")[0]
-        .addEventListener("composerMaximized", () => {
+        component.addEventListener("composerMaximized", () => {
           eventsFired.maximized = true;
         });
-      document
-        .getElementsByTagName("nylas-composer")[0]
-        .addEventListener("composerClosed", () => {
+        component.addEventListener("composerClosed", () => {
           eventsFired.closed = true;
         });
+      });
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
 
-      cy.get(".nylas-composer header .composer-btn")
-        .eq(0)
-        .click()
-        .then(() => {
-          expect(eventsFired.minimized).to.equal(true);
-        });
+  it("dispatches composerMinimized event", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.minimized = false;
+    });
 
-      cy.get(".nylas-composer header .composer-btn")
-        .eq(0)
-        .click()
-        .then(() => {
-          expect(eventsFired.maximized).to.equal(true);
-        });
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Collapse composer/i })
+      .click()
+      .then(() => {
+        expect(eventsFired.minimized).to.equal(true);
+      });
+  });
 
-      cy.get(".nylas-composer header .composer-btn")
-        .eq(1)
-        .click()
-        .then(() => {
-          expect(eventsFired.closed).to.equal(true);
+  it("dispatches composerMaximized event", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.minimized = true;
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Expand composer/i })
+      .click()
+      .then(() => {
+        expect(eventsFired.maximized).to.equal(true);
+      });
+  });
+
+  it("dispatches composerClosed event", () => {
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Close composer/i })
+      .click()
+      .then(() => {
+        expect(eventsFired.closed).to.equal(true);
+      });
+  });
+});
+
+describe.only("Composer `to` prop", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/index.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("Replace to field with array", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.to = [{ name: "test", email: "test@test.com" }];
+      })
+      .wait(500);
+
+    cy.get("[data-cy=contacts-search-field]").first().click();
+
+    cy.contains("test@test.com");
+  });
+
+  it("Replace to field with callback", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.to = () =>
+          Promise.resolve([{ name: "async", email: "async@test.com" }]);
+      })
+      .wait(500);
+
+    cy.get("[data-cy=contacts-search-field]").first().click();
+
+    cy.contains("async@test.com");
+  });
+});
+
+describe("Composer interactions", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/index.html");
+
+    cy.get("nylas-composer")
+      .should("exist")
+      .as("composer")
+      .then((el) => {
+        const component = el[0];
+        component.show_header = true;
+      });
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("minimizes composer", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.minimized = false;
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Collapse composer/i })
+      .click();
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Send/i })
+      .should("not.exist");
+  });
+
+  it("expands composer", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.minimized = true;
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Expand composer/i })
+      .click();
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Send/i })
+      .should("exist");
+  });
+
+  it("closes composer", () => {
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Close composer/i })
+      .click();
+    cy.get("header").should("not.exist");
+  });
+
+  it("disables send button when no recipient (to) provided", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [],
+        subject: "Sample subject",
+        body: "Sample Body",
+      };
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Send/i })
+      .should("be.disabled");
+  });
+
+  it("hides file upload button if no ID or custom file upload handler is provided", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.setAttribute("id", "");
+      component.setAttribute("uploadFile", "");
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Attach files/i })
+      .should("not.exist");
+  });
+
+  it("shows the file upload button if an ID is provided", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.setAttribute("uploadFile", "");
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByRole("button", { name: /Attach files/i })
+      .should("exist");
+  });
+});
+
+describe("Composer customizations", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/manifest.json", // We don't want account loaded so from field is empty
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/index.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("show header", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_header = true;
+    });
+
+    cy.get("header").should("exist");
+  });
+
+  it("hide header", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_header = false;
+    });
+
+    cy.get("header").should("not.exist");
+  });
+
+  it("hide from field", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_from = false;
+    });
+
+    cy.get("[data-cy=from-field]").should("not.exist");
+  });
+
+  it("show from field", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_from = true;
+      component.from = [];
+    });
+
+    cy.get("[data-cy=from-field]").should("exist");
+  });
+
+  it("hide to field", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_to = false;
+    });
+
+    cy.get("[data-cy=to-field]").should("not.exist");
+  });
+
+  it("show to field", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_to = true;
+    });
+
+    cy.get("[data-cy=to-field]").should("exist");
+  });
+
+  it("hide subject", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_subject = false;
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByLabelText(/email subject/i)
+      .should("not.exist");
+  });
+
+  it("show subject", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_subject = true;
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .findByLabelText(/email subject/i)
+      .should("exist");
+  });
+
+  it("hide edit toolbar", () => {
+    cy.get("@composer")
+      .find("nylas-html-editor")
+      .then((el) => {
+        const component = el[0];
+        component.show_editor_toolbar = false;
+      });
+    cy.get(".toolbar").should("not.exist");
+  });
+
+  it("show edit toolbar", () => {
+    cy.get("@composer")
+      .find("nylas-html-editor")
+      .then((el) => {
+        const component = el[0];
+        component.show_editor_toolbar = true;
+      });
+    cy.get(".toolbar").should("exist");
+  });
+
+  it("shows CC button", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_cc_button = true;
+      component.show_cc = false;
+    });
+
+    cy.get("[data-cy=toggle-cc-field-btn]").should("exist");
+  });
+
+  it("hides CC button", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_cc_button = false;
+      component.show_cc = true;
+    });
+
+    cy.get("[data-cy=toggle-cc-field-btn]").should("be.hidden");
+  });
+
+  it("shows BCC button", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_bcc_button = true;
+      component.show_bcc = false;
+    });
+
+    cy.get("[data-cy=toggle-bcc-field-btn]").should("exist");
+  });
+
+  it("hides BCC button", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_bcc_button = false;
+      component.show_bcc = true;
+    });
+
+    cy.get("[data-cy=toggle-bcc-field-btn]").should("be.hidden");
+  });
+
+  it("hides whole composer", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.close();
+      // Check after applying options
+      cy.get(".nylas-composer").should("not.exist");
+    });
+  });
+
+  it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        body: `[hi] what up!<br />
+      <br />
+      <br />
+      Thanks,
+      -Phil`,
+      };
+    });
+
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.setAttribute(
+        "replace_fields",
+        '[{"from": "[hi]", "to": "Hello"}]',
+      );
+      cy.get(".html-editor[contenteditable=true]")
+        .invoke("prop", "innerHTML")
+        .then((html) => {
+          expect(html).to.equal(
+            "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+          );
         });
     });
+  });
+
+  it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        body: `[hi] what up!<br />
+      <br />
+      <br />
+      Thanks,
+      -Phil`,
+      };
+
+      component.replace_fields = [{ from: "[hi]", to: "Hello" }];
+    });
+
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.include(
+          "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+        );
+      });
   });
 });
 
@@ -55,36 +495,115 @@ describe("Composer html", () => {
   let element;
 
   beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
     cy.visit("/components/composer/src/index.html");
 
-    cy.get("nylas-composer").should("exist").as("composer");
-    cy.get("@composer").then(([el]) => {
-      element = el;
-      el.change = (msg) => console.log("message changed", msg);
+    cy.get("nylas-composer")
+      .should("exist")
+      .as("composer")
+      .then((el) => {
+        element = el[0];
+        element.change = (msg) => console.log("message changed", msg);
 
-      el.from = [
-        { id: 1, email: "Tia30@hotmail.com" },
-        { id: 2, email: "Obie_Stokes@hotmail.com" },
-        { id: 3, email: "Mikayla.Jaskolski85@gmail.com" },
-        { id: 4, email: "Jacquelyn65@hotmail.com" },
-        { id: 5, email: "Dee57@hotmail.com" },
-      ];
+        element.from = [
+          { id: 1, email: "Tia30@hotmail.com" },
+          { id: 2, email: "Obie_Stokes@hotmail.com" },
+          { id: 3, email: "Mikayla.Jaskolski85@gmail.com" },
+          { id: 4, email: "Jacquelyn65@hotmail.com" },
+          { id: 5, email: "Dee57@hotmail.com" },
+        ];
 
-      el.to = (term) => {
-        console.log("term", term);
-        return fetch(`https://jsonplaceholder.typicode.com/users`)
-          .then((res) => res.json())
-          .then((res) => {
-            return res
-              .map((item) => ({ name: item.name, email: item.email }))
-              .filter((item) =>
+        element.to = (term) => {
+          return fetch(`https://jsonplaceholder.typicode.com/users`)
+            .then((res) => res.json())
+            .then((res) => {
+              return res.filter((item) =>
                 item.name.toLowerCase().includes(term.toLowerCase()),
               );
-          })
-          .catch((_err) => Promise.resolve([]));
-      };
+            })
+            .catch((_err) => Promise.resolve([]));
+        };
 
-      el.value = {
+        element.value = {
+          from: [
+            {
+              name: "Luka Test",
+              email: "luka.b@nylas.com",
+            },
+          ],
+          to: [
+            {
+              name: "Dan Test",
+              email: "dan.r@nylas.com",
+            },
+          ],
+          subject: "Sample subject",
+          body: "Sample Body",
+        };
+
+        element.show_header = true;
+        element.show_subject = true;
+        element.mode = "inline"; // or inline
+        element.theme = "dark";
+        element.show_editor_toolbar = true;
+
+        element.send = async (data) => {
+          console.log("sending (element.send)", data);
+          return new Promise((resolve, _reject) => {
+            setTimeout(() => {
+              return resolve({ success: true });
+            }, 250);
+          });
+        };
+
+        element.beforeSend = (message) => {
+          console.log(`Message before sending`, message);
+        };
+        element.afterSendSuccess = (response) => {
+          console.log(`Response afterSend success`, response);
+        };
+        element.afterSendError = (response) => {
+          console.log("After send error", response);
+        };
+
+        element.beforeFileUpload = (file) => {
+          console.log("beforeFileUpload", file);
+        };
+
+        element.afterFileUploadSuccess = (response) => {
+          console.log(`afterFileUploadSuccess`, response);
+        };
+
+        element.afterFileUploadError = (response) => {
+          console.log("afterFileUploadError error", response);
+        };
+      });
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  describe("Composer integration", () => {
+    beforeEach(() => {
+      cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    });
+
+    it("Composer basic integration", () => {
+      cy.get("header").contains("Sample subject");
+
+      element.value = {
         from: [
           {
             name: "Luka Test",
@@ -101,88 +620,37 @@ describe("Composer html", () => {
         body: "Sample Body",
       };
 
-      el.show_header = true;
-      el.show_subject = true;
-      el.mode = "inline"; // or inline
-      el.theme = "light";
-      el.show_editor_toolbar = true;
-
-      el.send = async (data) => {
-        console.log("sending (el.send)", data);
-        return new Promise((resolve, _reject) => {
-          setTimeout(() => {
-            return resolve({ success: true });
-          }, 250);
-        });
-      };
-
-      el.beforeSend = (message) => {
-        console.log(`Message before sending`, message);
-      };
-      el.afterSendSuccess = (response) => {
-        console.log(`Response afterSend success`, response);
-      };
-      el.afterSendError = (response) => {
-        console.log("After send error", response);
-      };
-
-      el.beforeFileUpload = (file) => {
-        console.log("beforeFileUpload", file);
-      };
-
-      el.afterFileUploadSuccess = (response) => {
-        console.log(`afterFileUploadSuccess`, response);
-      };
-
-      el.afterFileUploadError = (response) => {
-        console.log("afterFileUploadError error", response);
-      };
-    });
-  });
-
-  describe("Composer integration", () => {
-    it("Composer basic integration", () => {
-      cy.intercept("GET", "/users", [
-        { name: "Test User", email: "tester@nylas.com" },
-        { name: "Secound Test User", email: "tester2@nylas.com" },
-      ]).as("getAsyncContacts");
-      cy.get("nylas-composer").should("exist").as("composer");
-      cy.get("header").should("have.text", "Sample subject  ");
-      const send = async (_data) => {
+      element.send = async (_data) => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             return reject({ success: false });
           }, 25);
         });
       };
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.send = send;
-        // component.beforeSend = beforeSend;
-      });
+
       cy.get("input[name=subject]").should("have.value", "Sample subject");
       cy.get("header").contains("Sample subject");
       cy.get(".contact-item button").first().click();
-      cy.get(".search-field[name=email]")
+
+      cy.get("[data-cy=contacts-search-field]")
         .first()
-        .type("{downarrow}{downarrow}{enter}", { force: true });
-      cy.get(".search-field[name=email]").type("Seco", { force: true });
-      cy.wait("@getAsyncContacts");
+        .type("{downarrow}{downarrow}{enter}", {
+          force: true,
+        });
+      cy.get("[data-cy=contacts-search-field]")
+        .first()
+        .type("Seco", { force: true });
+
+      cy.wait("@getUsers");
+
       cy.get(".addons button:first").click({ force: true });
-      cy.get(".search-field[name=email]")
-        .last()
+      cy.get("[data-cy=contacts-search-field]")
+        .first()
         .type("tester@nylas.com{enter}", { force: true });
       cy.get(".addons button:first").click({ force: true });
       cy.get(".html-editor[contenteditable=true]")
         .click({ force: true })
         .type("{selectall}", { force: true });
-      // cy.get(".toolbar > button:first").click();
-      // cy.get(".html-editor[contenteditable=true]").then(() =>
-      //   cy.get("b").should("exist"));
-
-      // cy.get(".toolbar > button:first").click();
-      // cy.get(".html-editor[contenteditable=true]").then(() =>
-      //   cy.get("b").should("not.exist"))
 
       cy.get(".send-btn").contains("Send").click();
       cy.get("nylas-composer-alert-bar")
@@ -203,31 +671,20 @@ describe("Composer html", () => {
           cy.get(".html-editor[contenteditable=true]")
             .invoke("prop", "innerHTML")
             .then((html) => {
-              console.log(html);
               expect(html).to.include(
                 "Hey what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
               );
             });
         });
     });
-
-    it("Shows loader", () => {
-      cy.get("div").contains("Loading");
-    });
   });
 
   describe("Composer callbacks and options", () => {
-    it("Open/Close composer", () => {
-      cy.get("nylas-composer").should("exist").as("composer");
-      cy.get("header"); // wait for component to render
+    beforeEach(() => {
+      cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    });
 
-      // Close
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.close();
-        cy.get("header").should("not.exist");
-      });
-      // Open
+    it("Open/Close composer", () => {
       cy.get("@composer").then((el) => {
         const component = el[0];
         component.open();
@@ -236,7 +693,6 @@ describe("Composer html", () => {
     });
 
     it("Calls send callback", () => {
-      cy.get("nylas-composer").should("exist").as("composer");
       cy.get("header"); // wait for component to render
 
       // NOTE: Cannot be spied because it's called in shadow dom
@@ -251,240 +707,14 @@ describe("Composer html", () => {
       cy.contains("Message sent successfully");
     });
 
-    it("Replace to field with array or callback", () => {
-      cy.get("nylas-composer").should("exist").as("composer");
-      cy.get("header"); // wait for component to render
-
-      // Array
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.to = [{ name: "test", email: "test@test.com" }];
-      });
-      cy.wait(75);
-      cy.get(".contacts-container").last().click().as("fromField");
-      cy.contains("test@test.com");
-
-      // Promise (function)
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.to = () =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve([{ name: "async", email: "async@test.com" }]);
-            }, 5);
-          });
-      });
-      cy.wait(75);
-      cy.contains("async@test.com");
-    });
-
     it("Has a reactive value prop", () => {
-      cy.get("nylas-composer").should("exist").as("composer");
       cy.get("header"); // wait for component to render
 
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.value = { body: "Test reactive prop" };
-        cy.get(".html-editor[contenteditable=true]")
-          .invoke("prop", "innerHTML")
-          .should("include", "Test reactive prop");
-      });
-    });
-  });
+      element.value = { body: "Test reactive prop" };
 
-  describe("Composer actions", () => {
-    it("Minimize or expand on button click", () => {
-      // Collapse (minimize)
-      cy.get(".composer-btn")
-        .first()
-        .click()
-        .then(() => {
-          cy.get(".send-btn").should("not.exist");
-        });
-      // Deminimize
-      cy.get(".composer-btn")
-        .first()
-        .click()
-        .then(() => {
-          cy.get(".send-btn").should("exist");
-        });
-    });
-
-    it("Close on button click", () => {
-      cy.get("header>div>.composer-btn")
-        .last()
-        .click()
-        .then(() => {
-          cy.get("header").should("not.exist");
-        });
-    });
-
-    it("should not send an email if there is no recipient", () => {
-      element.value = {
-        from: [
-          {
-            name: "Luka Test",
-            email: "luka.b@nylas.com",
-          },
-        ],
-        to: [],
-        subject: "Sample subject",
-        body: "Sample Body",
-      };
-
-      cy.get(".send-btn").contains("Send").should("be.disabled");
-      // cy.get(".send-btn.send-later").should("be.disabled");
-    });
-
-    it("Hides the file upload button if no ID or custom file upload handler is provided", () => {
-      cy.visit("/components/composer/src/index.html");
-      cy.get("nylas-composer").then((el) => {
-        const component = el[0];
-        component.setAttribute("id", "");
-        component.setAttribute("uploadFile", "");
-        cy.get(".file-upload").should("not.exist");
-      });
-    });
-
-    it("Shows the file upload button if an ID is provided", () => {
-      cy.visit("/components/composer/src/index.html");
-      cy.get("nylas-composer").then((el) => {
-        const component = el[0];
-        component.setAttribute("uploadFile", "");
-        cy.get(".file-upload").should("exist");
-      });
-    });
-  });
-
-  describe("Composer customizations", () => {
-    it("Hide Composer Elements", () => {
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          // Check after applying options
-          cy.get(".html-editor").should("exist");
-          const component = el[0];
-          component.setAttribute("show_header", "false");
-          component.setAttribute("show_from", "false");
-          component.setAttribute("show_to", "false");
-          component.setAttribute("show_subject", "false");
-          component.setAttribute("show_editor_toolbar", "false");
-          cy.get(".contacts-placeholder").should("not.exist"); // from, to
-          cy.get(".subject").should("not.exist");
-          cy.get(".html-editor>.toolbar").should("not.exist");
-          cy.get("header").should("not.exist");
-        });
-    });
-
-    it("Shows CC BCC buttons", () => {
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.setAttribute("show_cc_button", "true");
-          component.setAttribute("show_bcc_button", "true");
-          cy.get(".addons > button").should("have.length", 2);
-        });
-    });
-
-    it("Hides CC BCC buttons", () => {
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.setAttribute("show_cc_button", "false");
-          component.setAttribute("show_bcc_button", "false");
-          cy.get(".addons > button").should("have.length", 0);
-        });
-    });
-
-    it("Hides CC BCC fields by default", () => {
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.setAttribute("show_cc", "true");
-          component.setAttribute("show_bcc", "true");
-          cy.get("main > nylas-contacts-search").should("have.length", 0);
-        });
-    });
-
-    it("Shows CC BCC fields", () => {
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.setAttribute("show_cc", "true");
-          component.setAttribute("show_bcc", "true");
-          cy.get("main > div.cc-container > nylas-contacts-search").should(
-            "have.length",
-            2,
-          );
-        });
-    });
-
-    it("Hide whole composer", () => {
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.close();
-          // Check after applying options
-          cy.get(".nylas-composer").should("not.exist");
-        });
-    });
-
-    it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
-      element.value = {
-        body: `[hi] what up!<br />
-      <br />
-      <br />
-      Thanks,
-      -Phil`,
-      };
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.setAttribute(
-            "replace_fields",
-            '[{"from": "[hi]", "to": "Hello"}]',
-          );
-          console.log(component);
-          cy.get(".html-editor[contenteditable=true]")
-            .invoke("prop", "innerHTML")
-            .then((html) => {
-              console.log(html);
-              expect(html).to.equal(
-                "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
-              );
-            });
-        });
-    });
-
-    it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
-      element.value = {
-        body: `[hi] what up!<br />
-      <br />
-      <br />
-      Thanks,
-      -Phil`,
-      };
-      cy.get("nylas-composer")
-        .as("composer")
-        .then((el) => {
-          const component = el[0];
-          component.replace_fields = [{ from: "[hi]", to: "Hello" }];
-          console.log(component);
-          cy.get(".html-editor[contenteditable=true]")
-            .invoke("prop", "innerHTML")
-            .then((html) => {
-              console.log(html);
-              expect(html).to.include(
-                "Hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
-              );
-            });
-        });
+      cy.get(".html-editor[contenteditable=true]")
+        .invoke("prop", "innerHTML")
+        .should("include", "Test reactive prop");
     });
   });
 

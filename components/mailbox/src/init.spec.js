@@ -296,7 +296,7 @@ describe("MailBox  component", () => {
       cy.get("pagination-nav").get(".back-btn").should("be.disabled");
     });
 
-    it.only("Should display correct number of items on the last page", () => {
+    it("Should display correct number of items on the last page", () => {
       cy.get("nylas-mailbox").then((element) => {
         const itemsPerPage = 10;
         const component = element[0];

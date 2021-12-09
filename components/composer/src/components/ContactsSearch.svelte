@@ -74,9 +74,13 @@
     focusSearch();
   };
 
-  const focusSearch = () => {
-    if (searchField && (!single || !selectedContacts.length)) {
-      searchField.focus();
+  const focusSearch = (e?: MouseEvent) => {
+    if (e?.target && searchField && (!single || !selectedContacts.length)) {
+      const element = e.target as HTMLElement;
+      if (element.tagName !== "INPUT") {
+        // handles bug when input is clicked, the input is blurred
+        searchField.focus();
+      }
       isOpen = true;
     }
   };
@@ -87,7 +91,7 @@
     searchField.removeAttribute("tabindex");
   }
 
-  const blurSearch = (options: BlurOptions) => {
+  const blurSearch = (options: BlurOptions = {}) => {
     setTimeout(() => {
       if (options.addContact && !filteredContacts.length && term) {
         handleSubmit();
@@ -97,8 +101,7 @@
       if (searchField) {
         searchField.blur();
       }
-      // @ts-ignore
-    }, options.blurIn | 500);
+    }, options.blurIn || 250);
   };
   const handleKeydown = (event: KeyboardEvent) => {
     // Backspace
@@ -123,7 +126,7 @@
       }
     }
     if (event.key === "Escape" && contactsList.length) {
-      blurSearch({});
+      blurSearch();
     }
   };
   const setActiveContact = (index: number) => {
@@ -323,13 +326,16 @@
     {#if (single && !selectedContacts.length) || !single}
       <form on:submit|preventDefault={handleSubmit} class="search-form">
         <input
+          data-cy="contacts-search-field"
           type="text"
           name="email"
           autocomplete="off"
           class="search-field"
           bind:this={searchField}
           on:keydown={handleKeydown}
-          on:blur={() => blurSearch({ addContact: true })}
+          on:blur={() => {
+            blurSearch({ addContact: true });
+          }}
           bind:value={term}
         />
       </form>
@@ -339,8 +345,7 @@
     <div class="dropdown-content">
       {#if loading && !filteredContacts.length}
         <p class="dropdown-item">Loading...</p>
-      {/if}
-      {#if !loading && filteredContacts.length}
+      {:else if filteredContacts.length}
         {#each filteredContacts as contact, i}
           <div
             class="dropdown-item"

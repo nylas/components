@@ -9,7 +9,7 @@ export interface ChangeCallback {
 }
 
 export interface BlurOptions {
-  blurIn?: number | Event;
+  blurIn?: number;
   addContact?: boolean;
 }
 export type CallbackDebounceFunction = (...args: any) => void;

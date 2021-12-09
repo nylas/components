@@ -7,7 +7,7 @@ const messageInitialState = {
   cc: [],
   bcc: [],
   body: "",
-  subject: "",
+  subject: "New Message",
   send_at: null,
   file_ids: [],
 };

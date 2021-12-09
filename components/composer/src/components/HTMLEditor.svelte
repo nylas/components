@@ -10,27 +10,31 @@
   export let show_editor_toolbar = true;
   export let replace_fields: ReplaceFields[] | null = null;
 
-  let container: HTMLElement;
+  let container: Element;
   let toolbar: ToolbarItem[] = defaultActions;
 
   $: if (html) {
-    const selection = get_current_component().shadowRoot.getSelection();
+    const selection = get_current_component()?.shadowRoot?.getSelection();
+
     if (typeof replace_fields === "string") {
       replace_fields = JSON.parse(replace_fields);
     }
-    if (Array.isArray(replace_fields)) {
+    if (selection && Array.isArray(replace_fields)) {
       for (const field of replace_fields) {
         html = html.replaceAll(field.from, field.to);
         const currentFocusedNode = selection.focusNode;
         const currentCaretPosition = selection.focusOffset;
-        if (currentFocusedNode) {
+
+        if (currentFocusedNode && currentFocusedNode.textContent) {
           if (currentFocusedNode.textContent.includes(field.from)) {
             const matchCount =
               currentFocusedNode.textContent.split(field.from).length - 1;
             const replaceNode = document.createTextNode(
               currentFocusedNode.textContent.replaceAll(field.from, field.to),
             );
+
             currentFocusedNode.replaceWith(replaceNode);
+
             if (
               selection.focusNode &&
               selection.focusNode.nodeType === Node.TEXT_NODE
