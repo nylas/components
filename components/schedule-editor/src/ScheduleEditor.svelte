@@ -250,13 +250,16 @@
   }
 
   let debouncedInputTimer: number;
-  function debounceEmailInput(e: Event, event: TimespanEvent) {
+
+  interface ManifestEvent extends Omit<TimespanEvent, "participants"> {
+    participants: string[];
+  }
+
+  function debounceEmailInput(e: Event, event: ManifestEvent) {
     const emailString = (e.target as HTMLTextAreaElement)?.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      event.participants = parseStringToArray(emailString).map((email) => ({
-        email,
-      }));
+      event.participants = parseStringToArray(emailString);
       _this.events = [..._this.events];
     }, 1000);
   }

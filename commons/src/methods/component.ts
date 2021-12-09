@@ -107,7 +107,17 @@ export default function parseStringToArray(parseStr: string): string[] {
     return [];
   }
 
-  return parseStr.split(",|s+|\n").map((s: string) => s.trim());
+  if (parseStr.includes(",")) {
+    return parseStr.split(",").map((s: string) => s.trim());
+  }
+  if (parseStr.includes(" ")) {
+    return parseStr.split(" ").map((s: string) => s.trim());
+  }
+  if (parseStr.includes("\n")) {
+    return parseStr.split("\n").map((s: string) => s.trim());
+  }
+
+  return [parseStr.trim()];
 }
 
 export function downloadAttachedFile(fileData: string, file: File): void {

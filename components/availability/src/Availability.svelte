@@ -1740,10 +1740,6 @@
 
 {#if manifest && manifest.error}
   <nylas-error {id} />
-{:else if _this.events.length === 0}
-  <nylas-message-error
-    error_message="Please enter at least one event to see availability."
-  />
 {:else}
   <main
     bind:this={main}
