@@ -38,8 +38,11 @@ Cypress.Commands.add(
   "visitComponentPage",
   (url, componentName, componentID) => {
     return cy.visit(url).then(() => {
-      const newID = componentID.replace("demo", "test");
-      cy.get(`${componentName}#${newID}`).as("testComponent");
+      return cy.get(componentName).then(($element) => {
+        const newID = componentID.replace("demo", "test");
+        $element.attr("id", newID);
+        cy.get(`${componentName}#${newID}`).as("testComponent");
+      });
     });
   },
 );
