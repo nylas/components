@@ -313,6 +313,10 @@
 
   const dispatchEvent = getEventDispatcher(get_current_component());
 
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
+
   //#region layout
 
   let main: HTMLElement;

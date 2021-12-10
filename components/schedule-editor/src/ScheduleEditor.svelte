@@ -15,13 +15,15 @@
   import type { CustomField } from "@commons/types/Scheduler";
   import { onDestroy, onMount, tick } from "svelte";
   import timezones from "timezones-list";
-  import { ManifestStore } from "../../../commons/src";
+  import { ErrorStore, ManifestStore } from "@commons";
+  import { getEventDispatcher } from "@commons/methods/component";
   import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
   import "../../scheduler/src/Scheduler.svelte";
   import DragIcon from "./assets/drag-icon.svg";
   import "./components/DragItemPlaceholder.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
+  import { get_current_component } from "svelte/internal";
 
   export let id: string = "";
   export let access_token: string = "";
@@ -60,6 +62,13 @@
   export let screen_bookings: boolean;
   export let timezone: string;
   export let events: EventDefinition[];
+
+  const dispatchEvent = getEventDispatcher(get_current_component());
+  $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   const eventTemplate: EventDefinition = {
     event_title: "",

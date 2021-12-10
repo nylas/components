@@ -2,7 +2,12 @@
 
 <script lang="ts">
   import formatDistanceStrict from "date-fns/formatDistanceStrict";
-  import { fetchContactImage, ContactStore, ManifestStore } from "@commons";
+  import {
+    ErrorStore,
+    fetchContactImage,
+    ContactStore,
+    ManifestStore,
+  } from "@commons";
   import { get_current_component, onMount } from "svelte/internal";
   import { tick } from "svelte";
   import { debounce } from "@commons/methods/component";
@@ -48,6 +53,10 @@
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   let _this = <ContactListProperties>(
     buildInternalProps({}, {}, defaultValueMap)

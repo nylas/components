@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-scheduler" />
 
 <script lang="ts">
-  import { ManifestStore, sendMessage } from "@commons";
+  import { ErrorStore, ManifestStore, sendMessage } from "@commons";
   import { createEvent } from "@commons/connections/events";
   import { get_current_component } from "svelte/internal";
   import {
@@ -47,6 +47,12 @@
   // #endregion props
 
   //#region mount and prop initialization
+  const dispatchEvent = getEventDispatcher(get_current_component());
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
+
   const defaultValueMap: Partial<Manifest> = {
     booking_label: "Schedule time slots",
     custom_fields: DefaultCustomFields,
@@ -88,8 +94,6 @@
       previousProps = $$props;
     }
   }
-
-  const dispatchEvent = getEventDispatcher(get_current_component());
   // #endregion mount and prop initialization
 
   let showSuccessNotification = false;

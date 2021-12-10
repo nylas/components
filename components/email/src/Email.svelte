@@ -3,6 +3,7 @@
 <script lang="ts">
   import {
     EmailStore,
+    ErrorStore,
     ManifestStore,
     fetchAccount,
     updateThread,
@@ -52,6 +53,10 @@
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   export let id: string = "";
   export let access_token: string = "";

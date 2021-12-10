@@ -4,6 +4,8 @@
 
 ## New Features
 
+- [Mailbox] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
+
 ## Bug Fixes
 
 # v1.1.5 (2021-12-10)
