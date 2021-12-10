@@ -1,44 +1,31 @@
 import { defaultPhoto } from "./default_photo.js";
 
-let testContactListComponent;
-
 beforeEach(() => {
-  cy.visit("/components/contact-list/src/index.html");
-  cy.get("nylas-contactt-list").then((component) => {
-    const contactList = component[0];
-    contactList.setAttribute("id", "test-contact-list");
-    testContactListComponent = contactList;
-    cy.get(testContactListComponent)
-      .should("have.prop", "id")
-      .and("equal", "test-contact-list");
-  });
+  cy.visitComponentPage(
+    "/components/contact-list/src/index.html",
+    "nylas-contact-list",
+    "demo-contact-list",
+  );
 });
 
 describe("Contact List initial states and thread/contact counts", () => {
   it("Loads 100 contacts by default", () => {
-    cy.loadContacts();
-    cy.wait("@contacts");
-    cy.get(testContactListComponent)
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
+    cy.get("@testComponent");
+    cy.get(".contact").should("have.length.greaterThan", 1);
   });
   xit("Loads 10 contacts", () => {
     cy.loadContacts();
     cy.get("#contacts_to_load").contains("10").click();
     cy.wait("@little-contacts");
-    cy.get(testContactListComponent).find(".contact").should("have.length", 10);
+    cy.get("@testComponent").find(".contact").should("have.length", 10);
   });
 });
 
 describe("Contact List component (Svelte)", () => {
   it("Shows Contact List", () => {
     cy.loadContacts();
-    cy.get(testContactListComponent).find(".loader").should("exist");
-    cy.get(testContactListComponent).invoke(
-      "attr",
-      "theme",
-      "arbitrary thinger",
-    );
+    cy.get("@testComponent").find(".loader").should("exist");
+    cy.get("@testComponent").invoke("attr", "theme", "arbitrary thinger");
   });
 
   it("Shows Empty state", () => {
@@ -46,7 +33,7 @@ describe("Contact List component (Svelte)", () => {
       response: [],
     });
 
-    cy.get(testContactListComponent).then(() => {
+    cy.get("@testComponent").then(() => {
       cy.get(".empty-state").contains("Enter contacts using the contacts prop");
     });
   });
@@ -62,12 +49,8 @@ describe("Contact List component (Svelte)", () => {
   });
 
   it("Sorts correctly (last emailed)", () => {
-    cy.loadContacts();
-    cy.wait("@contacts");
-    cy.get(testContactListComponent)
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
-    cy.get(testContactListComponent).invoke("attr", "sort_by", "last_emailed");
+    cy.get(".contact").should("have.length.greaterThan", 1);
+    cy.get("@testComponent").invoke("attr", "sort_by", "last_emailed");
 
     cy.get(".contact").then(($contacts) => {
       let lastContactedDates = $contacts.map((index, contact) => {
@@ -78,24 +61,14 @@ describe("Contact List component (Svelte)", () => {
   });
 
   it("handles selection properly", () => {
-    cy.loadContacts();
-    cy.wait("@contacts");
-    cy.get(testContactListComponent)
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
-    cy.get(testContactListComponent).invoke("attr", "click_action", "select");
+    cy.get(".contact").should("have.length.greaterThan", 1);
+    cy.get("@testComponent").invoke("attr", "click_action", "select");
     cy.get("[data-cy=0]");
-    cy.get(testContactListComponent)
-      .find(".contact.selected")
-      .should("have.length", 0);
+    cy.get(".contact.selected").should("have.length", 0);
     cy.get(".contact:eq(0)").click();
-    cy.get(testContactListComponent)
-      .find(".contact.selected")
-      .should("have.length", 1);
+    cy.get(".contact.selected").should("have.length", 1);
     cy.get(".contact:eq(0)").click();
-    cy.get(testContactListComponent)
-      .find(".contact.selected")
-      .should("have.length", 0);
+    cy.get(".contact.selected").should("have.length", 0);
   });
 });
 
@@ -131,15 +104,15 @@ describe("Contact List Interaction", () => {
   xit("Shows loading overlay and displays 1 or more contacts when user scrolls to the bottom of contact list element", () => {
     cy.loadContacts();
     cy.wait("@contacts");
-    cy.get(testContactListComponent)
+    cy.get("@testComponent")
       .find(".contact")
       .should("have.length.greaterThan", 1);
     cy.get("[data-cy=99]").scrollIntoView();
-    cy.get(testContactListComponent).find(".loading").should("exist");
+    cy.get("@testComponent").find(".loading").should("exist");
     cy.wait("@one-hundred-more-contacts");
-    cy.get(testContactListComponent).find(".loading").should("not.exist");
-    cy.get(testContactListComponent).find("[data-cy=199]").should("exist");
-    cy.get(testContactListComponent)
+    cy.get("@testComponent").find(".loading").should("not.exist");
+    cy.get("@testComponent").find("[data-cy=199]").should("exist");
+    cy.get("@testComponent")
       .find(".contact")
       .should("have.length.greaterThan", 1);
   });
@@ -148,7 +121,7 @@ describe("Contact List Interaction", () => {
     it("Toggles between custom and Nylas data", () => {
       cy.loadContacts();
       cy.wait("@contacts").then(() => {
-        cy.get(testContactListComponent)
+        cy.get("@testComponent")
           .as("contacts")
           .then((element) => {
             const contactlist = element[0];
@@ -207,9 +180,7 @@ describe("Optional Prop Handling", () => {
     cy.loadContacts();
     cy.wait("@contacts");
     cy.get("#show_names").contains("false").click();
-    cy.get(testContactListComponent)
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
+    cy.get(".contact").should("have.length.greaterThan", 1);
     cy.get(".email").should("not.exist");
   });
   xit("Loads default image passed by user", () => {
@@ -227,32 +198,29 @@ describe("Optional Prop Handling", () => {
       },
     });
     cy.wait("@contacts");
-    cy.get(testContactListComponent)
+    cy.get("@testComponent")
       .find("[data-cy=default_set_by_user]")
       .should("exist");
   });
 
   it("Component shows filter by email option when 'show_filter' is set to true", () => {
-    cy.loadContacts();
-    cy.get(testContactListComponent).then((element) => {
+    cy.get("@testComponent").then((element) => {
       const component = element[0];
       component.show_filter = true;
     });
-    cy.wait("@contacts");
     cy.get("label.entry.filter").contains("Filter by email: ");
     cy.get("input#show-filter-input").should("exist");
     cy.get("input#show-filter-input").type("nylascypresstest");
-    cy.get(testContactListComponent).find(".contact").should("have.length", 2);
+    cy.get("@testComponent").find(".contact").should("have.length", 2);
   });
 
   it("Component loads and works for sort_by=last_emailed when account has email & contact scopes", () => {
-    cy.loadContacts();
-    cy.get(testContactListComponent).then((element) => {
+    cy.get("@testComponent").then((element) => {
       const component = element[0];
       component.sort_by = "last_emailed";
     });
     cy.get(".loader").should("not.exist");
-    cy.get(testContactListComponent)
+    cy.get("@testComponent")
       .find(".contact")
       .should("have.length.greaterThan", 1);
   });
@@ -260,16 +228,16 @@ describe("Optional Prop Handling", () => {
 
 describe("ContactList component with contact scope (only) should work by default", () => {
   beforeEach(() => {
-    cy.loadContacts();
-    cy.get(testContactListComponent).then((element) => {
+    cy.get("nylas-contact-list").then((element) => {
       const component = element[0];
       component.id = "75f0cbc5-6b15-4bf1-894e-11eeb198cc34";
       component.sort_by = "name";
+      cy.get(component).as("contact-scope-component");
     });
   });
 
   it("Component loads and works for sort_by=name when account has only contact scope", () => {
-    cy.get(testContactListComponent)
+    cy.get("@contact-scope-component")
       .find(".contact")
       .should("have.length.greaterThan", 1);
   });
