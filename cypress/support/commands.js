@@ -3,16 +3,16 @@ import "cypress-file-upload";
 
 Cypress.Commands.add("loadContacts", () => {
   cy.server();
-  cy.route({
-    method: "get",
+  cy.intercept({
+    method: "GET",
     url: "/middleware/contact-list/contacts?limit=10&offset=0",
   }).as("little-contacts");
-  cy.route({
-    method: "get",
+  cy.intercept({
+    method: "GET",
     url: "/middleware/contact-list/contacts?limit=100&offset=0",
   }).as("contacts");
-  cy.route({
-    method: "get",
+  cy.intercept({
+    method: "GET",
     url: "/middleware/contact-list/contacts?limit=100&offset=100",
   }).as("one-hundred-more-contacts");
 });
@@ -33,3 +33,13 @@ Cypress.Commands.add("visitMailbox", () => {
     cy.get("nylas-mailbox").should("exist");
   });
 });
+
+Cypress.Commands.add(
+  "visitComponentPage",
+  (url, componentName, componentID) => {
+    return cy.visit(url).then(() => {
+      const newID = componentID.replace("demo", "test");
+      cy.get(`${componentName}#${newID}`).as("testComponent");
+    });
+  },
+);
