@@ -144,11 +144,12 @@ describe("Agenda Props", () => {
       const initialZoomLevel = zoomableEvent.getAttribute("style");
 
       // Zooming in shouldn't work, because we are at max zoom by default
-      await fireEvent.wheel(zoomableEvent, { deltaY: 5 });
-      expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
+      await fireEvent.wheel(zoomableEvent, { deltaY: 5, metaKey: true });
+      const afterZoomLevel = zoomableEvent.getAttribute("style");
+      expect(initialZoomLevel).toBe(afterZoomLevel);
 
       // Zooming out should still work
-      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5, metaKey: true });
       expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
       done();
     });
@@ -164,12 +165,12 @@ describe("Agenda Props", () => {
       const zoomableEvent = agenda.querySelector(".event") as Element;
       const initialZoomLevel = zoomableEvent.getAttribute("style");
 
-      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5, metaKey: true });
       expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
 
       component.prevent_zoom = false;
 
-      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5, metaKey: true });
       expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
       done();
     });
@@ -185,12 +186,12 @@ describe("Agenda Props", () => {
       const zoomableEvent = agenda.querySelector(".event") as Element;
       const initialZoomLevel = zoomableEvent.getAttribute("style");
 
-      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5, metaKey: true });
       expect(initialZoomLevel).toBe(zoomableEvent.getAttribute("style"));
 
       component.condensed_view = false;
 
-      await fireEvent.wheel(zoomableEvent, { deltaY: -5 });
+      await fireEvent.wheel(zoomableEvent, { deltaY: -5, metaKey: true });
       expect(initialZoomLevel).not.toBe(zoomableEvent.getAttribute("style"));
       done();
     });

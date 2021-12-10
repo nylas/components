@@ -81,7 +81,7 @@
     color_by: "event",
     condensed_view: false,
     eagerly_fetch_events: true,
-    end_minute: 1440,
+    end_minute: 1000,
     event_snap_interval: 15,
     header_type: "full",
     hide_all_day_events: false,
@@ -568,14 +568,19 @@
     setTimeout(() => {
       scrolling = false;
     }, 500);
+
+    // Only allow zooming in when meta or ctrl key is pressed while scrolling
+    if (!event.metaKey && !event.ctrlKey) {
+      return;
+    }
+
     event.preventDefault();
     const canvas = agendaElement.getBoundingClientRect();
     const mouseYPosition = event.clientY - canvas.top;
     let velocity = Math.abs(event.deltaY) / 10;
 
-    // ctrlKey = Pinch-to-zoom
-    if (event.ctrlKey) {
-      event.preventDefault();
+    // Pinch-to-zoom
+    if (event.ctrlKey || event.metaKey) {
       velocity *= 20;
     }
 
@@ -589,11 +594,12 @@
       (canvas.height - mouseYPosition) / canvas.height,
     ];
 
+    const max = 1000;
     if (direction === "out") {
-      if (endMinute <= 1440 && endMinute + velocity <= 1440) {
+      if (endMinute <= max && endMinute + velocity <= max) {
         endMinute += velocity;
       } else {
-        endMinute = 1440;
+        endMinute = max;
       }
       if (startMinute >= 0 && startMinute - velocity >= 0) {
         startMinute -= velocity;
@@ -1065,7 +1071,7 @@
     display: grid;
     grid-column: 1/3;
     grid-template-columns: 40px 1fr;
-    overflow: hidden;
+    overflow-x: hidden;
     line-height: 100%;
 
     &.hide-ticks {
@@ -1223,7 +1229,7 @@
     color: var(--mainTextAndDeclinedEvents);
     font-size: 12px;
     position: relative;
-    overflow: hidden;
+    overflow-y: visible;
     .tick {
       position: absolute;
       width: 100%;

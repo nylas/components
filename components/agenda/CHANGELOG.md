@@ -4,6 +4,8 @@
 
 ## New Features
 
+- [Agenda] Zoom in with `cmd`/`ctrl` + `scroll`, allow scroll up and down, reduce max zoom out so 15 min meetings remain visible [#]()
+
 ## Bug Fixes
 
 - [Agenda] Ensure that the `auto_time_box` property updates when events update [#243](https://github.com/nylas/components/pull/243)
