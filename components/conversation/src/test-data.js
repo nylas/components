@@ -17,7 +17,7 @@ export const mockedMessages = [
     object: "message",
     reply_to: [],
     snippet:
-      "Hey there, Welcome to Nylas! Glad to have you onboard Aaron D'Mello Sr. Software Engineer, Nylas aaron.d@nylas.com +1(647)220-5567",
+      "Hey there, Welcome to Nylas! Glad to have you onboard Aaron D'Mello Sr. Software Engineer, Nylas",
     starred: false,
     subject: "Welcome to Nylas",
     thread_id: "dclpsfd1i46mukv77b8y0qe4s",
@@ -82,7 +82,7 @@ export const mockedMessages = [
     object: "message",
     reply_to: [],
     snippet:
-      "That is awesome! Let’s chat soon regarding your first project. Aaron D'Mello Sr. Software Engineer, Nylas aaron.d@nylas.com +1(647)220-5567 On Aug 16, 2021, at 9:23 PM, Jack Smith",
+      "That is awesome! Let’s chat soon regarding your first project. Aaron D'Mello Sr. Software Engineer, Nylas aaron.d@nylas.com On Aug 16, 2021, at 9:23 PM, Jack Smith",
     starred: false,
     subject: "Re: Welcome to Nylas",
     thread_id: "dclpsfd1i46mukv77b8y0qe4s",
@@ -112,7 +112,7 @@ export const mockedMessages = [
     object: "message",
     reply_to: [],
     snippet:
-      "Sounds great! Looking forward to it. Aaron D'Mello Sr. Software Engineer, Nylas aaron.d@nylas.com +1(647)220-5567 On Aug 16, 2021, at 9:23 PM, Aaron D'Mello <aaron.d@nylas.com> wrote: That is",
+      "Sounds great! Looking forward to it. Aaron D'Mello Sr. Software Engineer, Nylas aaron.d@nylas.com On Aug 16, 2021, at 9:23 PM, Aaron D'Mello <aaron.d@nylas.com> wrote: That is",
     starred: false,
     subject: "Re: Welcome to Nylas",
     thread_id: "dclpsfd1i46mukv77b8y0qe4s",
