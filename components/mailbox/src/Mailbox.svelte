@@ -172,7 +172,6 @@
 
   //#region methods
   function fetchIndividualMessage(message: Message) {
-    // messageLoadStatus[msgIndex] = "loading";
     return fetchMessage(query, message.id).then((json) => {
       message.body = json.body;
       return message;

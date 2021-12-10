@@ -128,7 +128,7 @@
   });
 
   let previousProps = $$props;
-  $: {
+  $: (async () => {
     if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
       _this = buildInternalProps(
         $$props,
@@ -136,16 +136,20 @@
         defaultValueMap,
       ) as EmailProperties;
 
-      transformPropertyValues();
+      await transformPropertyValues();
       previousProps = $$props;
     }
-  }
+  })();
 
-  function transformPropertyValues() {
+  async function transformPropertyValues() {
     _this.thread_id = !thread && !message_id && !message ? _this.thread_id : "";
 
     if (id && !_this.thread_id && !_this.thread && _this.message_id) {
       fetchOneMessage();
+    }
+
+    if (!activeThread || previousProps.thread_id !== _this.thread_id) {
+      await getThread();
     }
   }
 
@@ -236,16 +240,40 @@
   let activeThread: Conversation;
 
   // #region thread intake and set
-  // The trick is to always ensure that activeThread is in the store; that way if we need to do fetches to update its messages, it too will be updated for free.
-  // TODO: this feels like it could be a "$: activeThread =" reactive prop declaration instead of a conditional block. -Phil
-  $: (async () => {
+  let fetchingThreadPromise: Promise<Conversation>;
+  async function getThread() {
+    if (id && _this.thread_id && !fetchingThreadPromise) {
+      fetchingThreadPromise = <Promise<Conversation>>fetchThread({
+        component_id: id,
+        thread_id: _this.thread_id,
+        access_token,
+      }).catch(silence);
+      const thread = await fetchingThreadPromise;
+      fetchingThreadPromise = <any>null;
+
+      // get body for last message in open thread
+      if (thread?.messages?.length > 0) {
+        const lastMsgIndex = thread.messages.length - 1;
+        thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
+          lastMsgIndex,
+          thread.messages[lastMsgIndex].id,
+        );
+      }
+      if (thread) {
+        thread.expanded =
+          activeThread?.expanded ?? _this.show_expanded_email_view_onload;
+        activeThread = thread;
+      }
+    }
+  }
+
+  $: {
     if (_this.thread && _this.thread.id) {
       // Is it in the store already? (via <nylas-mailbox>, for example)
-      const localThread: Conversation =
-        $EmailStore[queryKey]?.find(
-          (storedThread: Conversation) =>
-            storedThread && storedThread.id === thread?.id,
-        ) ?? (_this.thread as Conversation);
+      const localThread = ($EmailStore[queryKey]?.find(
+        (storedThread: Thread) =>
+          storedThread && storedThread.id === thread?.id,
+      ) ?? _this.thread) as Conversation;
 
       // This is for Email component demo purpose, where we want to show expanded threads by default on load.
       if (_this.show_expanded_email_view_onload) {
@@ -256,27 +284,8 @@
         lastMsg.body = lastMsg.body ?? lastMsg.snippet;
       }
       activeThread = localThread;
-    } else if (_this.thread_id) {
-      const thread = await fetchThread(query).catch(silence);
-
-      if (thread) {
-        if (_this.show_expanded_email_view_onload) {
-          thread.expanded = _this.show_expanded_email_view_onload;
-
-          // get body for last message in open thread
-          if (thread.messages.length) {
-            const lastMsgIndex = thread.messages.length - 1;
-            thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
-              lastMsgIndex,
-              thread.messages[lastMsgIndex].id,
-            );
-          }
-        }
-
-        activeThread = thread;
-      }
     }
-  })();
+  }
 
   // #endregion thread intake and set
   let emailManuallyPassed: boolean;
@@ -322,12 +331,7 @@
     }
   }
 
-  $: if (
-    !_this.thread &&
-    _this.clean_conversation &&
-    ((activeThread && !activeThread.messages.some((m) => m.conversation)) ||
-      (_this.message && !_this.message.conversation))
-  ) {
+  $: if (_this.clean_conversation && (_this.thread_id || _this.message_id)) {
     cleanConversation();
   }
   //#endregion Clean Conversation
@@ -396,7 +400,6 @@
       }
 
       //#region open thread + messages
-
       activeThread.expanded = !activeThread.expanded;
       // Upon expansion / lastMessage existing, scroll to it
       if (activeThread.expanded && _this.click_action === "default") {
@@ -533,15 +536,18 @@
     msgIndex: number,
     messageID: string,
   ): Promise<string | null> {
-    messageLoadStatus[msgIndex] = "loading";
-    return fetchMessage(query, messageID).then(async (json) => {
-      messageLoadStatus[msgIndex] = "loaded";
-      if (FilesStore.hasInlineFiles(json)) {
-        const messageWithInlineFiles = await getMessageWithInlineFiles(json);
-        return messageWithInlineFiles.body;
-      }
-      return json.body;
-    });
+    if (id) {
+      messageLoadStatus[msgIndex] = "loading";
+      return fetchMessage(query, messageID).then(async (json) => {
+        messageLoadStatus[msgIndex] = "loaded";
+        if (FilesStore.hasInlineFiles(json)) {
+          const messageWithInlineFiles = await getMessageWithInlineFiles(json);
+          return messageWithInlineFiles.body;
+        }
+        return json.body;
+      });
+    }
+    return new Promise(() => null);
   }
 
   function doNothing(e: MouseEvent | KeyboardEvent) {
@@ -665,10 +671,10 @@
 
   let attachedFiles: Record<string, File[]> = {};
 
-  $: activeThread, activeThread ? initializeAttachedFiles() : "";
+  $: activeThread ? initializeAttachedFiles() : "";
 
   function initializeAttachedFiles() {
-    attachedFiles = activeThread.messages.reduce(
+    attachedFiles = activeThread.messages?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
           if (
@@ -703,7 +709,7 @@
     return message;
   }
 
-  async function downloadSelectedFile(event: CustomEvent, file: File) {
+  async function downloadSelectedFile(event: MouseEvent, file: File) {
     event.stopImmediatePropagation();
     if (id && ((activeThread && _this.thread_id) || _this.message_id)) {
       const downloadedFileData = await downloadFile({
@@ -720,8 +726,8 @@
     });
   }
 
-  async function handleDownloadFromMessage(event: CustomEvent) {
-    const file = event.detail.file;
+  async function handleDownloadFromMessage(event: MouseEvent) {
+    const file = (<any>event.detail).file;
     downloadSelectedFile(event, file);
   }
 </script>
@@ -839,10 +845,7 @@
         }
 
         .thread-message-count {
-          color: var(
-            --nylas-email-thread-message-count-color,
-            var(--grey-light)
-          );
+          color: var(--nylas-email-thread-message-count-color, var(--black));
           font-size: 12px;
           align-self: center;
         }
@@ -926,6 +929,11 @@
               background: none;
               display: flex;
               cursor: pointer;
+
+              * {
+                width: 0.7em;
+                height: 0.7em;
+              }
             }
           }
           [role="toolbar"] {
@@ -1140,6 +1148,11 @@
               background: none;
               cursor: pointer;
               display: flex;
+
+              * {
+                width: 1em;
+                height: 1em;
+              }
             }
           }
         }
@@ -1284,6 +1297,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+
+            .spinner {
+              height: 18px;
+              animation: rotate 2s linear infinite;
+              margin-right: 10px;
+            }
           }
           @keyframes rotate {
             to {
@@ -1372,15 +1391,6 @@
                 <h1>{thread?.subject}</h1>
               </div>
               <div role="toolbar">
-                <div class="delete">
-                  <button
-                    title="Delete thread / Move to trash"
-                    aria-label="Delete thread (Move to trash)"
-                    on:click|stopPropagation={(e) => deleteEmail(e)}
-                  >
-                    <TrashIcon />
-                  </button>
-                </div>
                 {#if _this.show_star}
                   <div class="starred">
                     <button
@@ -1393,24 +1403,36 @@
                       aria-checked={thread.starred}
                       on:click|stopPropagation={handleThreadStarClick}
                     />
-                  </div>{/if}
-                <div class="read-status">
-                  <button
-                    title={`Mark thread as ${
-                      activeThread.unread ? "" : "un"
-                    }read`}
-                    aria-label={`Mark thread as ${
-                      activeThread.unread ? "" : "un"
-                    }read`}
-                    on:click|stopPropagation={toggleUnreadStatus}
-                  >
-                    {#if activeThread.unread}
-                      <MarkReadIcon aria-hidden="true" />
-                    {:else}
-                      <MarkUnreadIcon aria-hidden="true" />
-                    {/if}
-                  </button>
-                </div>
+                  </div>
+                {/if}
+                {#if _this.show_thread_actions}
+                  <div class="delete">
+                    <button
+                      title="Delete thread / Move to trash"
+                      aria-label="Delete thread (Move to trash)"
+                      on:click|stopPropagation={(e) => deleteEmail(e)}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                  <div class="read-status">
+                    <button
+                      title={`Mark thread as ${
+                        activeThread.unread ? "" : "un"
+                      }read`}
+                      aria-label={`Mark thread as ${
+                        activeThread.unread ? "" : "un"
+                      }read`}
+                      on:click|stopPropagation={toggleUnreadStatus}
+                    >
+                      {#if activeThread.unread}
+                        <MarkReadIcon aria-hidden="true" />
+                      {:else}
+                        <MarkUnreadIcon aria-hidden="true" />
+                      {/if}
+                    </button>
+                  </div>
+                {/if}
               </div>
             </header>
             {#if activeThread.messages.length}
@@ -1524,10 +1546,7 @@
                         {/await}
                       {:else}
                         <div class="email-loader">
-                          <LoadingIcon
-                            class="spinner"
-                            style="height:18px; animation: rotate 2s linear infinite; margin-right:10px;"
-                          />
+                          <LoadingIcon class="spinner" />
                           Loading...
                         </div>
                       {/if}
@@ -1652,9 +1671,9 @@
                     {/if}
                   </div>
                 </div>
-                {#if activeThread.messages.length > 1 && _this.show_number_of_messages}
-                  <span class="thread-message-count"
-                    >{activeThread.messages.length}
+                {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
+                  <span class="thread-message-count">
+                    {activeThread.messages.length}
                   </span>
                 {/if}
               </div>
@@ -1662,9 +1681,8 @@
             <div class="subject-snippet-date">
               <div class="snippet-attachment-container">
                 <div class="desktop-subject-snippet">
-                  <span class="subject">{thread?.subject}</span><span
-                    class="snippet"
-                  >
+                  <span class="subject">{thread?.subject}</span>
+                  <span class="snippet">
                     {thread.snippet}
                   </span>
                 </div>
@@ -1672,7 +1690,10 @@
                   <div class="attachment desktop">
                     {#each Object.values(attachedFiles) as files}
                       {#each files as file}
-                        <button on:click={(e) => downloadSelectedFile(e, file)}>
+                        <button
+                          on:click={(event) =>
+                            downloadSelectedFile(event, file)}
+                        >
                           {file.filename || file.id}
                         </button>
                       {/each}
@@ -1711,8 +1732,8 @@
                         <MarkReadIcon aria-hidden="true" />
                       {:else}
                         <MarkUnreadIcon aria-hidden="true" />
-                      {/if}</button
-                    >
+                      {/if}
+                    </button>
                   </div>
                 {:else if _this.show_received_timestamp}
                   <span>
@@ -1733,7 +1754,9 @@
                 <div class="attachment mobile">
                   {#each Object.values(attachedFiles) as files}
                     {#each files as file}
-                      <button on:click={(e) => downloadSelectedFile(e, file)}>
+                      <button
+                        on:click={(event) => downloadSelectedFile(event, file)}
+                      >
                         {file.filename || file.id}
                       </button>
                     {/each}
@@ -1804,11 +1827,13 @@
                 {/each}
               </div>
             </div>
-            <div class="message-date">
-              <span>
-                {formatPreviewDate(new Date(_this.message.date * 1000))}
-              </span>
-            </div>
+            {#if _this.show_received_timestamp}
+              <div class="message-date">
+                <span>
+                  {formatPreviewDate(new Date(_this.message.date * 1000))}
+                </span>
+              </div>
+            {/if}
           </div>
           <div class="message-body">
             {#if _this.clean_conversation && message.conversation}
