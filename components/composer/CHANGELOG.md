@@ -6,7 +6,13 @@
 
 ## Bug Fixes
 
-# v1.1.4
+# v1.1.5 (2021-12-10)
+
+## Bug Fixes
+
+- Added better error handling when file size exceeds 5MB [248](https://github.com/nylas/components/pull/248)
+
+# v1.1.4 (2021-12-09)
 
 ## Bug Fixes
 
