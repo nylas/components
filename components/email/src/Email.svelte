@@ -813,7 +813,9 @@
         .no-message-avatar-container {
           display: grid;
           &.show-star {
-            margin-left: calc(25px + 0.5rem);
+            margin-left: calc(
+              25px + 0.5rem
+            ); //to account for space occupied by star
           }
           .default-avatar {
             background: var(--red);
