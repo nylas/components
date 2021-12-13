@@ -403,17 +403,19 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded =
-        !activeThread.messages[lastMsgIndex].expanded;
+      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
+        lastMsgIndex
+      ].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
         if (!activeThread.messages[lastMsgIndex].body) {
-          activeThread.messages[lastMsgIndex].body =
-            await fetchIndividualMessage(
-              lastMsgIndex,
-              activeThread.messages[lastMsgIndex].id,
-            );
+          activeThread.messages[
+            lastMsgIndex
+          ].body = await fetchIndividualMessage(
+            lastMsgIndex,
+            activeThread.messages[lastMsgIndex].id,
+          );
         }
       }
 
@@ -612,8 +614,9 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
     } else {
-      activeThread.messages[msgIndex].expanded =
-        !activeThread.messages[msgIndex].expanded;
+      activeThread.messages[msgIndex].expanded = !activeThread.messages[
+        msgIndex
+      ].expanded;
       dispatchEvent("messageClicked", {
         event,
         message: activeThread.messages[msgIndex],
@@ -637,8 +640,9 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(event);
       } else {
-        activeThread.messages[msgIndex].expanded =
-          !activeThread.messages[msgIndex].expanded;
+        activeThread.messages[msgIndex].expanded = !activeThread.messages[
+          msgIndex
+        ].expanded;
       }
     }
   }
@@ -968,7 +972,7 @@
             white-space: nowrap;
             display: block;
             max-width: inherit;
-            color: var(--nylas-email-snippet-color, var(--grey));
+            color: var(--nylas-email-snippet-color, var(--grey-dark));
             margin-top: 4px;
           }
           .attachment {
@@ -1163,7 +1167,7 @@
               overflow: hidden;
               display: block;
               max-width: inherit;
-              color: var(--nylas-email-snippet-color, var(--grey));
+              color: var(--nylas-email-snippet-color, var(--grey-dark));
               margin-top: $spacing-xs;
             }
             div.message-head {
@@ -1250,7 +1254,7 @@
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
-              color: var(--nylas-email-snippet-color, var(--grey));
+              color: var(--nylas-email-snippet-color, var(--grey-dark));
               span.initial {
                 display: none;
               }
@@ -1305,7 +1309,7 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           span.snippet {
-            color: var(--nylas-email-snippet-color, var(--grey));
+            color: var(--nylas-email-snippet-color, var(--grey-dark));
           }
           &.date {
             display: flex;
