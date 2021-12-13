@@ -116,7 +116,7 @@
   }
 
   // sanitization to conform with Nylas API maximums
-  $: {
+  $: if (hasComponentLoaded) {
     _this.contacts_to_load = Math.max(
       Math.min(_this.contacts_to_load, 1000),
       1,
