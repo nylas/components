@@ -56,6 +56,8 @@
   export let query_string: string; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
   export let show_star: boolean;
   export let show_thread_checkbox: boolean;
+  export let with_composer: boolean;
+  export let composer_id: string;
 
   const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
@@ -63,6 +65,7 @@
     query_string: "in=inbox",
     show_star: false,
     show_thread_checkbox: true,
+    with_composer: false,
   };
 
   let manifest: Partial<MailboxProperties> = {};
@@ -670,6 +673,8 @@
           {you}
           show_star={_this.show_star}
           click_action="mailbox"
+          with_composer={_this.with_composer}
+          {composer_id}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}

@@ -79,5 +79,18 @@
     "title": "Select thread action you can specify",
     "type": "function",
     "noPreview": true
+  },
+  {
+    "label": "with_composer",
+    "title": "Allow Replies",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "composer_id",
+    "title": "Composer ID",
+    "type": "string",
+    "noPreview": true
   }
 ]

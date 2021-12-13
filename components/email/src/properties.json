@@ -90,5 +90,18 @@
     "title": "User's account object that you can pass in",
     "type": "Partial<Account>",
     "noPreview": true
+  },
+  {
+    "label": "with_composer",
+    "title": "Allow Replies",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
+  },
+  {
+    "label": "composer_id",
+    "title": "Composer ID",
+    "type": "string",
+    "noPreview": true
   }
 ]

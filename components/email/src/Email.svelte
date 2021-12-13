@@ -39,6 +39,7 @@
     Label,
     Folder,
     File,
+    ComposerProperties,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/MessageBody.svelte";
@@ -50,6 +51,10 @@
   import LoadingIcon from "./assets/loading.svg";
   import { downloadFile } from "@commons/connections/files";
   import { DisallowedContentTypes } from "@commons/constants/attachment-content-types";
+  import ReplyIcon from "./assets/reply.svg";
+  import ReplyAllIcon from "./assets/reply-all.svg";
+  import "../../composer/src/Composer.svelte";
+  import type { Message as ComposerMessage } from "@commons/types/Composer";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -76,6 +81,8 @@
   export let thread_id: string;
   export let thread: Thread;
   export let you: Partial<Account>;
+  export let with_composer: boolean;
+  export let composer_id: string;
 
   const defaultValueMap: Partial<EmailProperties> = {
     clean_conversation: false,
@@ -90,6 +97,7 @@
     theme: "theme-1",
     thread_id: "",
     you: {},
+    with_composer: false,
   };
 
   let manifest: Partial<EmailProperties> = {};
@@ -208,7 +216,10 @@
     }
   }
 
+  console.log(_this.with_composer && composer_id);
   let main: Element;
+  let composerRef: Partial<ComposerProperties> & Element;
+  let composing: boolean = false;
   let messageRefs: Element[] = [];
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
   const MAX_DESKTOP_PARTICIPANTS = 2;
@@ -498,6 +509,139 @@
       event,
       thread: activeThread,
     });
+  }
+
+  async function openComposer() {
+    await tick();
+    if (composerRef != null) {
+      composing = true;
+      composerRef.open();
+    }
+  }
+
+  async function closeComposer() {
+    await tick();
+    if (composerRef != null) {
+      composing = false;
+      composerRef.close();
+    }
+  }
+
+  async function handleReplyAllClick(event: MouseEvent, msgIndex: number) {
+    event.stopImmediatePropagation();
+
+    const currentMessage = activeThread.messages[msgIndex];
+
+    const me: Participant = {
+      name: _this.you.name,
+      email: _this.you.email_address,
+    };
+    const participantsWithoutMe = activeThread.participants.filter(
+      (e) => e.email != me.email,
+    );
+
+    const from = [me];
+    let to = participantsWithoutMe;
+    const subject = currentMessage.subject?.toLowerCase().startsWith("re")
+      ? currentMessage.subject
+      : `Re: ${currentMessage.subject}`;
+
+    composerRef.value = {
+      reply_to_message_id: currentMessage.id,
+      from: from,
+      to: to,
+      reply_to: to,
+      subject: subject,
+    };
+
+    composerRef.to = to;
+    composerRef.from = from;
+    composerRef.show_minimize_button = false;
+    composerRef.show_from = false;
+
+    composerRef.afterSendSuccess = async (data: ComposerMessage) => {
+      closeComposer();
+    };
+
+    openComposer();
+  }
+
+  async function handleReplyClick(event: MouseEvent, msgIndex: number) {
+    event.stopImmediatePropagation();
+
+    const currentMessage = activeThread.messages[msgIndex];
+
+    const me: Participant = {
+      name: _this.you.name,
+      email: _this.you.email_address,
+    };
+    const participantsWithoutMe = activeThread.participants.filter(
+      (e) => e.email != me.email,
+    );
+
+    const from = [me];
+    let to;
+    const subject = currentMessage.subject?.toLowerCase().startsWith("re")
+      ? currentMessage.subject
+      : `Re: ${currentMessage.subject}`;
+
+    /**
+     * In Gmail, reply options are available on each message in thread.
+     * There are a couple cases that need to be handled when the use clicks 'reply'
+     * and there are multiple participants in an email thread. In some cases, participants
+     * are add to the thread after messages have already been exchanged with out them.
+     *
+     *
+     * 1. When the message is from the user, AND the message is to multiple participants of the thread
+     *    then the default action is to reply to all participants
+     * 2. When the message is from the user, AND the message is to a single participant of the thread
+     *    then reply to only that participant
+     * 3. When the message is NOT from the user, then reply to the sender of the message
+     */
+    if (isFromMe(currentMessage)) {
+      if (currentMessage.to.length > 1) {
+        to = participantsWithoutMe;
+      } else {
+        to = currentMessage.to;
+      }
+    } else {
+      to = currentMessage.from;
+    }
+
+    composerRef.value = {
+      reply_to_message_id: currentMessage.id,
+      from: from,
+      to: to,
+      reply_to: to,
+      subject: subject,
+    };
+
+    composerRef.to = to;
+    composerRef.from = from;
+    composerRef.show_minimize_button = false;
+    composerRef.show_from = false;
+
+    composerRef.afterSendSuccess = async (data: ComposerMessage) => {
+      closeComposer();
+    };
+
+    openComposer();
+  }
+
+  function isFromMe(message: Message): boolean {
+    if (!_this.you.email_address) {
+      return false;
+    }
+
+    return message.from
+      .map((f) => {
+        return f.email.toLowerCase();
+      })
+      .includes(_this.you.email_address?.toLowerCase());
+  }
+
+  function canReplyAll(message: Message): boolean {
+    return !isFromMe(message) && message.to.length > 1;
   }
 
   function handleEmailClick(event: MouseEvent, msgIndex: number) {
@@ -920,6 +1064,10 @@
           gap: $spacing-m;
         }
 
+        .message-head [role="toolbar"] {
+          outline: none;
+        }
+
         .subject-title {
           justify-content: space-between;
           &.mailbox {
@@ -1177,6 +1325,30 @@
     }
   }
 
+  div.reply button {
+    background: none;
+  }
+  div.reply-all button {
+    background: none;
+  }
+
+  .composer {
+    z-index: 999;
+  }
+  .composer.hidden {
+    display: none;
+    height: 0;
+  }
+
+  .composer.active {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: unset;
+    width: 100%;
+    transition: height 0.125s cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
   @media #{$desktop} {
     main {
       .email-row {
@@ -1511,12 +1683,44 @@
                           {/each}
                         </div>
                       </div>
-                      <div class="message-date">
-                        <span>
-                          {formatExpandedDate(
-                            new Date(message.date * 1000),
-                          )}</span
+                      <div class="">
+                        <div class="message-date">
+                          <span>
+                            {formatExpandedDate(
+                              new Date(message.date * 1000),
+                            )}</span
+                          >
+                        </div>
+                        <div
+                          aria-label="Email Actions"
+                          role="toolbar"
+                          aria-controls="email"
                         >
+                          {#if _this.with_composer && composer_id}
+                            <div class="reply">
+                              <button
+                                title={"Reply"}
+                                aria-label={"Reply"}
+                                on:click|stopPropagation={(e) =>
+                                  handleReplyClick(e, msgIndex)}
+                              >
+                                <ReplyIcon aria-hidden="true" />
+                              </button>
+                            </div>
+                            {#if canReplyAll(message)}
+                              <div class="reply-all">
+                                <button
+                                  title={"Reply all"}
+                                  aria-label={"Reply all"}
+                                  on:click|stopPropagation={(e) =>
+                                    handleReplyAllClick(e, msgIndex)}
+                                >
+                                  <ReplyAllIcon aria-hidden="true" />
+                                </button>
+                              </div>
+                            {/if}
+                          {/if}
+                        </div>
                       </div>
                     </div>
                     <div class="message-body">
@@ -1854,5 +2058,17 @@
         </div>
       </div>
     {/if}
+  {/if}
+  {#if _this.with_composer && composer_id}
+    <nylas-composer
+      bind:this={composerRef}
+      id={composer_id}
+      {access_token}
+      class:hidden={!composing}
+      class:active={composing}
+      class="composer"
+      show_header="true"
+      show_subject="true"
+    />
   {/if}
 </main>

@@ -5,7 +5,12 @@ import type {
 } from "@commons/enums/Nylas";
 import type { Contact, HydratedContact } from "@commons/types/Contacts";
 import type { Event } from "@commons/types/Events";
-import type { ReplaceFields } from "./Composer";
+import type {
+  FetchContactsCallback,
+  ReplaceFields,
+  SendCallback,
+  Tracking,
+} from "./Composer";
 
 export interface CommonQuery {
   component_id: string;
@@ -195,6 +200,7 @@ export interface EmailProperties extends Manifest {
   thread_id: string;
   thread: Thread;
   you: Partial<Account>;
+  with_composer: boolean;
 }
 
 export interface MailboxProperties extends Manifest {
@@ -207,7 +213,10 @@ export interface MailboxProperties extends Manifest {
   show_star: boolean;
   show_thread_checkbox: boolean;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  with_composer: boolean;
 }
+
+export type ContactSearchCallback = Participant[] | FetchContactsCallback;
 
 export interface ComposerProperties extends Manifest {
   minimized: boolean;
@@ -228,6 +237,29 @@ export interface ComposerProperties extends Manifest {
   show_to: boolean;
   theme: "string";
   visible: boolean;
+
+  value: Partial<Message> | void;
+  to: ContactSearchCallback;
+  from: ContactSearchCallback;
+  cc: ContactSearchCallback;
+  bcc: ContactSearchCallback;
+  send: SendCallback;
+  open: () => void;
+  close: () => void;
+  change: FetchContactsCallback | null;
+  beforeSend: (msg: Message) => Message | void;
+  afterSendSuccess: Function | null;
+  afterSendError: Function | null;
+  template: string;
+  tracking: Tracking | null;
+
+  // Attributes
+  beforeFileUpload: Function | null;
+  afterFileUploadSuccess: Function | null;
+  afterFileUploadError: Function | null;
+  uploadFile: Function | null;
+  beforeFileRemove: Function | null;
+  afterFileRemove: Function | null;
 }
 
 export interface ContactListProperties extends Manifest {
