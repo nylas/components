@@ -552,7 +552,7 @@
         // Handle the Consecutive Events model, where a slot if busy if it falls within a consecutive timeslot.
         // None of the other above rules should apply, except (maybe!) Buffer and Open Hours.
         if (_this.events?.length > 1 && consecutiveOptions.length) {
-          let existsWithinConsecutiveBlock = consecutiveOptions.some(
+          const existsWithinConsecutiveBlock = consecutiveOptions.some(
             (event) => {
               return (
                 time >= event[0].start_time &&
@@ -846,8 +846,14 @@
 
   $: if (_this.events?.length && _this.events?.length > 1) {
     consecutiveParticipants = _this.events?.flatMap((e) => e.participantEmails);
+    singleEventParticipants = [];
+    newCalendarTimeslotsForGivenEmails = [];
   } else if (_this.events?.length === 1) {
     singleEventParticipants = _this.events?.flatMap((e) => e.participantEmails);
+    consecutiveParticipants = [];
+    dispatchEvent("eventOptionsReady", {
+      slots: [],
+    });
   }
 
   function getAvailabilityQuery(
