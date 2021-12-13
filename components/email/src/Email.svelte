@@ -761,13 +761,28 @@
     currentTooltipId = event.detail.tooltipID;
   }
 
-  function showFirstFromParticipant(messages: Message[]) {
-    return (
+  function showFromParticipants(
+    messages: Message[],
+    participants: Participant[],
+  ) {
+    let fromParticipants = messages[messages.length - 1]?.from;
+    const hasFirstFromParticipant =
       messages &&
       participants &&
       messages.length > 0 &&
-      messages[messages.length - 1]?.from.length
+      fromParticipants.length;
+    const hasMoreParticipants = showSecondFromParticipant(
+      messages,
+      participants,
     );
+    let fromString = "";
+    if (hasFirstFromParticipant) {
+      fromString += fromParticipants[0].name || fromParticipants[0].email;
+      if (hasMoreParticipants) {
+        fromString += ", " + (participants[0].name || participants[0].email);
+      }
+    }
+    return fromString;
   }
 
   function showSecondFromParticipant(
@@ -1375,7 +1390,10 @@
                 position: absolute;
                 bottom: 0;
                 right: 0;
-                background: var(--nylas-email-body-background, var(--grey-lightest));
+                background: var(
+                  --nylas-email-body-background,
+                  var(--grey-lightest)
+                );
               }
               &.condensed.unread::after {
                 background: var(--nylas-email-body-background, var(--white));
@@ -1866,22 +1884,12 @@
                         activeThread.participants,
                       )}
                     >
-                      {#if showFirstFromParticipant(activeThread.messages)}
-                        <span class="from-sub-section">
-                          {activeThread.messages[
-                            activeThread.messages.length - 1
-                          ]?.from[0].name ||
-                            activeThread.messages[
-                              activeThread.messages.length - 1
-                            ]?.from[0].email}
-                        </span>
-                      {/if}
-                      {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
-                        <span class="from-sub-section second"
-                          >, {activeThread.participants[0].name ||
-                            activeThread.participants[0].email}
-                        </span>
-                      {/if}
+                      <span class="from-sub-section">
+                        {showFromParticipants(
+                          activeThread.messages,
+                          activeThread.participants,
+                        )}
+                      </span>
                     </div>
                     <div class="participants-count">
                       {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
