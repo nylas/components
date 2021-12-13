@@ -533,6 +533,8 @@
 
     // Toggle select-all checkbox and thread checkbox from CSS Var
     .thread-checkbox {
+      margin-right: 1rem;
+
       input {
         @include checkbox;
         &:disabled {
@@ -681,6 +683,7 @@
           thread={currentlySelectedThread}
           {you}
           show_star={_this.show_star}
+          show_thread_actions={true}
           click_action="mailbox"
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
@@ -787,8 +790,8 @@
                 thread?.messages &&
                 thread?.messages?.length <= 0}
             >
-              {#if _this.show_thread_checkbox}
-                <div class="checkbox-container thread-checkbox">
+              <div class="checkbox-container thread-checkbox">
+                {#if _this.show_thread_checkbox}
                   <input
                     title={selectTitle}
                     aria-label={selectTitle}
@@ -799,8 +802,8 @@
                       thread?.messages?.length <= 0}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
-                </div>
-              {/if}
+                {/if}
+              </div>
               <div class="email-container">
                 {#key thread.id}
                   <nylas-email

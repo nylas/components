@@ -875,7 +875,7 @@
           .attachment {
             gap: 1rem;
             display: flex;
-            overflow-x: scroll;
+            overflow-x: auto;
 
             button {
               height: fit-content;
@@ -1032,7 +1032,7 @@
             flex-direction: column;
             width: 100%;
             div.attachment {
-              overflow-x: scroll;
+              overflow-x: auto;
               button {
                 margin: $spacing-xs;
                 height: fit-content;
@@ -1253,15 +1253,9 @@
               overflow: hidden;
               white-space: nowrap;
               position: relative;
+              text-overflow: ellipsis;
               .from-sub-section.second {
                 display: inline-block;
-              }
-              &.condensed::after {
-                content: ".";
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                background: var(--nylas-email-body-background, var(--white));
               }
             }
             .participants-count {
@@ -1384,7 +1378,7 @@
           .attachment {
             gap: 1rem;
             display: flex;
-            overflow-x: scroll;
+            overflow-x: auto;
 
             button {
               padding: 0.3rem 1rem;
