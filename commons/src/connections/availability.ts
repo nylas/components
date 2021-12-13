@@ -135,7 +135,6 @@ function removeSimultaneousAvailabilityOptions(
   availabilities: ConsecutiveEvent[][],
 ) {
   const blockSet = new Set();
-  debugger;
   return availabilities.filter((block) => {
     const blockString = `${block[0].start_time}_${
       block[block.length - 1].end_time
