@@ -11,6 +11,8 @@ export interface Message {
   bcc?: Participant[];
   file_ids?: string[];
   send_at?: number | null;
+  reply_to: Participant[];
+  reply_to_message_id?: string;
 }
 
 export interface UI {

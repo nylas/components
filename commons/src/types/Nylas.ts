@@ -117,6 +117,8 @@ export interface Message {
   expanded?: boolean;
   thread_id?: string;
   files: File[];
+  reply_to: Participant[];
+  reply_to_message_id?: string;
 }
 
 export interface RadialMessage extends Message {
