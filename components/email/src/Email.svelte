@@ -1308,8 +1308,9 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          span.snippet {
-            color: var(--nylas-email-snippet-color, var(--grey-dark));
+          color: var(--nylas-email-snippet-color, var(--grey-dark));
+          span.subject {
+            color: var(--nylas-email-subject-color, var(--black));
           }
           &.date {
             display: flex;
