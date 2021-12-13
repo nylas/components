@@ -1375,6 +1375,9 @@
                 position: absolute;
                 bottom: 0;
                 right: 0;
+                background: var(--nylas-email-body-background, var(--grey-lightest));
+              }
+              &.condensed.unread::after {
                 background: var(--nylas-email-body-background, var(--white));
               }
             }
