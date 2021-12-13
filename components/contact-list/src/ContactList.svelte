@@ -60,6 +60,7 @@
   let lastNumContactsLoaded = 0;
   let hydratedContacts: HydratedContact[] = [];
   let status: "loading" | "loaded" | "error" = "loading";
+  let hasComponentLoaded = false;
 
   onMount(async () => {
     await tick();
@@ -87,6 +88,8 @@
         setContacts();
       }
     }
+
+    hasComponentLoaded = true;
   });
 
   $: dispatchEvent("manifestLoaded", manifest);
@@ -131,7 +134,12 @@
   $: queryKey = JSON.stringify(query);
 
   $: setHydratedContacts(), contacts, queryKey;
+
   async function setHydratedContacts() {
+    if (!hasComponentLoaded) {
+      return;
+    }
+
     status = "loading";
     if (contacts && Array.isArray(contacts)) {
       hydratedContacts = contacts as HydratedContact[];
