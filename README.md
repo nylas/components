@@ -135,6 +135,8 @@ export default function App() {
 
 Please refer to our [Contributing Guidelines](CONTRIBUTING.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
 
+Please view our [development documentation](DOCUMENTATION.md) for information about how we've built things.
+
 ## License
 
 This project is licensed under the terms of the MIT open source license. Please refer to [LICENSE](LICENSE) for the full terms.
