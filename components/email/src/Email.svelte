@@ -910,6 +910,24 @@
           gap: 8px;
         }
 
+        .email-loader {
+          height: 3rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .spinner {
+            height: 18px;
+            animation: rotate 2s linear infinite;
+            margin-right: 10px;
+          }
+        }
+        @keyframes rotate {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
         header {
           @include barStyle;
           border-radius: 4px 4px 0 0;
@@ -967,6 +985,7 @@
             overflow: auto;
             display: inline-flex;
             flex-direction: column;
+            width: 100%;
             div.attachment {
               overflow-x: scroll;
               button {
@@ -1296,24 +1315,6 @@
                   }
                 }
               }
-            }
-          }
-
-          .email-loader {
-            height: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            .spinner {
-              height: 18px;
-              animation: rotate 2s linear infinite;
-              margin-right: 10px;
-            }
-          }
-          @keyframes rotate {
-            to {
-              transform: rotate(360deg);
             }
           }
         }
