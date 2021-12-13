@@ -41,3 +41,21 @@ The user can redefine the style by replacing the theme property (and therefore r
 ```
 <nylas-component theme="custom" style="--component-background-color: black" />
 ```
+
+## `properties.json`
+
+All Components have a `properties.json` file to help keep track of Component's properties for the Nylas Docs and Nylas Dashboard.
+
+When adding a new property, make sure to define the property's label (actual property name), title (name in written English), type, and default value. Most types have a number of options associated with them as well.
+
+Some properties can be flagged with `noPreview` to signify that this property is not to be edited or shown for certain cases
+
+```
+{
+  "label": "theme",
+  "title": "Theme",
+  "type": "string",
+  "options": ["theme-1", "theme-2", "theme-3", "theme-4", "theme-5"],
+  "value": "theme-1"
+},
+```
