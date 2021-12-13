@@ -133,6 +133,7 @@
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
 
+  // Gives ability to toggle between Nylas and custom contacts
   $: setHydratedContacts(), contacts, queryKey;
 
   async function setHydratedContacts() {
