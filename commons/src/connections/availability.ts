@@ -134,14 +134,17 @@ function hydrateSlotsToEvents(
 function removeSimultaneousAvailabilityOptions(
   availabilities: ConsecutiveEvent[][],
 ) {
-  return availabilities.filter((block, index, self) => {
-    let foundIndex = self.findIndex((otherBlock) => {
-      return (
-        otherBlock[0].start_time.getTime() === block[0].start_time.getTime() &&
-        otherBlock[otherBlock.length - 1].end_time.getTime() ===
-          block[block.length - 1].end_time.getTime()
-      );
-    });
-    return index === foundIndex;
+  const blockSet = new Set();
+  debugger;
+  return availabilities.filter((block) => {
+    const blockString = `${block[0].start_time}_${
+      block[block.length - 1].end_time
+    }`;
+    if (blockSet.has(blockString)) {
+      return false;
+    } else {
+      blockSet.add(blockString);
+      return true;
+    }
   });
 }
