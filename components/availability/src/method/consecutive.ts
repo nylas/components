@@ -19,7 +19,7 @@ export async function createConsecutiveQueryKey(
 
   const emailsList = events.reduce(
     (emails: string[][], event: EventDefinition) => {
-      emails.push(event.participants);
+      emails.push(event.participantEmails);
       return emails;
     },
     [],
