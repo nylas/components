@@ -886,7 +886,7 @@
           &:before {
             content: "\2605";
             display: inline-block;
-            font-size: 1em;
+            font-size: 1.1em;
             color: var(--nylas-email-unstarred-star-button-color, #ccc);
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -936,15 +936,16 @@
               background: none;
               display: flex;
               cursor: pointer;
-
-              * {
-                width: 0.7em;
-                height: 0.7em;
-              }
             }
           }
           [role="toolbar"] {
             outline: none;
+            button {
+              * {
+                width: 1em;
+                height: 1em;
+              }
+            }
           }
         }
 
