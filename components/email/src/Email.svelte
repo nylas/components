@@ -96,6 +96,8 @@
   let _this = <EmailProperties>buildInternalProps({}, {}, defaultValueMap);
 
   let userEmail: string | undefined;
+  const PARTICIPANTS_TO_TRUNCATE = 3;
+
   onMount(async () => {
     await tick();
     manifest = ((await $ManifestStore[
@@ -1486,29 +1488,37 @@
                           </div>
                         </div>
                         <div class="message-to">
-                          {#each message?.to as to, i}
+                          {#each message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
                             <div>
-                              {#if to.name || to.email}
-                                <span>
-                                  to&colon;&nbsp;{userEmail &&
-                                  to.email === userEmail
-                                    ? "me"
-                                    : to.name || to.email}
-                                  {#if i !== message.to.length - 1}
-                                    &nbsp;&comma;
-                                  {/if}
-                                </span>
-                                <!-- tooltip component -->
-                                <nylas-tooltip
-                                  on:toggleTooltip={setTooltip}
-                                  id={message?.id.slice(0, 4)}
-                                  current_tooltip_id={currentTooltipId}
-                                  icon={DropdownSymbol}
-                                  content={to.email}
-                                />
-                              {/if}
+                              <span>
+                                {i === 0 ? "to " : ""}
+                                {#if _this.you && to?.email === _this.you.email_address}
+                                  Me
+                                {/if}
+                                {#if to.email && to.name}
+                                  {to.name ?? _this.you.name} &lt;{to.email}&gt;
+                                {:else if to.email && !to.name}
+                                  {to.email}
+                                {/if}
+                              </span>
                             </div>
                           {/each}
+                          {#if message.to?.length > PARTICIPANTS_TO_TRUNCATE}
+                            <div>
+                              <nylas-tooltip
+                                on:toggleTooltip={setTooltip}
+                                id={`show-more-participants-${message.id}`}
+                                current_tooltip_id={currentTooltipId}
+                                icon={DropdownSymbol}
+                                text={`And ${
+                                  message.to?.length - PARTICIPANTS_TO_TRUNCATE
+                                } more`}
+                                content={`${message.to
+                                  .map((to) => `${to.name} ${to.email}`)
+                                  .join(", ")}`}
+                              />
+                            </div>
+                          {/if}
                         </div>
                       </div>
                       <div class="message-date">
@@ -1808,28 +1818,37 @@
               </div>
 
               <div class="message-to">
-                {#each _this.message?.to as to, i}
+                {#each message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
                   <div>
-                    {#if to.name || to.email}
-                      <span>
-                        to&colon;&nbsp;{userEmail && to.email === userEmail
-                          ? "me"
-                          : to.name || to.email}
-                      </span>
-                      <!-- tooltip component -->
-                      <nylas-tooltip
-                        on:toggleTooltip={setTooltip}
-                        id={_this.message.id.slice(0, 3)}
-                        current_tooltip_id={currentTooltipId}
-                        icon={DropdownSymbol}
-                        content={to.email}
-                      />
-                      {#if i !== _this.message?.to.length - 1}
-                        &nbsp;&comma;
+                    <span>
+                      {i === 0 ? "to " : ""}
+                      {#if _this.you && to?.email === _this.you.email_address}
+                        Me
                       {/if}
-                    {/if}
+                      {#if to.email && to.name}
+                        {to.name ?? _this.you.name} &lt;{to.email}&gt;
+                      {:else if to.email && !to.name}
+                        {to.email}
+                      {/if}
+                    </span>
                   </div>
                 {/each}
+                {#if message.to?.length > PARTICIPANTS_TO_TRUNCATE}
+                  <div>
+                    <nylas-tooltip
+                      on:toggleTooltip={setTooltip}
+                      id={`show-more-participants-${message.id}`}
+                      current_tooltip_id={currentTooltipId}
+                      icon={DropdownSymbol}
+                      text={`And ${
+                        message.to?.length - PARTICIPANTS_TO_TRUNCATE
+                      } more`}
+                      content={`${message.to
+                        .map((to) => `${to.name} ${to.email}`)
+                        .join(", ")}`}
+                    />
+                  </div>
+                {/if}
               </div>
             </div>
             {#if _this.show_received_timestamp}

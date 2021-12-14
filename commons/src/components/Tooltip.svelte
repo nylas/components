@@ -15,6 +15,7 @@
   export let content;
   export let id;
   export let icon;
+  export let text;
   // #endregion tooltip props
 
   $: isTooltipVisible =
@@ -42,9 +43,16 @@
     box-shadow: none;
     cursor: pointer;
     padding: 0;
-    width: 1rem;
     height: auto;
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+  }
+
+  .icon-container {
+    width: 1rem;
     &.reverse-icon {
       transform: rotate(180deg);
     }
@@ -61,25 +69,34 @@
     top: 8px;
     transform: translate(-50%, 0);
     width: max-content;
+    max-width: 240px;
+    max-height: 240px;
+    overflow-y: scroll;
+    word-break: break-word;
     z-index: 1;
   }
 </style>
 
 <button
   class="tooltip-trigger"
-  class:reverse-icon={isTooltipVisible}
   aria-expanded={isTooltipVisible ? "true" : "false"}
-  id={id ? `button-${id.slice(0, 3)}` : ""}
+  id={id ? `tooltip-trigger-${id}` : ""}
   aria-describedby={id}
   aria-label={isTooltipVisible ? "hide email" : "show email"}
   on:click|stopPropagation={(e) => toggleTooltipVisibility(e)}
 >
+  {#if text}
+    <p>{text}</p>
+  {/if}
   {#if icon}
-    <svelte:component this={icon} class="icon-container" aria-hidden="true" />
+    <div class="icon-container" class:reverse-icon={icon && isTooltipVisible}>
+      <svelte:component this={icon} aria-hidden="true" />
+    </div>
   {/if}
 </button>
 {#if isTooltipVisible}
   <p {id} role="tooltip" tabindex="0" class="tooltip">
     {content}
+    <!-- {@html content} -->
   </p>
 {/if}
