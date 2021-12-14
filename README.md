@@ -135,7 +135,7 @@ export default function App() {
 
 Please refer to our [Contributing Guidelines](CONTRIBUTING.md) for information about how to get involved. We welcome bug reports, questions, and pull requests.
 
-Please view our [development documentation](DOCUMENTATION.md) for information about how we've built things.
+Please view our [development documentation](DOCUMENTATION.md) for information about how we've built our Components.
 
 ## License
 
