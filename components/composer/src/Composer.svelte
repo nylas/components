@@ -357,6 +357,14 @@
       triggerElement.removeAttribute("tabindex");
     }
   };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Enter" && e.metaKey) {
+      if (isSendable) {
+        handleSend();
+      }
+    }
+  };
 </script>
 
 <style lang="scss">
@@ -772,6 +780,7 @@
           onchange={handleBodyChange}
           replace_fields={_this.replace_fields}
           show_editor_toolbar={_this.show_editor_toolbar}
+          on:keydown={handleKeyDown}
         />
         {#if $attachments.length}
           <div class="nylas-attachments">

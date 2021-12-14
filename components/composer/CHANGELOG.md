@@ -5,6 +5,7 @@
 ## New Features
 
 - [Composer] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
+- [Composer] Allow sending with CMD/CTRL + Enter
 
 ## Bug Fixes
 
