@@ -147,6 +147,7 @@ export const generateDaySlots = (
         availability === AvailabilityStatus.PARTIAL &&
         internalProps.required_participants.length
       ) {
+        //Check if every participants is included in the available calendar
         if (!arrayContainsArray(requiredParticipants, freeCalendars)) {
           availability = AvailabilityStatus.BUSY;
         }

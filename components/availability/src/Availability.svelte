@@ -456,6 +456,7 @@
           numFreeCalendars === 0 ||
           fewerCalendarsThanRatio ||
           (_this.required_participants.length &&
+            //Check if every participants is included in the available calendar
             !arrayContainsArray(
               requiredParticipants,
               epoch[0].available_calendars,
