@@ -57,7 +57,6 @@
   export let show_star: boolean;
   export let show_thread_checkbox: boolean;
   export let with_composer: boolean;
-  export let composer_id: string;
 
   const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
@@ -674,7 +673,6 @@
           show_star={_this.show_star}
           click_action="mailbox"
           with_composer={_this.with_composer}
-          {composer_id}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}

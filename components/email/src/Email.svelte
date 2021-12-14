@@ -39,7 +39,6 @@
     Label,
     Folder,
     File,
-    ComposerProperties,
   } from "@commons/types/Nylas";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/MessageBody.svelte";
@@ -53,8 +52,6 @@
   import { DisallowedContentTypes } from "@commons/constants/attachment-content-types";
   import ReplyIcon from "./assets/reply.svg";
   import ReplyAllIcon from "./assets/reply-all.svg";
-  import "../../composer/src/Composer.svelte";
-  import type { Message as ComposerMessage } from "@commons/types/Composer";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -82,7 +79,6 @@
   export let thread: Thread;
   export let you: Partial<Account>;
   export let with_composer: boolean;
-  export let composer_id: string;
 
   const defaultValueMap: Partial<EmailProperties> = {
     clean_conversation: false,
@@ -216,10 +212,7 @@
     }
   }
 
-  console.log(_this.with_composer && composer_id);
   let main: Element;
-  let composerRef: Partial<ComposerProperties> & Element;
-  let composing: boolean = false;
   let messageRefs: Element[] = [];
   let messageLoadStatus: string[] = []; // "loading" | "loaded"
   const MAX_DESKTOP_PARTICIPANTS = 2;
@@ -511,22 +504,6 @@
     });
   }
 
-  async function openComposer() {
-    await tick();
-    if (composerRef != null) {
-      composing = true;
-      composerRef.open();
-    }
-  }
-
-  async function closeComposer() {
-    await tick();
-    if (composerRef != null) {
-      composing = false;
-      composerRef.close();
-    }
-  }
-
   async function handleReplyAllClick(event: MouseEvent, msgIndex: number) {
     event.stopImmediatePropagation();
 
@@ -542,11 +519,11 @@
 
     const from = [me];
     let to = participantsWithoutMe;
-    const subject = currentMessage.subject?.toLowerCase().startsWith("re")
+    const subject = currentMessage.subject?.toLowerCase().startsWith("re:")
       ? currentMessage.subject
       : `Re: ${currentMessage.subject}`;
 
-    composerRef.value = {
+    const value = {
       reply_to_message_id: currentMessage.id,
       from: from,
       to: to,
@@ -554,16 +531,17 @@
       subject: subject,
     };
 
-    composerRef.to = to;
-    composerRef.from = from;
-    composerRef.show_minimize_button = false;
-    composerRef.show_from = false;
-
-    composerRef.afterSendSuccess = async (data: ComposerMessage) => {
-      closeComposer();
-    };
-
-    openComposer();
+    if (_this.with_composer) {
+      dispatchEvent("replyAllClicked", {
+        event,
+        message: activeThread.messages[msgIndex],
+        thread: activeThread,
+        value,
+        to,
+        from,
+        subject,
+      });
+    }
   }
 
   async function handleReplyClick(event: MouseEvent, msgIndex: number) {
@@ -581,7 +559,7 @@
 
     const from = [me];
     let to;
-    const subject = currentMessage.subject?.toLowerCase().startsWith("re")
+    const subject = currentMessage.subject?.toLowerCase().startsWith("re:")
       ? currentMessage.subject
       : `Re: ${currentMessage.subject}`;
 
@@ -608,7 +586,7 @@
       to = currentMessage.from;
     }
 
-    composerRef.value = {
+    const value = {
       reply_to_message_id: currentMessage.id,
       from: from,
       to: to,
@@ -616,16 +594,17 @@
       subject: subject,
     };
 
-    composerRef.to = to;
-    composerRef.from = from;
-    composerRef.show_minimize_button = false;
-    composerRef.show_from = false;
-
-    composerRef.afterSendSuccess = async (data: ComposerMessage) => {
-      closeComposer();
-    };
-
-    openComposer();
+    if (_this.with_composer) {
+      dispatchEvent("replyClicked", {
+        event,
+        message: activeThread.messages[msgIndex],
+        thread: activeThread,
+        value,
+        to,
+        from,
+        subject,
+      });
+    }
   }
 
   function isFromMe(message: Message): boolean {
@@ -1331,24 +1310,6 @@
   div.reply-all button {
     background: none;
   }
-
-  .composer {
-    z-index: 999;
-  }
-  .composer.hidden {
-    display: none;
-    height: 0;
-  }
-
-  .composer.active {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    height: unset;
-    width: 100%;
-    transition: height 0.125s cubic-bezier(0.075, 0.82, 0.165, 1);
-  }
   @media #{$desktop} {
     main {
       .email-row {
@@ -1696,7 +1657,7 @@
                           role="toolbar"
                           aria-controls="email"
                         >
-                          {#if _this.with_composer && composer_id}
+                          {#if _this.with_composer}
                             <div class="reply">
                               <button
                                 title={"Reply"}
@@ -2058,17 +2019,5 @@
         </div>
       </div>
     {/if}
-  {/if}
-  {#if _this.with_composer && composer_id}
-    <nylas-composer
-      bind:this={composerRef}
-      id={composer_id}
-      {access_token}
-      class:hidden={!composing}
-      class:active={composing}
-      class="composer"
-      show_header="true"
-      show_subject="true"
-    />
   {/if}
 </main>

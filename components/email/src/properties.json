@@ -97,11 +97,5 @@
     "type": "boolean",
     "options": [true, false],
     "value": false
-  },
-  {
-    "label": "composer_id",
-    "title": "Composer ID",
-    "type": "string",
-    "noPreview": true
   }
 ]
