@@ -26,6 +26,7 @@ export {
 } from "./connections/neural";
 
 export { AvailabilityStore } from "./store/availability";
+export { ConsecutiveAvailabilityStore } from "./store/consecutive-availability";
 export { CalendarStore } from "./store/calendars";
 export { ContactStore } from "./store/contacts";
 export { ContactAvatarStore } from "./store/contact-avatar";

@@ -67,7 +67,7 @@
     slot_size: 15,
     event_location: "",
     event_conferencing: "",
-    email_ids: [],
+    participantEmails: [],
     host_rules: {
       method: "all",
     },
@@ -174,16 +174,12 @@
     const cleanedProps = {
       ..._this,
       custom_fields: _this.custom_fields.map((field) => {
-        delete field["id"]; // used only for drag reorder interactions
+        delete field.id; // used only for drag reorder interactions
         return field;
       }),
     };
 
-    saveManifest({
-      id,
-      access_token,
-      manifest: { settings: cleanedProps },
-    });
+    saveManifest(id, cleanedProps, access_token);
   }
 
   // #region unpersisted variables
@@ -253,11 +249,12 @@
   }
 
   let debouncedInputTimer: number;
-  function debounceEmailInput(e: HTMLInputElement, event) {
-    const emailString = e.target.value;
+
+  function debounceEmailInput(e: Event, event: EventDefinition) {
+    const emailString = (e.target as HTMLTextAreaElement)?.value;
     clearTimeout(debouncedInputTimer);
     debouncedInputTimer = setTimeout(() => {
-      event.email_ids = parseStringToArray(emailString);
+      event.participantEmails = parseStringToArray(emailString);
       _this.events = [..._this.events];
     }, 1000);
   }
@@ -267,14 +264,14 @@
   $: showPreview = mainElementWidth > 600;
 
   //#region custom fields
-  const emptyCustomField: CustomFieldWithId = {
+  const emptyCustomField: CustomField = {
     title: "",
     description: "",
     type: "text",
     required: false,
     id: "",
   };
-  const customFieldKeys: Array<keyof CustomField> = [
+  const customFieldKeys: (keyof CustomField)[] = [
     "title",
     "description",
     "type",
@@ -282,7 +279,7 @@
   ];
 
   let newFieldTitleElement: HTMLElement;
-  let newCustomField: CustomFieldWithId = { ...emptyCustomField };
+  let newCustomField: CustomField = { ...emptyCustomField };
 
   function removeCustomField(field: CustomField) {
     _this.custom_fields = _this.custom_fields.filter(
@@ -304,13 +301,11 @@
     customFieldDomRects = getDomRects(customFieldRefs);
   }
 
-  type CustomFieldWithId = CustomField & { id: string };
-  let draggedField: CustomFieldWithId | null = null;
+  let draggedField: CustomField | null = null;
   let draggedFieldIndex: number;
   let tablerowRect: DOMRect;
   let tablecellRect: DOMRect[] = []; // To replicate cell dimensions on drag-placeholder
-  type CustomFieldRefs = Record<string, HTMLElement>;
-  let customFieldRefs: CustomFieldRefs = {}; // store the refs to dom nodes once so we can recalculate sizes on the fly
+  let customFieldRefs: Record<string, HTMLElement> = {}; // store the refs to dom nodes once so we can recalculate sizes on the fly
   let customFieldDomRects: DOMRect[] = [];
   let customFieldIdOrder: string[] = [];
   let maxDragTop: number;
@@ -322,17 +317,11 @@
   };
   let rowResizeObserver: ResizeObserver;
 
-  type CustomFieldDrag = {
-    event: MouseEvent;
-    fieldProperties: CustomFieldWithId;
-    fieldIndex: number;
-  };
-
-  function handleCustomFieldDrag({
-    event,
-    fieldProperties,
-    fieldIndex,
-  }: CustomFieldDrag) {
+  function handleCustomFieldDrag(
+    event: MouseEvent,
+    fieldProperties: CustomField,
+    fieldIndex: number,
+  ) {
     if (!dragBegins) {
       customFieldDomRects = getDomRects(customFieldRefs);
       dragBegins = true;
@@ -349,7 +338,7 @@
   }
 
   function swapDraggedWithHovered(hoveredFieldIndex: number) {
-    let updatedFieldOrder = [..._this.custom_fields] as CustomFieldWithId[];
+    let updatedFieldOrder = [..._this.custom_fields];
 
     // Swap the current hovered field with the dragged field
     let temp = updatedFieldOrder[hoveredFieldIndex];
@@ -358,7 +347,7 @@
 
     // update custom fields to reflect the drag order
     _this.custom_fields = updatedFieldOrder;
-    customFieldIdOrder = updatedFieldOrder.map((field) => field.id);
+    customFieldIdOrder = <string[]>updatedFieldOrder.map((field) => field.id);
 
     // current dragged index is now what was hovered
     draggedFieldIndex = updatedFieldOrder.findIndex(
@@ -534,15 +523,15 @@
               </div>
               <div>
                 <div>
-                  <strong id="email_ids"
+                  <strong id="participants"
                     >Email Ids to include for scheduling</strong
                   >
                 </div>
                 <label>
                   <textarea
-                    name="email_ids"
+                    name="participants"
                     on:input={(e) => debounceEmailInput(e, event)}
-                    value={event.email_ids}
+                    value={event.participantEmails}
                   />
                 </label>
               </div>
@@ -927,11 +916,7 @@
                       <button
                         class="drag"
                         on:mousedown={(event) => {
-                          handleCustomFieldDrag({
-                            event,
-                            fieldProperties: field,
-                            fieldIndex: i,
-                          });
+                          handleCustomFieldDrag(event, field, i);
                         }}
                       >
                         <span class="sr-only">Reorder custom field</span>
@@ -1040,7 +1025,7 @@
           on:timeSlotChosen={(event) => {
             slots_to_book = event.detail.timeSlots;
           }}
-          calendars={!_this.events[0]?.email_ids
+          calendars={!_this.events[0]?.participantEmails
             ? [
                 {
                   availability: "busy",
@@ -1054,7 +1039,7 @@
           {slots_to_book}
           {..._this}
           capacity={null}
-          calendars={!_this.events[0]?.email_ids
+          calendars={!_this.events[0]?.participantEmails
             ? [
                 {
                   availability: "busy",

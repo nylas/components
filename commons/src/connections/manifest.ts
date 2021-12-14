@@ -24,27 +24,22 @@ export const fetchManifest = async (
 
 // Allows <nylas-schedule-editor> to modify its own properties
 
-interface saveManifestParams {
-  id: string;
-  access_token?: string;
-  manifest: Manifest;
-}
-
 export const saveManifest = async (
-  params: saveManifestParams
+  id: string,
+  manifest: Manifest,
+  access_token?: string,
 ): Promise<Manifest> => {
-  const { id, access_token, manifest } = params;
   return fetch(
     `${getMiddlewareApiUrl(id)}/component`,
     getFetchConfig({
       method: "PUT",
       component_id: id,
       access_token,
-      body: manifest,
+      body: { settings: manifest },
     }),
   )
     .then((response) => handleResponse<MiddlewareResponse<Manifest>>(response))
     .then((json) => {
       return json.response;
     });
-}
+};

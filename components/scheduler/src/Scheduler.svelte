@@ -8,26 +8,16 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
-
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
-
-  import type { Manifest, CustomField } from "@commons/types/Scheduler";
-  import type { TimeSlot } from "@commons/types/Availability";
+  import type {
+    Manifest,
+    CustomField,
+    ConsecutiveEvent,
+  } from "@commons/types/Scheduler";
+  import type { BookableSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import { onMount, tick } from "svelte";
-
-  interface BookableSlot extends TimeSlot {
-    recurrence_cadence?:
-      | "none"
-      | "daily"
-      | "weekdays"
-      | "biweekly"
-      | "weekly"
-      | "monthly";
-    recurrence_expiry?: Date | string | undefined;
-    expirySelection: string;
-  }
 
   // #region props
   export let id: string = "";
@@ -53,6 +43,7 @@
     | "monthly"
   )[];
   export let recurrence_expiry: Date | string | null;
+  export let event_options: any[]; // TODO: type
   // #endregion props
 
   //#region mount and prop initialization
@@ -69,6 +60,7 @@
     notification_subject: "Invitation",
     recurrence: "none",
     recurrence_cadence: ["none"],
+    event_options: [],
   };
 
   let _this: Manifest = <Manifest>buildInternalProps({}, {}, defaultValueMap);
@@ -122,14 +114,14 @@
   async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
       let postableEvent: Partial<TimespanEvent> = {
-        title: _this.event_title,
-        description: _this.event_description,
-        location: _this.event_location,
-        conferencing: _this.event_conferencing
+        title: event.event_title,
+        description: event.event_description,
+        location: event.event_location,
+        conferencing: event.event_conferencing
           ? {
               provider: "Zoom Meeting", // TODO: make this dynamic
               details: {
-                url: _this.event_conferencing,
+                url: event.event_conferencing,
               },
             }
           : undefined,
@@ -203,7 +195,6 @@
 
     if (_this.notification_mode === NotificationMode.SEND_MESSAGE) {
       eventBookings.map((event, i) => {
-        console.log(`event ${i}`, event);
         const event_participants = event.participants?.map((participant) => {
           const { email, name } = participant;
           let to: { email: string; name?: string } = { email };
@@ -243,6 +234,27 @@
         customFieldResponses[field.title] !== "",
     );
   // #endregion custom fields
+
+  //#region Event Options
+  // Interface handling for when you've got multiple events to select from, like Consecutive Event options
+
+  function hoverOption(event: ConsecutiveEvent[]) {
+    dispatchEvent("eventOptionHovered", {
+      event,
+    });
+  }
+  function unhoverOption(event: ConsecutiveEvent[]) {
+    dispatchEvent("eventOptionUnhovered", {
+      event: null,
+    });
+  }
+  function selectOption(event: ConsecutiveEvent[]) {
+    dispatchEvent("eventOptionSelected", {
+      event,
+    });
+  }
+
+  //#endregion Event Options
 </script>
 
 <style lang="scss">
@@ -252,13 +264,16 @@
 <nylas-error {id} />
 <main>
   <section class="booker">
-    <h2>Your Appointment Bookings</h2>
     {#if slotsToBook.length}
+      <h2>Your Appointment Bookings</h2>
       <p>Do you want to book the following?</p>
       <ul class="timeslots">
         {#each slotsToBook as timeSlot}
           <li>
-            <h3>{_this.event_title}: {_this.event_description}</h3>
+            <h3>
+              {timeSlot.event_title || _this.event_title}: {timeSlot.event_description ||
+                _this.event_description}
+            </h3>
             <span class="time"
               >{timeSlot.start_time.toLocaleTimeString([], {
                 timeStyle: "short",
@@ -389,6 +404,46 @@
         on:click={() => bookTimeSlots(slotsToBook)}
         >{_this.booking_label}</button
       >
+    {:else if _this.event_options.length}
+      <h2>Select an option</h2>
+      <ul class="timeslots timeslot-options">
+        {#each _this.event_options as option}
+          <li
+            aria-role="button"
+            on:mouseenter={() => hoverOption(option)}
+            on:mouseleave={() => unhoverOption(option)}
+            on:click={() => selectOption(option)}
+          >
+            <span class="time"
+              >{option[0].start_time.toLocaleString([], {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+              -
+              {option[option.length - 1].end_time.toLocaleString([], {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}</span
+            >
+            <div class="sub-events">
+              {#each option as subevent, iter}
+                <span class="sub-event">
+                  <h4>
+                    {subevent.event_title}:
+                    {subevent.event_description}
+                  </h4>
+                  {subevent.start_time.toLocaleTimeString([], {
+                    timeStyle: "short",
+                  })} - {subevent.end_time.toLocaleTimeString([], {
+                    timeStyle: "short",
+                  })}
+                  with {subevent.emails.join(", ")}
+                </span>
+              {/each}
+            </div>
+          </li>
+        {/each}
+      </ul>
     {:else}
       <p>
         Select timeslots to view event information (You'll be able to review

@@ -1,14 +1,17 @@
 import type {
+  BookableSlot,
   Manifest as AvailabilityManifest,
   TimeSlot,
 } from "@commons/types/Availability";
 import type { NotificationMode } from "@commons/enums/Scheduler";
+import type { EventDefinition } from "./ScheduleEditor";
 
 export interface CustomField {
-  title: string;
   description?: string;
-  type: "text" | "checkbox" | "email";
   required: boolean;
+  title: string;
+  type: "text" | "checkbox" | "email";
+  id?: string;
   placeholder?: string;
 }
 
@@ -21,7 +24,7 @@ export interface Manifest extends AvailabilityManifest {
   event_description: string;
   event_location: string;
   event_conferencing: string;
-  slots_to_book: TimeSlot[];
+  slots_to_book: BookableSlot[];
   notification_mode: NotificationMode;
   notification_message: string;
   notification_subject: string;
@@ -35,4 +38,16 @@ export interface Manifest extends AvailabilityManifest {
     | "monthly"
   )[];
   recurrence_expiry: Date | string | null;
+  events: EventDefinition[];
+  event_options: ConsecutiveEvent[][];
+}
+
+export interface ConsecutiveEvent {
+  emails: string[];
+  start_time: Date;
+  end_time: Date;
+  available_calendars: string[];
+  event_description: string;
+  event_title: string;
+  slot_size: number;
 }
