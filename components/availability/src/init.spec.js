@@ -510,7 +510,7 @@ describe("availability component", () => {
         });
       });
 
-      cy.wait(1000); // TODO: have this as a wait for render to be complete instead of a timer
+      cy.wait(3000); // TODO: have this as a wait for render to be complete instead of a timer
     });
 
     it("should combine consecutive time slots", (done) => {
