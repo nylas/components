@@ -50,8 +50,10 @@
   export let header: string = "Mailbox";
   export let items_per_page: number;
   export let keyword_to_search: string;
-  export let onSelectThread: (event: MouseEvent, t: Thread) => void =
-    onSelectOne;
+  export let onSelectThread: (
+    event: MouseEvent,
+    t: Thread,
+  ) => void = onSelectOne;
   // query_string format => "in=trash from=phil.r@nylas.com"
   export let query_string: string; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
   export let show_star: boolean;
@@ -660,8 +662,9 @@
     main {
       #mailboxlist li {
         .checkbox-container.thread-checkbox {
-          padding: 0 0 0 $spacing-m;
+          padding: 0 0.5rem 0 $spacing-m;
           align-self: center;
+          display: flex;
         }
       }
 

@@ -877,6 +877,7 @@
   @import "../../theming/reset.scss";
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
+  @import "./styles/email.scss";
 
   $hover-outline-width: 2px;
   $collapsed-height: 56px;
@@ -924,10 +925,8 @@
         height: $mobile-collapsed-height;
         padding: $spacing-xs;
         flex-wrap: wrap;
-        display: grid;
-        gap: $spacing-xs;
-        align-items: center;
-        grid-template-columns: fit-content(350px) 1fr;
+        overflow: hidden;
+        @include condensed-grid;
         &.disable-click {
           cursor: not-allowed;
           display: grid;
@@ -965,58 +964,13 @@
           grid-template-columns: 25px auto;
           column-gap: $spacing-xs;
         }
-
-        .mobile-subject-snippet {
-          display: block;
-          font-size: 14px;
-          margin-top: $spacing-xs;
-          flex-basis: 100%;
-          grid-column-start: span 3;
-          .subject {
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-            max-width: inherit;
-            display: block;
-            word-break: keep-all;
-          }
-
-          .snippet {
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            display: block;
-            max-width: inherit;
-            color: var(--nylas-email-snippet-color, var(--grey-dark));
-            margin-top: 4px;
-          }
-          .attachment {
-            gap: 1rem;
-            display: flex;
-            overflow-x: scroll;
-
-            button {
-              height: fit-content;
-              width: max-content;
-              padding: 0.3rem 1rem;
-              border: 1px solid var(--grey);
-              border-radius: 30px;
-              background: white;
-              cursor: pointer;
-              &:hover {
-                background: var(--grey-light);
-              }
-            }
-            &.mobile {
-              display: flex;
-            }
-          }
-        }
-
         .thread-message-count {
           color: var(--nylas-email-thread-message-count-color, var(--black));
           font-size: 12px;
-          align-self: center;
+          text-align: left;
+        }
+        .date {
+          text-align: right;
         }
         &.unread {
           background: var(--nylas-email-unread-background, white);
@@ -1292,10 +1246,12 @@
         max-width: 350px;
 
         .from-participants {
-          max-width: 220px;
           display: grid;
           grid-template-columns: 1fr fit-content(60px);
           .participants-name {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
             .from-sub-section.second {
               display: none;
             }
@@ -1310,13 +1266,44 @@
           }
         }
       }
-      .subject-snippet-date {
-        .desktop-subject-snippet {
-          display: none;
+      .subject-snippet-attachment {
+        padding: $spacing-xs;
+        overflow: hidden;
+        .subject-snippet {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          color: var(--nylas-email-snippet-color, var(--grey-dark));
+
+          .subject {
+            color: var(--nylas-email-subject-color, var(--black));
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .snippet {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
         }
+
         .attachment {
-          &.desktop {
-            display: none;
+          margin-top: $spacing-xs;
+          gap: 1rem;
+          display: flex;
+          overflow-x: scroll;
+
+          button {
+            padding: 0.3rem 1rem;
+            border: 1px solid var(--grey);
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            &:hover {
+              background: var(--grey-light);
+            }
           }
         }
         div {
@@ -1416,11 +1403,9 @@
           }
         }
         &.condensed {
-          display: grid;
-          column-gap: $spacing-m;
-          grid-template-columns: fit-content(350px) 1fr;
           padding: $spacing-xs 0;
           justify-content: initial;
+
           div.starred {
             button {
               &:hover:before {
@@ -1429,8 +1414,18 @@
             }
           }
 
-          .mobile-subject-snippet {
-            display: none;
+          .date {
+            text-align: right;
+            padding: $spacing-xs;
+            display: flex;
+            justify-content: flex-end;
+            gap: $spacing-xs;
+            font-size: 14px;
+            color: var(--nylas-email-message-date-color, var(--grey));
+          }
+
+          .thread-message-count {
+            text-align: center;
           }
         }
 
@@ -1499,44 +1494,11 @@
           }
         }
 
-        .subject-snippet-date {
-          display: grid;
-          grid-template-columns: 1fr fit-content(120px);
-          gap: 1rem;
-          padding: $spacing-xs;
-          .desktop-subject-snippet {
-            display: block;
-
-            .subject {
-              margin-right: $spacing-xs;
-            }
-          }
-          .snippet-attachment-container {
-            display: flex;
-            flex-direction: column;
-            gap: $spacing-xs;
-          }
-          .attachment {
+        .subject-snippet-attachment {
+          .subject-snippet {
+            display: grid;
+            grid-template-columns: auto auto;
             gap: 1rem;
-            display: flex;
-            overflow-x: scroll;
-
-            button {
-              padding: 0.3rem 1rem;
-              border: 1px solid var(--grey);
-              border-radius: 30px;
-              background: white;
-              cursor: pointer;
-              &:hover {
-                background: var(--grey-light);
-              }
-            }
-            &.desktop {
-              display: flex;
-            }
-          }
-          .date {
-            text-align: right;
           }
         }
       }
@@ -1896,13 +1858,13 @@
                         <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
                         {#if activeThread.participants.length >= 2}
                           <span class="show-on-mobile">
-                            &nbsp;&plus;{activeThread.participants.length -
+                            &plus;{activeThread.participants.length -
                               MAX_MOBILE_PARTICIPANTS}
                           </span>
                         {/if}
                         <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
-                    Note that this might not be exactly correct if the name of the first participant is too long 
-                    and occupies entire width -->
+                        Note that this might not be exactly correct if the name of the first participant is too long 
+                        and occupies entire width -->
                         {#if activeThread.participants.length > 2}
                           <span class="show-on-desktop">
                             &nbsp; &plus; {activeThread.participants.length -
@@ -1912,87 +1874,22 @@
                       {/if}
                     </div>
                   </div>
-                  {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
-                    <span class="thread-message-count">
-                      {activeThread.messages.length}
-                    </span>
-                  {/if}
                 </div>
               </div>
-              <div class="subject-snippet-date">
-                <div class="snippet-attachment-container">
-                  <div class="desktop-subject-snippet">
-                    <span class="subject">{thread?.subject}</span>
-                    <span class="snippet">
-                      {thread.snippet}
-                    </span>
-                  </div>
-                  {#if Object.keys(attachedFiles).length > 0}
-                    <div class="attachment desktop">
-                      {#each Object.values(attachedFiles) as files}
-                        {#each files as file}
-                          <button
-                            on:click={(event) =>
-                              downloadSelectedFile(event, file)}
-                          >
-                            {file.filename || file.id}
-                          </button>
-                        {/each}
-                      {/each}
-                    </div>
-                  {/if}
-                </div>
-                <div
-                  class:date={_this.show_received_timestamp}
-                  class:action-icons={_this.show_thread_actions}
-                >
-                  {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
-                    <span><AttachmentIcon /></span>
-                  {/if}
-                  {#if _this.show_thread_actions}
-                    <div class="delete">
-                      <button
-                        title="Delete thread"
-                        aria-label="Delete thread"
-                        on:click|stopPropagation={deleteEmail}
-                      >
-                        <TrashIcon />
-                      </button>
-                    </div>
-                    <div class="read-status">
-                      <button
-                        title={`Mark thread as ${
-                          activeThread.unread ? "" : "un"
-                        }read`}
-                        aria-label={`Mark thread as ${
-                          activeThread.unread ? "" : "un"
-                        }read`}
-                        on:click|stopPropagation={toggleUnreadStatus}
-                      >
-                        {#if activeThread.unread}
-                          <MarkReadIcon aria-hidden="true" />
-                        {:else}
-                          <MarkUnreadIcon aria-hidden="true" />
-                        {/if}
-                      </button>
-                    </div>
-                  {:else if _this.show_received_timestamp}
-                    <span>
-                      {formatPreviewDate(
-                        new Date(thread.last_message_timestamp * 1000),
-                      )}
-                    </span>
-                  {/if}
-                </div>
-              </div>
-
-              <div class="mobile-subject-snippet">
-                <span class="subject">{thread?.subject}</span>
-                <span class="snippet">
-                  {thread.snippet}
+              {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
+                <span class="thread-message-count">
+                  {activeThread.messages.length}
                 </span>
+              {/if}
+              <div class="subject-snippet-attachment">
+                <div class="subject-snippet">
+                  {#if thread?.subject}<span class="subject"
+                      >{thread?.subject}</span
+                    >{/if}
+                  <span class="snippet">{thread.snippet.trim()}</span>
+                </div>
                 {#if Object.keys(attachedFiles).length > 0}
-                  <div class="attachment mobile">
+                  <div class="attachment">
                     {#each Object.values(attachedFiles) as files}
                       {#each files as file}
                         <button
@@ -2004,6 +1901,48 @@
                       {/each}
                     {/each}
                   </div>
+                {/if}
+              </div>
+              <div
+                class:date={_this.show_received_timestamp}
+                class:action-icons={_this.show_thread_actions}
+              >
+                {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
+                  <span><AttachmentIcon /></span>
+                {/if}
+                {#if _this.show_thread_actions}
+                  <div class="delete">
+                    <button
+                      title="Delete thread"
+                      aria-label="Delete thread"
+                      on:click|stopPropagation={deleteEmail}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                  <div class="read-status">
+                    <button
+                      title={`Mark thread as ${
+                        activeThread.unread ? "" : "un"
+                      }read`}
+                      aria-label={`Mark thread as ${
+                        activeThread.unread ? "" : "un"
+                      }read`}
+                      on:click|stopPropagation={toggleUnreadStatus}
+                    >
+                      {#if activeThread.unread}
+                        <MarkReadIcon aria-hidden="true" />
+                      {:else}
+                        <MarkUnreadIcon aria-hidden="true" />
+                      {/if}
+                    </button>
+                  </div>
+                {:else if _this.show_received_timestamp}
+                  <span>
+                    {formatPreviewDate(
+                      new Date(thread.last_message_timestamp * 1000),
+                    )}
+                  </span>
                 {/if}
               </div>
             {/if}
