@@ -527,7 +527,7 @@
       reply_to_message_id: currentMessage.id,
       from: from,
       to: to,
-      reply_to: to,
+      reply_to: from,
       subject: subject,
     };
 
@@ -590,7 +590,7 @@
       reply_to_message_id: currentMessage.id,
       from: from,
       to: to,
-      reply_to: to,
+      reply_to: from,
       subject: subject,
     };
 
