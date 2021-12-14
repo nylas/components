@@ -96,7 +96,7 @@ describe("Composer dispatches events", () => {
   });
 });
 
-describe.only("Composer `to` prop", () => {
+describe("Composer `to` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",

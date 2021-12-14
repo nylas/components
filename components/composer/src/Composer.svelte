@@ -8,6 +8,7 @@
   import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
   import {
+    ErrorStore,
     ManifestStore,
     sendMessage,
     fetchAccount,
@@ -23,6 +24,10 @@
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   import {
     message,

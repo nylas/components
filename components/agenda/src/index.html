@@ -152,6 +152,9 @@
             let { detail } = event;
             console.log("date changed", detail);
           });
+          element.addEventListener("onError", (event) => {
+            console.log("silent error:", event.detail);
+          });
         });
 
         let i = document.querySelector("input.start");

@@ -15,6 +15,7 @@
   import type { AgendaProperties } from "@commons/types/Nylas";
   import * as DOMPurify from "dompurify";
   import { timeDay } from "d3-time";
+  import { ErrorStore } from "@commons";
 
   import type {
     EventQuery,
@@ -24,6 +25,7 @@
     TimespanEvent,
     DateEvent,
   } from "@commons/types/Events";
+  import ErrorMessage from "@commonscomponents/ErrorMessage.svelte";
 
   // #region props
   const INTERNAL_EVENT_PROPS = Object.freeze([
@@ -127,6 +129,10 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
 
   $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   let previousProps = $$props;
   $: {

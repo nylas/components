@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-mailbox" />
 
 <script lang="ts">
-  import { fetchAccount, ManifestStore } from "@commons";
+  import { ErrorStore, fetchAccount, ManifestStore } from "@commons";
   import { fetchMessage } from "@commons/connections/messages";
   import {
     AccountOrganizationUnit,
@@ -37,6 +37,10 @@
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   export let id: string = "";
   export let access_token: string = "";
