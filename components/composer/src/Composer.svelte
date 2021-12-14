@@ -8,6 +8,7 @@
   import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
   import {
+    ErrorStore,
     ManifestStore,
     sendMessage,
     fetchAccount,
@@ -23,6 +24,10 @@
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   import {
     message,
@@ -55,8 +60,6 @@
     Participant,
   } from "@commons/types/Nylas";
   import type { FetchContactsCallback as ContactsSearchFetchContactsCallback } from "@commons/types/ContactsSearch";
-
-  let fileSelector: HTMLInputElement;
 
   type ContactSearchCallback =
     | Participant[]
@@ -211,10 +214,9 @@
     showDatepicker = false;
   };
 
-  const handleFilesChange = async () => {
-    if (!fileSelector?.files) {
-      return;
-    }
+  async function handleFilesChange(fileChangedEvent: Event) {
+    const fileSelector = fileChangedEvent.target as HTMLInputElement;
+    if (!fileSelector?.files) return;
 
     const file = fileSelector.files[0];
 
@@ -229,6 +231,10 @@
       fileSelector.value = "";
       if (beforeFileUpload) beforeFileUpload(file);
 
+      if (file.size >= 4000000) {
+        throw "Error: File size is too large.";
+      }
+
       const result = uploadFile
         ? await uploadFile(file)
         : id && (await nylasUploadFile(id, file, access_token));
@@ -239,10 +245,14 @@
         mergeMessage({ file_ids: [...$message.file_ids, result.id] });
       if (afterFileUploadSuccess) afterFileUploadSuccess(result);
     } catch (e) {
-      updateAttachment(file.name, { loading: false, error: true });
+      updateAttachment(file.name, {
+        loading: false,
+        error: true,
+        errorMessage: typeof e === "string" ? e : undefined,
+      });
       if (afterFileUploadError) afterFileUploadError(e);
     }
-  };
+  }
 
   const handleRemoveFile = (attachment: Attachment) => {
     if (beforeFileRemove) beforeFileRemove(attachment);
@@ -513,6 +523,14 @@
       background: var(--composer-background-muted-color, #f0f2ff);
     }
   }
+  .composer-btn.file-upload {
+    margin-right: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   .cc-btn {
     position: absolute;
@@ -582,9 +600,6 @@
   }
   .MinimizeIcon {
     transform: translateY(4px);
-  }
-  .AttachmentIcon {
-    margin-right: 15px;
   }
 </style>
 
@@ -775,14 +790,10 @@
       </main>
       <footer>
         {#if _this.show_attachment_button && (id || uploadFile)}
-          <button
-            class="composer-btn file-upload"
-            style="margin-right: 10px; width: 32px; height: 32px;"
-            on:click={() => fileSelector.click()}
-          >
-            <span class="sr-only">Attach Files</span>
+          <label for="file-upload" class="composer-btn file-upload">
             <AttachmentIcon class="AttachmentIcon" />
-          </button>
+            <span class="sr-only">Attach Files</span>
+          </label>
         {/if}
         <div class="btn-group">
           <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
@@ -794,9 +805,7 @@
           <input
             hidden
             type="file"
-            name=""
-            bind:this={fileSelector}
-            id=""
+            id="file-upload"
             on:change={handleFilesChange}
           />
         </form>

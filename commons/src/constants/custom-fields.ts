@@ -1,4 +1,6 @@
-export const DefaultCustomFields = [
+import type { CustomField } from "@commons/types/Scheduler";
+
+export const DefaultCustomFields: CustomField[] = [
   {
     title: "Your Name",
     type: "text",

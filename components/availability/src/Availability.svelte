@@ -11,6 +11,7 @@
     CalendarStore,
     ErrorStore,
     ContactStore,
+    ConsecutiveAvailabilityStore,
   } from "../../../commons/src";
   import { handleError } from "@commons/methods/api";
   import { onMount, afterUpdate, tick } from "svelte";
@@ -41,6 +42,8 @@
     AvailabilityRule,
     Day,
     PreDatedTimeSlot,
+    OpenHours,
+    ConsecutiveAvailabilityQuery,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
@@ -54,10 +57,17 @@
   import BackIcon from "./assets/left-arrow.svg";
   import NextIcon from "./assets/right-arrow.svg";
   import { isAvailable, isUnavailable } from "./method/slot";
+  import { convertHourAssumptionsToOpenHours } from "./method/openhours";
+  import { createConsecutiveQueryKey } from "./method/consecutive";
+  import type { EventDefinition } from "@commonstypes/ScheduleEditor";
+  import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
   //#region props
   export let id: string = "";
   export let access_token: string = "";
+
+  export let event_to_hover: ConsecutiveEvent[] | null = null;
+  export let event_to_select: ConsecutiveEvent[] | null = null;
 
   export let allow_booking: boolean;
   export let allow_date_change: boolean;
@@ -70,7 +80,6 @@
   export let closed_color: string;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let dates_to_show: number;
-  export let email_ids: string[]; // Deprecated. Use participants instead.
   export let participants: string[];
   export let end_hour: number;
   export let event_buffer: number;
@@ -95,6 +104,7 @@
   export let start_hour: number;
   export let timezone: string;
   export let view_as: "schedule" | "list";
+  export let events: EventDefinition[];
 
   const defaultValueMap: Partial<Manifest> = {
     allow_booking: false,
@@ -105,7 +115,6 @@
     closed_color: "#EE3248cc",
     date_format: "full",
     dates_to_show: 1,
-    email_ids: [],
     participants: [],
     end_hour: 24,
     event_buffer: 0,
@@ -130,6 +139,7 @@
     start_hour: 0,
     timezone: "",
     view_as: "schedule",
+    events: [],
   };
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
@@ -230,8 +240,6 @@
     });
     manifest = (await $ManifestStore[storeKey]) || {};
 
-    participants = email_ids; // handles deprecated email_ids prop
-
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
 
     const calendarQuery: CalendarQuery = {
@@ -304,6 +312,10 @@
   //#endregion mount and prop initialization
 
   const dispatchEvent = getEventDispatcher(get_current_component());
+
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
 
   //#region layout
 
@@ -383,12 +395,6 @@
         let availability = AvailabilityStatus.FREE; // default
         if (allCalendars.length) {
           for (const calendar of allCalendars) {
-            const slot = {
-              start_time: time,
-              end_time: endTime,
-              available_calendars: [],
-            };
-
             // Adjust calendar.timeslots for buffers
             const timeslots =
               calendar.availability === AvailabilityStatus.BUSY
@@ -418,6 +424,12 @@
                     ),
                     available_calendars: slot.available_calendars,
                   }));
+
+            const slot: TimeSlot = {
+              start_time: time,
+              end_time: endTime,
+              available_calendars: [],
+            };
 
             let concurrentSlotEventsForUser = 0;
             if (calendar.availability === AvailabilityStatus.BUSY) {
@@ -541,6 +553,26 @@
           }
         }
 
+        // Handle the Consecutive Events model, where a slot if busy if it falls within a consecutive timeslot.
+        // None of the other above rules should apply, except (maybe!) Buffer and Open Hours.
+        if (_this.events?.length > 1 && consecutiveOptions.length) {
+          const existsWithinConsecutiveBlock = consecutiveOptions.some(
+            (event) => {
+              return (
+                time >= event[0].start_time &&
+                endTime <= event[event.length - 1].end_time
+              );
+            },
+          );
+          if (existsWithinConsecutiveBlock) {
+            availability = AvailabilityStatus.FREE;
+            freeCalendars.length = consecutiveParticipants.length;
+          } else {
+            availability = AvailabilityStatus.BUSY;
+            freeCalendars.length = 0;
+          }
+        }
+
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           calendar_id: calendarID,
@@ -647,7 +679,7 @@
           }
         } else if (
           numFreeCalendars > 0 &&
-          numFreeCalendars !== allCalendars.length
+          numFreeCalendars < allCalendars.length
         ) {
           status = "partial";
         }
@@ -777,8 +809,21 @@
   $: {
     // Only dispatch if there's a diff
     if (JSON.stringify(sortedSlots) !== JSON.stringify(lastDispatchedSlots)) {
+      let dispatchableSlots = sortedSlots;
+      if (sortedSlots.length === 1) {
+        if (selectedConsecutiveEventBlock.length) {
+          dispatchableSlots = selectedConsecutiveEventBlock.map((event) => {
+            event.available_calendars = event.emails; // slot.available_calendars is a little convoluted with freeCalendars above. TODO: refactor freeCalendars in generateDaySlots()
+            return { ...sortedSlots[0], ...event };
+          });
+        } else {
+          dispatchableSlots = dispatchableSlots.map((slot) => {
+            return { ..._this.events[0], ...slot };
+          });
+        }
+      }
       dispatchEvent("timeSlotChosen", {
-        timeSlots: sortedSlots.map((slot) => Object.assign({}, slot)),
+        timeSlots: dispatchableSlots.map((slot) => Object.assign({}, slot)),
       });
       lastDispatchedSlots = sortedSlots;
     }
@@ -800,8 +845,23 @@
   }
   // #endregion timeSlot selection
 
+  let consecutiveParticipants: string[] = [];
+  let singleEventParticipants: string[] = [];
+
+  $: if (_this.events?.length && _this.events?.length > 1) {
+    consecutiveParticipants = _this.events?.flatMap((e) => e.participantEmails);
+    singleEventParticipants = [];
+    newCalendarTimeslotsForGivenEmails = [];
+  } else if (_this.events?.length === 1) {
+    singleEventParticipants = _this.events?.flatMap((e) => e.participantEmails);
+    consecutiveParticipants = [];
+    dispatchEvent("eventOptionsReady", {
+      slots: [],
+    });
+  }
+
   function getAvailabilityQuery(
-    emailAddresses = _this.participants,
+    emailAddresses = singleEventParticipants,
     accessToken = access_token,
   ): AvailabilityQuery {
     return {
@@ -826,10 +886,15 @@
   }
 
   let newCalendarTimeslotsForGivenEmails: any[] = [];
+
+  // Only make an availability request if you have a single event;
+  // Otherwise, assume consecutive.
   $: (async () => {
     if (
-      (Array.isArray(_this.participants) && _this.participants.length > 0) ||
-      (_this.booking_user_email && _this.booking_user_token)
+      ((Array.isArray(singleEventParticipants) &&
+        singleEventParticipants.length > 0) ||
+        (_this.booking_user_email && _this.booking_user_token)) &&
+      _this.events?.length === 1
     ) {
       await getAvailability();
     }
@@ -837,8 +902,8 @@
 
   // If 2 slots bump up to each other consider them a single group of time
   function groupConsecutiveTimeslots(slots: PreDatedTimeSlot[] = []) {
-    return slots.reduce((groups, slot) => {
-      const prevSlot: PreDatedTimeSlot = groups[groups.length - 1];
+    return slots.reduce((groups: PreDatedTimeSlot[], slot) => {
+      const prevSlot = groups[groups.length - 1];
       if (prevSlot && prevSlot.end_time === slot.start_time) {
         prevSlot.end_time = slot.end_time;
       } else {
@@ -859,10 +924,10 @@
     // Free-Busy endpoint returns busy timeslots for given participants between start_time & end_time
 
     type fetchableCalendarUser = { email: string; token?: string };
-    let calendarsToFetch: fetchableCalendarUser[] = _this.participants.map(
-      (email) => {
+    let calendarsToFetch: fetchableCalendarUser[] = singleEventParticipants.map(
+      (emailAddress) => {
         return {
-          email,
+          email: emailAddress,
         };
       },
     );
@@ -983,7 +1048,7 @@
   }
 
   //#region event query
-  let query: EventQuery;
+  let query;
   $: query = {
     component_id: id,
     access_token: access_token,
@@ -995,6 +1060,16 @@
     // TODO: consider merging these 2 into just calendars
     ...(_this.calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
+    ...consecutiveParticipants.map((email) => {
+      return {
+        emailAddress: email,
+        account: {
+          emailAddress: email,
+        },
+        availability: AvailabilityStatus.FREE,
+        timeslots: [],
+      };
+    }),
   ];
 
   //#region Attendee Overlay
@@ -1102,6 +1177,12 @@
     } else {
       _this.start_date = timeDay.offset(endDay, 1);
     }
+    // On date change, dispatch an empty list to let parent app trigger a loading state
+    if (isConsecutive) {
+      dispatchEvent("eventOptionsReady", {
+        slots: [],
+      });
+    }
   }
   function goToPreviousDate() {
     if (_this.show_as_week && !tooSmallForWeek) {
@@ -1116,6 +1197,12 @@
         true,
       );
       _this.start_date = previousRange[0];
+    }
+    // On date change, dispatch an empty list to let parent app trigger a loading state
+    if (isConsecutive) {
+      dispatchEvent("eventOptionsReady", {
+        slots: [],
+      });
     }
   }
   // #endregion Date Change
@@ -1279,9 +1366,9 @@
       if (day) {
         // day is optional; endDrag with no "day" passed means user left the canvas / we should un-pend and reset our initially-dragged event
         // Set all slots in our initially dragged block to unselected
-        draggedBlockSlots?.forEach(
-          (slot) => (slot.selectionStatus = SelectionStatus.UNSELECTED),
-        );
+        draggedBlockSlots?.forEach((slot) => {
+          slot.selectionStatus = SelectionStatus.UNSELECTED;
+        });
         // Set all our pending slots to Selected
         // (This is effectively the "Move" function)
         days.forEach((day) =>
@@ -1294,15 +1381,20 @@
         );
       }
     } else {
-      // Mode: Drag-creating a new event
-      days.forEach((day) =>
-        day.slots.forEach((slot) => {
-          if (slot.selectionPending) {
-            slot.selectionStatus = SelectionStatus.SELECTED;
-            slot.hovering = false;
-          }
-        }),
-      );
+      if (isConsecutive) {
+        // deselect when in consecutive mode
+        event_to_hover = null;
+      } else {
+        // Mode: Drag-creating a new event
+        days.forEach((day) =>
+          day.slots.forEach((slot) => {
+            if (slot.selectionPending) {
+              slot.selectionStatus = SelectionStatus.SELECTED;
+              slot.hovering = false;
+            }
+          }),
+        );
+      }
     }
     days = [...days]; // re-render
     resetDragState();
@@ -1310,11 +1402,28 @@
 
   // Click action for un-draggable slot-list buttons (list view)
   function toggleSlot(slot: SelectableSlot) {
-    if (slot.selectionStatus === SelectionStatus.SELECTED) {
-      slot.selectionStatus = SelectionStatus.UNSELECTED;
-    } else if (slotSelection.length < _this.max_bookable_slots) {
-      slot.selectionStatus = SelectionStatus.SELECTED;
+    if (isConsecutive) {
+      if (slot.selectionStatus === SelectionStatus.SELECTED) {
+        event_to_select = null;
+      } else {
+        event_to_select = inspectConsecutiveBlock(slot);
+      }
+
+      // Deselect any others
+      days
+        .flatMap((d) => d.slots)
+        .forEach((slot) => {
+          slot.selectionPending = false;
+          slot.selectionStatus = SelectionStatus.UNSELECTED;
+        });
+    } else {
+      if (slot.selectionStatus === SelectionStatus.SELECTED) {
+        slot.selectionStatus = SelectionStatus.UNSELECTED;
+      } else if (slotSelection.length < _this.max_bookable_slots) {
+        slot.selectionStatus = SelectionStatus.SELECTED;
+      }
     }
+
     days = [...days];
   }
   //#endregion dragging
@@ -1331,31 +1440,62 @@
     day,
   }: SlotInteractionHandler) {
     if (slot) {
-      if (
-        slotSelection.length < _this.max_bookable_slots ||
-        slot.selectionStatus === SelectionStatus.SELECTED
-      ) {
-        if (event instanceof MouseEvent) mouseIsDown = true;
-        else if (event instanceof TouchEvent) touchIsDown = true;
-      }
+      if (isConsecutive) {
+        // Deselect any others
+        days
+          .flatMap((d) => d.slots)
+          .forEach((slot) => {
+            slot.selectionPending = false;
+            slot.selectionStatus = SelectionStatus.UNSELECTED;
+          });
 
-      startDrag(slot, day);
+        if (event_to_select === inspectConsecutiveBlock(slot)) {
+          event_to_select = null;
+          days = [...days];
+        } else {
+          event_to_select = inspectConsecutiveBlock(slot);
+        }
+      } else {
+        if (
+          slotSelection.length < _this.max_bookable_slots ||
+          slot.selectionStatus === SelectionStatus.SELECTED
+        ) {
+          if (event instanceof MouseEvent) mouseIsDown = true;
+          else if (event instanceof TouchEvent) touchIsDown = true;
+        }
+
+        startDrag(slot, day);
+      }
     }
   }
 
   function handleSlotHover({ event, slot, day }: SlotInteractionHandler) {
-    if (slot) {
-      addToDrag(slot, day);
+    if (isConsecutive) {
+      // Deselect any others
+      days
+        .flatMap((d) => d.slots)
+        .forEach((slot) => {
+          slot.selectionPending = false;
+        });
 
-      if (!mouseIsDown && slot.selectionStatus !== SelectionStatus.SELECTED)
-        if (event instanceof MouseEvent) slot.hovering = true;
+      if (slot) {
+        event_to_hover = inspectConsecutiveBlock(slot);
+      }
+    } else {
+      if (slot) {
+        addToDrag(slot, day);
+
+        if (!mouseIsDown && slot.selectionStatus !== SelectionStatus.SELECTED)
+          if (event instanceof MouseEvent) slot.hovering = true;
+      }
     }
   }
 
   function handleSlotInteractionEnd(day: Day | null) {
     if (mouseIsDown || touchIsDown) {
-      if (document.activeElement instanceof HTMLElement)
+      if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
+      }
 
       endDrag(day);
     }
@@ -1427,12 +1567,12 @@
   //#endregion slot interaction handlers
 
   // #region error
-  $: if (id && _this.participants.length && _this.capacity) {
+  $: if (id && consecutiveParticipants.length && _this.capacity) {
     try {
       handleError(id, {
         name: "IncompatibleProperties",
         message:
-          "Setting `capacity` currently does not work with `participants`. Please use `calendars` to use `capacity`.",
+          "Setting `capacity` currently does not work when fetching availability directly from Nylas. Please pass `calendars` data directly to use `capacity`.",
       });
     } catch (error) {
       console.error(error);
@@ -1478,9 +1618,130 @@
   //#region colours
   // Show partial availability as a gradient, rather than as categorically "partial"
   $: partialScale = scaleLinear()
-    .domain([0, allCalendars?.length / 2, allCalendars?.length])
+    .domain([0, allCalendars.length / 2, allCalendars.length])
     .range([_this.busy_color, _this.partial_color, _this.free_color]);
   //#endregion colours
+
+  //#region Consecutive Events
+
+  let isConsecutive: boolean = false;
+  $: isConsecutive = _this.events.length > 1;
+
+  // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
+  let consecutiveOptions: ConsecutiveEvent[][] = [];
+  $: (async () => {
+    if (id && Array.isArray(_this.events) && isConsecutive && dayRange.length) {
+      // the availability/consecutive endpoint eagerly returns open timeslots;
+      // establish open hours so the user isn't overburdened with the horrible freedom of choice.
+      let openHours: OpenHours[] = [];
+      if (false && _this.open_hours.length) {
+        // TODO: conversion from component open hours format to Nylas events open hours format
+        // openHours = _this.open_hours;
+      } else if (_this.start_hour && _this.end_hour) {
+        // We can build an open hours array in the Nylas format from assumptions given start_hour and end_hour
+        openHours = convertHourAssumptionsToOpenHours(
+          _this.start_hour,
+          _this.end_hour,
+          _this.events,
+        );
+      }
+
+      const consecutiveSlotsQuery = {
+        events: _this.events,
+        dayRange,
+        startHour: start_hour,
+        endHour: end_hour,
+        openHours,
+      };
+
+      let consecutiveSlotsQueryKey = await createConsecutiveQueryKey(
+        consecutiveSlotsQuery,
+      );
+      const consecutiveSlotOptions = await $ConsecutiveAvailabilityStore[
+        JSON.stringify({
+          ...{ body: consecutiveSlotsQueryKey, component_id: id, access_token },
+        })
+      ].then((results) => {
+        consecutiveOptions = results;
+        return results;
+      });
+
+      // emit the awaited events list
+      dispatchEvent("eventOptionsReady", {
+        slots: consecutiveSlotOptions,
+      });
+
+      return consecutiveSlotOptions;
+    }
+  })();
+
+  // React to hovered or clicked events; respond by highlighting or selecting their slots
+  $: if (event_to_hover) {
+    days
+      .flatMap((d) => d.slots)
+      .filter((slot) => {
+        return (
+          event_to_hover &&
+          slot.start_time >= event_to_hover[0].start_time &&
+          slot.end_time <= event_to_hover[event_to_hover.length - 1].end_time
+        );
+      })
+      .forEach((slot) => (slot.selectionPending = true));
+    days = [...days];
+    // event_to_hover = null;
+  }
+
+  let selectedConsecutiveEventBlock: ConsecutiveEvent[] = [];
+
+  $: if (event_to_select) {
+    selectedConsecutiveEventBlock = event_to_select;
+    days
+      .flatMap((d) => d.slots)
+      .filter((slot) => {
+        return (
+          event_to_select &&
+          slot.start_time >= event_to_select[0].start_time &&
+          slot.end_time <= event_to_select[event_to_select.length - 1].end_time
+        );
+      })
+      .forEach((slot) => {
+        slot.selectionPending = false;
+        slot.selectionStatus = SelectionStatus.SELECTED;
+      });
+    days = [...days];
+    // event_to_select = null;
+  }
+
+  // Expand hovered / clicked time slots to show the full consecutive event span
+  function inspectConsecutiveBlock(slot: TimeSlot) {
+    let consecutiveBlockContainingSlot = consecutiveOptions.find(
+      (block) =>
+        slot.start_time >= block[0].start_time &&
+        slot.end_time <= block[block.length - 1].end_time,
+    );
+
+    return consecutiveBlockContainingSlot || null;
+  }
+
+  // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,
+  // a user can only book several in a row. We should, therefore, only show those slots that exist within a consecutive series
+  $: listViewOptions = (day: Day): SelectableSlot[] => {
+    if (isConsecutive) {
+      return day.slots.filter((slot) =>
+        consecutiveOptions.find((block: ConsecutiveEvent[]) =>
+          inspectConsecutiveBlock(slot),
+        ),
+      );
+    } else {
+      return day.slots.filter(
+        (slot) =>
+          slot.availability === AvailabilityStatus.FREE ||
+          slot.availability === AvailabilityStatus.PARTIAL, // TODO: does this observe partial_bookable_ratio?
+      );
+    }
+  };
+
+  //#endregion Consecutive Events
 </script>
 
 <style lang="scss">
@@ -1489,10 +1750,6 @@
 
 {#if manifest && manifest.error}
   <nylas-error {id} />
-{:else if _this.participants.length === 0 && _this.calendars.length === 0}
-  <nylas-message-error
-    error_message="Please enter participants to see availability."
-  />
 {:else}
   <main
     bind:this={main}
@@ -1699,11 +1956,7 @@
                       }
 
                       if (slot !== currentTouchedSlot) {
-                        handleSlotInteractionEnd({
-                          event,
-                          slot: currentTouchedSlot,
-                          day,
-                        });
+                        handleSlotInteractionEnd(day);
                       }
                     }
                   }}
@@ -1723,7 +1976,7 @@
             </div>
           {:else if _this.view_as === "list"}
             <div class="slot-list">
-              {#each day.slots.filter((slot) => slot.availability === AvailabilityStatus.FREE || slot.availability === AvailabilityStatus.PARTIAL) as slot}
+              {#each listViewOptions(day) as slot}
                 <button
                   data-available-calendars={slot.available_calendars.toString()}
                   aria-label="{getTimeString(

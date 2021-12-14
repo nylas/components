@@ -217,11 +217,11 @@ main {
 
         .inner {
           margin: 0rem;
-          height: calc(100% - 0.5rem - 2px);
+          height: calc(100% - 0.5rem);
           padding: 0.25rem 0;
           width: 8px;
-          border-radius: 8px;
-          margin: 1px 0;
+          // border-radius: 8px;
+          margin: 0;
         }
 
         &.busy {

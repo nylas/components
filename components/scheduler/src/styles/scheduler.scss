@@ -55,6 +55,17 @@ main {
           font-size: 0.8rem;
         }
 
+        .sub-events {
+          display: grid;
+          gap: 1rem;
+          font-size: 0.8rem;
+        }
+
+        .sub-event {
+          background-color: var(--grey-light);
+          padding: 0.5rem;
+        }
+
         footer {
           display: grid;
           grid-auto-flow: row;

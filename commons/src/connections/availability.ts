@@ -5,12 +5,15 @@ import {
   getMiddlewareApiUrl,
 } from "../methods/api";
 import type {
+  ConsecutiveAvailabilityQuery,
   AvailabilityQuery,
   AvailabilityResponse,
   FreeBusyResponse,
-  TimeSlot,
+  PreDatedTimeSlot,
 } from "@commons/types/Availability";
 import type { MiddlewareResponse } from "@commons/types/Nylas";
+import type { EventDefinition } from "@commons/types/ScheduleEditor";
+import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
 // TODO: deprecate if we find /calendars/availability to be fully sufficient
 export const fetchFreeBusy = async (
@@ -63,3 +66,84 @@ export const fetchAvailability = async (
     })
     .catch((error) => handleError(query.component_id, error));
 };
+
+export const fetchConsecutiveAvailability = async (
+  query: ConsecutiveAvailabilityQuery,
+): Promise<ConsecutiveEvent[][]> => {
+  return fetch(
+    `${getMiddlewareApiUrl(
+      query.component_id,
+    )}/calendars/availability/consecutive`,
+    getFetchConfig({
+      method: "POST",
+      component_id: query.component_id,
+      access_token: query.access_token,
+      body: query.body,
+    }),
+  )
+    .then(async (apiResponse): Promise<ConsecutiveEvent[][]> => {
+      const json = await handleResponse<
+        MiddlewareResponse<PreDatedTimeSlot[][]>
+      >(apiResponse);
+      let response: PreDatedTimeSlot[][] =
+        json.response?.map((blockSlot) => {
+          blockSlot = blockSlot.map((slot: any) => {
+            slot.start_time = new Date(slot.start_time * 1000);
+            slot.end_time = new Date(slot.end_time * 1000);
+            return slot;
+          });
+          return blockSlot;
+        }) || [];
+      const hydratedResponse = hydrateSlotsToEvents(
+        response,
+        query.body.events,
+      );
+      const dedupedResponse =
+        removeSimultaneousAvailabilityOptions(hydratedResponse);
+      return dedupedResponse;
+    })
+    .catch((error) => handleError(query.component_id, error));
+};
+
+// Doing the best we can with what we've got: /calendars/availability/consecutive doesn't return any info other than emails
+// and start/end times. This means that if we have to events (EventDefinitions) with the same email addresses? We're shooting in the dark about which is which.
+// TODO: allow for an indicator on the API side
+function hydrateSlotsToEvents(
+  availabilities: PreDatedTimeSlot[][],
+  events: EventDefinition[],
+): ConsecutiveEvent[][] {
+  return availabilities.map((block) => {
+    return block.map((subevent) => {
+      return {
+        ...subevent,
+        ...events.find(
+          (eventdef) =>
+            eventdef.participantEmails.length === subevent.emails.length &&
+            eventdef.participantEmails.every((email) =>
+              subevent.emails.includes(email),
+            ),
+        ),
+      };
+    });
+  }) as any[][]; // TODO: How to best coerce PreDatedTimeSlot[][] to ConsecutiveEvent[][]? spread-combined return handles it.
+}
+
+// We don't want to overburden our users with too much sweet horrible freedom of choice;
+// the /calendars/availability/consecutive endpoint returns order permutations with same time slots;
+// Cull them down to just the first that exists per timeslot.
+function removeSimultaneousAvailabilityOptions(
+  availabilities: ConsecutiveEvent[][],
+) {
+  const blockSet = new Set();
+  return availabilities.filter((block) => {
+    const blockString = `${block[0].start_time}_${
+      block[block.length - 1].end_time
+    }`;
+    if (blockSet.has(blockString)) {
+      return false;
+    } else {
+      blockSet.add(blockString);
+      return true;
+    }
+  });
+}

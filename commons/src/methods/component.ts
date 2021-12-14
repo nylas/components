@@ -102,7 +102,7 @@ export function parseBoolean(
   return (<any>[true, "true", "1"]).includes(val);
 }
 
-export default function parseStringToArray(parseStr: string) {
+export default function parseStringToArray(parseStr: string): string[] {
   if (!parseStr) {
     return [];
   }

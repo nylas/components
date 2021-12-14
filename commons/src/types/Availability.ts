@@ -6,6 +6,9 @@ import type {
   CommonQuery,
   Manifest as NylasManifest,
 } from "@commons/types/Nylas";
+
+import type { EventDefinition } from "./ScheduleEditor";
+
 export interface Manifest extends NylasManifest {
   allow_booking: boolean;
   allow_date_change: boolean;
@@ -18,7 +21,6 @@ export interface Manifest extends NylasManifest {
   closed_color: string;
   date_format: "full" | "weekday" | "date" | "none";
   dates_to_show: number;
-  email_ids: string[];
   participants: string[];
   end_hour: number;
   event_buffer: number;
@@ -43,6 +45,7 @@ export interface Manifest extends NylasManifest {
   start_hour: number;
   view_as: "schedule" | "list";
   timezone: string;
+  events: EventDefinition[];
 }
 
 export interface AvailabilityRule {
@@ -73,9 +76,25 @@ export interface TimeSlot {
   end_time: Date;
   available_calendars: string[];
   calendar_id?: string;
+  expirySelection?: string;
+  recurrence_cadence?: string;
+  recurrence_expiry?: Date | string;
+}
+
+export interface BookableSlot extends TimeSlot {
+  event_conferencing: string;
+  event_description: string;
+  event_location: string;
+  event_title: string;
   expirySelection: string;
-  recurrence_cadence: string;
-  recurrence_expiry: string;
+  recurrence_cadence?:
+    | "none"
+    | "daily"
+    | "weekdays"
+    | "biweekly"
+    | "weekly"
+    | "monthly";
+  recurrence_expiry?: Date | string;
 }
 
 export interface SelectableSlot extends TimeSlot {
@@ -94,6 +113,21 @@ export interface AvailabilityQuery extends CommonQuery {
     free_busy: any[];
     duration_minutes: number;
     interval_minutes: number;
+    round_robin?: string;
+  };
+  forceReload?: boolean;
+}
+
+export interface ConsecutiveAvailabilityQuery extends CommonQuery {
+  body: {
+    emails: string[];
+    start_time: number;
+    end_time: number;
+    free_busy: any[];
+    duration_minutes: number;
+    interval_minutes: number;
+    events: EventDefinition[];
+    round_robin: "max-availability" | "max-fairness";
   };
   forceReload?: boolean;
 }
@@ -137,4 +171,13 @@ export interface Day {
   isBookable: boolean;
   slots: SelectableSlot[];
   timestamp: Date;
+}
+
+export interface OpenHours {
+  emails: string[];
+  days: number[];
+  start: string;
+  end: string;
+  timezone: string;
+  object_type: "open_hours";
 }

@@ -2,7 +2,12 @@
 
 <script lang="ts">
   import formatDistanceStrict from "date-fns/formatDistanceStrict";
-  import { fetchContactImage, ContactStore, ManifestStore } from "@commons";
+  import {
+    ErrorStore,
+    fetchContactImage,
+    ContactStore,
+    ManifestStore,
+  } from "@commons";
   import { get_current_component, onMount } from "svelte/internal";
   import { tick } from "svelte";
   import { debounce } from "@commons/methods/component";
@@ -49,6 +54,10 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
+
   let _this = <ContactListProperties>(
     buildInternalProps({}, {}, defaultValueMap)
   );
@@ -60,6 +69,7 @@
   let lastNumContactsLoaded = 0;
   let hydratedContacts: HydratedContact[] = [];
   let status: "loading" | "loaded" | "error" = "loading";
+  let hasComponentLoaded = false;
 
   onMount(async () => {
     await tick();
@@ -87,6 +97,8 @@
         setContacts();
       }
     }
+
+    hasComponentLoaded = true;
   });
 
   $: dispatchEvent("manifestLoaded", manifest);
@@ -113,7 +125,7 @@
   }
 
   // sanitization to conform with Nylas API maximums
-  $: {
+  $: if (hasComponentLoaded) {
     _this.contacts_to_load = Math.max(
       Math.min(_this.contacts_to_load, 1000),
       1,
@@ -131,7 +143,12 @@
   $: queryKey = JSON.stringify(query);
 
   $: setHydratedContacts(), contacts, queryKey;
+
   async function setHydratedContacts() {
+    if (!hasComponentLoaded) {
+      return;
+    }
+
     status = "loading";
     if (contacts && Array.isArray(contacts)) {
       hydratedContacts = contacts as HydratedContact[];

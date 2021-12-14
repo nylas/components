@@ -58,6 +58,10 @@
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
 
+  $: if (Object.keys($ErrorStore).length) {
+    dispatchEvent("onError", $ErrorStore);
+  }
+
   let conversationManuallyPassed: boolean;
   $: conversationManuallyPassed = !!_this.messages && _this.messages.length > 0;
 
