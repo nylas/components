@@ -79,6 +79,7 @@ export interface TimeSlot {
   expirySelection?: string;
   recurrence_cadence?: string;
   recurrence_expiry?: Date | string;
+  isBookable: boolean;
 }
 
 export interface BookableSlot extends TimeSlot {
@@ -168,7 +169,6 @@ export interface EventParticipant {
 
 export interface Day {
   epochs: any[]; // TODO typing
-  isBookable: boolean;
   slots: SelectableSlot[];
   timestamp: Date;
 }

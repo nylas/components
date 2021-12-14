@@ -573,6 +573,10 @@
           }
         }
 
+        const dateOffset =
+          (new Date(time).getTime() - new Date().getTime()) /
+          (1000 * 60 * 60 * 24);
+
         return {
           selectionStatus: SelectionStatus.UNSELECTED,
           calendar_id: calendarID,
@@ -580,6 +584,10 @@
           available_calendars: freeCalendars,
           start_time: time,
           end_time: endTime,
+          isBookable:
+            dateOffset >= 0 &&
+            dateOffset >= _this.min_book_ahead_days &&
+            dateOffset <= _this.max_book_ahead_days,
         };
       });
   };
@@ -762,17 +770,8 @@
       generateDaySlots(timestamp, _this.start_hour, _this.end_hour),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
 
-    const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime();
-    const dayOffset = Math.ceil(
-      (new Date(timestamp).getTime() - today) / (1000 * 60 * 60 * 24),
-    );
-
     return {
       epochs: generateEpochs(slots, _this.partial_bookable_ratio),
-      isBookable:
-        dayOffset >= 0 &&
-        dayOffset >= _this.min_book_ahead_days &&
-        dayOffset <= _this.max_book_ahead_days,
       slots,
       timestamp,
     };
@@ -1261,7 +1260,7 @@
     : [];
 
   function startDrag(slot: SelectableSlot, day: Day) {
-    if (_this.allow_booking && day.isBookable) {
+    if (_this.allow_booking && slot.isBookable) {
       // Retain the initially-clicked slot and day, so we can adjust if you've moved across dates, etc.
       dragStartSlot = slot;
       dragStartDay = day;
@@ -1284,7 +1283,7 @@
   }
 
   function addToDrag(slot: SelectableSlot, day: Day) {
-    if (day.isBookable && (mouseIsDown || touchIsDown)) {
+    if (slot.isBookable && (mouseIsDown || touchIsDown)) {
       if (draggingExistingBlock && dragStartSlot && dragStartDay) {
         // dragStartSlot && dragStartDay are superfluous here, but type errors are thrown if we don't explicitly check for them
 
@@ -1709,18 +1708,18 @@
         slot.selectionStatus = SelectionStatus.SELECTED;
       });
     days = [...days];
-    // event_to_select = null;
   }
 
   // Expand hovered / clicked time slots to show the full consecutive event span
   function inspectConsecutiveBlock(slot: TimeSlot) {
-    let consecutiveBlockContainingSlot = consecutiveOptions.find(
-      (block) =>
-        slot.start_time >= block[0].start_time &&
-        slot.end_time <= block[block.length - 1].end_time,
+    return (
+      consecutiveOptions.find(
+        (block) =>
+          slot.isBookable &&
+          slot.start_time >= block[0].start_time &&
+          slot.end_time <= block[block.length - 1].end_time,
+      ) ?? null
     );
-
-    return consecutiveBlockContainingSlot || null;
   }
 
   // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,
