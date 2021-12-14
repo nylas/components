@@ -1003,7 +1003,7 @@
             content: "\2605";
             display: inline-block;
             font-size: 1.1em;
-            color: var(--nylas-email-unstarred-star-button-color, #ccc);
+            color: var(--nylas-email-unstarred-star-button-color, #8d94a5);
             -webkit-user-select: none;
             -moz-user-select: none;
             user-select: none;
