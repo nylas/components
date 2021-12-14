@@ -1152,8 +1152,9 @@
       }
 
       &.status-noreply {
-        background-color: var(--emptyEventBackground) !important;
-        color: var(--secondaryCalendar) !important;
+        background-color: #ccc !important;
+        color: #444 !important;
+
         a {
           color: var(--secondaryCalendar) !important;
         }
