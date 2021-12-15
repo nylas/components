@@ -11,6 +11,9 @@
       document.addEventListener("DOMContentLoaded", function () {
         const mailbox = document.querySelector("nylas-mailbox");
 
+        mailbox.addEventListener("returnToMailbox", (event) => {
+          console.log("returnToMailbox", event.detail);
+        });
         // enable `header="string"` and click refresh button
         // mailbox.addEventListener("refreshClicked", function (event) {
         //   mailbox.all_threads = [...mailbox.all_threads, thread2];
