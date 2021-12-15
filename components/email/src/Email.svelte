@@ -1047,6 +1047,12 @@
           outline: none;
         }
 
+        .message-head [role="toolbar"] button {
+          background: none;
+          outline: none;
+          cursor: pointer;
+        }
+
         .subject-title {
           justify-content: space-between;
           &.mailbox {
@@ -1304,12 +1310,6 @@
     }
   }
 
-  div.reply button {
-    background: none;
-  }
-  div.reply-all button {
-    background: none;
-  }
   @media #{$desktop} {
     main {
       .email-row {
