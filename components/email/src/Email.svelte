@@ -1886,7 +1886,9 @@
                   {#if thread?.subject}<span class="subject"
                       >{thread?.subject}</span
                     >{/if}
-                  <span class="snippet">{thread.snippet.trim()}</span>
+                  <span class="snippet"
+                    >{thread.snippet.replace(/\u200C /g, "")}</span
+                  >
                 </div>
                 {#if Object.keys(attachedFiles).length > 0}
                   <div class="attachment">
