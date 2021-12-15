@@ -688,6 +688,7 @@
         for (const [fileIndex, file] of message.files.entries()) {
           if (
             file.content_disposition === "attachment" &&
+            !file.content_id && // treat all files with content_id as inline
             !DisallowedContentTypes.includes(file.content_type)
           ) {
             if (!files[message.id]) {
