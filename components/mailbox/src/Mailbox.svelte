@@ -535,6 +535,9 @@
     .thread-checkbox {
       input {
         @include checkbox;
+        &:disabled {
+          cursor: not-allowed;
+        }
       }
     }
 
@@ -565,6 +568,7 @@
     #mailboxlist li {
       display: grid;
       grid-template-columns: auto 1fr;
+      gap: 0.5rem;
       align-items: center;
       justify-content: left;
 
@@ -595,6 +599,14 @@
       }
       &.unread {
         background: var(--mailbox-unread-color, var(--nylas-email-background));
+      }
+      &.no-messages {
+        background: var(--grey-lighter);
+        .thread-checkbox {
+          input {
+            background: var(--grey-dark-warm);
+          }
+        }
       }
       // #endregion define background styles
 
@@ -768,7 +780,13 @@
       <ul id="mailboxlist" class:refreshing={refreshingMailbox}>
         {#each threads as thread}
           {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
-            <li class:unread={thread.unread} class:checked={thread.selected}>
+            <li
+              class:unread={thread.unread}
+              class:checked={thread.selected}
+              class:no-messages={thread &&
+                thread?.messages &&
+                thread?.messages?.length <= 0}
+            >
               {#if _this.show_thread_checkbox}
                 <div class="checkbox-container thread-checkbox">
                   <input
@@ -776,6 +794,9 @@
                     aria-label={selectTitle}
                     type="checkbox"
                     checked={thread.selected}
+                    disabled={thread &&
+                      thread?.messages &&
+                      thread?.messages?.length <= 0}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
                 </div>

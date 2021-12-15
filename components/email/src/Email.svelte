@@ -28,6 +28,8 @@
   import MarkUnreadIcon from "./assets/envelope.svg";
   import AttachmentIcon from "./assets/attachment.svg";
   import LeftArrowLineIcon from "./assets/arrow-line.svg";
+  import NoMessagesIcon from "./assets/no-messages.svg";
+  import DraftIcon from "./assets/draft.svg";
   import type {
     EmailProperties,
     Participant,
@@ -737,6 +739,13 @@
     const file = (<any>event.detail).file;
     downloadSelectedFile(event, file);
   }
+
+  function isThreadADraftEmail(currentThread: Thread): boolean {
+    return (
+      currentThread &&
+      currentThread.labels?.find((label) => label.name === "drafts")
+    );
+  }
 </script>
 
 <style lang="scss">
@@ -775,7 +784,7 @@
         font-family: sans-serif;
         font-size: 1rem;
         font-weight: bold;
-        height: 32px;
+        height: 31px;
         line-height: 35px;
         text-align: center;
         text-transform: uppercase;
@@ -797,6 +806,35 @@
         grid-template-columns: fit-content(350px) 1fr;
         &.disable-click {
           cursor: not-allowed;
+          display: grid;
+          align-items: flex-start;
+          background: var(--grey-lighter);
+        }
+        .no-message-avatar-container {
+          display: grid;
+          &.show-star {
+            margin-left: calc(
+              25px + 0.5rem
+            ); //to account for space occupied by star
+          }
+          .default-avatar {
+            background: var(--red);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &.draft {
+              background: var(--blue);
+            }
+          }
+        }
+        .no-messages-warning-container {
+          display: grid;
+          color: var(--red);
+          align-self: center;
+          &.draft {
+            color: var(--blue);
+          }
         }
         .from-star {
           display: grid;
@@ -1620,91 +1658,182 @@
             class:disable-click={activeThread &&
               activeThread.messages.length <= 0}
           >
-            <div class="from{_this.show_star ? '-star' : ''}">
-              {#if _this.show_star}
-                <div class="starred">
-                  <button
-                    id={`thread-star-${_this.thread_id}`}
-                    class={activeThread.starred ? "starred" : ""}
-                    value={_this.thread_id}
-                    role="switch"
-                    aria-checked={activeThread.starred}
-                    on:click|preventDefault={handleThreadStarClick}
-                    aria-label={`Star button for thread ${_this.thread_id}`}
-                  />
+            {#if activeThread && activeThread.messages.length <= 0}
+              {#await isThreadADraftEmail(activeThread) then isDraft}
+                <div
+                  class={`no-message-avatar-container ${
+                    _this.show_star ? "show-star" : ""
+                  }`}
+                >
+                  <div class="default-avatar" class:draft={isDraft}>
+                    {#if isDraft}
+                      <DraftIcon />
+                    {:else}
+                      <NoMessagesIcon />
+                    {/if}
+                  </div>
                 </div>
-              {/if}
-              <div class="from-message-count">
-                {#if _this.show_contact_avatar}
-                  <div class="default-avatar">
-                    <nylas-contact-image
-                      {contact_query}
-                      contact={activeThreadContact}
+                <div
+                  class="no-messages-warning-container"
+                  class:draft={isDraft}
+                >
+                  {isDraft
+                    ? `This is a draft email.`
+                    : `Sorry, looks like this thread is currently unavailable. It may
+                  have been deleted in your provider inbox.`}
+                </div>
+              {/await}
+            {:else}
+              <div class="from{_this.show_star ? '-star' : ''}">
+                {#if _this.show_star}
+                  <div class="starred">
+                    <button
+                      id={`thread-star-${_this.thread_id}`}
+                      class={activeThread.starred ? "starred" : ""}
+                      value={_this.thread_id}
+                      role="switch"
+                      aria-checked={activeThread.starred}
+                      on:click|preventDefault={handleThreadStarClick}
+                      aria-label={`Star button for thread ${_this.thread_id}`}
                     />
                   </div>
                 {/if}
-                <div class="from-participants">
-                  <div
-                    class="participants-name"
-                    class:condensed={showSecondFromParticipant(
-                      activeThread.messages,
-                      activeThread.participants,
-                    )}
-                  >
-                    {#if showFirstFromParticipant(activeThread.messages)}
-                      <span class="from-sub-section">
-                        {activeThread.messages[activeThread.messages.length - 1]
-                          ?.from[0].name ||
-                          activeThread.messages[
+                <div class="from-message-count">
+                  {#if _this.show_contact_avatar}
+                    <div class="default-avatar">
+                      <nylas-contact-image
+                        {contact_query}
+                        contact={activeThreadContact}
+                      />
+                    </div>
+                  {/if}
+                  <div class="from-participants">
+                    <div
+                      class="participants-name"
+                      class:condensed={showSecondFromParticipant(
+                        activeThread.messages,
+                        activeThread.participants,
+                      )}
+                    >
+                      {#if showFirstFromParticipant(activeThread.messages)}
+                        <span class="from-sub-section">
+                          {activeThread.messages[
                             activeThread.messages.length - 1
-                          ]?.from[0].email}
-                      </span>
-                    {/if}
-                    {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
-                      <span class="from-sub-section second"
-                        >, {activeThread.participants[0].name ||
-                          activeThread.participants[0].email}
-                      </span>
-                    {/if}
-                  </div>
-                  <div class="participants-count">
-                    {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
-                      <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
-                      {#if activeThread.participants.length >= 2}
-                        <span class="show-on-mobile">
-                          &nbsp;&plus;{activeThread.participants.length -
-                            MAX_MOBILE_PARTICIPANTS}
+                          ]?.from[0].name ||
+                            activeThread.messages[
+                              activeThread.messages.length - 1
+                            ]?.from[0].email}
                         </span>
                       {/if}
-                      <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
+                      {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
+                        <span class="from-sub-section second"
+                          >, {activeThread.participants[0].name ||
+                            activeThread.participants[0].email}
+                        </span>
+                      {/if}
+                    </div>
+                    <div class="participants-count">
+                      {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
+                        <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
+                        {#if activeThread.participants.length >= 2}
+                          <span class="show-on-mobile">
+                            &nbsp;&plus;{activeThread.participants.length -
+                              MAX_MOBILE_PARTICIPANTS}
+                          </span>
+                        {/if}
+                        <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
                     Note that this might not be exactly correct if the name of the first participant is too long 
                     and occupies entire width -->
-                      {#if activeThread.participants.length > 2}
-                        <span class="show-on-desktop">
-                          &nbsp; &plus; {activeThread.participants.length -
-                            MAX_DESKTOP_PARTICIPANTS}
-                        </span>
+                        {#if activeThread.participants.length > 2}
+                          <span class="show-on-desktop">
+                            &nbsp; &plus; {activeThread.participants.length -
+                              MAX_DESKTOP_PARTICIPANTS}
+                          </span>
+                        {/if}
                       {/if}
-                    {/if}
+                    </div>
                   </div>
+                  {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
+                    <span class="thread-message-count">
+                      {activeThread.messages.length}
+                    </span>
+                  {/if}
                 </div>
-                {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
-                  <span class="thread-message-count">
-                    {activeThread.messages.length}
-                  </span>
-                {/if}
               </div>
-            </div>
-            <div class="subject-snippet-date">
-              <div class="snippet-attachment-container">
-                <div class="desktop-subject-snippet">
-                  <span class="subject">{thread?.subject}</span>
-                  <span class="snippet">
-                    {thread.snippet}
-                  </span>
+              <div class="subject-snippet-date">
+                <div class="snippet-attachment-container">
+                  <div class="desktop-subject-snippet">
+                    <span class="subject">{thread?.subject}</span>
+                    <span class="snippet">
+                      {thread.snippet}
+                    </span>
+                  </div>
+                  {#if Object.keys(attachedFiles).length > 0}
+                    <div class="attachment desktop">
+                      {#each Object.values(attachedFiles) as files}
+                        {#each files as file}
+                          <button
+                            on:click={(event) =>
+                              downloadSelectedFile(event, file)}
+                          >
+                            {file.filename || file.id}
+                          </button>
+                        {/each}
+                      {/each}
+                    </div>
+                  {/if}
                 </div>
+                <div
+                  class:date={_this.show_received_timestamp}
+                  class:action-icons={_this.show_thread_actions}
+                >
+                  {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
+                    <span><AttachmentIcon /></span>
+                  {/if}
+                  {#if _this.show_thread_actions}
+                    <div class="delete">
+                      <button
+                        title="Delete thread"
+                        aria-label="Delete thread"
+                        on:click|stopPropagation={deleteEmail}
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
+                    <div class="read-status">
+                      <button
+                        title={`Mark thread as ${
+                          activeThread.unread ? "" : "un"
+                        }read`}
+                        aria-label={`Mark thread as ${
+                          activeThread.unread ? "" : "un"
+                        }read`}
+                        on:click|stopPropagation={toggleUnreadStatus}
+                      >
+                        {#if activeThread.unread}
+                          <MarkReadIcon aria-hidden="true" />
+                        {:else}
+                          <MarkUnreadIcon aria-hidden="true" />
+                        {/if}
+                      </button>
+                    </div>
+                  {:else if _this.show_received_timestamp}
+                    <span>
+                      {formatPreviewDate(
+                        new Date(thread.last_message_timestamp * 1000),
+                      )}
+                    </span>
+                  {/if}
+                </div>
+              </div>
+
+              <div class="mobile-subject-snippet">
+                <span class="subject">{thread?.subject}</span>
+                <span class="snippet">
+                  {thread.snippet}
+                </span>
                 {#if Object.keys(attachedFiles).length > 0}
-                  <div class="attachment desktop">
+                  <div class="attachment mobile">
                     {#each Object.values(attachedFiles) as files}
                       {#each files as file}
                         <button
@@ -1718,69 +1847,7 @@
                   </div>
                 {/if}
               </div>
-              <div
-                class:date={_this.show_received_timestamp}
-                class:action-icons={_this.show_thread_actions}
-              >
-                {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
-                  <span><AttachmentIcon /></span>
-                {/if}
-                {#if _this.show_thread_actions}
-                  <div class="delete">
-                    <button
-                      title="Delete thread"
-                      aria-label="Delete thread"
-                      on:click|stopPropagation={deleteEmail}
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                  <div class="read-status">
-                    <button
-                      title={`Mark thread as ${
-                        activeThread.unread ? "" : "un"
-                      }read`}
-                      aria-label={`Mark thread as ${
-                        activeThread.unread ? "" : "un"
-                      }read`}
-                      on:click|stopPropagation={toggleUnreadStatus}
-                    >
-                      {#if activeThread.unread}
-                        <MarkReadIcon aria-hidden="true" />
-                      {:else}
-                        <MarkUnreadIcon aria-hidden="true" />
-                      {/if}
-                    </button>
-                  </div>
-                {:else if _this.show_received_timestamp}
-                  <span>
-                    {formatPreviewDate(
-                      new Date(thread.last_message_timestamp * 1000),
-                    )}
-                  </span>
-                {/if}
-              </div>
-            </div>
-
-            <div class="mobile-subject-snippet">
-              <span class="subject">{thread?.subject}</span>
-              <span class="snippet">
-                {thread.snippet}
-              </span>
-              {#if Object.keys(attachedFiles).length > 0}
-                <div class="attachment mobile">
-                  {#each Object.values(attachedFiles) as files}
-                    {#each files as file}
-                      <button
-                        on:click={(event) => downloadSelectedFile(event, file)}
-                      >
-                        {file.filename || file.id}
-                      </button>
-                    {/each}
-                  {/each}
-                </div>
-              {/if}
-            </div>
+            {/if}
           </div>
         {/if}
       {/if}
