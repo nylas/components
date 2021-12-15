@@ -155,12 +155,11 @@ describe("Contact List Interaction", () => {
             const contactlist = element[0];
 
             // Check to make sure it's using Nylas data (Test user is a signifier)
-            cy.get("ul.contacts")
-              .find("li.contact .title:contains('Test User')")
-              .should("exist");
+            cy.get("ul.contacts").then((contactList) => {
+              expect(
+                contactList.find("li.contact .title:contains('Test User')"),
+              ).not.to.equal(undefined);
 
-            cy.loadContacts();
-            cy.wait("@contacts").then(() => {
               // Set custom data
               contactlist.contacts = [
                 {
