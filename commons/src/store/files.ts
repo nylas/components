@@ -17,7 +17,11 @@ function initializeFilesForMessage() {
       if (!filesMap[incomingMessage.id]) {
         const inlineFiles: Record<string, File> = {};
         for (const file of incomingMessage.files.values()) {
-          if (file.content_disposition === "inline" && !inlineFiles[file.id]) {
+          // treat all files with content_id as inline
+          if (
+            (file.content_disposition === "inline" || file.content_id) &&
+            !inlineFiles[file.id]
+          ) {
             inlineFiles[file.id] = file;
             inlineFiles[file.id].data = await downloadFile({
               file_id: file.id,
@@ -36,7 +40,7 @@ function initializeFilesForMessage() {
     },
     hasInlineFiles: (incomingMessage: Message): boolean => {
       return incomingMessage?.files?.some(
-        (file) => file.content_disposition === "inline",
+        (file) => file.content_disposition === "inline" || file.content_id,
       );
     },
     reset: () => set({}),
