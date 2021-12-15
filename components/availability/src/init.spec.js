@@ -86,16 +86,6 @@ describe("availability component", () => {
       cy.get(".slot.selected").should("have.length", 1);
     });
 
-    // it("available time slot toggles (un)selected class", () => {
-    //   cy.get(testAvailabilityComponent).then((element) => {
-    //     const component = element[0];
-    //     component.allow_booking = true;
-    //     cy.get(".slot.free").first().should("have.class", "unselected");
-    //     cy.get(".slot.free").first().click();
-    //     cy.get(".slot.free").first().should("have.class", "selected");
-    //   });
-    // });
-
     it("should not show confirm button when multiple time slots are selected", () => {
       cy.get(testAvailabilityComponent).then((element) => {
         element[0].participants = ["nylascypresstest@gmail.com"];
