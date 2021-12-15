@@ -1089,4 +1089,52 @@ describe("availability component", () => {
       });
     });
   });
+
+  describe("Dynamically generate time slots based on manifest", () => {
+    it("Updates slot_size will change number of slots on screen", () => {
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 15);
+      cy.get("button.slot").should("have.length", 96);
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
+      cy.get("button.slot").should("have.length", 48);
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 60);
+      cy.get("button.slot").should("have.length", 24);
+      cy.get(testAvailabilityComponent).invoke("attr", "end_hour", 18);
+      cy.get("button.slot").should("have.length", 18);
+      cy.get(testAvailabilityComponent).invoke("attr", "start_hour", 8);
+      cy.get("button.slot").should("have.length", 10);
+    });
+
+    it("Updates partial_bookable_ratio/Participant Threshold will change availability", () => {
+      cy.get(testAvailabilityComponent).invoke(
+        "attr",
+        "partial_bookable_ratio",
+        0.5,
+      );
+      cy.get("button.slot.busy").should("have.length", 20);
+      cy.get(testAvailabilityComponent).invoke(
+        "attr",
+        "partial_bookable_ratio",
+        1,
+      );
+      cy.get("button.slot.busy").should("have.length", 92);
+    });
+
+    it("Updates mandate_top_of_hour will change availability", () => {
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
+      cy.get(".controls")
+        .get('input[type="radio"][name="mandate-top-of-hour"][value="true"]')
+        .first()
+        .check();
+      cy.get("button.slot.busy").should("have.length", 26);
+    });
+
+    it("Updates open_hours/Block Lunch control will change availability", () => {
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
+      cy.get(".controls")
+        .get('input[type="radio"][name="block-lunch"][value="everyday"]')
+        .first()
+        .check();
+      cy.get("button.slot.closed").should("have.length", 25);
+    });
+  });
 });
