@@ -132,3 +132,7 @@ export function downloadAttachedFile(fileData: string, file: File): void {
   a.click();
   a.remove();
 }
+
+export function arrayContainsArray(superset: any[], subset: any[]): boolean {
+  return subset.every((target) => superset.includes(target));
+}
