@@ -64,15 +64,37 @@ describe("availability component", () => {
       });
     });
 
-    it("available time slot toggles (un)selected class", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
-        const component = element[0];
-        component.allow_booking = true;
-        cy.get(".slot.free").first().should("have.class", "unselected");
-        cy.get(".slot.free").first().click();
-        cy.get(".slot.free").first().should("have.class", "selected");
-      });
+    it("Toggles (un)selected class based on isBookable property", () => {
+      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
+      const currentHour = new Date();
+      currentHour.setMinutes(0, 0, 0);
+      //Get the closest full hour prior to current time, slots isBookable should be false
+      cy.get(
+        `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
+      )
+        .first()
+        .click();
+      cy.get(".slot.selected").should("have.length", 0);
+
+      //Get the closest next hour after the current hour, slots isBookable should be true
+      currentHour.setHours(currentHour.getHours() + 2);
+      cy.get(
+        `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
+      )
+        .first()
+        .click();
+      cy.get(".slot.selected").should("have.length", 1);
     });
+
+    // it("available time slot toggles (un)selected class", () => {
+    //   cy.get(testAvailabilityComponent).then((element) => {
+    //     const component = element[0];
+    //     component.allow_booking = true;
+    //     cy.get(".slot.free").first().should("have.class", "unselected");
+    //     cy.get(".slot.free").first().click();
+    //     cy.get(".slot.free").first().should("have.class", "selected");
+    //   });
+    // });
 
     it("should not show confirm button when multiple time slots are selected", () => {
       cy.get(testAvailabilityComponent).then((element) => {
