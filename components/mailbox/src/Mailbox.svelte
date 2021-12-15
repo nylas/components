@@ -225,10 +225,10 @@
     .filter((thread) => thread.selected)
     .some((thread) => thread.starred);
 
-  let areAllSelectedUnread = false;
-  $: areAllSelectedUnread = threads
+  let areAllSelectedRead = false;
+  $: areAllSelectedRead = threads
     .filter((thread) => thread.selected)
-    .some((thread) => thread.unread);
+    .some((thread) => !thread.unread);
 
   async function messageClicked(event: CustomEvent) {
     let message = event.detail.message;
@@ -398,14 +398,14 @@
     if (Array.isArray(_this.all_threads)) {
       threads = threads.map((thread) => {
         if (thread.selected) {
-          thread.unread = !areAllSelectedUnread;
+          thread.unread = areAllSelectedRead;
         }
         return { ...thread };
       });
     } else {
       const readStatusPromises = [];
       for (const thread of threads.filter((thread) => thread.selected)) {
-        thread.unread = !areAllSelectedUnread;
+        thread.unread = areAllSelectedRead;
         readStatusPromises.push(updateThreadStatus(thread));
       }
       await Promise.all(readStatusPromises);
@@ -541,6 +541,15 @@
       .thread-checkbox {
         display: flex;
       }
+
+      button {
+        &[disabled] svg {
+          fill: var(--grey);
+        }
+        svg {
+          fill: var(--grey-dark);
+        }
+      }
     }
 
     // Toggle select-all checkbox and thread checkbox from CSS Var
@@ -565,13 +574,18 @@
           content: "\2605";
           display: inline-block;
           font-size: 1em;
-          color: var(--mailbox-starred-disabled-color, #8d94a5);
+          color: var(--mailbox-starred-disabled-color, var(--grey));
           -webkit-user-select: none;
           -moz-user-select: none;
           user-select: none;
         }
 
-        &.starred:before {
+        &:not([disabled]):before,
+        svg {
+          color: var(--mailbox-starred-unselected-color, #8d94a5);
+        }
+
+        &:not([disabled]).starred:before {
           color: var(--mailbox-starred-enabled-color, #ffc107);
         }
       }
@@ -749,7 +763,7 @@
                 title="Delete selected email(s)"
                 disabled={!threads.filter((thread) => thread.selected).length}
                 aria-label="Delete selected email(s)"
-                on:click={(e) => onDeleteSelected(e)}><TrashIcon fill /></button
+                on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
               >
             </div>
           {/if}
@@ -770,7 +784,7 @@
           {/if}
           {#if _this.actions_bar.includes(MailboxActions.UNREAD)}
             <div class="read-status">
-              {#if areAllSelectedUnread}
+              {#if !areAllSelectedRead}
                 <button
                   data-cy="mark-read"
                   title="Mark selected email(s) as read"
