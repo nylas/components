@@ -51,7 +51,10 @@
   import * as DOMPurify from "dompurify";
   import LoadingIcon from "./assets/loading.svg";
   import { downloadFile } from "@commons/connections/files";
-  import { DisallowedContentTypes } from "@commons/constants/attachment-content-types";
+  import {
+    DisallowedContentTypes,
+    InlineImageTypes,
+  } from "@commons/constants/attachment-content-types";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -688,7 +691,9 @@
         for (const [fileIndex, file] of message.files.entries()) {
           if (
             file.content_disposition === "attachment" &&
-            !file.content_id && // treat all files with content_id as inline
+            !(
+              file.content_id && InlineImageTypes.includes(file.content_type)
+            ) && // treat all files with content_id as inline
             !DisallowedContentTypes.includes(file.content_type)
           ) {
             if (!files[message.id]) {
