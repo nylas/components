@@ -206,6 +206,10 @@ export const generateDaySlots = (
         }
       }
 
+      const dateOffset =
+        (new Date(time).getTime() - new Date().getTime()) /
+        (1000 * 60 * 60 * 24);
+
       return {
         selectionStatus: SelectionStatus.UNSELECTED,
         calendar_id: calendarID,
@@ -213,6 +217,10 @@ export const generateDaySlots = (
         available_calendars: freeCalendars,
         start_time: time,
         end_time: endTime,
+        isBookable:
+          dateOffset >= 0 &&
+          dateOffset >= internalProps.min_book_ahead_days &&
+          dateOffset <= internalProps.max_book_ahead_days,
       };
     });
 };
