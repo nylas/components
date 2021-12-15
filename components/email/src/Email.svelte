@@ -1416,7 +1416,7 @@
 
           .date {
             text-align: right;
-            padding: $spacing-xs;
+            padding-right: $spacing-xs;
             display: flex;
             justify-content: flex-end;
             gap: $spacing-xs;

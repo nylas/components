@@ -668,9 +668,10 @@
     main {
       #mailboxlist li {
         .checkbox-container.thread-checkbox {
-          padding: 0 0.5rem 0 $spacing-m;
-          align-self: center;
+          padding: 0.6rem 0.5rem 0 $spacing-m;
           display: flex;
+          min-height: 2rem;
+          align-items: center;
         }
       }
 
