@@ -1132,7 +1132,7 @@
       }
 
       &.status-maybe {
-        background-color: var(--emptyEventBackground) !important;
+        background-color: var(--emptyEventBackground, #ddd) !important;
         border-left-width: 7px;
         color: var(--secondaryCalendar) !important;
 
@@ -1152,8 +1152,8 @@
       }
 
       &.status-noreply {
-        background-color: #ccc !important;
-        color: #444 !important;
+        background-color: var(--emptyEventBackground, #ddd) !important;
+        color: var(--secondaryCalendar, #444) !important;
 
         a {
           color: var(--secondaryCalendar) !important;
@@ -1165,9 +1165,9 @@
           text-decoration: line-through;
         }
 
-        border-color: var(--alertWarningDeclined);
-        color: var(--alertWarningDeclined);
-        background-color: var(--emptyEventBackground) !important;
+        border-color: var(--alertWarningDeclined, #eb8f24);
+        color: var(--alertWarningDeclined, #eb8f24);
+        background-color: var(--emptyEventBackground, #ddd) !important;
 
         a {
           color: var(--secondaryCalendar) !important;
