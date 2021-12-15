@@ -1,5 +1,7 @@
 let testAvailabilityComponent;
+const frozenDateTime = new Date(2021, 11, 15, 12, 0, 0); // Dec 15, 2021 at 12:00 PM
 beforeEach(() => {
+  cy.clock(frozenDateTime.getTime(), ["Date"]);
   cy.visit("/components/availability/src/index.html");
   cy.get("nylas-availability").then((element) => {
     const component = element[0];
@@ -39,12 +41,12 @@ describe("availability component", () => {
           availability: "free",
           timeslots: [
             {
-              start_time: new Date(new Date().setHours(1, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+              start_time: new Date(frozenDateTime.setHours(1, 0, 0, 0)),
+              end_time: new Date(frozenDateTime.setHours(3, 0, 0, 0)),
             },
             {
-              start_time: new Date(new Date().setHours(8, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              start_time: new Date(frozenDateTime.setHours(8, 0, 0, 0)),
+              end_time: new Date(frozenDateTime.setHours(16, 0, 0, 0)),
             },
           ],
         },
@@ -66,8 +68,10 @@ describe("availability component", () => {
 
     it("Toggles (un)selected class based on isBookable property", () => {
       cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
-      const currentHour = new Date();
+      const currentHour = frozenDateTime;
       currentHour.setMinutes(0, 0, 0);
+      currentHour.setHours(currentHour.getHours() - 1);
+      console.debug("currentHour", currentHour.toString());
       //Get the closest full hour prior to current time, slots isBookable should be false
       cy.get(
         `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
@@ -113,12 +117,12 @@ describe("availability component", () => {
           availability: "busy",
           timeslots: [
             {
-              start_time: new Date(new Date().setHours(1, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+              start_time: new Date(frozenDateTime.setHours(1, 0, 0, 0)),
+              end_time: new Date(frozenDateTime.setHours(3, 0, 0, 0)),
             },
             {
-              start_time: new Date(new Date().setHours(8, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              start_time: new Date(frozenDateTime.setHours(8, 0, 0, 0)),
+              end_time: new Date(frozenDateTime.setHours(16, 0, 0, 0)),
             },
           ],
         },
@@ -146,12 +150,12 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+            start_time: new Date(frozenDateTime.setHours(3, 0, 0, 0)),
+            end_time: new Date(frozenDateTime.setHours(6, 0, 0, 0)),
           },
           {
-            start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+            start_time: new Date(frozenDateTime.setHours(9, 0, 0, 0)),
+            end_time: new Date(frozenDateTime.setHours(15, 0, 0, 0)),
           },
         ],
       },
@@ -160,8 +164,8 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+            start_time: new Date(frozenDateTime.setHours(4, 0, 0, 0)),
+            end_time: new Date(frozenDateTime.setHours(11, 0, 0, 0)),
           },
         ],
       },
@@ -527,13 +531,13 @@ describe("availability component", () => {
 
     it("should combine consecutive time slots", (done) => {
       const consecutiveSlotEndTime = new Date(
-        `${new Date().toLocaleDateString()} 15:30:00`,
+        `${frozenDateTime.toLocaleDateString()} 15:30:00`,
       ).toISOString();
       const singularSlotStartTime = new Date(
-        `${new Date().toLocaleDateString()} 15:45:00`,
+        `${frozenDateTime.toLocaleDateString()} 15:45:00`,
       ).toISOString();
       const singularSlotEndTime = new Date(
-        `${new Date().toLocaleDateString()} 16:00:00`,
+        `${frozenDateTime.toLocaleDateString()} 16:00:00`,
       ).toISOString();
 
       cy.get(".slot.free")
@@ -972,8 +976,8 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(0, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+            start_time: new Date(frozenDateTime.setHours(0, 0, 0, 0)),
+            end_time: new Date(frozenDateTime.setHours(6, 0, 0, 0)),
           },
         ],
         account: {
@@ -987,8 +991,8 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(5, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(12, 0, 0, 0)),
+            start_time: new Date(frozenDateTime.setHours(5, 0, 0, 0)),
+            end_time: new Date(frozenDateTime.setHours(12, 0, 0, 0)),
           },
         ],
         account: {
@@ -1052,8 +1056,8 @@ describe("availability component", () => {
 
   describe("Capacity", () => {
     const timeSlot = {
-      start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-      end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+      start_time: new Date(frozenDateTime.setHours(3, 0, 0, 0)),
+      end_time: new Date(frozenDateTime.setHours(6, 0, 0, 0)),
     };
     const calendar = [
       {

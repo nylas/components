@@ -1513,6 +1513,8 @@
     }
   };
 
+  $: console.debug("Component time", new Date());
+
   //#endregion Consecutive Events
 </script>
 
