@@ -5,8 +5,10 @@
 ## New Features
 
 - [Agenda] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
-  
+
 ## Bug Fixes
+
+- [Agenda] Fix show message when `show_no_events_message` is `true` [#274](https://github.com/nylas/components/pull/274)
 
 # v1.1.5 (2021-12-10)
 
