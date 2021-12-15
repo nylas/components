@@ -1,3 +1,11 @@
+# Pending Changes
+
+## Breaking Changes
+## New Features
+## Bug Fixes
+
+- [Composer] Fix support for Firefox and Safari browsers. [#279](https://github.com/nylas/components/pull/279)
+
 # v1.1.6 (2021-12-15)
 
 ## New Features
