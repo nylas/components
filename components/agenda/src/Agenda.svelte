@@ -325,7 +325,14 @@
 
   let calendarEvents: Event[] = [];
   $: (async () => {
-    calendarEvents = _this.events ?? (await EventStore.getEvents(query)) ?? [];
+    if (_this.events) {
+      calendarEvents = _this.events;
+    } else {
+      await EventStore.getEvents(query).then(async () => {
+        calendarEvents = (await EventStore.getEvents(query)) || [];
+      });
+    }
+
     if (siblingQueries?.length) {
       siblingQueries.forEach((siblingQuery) =>
         EventStore.getEvents(siblingQuery),
