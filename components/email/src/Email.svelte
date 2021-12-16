@@ -1888,7 +1888,7 @@
               </div>
 
               <div class="message-to">
-                {#each message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
+                {#each _this.message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
                   <div>
                     <span>
                       {i === 0 ? "to " : ""}
@@ -1903,7 +1903,7 @@
                     </span>
                   </div>
                 {/each}
-                {#if message.to?.length > PARTICIPANTS_TO_TRUNCATE}
+                {#if _this.message.to?.length > PARTICIPANTS_TO_TRUNCATE}
                   <div>
                     <nylas-tooltip
                       on:toggleTooltip={setTooltip}
