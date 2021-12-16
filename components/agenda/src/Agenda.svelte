@@ -324,13 +324,22 @@
   const { loadingEvents } = EventStore;
 
   let calendarEvents: Event[] = [];
+  let fetchEventsPromiseQueue: Promise<Event[] | undefined>[] = [];
+
   $: (async () => {
     if (_this.events) {
       calendarEvents = _this.events;
     } else {
-      await EventStore.getEvents(query).then(async () => {
-        calendarEvents = (await EventStore.getEvents(query)) || [];
-      });
+      fetchEventsPromiseQueue.push(EventStore.getEvents(query));
+      const resolvedPromises = <PromiseFulfilledResult<Event[] | undefined>[]>(
+        (await Promise.allSettled(fetchEventsPromiseQueue)).filter(
+          (result) => result.status !== "rejected",
+        )
+      );
+
+      calendarEvents =
+        resolvedPromises[resolvedPromises.length - 1].value ?? [];
+      fetchEventsPromiseQueue.length = 0; // Clear array without changing ref
     }
 
     if (siblingQueries?.length) {
