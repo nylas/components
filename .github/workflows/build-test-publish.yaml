@@ -27,6 +27,7 @@ jobs:
 
       - name: Print unique ID 🖨`
         run: echo "generated id ${{ steps.uuid.outputs.value }}"
+
   build:
     runs-on: ubuntu-latest
     strategy:
