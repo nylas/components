@@ -312,12 +312,12 @@
     return message;
   }
 
-  let refreshingMailbox = false;
+  let loading = false;
   async function refreshClicked(event: MouseEvent) {
-    refreshingMailbox = true;
+    loading = true;
     dispatchEvent("refreshClicked", { event });
     await updateDisplayedThreads(true);
-    refreshingMailbox = false;
+    loading = false;
   }
 
   function onSelectOne(event: MouseEvent, thread: Thread) {
@@ -477,8 +477,10 @@
 
   //#region pagination
   async function changePage(event: CustomEvent) {
+    loading = true;
     currentPage = event.detail.newPage;
     await updateDisplayedThreads();
+    loading = false;
   }
   //#endregion pagination
 </script>
@@ -732,7 +734,7 @@
               width="16"
               height="16"
               viewBox="0 0 16 16"
-              class:refreshing={refreshingMailbox}
+              class:refreshing={loading}
             >
               <path
                 d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
@@ -812,7 +814,7 @@
           {/if}
         </div>
       {/if}
-      <ul id="mailboxlist" class:refreshing={refreshingMailbox}>
+      <ul id="mailboxlist" class:refreshing={loading}>
         {#each threads as thread}
           {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
