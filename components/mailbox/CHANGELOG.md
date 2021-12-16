@@ -1,4 +1,14 @@
+<<<<<<< HEAD
 # Pending Changes
+=======
+# Unreleased (2021-12-17)
+
+## Bug Fixes
+
+- [Mailbox] Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
+
+# v1.1.5 (2021-12-15)
+>>>>>>> 4dbc871 (changelog)
 
 ## Breaking
 

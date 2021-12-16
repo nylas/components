@@ -1011,6 +1011,9 @@
           &.starred:before {
             color: var(--nylas-email-star-button-color, #ffc107);
           }
+          &:hover:before {
+            color: var(--nylas-email-star-button-hover-color, #ffc107);
+          }
         }
       }
       &.expanded {
