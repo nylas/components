@@ -509,7 +509,7 @@
 
     $outline-style: 1px solid var(--mailbox-border-color, var(--grey-lighter));
     @mixin barStyle {
-      outline: $outline-style;
+      border: $outline-style;
       display: flex;
       align-items: center;
       padding: 24px 16px;
@@ -518,6 +518,7 @@
 
     header {
       @include barStyle;
+      border-bottom: none;
       border-radius: 4px 4px 0 0;
       font-weight: bold;
       button {
@@ -537,6 +538,8 @@
 
     [role="toolbar"] {
       @include barStyle;
+      border-bottom: 0.5px solid
+        var(--mailbox-border-color, var(--grey-lighter));
       padding: $spacing-s $spacing-m;
       gap: $spacing-m;
 
@@ -606,15 +609,32 @@
       }
 
       &:hover {
-        $hover-outline-width: 1px;
-        outline: $hover-outline-width solid
-          var(--mailbox-grey-warm-color, var(--grey-warm));
+        outline: 2px solid var(--mailbox-grey-warm-color, var(--grey-warm));
+        outline-offset: -2px;
+        border-color: var(--mailbox-grey-warm-color, var(--grey-warm));
         cursor: pointer;
       }
 
       // #region define border styles
-      --nylas-email-border: none;
-      outline: $outline-style;
+      --email-border-style: none;
+      border: 1px solid var(--grey-lighter);
+      border-top: var(
+        --mailbox-vertical-border-style,
+        0.5px solid var(--grey-lighter)
+      );
+      border-bottom: var(
+        --mailbox-vertical-border-style,
+        0.5px solid var(--grey-lighter)
+      );
+      border-left: var(
+        --mailbox-horizontal-border-style,
+        1px solid var(--grey-lighter)
+      );
+      border-right: var(
+        --mailbox-horizontal-border-style,
+        1px solid var(--grey-lighter)
+      );
+
       // #endregion define border styles
 
       // #region define background styles

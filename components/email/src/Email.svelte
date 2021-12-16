@@ -896,8 +896,7 @@
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
-      border: var(--nylas-email-border-style, 1px solid var(--grey-lighter));
-      border-left-width: var(--nylas-email-border-left-width, 1px);
+      border: var(--email-border-style, 1px solid var(--grey-lighter));
 
       nylas-tooltip {
         position: relative;
@@ -1268,6 +1267,7 @@
       }
       .subject-snippet-attachment {
         padding: $spacing-xs;
+        padding-top: 0.4rem;
         overflow: hidden;
         .subject-snippet {
           display: flex;
