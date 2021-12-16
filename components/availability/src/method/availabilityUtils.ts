@@ -206,7 +206,11 @@ export const generateDaySlots = (
         }
       }
 
-      const dateOffset =
+      const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime();
+      const dayOffset =
+        (new Date(timestamp).getTime() - today) / (1000 * 60 * 60 * 24);
+
+      const timeOffset =
         (new Date(time).getTime() - new Date().getTime()) /
         (1000 * 60 * 60 * 24);
 
@@ -218,9 +222,9 @@ export const generateDaySlots = (
         start_time: time,
         end_time: endTime,
         isBookable:
-          dateOffset >= 0 &&
-          dateOffset >= internalProps.min_book_ahead_days &&
-          dateOffset <= internalProps.max_book_ahead_days,
+          timeOffset >= 0 &&
+          dayOffset >= internalProps.min_book_ahead_days &&
+          dayOffset <= internalProps.max_book_ahead_days,
       };
     });
 };
