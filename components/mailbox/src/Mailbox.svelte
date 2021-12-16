@@ -650,7 +650,11 @@
   }
 
   ul.refreshing {
-    filter: blur(0.2rem);
+    position: relative;
+    @include progress-bar(top, 0, left, 0, var(--blue), var(--blue-lighter));
+    &:before {
+      z-index: 1;
+    }
   }
 
   .checkbox-container {
