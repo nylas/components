@@ -7,6 +7,7 @@ export const mockAgendaManifest: Partial<AgendaProperties> = {
   calendar_ids: mockAgendaCalendar[0].id,
   color_by: "event",
   condensed_view: false,
+  eagerly_fetch_events: false,
   header_type: "full",
   hide_current_time: false,
   prevent_zoom: false,

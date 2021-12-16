@@ -337,8 +337,7 @@
         )
       );
 
-      calendarEvents =
-        resolvedPromises[resolvedPromises.length - 1].value ?? [];
+      calendarEvents = resolvedPromises.pop()?.value ?? [];
       fetchEventsPromiseQueue.length = 0; // Clear array without changing ref
     }
 
