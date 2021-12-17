@@ -19,8 +19,6 @@ var thread1 = {
       files: [
         {
           content_disposition: "attachment",
-          content_id:
-            "61a72e5c7646b_103f96c4ab17fc31973866b@emaily-consumer-5945b858d7-xcmvp.mail",
           content_type: "application/pdf",
           filename: "invoice_2062.pdf",
           id: "d1fop1j6savk2dqex9uvwvclt",
