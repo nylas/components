@@ -11,5 +11,4 @@ export const InlineImageTypes = [
   "image/gif",
   "image/jpeg",
   "image/svg+xml",
-  "image/webp",
 ];
