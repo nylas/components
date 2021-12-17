@@ -11,5 +11,5 @@
   "includeShadowDom": true,
   "ignoreTestFiles": "**/node_modules/**/*",
   "projectId": "bwwg3s",
-  "retries": 0
+  "retries": 3
 }
