@@ -78,7 +78,7 @@ describe("Composer dispatches events", () => {
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Expand composer/i })
+      .contains("Expand composer", { matchCase: false })
       .click()
       .then(() => {
         expect(eventsFired.maximized).to.equal(true);
@@ -88,7 +88,7 @@ describe("Composer dispatches events", () => {
   it("dispatches composerClosed event", () => {
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Close composer/i })
+      .contains("Close composer", { matchCase: false })
       .click()
       .then(() => {
         expect(eventsFired.closed).to.equal(true);
@@ -188,11 +188,11 @@ describe("Composer interactions", () => {
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Collapse composer/i })
+      .contains("Collapse composer", { matchCase: false })
       .click();
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Send/i })
+      .contains("Send", { matchCase: false })
       .should("not.exist");
   });
 
@@ -204,18 +204,18 @@ describe("Composer interactions", () => {
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Expand composer/i })
+      .contains("Expand composer", { matchCase: false })
       .click();
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Send/i })
+      .contains("Send", { matchCase: false })
       .should("exist");
   });
 
   it("closes composer", () => {
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Close composer/i })
+      .contains("Close composer", { matchCase: false })
       .click();
     cy.get("header").should("not.exist");
   });
@@ -238,7 +238,7 @@ describe("Composer interactions", () => {
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Send/i })
+      .contains("Send", { matchCase: false })
       .should("be.disabled");
   });
 
@@ -251,7 +251,7 @@ describe("Composer interactions", () => {
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Attach files/i })
+      .contains("Attach files", { matchCase: false })
       .should("not.exist");
   });
 

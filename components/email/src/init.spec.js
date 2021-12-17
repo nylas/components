@@ -191,12 +191,6 @@ const SAMPLE_THREAD = {
 
 describe("Email component", () => {
   beforeEach(() => {
-    // cy.intercept(
-    //   "POST",
-    //   "/middleware/contacts?email=nylascypresstest@gmail.com",
-    //   (req) =>
-    //     req.reply({ ...COMPONENT_RESPONSE, response: CONSEC_RESPONSE }),
-    // );
     cy.visit("/components/email/src/index.html");
     cy.get("nylas-email").should("exist");
     cy.get("nylas-email")
