@@ -92,10 +92,17 @@
     "noPreview": true
   },
   {
-    "label": "with_composer",
-    "title": "Allow Replies",
+    "label": "show_reply",
+    "title": "Show reply button",
     "type": "boolean",
     "options": [true, false],
-    "value": false
+    "value": true
+  },
+  {
+    "label": "show_reply_all",
+    "title": "Show reply all button",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
   }
 ]

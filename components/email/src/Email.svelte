@@ -78,7 +78,8 @@
   export let thread_id: string;
   export let thread: Thread;
   export let you: Partial<Account>;
-  export let with_composer: boolean;
+  export let show_reply: boolean;
+  export let show_reply_all: boolean;
 
   const defaultValueMap: Partial<EmailProperties> = {
     clean_conversation: false,
@@ -93,7 +94,8 @@
     theme: "theme-1",
     thread_id: "",
     you: {},
-    with_composer: false,
+    show_reply: false,
+    show_reply_all: false,
   };
 
   let manifest: Partial<EmailProperties> = {};
@@ -504,7 +506,11 @@
     });
   }
 
-  async function handleReplyAllClick(event: MouseEvent, msgIndex: number) {
+  async function handleReplyClick(
+    event: MouseEvent,
+    type: "reply" | "reply_all",
+    msgIndex: number,
+  ) {
     event.stopImmediatePropagation();
 
     const currentMessage = activeThread.messages[msgIndex];
@@ -513,55 +519,19 @@
       name: _this.you.name,
       email: _this.you.email_address,
     };
-    const participantsWithoutMe = activeThread.participants.filter(
-      (e) => e.email != me.email,
-    );
 
-    const from = [me];
-    let to = participantsWithoutMe;
     const subject = currentMessage.subject?.toLowerCase().startsWith("re:")
       ? currentMessage.subject
       : `Re: ${currentMessage.subject}`;
 
-    const value = {
-      reply_to_message_id: currentMessage.id,
-      from: from,
-      to: to,
-      reply_to: from,
-      subject: subject,
-    };
+    const from = [me];
 
-    if (_this.with_composer) {
-      dispatchEvent("replyAllClicked", {
-        event,
-        message: activeThread.messages[msgIndex],
-        thread: activeThread,
-        value,
-        to,
-        from,
-        subject,
-      });
-    }
-  }
-
-  async function handleReplyClick(event: MouseEvent, msgIndex: number) {
-    event.stopImmediatePropagation();
-
-    const currentMessage = activeThread.messages[msgIndex];
-
-    const me: Participant = {
-      name: _this.you.name,
-      email: _this.you.email_address,
-    };
     const participantsWithoutMe = activeThread.participants.filter(
       (e) => e.email != me.email,
     );
 
-    const from = [me];
+    let event_identitfier;
     let to;
-    const subject = currentMessage.subject?.toLowerCase().startsWith("re:")
-      ? currentMessage.subject
-      : `Re: ${currentMessage.subject}`;
 
     /**
      * In Gmail, reply options are available on each message in thread.
@@ -571,19 +541,30 @@
      *
      *
      * 1. When the message is from the user, AND the message is to multiple participants of the thread
-     *    then the default action is to reply to all participants
+     *    then the default action is to reply to all participants and the reply_all button is not shown.
      * 2. When the message is from the user, AND the message is to a single participant of the thread
-     *    then reply to only that participant
+     *    then reply to only that participant.
      * 3. When the message is NOT from the user, then reply to the sender of the message
      */
-    if (isFromMe(currentMessage)) {
-      if (currentMessage.to.length > 1) {
+
+    switch (type) {
+      case "reply":
+        event_identitfier = "replyClicked";
+        if (isFromMe(currentMessage)) {
+          if (currentMessage.to.length > 1) {
+            to = participantsWithoutMe;
+          } else {
+            to = currentMessage.to;
+          }
+        } else {
+          to = currentMessage.from;
+        }
+        break;
+
+      case "reply_all":
+        event_identitfier = "replyAllClicked";
         to = participantsWithoutMe;
-      } else {
-        to = currentMessage.to;
-      }
-    } else {
-      to = currentMessage.from;
+        break;
     }
 
     const value = {
@@ -594,17 +575,12 @@
       subject: subject,
     };
 
-    if (_this.with_composer) {
-      dispatchEvent("replyClicked", {
-        event,
-        message: activeThread.messages[msgIndex],
-        thread: activeThread,
-        value,
-        to,
-        from,
-        subject,
-      });
-    }
+    dispatchEvent(event_identitfier, {
+      event,
+      message: activeThread.messages[msgIndex],
+      thread: activeThread,
+      value,
+    });
   }
 
   function isFromMe(message: Message): boolean {
@@ -620,7 +596,7 @@
   }
 
   function canReplyAll(message: Message): boolean {
-    return !isFromMe(message) && message.to.length > 1;
+    return message?.to?.length > 1 && !isFromMe(message);
   }
 
   function handleEmailClick(event: MouseEvent, msgIndex: number) {
@@ -1652,34 +1628,30 @@
                             )}</span
                           >
                         </div>
-                        <div
-                          aria-label="Email Actions"
-                          role="toolbar"
-                          aria-controls="email"
-                        >
-                          {#if _this.with_composer}
+                        <div aria-label="Email Actions" role="toolbar">
+                          {#if _this.show_reply}
                             <div class="reply">
                               <button
                                 title={"Reply"}
                                 aria-label={"Reply"}
                                 on:click|stopPropagation={(e) =>
-                                  handleReplyClick(e, msgIndex)}
+                                  handleReplyClick(e, "reply", msgIndex)}
                               >
                                 <ReplyIcon aria-hidden="true" />
                               </button>
                             </div>
-                            {#if canReplyAll(message)}
-                              <div class="reply-all">
-                                <button
-                                  title={"Reply all"}
-                                  aria-label={"Reply all"}
-                                  on:click|stopPropagation={(e) =>
-                                    handleReplyAllClick(e, msgIndex)}
-                                >
-                                  <ReplyAllIcon aria-hidden="true" />
-                                </button>
-                              </div>
-                            {/if}
+                          {/if}
+                          {#if _this.show_reply_all && canReplyAll(message)}
+                            <div class="reply-all">
+                              <button
+                                title={"Reply all"}
+                                aria-label={"Reply all"}
+                                on:click|stopPropagation={(e) =>
+                                  handleReplyClick(e, "reply_all", msgIndex)}
+                              >
+                                <ReplyAllIcon aria-hidden="true" />
+                              </button>
+                            </div>
                           {/if}
                         </div>
                       </div>

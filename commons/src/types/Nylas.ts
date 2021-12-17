@@ -200,7 +200,8 @@ export interface EmailProperties extends Manifest {
   thread_id: string;
   thread: Thread;
   you: Partial<Account>;
-  with_composer: boolean;
+  show_reply: boolean;
+  show_reply_all: boolean;
 }
 
 export interface MailboxProperties extends Manifest {
@@ -213,7 +214,8 @@ export interface MailboxProperties extends Manifest {
   show_star: boolean;
   show_thread_checkbox: boolean;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  with_composer: boolean;
+  show_reply: boolean;
+  show_reply_all: boolean;
 }
 
 export type ContactSearchCallback = Participant[] | FetchContactsCallback;
