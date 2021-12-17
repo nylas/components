@@ -1871,7 +1871,7 @@
                 {/if}
                 <div class="message-from">
                   <span class="name"
-                    >{userEmail && message?.from[0].email === userEmail
+                    >{userEmail && _this.message?.from[0].email === userEmail
                       ? "me"
                       : _this.message?.from[0]?.name ||
                         _this.message?.from[0]?.email}</span
@@ -1907,13 +1907,13 @@
                   <div>
                     <nylas-tooltip
                       on:toggleTooltip={setTooltip}
-                      id={`show-more-participants-${message.id}`}
+                      id={`show-more-participants-${_this.message.id}`}
                       current_tooltip_id={currentTooltipId}
                       icon={DropdownSymbol}
                       text={`And ${
-                        message.to?.length - PARTICIPANTS_TO_TRUNCATE
+                        _this.message.to?.length - PARTICIPANTS_TO_TRUNCATE
                       } more`}
-                      content={`${message.to
+                      content={`${_this.message.to
                         .map((to) => `${to.name} ${to.email}`)
                         .join(", ")}`}
                     />
@@ -1930,7 +1930,7 @@
             {/if}
           </div>
           <div class="message-body">
-            {#if _this.clean_conversation && message.conversation}
+            {#if _this.clean_conversation && _this.message.conversation}
               {@html DOMPurify.sanitize(_this.message?.conversation ?? "")}
             {:else if _this.message}
               <nylas-message-body
