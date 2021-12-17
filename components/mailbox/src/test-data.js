@@ -2,7 +2,7 @@ var thread1 = {
   account_id: "1xrddnl99frq3b7son9j32aba",
   drafts: [],
   first_message_timestamp: 1629832405,
-  has_attachments: false,
+  has_attachments: true,
   id: "dlrwnv5oc3v3apxc2j0ht8vop",
   labels: [
     { display_name: "Inbox", id: "dx62wkpj57erbkargbr3zew3j", name: "inbox" },
