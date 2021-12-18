@@ -50,10 +50,8 @@
   export let header: string = "Mailbox";
   export let items_per_page: number;
   export let keyword_to_search: string;
-  export let onSelectThread: (
-    event: MouseEvent,
-    t: Thread,
-  ) => void = onSelectOne;
+  export let onSelectThread: (event: MouseEvent, t: Thread) => void =
+    onSelectOne;
   // query_string format => "in=trash from=phil.r@nylas.com"
   export let query_string: string; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
   export let show_star: boolean;
@@ -783,54 +781,58 @@
               {/each}
             </div>
           {/if}
-          {#if _this.actions_bar.includes(MailboxActions.DELETE)}
-            <div class="delete">
-              <button
-                title="Delete selected email(s)"
-                disabled={!threads.filter((thread) => thread.selected).length}
-                aria-label="Delete selected email(s)"
-                on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
-              >
-            </div>
-          {/if}
-          {#if _this.show_star && _this.actions_bar.includes(MailboxActions.STAR)}
-            <div class="starred">
-              {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
+          {#if threads.filter((thread) => thread.selected).length}
+            {#if _this.actions_bar.includes(MailboxActions.DELETE)}
+              <div class="delete">
                 <button
-                  class={areAllSelectedStarred ? "starred" : ""}
-                  title={starAllTitle}
-                  aria-label={starAllTitle}
-                  role="switch"
+                  title="Delete selected email(s)"
                   disabled={!threads.filter((thread) => thread.selected).length}
-                  aria-checked={areAllSelectedStarred}
-                  on:click={(e) => onStarSelected(e)}
-                />
-              {/each}
-            </div>
-          {/if}
-          {#if _this.actions_bar.includes(MailboxActions.UNREAD)}
-            <div class="read-status">
-              {#if !areAllSelectedRead}
-                <button
-                  data-cy="mark-read"
-                  title="Mark selected email(s) as read"
-                  disabled={!threads.filter((thread) => thread.selected).length}
-                  aria-label="Mark selected email(s) as read"
-                  on:click={(e) => onChangeSelectedReadStatus(e)}
+                  aria-label="Delete selected email(s)"
+                  on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
                 >
-                  <MarkReadIcon />
-                </button>
-              {:else}
-                <button
-                  data-cy="mark-unread"
-                  title="Mark selected email(s) as unread"
-                  aria-label="Mark selected email(s) as unread"
-                  on:click={(e) => onChangeSelectedReadStatus(e)}
-                >
-                  <MarkUnreadIcon />
-                </button>
-              {/if}
-            </div>
+              </div>
+            {/if}
+            {#if _this.show_star && _this.actions_bar.includes(MailboxActions.STAR)}
+              <div class="starred">
+                {#each [areAllSelectedStarred ? "Unstar selected email(s)" : "Star selected email(s)"] as starAllTitle}
+                  <button
+                    class={areAllSelectedStarred ? "starred" : ""}
+                    title={starAllTitle}
+                    aria-label={starAllTitle}
+                    role="switch"
+                    disabled={!threads.filter((thread) => thread.selected)
+                      .length}
+                    aria-checked={areAllSelectedStarred}
+                    on:click={(e) => onStarSelected(e)}
+                  />
+                {/each}
+              </div>
+            {/if}
+            {#if _this.actions_bar.includes(MailboxActions.UNREAD)}
+              <div class="read-status">
+                {#if !areAllSelectedRead}
+                  <button
+                    data-cy="mark-read"
+                    title="Mark selected email(s) as read"
+                    disabled={!threads.filter((thread) => thread.selected)
+                      .length}
+                    aria-label="Mark selected email(s) as read"
+                    on:click={(e) => onChangeSelectedReadStatus(e)}
+                  >
+                    <MarkReadIcon />
+                  </button>
+                {:else}
+                  <button
+                    data-cy="mark-unread"
+                    title="Mark selected email(s) as unread"
+                    aria-label="Mark selected email(s) as unread"
+                    on:click={(e) => onChangeSelectedReadStatus(e)}
+                  >
+                    <MarkUnreadIcon />
+                  </button>
+                {/if}
+              </div>
+            {/if}
           {/if}
         </div>
       {/if}
