@@ -7,6 +7,9 @@ beforeEach(() => {
     "nylas-availability",
     "demo-availability",
   );
+  cy.get("@testComponent")
+    .should("have.prop", "id")
+    .and("equal", "test-availability");
 });
 
 describe("availability component", () => {
