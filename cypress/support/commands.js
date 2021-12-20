@@ -33,3 +33,16 @@ Cypress.Commands.add("visitMailbox", () => {
     cy.get("nylas-mailbox").should("exist");
   });
 });
+
+Cypress.Commands.add(
+  "visitComponentPage",
+  (url, componentName, componentID) => {
+    return cy.visit(url).then(() => {
+      return cy.get(componentName).then(($element) => {
+        const newID = componentID.replace("demo", "test");
+        $element.attr("id", newID);
+        cy.get(`${componentName}#${newID}`).as("testComponent");
+      });
+    });
+  },
+);
