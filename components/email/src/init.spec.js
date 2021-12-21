@@ -189,6 +189,71 @@ const SAMPLE_THREAD = {
   version: 63,
 };
 
+const EMPTY_THREAD = {
+  account_id: "cou6r5tjgubx9rswikzvz9afb",
+  drafts: [],
+  first_message_timestamp: 1613494375,
+  has_attachments: true,
+  id: "c7ksnn0zyweivc3bcjnd9miwb",
+  labels: [
+    {
+      display_name: "Important",
+      id: "qu2u9kjbafk1xgfd1qr3auv4",
+      name: "important",
+    },
+    {
+      display_name: "All Mail",
+      id: "2j0dp79lsxxw8fa4y57yszmw9",
+      name: "all",
+    },
+    {
+      display_name: "Sent Mail",
+      id: "4t2d14mxzlushnbgtlknxf7e0",
+      name: "sent",
+    },
+  ],
+  last_message_received_timestamp: 1613703916,
+  last_message_sent_timestamp: 1613748385,
+  last_message_timestamp: 1613748385,
+  messages: [],
+  object: "thread",
+  participants: [
+    {
+      email: "jimmy@nylas.com",
+      name: "Jimmy Hooker",
+    },
+    {
+      email: "chantal.l@nylas.com",
+      name: "Chantal Lam",
+    },
+    {
+      email: "hazik.a@nylas.com",
+      name: "Hazik Afzal",
+    },
+    {
+      email: "phil.r@nylas.com",
+      name: "Phil Renaud",
+    },
+  ],
+  snippet: "Testing with updated commons! --Sent with Nylas",
+  starred: false,
+  subject: "This is a Super great test email.",
+  unread: true,
+  version: 63,
+};
+
+const DRAFT_THREAD = {
+  ...EMPTY_THREAD,
+  labels: [
+    ...EMPTY_THREAD.labels,
+    {
+      display_name: "Draft",
+      id: "qu2u9kjbafk1xgfd1qr3auv4",
+      name: "drafts",
+    },
+  ],
+};
+
 describe("Email component", () => {
   beforeEach(() => {
     cy.visit("/components/email/src/index.html");
@@ -571,6 +636,40 @@ describe("Email component", () => {
               .should("eq", "show email");
           });
       });
+    });
+
+    it("Shows empty message", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          component.show_expanded_email_view_onload = false;
+          component.thread = EMPTY_THREAD;
+          cy.get(component)
+            .find(".no-messages-warning-container")
+            .should("exist")
+            .and(($div) => {
+              expect($div).to.contain(
+                "Sorry, looks like this thread is currently unavailable",
+              );
+            });
+        });
+    });
+
+    it("Shows draft message", () => {
+      cy.get("nylas-email")
+        .as("email")
+        .then((element) => {
+          const component = element[2];
+          component.show_expanded_email_view_onload = false;
+          component.thread = DRAFT_THREAD;
+          cy.get(component)
+            .find(".no-messages-warning-container")
+            .should("exist")
+            .and(($div) => {
+              expect($div).to.contain("This is a draft email");
+            });
+        });
     });
   });
 });
