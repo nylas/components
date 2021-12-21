@@ -254,421 +254,481 @@ const DRAFT_THREAD = {
   ],
 };
 
-describe("Email component", () => {
+describe("Email: Displays threads and messages", () => {
   beforeEach(() => {
-    cy.visit("/components/email/src/index.html");
-    cy.get("nylas-email").should("exist");
-    cy.get("nylas-email")
-      .as("email")
-      .then((element) => {
-        const component0 = element[0];
-        component0.show_expanded_email_view_onload = false;
-        const component1 = element[1];
-        component1.show_expanded_email_view_onload = false;
-      });
-  });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/c5xjcjlhzldqctpud8zeufa6t",
+      {
+        fixture: "email/messages/idWithImage.json",
+      },
+    ).as("messageWithImage");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "email/account.json",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/files/6dywzoo80moag1it135co9zv8/download",
+      {
+        fixture: "email/files/download.json",
+      },
+    ).as("filesDownload");
 
-  it("Shows Email with demo id and thread", () => {
-    cy.get("nylas-email").find(".subject").should("exist");
-    cy.get("nylas-email").find(".subject").should("contain", "Test");
-  });
-  // TODO: Fails github action.
-  xit("Shows Email with passed thread", () => {
-    cy.get("nylas-email")
-      .as("email")
-      .then((element) => {
-        const component = element[1];
-        component.thread = SAMPLE_THREAD;
-        cy.get(component).find(".subject").should("exist");
-        cy.get(component).find(".subject").should("contain", "Super great");
-      });
-  });
-  it("Shows a single email with passed message_id and no thread/thread_id", () => {
-    cy.get("nylas-email")
-      .as("email")
-      .then((element) => {
-        const component = element[2];
-        component.id = "demo-email";
-        component.thread_id = undefined;
-        component.thread = undefined;
-        component.message_id = "affxolvozy2pcqh4303w7pc9n";
-        cy.get(component)
-          .find(".email-row.expanded.singular header")
-          .should("exist");
-        cy.get(component)
-          .find(".email-row.expanded.singular header")
-          .should("contain", "Demo Thread");
-        cy.get(component).find(".message-body").should("exist");
-        cy.get(component)
-          .find("nylas-message-body")
-          .then((nylasMessageBody) => {
-            const messageBody = nylasMessageBody[0];
-            cy.get(messageBody).find("div").should("contain", "Allo bonjour");
-          });
-        cy.get(component).find(".name").should("exist");
-        cy.get(component).find(".name").should("contain", "Test User");
-        cy.get(component).find(".email-row.expanded.singular header").click();
-        cy.get(component)
-          .find("nylas-tooltip")
-          .then((element) => {
-            const tooltip = element[0];
-            cy.get(tooltip).find(".tooltip-trigger").should("exist");
-            cy.get(tooltip).find(".tooltip-trigger").click();
-            cy.get(tooltip)
-              .find(".tooltip")
-              .should("contain", "nylascypresstest@gmail.com");
-            cy.get(tooltip).find(".tooltip-trigger").click();
-            cy.get(tooltip).find(".tooltip").should("not.exist");
-          });
-        cy.get(component).find(".message-date span").should("exist");
-        cy.get(component)
-          .find(".message-date span")
-          .should("contain", "October 21");
-        cy.get(component).find(".message-to span").should("contain", "Me");
-      });
-  });
-  it("Shows a thread even when message_id is passed", (done) => {
+    cy.visit("/components/email/src/cypress.html");
+
     cy.get("nylas-email")
       .as("email")
       .then((element) => {
         const component = element[0];
-        component.message_id = "ew8xkdd7aov1xkxqfed5l5mvt";
-        setTimeout(() => {
-          cy.get(component).find(".email-row.singular").should("not.exist");
-          cy.get(component).find(".email-row.condensed").should("exist");
-          done();
-        }, 100);
+        component.show_expanded_email_view_onload = false;
       });
   });
-  it("Shows a message when a full message is passed", () => {
-    cy.get("nylas-email")
-      .as("email")
+
+  it("Shows Email with demo id and thread", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.thread_id = "b3z0fd5kbbwcxvf4q1ele5us6";
+    });
+
+    cy.get("@email").find(".subject").should("exist");
+    cy.get("@email").find(".subject").should("contain", "Test");
+  });
+
+  it("Shows Email with passed thread", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.thread = SAMPLE_THREAD;
+
+      cy.get(component).find(".subject").should("exist");
+      cy.get(component).find(".subject").should("contain", "Super great");
+    });
+  });
+
+  it("Shows a single email with passed message_id and no thread/thread_id", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.thread_id = undefined;
+      component.thread = undefined;
+      component.message_id = "affxolvozy2pcqh4303w7pc9n";
+    });
+
+    cy.get("@email")
+      .find(".email-row.expanded.singular header")
+      .should("contain", "Demo Thread");
+    cy.get("@email").find("nylas-message-body").contains("Allo bonjour");
+    cy.get("@email").find(".name").contains("me");
+    cy.get("@email").find(".message-to").contains("Test User");
+    cy.get("@email").find(".email-row.expanded.singular header").click();
+    cy.get("@email")
+      .find("nylas-tooltip")
       .then((element) => {
-        const component = element[3];
-        component.message = SAMPLE_THREAD.messages[0];
-        cy.get(component).find(".email-row.singular").should("exist");
-        cy.get(component).find(".email-row.condensed").should("not.exist");
+        const tooltip = element[0];
+        cy.get(tooltip).find(".tooltip-trigger").should("exist");
+        cy.get(tooltip).find(".tooltip-trigger").click();
+        cy.get(tooltip)
+          .find(".tooltip")
+          .should("contain", "nylascypresstest@gmail.com");
+        cy.get(tooltip).find(".tooltip-trigger").click();
+        cy.get(tooltip).find(".tooltip").should("not.exist");
       });
+    cy.get("@email").find(".message-date").contains("October 21");
+    cy.get("@email").find(".message-to").contains("Me");
   });
+
+  it("Shows a thread even when message_id is passed", (done) => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.message_id = "affxolvozy2pcqh4303w7pc9n";
+      setTimeout(() => {
+        cy.get(component).find(".email-row.singular").should("not.exist");
+        cy.get(component).find(".email-row.condensed").should("exist");
+        done();
+      }, 100);
+    });
+  });
+
+  it("Shows a message when a full message is passed", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.message = SAMPLE_THREAD.messages[0];
+    });
+
+    cy.get("@email").find(".email-row.singular").should("exist");
+    cy.get("@email").find(".email-row.condensed").should("not.exist");
+  });
+
   it("Sanitizes markup in the email body", (done) => {
     const stub = cy.stub();
     cy.on("window:alert", stub);
 
     cy.on("window:alert", stub);
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.style = "position: absolute; top: 0";
+      component.message = {
+        ...SAMPLE_THREAD.messages[0],
+        body: `<img src=x onerror=alert(1)//>`,
+      };
+      setTimeout(() => {
+        expect(stub).not.to.be.called;
+        done();
+      }, 50);
+    });
+  });
+
+  it("Renders inline file appropriately", () => {
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/manifest");
+
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      // Replace thread id of the first email component
+      component.thread_id = "c5xjcjlhzldqctpud8zeufa6t";
+      component.click_action = "default";
+    });
+
+    cy.get("@email").find(".email-row.condensed").click();
+
+    cy.wait("@filesDownload");
+
+    cy.get("@email")
+      .find("img[alt='Streams Automation.jpg']")
+      .should("have.attr", "src")
+      .and(($div) => {
+        expect($div).to.contain("data:image/jpeg");
+      });
+  });
+
+  it("Shows attached file when condensed", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_expanded_email_view_onload = false;
+      component.thread = SAMPLE_THREAD;
+    });
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment.desktop button")
+      .should("have.text", "invoice_2062.pdf ");
+  });
+
+  it("Shows empty message", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_expanded_email_view_onload = false;
+      component.thread = EMPTY_THREAD;
+    });
+
+    cy.get("@email")
+      .find(".no-messages-warning-container")
+      .should("exist")
+      .and(($div) => {
+        expect($div).to.contain(
+          "Sorry, looks like this thread is currently unavailable",
+        );
+      });
+  });
+
+  it("Shows draft message", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_expanded_email_view_onload = false;
+      component.thread = DRAFT_THREAD;
+    });
+
+    cy.get("@email")
+      .find(".no-messages-warning-container")
+      .should("exist")
+      .and(($div) => {
+        expect($div).to.contain("This is a draft email");
+      });
+  });
+});
+
+describe("Email: Stars", () => {
+  beforeEach(() => {
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "email/account.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6",
+    );
+
+    cy.visit("/components/email/src/cypress.html");
+
     cy.get("nylas-email")
       .as("email")
       .then((element) => {
-        const component = element[3];
-        component.style = "position: absolute; top: 0";
-        component.message = {
-          ...SAMPLE_THREAD.messages[0],
-          body: `<img src=x onerror=alert(1)//>`,
-        };
-        setTimeout(() => {
-          expect(stub).not.to.be.called;
-          done();
-        }, 50);
+        const component = element[0];
+        component.thread_id = "b3z0fd5kbbwcxvf4q1ele5us6";
       });
   });
 
-  describe("Stars", () => {
-    // TODO: stars aren't showing up when property is changed
-    it("Shows no stars when show_star=false", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[1];
-          component.show_star = false;
-          cy.get(component).find("div.starred").should("not.exist");
-        });
-    });
-
-    it("Shows stars when show_star=true", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[1];
-          component.show_star = true;
-          cy.get(component).find("div.starred").should("exist");
-        });
-    });
-
-    it("Updates starred status via clicking", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[1];
-          component.show_star = "true";
-          cy.get(component).find("div.starred").should("exist");
-          cy.get(component)
-            .find("div.starred")
-            .find("button")
-            .should("not.have.class", "starred");
-          cy.get(component).find("div.starred").find("button").click();
-          cy.get(component).find("button").should("have.class", "starred");
-          cy.get(component).find("button.starred").click();
-          cy.get(component).find("button").should("not.have.class", "starred");
-        });
+  // TODO: stars aren't showing up when property is changed
+  it("Shows no stars when show_star=false", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_star = false;
+      cy.get(component).find("div.starred").should("not.exist");
     });
   });
-  describe("Unread status", () => {
-    // test setting prop
-    it("Updates unread status via component prop", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[0];
-          component.thread = { ...SAMPLE_THREAD, unread: false };
-          cy.get(component)
-            .find(".unread")
-            .should("not.exist")
-            .then(() => {
-              component.thread = { ...component.thread, unread: true };
-              cy.get(component).find(".unread").should("exist");
-            });
-        });
+
+  it("Shows stars when show_star=true", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_star = true;
+      cy.get(component).find("div.starred").should("exist");
+    });
+  });
+
+  it("Updates starred status via clicking", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.click_action = "default";
+      component.show_star = true;
     });
 
-    // test clicking
-    // TODO: This test fails in Github Actions
-    xit("Updates unread status via clicking", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[1];
-          component.thread = SAMPLE_THREAD;
+    cy.get("@email").find("div.starred").should("exist");
+    cy.get("@email")
+      .shadow()
+      .findByLabelText("Star button for thread b3z0fd5kbbwcxvf4q1ele5us6")
+      .click();
+    cy.get("@email")
+      .find("div.starred")
+      .find("button")
+      .should("have.class", "starred");
+  });
+});
+
+describe("Email: Unread status", () => {
+  beforeEach(() => {
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "email/account.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+
+    cy.visit("/components/email/src/cypress.html");
+
+    cy.get("nylas-email").as("email");
+  });
+
+  // test setting prop
+  it("Updates unread status via component prop", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.thread = { ...SAMPLE_THREAD, unread: false };
+      cy.get(component)
+        .find(".unread")
+        .should("not.exist")
+        .then(() => {
+          component.thread = { ...component.thread, unread: true };
           cy.get(component).find(".unread").should("exist");
-          cy.get(component).find(".email-row").click();
-          cy.get(component).find(".email-row.expanded header").click();
-          cy.get(component).find(".unread").should("not.exist");
         });
     });
   });
 
-  describe("Toggle email of sender/recipient", () => {
-    it("When tooltip trigger is clicked", () => {
-      cy.get("nylas-email").then((element) => {
-        const component = element[2];
-        cy.get(component)
-          .find("nylas-tooltip")
-          .then((element) => {
-            const firstTooltip = element[0];
-            cy.get(firstTooltip).find(".tooltip-trigger").should("exist");
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("exist");
-            cy.get(firstTooltip)
-              .find(".tooltip")
-              .should("contain", "nylascypresstest@gmail.com");
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("not.exist");
-          });
-      });
-    });
-    it("Does not show more than one tooltip", () => {
-      cy.get("nylas-email").then((element) => {
-        const component = element[2];
-        cy.get(component)
-          .find("nylas-tooltip")
-          .then((element) => {
-            const firstTooltip = element[0];
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("exist");
-            cy.get(firstTooltip)
-              .find(".tooltip")
-              .should("contain", "nylascypresstest@gmail.com");
-          });
-      });
-    });
-    it("When tooltip trigger is clicked multiple times", () => {
-      cy.get("nylas-email").then((element) => {
-        const component = element[3];
-        cy.get(component)
-          .find("nylas-tooltip")
-          .then((element) => {
-            const firstTooltip = element[0];
-            cy.get(firstTooltip).find(".tooltip-trigger").should("exist");
-            // first toggle
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("exist");
-            cy.get(firstTooltip)
-              .find(".tooltip")
-              .should("contain", "notifications@github.com");
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("not.exist");
-            // second toggle
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("exist");
-            cy.get(firstTooltip)
-              .find(".tooltip")
-              .should("contain", "notifications@github.com");
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("not.exist");
-            // third toggle
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("exist");
-            cy.get(firstTooltip)
-              .find(".tooltip")
-              .should("contain", "notifications@github.com");
-            cy.get(firstTooltip).find(".tooltip-trigger").click();
-            cy.get(firstTooltip).find(".tooltip").should("not.exist");
-          });
-      });
-    });
-    it("Accessibility attributes are set by default", () => {
-      cy.get("nylas-email").then((element) => {
-        const component = element[2];
-        cy.get(component)
-          .find("nylas-tooltip")
-          .then((element) => {
-            const tooltip = element[0];
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-expanded")
-              .should("eq", "false");
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-label")
-              .should("eq", "show email");
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-describedby")
-              .should("exist");
-            cy.get(tooltip)
-              .find(".tooltip-trigger svg")
-              .invoke("attr", "aria-hidden")
-              .should("eq", "true");
-          });
-      });
-    });
-    it("Shows attached file when condensed", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[2];
-          component.show_expanded_email_view_onload = false;
-          component.thread = SAMPLE_THREAD;
-          cy.get(component)
-            .find(".email-row.condensed .attachment")
-            .should("exist");
-          cy.get(component)
-            .find(".email-row.condensed .attachment.desktop button")
-            .should("have.text", "invoice_2062.pdf ");
-        });
+  it("Updates unread status via clicking", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.thread = SAMPLE_THREAD;
+      component.show_expanded_email_view_onload = false;
+      component.click_action = "default";
     });
 
-    it("Renders inline file appropriately", () => {
-      // Wait for the component to load
-      cy.wait(3000);
-      cy.get("nylas-email")
-        .as("email")
+    cy.get("@email").find(".unread").should("exist");
+    cy.get("@email").find(".email-row").click();
+    cy.get("@email").find(".unread").should("not.exist");
+  });
+});
+
+describe("Email: Toggle email of sender/recipient", () => {
+  beforeEach(() => {
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "email/account.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+
+    cy.visit("/components/email/src/cypress.html");
+
+    cy.get("nylas-email")
+      .as("email")
+      .then((element) => {
+        const component = element[0];
+        component.thread_id = "b3z0fd5kbbwcxvf4q1ele5us6";
+        component.show_expanded_email_view_onload = true;
+      });
+  });
+
+  it("When tooltip trigger is clicked", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      cy.get(component)
+        .find("nylas-tooltip")
         .then((element) => {
-          const component = element[0];
-          component.show_expanded_email_view_onload = false;
-          // Replace thread id of the first email component
-          component.thread_id = "c5xjcjlhzldqctpud8zeufa6t";
-          // Wait for the new thread id to be loaded
-          cy.wait(3000);
-          cy.get(component).find(".email-row.condensed").click();
-          cy.get(component)
-            .find("nylas-message-body")
-            .then((bodyElement) => {
-              const messageBodyComponent = bodyElement[0];
-              cy.get(messageBodyComponent)
-                .find('img[alt="Streams Automation.jpg"]')
-                .should("exist");
-              cy.get(messageBodyComponent)
-                .find('img[alt="Streams Automation.jpg"]')
-                .should("not.have.attr", "src", "cid:ii_kwwc5np40");
-              cy.get(messageBodyComponent)
-                .find('img[alt="Streams Automation.jpg"]')
-                .should("have.attr", "src")
-                .and(($div) => {
-                  expect($div).to.contain("data:image/jpeg");
+          const firstTooltip = element[0];
+          cy.get(firstTooltip).find(".tooltip-trigger").should("exist");
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("exist");
+          cy.get(firstTooltip)
+            .find(".tooltip")
+            .should("contain", "nylascypresstest@gmail.com");
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("not.exist");
+        });
+    });
+  });
+
+  it("Does not show more than one tooltip", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      cy.get(component)
+        .find("nylas-tooltip")
+        .then((element) => {
+          const firstTooltip = element[0];
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("exist");
+          cy.get(firstTooltip)
+            .find(".tooltip")
+            .should("contain", "nylascypresstest@gmail.com");
+        });
+    });
+  });
+
+  it("When tooltip trigger is clicked multiple times", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      cy.get(component)
+        .find("nylas-tooltip")
+        .then((element) => {
+          const firstTooltip = element[0];
+          cy.get(firstTooltip).find(".tooltip-trigger").should("exist");
+          // first toggle
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("exist");
+          cy.get(firstTooltip)
+            .find(".tooltip")
+            .should("contain", "nylascypresstest@gmail.com");
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("not.exist");
+          // second toggle
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("exist");
+          cy.get(firstTooltip)
+            .find(".tooltip")
+            .should("contain", "nylascypresstest@gmail.com");
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("not.exist");
+          // third toggle
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("exist");
+          cy.get(firstTooltip)
+            .find(".tooltip")
+            .should("contain", "nylascypresstest@gmail.com");
+          cy.get(firstTooltip).find(".tooltip-trigger").click();
+          cy.get(firstTooltip).find(".tooltip").should("not.exist");
+        });
+    });
+  });
+
+  it("Accessibility attributes are set by default", () => {
+    cy.get("@email")
+      .find("nylas-tooltip")
+      .then((element) => {
+        const tooltip = element[0];
+        cy.get(tooltip)
+          .find(".tooltip-trigger")
+          .invoke("attr", "aria-expanded")
+          .should("eq", "false");
+        cy.get(tooltip)
+          .find(".tooltip-trigger")
+          .invoke("attr", "aria-label")
+          .should("eq", "show email");
+        cy.get(tooltip)
+          .find(".tooltip-trigger")
+          .invoke("attr", "aria-describedby")
+          .should("exist");
+        cy.get(tooltip)
+          .find(".tooltip-trigger svg")
+          .invoke("attr", "aria-hidden")
+          .should("eq", "true");
+      });
+  });
+
+  it("Accessibility attributes change when tooltip trigger is clicked", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      cy.get(component)
+        .find("nylas-tooltip")
+        .then((element) => {
+          const tooltip = element[0];
+
+          cy.get(tooltip).find(".tooltip-trigger").click();
+          cy.get(tooltip)
+            .find(".tooltip")
+            .invoke("attr", "tabindex")
+            .should("eq", "0");
+          cy.get(tooltip)
+            .find(".tooltip")
+            .invoke("attr", "role")
+            .should("eq", "tooltip");
+          cy.get(tooltip)
+            .find(".tooltip")
+            .invoke("attr", "id")
+            .then(($tooltipID) => {
+              cy.get(tooltip)
+                .find(".tooltip-trigger")
+                .invoke("attr", "aria-describedby")
+                .then(($ariaDescribedby) => {
+                  expect($tooltipID).to.be.equal($ariaDescribedby);
                 });
             });
-        });
-    });
-
-    it("Accessibility attributes change when tooltip trigger is clicked", () => {
-      cy.get("nylas-email").then((element) => {
-        const component = element[2];
-        cy.get(component)
-          .find("nylas-tooltip")
-          .then((element) => {
-            const tooltip = element[0];
-
-            cy.get(tooltip).find(".tooltip-trigger").click();
-            cy.get(tooltip)
-              .find(".tooltip")
-              .invoke("attr", "tabindex")
-              .should("eq", "0");
-            cy.get(tooltip)
-              .find(".tooltip")
-              .invoke("attr", "role")
-              .should("eq", "tooltip");
-            cy.get(tooltip)
-              .find(".tooltip")
-              .invoke("attr", "id")
-              .then(($tooltipID) => {
-                cy.get(tooltip)
-                  .find(".tooltip-trigger")
-                  .invoke("attr", "aria-describedby")
-                  .then(($ariaDescribedby) => {
-                    expect($tooltipID).to.be.equal($ariaDescribedby);
-                  });
-              });
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-expanded")
-              .should("eq", "true");
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-label")
-              .should("eq", "hide email");
-            cy.get(tooltip).find(".tooltip-trigger").click();
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-expanded")
-              .should("eq", "false");
-            cy.get(tooltip)
-              .find(".tooltip-trigger")
-              .invoke("attr", "aria-label")
-              .should("eq", "show email");
-          });
-      });
-    });
-
-    it("Shows empty message", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[2];
-          component.show_expanded_email_view_onload = false;
-          component.thread = EMPTY_THREAD;
-          cy.get(component)
-            .find(".no-messages-warning-container")
-            .should("exist")
-            .and(($div) => {
-              expect($div).to.contain(
-                "Sorry, looks like this thread is currently unavailable",
-              );
-            });
-        });
-    });
-
-    it("Shows draft message", () => {
-      cy.get("nylas-email")
-        .as("email")
-        .then((element) => {
-          const component = element[2];
-          component.show_expanded_email_view_onload = false;
-          component.thread = DRAFT_THREAD;
-          cy.get(component)
-            .find(".no-messages-warning-container")
-            .should("exist")
-            .and(($div) => {
-              expect($div).to.contain("This is a draft email");
-            });
+          cy.get(tooltip)
+            .find(".tooltip-trigger")
+            .invoke("attr", "aria-expanded")
+            .should("eq", "true");
+          cy.get(tooltip)
+            .find(".tooltip-trigger")
+            .invoke("attr", "aria-label")
+            .should("eq", "hide email");
+          cy.get(tooltip).find(".tooltip-trigger").click();
+          cy.get(tooltip)
+            .find(".tooltip-trigger")
+            .invoke("attr", "aria-expanded")
+            .should("eq", "false");
+          cy.get(tooltip)
+            .find(".tooltip-trigger")
+            .invoke("attr", "aria-label")
+            .should("eq", "show email");
         });
     });
   });
