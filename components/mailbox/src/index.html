@@ -6,23 +6,77 @@
     <title>Mailbox Demo</title>
     <link rel="shortcut icon" href="data:;base64,=" />
     <script src="../index.js"></script>
+    <script src="../../composer/index.js"></script>
+    <style>
+      .composer {
+        z-index: 999;
+      }
+
+      .composer.hidden {
+        display: none;
+        height: 0;
+      }
+
+      .composer.active {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: unset;
+        width: 100%;
+        transition: height 0.125s cubic-bezier(0.075, 0.82, 0.165, 1);
+      }
+    </style>
     <script type="module">
       import { thread1, thread2 } from "./test-data.js";
       document.addEventListener("DOMContentLoaded", function () {
         const mailbox = document.querySelector("nylas-mailbox");
 
-        // enable `header="string"` and click refresh button
-        // mailbox.addEventListener("refreshClicked", function (event) {
-        //   mailbox.all_threads = [...mailbox.all_threads, thread2];
-        // });
-
-        // mailbox.all_threads = [thread1]; // enable to overwrite thread_id fetching
         mailbox.actions_bar = ["selectall", "star", "delete", "unread"];
         mailbox.show_star = true;
-        // mailbox.keyword_to_search = "Hi";
-        // mailbox.query_string = "in=inbox from=tips@nylas.com";
+        mailbox.show_reply = true;
+        mailbox.show_reply_all = true;
 
-        // setTimeout(() => mailbox.items_per_page = 10, 5000)
+        const composer = document.querySelector("nylas-composer");
+        composer.show_header = true;
+        composer.show_minimize_button = false;
+        composer.show_from = false;
+        composer.show_bcc = false;
+        composer.show_cc = false;
+
+        composer.close();
+
+        composer.afterSendSuccess = async (data) => {
+          composer.close();
+          composer.classList.remove("active");
+          composer.classList.add("hidden");
+        };
+
+        mailbox.addEventListener("replyClicked", (v) => {
+          composer.classList.remove("hidden");
+          composer.classList.add("active");
+
+          const c = v.detail;
+          console.log(c.value);
+          composer.value = c.value;
+          composer.from = c.value.from;
+          composer.to = c.value.to;
+
+          composer.open();
+        });
+
+        mailbox.addEventListener("replyAllClicked", (v) => {
+          composer.classList.remove("hidden");
+          composer.classList.add("active");
+
+          const c = v.detail;
+          console.log(c.value);
+          composer.value = c.value;
+          composer.from = c.value.from;
+          composer.to = c.value.to;
+
+          composer.open();
+        });
       });
     </script>
   </head>
@@ -32,8 +86,12 @@
       id="demo-mailbox"
       header="Mailbox"
       show_star="true"
-      with_composer="true"
-      composer_id="test-composer"
-    />
+    ></nylas-mailbox>
+    <nylas-composer
+      id="test-composer"
+      class="composer"
+      show_header="true"
+      show_subject="true"
+    ></nylas-composer>
   </body>
 </html>
