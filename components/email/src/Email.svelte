@@ -51,6 +51,8 @@
   import * as DOMPurify from "dompurify";
   import LoadingIcon from "./assets/loading.svg";
   import { downloadFile } from "@commons/connections/files";
+  import ReplyIcon from "./assets/reply.svg";
+  import ReplyAllIcon from "./assets/reply-all.svg";
   import {
     DisallowedContentTypes,
     InlineImageTypes,
@@ -81,6 +83,8 @@
   export let thread_id: string;
   export let thread: Thread;
   export let you: Partial<Account>;
+  export let show_reply: boolean;
+  export let show_reply_all: boolean;
 
   const defaultValueMap: Partial<EmailProperties> = {
     clean_conversation: false,
@@ -95,6 +99,8 @@
     theme: "theme-1",
     thread_id: "",
     you: {},
+    show_reply: false,
+    show_reply_all: false,
   };
 
   let manifest: Partial<EmailProperties> = {};
@@ -505,6 +511,99 @@
       event,
       thread: activeThread,
     });
+  }
+
+  async function handleReplyClick(
+    event: MouseEvent,
+    type: "reply" | "reply_all",
+    msgIndex: number,
+  ) {
+    event.stopImmediatePropagation();
+
+    const currentMessage = activeThread.messages[msgIndex];
+
+    const me: Participant = {
+      name: _this.you.name,
+      email: _this.you.email_address,
+    };
+
+    const subject = currentMessage.subject?.toLowerCase().startsWith("re:")
+      ? currentMessage.subject
+      : `Re: ${currentMessage.subject}`;
+
+    const from = [me];
+
+    const participantsWithoutMe = activeThread.participants.filter(
+      (e) => e.email != me.email,
+    );
+
+    let event_identitfier;
+    let to;
+
+    /**
+     * In Gmail, reply options are available on each message in thread.
+     * There are a couple cases that need to be handled when the use clicks 'reply'
+     * and there are multiple participants in an email thread. In some cases, participants
+     * are add to the thread after messages have already been exchanged with out them.
+     *
+     *
+     * 1. When the message is from the user, AND the message is to multiple participants of the thread
+     *    then the default action is to reply to all participants and the reply_all button is not shown.
+     * 2. When the message is from the user, AND the message is to a single participant of the thread
+     *    then reply to only that participant.
+     * 3. When the message is NOT from the user, then reply to the sender of the message
+     */
+
+    switch (type) {
+      case "reply":
+        event_identitfier = "replyClicked";
+        if (isFromMe(currentMessage)) {
+          if (currentMessage.to.length > 1) {
+            to = participantsWithoutMe;
+          } else {
+            to = currentMessage.to;
+          }
+        } else {
+          to = currentMessage.from;
+        }
+        break;
+
+      case "reply_all":
+        event_identitfier = "replyAllClicked";
+        to = participantsWithoutMe;
+        break;
+    }
+
+    const value = {
+      reply_to_message_id: currentMessage.id,
+      from: from,
+      to: to,
+      reply_to: from,
+      subject: subject,
+    };
+
+    dispatchEvent(event_identitfier, {
+      event,
+      message: activeThread.messages[msgIndex],
+      thread: activeThread,
+      value,
+    });
+  }
+
+  function isFromMe(message: Message): boolean {
+    if (!_this.you.email_address) {
+      return false;
+    }
+
+    return message.from
+      .map((f) => {
+        return f.email.toLowerCase();
+      })
+      .includes(_this.you.email_address?.toLowerCase());
+  }
+
+  function canReplyAll(message: Message): boolean {
+    return message?.to?.length > 1 && !isFromMe(message);
   }
 
   function handleEmailClick(event: MouseEvent, msgIndex: number) {
@@ -982,6 +1081,16 @@
           @include barStyle;
           padding: $spacing-s $spacing-m;
           gap: $spacing-m;
+        }
+
+        .message-head [role="toolbar"] {
+          outline: none;
+        }
+
+        .message-head [role="toolbar"] button {
+          background: none;
+          outline: none;
+          cursor: pointer;
         }
 
         .subject-title {
@@ -1567,12 +1676,40 @@
                           {/if}
                         </div>
                       </div>
-                      <div class="message-date">
-                        <span>
-                          {formatExpandedDate(
-                            new Date(message.date * 1000),
-                          )}</span
-                        >
+                      <div class="">
+                        <div class="message-date">
+                          <span>
+                            {formatExpandedDate(
+                              new Date(message.date * 1000),
+                            )}</span
+                          >
+                        </div>
+                        <div aria-label="Email Actions" role="toolbar">
+                          {#if _this.show_reply}
+                            <div class="reply">
+                              <button
+                                title={"Reply"}
+                                aria-label={"Reply"}
+                                on:click|stopPropagation={(e) =>
+                                  handleReplyClick(e, "reply", msgIndex)}
+                              >
+                                <ReplyIcon aria-hidden="true" />
+                              </button>
+                            </div>
+                          {/if}
+                          {#if _this.show_reply_all && canReplyAll(message)}
+                            <div class="reply-all">
+                              <button
+                                title={"Reply all"}
+                                aria-label={"Reply all"}
+                                on:click|stopPropagation={(e) =>
+                                  handleReplyClick(e, "reply_all", msgIndex)}
+                              >
+                                <ReplyAllIcon aria-hidden="true" />
+                              </button>
+                            </div>
+                          {/if}
+                        </div>
                       </div>
                     </div>
                     <div class="message-body">

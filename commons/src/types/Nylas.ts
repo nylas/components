@@ -5,7 +5,12 @@ import type {
 } from "@commons/enums/Nylas";
 import type { Contact, HydratedContact } from "@commons/types/Contacts";
 import type { Event } from "@commons/types/Events";
-import type { ReplaceFields } from "./Composer";
+import type {
+  FetchContactsCallback,
+  ReplaceFields,
+  SendCallback,
+  Tracking,
+} from "./Composer";
 
 export interface CommonQuery {
   component_id: string;
@@ -117,6 +122,8 @@ export interface Message {
   expanded?: boolean;
   thread_id?: string;
   files: File[];
+  reply_to: Participant[];
+  reply_to_message_id?: string;
 }
 
 export interface RadialMessage extends Message {
@@ -193,6 +200,8 @@ export interface EmailProperties extends Manifest {
   thread_id: string;
   thread: Thread;
   you: Partial<Account>;
+  show_reply: boolean;
+  show_reply_all: boolean;
 }
 
 export interface MailboxProperties extends Manifest {
@@ -205,7 +214,11 @@ export interface MailboxProperties extends Manifest {
   show_star: boolean;
   show_thread_checkbox: boolean;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  show_reply: boolean;
+  show_reply_all: boolean;
 }
+
+export type ContactSearchCallback = Participant[] | FetchContactsCallback;
 
 export interface ComposerProperties extends Manifest {
   minimized: boolean;
@@ -226,6 +239,29 @@ export interface ComposerProperties extends Manifest {
   show_to: boolean;
   theme: "string";
   visible: boolean;
+
+  value: Partial<Message> | void;
+  to: ContactSearchCallback;
+  from: ContactSearchCallback;
+  cc: ContactSearchCallback;
+  bcc: ContactSearchCallback;
+  send: SendCallback;
+  open: () => void;
+  close: () => void;
+  change: FetchContactsCallback | null;
+  beforeSend: (msg: Message) => Message | void;
+  afterSendSuccess?: () => void | null;
+  afterSendError?: () => void | null;
+  template: string;
+  tracking: Tracking | null;
+
+  // Attributes
+  beforeFileUpload?: () => void | null;
+  afterFileUploadSuccess?: () => void | null;
+  afterFileUploadError?: () => void | null;
+  uploadFile?: () => void | null;
+  beforeFileRemove?: () => void | null;
+  afterFileRemove?: () => void | null;
 }
 
 export interface ContactListProperties extends Manifest {

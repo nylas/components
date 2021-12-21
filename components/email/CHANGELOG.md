@@ -5,6 +5,24 @@
 - [Email] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
 - [Email] Added styles for draft and empty messages, disallows clicking on email with no messages [#267](https://github.com/nylas/components/pull/267)
 
+- Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
+- Added dispatched event `replyAllClicked` with properties
+  - event
+  - message
+  - thread
+  - value
+  - to
+  - from
+  - subject
+- Added dispatched event `replyClicked` with properties
+  - event
+  - message
+  - thread
+  - value
+  - to
+  - from
+  - subject
+
 ## Bug Fixes
 
 - [Email] Participants list truncates after 1 participant and displays how many more participants are included. Clicking 'And {N} more' opens a tooltip with additional participants. [#254](https://github.com/nylas/components/pull/254)
