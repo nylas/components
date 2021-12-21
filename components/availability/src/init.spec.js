@@ -1,14 +1,15 @@
-let testAvailabilityComponent;
+// Returns a new date object for December 15, 2021 at 9:00 am
+const frozenDateTime = () => new Date(2021, 11, 15, 9, 0, 0);
 beforeEach(() => {
-  cy.visit("/components/availability/src/index.html");
-  cy.get("nylas-availability").then((element) => {
-    const component = element[0];
-    component.setAttribute("id", "test-availability");
-    testAvailabilityComponent = component;
-    cy.get(testAvailabilityComponent)
-      .should("have.prop", "id")
-      .and("equal", "test-availability");
-  });
+  cy.clock(frozenDateTime().getTime(), ["Date"]);
+  cy.visitComponentPage(
+    "/components/availability/src/index.html",
+    "nylas-availability",
+    "demo-availability",
+  );
+  cy.get("@testComponent")
+    .should("have.prop", "id")
+    .and("equal", "test-availability");
 });
 
 describe("availability component", () => {
@@ -21,14 +22,14 @@ describe("availability component", () => {
 
   describe("available times", () => {
     beforeEach(() => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
     });
 
     it("observes available times", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = [];
         cy.get(".slot.busy").should("not.exist");
@@ -39,43 +40,57 @@ describe("availability component", () => {
           availability: "free",
           timeslots: [
             {
-              start_time: new Date(new Date().setHours(1, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+              start_time: new Date(frozenDateTime().setHours(1, 0, 0, 0)),
+              end_time: new Date(frozenDateTime().setHours(3, 0, 0, 0)),
             },
             {
-              start_time: new Date(new Date().setHours(8, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              start_time: new Date(frozenDateTime().setHours(8, 0, 0, 0)),
+              end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
             },
           ],
         },
       ];
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         cy.get(".slot.busy").should("exist");
         cy.get(".slot.free").should("have.length", 40);
       });
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.slot_size = 30;
         cy.get(".slot.free").should("have.length", 20);
       });
     });
 
-    it("available time slot toggles (un)selected class", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
-        const component = element[0];
-        component.allow_booking = true;
-        cy.get(".slot.free").first().should("have.class", "unselected");
-        cy.get(".slot.free").first().click();
-        cy.get(".slot.free").first().should("have.class", "selected");
-      });
+    it("Toggles (un)selected class based on isBookable property", () => {
+      cy.get("@testComponent").invoke("attr", "slot_size", 30);
+      const currentHour = frozenDateTime();
+      currentHour.setMinutes(0, 0, 0);
+      currentHour.setHours(currentHour.getHours() - 1);
+      console.debug("currentHour", currentHour.toString());
+      //Get the closest full hour prior to current time, slots isBookable should be false
+      cy.get(
+        `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
+      )
+        .first()
+        .click();
+      cy.get(".slot.selected").should("have.length", 0);
+
+      //Get the closest next hour after the current hour, slots isBookable should be true
+      currentHour.setHours(currentHour.getHours() + 2);
+      cy.get(
+        `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
+      )
+        .first()
+        .click();
+      cy.get(".slot.selected").should("have.length", 1);
     });
 
     it("should not show confirm button when multiple time slots are selected", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         element[0].participants = ["nylascypresstest@gmail.com"];
       });
 
@@ -90,7 +105,7 @@ describe("availability component", () => {
 
   describe("unavailable times", () => {
     it("observes unavailable times", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = [];
         cy.get(".slot.busy").should("not.exist");
@@ -101,25 +116,25 @@ describe("availability component", () => {
           availability: "busy",
           timeslots: [
             {
-              start_time: new Date(new Date().setHours(1, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(3, 0, 0, 0)),
+              start_time: new Date(frozenDateTime().setHours(1, 0, 0, 0)),
+              end_time: new Date(frozenDateTime().setHours(3, 0, 0, 0)),
             },
             {
-              start_time: new Date(new Date().setHours(8, 0, 0, 0)),
-              end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+              start_time: new Date(frozenDateTime().setHours(8, 0, 0, 0)),
+              end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
             },
           ],
         },
       ];
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         cy.get(".slot.busy").should("exist");
         cy.get(".slot.free").should("have.length", 56);
       });
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.slot_size = 30;
         cy.get(".slot.free").should("have.length", 28);
@@ -134,12 +149,12 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+            start_time: new Date(frozenDateTime().setHours(3, 0, 0, 0)),
+            end_time: new Date(frozenDateTime().setHours(6, 0, 0, 0)),
           },
           {
-            start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(15, 0, 0, 0)),
+            start_time: new Date(frozenDateTime().setHours(9, 0, 0, 0)),
+            end_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
           },
         ],
       },
@@ -148,8 +163,8 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(11, 0, 0, 0)),
+            start_time: new Date(frozenDateTime().setHours(4, 0, 0, 0)),
+            end_time: new Date(frozenDateTime().setHours(11, 0, 0, 0)),
           },
         ],
       },
@@ -158,22 +173,22 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(5, 30, 0, 0)),
-            end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+            start_time: new Date(frozenDateTime().setHours(5, 30, 0, 0)),
+            end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
           },
         ],
       },
     ];
 
     beforeEach(() => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
     });
 
     it("observes multiple availabilites", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         cy.get(".slot.partial").should("exist");
@@ -184,17 +199,17 @@ describe("availability component", () => {
     });
 
     it("requires certain participants be present for booking", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         cy.get(
-          `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+          `.slot[data-start-time='${frozenDateTime().toLocaleDateString()}, 6:30:00 AM']`,
         )
           .should("have.class", "partial")
           .then(() => {
             component.required_participants = [calendars[1].emailAddress];
             cy.get(
-              `.slot[data-start-time='${new Date().toLocaleDateString()}, 6:30:00 AM']`,
+              `.slot[data-start-time='${frozenDateTime().toLocaleDateString()}, 6:30:00 AM']`,
             ).should("have.class", "busy");
           });
       });
@@ -203,9 +218,9 @@ describe("availability component", () => {
 
   describe("start and ending hour props", () => {
     it("Shows timeslots from 12AM to the next day's 12AM by default", () => {
-      const today = new Date();
+      const today = frozenDateTime();
       today.setHours(0, 0, 0);
-      const tomorrow = new Date();
+      const tomorrow = frozenDateTime();
       tomorrow.setHours(0, 0, 0);
       tomorrow.setDate(today.getDate() + 1);
       cy.get(".slot")
@@ -219,10 +234,10 @@ describe("availability component", () => {
     });
 
     it("Updates start_hour via component prop", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.start_hour = 8;
-        const start_time = new Date();
+        const start_time = frozenDateTime();
         start_time.setHours(component.start_hour, 0, 0);
         cy.get(".slot").should("have.length", 64);
         cy.get(".slot")
@@ -233,10 +248,10 @@ describe("availability component", () => {
     });
 
     it("Updates end_hour via component prop", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.end_hour = 8;
-        const end_time = new Date();
+        const end_time = frozenDateTime();
         end_time.setHours(8, 0, 0);
         cy.get(".slot").should("have.length", 32);
         cy.get(".slot")
@@ -253,7 +268,7 @@ describe("availability component", () => {
     });
 
     it("Updates slot_size via component prop", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.slot_size = 60;
         cy.get(".slot").should("have.length", 24);
@@ -267,16 +282,16 @@ describe("availability component", () => {
         .first()
         .get("header h2")
         .contains(
-          new Date().toLocaleString("default", {
+          frozenDateTime().toLocaleString("default", {
             day: "numeric",
           }),
         );
     });
 
     it("Updates start_date via component prop", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
-        const nextWeek = new Date();
+        const nextWeek = frozenDateTime();
         nextWeek.setDate(nextWeek.getDate() + 7);
         component.start_date = nextWeek;
         cy.get("div.day")
@@ -298,7 +313,7 @@ describe("availability component", () => {
 
     it("Updates dates_to_show via component prop", () => {
       cy.viewport(1500, 550);
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.dates_to_show = 7;
         cy.get("div.day").should("have.length", 7);
@@ -308,7 +323,7 @@ describe("availability component", () => {
 
   describe("axis ticks", () => {
     beforeEach(() => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -319,7 +334,7 @@ describe("availability component", () => {
     });
 
     it("allows you to disable ticks column", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.show_ticks = false;
         cy.get("ul.ticks").should("not.exist");
@@ -352,9 +367,9 @@ describe("availability component", () => {
     });
 
     it("dynamically skips ticks with slot size 60", () => {
-      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 60);
+      cy.get("@testComponent").invoke("attr", "slot_size", 60);
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -362,13 +377,13 @@ describe("availability component", () => {
     });
 
     it("dynamically skips ticks with slot size 30", () => {
-      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 30);
+      cy.get("@testComponent").invoke("attr", "slot_size", 30);
       cy.get("button.slot").should("have.length", 48);
     });
 
     it("dynamically skips ticks with slot size 15", () => {
-      cy.get(testAvailabilityComponent).invoke("attr", "slot_size", 15);
-      cy.get(testAvailabilityComponent).invoke("attr", "end_hour", 8);
+      cy.get("@testComponent").invoke("attr", "slot_size", 15);
+      cy.get("@testComponent").invoke("attr", "end_hour", 8);
       cy.viewport(550, 1500);
       cy.get("button.slot").should("have.length", 32);
     });
@@ -386,7 +401,7 @@ describe("availability component", () => {
 
       selectedTimeslots = [];
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
 
         availabilityComponent = component;
@@ -399,28 +414,36 @@ describe("availability component", () => {
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(new Date().setHours(15 - 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(15, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(15 + 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
               },
             ],
             account: {
@@ -435,28 +458,36 @@ describe("availability component", () => {
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(new Date().setHours(15 - 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(15, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(15 + 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
               },
             ],
             account: {
@@ -471,28 +502,36 @@ describe("availability component", () => {
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(new Date().setHours(15 - 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16 - 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(15, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
+                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17, 0, 0, 0)),
+                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(15 + 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(new Date().setHours(16 + 24, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(17 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
               },
             ],
             account: {
@@ -510,18 +549,18 @@ describe("availability component", () => {
         });
       });
 
-      cy.wait(3000); // TODO: have this as a wait for render to be complete instead of a timer
+      cy.get(".days.loading").should("not.exist");
     });
 
-    it("should combine consecutive time slots", (done) => {
+    xit("should combine consecutive time slots", (done) => {
       const consecutiveSlotEndTime = new Date(
-        `${new Date().toLocaleDateString()} 15:30:00`,
+        `${frozenDateTime().toLocaleDateString()} 15:30:00`,
       ).toISOString();
       const singularSlotStartTime = new Date(
-        `${new Date().toLocaleDateString()} 15:45:00`,
+        `${frozenDateTime().toLocaleDateString()} 15:45:00`,
       ).toISOString();
       const singularSlotEndTime = new Date(
-        `${new Date().toLocaleDateString()} 16:00:00`,
+        `${frozenDateTime().toLocaleDateString()} 16:00:00`,
       ).toISOString();
 
       cy.get(".slot.free")
@@ -554,7 +593,7 @@ describe("availability component", () => {
         });
     });
 
-    it("should prevent booking events in the past", () => {
+    xit("should prevent booking events in the past", () => {
       // Change to previous date
       cy.get("div.change-dates").should("exist");
       cy.get(".change-dates button:eq(0)").click();
@@ -569,7 +608,7 @@ describe("availability component", () => {
         });
     });
 
-    it("should prevent booking on days before min_book_ahead_days", (done) => {
+    xit("should prevent booking on days before min_book_ahead_days", (done) => {
       // Check that we can book on current date if min_book_ahead_days is 0
       availabilityComponent.min_book_ahead_days = 0;
 
@@ -647,14 +686,14 @@ describe("availability component", () => {
   describe("weeks and weekends", () => {
     beforeEach(() => {
       cy.viewport(1500, 550);
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
     });
 
     it("Handles week_view false", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.start_date = new Date("2021-04-06 00:00");
         component.show_as_week = false;
@@ -664,7 +703,7 @@ describe("availability component", () => {
     });
 
     it("Handles week_view true", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.start_date = new Date("2021-04-06 00:00");
         component.show_as_week = true;
@@ -675,7 +714,7 @@ describe("availability component", () => {
     });
 
     it("Drops weekends like a bad habit: today view", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.start_date = new Date("2021-04-06 00:00");
         component.dates_to_show = 7;
@@ -688,7 +727,7 @@ describe("availability component", () => {
     });
 
     it("Drops weekends like a bad habit: week view", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.start_date = new Date("2021-04-06 00:00");
         component.dates_to_show = 7;
@@ -704,7 +743,7 @@ describe("availability component", () => {
 
   describe("date changes", () => {
     beforeEach(() => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -714,21 +753,21 @@ describe("availability component", () => {
       cy.get("div.change-dates").should("exist");
     });
     it("Does not show date change header when date change is disallowed", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.allow_date_change = false;
         cy.get("div.change-dates").should("not.exist");
       });
     });
     it("Does not show date change header when date change is allowed", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.allow_date_change = true;
         cy.get("div.change-dates").should("exist");
       });
     });
     it("Moves me from Fri to Monday when weekends are disallowed", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.allow_date_change = true;
         component.show_weekends = true;
@@ -745,7 +784,7 @@ describe("availability component", () => {
       });
     });
     it("Moves me from Monday to Fri on prev click when weekends are disallowed", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.allow_date_change = true;
         component.show_weekends = true;
@@ -763,7 +802,7 @@ describe("availability component", () => {
       });
     });
     it("Moves multiple-shown-dates when weekends are disallowed", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.allow_date_change = true;
         component.show_weekends = false;
@@ -786,7 +825,7 @@ describe("availability component", () => {
     });
     it("Moves a full week on prev/next push", () => {
       cy.viewport(1500, 550);
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.allow_date_change = true;
         component.show_weekends = false;
@@ -814,7 +853,7 @@ describe("availability component", () => {
 
   describe("change colours", () => {
     beforeEach(() => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
       });
@@ -826,7 +865,7 @@ describe("availability component", () => {
         "background-color",
         "rgb(0, 0, 0)",
       );
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.partial_color = "#222";
         component.busy_color = "#000";
@@ -842,14 +881,14 @@ describe("availability component", () => {
 
   describe("list view", () => {
     it("Shows scheduler view by default", () => {
-      cy.get(testAvailabilityComponent).then(() => {
+      cy.get("@testComponent").then(() => {
         cy.get(".epochs").should("exist");
         cy.get(".slots").should("exist");
         cy.get(".slot-list").should("not.exist");
       });
     });
     it("Shows list view by passed property", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.view_as = "list";
 
@@ -862,7 +901,7 @@ describe("availability component", () => {
 
   describe("Limiting screen size", () => {
     it("Cuts off the number of days if they drop below 100px in width", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.dates_to_show = 7;
         cy.viewport(1500, 550);
@@ -877,7 +916,7 @@ describe("availability component", () => {
       });
     });
     it("Allows you to navigate a squashed schedule", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = [];
         component.dates_to_show = 7;
@@ -893,7 +932,7 @@ describe("availability component", () => {
       });
     });
     it("Handles show_as_week gracefully when squashed", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.dates_to_show = 7;
         component.start_date = new Date("2021-04-06 00:00");
@@ -929,7 +968,7 @@ describe("availability component", () => {
 
   describe("Event Buffer", () => {
     it("With 0 min buffer time", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.event_buffer = 0;
         cy.get(".slot.busy").should("have.length", 5);
@@ -937,7 +976,7 @@ describe("availability component", () => {
       });
     });
     it("Adds 15 min buffer time", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.event_buffer = 15;
         cy.get(".slot.busy").should("have.length", 6);
@@ -945,7 +984,7 @@ describe("availability component", () => {
       });
     });
     it("Adds 30 min buffer time", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.event_buffer = 30;
         cy.get(".slot.busy").should("have.length", 7);
@@ -960,8 +999,8 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(0, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+            start_time: new Date(frozenDateTime().setHours(0, 0, 0, 0)),
+            end_time: new Date(frozenDateTime().setHours(6, 0, 0, 0)),
           },
         ],
         account: {
@@ -975,8 +1014,8 @@ describe("availability component", () => {
         availability: "busy",
         timeslots: [
           {
-            start_time: new Date(new Date().setHours(5, 0, 0, 0)),
-            end_time: new Date(new Date().setHours(12, 0, 0, 0)),
+            start_time: new Date(frozenDateTime().setHours(5, 0, 0, 0)),
+            end_time: new Date(frozenDateTime().setHours(12, 0, 0, 0)),
           },
         ],
         account: {
@@ -989,7 +1028,7 @@ describe("availability component", () => {
     ];
 
     it("shows busy when slots booked over threshold", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         component.overbooked_threshold = 100;
@@ -997,7 +1036,7 @@ describe("availability component", () => {
         cy.get(".slot.busy").should("have.length", 4);
       });
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         component.overbooked_threshold = 24;
@@ -1005,7 +1044,7 @@ describe("availability component", () => {
         cy.get(".slot.busy").should("have.length", 96);
       });
 
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         component.overbooked_threshold = 25;
@@ -1016,7 +1055,7 @@ describe("availability component", () => {
     });
 
     it("handles overbooked_threshold correctly with reduced hours", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         component.start_hour = 0;
@@ -1026,7 +1065,7 @@ describe("availability component", () => {
         cy.get(".slot.partial").should("have.length", 24);
         cy.get(".slot.busy").should("have.length", 24);
       });
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.calendars = calendars;
         component.start_hour = 0;
@@ -1040,8 +1079,8 @@ describe("availability component", () => {
 
   describe("Capacity", () => {
     const timeSlot = {
-      start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-      end_time: new Date(new Date().setHours(6, 0, 0, 0)),
+      start_time: new Date(frozenDateTime().setHours(3, 0, 0, 0)),
+      end_time: new Date(frozenDateTime().setHours(6, 0, 0, 0)),
     };
     const calendar = [
       {
@@ -1056,7 +1095,7 @@ describe("availability component", () => {
       },
     ];
     it("should have busy for 1 event with capacity 1", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.capacity = 1;
         component.calendars = calendar;
@@ -1064,7 +1103,7 @@ describe("availability component", () => {
       });
     });
     it("should have free for 1 event with capacity 2", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.capacity = 2;
         calendar[0].timeslots.concat([timeSlot]);
@@ -1077,16 +1116,56 @@ describe("availability component", () => {
 
   describe("Top-of-hour requirement", () => {
     it("should remove the ability to book slots that don't start at :00", () => {
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.participants = ["nylascypresstest@gmail.com"];
         cy.get(".slot.busy").should("have.length", 5);
       });
-      cy.get(testAvailabilityComponent).then((element) => {
+      cy.get("@testComponent").then((element) => {
         const component = element[0];
         component.mandate_top_of_hour = true;
         cy.get(".slot.busy").should("have.length", 74);
       });
+    });
+  });
+
+  describe("Dynamically generate time slots based on manifest", () => {
+    it("Updates slot_size will change number of slots on screen", () => {
+      cy.get("@testComponent").invoke("attr", "slot_size", 15);
+      cy.get("button.slot").should("have.length", 96);
+      cy.get("@testComponent").invoke("attr", "slot_size", 30);
+      cy.get("button.slot").should("have.length", 48);
+      cy.get("@testComponent").invoke("attr", "slot_size", 60);
+      cy.get("button.slot").should("have.length", 24);
+      cy.get("@testComponent").invoke("attr", "end_hour", 18);
+      cy.get("button.slot").should("have.length", 18);
+      cy.get("@testComponent").invoke("attr", "start_hour", 8);
+      cy.get("button.slot").should("have.length", 10);
+    });
+
+    it("Updates partial_bookable_ratio/Participant Threshold will change availability", () => {
+      cy.get("@testComponent").invoke("attr", "partial_bookable_ratio", 0.5);
+      cy.get("button.slot.busy").should("have.length", 20);
+      cy.get("@testComponent").invoke("attr", "partial_bookable_ratio", 1);
+      cy.get("button.slot.busy").should("have.length", 92);
+    });
+
+    it("Updates mandate_top_of_hour will change availability", () => {
+      cy.get("@testComponent").invoke("attr", "slot_size", 30);
+      cy.get(".controls")
+        .get('input[type="radio"][name="mandate-top-of-hour"][value="true"]')
+        .first()
+        .check();
+      cy.get("button.slot.busy").should("have.length", 26);
+    });
+
+    it("Updates open_hours/Block Lunch control will change availability", () => {
+      cy.get("@testComponent").invoke("attr", "slot_size", 30);
+      cy.get(".controls")
+        .get('input[type="radio"][name="block-lunch"][value="everyday"]')
+        .first()
+        .check();
+      cy.get("button.slot.closed").should("have.length", 25);
     });
   });
 });

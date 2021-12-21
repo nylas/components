@@ -2,7 +2,7 @@ var thread1 = {
   account_id: "1xrddnl99frq3b7son9j32aba",
   drafts: [],
   first_message_timestamp: 1629832405,
-  has_attachments: false,
+  has_attachments: true,
   id: "dlrwnv5oc3v3apxc2j0ht8vop",
   labels: [
     { display_name: "Inbox", id: "dx62wkpj57erbkargbr3zew3j", name: "inbox" },
@@ -19,8 +19,6 @@ var thread1 = {
       files: [
         {
           content_disposition: "attachment",
-          content_id:
-            "61a72e5c7646b_103f96c4ab17fc31973866b@emaily-consumer-5945b858d7-xcmvp.mail",
           content_type: "application/pdf",
           filename: "invoice_2062.pdf",
           id: "d1fop1j6savk2dqex9uvwvclt",

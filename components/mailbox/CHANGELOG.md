@@ -1,4 +1,4 @@
-# Pending Changes
+# v1.1.5 (2021-12-15)
 
 ## Breaking
 
@@ -26,7 +26,7 @@
 
 ## Bug Fixes
 
-# v1.1.5 (2021-12-10)
+# v1.1.4 (2021-12-10)
 
 ## New Features
 
@@ -35,7 +35,7 @@
 
 ## Bug Fixes
 
-# v1.1.4 (2021-12-09)
+# v1.1.4-canary.0 (2021-12-09)
 
 ## Bug Fixes
 

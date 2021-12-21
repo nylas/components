@@ -45,7 +45,7 @@
   export let allowed_dates: Date[] | string;
   export let auto_time_box: boolean;
   export let end_minute: number;
-  export let events: Event[] | null;
+  export let events: Event[] = [];
   export let calendar_id: string;
   export let calendar_ids: string;
   export let click_action: (
@@ -320,6 +320,8 @@
       calendars = await CalendarStore.getCalendars(calendarQuery);
     }
   })();
+
+  const { loadingEvents } = EventStore;
 
   let calendarEvents: Event[] = [];
   $: (async () => {
@@ -1138,7 +1140,7 @@
       }
 
       &.status-maybe {
-        background-color: var(--emptyEventBackground) !important;
+        background-color: var(--emptyEventBackground, #ddd) !important;
         border-left-width: 7px;
         color: var(--secondaryCalendar) !important;
 
@@ -1158,8 +1160,9 @@
       }
 
       &.status-noreply {
-        background-color: var(--emptyEventBackground) !important;
-        color: var(--secondaryCalendar) !important;
+        background-color: var(--emptyEventBackground, #ddd) !important;
+        color: var(--secondaryCalendar, #444) !important;
+
         a {
           color: var(--secondaryCalendar) !important;
         }
@@ -1170,9 +1173,9 @@
           text-decoration: line-through;
         }
 
-        border-color: var(--alertWarningDeclined);
-        color: var(--alertWarningDeclined);
-        background-color: var(--emptyEventBackground) !important;
+        border-color: var(--alertWarningDeclined, #eb8f24);
+        color: var(--alertWarningDeclined, #eb8f24);
+        background-color: var(--emptyEventBackground, #ddd) !important;
 
         a {
           color: var(--secondaryCalendar) !important;
@@ -1486,12 +1489,14 @@
         on:pointerup={agendaMouseUp}
         on:mouseleave={agendaMouseUp}
       >
-        <div class="hour-ticks">
-          {#each ticks as tick}
-            <span style="top: {tick.relativeTickPosition * 100}%" />
-          {/each}
-        </div>
-        {#if Array.isArray(loadedEvents)}
+        {#if loadedEvents.length || (!_this.show_no_events_message && !$loadingEvents)}
+          <div class="hour-ticks">
+            {#each ticks as tick}
+              <span style="top: {tick.relativeTickPosition * 100}%" />
+            {/each}
+          </div>
+        {/if}
+        {#if loadedEvents.length}
           {#each [...loadedEvents, newEvent] as event}
             {#if event && event.relativeStartTime !== undefined}
               <li
@@ -1565,7 +1570,7 @@
               </svg>
             </span>
           {/if}
-        {:else if _this.show_no_events_message && $EventStore[queryKey]}
+        {:else if _this.show_no_events_message && !$loadingEvents && $EventStore[queryKey]}
           <li class="no-events">No events for {selectedDate.toDateString()}</li>
         {/if}
       </ul>
