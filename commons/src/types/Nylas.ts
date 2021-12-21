@@ -250,18 +250,18 @@ export interface ComposerProperties extends Manifest {
   close: () => void;
   change: FetchContactsCallback | null;
   beforeSend: (msg: Message) => Message | void;
-  afterSendSuccess: Function | null;
-  afterSendError: Function | null;
+  afterSendSuccess?: () => void | null;
+  afterSendError?: () => void | null;
   template: string;
   tracking: Tracking | null;
 
   // Attributes
-  beforeFileUpload: Function | null;
-  afterFileUploadSuccess: Function | null;
-  afterFileUploadError: Function | null;
-  uploadFile: Function | null;
-  beforeFileRemove: Function | null;
-  afterFileRemove: Function | null;
+  beforeFileUpload?: () => void | null;
+  afterFileUploadSuccess?: () => void | null;
+  afterFileUploadError?: () => void | null;
+  uploadFile?: () => void | null;
+  beforeFileRemove?: () => void | null;
+  afterFileRemove?: () => void | null;
 }
 
 export interface ContactListProperties extends Manifest {
