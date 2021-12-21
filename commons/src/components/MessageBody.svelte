@@ -7,7 +7,10 @@
   import * as DOMPurify from "dompurify";
   import { getEventDispatcher } from "@commons/methods/component";
   import { get_current_component, onMount } from "svelte/internal";
-  import { DisallowedContentTypes } from "@commons/constants/attachment-content-types";
+  import {
+    DisallowedContentTypes,
+    InlineImageTypes,
+  } from "@commons/constants/attachment-content-types";
 
   export let message;
   export let body;
@@ -30,6 +33,7 @@
       for (const [fileIndex, file] of message.files.entries()) {
         if (
           file.content_disposition === "attachment" &&
+          !(file.content_id && InlineImageTypes.includes(file.content_type)) && // treat all files with content_id as inline
           !DisallowedContentTypes.includes(file.content_type)
         ) {
           attachedFiles.push(message.files[fileIndex]);

@@ -7,23 +7,33 @@ function initializeEvents() {
     {},
   );
   let eventsMap: Record<string, Promise<Event[]>> = {};
+  const loadingEvents = writable(true);
 
   return {
+    loadingEvents,
     subscribe,
     getEvents: async (query: EventQuery) => {
       if (Array.isArray(query.calendarIDs) && query.calendarIDs.length > 0) {
+        loadingEvents.set(true);
+
         const queryKey = JSON.stringify(query);
         if (
           !eventsMap[queryKey] &&
           (query.component_id || query.access_token)
         ) {
           eventsMap[queryKey] = fetchEvents(query);
+
           update((events) => {
             events[queryKey] = eventsMap[queryKey];
             return { ...events };
           });
         }
-        return await eventsMap[queryKey];
+
+        const events = await eventsMap[queryKey];
+
+        loadingEvents.set(false);
+
+        return events;
       }
     },
     createEvent: async (event: Event, query: EventQuery) => {

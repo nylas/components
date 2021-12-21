@@ -90,5 +90,19 @@
     "title": "User's account object that you can pass in",
     "type": "Partial<Account>",
     "noPreview": true
+  },
+  {
+    "label": "show_reply",
+    "title": "Show reply button",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
+    "label": "show_reply_all",
+    "title": "Show reply all button",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
   }
 ]

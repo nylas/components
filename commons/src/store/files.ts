@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 import type { File, Message } from "@commons/types/Nylas";
 import { downloadFile } from "@commons/connections/files";
-
+import { InlineImageTypes } from "@commons/constants/attachment-content-types";
 function initializeFilesForMessage() {
   const { subscribe, set, update } = writable<
     Record<string, Record<string, File>>
@@ -17,7 +17,13 @@ function initializeFilesForMessage() {
       if (!filesMap[incomingMessage.id]) {
         const inlineFiles: Record<string, File> = {};
         for (const file of incomingMessage.files.values()) {
-          if (file.content_disposition === "inline" && !inlineFiles[file.id]) {
+          // treat all files with content_id as inline
+          if (
+            (file.content_disposition === "inline" ||
+              (file.content_id &&
+                InlineImageTypes.includes(file.content_type))) &&
+            !inlineFiles[file.id]
+          ) {
             inlineFiles[file.id] = file;
             inlineFiles[file.id].data = await downloadFile({
               file_id: file.id,
@@ -36,7 +42,9 @@ function initializeFilesForMessage() {
     },
     hasInlineFiles: (incomingMessage: Message): boolean => {
       return incomingMessage?.files?.some(
-        (file) => file.content_disposition === "inline",
+        (file) =>
+          file.content_disposition === "inline" ||
+          (file.content_id && InlineImageTypes.includes(file.content_type)),
       );
     },
     reset: () => set({}),
