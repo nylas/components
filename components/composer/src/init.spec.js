@@ -252,7 +252,7 @@ describe("Composer interactions", () => {
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Attach files/i })
+      .findByRole("label", { name: /Attach files/i })
       .should("not.exist");
   });
 

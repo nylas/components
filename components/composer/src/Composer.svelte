@@ -799,10 +799,10 @@
       </main>
       <footer>
         {#if _this.show_attachment_button && (id || uploadFile)}
-          <button for="file-upload" class="composer-btn file-upload">
-            <span class="sr-only">Attach Files</span>
+          <label for="file-upload" class="composer-btn file-upload">
             <AttachmentIcon class="AttachmentIcon" />
-          </button>
+            <span class="sr-only">Attach Files</span>
+          </label>
         {/if}
         <div class="btn-group">
           <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
