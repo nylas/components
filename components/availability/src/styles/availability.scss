@@ -104,6 +104,7 @@ main {
   }
 
   .days {
+    position: relative;
     display: grid;
     gap: 0rem;
     grid-auto-flow: column;
