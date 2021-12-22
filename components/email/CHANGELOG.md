@@ -1,11 +1,19 @@
-# v1.1.6 (2021-12-15)
+# Pending Changes
+
+## Breaking
+
+## New Features
+
+## Bug Fixes
+
+# v1.1.7 (2021-12-22)
 
 ## New Features
 
 - [Email] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
 - [Email] Added styles for draft and empty messages, disallows clicking on email with no messages [#267](https://github.com/nylas/components/pull/267)
 
-- Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
+- Added ability to reply to email/thread [#228](https://github.com/nylas/components/pull/228)
 - Added dispatched event `replyAllClicked` with properties
   - event
   - message
@@ -22,6 +30,12 @@
   - to
   - from
   - subject
+
+## Bug Fixes
+
+- [Email] Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
+
+# v1.1.6 (2021-12-15)
 
 ## Bug Fixes
 
