@@ -1,0 +1,96 @@
+{
+  "component": {
+    "theming": {
+      "show_received_timestamp": true,
+      "thread_id": "b3z0fd5kbbwcxvf4q1ele5us6",
+      "clean_conversation": false,
+      "unread": false,
+      "show_star": false,
+      "show_contact_avatar": true,
+      "show_number_of_messages": true,
+      "click_action": "select"
+    }
+  },
+  "response": {
+    "account_id": "1xrddnl99frq3b7son9j32aba",
+    "drafts": [],
+    "first_message_timestamp": 1638895701,
+    "has_attachments": true,
+    "id": "c5xjcjlhzldqctpud8zeufa6t",
+    "labels": [
+      {
+        "display_name": "IMPORTANT",
+        "id": "5852fv5ompdk51g0ve17mvej9",
+        "name": "important"
+      },
+      {
+        "display_name": "INBOX",
+        "id": "dx62wkpj57erbkargbr3zew3j",
+        "name": "inbox"
+      },
+      {
+        "display_name": "All Mail",
+        "id": "78im4dxnn2mj0hl038vcnezwn",
+        "name": "all"
+      }
+    ],
+    "last_message_received_timestamp": 1638895701,
+    "last_message_sent_timestamp": null,
+    "last_message_timestamp": 1638895701,
+    "messages": [
+      {
+        "account_id": "1xrddnl99frq3b7son9j32aba",
+        "bcc": [],
+        "cc": [],
+        "date": 1638895701,
+        "files": [
+          {
+            "content_disposition": "inline",
+            "content_id": "ii_kwwc5np40",
+            "content_type": "image/jpeg",
+            "filename": "Streams Automation.jpg",
+            "id": "6dywzoo80moag1it135co9zv8",
+            "size": 1022500
+          }
+        ],
+        "from": [{ "email": "test@nylas.com", "name": "First User" }],
+        "id": "7w3i9u9xk95w331zuw40yvm4j",
+        "labels": [
+          {
+            "display_name": "INBOX",
+            "id": "dx62wkpj57erbkargbr3zew3j",
+            "name": "inbox"
+          },
+          {
+            "display_name": "IMPORTANT",
+            "id": "5852fv5ompdk51g0ve17mvej9",
+            "name": "important"
+          },
+          {
+            "display_name": "All Mail",
+            "id": "78im4dxnn2mj0hl038vcnezwn",
+            "name": "all"
+          }
+        ],
+        "object": "message",
+        "reply_to": [],
+        "snippet": "Inline image test: Does it render properly?",
+        "starred": false,
+        "subject": "Inline image rendering",
+        "thread_id": "c5xjcjlhzldqctpud8zeufa6t",
+        "to": [{ "email": "nylascypresstest@gmail.com", "name": "Test User" }],
+        "unread": false
+      }
+    ],
+    "object": "thread",
+    "participants": [
+      { "email": "test@nylas.com", "name": "First User" },
+      { "email": "nylascypresstest@gmail.com", "name": "Test User" }
+    ],
+    "snippet": "Inline image test: Does it render properly?",
+    "starred": false,
+    "subject": "Inline image rendering",
+    "unread": false,
+    "version": 5
+  }
+}
