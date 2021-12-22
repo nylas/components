@@ -34,8 +34,7 @@ describe("available times", () => {
 
   beforeEach(() => {
     cy.get("@testComponent").then((element) => {
-      const component = element[0];
-      component.calendars = calendars;
+      element[0].calendars = calendars;
     });
   });
 
@@ -88,9 +87,8 @@ describe("Booking time slots", () => {
   describe("Single availability", () => {
     it("observes unavailable times", () => {
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.participants = [];
-        component.calendars = [];
+        element[0].participants = [];
+        element[0].calendars = [];
         cy.get(".slot.busy").should("not.exist");
       });
     });
@@ -113,8 +111,7 @@ describe("Booking time slots", () => {
       ];
 
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
+        element[0].calendars = calendars;
         cy.get(".slot.busy").should("exist");
         cy.get(".slot.free").should("have.length", 56);
       });
@@ -161,8 +158,7 @@ describe("Booking time slots", () => {
 
     beforeEach(() => {
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
+        element[0].calendars = calendars;
       });
     });
 
@@ -177,8 +173,7 @@ describe("Booking time slots", () => {
         `.slot[data-start-time='${frozenDateTime().toLocaleDateString()}, 6:30:00 AM']`,
       ).should("have.class", "partial");
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.required_participants = [calendars[1].emailAddress];
+        element[0].required_participants = [calendars[1].emailAddress];
         cy.get(
           `.slot[data-start-time='${frozenDateTime().toLocaleDateString()}, 6:30:00 AM']`,
         ).should("have.class", "busy");
@@ -207,8 +202,7 @@ describe("Booking time slots", () => {
       const start_time = frozenDateTime();
       cy.get("@testComponent").invoke("attr", "start_hour", 8);
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        start_time.setHours(component.start_hour, 0, 0);
+        start_time.setHours(element[0].start_hour, 0, 0);
         cy.get(".slot").should("have.length", 64);
         cy.get(".slot")
           .first()
@@ -308,181 +302,206 @@ describe("Booking time slots", () => {
 
   describe("selecting available time slots", () => {
     let selectedTimeslots = [];
-    const calendars = [
-      {
-        availability: "free",
-        timeslots: [
-          {
-            start_time: frozenDateTime().setHours(15 - 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16 - 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16 - 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17 - 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(15, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(15 + 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16 + 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16 + 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17 + 24, 0, 0, 0),
-          },
-        ],
-        account: {
-          emailAddress: "person@name.com",
-          firstName: "Jim",
-          lastName: "Person",
-          avatarUrl: "",
-        },
-      },
-      {
-        emailAddress: "thelonious@nylas.com",
-        availability: "free",
-        timeslots: [
-          {
-            start_time: frozenDateTime().setHours(15 - 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16 - 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16 - 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17 - 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(15, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(15 + 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16 + 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16 + 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17 + 24, 0, 0, 0),
-          },
-        ],
-        account: {
-          emailAddress: "thelonious@nylas.com",
-          firstName: "Thelonious",
-          lastName: "",
-          avatarUrl: "",
-        },
-      },
-      {
-        emailAddress: "booker@nylas.com",
-        availability: "free",
-        timeslots: [
-          {
-            start_time: frozenDateTime().setHours(15 - 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16 - 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16 - 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17 - 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(15, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(15 + 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(16 + 24, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(16 + 24, 0, 0, 0),
-            end_time: frozenDateTime().setHours(17 + 24, 0, 0, 0),
-          },
-        ],
-        account: {
-          emailAddress: "booker@nylas.com",
-          firstName: "Bill",
-          lastName: "Ooker",
-          avatarUrl: "",
-        },
-      },
-    ];
+    let availabilityComponent;
+
     beforeEach(() => {
+      cy.intercept({
+        method: "POST",
+        url: "/middleware/calendars/availability",
+      });
+
+      selectedTimeslots = [];
+
       cy.get("@testComponent").then((element) => {
         const component = element[0];
-        component.calendars = calendars;
+
+        availabilityComponent = component;
         component.participants = [];
-        cy.get("@testComponent").invoke("attr", "max_bookable_slots", 3);
-        cy.get("@testComponent").invoke("attr", "allow_booking", true);
-        // availabilityComponent = component;
-        // component.participants = [];
-        // component.allow_booking = true;
-        // component.max_bookable_slots = 3;
+        component.allow_booking = true;
+        component.max_bookable_slots = 3;
+
+        component.calendars = [
+          {
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
+              },
+            ],
+            account: {
+              emailAddress: "person@name.com",
+              firstName: "Jim",
+              lastName: "Person",
+              avatarUrl: "",
+            },
+          },
+          {
+            emailAddress: "thelonious@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
+              },
+            ],
+            account: {
+              emailAddress: "thelonious@nylas.com",
+              firstName: "Thelonious",
+              lastName: "",
+              avatarUrl: "",
+            },
+          },
+          {
+            emailAddress: "booker@nylas.com",
+            availability: "free",
+            timeslots: [
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
+                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
+              },
+              {
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
+                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
+              },
+            ],
+            account: {
+              emailAddress: "booker@nylas.com",
+              firstName: "Bill",
+              lastName: "Ooker",
+              avatarUrl: "",
+            },
+          },
+        ];
 
         component.addEventListener("timeSlotChosen", (event) => {
           // expect(event.detail).to.have.ownProperty("timeSlots");
           selectedTimeslots = event.detail.timeSlots;
         });
       });
+
+      cy.get(".days.loading").should("not.exist");
     });
 
-    it("should combine consecutive time slots", () => {
+    xit("should combine consecutive time slots", (done) => {
       const consecutiveSlotEndTime = new Date(
         `${frozenDateTime().toLocaleDateString()} 15:30:00`,
-      );
+      ).toISOString();
       const singularSlotStartTime = new Date(
         `${frozenDateTime().toLocaleDateString()} 15:45:00`,
-      );
+      ).toISOString();
       const singularSlotEndTime = new Date(
         `${frozenDateTime().toLocaleDateString()} 16:00:00`,
-      );
-      cy.get(".slot.free").each((slot, index) => {
-        if (index === 0 || index === 3) {
-          cy.get(slot).click();
-        }
-        console.log({ selectedTimeslots });
-      });
-      console.log({
-        selectedTimeslots,
-        consecutiveSlotEndTime,
-        singularSlotStartTime,
-        singularSlotEndTime,
-      });
-      expect(selectedTimeslots[0].end_time).eq(consecutiveSlotEndTime);
-      expect(selectedTimeslots[1].start_time).eq(singularSlotStartTime);
-      expect(selectedTimeslots[1].end_time).eq(singularSlotEndTime);
-      // cy.get(".slot.free").first().click().then(() => {
-      //   expect(selectedTimeslots).to.have.lengthOf(1);
-      //   cy.get(".slot.free").eq(3).click().then(() => {
-      //       expect(selectedTimeslots).to.have.lengthOf(2);
-      //       cy.get(".slot.free")
-      //         .eq(1)
-      //         .click()
-      //         .then(() => {
-      //           expect(selectedTimeslots).to.have.lengthOf(2);
-      //           expect(selectedTimeslots[0].end_time.toISOString()).eq(
-      //             consecutiveSlotEndTime,
-      //           );
-      //           expect(selectedTimeslots[1].start_time.toISOString()).eq(
-      //             singularSlotStartTime,
-      //           );
-      //           expect(selectedTimeslots[1].end_time.toISOString()).eq(
-      //             singularSlotEndTime,
-      //           );
-      //           done();
-      //         });
-      //     });
-      //   });
+      ).toISOString();
+
+      cy.get(".slot.free")
+        .eq(0)
+        .click()
+        .then(() => {
+          expect(selectedTimeslots).to.have.lengthOf(1);
+          cy.get(".slot.free")
+            .eq(3)
+            .click()
+            .then(() => {
+              expect(selectedTimeslots).to.have.lengthOf(2);
+              cy.get(".slot.free")
+                .eq(1)
+                .click()
+                .then(() => {
+                  expect(selectedTimeslots).to.have.lengthOf(2);
+                  expect(selectedTimeslots[0].end_time.toISOString()).eq(
+                    consecutiveSlotEndTime,
+                  );
+                  expect(selectedTimeslots[1].start_time.toISOString()).eq(
+                    singularSlotStartTime,
+                  );
+                  expect(selectedTimeslots[1].end_time.toISOString()).eq(
+                    singularSlotEndTime,
+                  );
+                  done();
+                });
+            });
+        });
     });
 
     xit("should prevent booking events in the past", () => {
@@ -623,6 +642,7 @@ describe("Booking time slots", () => {
     });
 
     it("When it's Friday, next date shown is Monday when weekends are disallowed", () => {
+      // REFACTOR THIS TO USE CURRENT DATE
       const friday = new Date(2021, 11, 17, 9, 0, 0);
       cy.get("@testComponent").invoke("attr", "show_weekends", false);
       cy.get("@testComponent").invoke("attr", "start_date", friday);
@@ -691,12 +711,9 @@ describe("Booking time slots", () => {
   });
 
   describe("Limiting screen size", () => {
-    const monday = new Date(2021, 11, 20, 9, 0, 0);
-
     beforeEach(() => {
       cy.get("@testComponent").invoke("attr", "show_as_week", true);
       cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
-      cy.get("@testComponent").invoke("attr", "start_date", monday);
     });
 
     it("Cuts off the number of days if viewport 1200px wide", () => {
@@ -712,52 +729,43 @@ describe("Booking time slots", () => {
     it("Allows you to navigate forward with a squashed schedule and show_as_week as false", () => {
       cy.viewport(800, 550);
       cy.get("@testComponent").invoke("attr", "show_as_week", false);
-      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "20 Mon");
-      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "22 Wed");
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "15 Wed");
+      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "17 Fri");
       cy.get(".change-dates button:eq(1)").click();
-      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "23 Thu");
-      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "25 Sat");
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "18 Sat");
+      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "20 Mon");
     });
 
-    it.only("Handles moving forward show_as_week gracefully when squashed", () => {
+    it("Handles moving forward show_as_week gracefully when squashed", () => {
       cy.viewport(800, 550);
-      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "19 Sun");
-      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "22 Tue");
+      cy.get(".change-dates button:eq(1)").click();
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "18 Sat");
+      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "20 Mon");
     });
 
-    it.only("Handles moving backward show_as_week gracefully when squashed", () => {
+    it("Handles moving backward show_as_week gracefully when squashed", () => {
       cy.viewport(800, 550);
       cy.get(".day").should("have.length", 3);
       cy.get(".change-dates button:eq(0)").click();
-      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "17 Fri");
-      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "19 Sun");
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "12 Sun");
+      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "14 Tue");
     });
   });
 
   describe("Event Buffer", () => {
-    it("With 0 min buffer time", () => {
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.event_buffer = 0;
-        cy.get(".slot.busy").should("have.length", 5);
-        cy.get(".slot.free").should("have.length", 4);
-      });
+    it("Default buffer time is 0 minutes", () => {
+      cy.get(".slot.busy").should("have.length", 5);
+      cy.get(".slot.free").should("have.length", 4);
     });
     it("Adds 15 min buffer time", () => {
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.event_buffer = 15;
-        cy.get(".slot.busy").should("have.length", 6);
-        cy.get(".slot.free").should("have.length", 3);
-      });
+      cy.get("@testComponent").invoke("attr", "event_buffer", 15);
+      cy.get(".slot.busy").should("have.length", 6);
+      cy.get(".slot.free").should("have.length", 3);
     });
     it("Adds 30 min buffer time", () => {
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.event_buffer = 30;
-        cy.get(".slot.busy").should("have.length", 7);
-        cy.get(".slot.free").should("have.length", 2);
-      });
+      cy.get("@testComponent").invoke("attr", "event_buffer", 30);
+      cy.get(".slot.busy").should("have.length", 7);
+      cy.get(".slot.free").should("have.length", 2);
     });
   });
 
@@ -794,123 +802,88 @@ describe("Booking time slots", () => {
         },
       },
     ];
-
-    it("shows busy when slots booked over threshold", () => {
+    beforeEach(() => {
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
-        component.overbooked_threshold = 100;
-        cy.get(".slot.partial").should("exist");
-        cy.get(".slot.busy").should("have.length", 4);
-      });
-
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
-        component.overbooked_threshold = 24;
-        cy.get(".slot.partial").should("not.exist");
-        cy.get(".slot.busy").should("have.length", 96);
-      });
-
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
-        component.overbooked_threshold = 25;
-        cy.get(".slot.partial").should("exist");
-        cy.get(".slot.partial").should("have.length", 72);
-        cy.get(".slot.busy").should("have.length", 24);
+        element[0].calendars = calendars;
       });
     });
 
-    it("handles overbooked_threshold correctly with reduced hours", () => {
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
-        component.start_hour = 0;
-        component.end_hour = 12;
-        component.overbooked_threshold = 50;
-        cy.get(".slot.partial").should("exist");
-        cy.get(".slot.partial").should("have.length", 24);
-        cy.get(".slot.busy").should("have.length", 24);
-      });
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.calendars = calendars;
-        component.start_hour = 0;
-        component.end_hour = 12;
-        component.overbooked_threshold = 49;
-        cy.get(".slot.partial").should("have.length", 0);
-        cy.get(".slot.busy").should("have.length", 48);
-      });
+    it("shows busy when 100% of day is meetings by default", () => {
+      cy.get(".slot.partial").should("exist");
+      cy.get(".slot.busy").should("have.length", 4);
+    });
+
+    it("shows busy when 24% of day is meetings", () => {
+      cy.get("@testComponent").invoke("attr", "overbooked_threshold", 24);
+      cy.get(".slot.partial").should("not.exist");
+      cy.get(".slot.busy").should("have.length", 96);
+    });
+
+    it("shows busy when 25% of day is meetings", () => {
+      cy.get("@testComponent").invoke("attr", "overbooked_threshold", 25);
+      cy.get(".slot.partial").should("have.length", 72);
+      cy.get(".slot.busy").should("have.length", 24);
+    });
+
+    it("handles overbooked_threshold at 50% correctly with reduced hours", () => {
+      cy.get("@testComponent").invoke("attr", "overbooked_threshold", 50);
+      cy.get("@testComponent").invoke("attr", "start_hour", 0);
+      cy.get("@testComponent").invoke("attr", "end_hour", 12);
+      cy.get(".slot.partial").should("exist");
+      cy.get(".slot.partial").should("have.length", 24);
+      cy.get(".slot.busy").should("have.length", 24);
+    });
+
+    it("handles overbooked_threshold at 49% correctly with reduced hours", () => {
+      cy.get("@testComponent").invoke("attr", "overbooked_threshold", 49);
+      cy.get("@testComponent").invoke("attr", "start_hour", 0);
+      cy.get("@testComponent").invoke("attr", "end_hour", 12);
+      cy.get(".slot.partial").should("have.length", 0);
+      cy.get(".slot.busy").should("have.length", 48);
     });
   });
 
   describe("Capacity", () => {
-    const timeSlot = {
-      start_time: frozenDateTime().setHours(3, 0, 0, 0),
-      end_time: frozenDateTime().setHours(6, 0, 0, 0),
-    };
     const calendar = [
       {
         availability: "busy",
-        timeslots: [timeSlot],
-        account: {
-          emailAddress: "person@name.com",
-          firstName: "Jim",
-          lastName: "Person",
-          avatarUrl: "",
-        },
+        timeslots: [
+          {
+            start_time: frozenDateTime().setHours(3, 0, 0, 0),
+            end_time: frozenDateTime().setHours(6, 0, 0, 0),
+          },
+        ],
       },
     ];
-    it("should have busy for 1 event with capacity 1", () => {
+    beforeEach(() => {
       cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.capacity = 1;
-        component.calendars = calendar;
-        cy.get(".slot.busy").should("have.length", 12);
+        element[0].calendars = calendar;
       });
     });
+
+    it("should have busy for 1 event with capacity 1", () => {
+      cy.get("@testComponent").invoke("attr", "capacity", 1);
+      cy.get(".slot.busy").should("have.length", 12);
+    });
+
     it("should have free for 1 event with capacity 2", () => {
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.capacity = 2;
-        calendar[0].timeslots.concat([timeSlot]);
-        expect(calendar[0].timeslots.length === 2);
-        component.calendars = calendar;
-        cy.get(".slot.busy").should("have.length", 0);
-      });
+      cy.get("@testComponent").invoke("attr", "capacity", 2);
+      let timeSlots = calendar[0].timeslots;
+      timeSlots = [...timeSlots, calendar.timeslots];
+      expect(timeSlots.length === 2);
+      cy.get(".slot.busy").should("have.length", 0);
     });
   });
 
   describe("Top-of-hour requirement", () => {
     it("should remove the ability to book slots that don't start at :00", () => {
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.participants = ["nylascypresstest@gmail.com"];
-        cy.get(".slot.busy").should("have.length", 5);
-      });
-      cy.get("@testComponent").then((element) => {
-        const component = element[0];
-        component.mandate_top_of_hour = true;
-        cy.get(".slot.busy").should("have.length", 74);
-      });
+      cy.get(".slot.busy").should("have.length", 5);
+      cy.get("@testComponent").invoke("attr", "mandate_top_of_hour", true);
+      cy.get(".slot.busy").should("have.length", 74);
     });
   });
 
   describe("Dynamically generate time slots based on manifest", () => {
-    it("Updates slot_size will change number of slots on screen", () => {
-      cy.get("@testComponent").invoke("attr", "slot_size", 15);
-      cy.get("button.slot").should("have.length", 96);
-      cy.get("@testComponent").invoke("attr", "slot_size", 30);
-      cy.get("button.slot").should("have.length", 48);
-      cy.get("@testComponent").invoke("attr", "slot_size", 60);
-      cy.get("button.slot").should("have.length", 24);
-      cy.get("@testComponent").invoke("attr", "end_hour", 18);
-      cy.get("button.slot").should("have.length", 18);
-      cy.get("@testComponent").invoke("attr", "start_hour", 8);
-      cy.get("button.slot").should("have.length", 10);
-    });
-
     it("Updates partial_bookable_ratio/Participant Threshold will change availability", () => {
       cy.get("@testComponent").invoke("attr", "partial_bookable_ratio", 0.5);
       cy.get("button.slot.busy").should("have.length", 20);
@@ -919,21 +892,17 @@ describe("Booking time slots", () => {
     });
 
     it("Updates mandate_top_of_hour will change availability", () => {
-      cy.get("@testComponent").invoke("attr", "slot_size", 30);
       cy.get(".controls")
-        .get('input[type="radio"][name="mandate-top-of-hour"][value="true"]')
-        .first()
+        .find('input[type="radio"][name="mandate-top-of-hour"][value="true"]')
         .check();
-      cy.get("button.slot.busy").should("have.length", 26);
+      cy.get("button.slot.busy").should("have.length", 74);
     });
 
     it("Updates open_hours/Block Lunch control will change availability", () => {
-      cy.get("@testComponent").invoke("attr", "slot_size", 30);
       cy.get(".controls")
-        .get('input[type="radio"][name="block-lunch"][value="everyday"]')
-        .first()
+        .find('input[type="radio"][name="block-lunch"][value="everyday"]')
         .check();
-      cy.get("button.slot.closed").should("have.length", 25);
+      cy.get("button.slot.closed").should("have.length", 51);
     });
   });
 });
