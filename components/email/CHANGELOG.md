@@ -1,3 +1,11 @@
+# Pending Changes
+
+## Breaking
+
+## New Features
+
+## Bug Fixes
+
 # v1.1.7 (2021-12-22)
 
 ## New Features

@@ -1,8 +1,15 @@
+# Pending Changes
+
+## Breaking
+
+## New Features
+
+## Bug Fixes
+
 # v1.1.6 (2021-12-22)
 
 ## New Features
 
-- [Mailbox] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
 - [Mailbox] Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
 - Added dispatched event `replyAllClicked` with properties
   - event
@@ -27,7 +34,9 @@
 
 # v1.1.5 (2021-12-15)
 
-## Bug Fixes
+## New Features
+
+- [Mailbox] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
 
 # v1.1.4 (2021-12-10)
 
