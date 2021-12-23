@@ -135,11 +135,10 @@
 
   export const close = (): void => {
     visible = false;
-    if (_this.reset_after_send) {
+    if (_this.reset_after_send || _this.reset_after_close) {
       sendSuccess = false;
     }
     if (_this.reset_after_close) {
-      sendSuccess = false;
       resetAfterSend($message.from);
     }
     dispatchEvent("composerClosed", {});
