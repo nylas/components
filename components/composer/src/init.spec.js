@@ -2,7 +2,7 @@
 
 describe("Composer loading state", () => {
   it("displays loading screen", () => {
-    cy.visit("/components/composer/src/index.html");
+    cy.visit("/components/composer/src/cypress.html");
 
     cy.contains("Loading");
   });
@@ -32,7 +32,7 @@ describe("Composer dispatches events", () => {
       { name: "Secound Test User", email: "tester2@nylas.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/index.html");
+    cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer")
       .should("exist")
@@ -113,7 +113,7 @@ describe("Composer `to` prop", () => {
       { name: "Secound Test User", email: "tester2@nylas.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/index.html");
+    cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer").should("exist").as("composer");
     cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
@@ -168,7 +168,7 @@ describe("Composer interactions", () => {
       { name: "Secound Test User", email: "tester2@nylas.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/index.html");
+    cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer")
       .should("exist")
@@ -220,8 +220,7 @@ describe("Composer interactions", () => {
     cy.get("header").should("not.exist");
   });
 
-  // TODO: We need to figure out why tests are failing in Github Actions
-  xit("disables send button when no recipient (to) provided", () => {
+  it("disables send button when no recipient (to) provided", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.value = {
@@ -283,10 +282,9 @@ describe("Composer customizations", () => {
       { name: "Secound Test User", email: "tester2@nylas.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/index.html");
+    cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer").should("exist").as("composer");
-    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
   });
 
   it("show header", () => {
@@ -437,8 +435,15 @@ describe("Composer customizations", () => {
     });
   });
 
-  // TODO: We must figure out why this test fails only in Github Actions
-  xit("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
+  it("opens composer", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.open();
+    });
+    cy.get(".nylas-composer").should("exist");
+  });
+
+  it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.value = {
@@ -466,8 +471,7 @@ describe("Composer customizations", () => {
     });
   });
 
-  // TODO: We must figure out why this test fails only in Github Actions
-  xit("Replaces merge fields as defined in replace_fields when passed a prop", () => {
+  it.only("Replaces merge fields as defined in replace_fields when passed a prop", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.value = {
@@ -491,11 +495,7 @@ describe("Composer customizations", () => {
   });
 });
 
-// TODO: These tests consistently fail when run via Github Actions.
-// We need to investigate why this is happening.
-xdescribe("Composer html", () => {
-  let element;
-
+describe("Composer integration", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -512,100 +512,27 @@ xdescribe("Composer html", () => {
       { name: "Secound Test User", email: "tester2@nylas.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/index.html");
+    cy.visit("/components/composer/src/cypress.html");
 
-    cy.get("nylas-composer")
-      .should("exist")
-      .as("composer")
-      .then((el) => {
-        element = el[0];
-        element.change = (msg) => console.log("message changed", msg);
-
-        element.from = [
-          { id: 1, email: "Tia30@hotmail.com" },
-          { id: 2, email: "Obie_Stokes@hotmail.com" },
-          { id: 3, email: "Mikayla.Jaskolski85@gmail.com" },
-          { id: 4, email: "Jacquelyn65@hotmail.com" },
-          { id: 5, email: "Dee57@hotmail.com" },
-        ];
-
-        element.to = (term) => {
-          return fetch(`https://jsonplaceholder.typicode.com/users`)
-            .then((res) => res.json())
-            .then((res) => {
-              return res.filter((item) =>
-                item.name.toLowerCase().includes(term.toLowerCase()),
-              );
-            })
-            .catch((_err) => Promise.resolve([]));
-        };
-
-        element.value = {
-          from: [
-            {
-              name: "Luka Test",
-              email: "luka.b@nylas.com",
-            },
-          ],
-          to: [
-            {
-              name: "Dan Test",
-              email: "dan.r@nylas.com",
-            },
-          ],
-          subject: "Sample subject",
-          body: "Sample Body",
-        };
-
-        element.show_header = true;
-        element.show_subject = true;
-        element.mode = "inline"; // or inline
-        element.theme = "dark";
-        element.show_editor_toolbar = true;
-
-        element.send = async (data) => {
-          console.log("sending (element.send)", data);
-          return new Promise((resolve, _reject) => {
-            setTimeout(() => {
-              return resolve({ success: true });
-            }, 250);
-          });
-        };
-
-        element.beforeSend = (message) => {
-          console.log(`Message before sending`, message);
-        };
-        element.afterSendSuccess = (response) => {
-          console.log(`Response afterSend success`, response);
-        };
-        element.afterSendError = (response) => {
-          console.log("After send error", response);
-        };
-
-        element.beforeFileUpload = (file) => {
-          console.log("beforeFileUpload", file);
-        };
-
-        element.afterFileUploadSuccess = (response) => {
-          console.log(`afterFileUploadSuccess`, response);
-        };
-
-        element.afterFileUploadError = (response) => {
-          console.log("afterFileUploadError error", response);
-        };
-      });
-    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+    cy.get("nylas-composer").should("exist").as("composer");
   });
 
-  describe("Composer integration", () => {
-    beforeEach(() => {
-      cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+  it("Sets subject", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
+        subject: "Sample subject",
+      };
     });
 
-    it("Composer basic integration", () => {
-      cy.get("header").contains("Sample subject");
+    cy.get("input[name=subject]").should("have.value", "Sample subject");
+    cy.get("header").contains("Sample subject").should("be.visible");
+  });
 
-      element.value = {
+  it("Removes contact from from-field", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
         from: [
           {
             name: "Luka Test",
@@ -618,165 +545,273 @@ xdescribe("Composer html", () => {
             email: "dan.r@nylas.com",
           },
         ],
-        subject: "Sample subject",
-        body: "Sample Body",
       };
-
-      element.send = async (_data) => {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            return reject({ success: false });
-          }, 25);
-        });
-      };
-
-      cy.get("input[name=subject]").should("have.value", "Sample subject");
-      cy.get("header").contains("Sample subject");
-      cy.get(".contact-item button").first().click();
-
-      cy.get("[data-cy=contacts-search-field]")
-        .first()
-        .type("{downarrow}{downarrow}{enter}", {
-          force: true,
-        });
-      cy.get("[data-cy=contacts-search-field]")
-        .first()
-        .type("Seco", { force: true });
-
-      cy.wait("@getUsers");
-
-      cy.get(".addons button:first").click({ force: true });
-      cy.get("[data-cy=contacts-search-field]")
-        .first()
-        .type("tester@nylas.com{enter}", { force: true });
-      cy.get(".addons button:first").click({ force: true });
-      cy.get(".html-editor[contenteditable=true]")
-        .click({ force: true })
-        .type("{selectall}", { force: true });
-
-      cy.get(".send-btn").contains("Send").click();
-      cy.get("nylas-composer-alert-bar")
-        .should("exist")
-        .contains("Failed to send the message");
     });
 
-    it("shows template", () => {
-      element.value = { body: "" };
-      element.template = `Hey what up!<br />
+    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
+    cy.get(".contact-item button").first().click();
+    cy.get("[data-cy=from-field]").contains("Luka Test").should("not.exist");
+  });
+
+  it("Search input populates contact search dropdown", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.to = [
+        {
+          name: "Luka Test",
+          email: "luka.b@nylas.com",
+        },
+      ];
+    });
+
+    cy.get("[data-cy=to-field]")
+      .find("[data-cy=contacts-search-field]")
+      .type("Luk", { force: true });
+
+    cy.contains("Luka Test").should("be.visible");
+  });
+
+  it("Displays failed message after failing to send email", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+
+      component.send = () => {
+        return Promise.reject("some error");
+      };
+    });
+
+    cy.get(".send-btn").contains("Send").click();
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Failed to send the message",
+    );
+  });
+
+  it("Displays success message after successfully sending email", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+
+      component.send = () => {
+        return Promise.resolve("success");
+      };
+    });
+
+    cy.get(".send-btn").contains("Send").click();
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Message sent successfully!",
+    );
+  });
+
+  it("Shows template in email body", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.template = `Hey what up!<br />
       <br />
       <br />
       Thanks,
       -Phil`;
-      cy.get("nylas-composer")
-        .as("composer")
-        .then(() => {
-          cy.get(".html-editor[contenteditable=true]")
-            .invoke("prop", "innerHTML")
-            .then((html) => {
-              expect(html).to.include(
-                "Hey what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
-              );
-            });
-        });
     });
+
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.include(
+          "Hey what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+        );
+      });
   });
 
-  describe("Composer callbacks and options", () => {
-    beforeEach(() => {
-      cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+  it("Shows body via value prop", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = { body: "Test value body prop" };
     });
 
-    it("Open/Close composer", () => {
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.open();
-        cy.get("header").should("exist");
-      });
-    });
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .should("include", "Test value body prop");
+  });
+});
 
-    it("Calls send callback", () => {
-      cy.get("header"); // wait for component to render
+describe("Composer callbacks and options", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
 
-      // NOTE: Cannot be spied because it's called in shadow dom
-      const sendCallback = () => {
-        return Promise.resolve({});
-      };
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.send = sendCallback;
-      });
-      cy.get(".send-btn").contains("Send").click();
-      cy.contains("Message sent successfully");
-    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
 
-    it("Has a reactive value prop", () => {
-      cy.get("header"); // wait for component to render
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
 
-      element.value = { body: "Test reactive prop" };
+    cy.visit("/components/composer/src/cypress.html");
 
-      cy.get(".html-editor[contenteditable=true]")
-        .invoke("prop", "innerHTML")
-        .should("include", "Test reactive prop");
-    });
+    cy.get("nylas-composer").should("exist").as("composer");
   });
 
-  describe("File upload", () => {
-    it("Successful upload", () => {
-      cy.get("nylas-composer").should("exist").as("composer");
-      cy.get("header"); // wait for component to render
-
-      const filePath = "example.json";
-
-      const send = async (data) => {
-        return new Promise((resolve, _reject) => {
-          setTimeout(() => {
-            expect(data.file_ids).to.have.lengthOf(1);
-            return resolve({ success: true });
-          }, 25);
-        });
+  it("Calls send callback", () => {
+    let sent = false;
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
       };
-      const uploadFile = async (id, _file) => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            return resolve({ id });
-          }, 25);
-        });
+
+      component.send = () => {
+        sent = true;
+        return Promise.resolve("success");
       };
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.send = send;
-        // component.beforeSend = beforeSend;
-        component.uploadFile = uploadFile;
-      });
-      cy.get("input[type=file]").attachFile(filePath);
-      cy.get(".send-btn").contains("Send").click();
-      cy.get("nylas-composer-alert-bar")
-        .should("exist")
-        .contains("Message sent successfully!");
-      cy.get(".file-item .close-btn").click();
     });
 
-    it("Failed upload", () => {
-      cy.get("nylas-composer").should("exist").as("composer");
-      cy.get("header"); // wait for component to render
-      const send = async (_data) => {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            return reject({ success: false });
-          }, 25);
-        });
-      };
-      cy.get("@composer").then((el) => {
-        const component = el[0];
-        component.send = send;
-        // component.beforeSend = beforeSend;
+    cy.get(".send-btn")
+      .contains("Send")
+      .click()
+      .then(() => {
+        expect(sent).to.be.true;
       });
-      const filePath = "example.json";
-      cy.get("input[type=file]").attachFile(filePath);
-      cy.get(".send-btn").contains("Send").click();
-      cy.get("nylas-composer-alert-bar")
-        .should("exist")
-        .contains("Failed to send the message");
+  });
+});
+
+describe("Composer file upload", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+  });
+
+  it("Successful upload", () => {
+    const filePath = "example.json";
+
+    const send = (data) => {
+      expect(data.file_ids).to.have.lengthOf(1);
+      return Promise.resolve({ success: true });
+    };
+    const uploadFile = (id, _file) => {
+      return Promise.resolve({ id });
+    };
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+      component.send = send;
+      component.uploadFile = uploadFile;
     });
+
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("example.json")
+      .should("be.visible");
+    cy.get(".send-btn").contains("Send").click();
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Message sent successfully!",
+    );
+  });
+
+  it("Failed upload", () => {
+    const send = (_data) => {
+      return Promise.reject({ success: false });
+    };
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.send = send;
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+    });
+    const filePath = "example.json";
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("example.json")
+      .should("be.visible");
+    cy.get(".send-btn").contains("Send").click();
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Failed to send the message",
+    );
   });
 });
