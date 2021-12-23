@@ -84,6 +84,7 @@
   // Attributes
   export let minimized: Attribute;
   export let reset_after_send: Attribute;
+  export let reset_after_close: Attribute;
   export let show_from: Attribute;
   export let show_to: Attribute;
   export let show_header: Attribute;
@@ -136,6 +137,10 @@
     visible = false;
     if (_this.reset_after_send) {
       sendSuccess = false;
+    }
+    if (_this.reset_after_close) {
+      sendSuccess = false;
+      resetAfterSend($message.from);
     }
     dispatchEvent("composerClosed", {});
   };

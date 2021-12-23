@@ -62,6 +62,13 @@
     "value": true
   },
   {
+    "label": "reset_after_close",
+    "title": "Reset after close",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
     "label": "show_minimize_button",
     "title": "Show minimize button",
     "type": "boolean",
