@@ -78,6 +78,7 @@ export const svelteConfig = {
   }),
   emitCss: false,
   compilerOptions: {
+    generate: "ssr",
     dev: !production,
     customElement: true,
   },

@@ -1,9 +1,18 @@
-export const originalDefine = window.customElements.define.bind(
-  window.customElements,
-);
-window.customElements.define = (name: string, ...args) => {
-  if (customElements.get(name)) {
-    return;
+const globalWindow = typeof window !== "undefined" ? window : undefined;
+
+export function registerWebComponent(): void {
+  if (globalWindow) {
+    const originalDefine = globalWindow.customElements.define.bind(
+      globalWindow.customElements,
+    );
+
+    globalWindow.customElements.define = (name: string, ...args) => {
+      if (globalWindow.customElements.get(name)) {
+        return;
+      }
+      return originalDefine(name, ...args);
+    };
   }
-  return originalDefine(name, ...args);
-};
+}
+
+registerWebComponent();
