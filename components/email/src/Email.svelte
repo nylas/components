@@ -515,12 +515,12 @@
 
   async function handleReplyClick(
     event: MouseEvent,
+    message: Message,
     type: "reply" | "reply_all",
-    msgIndex: number,
   ) {
     event.stopImmediatePropagation();
 
-    const currentMessage = activeThread.messages[msgIndex];
+    const currentMessage = message;
 
     const me: Participant = {
       name: _this.you.name,
@@ -532,45 +532,17 @@
       : `Re: ${currentMessage.subject}`;
 
     const from = [me];
-
-    const participantsWithoutMe = activeThread.participants.filter(
-      (e) => e.email != me.email,
-    );
+    const to = buildTo({ message: currentMessage, type });
 
     let event_identitfier;
-    let to;
-
-    /**
-     * In Gmail, reply options are available on each message in thread.
-     * There are a couple cases that need to be handled when the use clicks 'reply'
-     * and there are multiple participants in an email thread. In some cases, participants
-     * are add to the thread after messages have already been exchanged with out them.
-     *
-     *
-     * 1. When the message is from the user, AND the message is to multiple participants of the thread
-     *    then the default action is to reply to all participants and the reply_all button is not shown.
-     * 2. When the message is from the user, AND the message is to a single participant of the thread
-     *    then reply to only that participant.
-     * 3. When the message is NOT from the user, then reply to the sender of the message
-     */
 
     switch (type) {
       case "reply":
         event_identitfier = "replyClicked";
-        if (isFromMe(currentMessage)) {
-          if (currentMessage.to.length > 1) {
-            to = participantsWithoutMe;
-          } else {
-            to = currentMessage.to;
-          }
-        } else {
-          to = currentMessage.from;
-        }
         break;
 
       case "reply_all":
         event_identitfier = "replyAllClicked";
-        to = participantsWithoutMe;
         break;
     }
 
@@ -584,10 +556,36 @@
 
     dispatchEvent(event_identitfier, {
       event,
-      message: activeThread.messages[msgIndex],
+      message: currentMessage,
       thread: activeThread,
       value,
     });
+  }
+
+  function buildTo({
+    message,
+    type,
+  }: {
+    message: Message;
+    type: "reply" | "reply_all";
+  }): Participant[] {
+    let to: Participant[];
+
+    switch (type) {
+      case "reply":
+        if (isFromMe(message)) {
+          to = message.to;
+        } else {
+          to = message.from;
+        }
+        break;
+
+      case "reply_all":
+        to = message.to;
+        break;
+    }
+
+    return to;
   }
 
   function isFromMe(message: Message): boolean {
@@ -1691,7 +1689,7 @@
                                 title={"Reply"}
                                 aria-label={"Reply"}
                                 on:click|stopPropagation={(e) =>
-                                  handleReplyClick(e, "reply", msgIndex)}
+                                  handleReplyClick(e, message, "reply")}
                               >
                                 <ReplyIcon aria-hidden="true" />
                               </button>
@@ -1703,7 +1701,7 @@
                                 title={"Reply all"}
                                 aria-label={"Reply all"}
                                 on:click|stopPropagation={(e) =>
-                                  handleReplyClick(e, "reply_all", msgIndex)}
+                                  handleReplyClick(e, message, "reply_all")}
                               >
                                 <ReplyAllIcon aria-hidden="true" />
                               </button>
@@ -2063,13 +2061,41 @@
                 {/if}
               </div>
             </div>
-            {#if _this.show_received_timestamp}
-              <div class="message-date">
-                <span>
-                  {formatPreviewDate(new Date(_this.message.date * 1000))}
-                </span>
+            <section class="">
+              {#if _this.show_received_timestamp}
+                <div class="message-date">
+                  <span>
+                    {formatExpandedDate(new Date(_this.message.date * 1000))}
+                  </span>
+                </div>
+              {/if}
+              <div aria-label="Email Actions" role="toolbar">
+                {#if _this.show_reply}
+                  <div class="reply">
+                    <button
+                      title={"Reply"}
+                      aria-label={"Reply"}
+                      on:click|stopPropagation={(e) =>
+                        handleReplyClick(e, _this.message, "reply")}
+                    >
+                      <ReplyIcon aria-hidden="true" />
+                    </button>
+                  </div>
+                {/if}
+                {#if _this.show_reply_all && canReplyAll(_this.message)}
+                  <div class="reply-all">
+                    <button
+                      title={"Reply all"}
+                      aria-label={"Reply all"}
+                      on:click|stopPropagation={(e) =>
+                        handleReplyClick(e, _this.message, "reply_all")}
+                    >
+                      <ReplyAllIcon aria-hidden="true" />
+                    </button>
+                  </div>
+                {/if}
               </div>
-            {/if}
+            </section>
           </div>
           <div class="message-body">
             {#if _this.clean_conversation && _this.message.conversation}
