@@ -126,11 +126,17 @@
   // Callbacks
   export const open = (): void => {
     visible = true;
+    if (_this.reset_after_send) {
+      sendSuccess = false;
+    }
     dispatchEvent("composerOpened", {});
   };
 
   export const close = (): void => {
     visible = false;
+    if (_this.reset_after_send) {
+      sendSuccess = false;
+    }
     dispatchEvent("composerClosed", {});
   };
 
