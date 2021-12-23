@@ -7,6 +7,7 @@
 ## Bug Fixes
 
 - [Composer]: Reset sendSuccess when composer is opened and closed [#300](https://github.com/nylas/components/pull/300)
+- [Composer]: Added a prop 'reset_after_close' which resets after closing[#301](https://github.com/nylas/components/pull/301)
 
 # v1.1.6 (2021-12-22)
 

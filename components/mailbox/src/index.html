@@ -53,7 +53,7 @@
         composer.show_bcc = false;
         composer.show_cc = false;
         composer.reset_after_send = true;
-
+        composer.reset_after_close = true;
         composer.close();
 
         composer.afterSendSuccess = async (data) => {
