@@ -1677,13 +1677,15 @@
                         </div>
                       </div>
                       <div class="">
-                        <div class="message-date">
-                          <span>
-                            {formatExpandedDate(
-                              new Date(message.date * 1000),
-                            )}</span
-                          >
-                        </div>
+                        {#if _this.show_received_timestamp}
+                          <div class="message-date">
+                            <span>
+                              {formatExpandedDate(
+                                new Date(message.date * 1000),
+                              )}
+                            </span>
+                          </div>
+                        {/if}
                         <div aria-label="Email Actions" role="toolbar">
                           {#if _this.show_reply}
                             <div class="reply">
@@ -1777,11 +1779,17 @@
                           />
                         </div>
                       </div>
-                      <div class="message-date">
-                        <span>
-                          {formatExpandedDate(new Date(message.date * 1000))}
-                        </span>
-                      </div>
+                      <section>
+                        {#if _this.show_received_timestamp}
+                          <div class="message-date">
+                            <span>
+                              {formatExpandedDate(
+                                new Date(message.date * 1000),
+                              )}
+                            </span>
+                          </div>
+                        {/if}
+                      </section>
                     </div>
                     <div class="snippet">
                       {message.snippet}
