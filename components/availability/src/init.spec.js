@@ -10,7 +10,9 @@ beforeEach(() => {
     "demo-availability",
   );
   cy.get("@testComponent").invoke("attr", "participants", testUser);
-  cy.get("@testComponent").should("have.prop", "id").and("equal", "test-availability");
+  cy.get("@testComponent")
+    .should("have.prop", "id")
+    .and("equal", "test-availability");
 });
 
 describe("available times", () => {
@@ -56,14 +58,18 @@ describe("Booking time slots", () => {
     currentHour.setHours(currentHour.getHours() - 1);
 
     //Get the closest full hour prior to current time, slots isBookable should be false
-    cy.get(`button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`)
+    cy.get(
+      `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
+    )
       .first()
       .click();
     cy.get(".slot.selected").should("not.exist");
 
     //Get the closest next hour after the current hour, slots isBookable should be true
     currentHour.setHours(currentHour.getHours() + 2);
-    cy.get(`button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`)
+    cy.get(
+      `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
+    )
       .first()
       .click();
     cy.get(".slot.selected").should("have.length", 1);
@@ -319,11 +325,15 @@ describe("Booking time slots", () => {
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(frozenDateTime().setHours(15 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
               },
               {
@@ -335,11 +345,15 @@ describe("Booking time slots", () => {
                 end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(15 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
               },
             ],
@@ -355,11 +369,15 @@ describe("Booking time slots", () => {
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(frozenDateTime().setHours(15 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
               },
               {
@@ -371,11 +389,15 @@ describe("Booking time slots", () => {
                 end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(15 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
               },
             ],
@@ -391,11 +413,15 @@ describe("Booking time slots", () => {
             availability: "free",
             timeslots: [
               {
-                start_time: new Date(frozenDateTime().setHours(15 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
               },
               {
@@ -407,11 +433,15 @@ describe("Booking time slots", () => {
                 end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(15 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
               },
               {
-                start_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
+                start_time: new Date(
+                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
+                ),
                 end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
               },
             ],
@@ -459,9 +489,15 @@ describe("Booking time slots", () => {
                 .click()
                 .then(() => {
                   expect(selectedTimeslots).to.have.lengthOf(2);
-                  expect(selectedTimeslots[0].end_time.toISOString()).eq(consecutiveSlotEndTime);
-                  expect(selectedTimeslots[1].start_time.toISOString()).eq(singularSlotStartTime);
-                  expect(selectedTimeslots[1].end_time.toISOString()).eq(singularSlotEndTime);
+                  expect(selectedTimeslots[0].end_time.toISOString()).eq(
+                    consecutiveSlotEndTime,
+                  );
+                  expect(selectedTimeslots[1].start_time.toISOString()).eq(
+                    singularSlotStartTime,
+                  );
+                  expect(selectedTimeslots[1].end_time.toISOString()).eq(
+                    singularSlotEndTime,
+                  );
                   done();
                 });
             });
@@ -561,20 +597,24 @@ describe("Booking time slots", () => {
   describe("weeks and weekends", () => {
     it("Doesn't show Sunday as first day", () => {
       cy.get("div.day:eq(2)").should("not.exist");
-      cy.get("div.day:eq(0) header h2").invoke("text").should("not.contain", "Sun");
+      cy.get("div.day:eq(0) header h2")
+        .invoke("text")
+        .should("not.contain", "Sun");
     });
 
     it("Handles show_as_week true", () => {
       cy.viewport(1800, 550);
       cy.get("@testComponent").invoke("attr", "show_as_week", true);
-      cy.intercept("/middleware/calendars").then(() => {
+      cy.intercept("/middleware/calendars").as("calendars");
+      cy.wait("@calendars").then(() => {
         cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "12 Sun");
         cy.get("div.day:eq(6) header h2").invoke("text").should("eq", "18 Sat");
       });
     });
 
     it("Drops weekends like a bad habit: today view", () => {
-      cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
+      cy.get("@testComponent").invoke("attr", "dates_to_show", 6);
+      cy.get("@testComponent").invoke("attr", "show_weekends", false);
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "15 Wed");
       cy.get("div.day:eq(4) header h2").invoke("text").should("eq", "21 Tue");
       cy.get("div.day:eq(5) header h2").invoke("text").should("eq", "22 Wed");
@@ -608,7 +648,6 @@ describe("Booking time slots", () => {
     });
 
     it("When it's Friday, next date shown is Monday when weekends are disallowed", () => {
-      // REFACTOR THIS TO USE CURRENT DATE
       const friday = new Date(2021, 11, 17, 9, 0, 0);
       cy.get("@testComponent").invoke("attr", "show_weekends", false);
       cy.get("@testComponent").invoke("attr", "start_date", friday);
@@ -644,11 +683,19 @@ describe("Booking time slots", () => {
 
   describe("change colours", () => {
     it("changes colour by prop", () => {
-      cy.get(".epoch.partial .inner").should("not.have.css", "background-color", "rgb(0, 0, 0)");
+      cy.get(".epoch.partial .inner").should(
+        "not.have.css",
+        "background-color",
+        "rgb(0, 0, 0)",
+      );
       cy.get("@testComponent").invoke("attr", "partial_color", "#222");
       cy.get("@testComponent").invoke("attr", "busy_color", "#000");
       cy.get("@testComponent").invoke("attr", "free_color", "#444");
-      cy.get(".epoch.partial .inner").should("have.css", "background-color", "rgb(45, 45, 45)"); // 45: 2/3 availability = 2/3 distance between 000 and 444 in base RGB.
+      cy.get(".epoch.partial .inner").should(
+        "have.css",
+        "background-color",
+        "rgb(45, 45, 45)",
+      ); // 45: 2/3 availability = 2/3 distance between 000 and 444 in base RGB.
     });
   });
 
@@ -671,7 +718,6 @@ describe("Booking time slots", () => {
   describe("Limiting screen size", () => {
     beforeEach(() => {
       cy.get("@testComponent").invoke("attr", "show_as_week", true);
-      cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
     });
 
     it("Cuts off the number of days if viewport 1200px wide", () => {
@@ -703,7 +749,6 @@ describe("Booking time slots", () => {
 
     it("Handles moving backward show_as_week gracefully when squashed", () => {
       cy.viewport(800, 550);
-      cy.get(".day").should("have.length", 3);
       cy.get(".change-dates button:eq(0)").click();
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "12 Sun");
       cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "14 Tue");
@@ -850,14 +895,12 @@ describe("Booking time slots", () => {
     });
 
     it("Updates mandate_top_of_hour will change availability", () => {
-      cy.get(".controls")
-        .find('input[type="radio"][name="mandate-top-of-hour"][value="true"]')
-        .check();
+      cy.get('.controls input[name="mandate-top-of-hour"]').check("true");
       cy.get("button.slot.busy").should("have.length", 74);
     });
 
     it("Updates open_hours/Block Lunch control will change availability", () => {
-      cy.get(".controls").find('input[type="radio"][name="block-lunch"][value="everyday"]').check();
+      cy.get('.controls input[name="block-lunch"]').check("everyday");
       cy.get("button.slot.closed").should("have.length", 51);
     });
   });
