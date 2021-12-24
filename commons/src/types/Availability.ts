@@ -88,6 +88,7 @@ export interface BookableSlot extends TimeSlot {
   event_location: string;
   event_title: string;
   expirySelection: string;
+  participantEmails: string[];
   recurrence_cadence?:
     | "none"
     | "daily"
