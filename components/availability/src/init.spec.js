@@ -718,6 +718,7 @@ describe("Booking time slots", () => {
   describe("Limiting screen size", () => {
     beforeEach(() => {
       cy.get("@testComponent").invoke("attr", "show_as_week", true);
+      cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
     });
 
     it("Cuts off the number of days if viewport 1200px wide", () => {
