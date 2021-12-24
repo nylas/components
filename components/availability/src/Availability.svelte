@@ -679,7 +679,7 @@
       if (prevSlot && prevSlot.end_time === slot.start_time) {
         prevSlot.end_time = slot.end_time;
       } else {
-        groups.push({ ...slot }); // TODO: types ¯\_(ツ)_/¯
+        groups.push({ ...slot });
       }
       return groups;
     }, []);

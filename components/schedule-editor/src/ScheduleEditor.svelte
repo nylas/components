@@ -213,7 +213,7 @@
 
   // niceDate: shows date rules in a nice string format; selectively includes weekday if _this.show_as_week /  _this.show_weekends are set
   function niceDate(block: AvailabilityRule) {
-    let startMoment = new Date(
+    const startMoment = new Date(
       0,
       0,
       0,
@@ -225,7 +225,7 @@
       hour12: true,
     });
 
-    let endMoment = new Date(
+    const endMoment = new Date(
       0,
       0,
       0,
@@ -238,7 +238,7 @@
     });
 
     if ((_this.show_as_week || _this.show_weekends) && block.startWeekday) {
-      let weekday = weekdays[block.startWeekday];
+      const weekday = weekdays[block.startWeekday];
       return `${weekday}: ${startMoment} - ${endMoment}`;
     } else {
       return `${startMoment} - ${endMoment}`;
