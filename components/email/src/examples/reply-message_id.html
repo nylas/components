@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Reply Message ID - Email Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+    <link rel="stylesheet" href="../index.css" />
+    <script src="../../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const email = document.getElementById("demo-email");
+        email.show_reply = true;
+
+        email.addEventListener("replyClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyClicked", detail.value);
+        });
+
+        email.addEventListener("replyAllClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyAllClicked", detail.value);
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p class="demo-index demo-head">Reply Demo</p>
+      <h2 class="demo-head">Manually passed message_id</h2>
+      <p class="demo-description demo-head">
+        Testing reply with manually passed message_id.
+      </p>
+      <nylas-email
+        id="demo-email"
+        message_id="d0byfc378l2728z35pax362ho"
+        show_reply="true"
+      ></nylas-email>
+    </div>
+  </body>
+</html>

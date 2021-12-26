@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Reply Message - Email Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+    <link rel="stylesheet" href="../index.css" />
+    <script src="../../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const message = {
+          account_id: "cou6r5tjgubx9rswikzvz9afb",
+          bcc: [],
+          cc: [
+            {
+              email: "phil.r@nylas.com",
+              name: "Phil Renaud",
+            },
+            {
+              email: "review_requested@noreply.github.com",
+              name: "Review requested",
+            },
+          ],
+          date: 1621472861,
+          files: [],
+          from: [
+            {
+              email: "notifications@github.com",
+              name: "Mostafa Rashed",
+            },
+          ],
+          id: "epgslj6wocxcnuyy6h9yyle6v",
+          labels: [
+            {
+              display_name: "Inbox",
+              id: "3fhdx7sufj12vbhhjm5ecwcm4",
+              name: "inbox",
+            },
+          ],
+          object: "message",
+          reply_to: [
+            {
+              email:
+                "reply+AAFOKBZZTCUKW3S3KF62NIF6WGLV3EVBNHHDK2QOAM@reply.github.com",
+              name: "nylas/nylas-nodejs",
+            },
+          ],
+          snippet:
+            "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+          starred: false,
+          subject:
+            "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+          thread_id: "db8z5xg97si2qio9z7md84fgk",
+          to: [
+            {
+              email: "nylas-nodejs@noreply.github.com",
+              name: "nylas/nylas-nodejs",
+            },
+          ],
+          unread: true,
+        };
+
+        const email = document.getElementById("demo-email");
+        email.message = message;
+
+        email.addEventListener("replyClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyClicked", detail.value);
+        });
+
+        email.addEventListener("replyAllClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyAllClicked", detail.value);
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="demo">
+      <p class="demo-index demo-head">Reply Demo</p>
+      <h2 class="demo-head">Manually passed message</h2>
+      <p class="demo-description demo-head">
+        Testing reply with manually passed message.
+      </p>
+      <nylas-email id="demo-email" show_reply="true" click_action="default">
+      </nylas-email>
+    </div>
+  </body>
+</html>
