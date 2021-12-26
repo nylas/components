@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Reply Thread - Email Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+    <link rel="stylesheet" href="../index.css" />
+    <script src="../../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const thread = {
+          account_id: "cou6r5tjgubx9rswikzvz9afb",
+          drafts: [],
+          first_message_timestamp: 1621472861,
+          has_attachments: false,
+          id: "db8z5xg97si2qio9z7md84fgk",
+          labels: [
+            {
+              display_name: "Inbox",
+              id: "3fhdx7sufj12vbhhjm5ecwcm4",
+              name: "inbox",
+            },
+          ],
+          last_message_received_timestamp: 1621472865,
+          last_message_sent_timestamp: null,
+          last_message_timestamp: 1621472865,
+          messages: [
+            {
+              account_id: "cou6r5tjgubx9rswikzvz9afb",
+              bcc: [],
+              cc: [],
+              date: 1621472861,
+              files: [],
+              from: [
+                {
+                  email: "c@c.com",
+                  name: "The Letter C",
+                },
+              ],
+              id: "epgslj6wocxcnuyy6h9yyle6v",
+              labels: [
+                {
+                  display_name: "Inbox",
+                  id: "3fhdx7sufj12vbhhjm5ecwcm4",
+                  name: "inbox",
+                },
+              ],
+              object: "message",
+              reply_to: [],
+              snippet:
+                "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+              starred: false,
+              subject:
+                "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+              thread_id: "db8z5xg97si2qio9z7md84fgk",
+              to: [
+                {
+                  email: "nylascypresstest@gmail.com",
+                  name: "Test User",
+                },
+                {
+                  email: "a@a.com",
+                  name: "The Letter A",
+                },
+                {
+                  email: "b@b.com",
+                  name: "The Letter b",
+                },
+              ],
+              unread: true,
+            },
+            {
+              account_id: "cou6r5tjgubx9rswikzvz9afb",
+              bcc: [],
+              cc: [],
+              date: 1621472861,
+              files: [],
+              from: [
+                {
+                  email: "c@c.com",
+                  name: "The Letter C",
+                },
+              ],
+              id: "epgslj6wocxcnuyy6h9yyle6v",
+              labels: [
+                {
+                  display_name: "Inbox",
+                  id: "3fhdx7sufj12vbhhjm5ecwcm4",
+                  name: "inbox",
+                },
+              ],
+              object: "message",
+              reply_to: [],
+              snippet:
+                "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+              starred: false,
+              subject:
+                "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+              thread_id: "db8z5xg97si2qio9z7md84fgk",
+              to: [
+                {
+                  email: "nylascypresstest@gmail.com",
+                  name: "Test User",
+                },
+                {
+                  email: "a@a.com",
+                  name: "The Letter A",
+                },
+                {
+                  email: "b@b.com",
+                  name: "The Letter b",
+                },
+              ],
+              unread: true,
+            },
+            {
+              account_id: "cou6r5tjgubx9rswikzvz9afb",
+              bcc: [],
+              cc: [],
+              date: 1621472861,
+              files: [],
+              from: [
+                {
+                  email: "c@c.com",
+                  name: "The Letter C",
+                },
+              ],
+              id: "epgslj6wocxcnuyy6h9yyle6v",
+              labels: [
+                {
+                  display_name: "Inbox",
+                  id: "3fhdx7sufj12vbhhjm5ecwcm4",
+                  name: "inbox",
+                },
+              ],
+              object: "message",
+              reply_to: [],
+              snippet:
+                "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+              starred: false,
+              subject:
+                "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+              thread_id: "db8z5xg97si2qio9z7md84fgk",
+              to: [
+                {
+                  email: "nylascypresstest@gmail.com",
+                  name: "Test User",
+                },
+                {
+                  email: "a@a.com",
+                  name: "The Letter A",
+                },
+                {
+                  email: "b@b.com",
+                  name: "The Letter b",
+                },
+              ],
+              unread: true,
+            },
+          ],
+          object: "thread",
+          participants: [
+            {
+              email: "nylascypresstest@gmail.com",
+              name: "Test User",
+            },
+            {
+              email: "a@a.com",
+              name: "The Letter A",
+            },
+            {
+              email: "b@b.com",
+              name: "The Letter b",
+            },
+            {
+              email: "c@c.com",
+              name: "The Letter C",
+            },
+          ],
+          snippet: "Alphabet Soup",
+          starred: false,
+          subject: "Alphabet Soup",
+          unread: true,
+          version: 1,
+        };
+
+        const email = document.getElementById("demo-email");
+        email.thread = thread;
+
+        email.addEventListener("replyClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyClicked", detail.value);
+        });
+
+        email.addEventListener("replyAllClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyAllClicked", detail.value);
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="emails"></div>
+    <div class="demo">
+      <p class="demo-index demo-head">Reply All Demo</p>
+      <h2 class="demo-head">Manually passed thread</h2>
+      <p class="demo-description demo-head">
+        Testing reply all with manually passed thread.
+      </p>
+      <nylas-email
+        id="demo-email"
+        show_reply_all="true"
+        show_expanded_email_view_onload="true"
+        click_action="default"
+      >
+      </nylas-email>
+    </div>
+  </body>
+</html>

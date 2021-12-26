@@ -821,3 +821,100 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
     });
   });
 });
+
+describe("Should Render Reply All Button And Respond To Clicks", () => {
+  it("Should Render Reply All Button When Passed A Message", () => {
+    cy.visit("/components/email/src/examples/reply-all-message.html");
+
+    cy.get("nylas-email").then((component) => {
+      cy.get(component).should("exist");
+      cy.get(component).find("div.reply-all button").should("exist");
+    });
+  });
+
+  it("Should Render Reply All Button When Passed A Thread", () => {
+    cy.visit("/components/email/src/examples/reply-all-thread.html");
+
+    cy.get("nylas-email").then((component) => {
+      cy.get(component).should("exist");
+      cy.get(component).find("div.reply-all button").should("exist");
+    });
+  });
+
+  it("Should Render Reply All Button When Passed A Message ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/d0byfc378l2728z35pax362ho",
+      },
+      {
+        fixture: "email/messages/idWithMultipleSenders.json",
+      },
+    ).as("messageRequest");
+
+    cy.visit("/components/email/src/examples/reply-all-message_id.html");
+    cy.wait("@messageRequest");
+
+    cy.get("nylas-email").then((component) => {
+      cy.get(component).should("exist");
+      cy.get(component).find("div.reply-all button").should("exist");
+    });
+  });
+
+  it("Should Render Reply All Button When Passed A Thread ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/threads/e2k5xktxejdok7d8x28ljf44d?view=expanded",
+      },
+      {
+        fixture: "email/threads/idWithMultipleSenders.json",
+      },
+    ).as("threadRequest");
+
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/*",
+      },
+      {
+        fixture: "email/messages/idWithMultipleSenders.json",
+      },
+    );
+
+    cy.visit("/components/email/src/examples/reply-all-thread_id.html");
+    cy.wait("@threadRequest");
+
+    cy.get("nylas-email").then((component) => {
+      cy.get(component).should("exist");
+      cy.get(component).find("div.reply-all button").should("exist");
+    });
+  });
+
+  it("Should Not Render Reply All Button When Reply All Option Is Not Available", () => {
+    cy.visit("/components/email/src/examples/reply-all-not-available.html");
+
+    cy.get("nylas-email").then((component) => {
+      cy.get(component).should("exist");
+      cy.get(component).find("div.reply-all button").should("not.exist");
+    });
+  });
+
+  it("Should Dispatch Event When Reply All Button Is Clicked", () => {
+    cy.visit("/components/email/src/examples/reply-all-message.html");
+
+    cy.get("nylas-email").then((components) => {
+      cy.get(components).should("exist");
+      cy.get(components).find("div.reply-all button").as("button");
+
+      cy.get("@button").should("exist");
+
+      components
+        .get(0)
+        .addEventListener("replyAllClicked", cy.stub().as("replyAllClicked"));
+
+      cy.get("@button").click();
+      cy.get("@replyAllClicked").should("have.been.calledOnce");
+    });
+  });
+});

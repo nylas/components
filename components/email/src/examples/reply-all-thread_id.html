@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Reply Thread ID - Email Demo</title>
+    <link rel="shortcut icon" href="data:;base64,=" />
+    <link rel="stylesheet" href="../index.css" />
+    <script src="../../index.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const email = document.getElementById("demo-email");
+
+        email.addEventListener("replyClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyClicked", detail.value);
+        });
+
+        email.addEventListener("replyAllClicked", (event) => {
+          const detail = event.detail;
+          console.log("replyAllClicked", detail.value);
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="emails"></div>
+    <div class="demo">
+      <p class="demo-index demo-head">Reply All Demo</p>
+      <h2 class="demo-head">Manually passed thread_id</h2>
+      <p class="demo-description demo-head">
+        Testing reply all with manually passed thread_id.
+      </p>
+      <nylas-email
+        id="demo-email"
+        show_reply_all="true"
+        show_expanded_email_view_onload="true"
+        thread_id="e2k5xktxejdok7d8x28ljf44d"
+        click_action="default"
+      >
+      </nylas-email>
+    </div>
+  </body>
+</html>
