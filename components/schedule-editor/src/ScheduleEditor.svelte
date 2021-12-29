@@ -166,16 +166,22 @@
 
   // Properties requiring further manipulation:
   let startDate: string = new Date().toLocaleDateString("en-CA");
+  let startDateMethod: "date" | "current" = "current";
 
   function transformPropertyValues() {
-    startDate = _this.start_date?.toLocaleDateString("en-CA");
+    startDate = _this.start_date?.toLocaleDateString("en-CA") as string;
+    startDateMethod = _this.start_date ? "date" : "current";
   }
 
-  $: {
-    _this.start_date = new Date(
-      new Date(startDate).getTime() -
-        new Date(startDate).getTimezoneOffset() * -60000,
-    );
+  $: if (initialized) {
+    if (startDateMethod === "date") {
+      _this.start_date = new Date(
+        new Date(startDate).getTime() -
+          new Date(startDate).getTimezoneOffset() * -60000,
+      );
+    } else {
+      _this.start_date = null;
+    }
   }
   // #endregion mount and prop initialization
 
@@ -583,7 +589,15 @@
           </div>
           <label>
             <strong>Start Date</strong>
-            <input type="date" bind:value={startDate} />
+
+            <select bind:value={startDateMethod}>
+              <option value="current">Always the current date</option>
+              <option value="date">A specific date (pick)</option>
+            </select>
+
+            {#if startDateMethod === "date"}
+              <input type="date" bind:value={startDate} />
+            {/if}
           </label>
           <label>
             <strong>Time Zone</strong>
