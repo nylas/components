@@ -307,4 +307,63 @@ describe("Store and web requests", () => {
       done();
     });
   });
+
+  it("should set the current day's events when multiple ", (done) => {
+    getEventSpy.mockReset();
+    getEventSpy = jest
+      .spyOn(EventStore, "getEvents")
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => setTimeout(() => resolve([] as any[]), 10)),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve([mockEvents[0]] as any[]), 10),
+          ),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve([mockEvents[1]] as any[]), 20),
+          ),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(mockEvents as any[]), 5),
+          ),
+      );
+
+    const mockComponentId = "mock agenda ID";
+    const mockManifestKey = JSON.stringify({
+      component_id: mockComponentId,
+      access_token: "",
+    });
+
+    ManifestStore.update(() => ({
+      [mockManifestKey]: new Promise((resolve) => resolve(mockAgendaManifest)),
+    }));
+
+    const { container: agenda } = render(Agenda, {
+      id: mockComponentId,
+    });
+
+    setTimeout(async () => {
+      await fireEvent.click(
+        agenda.querySelector(".change-date.next") as Element,
+      );
+
+      await fireEvent.click(
+        agenda.querySelector(".change-date.next") as Element,
+      );
+
+      setTimeout(() => {
+        expect(agenda.querySelectorAll(".event").length).toBe(
+          mockEvents.length,
+        );
+        done();
+      }, 200);
+    });
+  });
 });
