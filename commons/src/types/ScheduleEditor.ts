@@ -7,7 +7,7 @@ export interface Manifest extends NylasManifest {
   show_hosts: "show" | "hide";
   start_hour: number;
   end_hour: number;
-  start_date: Date;
+  start_date: Date | null;
   dates_to_show: number;
   show_ticks: boolean;
   allow_booking: boolean;

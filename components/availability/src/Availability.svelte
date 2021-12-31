@@ -102,7 +102,7 @@
   export let show_ticks: boolean;
   export let show_weekends: boolean;
   export let slot_size: number; // in minutes
-  export let start_date: Date;
+  export let start_date: Date | null;
   export let start_hour: number;
   export let timezone: string;
   export let view_as: "schedule" | "list";
@@ -243,6 +243,7 @@
     manifest = (await $ManifestStore[storeKey]) || {};
 
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
+    transformPropertyValues();
 
     const calendarQuery: CalendarQuery = {
       access_token,
@@ -264,6 +265,13 @@
         defaultValueMap,
       ) as Manifest;
       previousProps = $$props;
+    }
+  }
+
+  // Properties requiring further manipulation:
+  function transformPropertyValues() {
+    if (!_this.start_date) {
+      _this.start_date = defaultValueMap.start_date;
     }
   }
 
