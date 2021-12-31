@@ -270,7 +270,7 @@
 
   // Properties requiring further manipulation:
   function transformPropertyValues() {
-    if (_this.start_date === null) {
+    if (!_this.start_date) {
       _this.start_date = defaultValueMap.start_date;
     }
   }
