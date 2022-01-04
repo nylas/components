@@ -6,6 +6,19 @@
 
 ## Bug Fixes
 
+# Unreleased (2022-01-07)
+# Pending Changes
+
+## Breaking
+
+## New Features
+
+## Bug Fixes
+
+- [Email] UI tweaks that improve design [#270](https://github.com/nylas/components/pull/270)
+- [Email] Added new loading indicator [#270](https://github.com/nylas/components/pull/270)
+- [Email] Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
+
 # v1.1.7 (2021-12-22)
 
 ## New Features
@@ -48,7 +61,7 @@
 ## New Features
 
 - [Email] Added support for downloading attachments [#240](https://github.com/nylas/components/pull/240)
-- [Email] Added support for rendering inline images (broken images) [249](https://github.com/nylas/components/pull/249)
+- [Email] Added support for rendering inline images (broken images) [#249](https://github.com/nylas/components/pull/249)
 
 ## Bug Fixes
 

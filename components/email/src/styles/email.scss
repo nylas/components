@@ -1,0 +1,49 @@
+@mixin condensed-grid {
+  flex-wrap: wrap;
+  display: grid;
+  gap: $spacing-xs;
+  align-items: flex-start;
+  grid-template-areas:
+    "a a a a b c"
+    "d d d d d d";
+
+  .from-star {
+    grid-area: a;
+  }
+  .thread-message-count {
+    grid-area: b;
+  }
+  .subject-snippet-attachment {
+    grid-area: d;
+  }
+  .date {
+    grid-area: c;
+  }
+
+  @media #{$desktop} {
+    display: grid;
+    column-gap: $spacing-m;
+    grid-template-areas: unset;
+    grid-template-columns: minmax(250px, 18%) 6% auto 130px;
+
+    .from-star {
+      grid-area: unset;
+    }
+    .thread-message-count {
+      grid-area: unset;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .subject-snippet-attachment {
+      grid-area: unset;
+    }
+    .date {
+      grid-area: unset;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+    }
+  }
+}

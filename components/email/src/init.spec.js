@@ -414,7 +414,7 @@ describe("Email: Displays threads and messages", () => {
 
     cy.get("@email").find(".email-row.condensed .attachment").should("exist");
     cy.get("@email")
-      .find(".email-row.condensed .attachment.desktop button")
+      .find(".email-row.condensed .attachment button")
       .should("have.text", "invoice_2062.pdf ");
   });
 
@@ -502,17 +502,24 @@ describe("Email: Stars", () => {
       const component = element[0];
       component.click_action = "default";
       component.show_star = true;
-    });
 
-    cy.get("@email").find("div.starred").should("exist");
-    cy.get("@email")
-      .shadow()
-      .findByLabelText("Star button for thread b3z0fd5kbbwcxvf4q1ele5us6")
-      .click();
-    cy.get("@email")
-      .find("div.starred")
-      .find("button")
-      .should("have.class", "starred");
+      cy.get("@email").find("div.starred").should("exist");
+      cy.get("@email")
+        .find("div.starred")
+        .find("button")
+        .then(($btn) => {
+          let isStarred = $btn.hasClass("starred");
+          cy.get("@email")
+            .shadow()
+            .findByLabelText("Star button for thread b3z0fd5kbbwcxvf4q1ele5us6")
+            .click();
+          if (isStarred) {
+            cy.wrap($btn).should("not.have.class", "starred");
+          } else {
+            cy.wrap($btn).should("have.class", "starred");
+          }
+        });
+    });
   });
 });
 
