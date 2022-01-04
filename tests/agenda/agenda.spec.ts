@@ -9,7 +9,7 @@ import { mockEvents } from "../mocks/MockEvents";
 import { mockAgendaManifest } from "../mocks/MockManifests";
 
 jest.mock("../../commons/src/connections/manifest", () => ({
-  ...jest.requireActual("../../commons/src/connections/manifest"),
+  ...(jest.requireActual("../../commons/src/connections/manifest") as any),
   fetchManifest: jest.fn(),
 }));
 import { fetchManifest } from "../../commons/src/connections/manifest";

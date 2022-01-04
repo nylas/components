@@ -1,7 +1,7 @@
 import { getMiddlewareApiUrl } from "../../commons/src/methods/api";
 
 jest.mock("../../commons/src/connections/manifest", () => ({
-  ...jest.requireActual("../../commons/src/connections/manifest"),
+  ...(jest.requireActual("../../commons/src/connections/manifest") as any),
   fetchManifest: jest.fn(),
 }));
 
