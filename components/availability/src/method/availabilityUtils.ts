@@ -12,6 +12,7 @@ import type {
   SelectableSlot,
 } from "@commons/types/Availability";
 import { arrayContainsArray } from "@commons/methods/component";
+import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
 // map over the ticks() of the time scale between your start day and end day
 // populate them with as many slots as your start_hour, end_hour, and slot_size dictate
@@ -20,6 +21,8 @@ export const generateDaySlots = (
   allCalendars: any[],
   calendarID: string,
   requiredParticipants: string[],
+  consecutiveOptions: ConsecutiveEvent[][],
+  consecutiveParticipants: string[],
   internalProps: Manifest,
 ): any[] => {
   const dayStart = timeHour(
@@ -203,6 +206,26 @@ export const generateDaySlots = (
             availability = AvailabilityStatus.CLOSED;
             freeCalendars.length = 0;
           }
+        }
+      }
+
+      // Handle the Consecutive Events model, where a slot if busy if it falls within a consecutive timeslot.
+      // None of the other above rules should apply, except (maybe!) Buffer and Open Hours.
+      if (internalProps.events?.length > 1 && consecutiveOptions.length) {
+        const existsWithinConsecutiveBlock = consecutiveOptions.some(
+          (event) => {
+            return (
+              time >= event[0].start_time &&
+              endTime <= event[event.length - 1].end_time
+            );
+          },
+        );
+        if (existsWithinConsecutiveBlock) {
+          availability = AvailabilityStatus.FREE;
+          freeCalendars.length = consecutiveParticipants.length;
+        } else {
+          availability = AvailabilityStatus.BUSY;
+          freeCalendars.length = 0;
         }
       }
 
