@@ -670,7 +670,8 @@ describe("Booking time slots", () => {
       cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "27 Mon");
     });
 
-    it("Moves a full week on prev/next push", () => {
+    it.only("Moves a full week when next button is clicked", () => {
+      cy.viewport(1500, 550);
       cy.get("@testComponent").invoke("attr", "show_weekends", false);
       cy.get("@testComponent").invoke("attr", "show_as_week", true);
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "20 Mon");
