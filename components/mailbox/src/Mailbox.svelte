@@ -600,6 +600,7 @@
       gap: 0.5rem;
       align-items: center;
       justify-content: left;
+      position: relative;
 
       .checkbox-container.thread-checkbox {
         padding: 1rem 0 0 1rem;
@@ -607,10 +608,13 @@
       }
 
       &:hover {
-        outline: 2px solid var(--mailbox-grey-warm-color, var(--grey-warm));
-        outline-offset: -2px;
+        box-shadow: inset 1px 0 0
+            var(--mailbox-grey-warm-color, var(--grey-warm)),
+          inset -1px 0 0 var(--mailbox-grey-warm-color, var(--grey-warm)),
+          0 1px 2px 0 rgb(44 46 46 / 20%), 0 1px 3px 1px rgb(44 46 46 / 5%);
         border-color: var(--mailbox-grey-warm-color, var(--grey-warm));
         cursor: pointer;
+        z-index: 1;
       }
 
       // #region define border styles
