@@ -113,7 +113,7 @@ describe("MailBox  component", () => {
                 .find(".email-row.condensed .attachment")
                 .should("exist");
               cy.get(email)
-                .find(".email-row.condensed .attachment.desktop button")
+                .find(".email-row.condensed .attachment button")
                 .should("have.text", "invoice_2062.pdf ");
             });
         });

@@ -403,19 +403,17 @@
       //#endregion read/unread
 
       const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded = !activeThread.messages[
-        lastMsgIndex
-      ].expanded;
+      activeThread.messages[lastMsgIndex].expanded =
+        !activeThread.messages[lastMsgIndex].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
         if (!activeThread.messages[lastMsgIndex].body) {
-          activeThread.messages[
-            lastMsgIndex
-          ].body = await fetchIndividualMessage(
-            lastMsgIndex,
-            activeThread.messages[lastMsgIndex].id,
-          );
+          activeThread.messages[lastMsgIndex].body =
+            await fetchIndividualMessage(
+              lastMsgIndex,
+              activeThread.messages[lastMsgIndex].id,
+            );
         }
       }
 
@@ -614,9 +612,8 @@
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
     } else {
-      activeThread.messages[msgIndex].expanded = !activeThread.messages[
-        msgIndex
-      ].expanded;
+      activeThread.messages[msgIndex].expanded =
+        !activeThread.messages[msgIndex].expanded;
       dispatchEvent("messageClicked", {
         event,
         message: activeThread.messages[msgIndex],
@@ -640,9 +637,8 @@
       if (msgIndex === activeThread.messages.length - 1) {
         doNothing(event);
       } else {
-        activeThread.messages[msgIndex].expanded = !activeThread.messages[
-          msgIndex
-        ].expanded;
+        activeThread.messages[msgIndex].expanded =
+          !activeThread.messages[msgIndex].expanded;
       }
     }
   }
@@ -1116,7 +1112,7 @@
             flex-direction: column;
             width: 100%;
             div.attachment {
-              overflow-x: scroll;
+              overflow-x: auto;
               button {
                 margin: $spacing-xs;
                 height: fit-content;
@@ -1254,6 +1250,7 @@
             overflow: hidden;
             white-space: nowrap;
             position: relative;
+            text-overflow: ellipsis;
             .from-sub-section.second {
               display: none;
             }
@@ -1296,7 +1293,7 @@
           margin-top: $spacing-xs;
           gap: 1rem;
           display: flex;
-          overflow-x: scroll;
+          overflow-x: auto;
 
           button {
             padding: 0.3rem 1rem;
