@@ -2,14 +2,14 @@ import { writable } from "svelte/store";
 import type { Attachment, AttachmentUpdate } from "@commons/types/Composer";
 
 const messageInitialState = {
-  from: [],
-  to: [],
-  cc: [],
-  bcc: [],
+  from: <string[]>[],
+  to: <string[]>[],
+  cc: <string[]>[],
+  bcc: <string[]>[],
   body: "",
   subject: "New Message",
-  send_at: null,
-  file_ids: [],
+  send_at: <Date>null,
+  file_ids: <string[]>[],
 };
 export const message = writable(
   JSON.parse(JSON.stringify(messageInitialState)),

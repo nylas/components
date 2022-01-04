@@ -3,6 +3,7 @@
 <script lang="ts">
   import {
     formatTimeSlot,
+    isValidTimezone,
     setTimeZoneOffset,
   } from "@commons/methods/convertDateTimeZone";
   import {
@@ -62,7 +63,7 @@
   import { createConsecutiveQueryKey } from "./method/consecutive";
   import type { EventDefinition } from "@commonstypes/ScheduleEditor";
   import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
-  import { generateDaySlots, overlap } from "./method/availabilityUtils";
+  import { generateDaySlots } from "./method/availabilityUtils";
 
   //#region props
   export let id: string = "";
@@ -265,6 +266,17 @@
         defaultValueMap,
       ) as Manifest;
       previousProps = $$props;
+
+      if (_this.timezone) {
+        if (!isValidTimezone(_this.timezone)) {
+          console.warn(`Invalid IANA time zone: ${_this.timezone}`);
+          _this.timezone = undefined;
+        } else if (
+          _this.timezone === Intl.DateTimeFormat().resolvedOptions().timeZone
+        ) {
+          _this.timezone = undefined;
+        }
+      }
     }
   }
 

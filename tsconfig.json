@@ -20,6 +20,7 @@
       "@commons": ["./commons/src/"]
     },
     "strict": true,
+    "strictNullChecks": false,
     "skipLibCheck": true,
     "resolveJsonModule": true
   },

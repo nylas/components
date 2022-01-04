@@ -1,4 +1,8 @@
-import { DateTime } from "luxon";
+import { DateTime, IANAZone } from "luxon";
+
+export function isValidTimezone(zone: string) {
+  return IANAZone.isValidZone(zone);
+}
 
 /**
  *
@@ -30,14 +34,12 @@ export function formatTimeSlot(slot: Date, zone: string): string {
  * @param zone string
  * @returns string
  */
-export function setTimeZoneOffset(
-  slot: Date,
-  zone: string | undefined = undefined,
-): string {
+export function setTimeZoneOffset(slot: Date, zone?: string): string {
   const dateTimeSlot = DateTime.fromJSDate(slot, { zone });
   if (
-    !dateTimeSlot.isValid &&
-    (dateTimeSlot.invalidReason === "unsupported zone" || !zone)
+    (zone && !isValidTimezone(zone)) ||
+    (!dateTimeSlot.isValid &&
+      (dateTimeSlot.invalidReason === "unsupported zone" || !zone))
   ) {
     return "";
   }
