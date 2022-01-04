@@ -1,0 +1,137 @@
+nylas-tooltip {
+  position: relative;
+}
+
+.default-avatar {
+  background: var(--nylas-default-avatar-background, var(--blue));
+  border-radius: 50%;
+  color: var(--nylas-default-avatar-color, var(--white));
+  font-family: sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  height: 31px;
+  line-height: 35px;
+  text-align: center;
+  text-transform: uppercase;
+  width: 32px;
+}
+
+.nylas-email {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: grid;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.nylas-thread .email-row {
+  background: var(--nylas-email-background, var(--grey-lightest));
+  border: var(--nylas-email-border-style, 1px solid var(--grey-lighter));
+  border-left-width: var(--nylas-email-border-left-width, 1px);
+}
+
+.nylas-thread .email-row header {
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: $spacing-xs;
+  padding-bottom: 0;
+}
+
+.nylas-thread .email-row.condensed {
+  height: $mobile-collapsed-height;
+  padding: $spacing-xs;
+  flex-wrap: wrap;
+  display: grid;
+  gap: $spacing-xs;
+  align-items: center;
+  grid-template-columns: fit-content(350px) 1fr;
+}
+
+.nylas-thread .email-row.condensed.disable-click {
+  cursor: not-allowed;
+  display: grid;
+  align-items: flex-start;
+  background: var(--grey-lighter);
+}
+
+.nylas-thread .email-row.condensed.unread {
+  background: var(--nylas-email-unread-background, white);
+}
+
+.nylas-thread .email-row.condensed.unread .from-message-count,
+.date,
+.subject {
+  font-weight: 600;
+  color: var(--nylas-email-subject-color, var(--black));
+}
+
+.nylas-thread .email-row.condensed.unread .thread-message-count {
+  color: var(--nylas-email-unread-thread-message-count-color, var(--blue));
+}
+
+.nylas-thread .email-row.condensed .no-message-avatar-container {
+  display: grid;
+}
+
+.nylas-thread .email-row.condensed .no-message-avatar-container.show-star {
+  margin-left: calc(25px + 0.5rem); //to account for space occupied by star
+}
+
+.nylas-thread
+  .email-row.condensed
+  .no-message-avatar-container
+  .default-avatar {
+  background: var(--red);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nylas-thread
+  .email-row.condensed
+  .no-message-avatar-container
+  .default-avatar.draft {
+  background: var(--blue);
+}
+
+.nylas-thread .email-row.condensed .no-messages-warning-container {
+}
+
+.nylas-thread .email-row.condensed .from-star {
+}
+
+.nylas-thread .email-row.condensed .mobile-subject-snippet {
+}
+
+.nylas-thread .email-row.condensed .thread-message-count {
+}
+
+@media #{$desktop} {
+  .nylas-email {
+  }
+
+  .nylas-thread {
+  }
+
+  .nylas-thread .from-message-count {
+    max-width: 50px;
+  }
+
+  .nylas-thread .email-row {
+  }
+
+  .nylas-thread .email-row.condensed {
+  }
+
+  .nylas-thread .email-row.expanded {
+  }
+
+  .nylas-thread .email-row.expanded-mailbox-thread {
+  }
+
+  .nylas-message {
+  }
+
+  .nylas-message .message-head {
+  }
+}

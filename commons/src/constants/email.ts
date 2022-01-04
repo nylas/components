@@ -1,0 +1,3 @@
+export const MAX_DESKTOP_PARTICIPANTS = 2;
+export const MAX_MOBILE_PARTICIPANTS = 1;
+export const PARTICIPANTS_TO_TRUNCATE = 3;

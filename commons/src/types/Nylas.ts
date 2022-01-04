@@ -186,22 +186,22 @@ export interface AgendaProperties extends Manifest {
 }
 
 export interface EmailProperties extends Manifest {
-  clean_conversation: boolean;
-  click_action: "default" | "mailbox" | "custom";
-  message_id: string;
-  message: Message;
-  show_contact_avatar: boolean;
-  show_expanded_email_view_onload: boolean;
-  show_number_of_messages: boolean;
-  show_received_timestamp: boolean;
-  show_star: boolean;
-  show_thread_actions: boolean;
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  thread_id: string;
-  thread: Thread;
-  you: Partial<Account>;
-  show_reply: boolean;
-  show_reply_all: boolean;
+  clean_conversation?: boolean;
+  click_action?: "default" | "mailbox" | "custom";
+  message_id?: string;
+  message?: Message;
+  show_contact_avatar?: boolean;
+  show_expanded_email_view_onload?: boolean;
+  show_number_of_messages?: boolean;
+  show_received_timestamp?: boolean;
+  show_star?: boolean;
+  show_thread_actions?: boolean;
+  theme?: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  thread_id?: string;
+  thread?: Thread;
+  you?: Partial<Account>;
+  show_reply?: boolean;
+  show_reply_all?: boolean;
 }
 
 export interface MailboxProperties extends Manifest {
@@ -320,6 +320,7 @@ export interface Conversation extends Thread {
   messages: Message[];
 }
 
+export interface ThreadProperties extends EmailProperties, HTMLElement {}
 export interface Account {
   account_id: string;
   id: string;

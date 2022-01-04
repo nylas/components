@@ -1,0 +1,661 @@
+$hover-outline-width: 2px;
+$collapsed-height: 56px;
+$mobile-collapsed-height: fit-content;
+$spacing-xs: 0.5rem;
+$spacing-s: 0.7rem;
+$spacing-m: 1rem;
+$spacing-l: 1.5rem;
+$spacing-xl: 2.5rem;
+
+main,
+.nylas-email,
+.nylas-thread {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: grid;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  .email-row {
+    background: var(--nylas-email-background, var(--grey-lightest));
+    border: var(--nylas-email-border-style, 1px solid var(--grey-lighter));
+    border-left-width: var(--nylas-email-border-left-width, 1px);
+
+    nylas-tooltip {
+      position: relative;
+    }
+    .default-avatar {
+      background: var(--nylas-default-avatar-background, var(--blue));
+      border-radius: 50%;
+      color: var(--nylas-default-avatar-color, var(--white));
+      font-family: sans-serif;
+      font-size: 1rem;
+      font-weight: bold;
+      height: 31px;
+      line-height: 35px;
+      text-align: center;
+      text-transform: uppercase;
+      width: 32px;
+    }
+    header {
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: $spacing-xs;
+      padding-bottom: 0;
+    }
+    &.condensed {
+      height: $mobile-collapsed-height;
+      padding: $spacing-xs;
+      flex-wrap: wrap;
+      display: grid;
+      gap: $spacing-xs;
+      align-items: center;
+      grid-template-columns: fit-content(350px) 1fr;
+      &.disable-click {
+        cursor: not-allowed;
+        display: grid;
+        align-items: flex-start;
+        background: var(--grey-lighter);
+      }
+      .no-message-avatar-container {
+        display: grid;
+        &.show-star {
+          margin-left: calc(
+            25px + 0.5rem
+          ); //to account for space occupied by star
+        }
+        .default-avatar {
+          background: var(--red);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          &.draft {
+            background: var(--blue);
+          }
+        }
+      }
+      .no-messages-warning-container {
+        display: grid;
+        color: var(--red);
+        align-self: center;
+        &.draft {
+          color: var(--blue);
+        }
+      }
+      .from-star {
+        display: grid;
+        grid-template-columns: 25px auto;
+        column-gap: $spacing-xs;
+      }
+
+      .mobile-subject-snippet {
+        display: block;
+        font-size: 14px;
+        margin-top: $spacing-xs;
+        flex-basis: 100%;
+        grid-column-start: span 3;
+        .subject {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          max-width: inherit;
+          display: block;
+          word-break: keep-all;
+        }
+
+        .snippet {
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          display: block;
+          max-width: inherit;
+          color: var(--nylas-email-snippet-color, var(--grey));
+          margin-top: 4px;
+        }
+        .attachment {
+          gap: 1rem;
+          display: flex;
+          overflow-x: scroll;
+
+          button {
+            height: fit-content;
+            width: max-content;
+            padding: 0.3rem 1rem;
+            border: 1px solid var(--grey);
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            &:hover {
+              background: var(--grey-light);
+            }
+          }
+          &.mobile {
+            display: flex;
+          }
+        }
+      }
+
+      .thread-message-count {
+        color: var(--nylas-email-thread-message-count-color, var(--black));
+        font-size: 12px;
+        align-self: center;
+      }
+      &.unread {
+        background: var(--nylas-email-unread-background, white);
+
+        .from-message-count,
+        .date,
+        .subject {
+          font-weight: 600;
+          color: var(--nylas-email-subject-color, var(--black));
+
+          .thread-message-count {
+            color: var(
+              --nylas-email-unread-thread-message-count-color,
+              var(--blue)
+            );
+          }
+        }
+      }
+    }
+    div.starred {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      button {
+        background-color: transparent;
+        cursor: pointer;
+        &:before {
+          content: "\2605";
+          display: inline-block;
+          font-size: 1.1em;
+          color: var(--nylas-email-unstarred-star-button-color, #ccc);
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          user-select: none;
+        }
+
+        &.starred:before {
+          color: var(--nylas-email-star-button-color, #ffc107);
+        }
+      }
+    }
+    &.expanded {
+      background: var(--nylas-email-body-background, var(--white));
+      padding: 0;
+      $outline-style: 1px solid var(--grey-lighter);
+      @mixin barStyle {
+        outline: $outline-style;
+        display: flex;
+        align-items: center;
+        padding: 24px 16px;
+        gap: 8px;
+      }
+
+      .email-loader {
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .spinner {
+          height: 18px;
+          animation: rotate 2s linear infinite;
+          margin-right: 10px;
+        }
+      }
+      @keyframes rotate {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      header {
+        @include barStyle;
+        border-radius: 4px 4px 0 0;
+        font-weight: bold;
+      }
+
+      [role="toolbar"] {
+        @include barStyle;
+        padding: $spacing-s $spacing-m;
+        gap: $spacing-m;
+      }
+
+      .message-head [role="toolbar"] {
+        outline: none;
+      }
+
+      .message-head [role="toolbar"] button {
+        background: none;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .subject-title {
+        justify-content: space-between;
+        &.mailbox {
+          cursor: default;
+        }
+        & > div {
+          display: flex;
+          align-items: center;
+          gap: $spacing-m;
+
+          button {
+            background: none;
+            display: flex;
+            cursor: pointer;
+          }
+        }
+        [role="toolbar"] {
+          outline: none;
+          button {
+            * {
+              width: 1em;
+              height: 1em;
+            }
+          }
+        }
+      }
+
+      .icon-container,
+      .icon-container > * {
+        pointer-events: none;
+      }
+      &.expanded-mailbox-thread {
+        .message-from {
+          .name {
+            font-weight: 600;
+          }
+        }
+      }
+      div.individual-message {
+        box-sizing: border-box;
+        padding: $spacing-xs;
+
+        div.message-body {
+          overflow: auto;
+          display: inline-flex;
+          flex-direction: column;
+          width: 100%;
+          div.attachment {
+            overflow-x: scroll;
+            button {
+              margin: $spacing-xs;
+              height: fit-content;
+              padding: 0.3rem 1rem;
+              border: 1px solid var(--grey);
+              border-radius: 30px;
+              background: white;
+              cursor: pointer;
+              &:hover {
+                background: var(--grey-light);
+              }
+            }
+          }
+        }
+
+        &.condensed {
+          div.snippet {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: block;
+            max-width: inherit;
+            color: var(--nylas-email-snippet-color, var(--grey));
+            margin-top: $spacing-xs;
+          }
+          div.message-head {
+            .avatar-from {
+              display: flex;
+              align-items: center;
+              gap: $spacing-s;
+            }
+          }
+        }
+        &:not(:last-of-type) {
+          border-bottom: 1px solid #eee;
+        }
+        &:not(.last-message) {
+          &.expanded {
+            div.message-head:hover {
+              cursor: n-resize;
+            }
+          }
+        }
+        &.last-message {
+          .message-head:hover,
+          .message-body:hover {
+            cursor: default;
+          }
+        }
+
+        div.message-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: $spacing-xs;
+        }
+        div.message-date {
+          display: flex;
+          color: var(--nylas-email-message-date-color, var(--grey));
+          font-size: 12px;
+        }
+
+        div.message-from {
+          display: flex;
+          align-items: center;
+          span {
+            &.name {
+              font-weight: 600;
+              margin-right: 0.5rem;
+            }
+          }
+        }
+      }
+      &.expanded {
+        div.message-head {
+          div.message-from-to {
+            margin: 0.5rem 0;
+            .avatar-from {
+              display: flex;
+              align-items: center;
+              gap: $spacing-s;
+            }
+            div.message-to {
+              color: var(--nylas-email-message-to-color, var(--grey));
+              max-width: 150px;
+              margin-left: calc(32px + 0.7rem);
+              div {
+                display: grid;
+                grid-template-columns: 1fr 16px;
+
+                span {
+                  text-overflow: ellipsis;
+                  overflow: hidden;
+                }
+              }
+            }
+          }
+        }
+        &.condensed {
+          gap: 1rem;
+          &:hover,
+          &:focus {
+            cursor: s-resize;
+            outline: none;
+          }
+          span.snippet {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--nylas-email-snippet-color, var(--grey));
+            span.initial {
+              display: none;
+            }
+            span.loading {
+              display: inline-block;
+            }
+          }
+        }
+      }
+    }
+    &:hover {
+      cursor: pointer;
+    }
+    .from-message-count {
+      align-items: center;
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      grid-gap: $spacing-m;
+      justify-content: flex-start;
+      max-width: 350px;
+
+      .from-participants {
+        max-width: 220px;
+        display: grid;
+        grid-template-columns: 1fr fit-content(60px);
+        .participants-name {
+          .from-sub-section.second {
+            display: none;
+          }
+        }
+        .participants-count {
+          .show-on-mobile {
+            display: inline-block;
+          }
+          .show-on-desktop {
+            display: none;
+          }
+        }
+      }
+    }
+    .subject-snippet-date {
+      .desktop-subject-snippet {
+        display: none;
+      }
+      .attachment {
+        &.desktop {
+          display: none;
+        }
+      }
+      div {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        span.snippet {
+          color: var(--nylas-email-snippet-color, var(--grey));
+        }
+        &.date {
+          display: flex;
+          justify-content: flex-end;
+          gap: $spacing-xs;
+          width: 100%;
+          font-size: 14px;
+          color: var(--nylas-email-message-date-color, var(--grey));
+        }
+        &.action-icons {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          width: 100%;
+          gap: 1rem;
+          & > :last-child {
+            padding-right: 1rem;
+          }
+          button {
+            background: none;
+            cursor: pointer;
+            display: flex;
+
+            * {
+              width: 1em;
+              height: 1em;
+            }
+          }
+        }
+      }
+    }
+    &.expanded.singular {
+      &:hover {
+        box-shadow: none;
+        cursor: default;
+      }
+      div.individual-message:not(.last-message).expanded {
+        .message-head:hover,
+        .message-body:hover {
+          cursor: default;
+        }
+      }
+    }
+  }
+}
+
+@media #{$desktop} {
+  main,
+  .nylas-email,
+  .nylas-thread {
+    .email-row {
+      .from-message-count {
+        max-width: 350px;
+        .from-participants {
+          .participants-name {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            .from-sub-section.second {
+              display: inline-block;
+            }
+            &.condensed::after {
+              content: ".";
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              background: var(--nylas-email-body-background, var(--white));
+            }
+          }
+          .participants-count {
+            .show-on-mobile {
+              display: none;
+            }
+            .show-on-desktop {
+              display: inline-block;
+            }
+          }
+        }
+      }
+
+      &.expanded.singular {
+        .individual-message.expanded {
+          padding-top: $spacing-xs;
+        }
+      }
+      &.condensed {
+        display: grid;
+        column-gap: $spacing-m;
+        grid-template-columns: fit-content(350px) 1fr;
+        padding: $spacing-xs 0;
+        justify-content: initial;
+        div.starred {
+          button {
+            &:hover:before {
+              color: var(--nylas-email-star-button-hover-color, #ffc107);
+            }
+          }
+        }
+
+        .mobile-subject-snippet {
+          display: none;
+        }
+      }
+
+      &.expanded {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        width: 100%;
+        overflow-x: hidden;
+        header {
+          padding: $spacing-m $spacing-xl;
+        }
+        div.individual-message {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: $spacing-m 0;
+          width: inherit;
+          div.message-head,
+          div.message-body {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 $spacing-xl;
+          }
+          div.message-body {
+            display: flex;
+            flex-direction: column;
+          }
+
+          &.condensed {
+            div.snippet {
+              width: 100%;
+              box-sizing: border-box;
+              padding: 0 $spacing-xl;
+              white-space: pre-wrap;
+              max-width: 95vw;
+              align-self: flex-start;
+            }
+          }
+
+          div.message-date {
+            font-size: 14px;
+            align-self: center;
+          }
+          &.expanded {
+            div.message-head {
+              div.message-from-to {
+                margin: $spacing-xs 0;
+                div.message-to {
+                  max-width: inherit;
+                  overflow: inherit;
+                  div {
+                    display: grid;
+                    grid-template-columns: 1fr 16px;
+                    align-items: center;
+
+                    span {
+                      text-overflow: ellipsis;
+                      overflow: hidden;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .subject-snippet-date {
+        display: grid;
+        grid-template-columns: 1fr fit-content(120px);
+        gap: 1rem;
+        padding: $spacing-xs;
+        .desktop-subject-snippet {
+          display: block;
+
+          .subject {
+            margin-right: $spacing-xs;
+          }
+        }
+        .snippet-attachment-container {
+          display: flex;
+          flex-direction: column;
+          gap: $spacing-xs;
+        }
+        .attachment {
+          gap: 1rem;
+          display: flex;
+          overflow-x: scroll;
+
+          button {
+            padding: 0.3rem 1rem;
+            border: 1px solid var(--grey);
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            &:hover {
+              background: var(--grey-light);
+            }
+          }
+          &.desktop {
+            display: flex;
+          }
+        }
+        .date {
+          text-align: right;
+        }
+      }
+    }
+  }
+}

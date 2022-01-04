@@ -115,3 +115,65 @@ export const weekdays = [
   "Friday",
   "Saturday",
 ];
+
+export function formatPreviewDate(date: Date): string {
+  const today = new Date(new Date().setHours(0, 0, 0, 0));
+  const yesterday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 1,
+    0,
+    0,
+    0,
+    0,
+  );
+  const lastWeek = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 6,
+    0,
+    0,
+    0,
+    0,
+  );
+  const thisYear = new Date(today.getFullYear(), 0, 1);
+
+  if (date >= today) {
+    return date.toLocaleTimeString("en-US", {
+      hour12: true,
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } else if (date >= yesterday) {
+    return "Yesterday";
+  } else if (date >= lastWeek) {
+    return weekdays[date.getDay()];
+  } else if (date >= thisYear) {
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+    });
+  } else {
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+}
+
+export function formatExpandedDate(date: Date): string {
+  return (
+    date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "long",
+      day: "numeric",
+    }) +
+    ", " +
+    date.toLocaleTimeString("en-US", {
+      hour12: true,
+      hour: "numeric",
+      minute: "2-digit",
+    })
+  );
+}
