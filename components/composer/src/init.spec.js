@@ -454,7 +454,7 @@ describe("Composer customizations", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.close();
-      // Check after applying options
+      // Check after applying options.
       cy.get(".nylas-composer").should("not.exist");
     });
   });
