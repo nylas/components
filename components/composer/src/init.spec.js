@@ -274,7 +274,7 @@ describe("Composer customizations", () => {
     ).as("getMiddlewareManifest");
 
     cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "composer/manifest.json", // We don't want account loaded so from field is empty
+      fixture: "composer/account.json",
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
@@ -322,6 +322,30 @@ describe("Composer customizations", () => {
     });
 
     cy.get("[data-cy=from-field]").should("exist");
+  });
+
+  it("from field cannot be changed", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_from = true;
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+    });
+
+    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
+    cy.get("[data-cy=from-field] .contact-item button").should("not.exist");
   });
 
   it("hide to field", () => {
@@ -471,7 +495,7 @@ describe("Composer customizations", () => {
     });
   });
 
-  it.only("Replaces merge fields as defined in replace_fields when passed a prop", () => {
+  it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.value = {
@@ -527,30 +551,6 @@ describe("Composer integration", () => {
 
     cy.get("input[name=subject]").should("have.value", "Sample subject");
     cy.get("header").contains("Sample subject").should("be.visible");
-  });
-
-  it("Removes contact from from-field", () => {
-    cy.get("@composer").then((element) => {
-      const component = element[0];
-      component.value = {
-        from: [
-          {
-            name: "Luka Test",
-            email: "luka.b@nylas.com",
-          },
-        ],
-        to: [
-          {
-            name: "Dan Test",
-            email: "dan.r@nylas.com",
-          },
-        ],
-      };
-    });
-
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
-    cy.get(".contact-item button").first().click();
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("not.exist");
   });
 
   it("Search input populates contact search dropdown", () => {
