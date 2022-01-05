@@ -130,5 +130,12 @@
     "type": "boolean",
     "options": [true, false],
     "value": true
+  },
+  {
+    "label": "subject",
+    "title": "Message subject",
+    "type": "string",
+    "value": "",
+    "noPreview": true
   }
 ]

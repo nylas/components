@@ -541,16 +541,28 @@ describe("Composer integration", () => {
     cy.get("nylas-composer").should("exist").as("composer");
   });
 
-  it("Sets subject", () => {
+  it("Removes contact from from-field", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];
       component.value = {
-        subject: "Sample subject",
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
       };
     });
 
-    cy.get("input[name=subject]").should("have.value", "Sample subject");
-    cy.get("header").contains("Sample subject").should("be.visible");
+    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
+    cy.get(".contact-item button").first().click();
+    cy.get("[data-cy=from-field]").contains("Luka Test").should("not.exist");
   });
 
   it("Search input populates contact search dropdown", () => {
@@ -813,5 +825,29 @@ describe("Composer file upload", () => {
       "contain",
       "Failed to send the message",
     );
+  });
+});
+
+describe("Composer subject", () => {
+  beforeEach(() => {
+    cy.visitComponentPage(
+      "/components/composer/src/index.html",
+      "nylas-composer",
+      "demo-composer",
+    );
+    cy.get("@testComponent")
+      .should("have.prop", "id")
+      .and("equal", "test-composer");
+  });
+
+  it("Shows subject prop if passed by user", () => {
+    cy.get("@testComponent").invoke("attr", "subject", "my test subject");
+    cy.get("header").contains("my test subject");
+    cy.get("input.subject").invoke("val").should("eq", "my test subject");
+  });
+
+  it("Shows default subject if subject prop is not passed", () => {
+    cy.get("header").contains("New Message");
+    cy.get("input.subject").invoke("val").should("eq", "New Message");
   });
 });
