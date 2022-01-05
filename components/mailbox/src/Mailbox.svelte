@@ -246,6 +246,13 @@
           currentPage,
         );
       }
+      if (currentlySelectedThread) {
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          );
+        currentlySelectedThread = currentlySelectedThread;
+      }
     }
   }
 
@@ -290,6 +297,13 @@
           query,
           currentPage,
         );
+      }
+      if (currentlySelectedThread) {
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          );
+        currentlySelectedThread = currentlySelectedThread;
       }
     }
   }
