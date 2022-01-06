@@ -324,6 +324,30 @@ describe("Composer customizations", () => {
     cy.get("[data-cy=from-field]").should("exist");
   });
 
+  it("from field cannot be changed", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_from = true;
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+    });
+
+    cy.get("[data-cy=from-field]").contains("Test").should("be.visible");
+    cy.get("[data-cy=from-field] .contact-item button").should("not.exist");
+  });
+
   it("hide to field", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
@@ -430,7 +454,7 @@ describe("Composer customizations", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.close();
-      // Check after applying options
+      // Check after applying options.
       cy.get(".nylas-composer").should("not.exist");
     });
   });
@@ -471,7 +495,7 @@ describe("Composer customizations", () => {
     });
   });
 
-  it.only("Replaces merge fields as defined in replace_fields when passed a prop", () => {
+  it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
     cy.get("@composer").then((el) => {
       const component = el[0];
       component.value = {
@@ -529,36 +553,12 @@ describe("Composer integration", () => {
     cy.get("header").contains("Sample subject").should("be.visible");
   });
 
-  it("Removes contact from from-field", () => {
-    cy.get("@composer").then((element) => {
-      const component = element[0];
-      component.value = {
-        from: [
-          {
-            name: "Luka Test",
-            email: "luka.b@nylas.com",
-          },
-        ],
-        to: [
-          {
-            name: "Dan Test",
-            email: "dan.r@nylas.com",
-          },
-        ],
-      };
-    });
-
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
-    cy.get(".contact-item button").first().click();
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("not.exist");
-  });
-
   it("Search input populates contact search dropdown", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];
       component.to = [
         {
-          name: "Luka Test",
+          name: "Test User",
           email: "luka.b@nylas.com",
         },
       ];
@@ -566,9 +566,9 @@ describe("Composer integration", () => {
 
     cy.get("[data-cy=to-field]")
       .find("[data-cy=contacts-search-field]")
-      .type("Luk", { force: true });
+      .type("Test", { force: true });
 
-    cy.contains("Luka Test").should("be.visible");
+    cy.contains("Test User").should("be.visible");
   });
 
   it("Displays failed message after failing to send email", () => {

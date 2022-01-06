@@ -522,6 +522,42 @@
     position: relative;
     text-decoration: none;
     color: var(--composer-text-color, black);
+    .contacts-container {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 0.4rem var(--outer-padding);
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-from {
+      display: flex;
+      align-items: center;
+      padding-bottom: 0.1rem;
+      padding-right: 0.1rem;
+    }
+    .contact-item {
+      display: inline-flex;
+      background: var(--primary-light);
+      color: var(--primary);
+      align-items: center;
+      border-radius: calc(var(--border-radius) / 2);
+      padding: 0.2rem 0.8rem;
+      margin-right: 0.25rem;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+    .contact-item__name {
+      color: var(--text-secondary);
+      font-size: 12px;
+      padding-right: 0.75rem;
+    }
+    .contacts-placeholder {
+      font-size: var(--font-size-small);
+      margin-right: 10px;
+      min-width: 30px;
+      display: flex;
+      color: var(--text-light);
+    }
   }
   .close-btn {
     background: none;
@@ -613,6 +649,10 @@
     width: 10px;
     height: 10px;
   }
+  [class$="AttachmentIcon"] {
+    width: 16px;
+    height: 16px;
+  }
   .ExpandIcon {
     transform: translateY(1px);
   }
@@ -677,14 +717,25 @@
         <!-- Search -->
         <div class="contacts-wrapper">
           {#if _this.show_from}
-            <nylas-contacts-search
-              data-cy="from-field"
-              placeholder="From:"
-              single={true}
-              change={handleContactsChange("from")}
-              contacts={from}
-              value={$message.from}
-            />
+            <div class="contacts-container">
+              <div class="contact-from">
+                <div class="contacts-placeholder">From:</div>
+                <div class="contacts-results-inner">
+                  <div class="contact-item" data-cy="from-field">
+                    <span class="contact-item__name">
+                      {#if $message.from.length > 0}
+                        {#if $message.from[0].name}
+                          <strong>{$message.from[0].name}</strong>
+                          {`<${$message.from[0].email}>`}
+                        {:else}
+                          {$message.from[0].email}
+                        {/if}
+                      {/if}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           {/if}
           {#if _this.show_to}
             <nylas-contacts-search
