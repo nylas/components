@@ -541,30 +541,6 @@ describe("Composer integration", () => {
     cy.get("nylas-composer").should("exist").as("composer");
   });
 
-  it("Removes contact from from-field", () => {
-    cy.get("@composer").then((element) => {
-      const component = element[0];
-      component.value = {
-        from: [
-          {
-            name: "Luka Test",
-            email: "luka.b@nylas.com",
-          },
-        ],
-        to: [
-          {
-            name: "Dan Test",
-            email: "dan.r@nylas.com",
-          },
-        ],
-      };
-    });
-
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
-    cy.get(".contact-item button").first().click();
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("not.exist");
-  });
-
   it("Search input populates contact search dropdown", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];
@@ -840,14 +816,17 @@ describe("Composer subject", () => {
       .and("equal", "test-composer");
   });
 
-  it("Shows subject prop if passed by user", () => {
-    cy.get("@testComponent").invoke("attr", "subject", "my test subject");
-    cy.get("header").contains("my test subject");
-    cy.get("input.subject").invoke("val").should("eq", "my test subject");
+  it("Sets subject", () => {
+    cy.get("@testComponent").then((element) => {
+      element[0].value = { subject: "Test subject" };
+    });
+
+    cy.get("input[name=subject]").should("have.value", "Test subject");
+    cy.get("header span:eq(0)").contains("Test subject").should("be.visible");
   });
 
-  it("Shows default subject if subject prop is not passed", () => {
-    cy.get("header").contains("New Message");
+  it("Sets default subject if no subject is set", () => {
+    cy.get("header span:eq(0)").contains("New Message");
     cy.get("input.subject").invoke("val").should("eq", "New Message");
   });
 });

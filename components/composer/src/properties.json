@@ -20,10 +20,9 @@
   },
   {
     "label": "value",
-    "title": "Message value",
-    "type": "string",
-    "value": "",
-    "noPreview": true
+    "title": "Message object that you can pass in",
+    "type": "Message",
+    "value": { "subject": "string" }
   },
   {
     "label": "minimized",
@@ -130,12 +129,5 @@
     "type": "boolean",
     "options": [true, false],
     "value": true
-  },
-  {
-    "label": "subject",
-    "title": "Message subject",
-    "type": "string",
-    "value": "",
-    "noPreview": true
   }
 ]

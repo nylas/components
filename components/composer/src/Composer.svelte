@@ -74,7 +74,6 @@
   export let cc: ContactSearchCallback = [];
   export let bcc: ContactSearchCallback = [];
   export let send: SendCallback;
-  export let subject: string;
   export let change: FetchContactsCallback | null = null;
   export let beforeSend: (msg: Message) => Message | void;
   export let afterSendSuccess: Function | null = null;
@@ -123,7 +122,6 @@
     show_attachment_button: true,
     show_editor_toolbar: true,
     theme: "theme-1",
-    subject: $message.subject,
   };
 
   // Callbacks
@@ -152,6 +150,7 @@
   let showDatepicker = false;
   let themeLoaded = false;
   let visible = true;
+  $: subject = value?.subject ?? $message.subject;
 
   onMount(async () => {
     isLoading = true;
@@ -684,7 +683,7 @@
   <div class="nylas-composer" class:minimized={_this.minimized}>
     {#if _this.show_header}
       <header class={_this.minimized ? "minimized" : undefined}>
-        {subject}
+        <span>{subject}</span>
         <div>
           {#if _this.show_minimize_button}
             {#if _this.minimized}
