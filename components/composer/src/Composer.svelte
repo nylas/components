@@ -723,10 +723,14 @@
                 <div class="contacts-results-inner">
                   <div class="contact-item" data-cy="from-field">
                     <span class="contact-item__name">
-                      {#if $message.from[0].name}
-                        <strong>{$message.from[0].name}</strong>
-                        {`<${$message.from[0].email}>`}
-                      {:else}{$message.from[0].email}{/if}
+                      {#if $message.from.length > 0}
+                        {#if $message.from[0].name}
+                          <strong>{$message.from[0].name}</strong>
+                          {`<${$message.from[0].email}>`}
+                        {:else}
+                          {$message.from[0].email}
+                        {/if}
+                      {/if}
                     </span>
                   </div>
                 </div>
