@@ -231,7 +231,7 @@
   async function messageClicked(event: CustomEvent) {
     let message = event.detail.message;
 
-    if (message && currentlySelectedThread) {
+    if (!_this.all_threads && message && currentlySelectedThread) {
       message = await fetchIndividualMessage(message);
       threads = MailboxStore.hydrateMessageInThread(
         message,
@@ -277,7 +277,6 @@
   async function threadClicked(event: CustomEvent) {
     const thread = event.detail.thread;
 
-    dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {

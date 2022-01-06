@@ -23,8 +23,10 @@
 ## Bug Fixes
 
 - Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
-- Message content of emails failed to load if they were accessed while pagination was in progress
+- Message content of emails failed to load if they were accessed while pagination was in progress [311](https://github.com/nylas/components/pull/311)
 - Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
+- Fixed TypeError was being thrown if all_threads prop was used and user clicked a message to expand it's body [315](https://github.com/nylas/components/pull/315)
+- Fixed dispatched event `threadClicked` being dispatched multiple times on a single click [315](https://github.com/nylas/components/pull/315)
 
 # v1.1.5 (2021-12-15)
 
