@@ -274,7 +274,7 @@ describe("Composer customizations", () => {
     ).as("getMiddlewareManifest");
 
     cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "composer/account.json",
+      fixture: "composer/manifest.json", // We don't want account loaded so from field is empty
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
@@ -344,7 +344,7 @@ describe("Composer customizations", () => {
       };
     });
 
-    cy.get("[data-cy=from-field]").contains("Luka Test").should("be.visible");
+    cy.get("[data-cy=from-field]").contains("Test").should("be.visible");
     cy.get("[data-cy=from-field] .contact-item button").should("not.exist");
   });
 
@@ -558,7 +558,7 @@ describe("Composer integration", () => {
       const component = element[0];
       component.to = [
         {
-          name: "Luka Test",
+          name: "Test User",
           email: "luka.b@nylas.com",
         },
       ];
@@ -566,9 +566,9 @@ describe("Composer integration", () => {
 
     cy.get("[data-cy=to-field]")
       .find("[data-cy=contacts-search-field]")
-      .type("Luk", { force: true });
+      .type("Test", { force: true });
 
-    cy.contains("Luka Test").should("be.visible");
+    cy.contains("Test User").should("be.visible");
   });
 
   it("Displays failed message after failing to send email", () => {
