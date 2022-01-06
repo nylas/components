@@ -468,31 +468,26 @@ describe("Composer customizations", () => {
   });
 
   it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
-    cy.get("@composer").then((el) => {
-      const component = el[0];
-      component.value = {
-        body: `[hi] what up!<br />
+    const value = {
+      body: `[hi] what up!<br />
       <br />
       <br />
       Thanks,
       -Phil`,
-      };
-    });
+    };
 
-    cy.get("@composer").then((el) => {
-      const component = el[0];
-      component.setAttribute(
-        "replace_fields",
-        '[{"from": "[hi]", "to": "hello"}]',
-      );
-      cy.get(".html-editor[contenteditable=true]")
-        .invoke("prop", "innerHTML")
-        .then((html) => {
-          expect(html).to.equal(
-            "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
-          );
-        });
-    });
+    cy.get("@composer").invoke("prop", "value", value);
+    cy.get("@composer").invoke("prop", "replace_fields", [
+      { from: "[hi]", to: "hello" },
+    ]);
+    cy.get(".html-editor[contenteditable=true]").should("exist");
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.equal(
+          "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+        );
+      });
   });
 
   it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
