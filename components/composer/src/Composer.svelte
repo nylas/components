@@ -150,6 +150,7 @@
   let showDatepicker = false;
   let themeLoaded = false;
   let visible = true;
+  $: subject = value?.subject ?? $message.subject;
 
   onMount(async () => {
     isLoading = true;
@@ -682,7 +683,7 @@
   <div class="nylas-composer" class:minimized={_this.minimized}>
     {#if _this.show_header}
       <header class={_this.minimized ? "minimized" : undefined}>
-        {$message.subject}
+        <span>{subject}</span>
         <div>
           {#if _this.show_minimize_button}
             {#if _this.minimized}
@@ -827,7 +828,7 @@
               type="text"
               placeholder="Subject"
               class="subject"
-              value={$message.subject}
+              value={subject}
               name="subject"
               on:input={handleInputChange}
             />

@@ -468,31 +468,26 @@ describe("Composer customizations", () => {
   });
 
   it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
-    cy.get("@composer").then((el) => {
-      const component = el[0];
-      component.value = {
-        body: `[hi] what up!<br />
+    const value = {
+      body: `[hi] what up!<br />
       <br />
       <br />
       Thanks,
       -Phil`,
-      };
-    });
+    };
 
-    cy.get("@composer").then((el) => {
-      const component = el[0];
-      component.setAttribute(
-        "replace_fields",
-        '[{"from": "[hi]", "to": "hello"}]',
-      );
-      cy.get(".html-editor[contenteditable=true]")
-        .invoke("prop", "innerHTML")
-        .then((html) => {
-          expect(html).to.equal(
-            "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
-          );
-        });
-    });
+    cy.get("@composer").invoke("prop", "value", value);
+    cy.get("@composer").invoke("prop", "replace_fields", [
+      { from: "[hi]", to: "hello" },
+    ]);
+    cy.get(".html-editor[contenteditable=true]").should("exist");
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.equal(
+          "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+        );
+      });
   });
 
   it("Replaces merge fields as defined in replace_fields when passed a prop", () => {
@@ -539,18 +534,6 @@ describe("Composer integration", () => {
     cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer").should("exist").as("composer");
-  });
-
-  it("Sets subject", () => {
-    cy.get("@composer").then((element) => {
-      const component = element[0];
-      component.value = {
-        subject: "Sample subject",
-      };
-    });
-
-    cy.get("input[name=subject]").should("have.value", "Sample subject");
-    cy.get("header").contains("Sample subject").should("be.visible");
   });
 
   it("Search input populates contact search dropdown", () => {
@@ -813,5 +796,32 @@ describe("Composer file upload", () => {
       "contain",
       "Failed to send the message",
     );
+  });
+});
+
+describe("Composer subject", () => {
+  beforeEach(() => {
+    cy.visitComponentPage(
+      "/components/composer/src/index.html",
+      "nylas-composer",
+      "demo-composer",
+    );
+    cy.get("@testComponent")
+      .should("have.prop", "id")
+      .and("equal", "test-composer");
+  });
+
+  it("Sets subject", () => {
+    cy.get("@testComponent").then((element) => {
+      element[0].value = { subject: "Test subject" };
+    });
+
+    cy.get("input[name=subject]").should("have.value", "Test subject");
+    cy.get("header span:eq(0)").contains("Test subject").should("be.visible");
+  });
+
+  it("Sets default subject if no subject is set", () => {
+    cy.get("header span:eq(0)").contains("New Message");
+    cy.get("input.subject").invoke("val").should("eq", "New Message");
   });
 });
