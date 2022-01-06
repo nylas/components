@@ -55,7 +55,9 @@ export const fetchSearchResultThreads = (
 ): Promise<Thread[]> => {
   const queryString = `${getMiddlewareApiUrl(
     query.component_id,
-  )}/threads/search?q=${query.keywordToSearch}&view=expanded`;
+  )}/threads/search?q=${query.keywordToSearch}&view=expanded&limit=${
+    query.query.limit
+  }&offset=${query.query.offset}`;
 
   return fetch(queryString, getFetchConfig(query))
     .then(async (response) =>

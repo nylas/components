@@ -1,8 +1,10 @@
-# v1.1.6 (Unreleased)
+# Unreleased
 
+## Breaking
 ## New Features
 
-- Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
+- [Mailbox] Add pagination when `keyword_to_search` is used [#313](https://github.com/nylas/components/pull/313)
+- [Mailbox] Added ability to reply to email/thread [#311](https://github.com/nylas/components/pull/311)
 - Added dispatched event `replyAllClicked` with properties
   - event
   - message
