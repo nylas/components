@@ -1,26 +1,8 @@
-<<<<<<< HEAD
-# Pending Changes
-=======
-# Unreleased (2021-12-17)
-
-## Bug Fixes
-
-- [Mailbox] Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
-
-# v1.1.5 (2021-12-15)
->>>>>>> 4dbc871 (changelog)
-
-## Breaking
+# v1.1.6 (Unreleased)
 
 ## New Features
 
-## Bug Fixes
-
-# v1.1.6 (2021-12-22)
-
-## New Features
-
-- [Mailbox] Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
+- Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
 - Added dispatched event `replyAllClicked` with properties
   - event
   - message
@@ -40,13 +22,15 @@
 
 ## Bug Fixes
 
-- [Mailbox] Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
+- Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
+- Message content of emails failed to load if they were accessed while pagination was in progress
+- Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
 
 # v1.1.5 (2021-12-15)
 
 ## New Features
 
-- [Mailbox] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
+- Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
 
 # v1.1.4 (2021-12-10)
 
