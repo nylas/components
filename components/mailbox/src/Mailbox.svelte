@@ -310,6 +310,7 @@
         query,
         currentPage,
       );
+
       if (FilesStore.hasInlineFiles(message)) {
         message = await getMessageWithInlineFiles(message);
         threads = MailboxStore.hydrateMessageInThread(
@@ -318,6 +319,7 @@
           currentPage,
         );
       }
+
       if (currentlySelectedThread) {
         currentlySelectedThread.messages =
           currentlySelectedThread.messages?.map((currentMessage) =>

@@ -418,21 +418,9 @@
         }
       }
 
-      //#region open thread + messages
       activeThread.expanded = !activeThread.expanded;
-      // Upon expansion / lastMessage existing, scroll to it
-      if (activeThread.expanded && _this.click_action === "default") {
-        // Timeout here is to ensure the element is available before trying
-        // to scroll it into view
-        setTimeout(() => {
-          messageRefs[lastMsgIndex].scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 50);
-      }
-      //#endregion open thread + messages
     }
+
     dispatchEvent("threadClicked", {
       event,
       thread: activeThread,
@@ -833,6 +821,34 @@
       currentThread &&
       currentThread.labels?.find((label) => label.name === "drafts")
     );
+  }
+
+  let messagesContainerNode: HTMLElement | null = null;
+  let latestMessageNode: HTMLElement | null = null;
+  let scrolledToLatest = false;
+
+  function storeMessagesContainer(node: HTMLElement) {
+    messagesContainerNode = node;
+  }
+
+  function storeLatestMessageNode(
+    node: HTMLElement,
+    { msgIndex }: { msgIndex: number },
+  ) {
+    if (activeThread.messages.length - 1 === msgIndex) {
+      latestMessageNode = node;
+    }
+  }
+
+  $: if (messagesContainerNode && latestMessageNode && !scrolledToLatest) {
+    // scroll if latest message is not already at the top
+    if (latestMessageNode.offsetTop > 0) {
+      messagesContainerNode.scrollTo({
+        behavior: "smooth",
+        top: latestMessageNode.offsetTop,
+      });
+      scrolledToLatest = true;
+    }
   }
 </script>
 
@@ -1488,6 +1504,7 @@
       {#if thread && activeThread}
         {#if activeThread.expanded}
           <div
+            use:storeMessagesContainer
             class="email-row expanded {_this.click_action === 'mailbox'
               ? 'expanded-mailbox-thread'
               : ''}"
@@ -1565,6 +1582,7 @@
                       : "condensed"
                   }`}
                   bind:this={messageRefs[msgIndex]}
+                  use:storeLatestMessageNode={{ msgIndex }}
                   on:click|stopPropagation={(e) =>
                     handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
