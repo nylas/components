@@ -176,21 +176,16 @@
 
   let contacts: Record<string, Contact> = {};
   let activeThreadContact = {};
+
   $: activeThreadContact =
-    allActiveThreadMessages && contacts
-      ? contacts[allActiveThreadMessages[totalMessages]?.from[0].email]
+    activeThread && contacts
+      ? contacts[
+          activeThread.messages[activeThread.messages.length - 1]?.from[0].email
+        ]
       : {};
   $: activeMessageContact =
     _this.message && contacts ? contacts[_this.message?.from[0].email] : {};
 
-  $: allActiveThreadMessages =
-    activeThread?.drafts.length && activeThread?.messages.length
-      ? [...activeThread.messages, ...activeThread.drafts]
-      : activeThread?.messages | [];
-
-  $: console.log({ allActiveThreadMessages: allActiveThreadMessages });
-
-  $: totalMessages = allActiveThreadMessages?.length - 1 ?? 0;
   let threadIdChanged = false;
   $: _this.thread_id, (threadIdChanged = true);
 
@@ -264,11 +259,10 @@
   $: queryKey = JSON.stringify(query);
 
   let activeThread: Conversation;
-
+  $: console.log({ drafts: activeThread?.drafts });
   // #region thread intake and set
   let fetchingThreadPromise: Promise<Conversation>;
-  async function getThread(messageType: "messages" | "drafts" = "messages") {
-    console.log({ messageType });
+  async function getThread() {
     if (id && _this.thread_id && !fetchingThreadPromise) {
       fetchingThreadPromise = <Promise<Conversation>>fetchThread({
         component_id: id,
@@ -280,10 +274,10 @@
 
       // get body for last message in open thread
       if (thread?.messages?.length > 0) {
-        const lastMsgIndex = thread[messageType].length - 1;
-        thread[messageType][lastMsgIndex].body = await fetchIndividualMessage(
+        const lastMsgIndex = thread.messages.length - 1;
+        thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
           lastMsgIndex,
-          thread[messageType][lastMsgIndex].id,
+          thread.messages[lastMsgIndex].id,
         );
       }
       if (thread) {
@@ -395,16 +389,8 @@
     }
   }
 
-  async function handleThread(
-    event: MouseEvent | KeyboardEvent,
-    messageType: "messages" | "drafts" = "messages",
-  ) {
-    console.log({
-      handleThread: event,
-      drafts: activeThread[messageType],
-      activeThread,
-    });
-    if (activeThread[messageType].length <= 0) {
+  async function handleThread(event: MouseEvent | KeyboardEvent) {
+    if (activeThread.messages.length <= 0 && !activeThread.drafts.length) {
       return;
     }
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
@@ -419,17 +405,17 @@
       }
       //#endregion read/unread
 
-      const lastMsgIndex = activeThread[messageType].length - 1;
-      activeThread[messageType][lastMsgIndex].expanded =
-        !activeThread[messageType][lastMsgIndex].expanded;
+      const lastMsgIndex = activeThread.messages.length - 1;
+      activeThread.messages[lastMsgIndex].expanded =
+        !activeThread.messages[lastMsgIndex].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
-        if (!activeThread[messageType][lastMsgIndex].body) {
-          activeThread[messageType][lastMsgIndex].body =
+        if (!activeThread.messages[lastMsgIndex].body) {
+          activeThread.messages[lastMsgIndex].body =
             await fetchIndividualMessage(
               lastMsgIndex,
-              activeThread[messageType][lastMsgIndex].id,
+              activeThread.messages[lastMsgIndex].id,
             );
         }
       }
@@ -472,8 +458,11 @@
     });
   }
 
-  function handleThreadClick(event: MouseEvent) {
-    const messageType = activeThread.drafts.length ? "drafts" : "messages";
+  async function handleThreadClick(event: MouseEvent) {
+    if (isThreadADraftEmail(activeThread)) {
+      await handleDraftEvent(event);
+      return;
+    }
     if (
       (_this.message && (!_this.thread_id || !_this.thread)) ||
       (_this.click_action === "mailbox" && activeThread.expanded)
@@ -481,7 +470,7 @@
       return;
     }
     event.preventDefault();
-    handleThread(event, messageType);
+    handleThread(event);
   }
 
   function returnToMailbox(event: MouseEvent | KeyboardEvent) {
@@ -491,8 +480,11 @@
     });
   }
 
-  function handleThreadKeypress(event: KeyboardEvent) {
-    const messageType = activeThread.drafts.length ? "drafts" : "messages";
+  async function handleThreadKeypress(event: KeyboardEvent) {
+    if (isThreadADraftEmail(activeThread)) {
+      await handleDraftEvent(event);
+      return;
+    }
     if (
       (_this.message && (!_this.thread_id || !_this.thread)) ||
       (_this.click_action === "mailbox" && activeThread.expanded)
@@ -501,7 +493,7 @@
     }
     event.preventDefault();
     if (event.code === "Enter") {
-      handleThread(event, messageType);
+      handleThread(event);
     }
   }
 
@@ -595,48 +587,39 @@
     );
   }
 
-  function handleEmailClick(
-    event: MouseEvent,
-    msgIndex: number,
-    messageType: "messages" | "drafts" = "messages",
-  ) {
+  function handleEmailClick(event: MouseEvent, msgIndex: number) {
     event.stopImmediatePropagation();
-    console.log({ handleEmailClick: event });
-    if (msgIndex === activeThread[messageType].length - 1) {
+
+    if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
     } else {
-      activeThread[messageType][msgIndex].expanded =
-        !activeThread[messageType][msgIndex].expanded;
+      activeThread.messages[msgIndex].expanded =
+        !activeThread.messages[msgIndex].expanded;
       dispatchEvent("messageClicked", {
         event,
-        message: activeThread[messageType][msgIndex],
+        message: activeThread.messages[msgIndex],
         thread: activeThread,
       });
       // Don't fetch message when thread is being passed manually
       if (!_this.thread) {
-        console.log({ id: activeThread[messageType][msgIndex].id });
         fetchIndividualMessage(
           msgIndex,
-          activeThread[messageType][msgIndex].id,
+          activeThread.messages[msgIndex].id,
         ).then((res) => {
-          activeThread[messageType][msgIndex].body = res;
+          activeThread.messages[msgIndex].body = res;
         });
       }
     }
   }
 
-  function handleEmailKeypress(
-    event: KeyboardEvent,
-    msgIndex: number,
-    messageType: "messages" | "drafts" = "messages",
-  ) {
+  function handleEmailKeypress(event: KeyboardEvent, msgIndex: number) {
     event.stopImmediatePropagation();
     if (event.code === "Enter") {
-      if (msgIndex === activeThread[messageType].length - 1) {
+      if (msgIndex === activeThread.messages.length - 1) {
         doNothing(event);
       } else {
-        activeThread[messageType][msgIndex].expanded =
-          !activeThread[messageType][msgIndex].expanded;
+        activeThread.messages[msgIndex].expanded =
+          !activeThread.messages[msgIndex].expanded;
       }
     }
   }
@@ -797,10 +780,8 @@
 
   $: activeThread ? initializeAttachedFiles() : "";
 
-  function initializeAttachedFiles(
-    messageType: "messages" | "drafts" = "messages",
-  ) {
-    attachedFiles = activeThread[messageType]?.reduce(
+  function initializeAttachedFiles() {
+    attachedFiles = activeThread.messages?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
           if (
@@ -1614,13 +1595,13 @@
                 {/if}
               </div>
             </header>
-            {#if allActiveThreadMessages.length}
-              {#each allActiveThreadMessages as message, msgIndex}
+            {#if activeThread.messages.length}
+              {#each activeThread.messages as message, msgIndex}
                 <div
                   class:last-message={msgIndex ===
-                    allActiveThreadMessages.length - 1}
+                    activeThread.messages.length - 1}
                   class={`individual-message ${
-                    msgIndex === allActiveThreadMessages.length - 1 ||
+                    msgIndex === activeThread.messages.length - 1 ||
                     message.expanded
                       ? "expanded"
                       : "condensed"
@@ -1631,7 +1612,7 @@
                     handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
                 >
-                  {#if message.expanded || msgIndex === allActiveThreadMessages.length - 1}
+                  {#if message.expanded || msgIndex === activeThread.messages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
                         <div class="avatar-from">
@@ -1836,8 +1817,11 @@
             class="email-row condensed"
             class:show_star={_this.show_star}
             class:unread={activeThread.unread}
+            class:disable-click={activeThread &&
+              activeThread.messages.length <= 0 &&
+              !activeThread.drafts.length}
           >
-            <!-- {#if activeThread && allActiveThreadMessages.length <= 0}
+            <!-- {#if activeThread && activeThread.messages.length <= 0}
               {#await isThreadADraftEmail(activeThread) then isDraft}
                 <div
                   class={`no-message-avatar-container ${
@@ -1890,19 +1874,19 @@
                   <div
                     class="participants-name"
                     class:condensed={showSecondFromParticipant(
-                      allActiveThreadMessages,
+                      activeThread.messages,
                       activeThread.participants,
                     )}
                   >
                     <span class="from-sub-section">
                       {showFromParticipants(
-                        allActiveThreadMessages,
+                        activeThread.messages,
                         activeThread.participants,
                       )}
                     </span>
                   </div>
                   <div class="participants-count">
-                    {#if showSecondFromParticipant(allActiveThreadMessages, activeThread.participants)}
+                    {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
                       <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
                       {#if activeThread.participants.length >= 2}
                         <span class="show-on-mobile">
@@ -1911,8 +1895,8 @@
                         </span>
                       {/if}
                       <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
-                        Note that this might not be exactly correct if the name of the first participant is too long 
-                        and occupies entire width -->
+                      Note that this might not be exactly correct if the name of the first participant is too long 
+                      and occupies entire width -->
                       {#if activeThread.participants.length > 2}
                         <span class="show-on-desktop">
                           &nbsp; &plus; {activeThread.participants.length -
@@ -1926,7 +1910,7 @@
             </div>
             {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
               <span class="thread-message-count">
-                {allActiveThreadMessages.length}
+                {activeThread.messages.length}
               </span>
             {/if}
             <div class="subject-snippet-attachment">
