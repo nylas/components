@@ -176,16 +176,21 @@
 
   let contacts: Record<string, Contact> = {};
   let activeThreadContact = {};
-
   $: activeThreadContact =
-    activeThread && contacts
-      ? contacts[
-          activeThread.messages[activeThread.messages.length - 1]?.from[0].email
-        ]
+    allActiveThreadMessages && contacts
+      ? contacts[allActiveThreadMessages[totalMessages]?.from[0].email]
       : {};
   $: activeMessageContact =
     _this.message && contacts ? contacts[_this.message?.from[0].email] : {};
 
+  $: allActiveThreadMessages =
+    activeThread?.drafts.length && activeThread?.messages.length
+      ? [...activeThread.messages, ...activeThread.drafts]
+      : activeThread?.messages | [];
+
+  $: console.log({ allActiveThreadMessages: allActiveThreadMessages });
+
+  $: totalMessages = allActiveThreadMessages?.length - 1 ?? 0;
   let threadIdChanged = false;
   $: _this.thread_id, (threadIdChanged = true);
 
@@ -262,7 +267,8 @@
 
   // #region thread intake and set
   let fetchingThreadPromise: Promise<Conversation>;
-  async function getThread() {
+  async function getThread(messageType: "messages" | "drafts" = "messages") {
+    console.log({ messageType });
     if (id && _this.thread_id && !fetchingThreadPromise) {
       fetchingThreadPromise = <Promise<Conversation>>fetchThread({
         component_id: id,
@@ -274,10 +280,10 @@
 
       // get body for last message in open thread
       if (thread?.messages?.length > 0) {
-        const lastMsgIndex = thread.messages.length - 1;
-        thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
+        const lastMsgIndex = thread[messageType].length - 1;
+        thread[messageType][lastMsgIndex].body = await fetchIndividualMessage(
           lastMsgIndex,
-          thread.messages[lastMsgIndex].id,
+          thread[messageType][lastMsgIndex].id,
         );
       }
       if (thread) {
@@ -389,8 +395,16 @@
     }
   }
 
-  async function handleThread(event: MouseEvent | KeyboardEvent) {
-    if (activeThread.messages.length <= 0) {
+  async function handleThread(
+    event: MouseEvent | KeyboardEvent,
+    messageType: "messages" | "drafts" = "messages",
+  ) {
+    console.log({
+      handleThread: event,
+      drafts: activeThread[messageType],
+      activeThread,
+    });
+    if (activeThread[messageType].length <= 0) {
       return;
     }
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
@@ -405,17 +419,17 @@
       }
       //#endregion read/unread
 
-      const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded =
-        !activeThread.messages[lastMsgIndex].expanded;
+      const lastMsgIndex = activeThread[messageType].length - 1;
+      activeThread[messageType][lastMsgIndex].expanded =
+        !activeThread[messageType][lastMsgIndex].expanded;
 
       if (!emailManuallyPassed) {
         // fetch last message
-        if (!activeThread.messages[lastMsgIndex].body) {
-          activeThread.messages[lastMsgIndex].body =
+        if (!activeThread[messageType][lastMsgIndex].body) {
+          activeThread[messageType][lastMsgIndex].body =
             await fetchIndividualMessage(
               lastMsgIndex,
-              activeThread.messages[lastMsgIndex].id,
+              activeThread[messageType][lastMsgIndex].id,
             );
         }
       }
@@ -459,6 +473,7 @@
   }
 
   function handleThreadClick(event: MouseEvent) {
+    const messageType = activeThread.drafts.length ? "drafts" : "messages";
     if (
       (_this.message && (!_this.thread_id || !_this.thread)) ||
       (_this.click_action === "mailbox" && activeThread.expanded)
@@ -466,7 +481,7 @@
       return;
     }
     event.preventDefault();
-    handleThread(event);
+    handleThread(event, messageType);
   }
 
   function returnToMailbox(event: MouseEvent | KeyboardEvent) {
@@ -477,6 +492,7 @@
   }
 
   function handleThreadKeypress(event: KeyboardEvent) {
+    const messageType = activeThread.drafts.length ? "drafts" : "messages";
     if (
       (_this.message && (!_this.thread_id || !_this.thread)) ||
       (_this.click_action === "mailbox" && activeThread.expanded)
@@ -485,7 +501,7 @@
     }
     event.preventDefault();
     if (event.code === "Enter") {
-      handleThread(event);
+      handleThread(event, messageType);
     }
   }
 
@@ -579,39 +595,48 @@
     );
   }
 
-  function handleEmailClick(event: MouseEvent, msgIndex: number) {
+  function handleEmailClick(
+    event: MouseEvent,
+    msgIndex: number,
+    messageType: "messages" | "drafts" = "messages",
+  ) {
     event.stopImmediatePropagation();
-
-    if (msgIndex === activeThread.messages.length - 1) {
+    console.log({ handleEmailClick: event });
+    if (msgIndex === activeThread[messageType].length - 1) {
       doNothing(event);
     } else {
-      activeThread.messages[msgIndex].expanded =
-        !activeThread.messages[msgIndex].expanded;
+      activeThread[messageType][msgIndex].expanded =
+        !activeThread[messageType][msgIndex].expanded;
       dispatchEvent("messageClicked", {
         event,
-        message: activeThread.messages[msgIndex],
+        message: activeThread[messageType][msgIndex],
         thread: activeThread,
       });
       // Don't fetch message when thread is being passed manually
       if (!_this.thread) {
+        console.log({ id: activeThread[messageType][msgIndex].id });
         fetchIndividualMessage(
           msgIndex,
-          activeThread.messages[msgIndex].id,
+          activeThread[messageType][msgIndex].id,
         ).then((res) => {
-          activeThread.messages[msgIndex].body = res;
+          activeThread[messageType][msgIndex].body = res;
         });
       }
     }
   }
 
-  function handleEmailKeypress(event: KeyboardEvent, msgIndex: number) {
+  function handleEmailKeypress(
+    event: KeyboardEvent,
+    msgIndex: number,
+    messageType: "messages" | "drafts" = "messages",
+  ) {
     event.stopImmediatePropagation();
     if (event.code === "Enter") {
-      if (msgIndex === activeThread.messages.length - 1) {
+      if (msgIndex === activeThread[messageType].length - 1) {
         doNothing(event);
       } else {
-        activeThread.messages[msgIndex].expanded =
-          !activeThread.messages[msgIndex].expanded;
+        activeThread[messageType][msgIndex].expanded =
+          !activeThread[messageType][msgIndex].expanded;
       }
     }
   }
@@ -772,8 +797,10 @@
 
   $: activeThread ? initializeAttachedFiles() : "";
 
-  function initializeAttachedFiles() {
-    attachedFiles = activeThread.messages?.reduce(
+  function initializeAttachedFiles(
+    messageType: "messages" | "drafts" = "messages",
+  ) {
+    attachedFiles = activeThread[messageType]?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
           if (
@@ -1587,13 +1614,13 @@
                 {/if}
               </div>
             </header>
-            {#if activeThread.messages.length}
-              {#each activeThread.messages as message, msgIndex}
+            {#if allActiveThreadMessages.length}
+              {#each allActiveThreadMessages as message, msgIndex}
                 <div
                   class:last-message={msgIndex ===
-                    activeThread.messages.length - 1}
+                    allActiveThreadMessages.length - 1}
                   class={`individual-message ${
-                    msgIndex === activeThread.messages.length - 1 ||
+                    msgIndex === allActiveThreadMessages.length - 1 ||
                     message.expanded
                       ? "expanded"
                       : "condensed"
@@ -1604,7 +1631,7 @@
                     handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
                 >
-                  {#if message.expanded || msgIndex === activeThread.messages.length - 1}
+                  {#if message.expanded || msgIndex === allActiveThreadMessages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
                         <div class="avatar-from">
@@ -1809,10 +1836,8 @@
             class="email-row condensed"
             class:show_star={_this.show_star}
             class:unread={activeThread.unread}
-            class:disable-click={activeThread &&
-              activeThread.messages.length <= 0}
           >
-            {#if activeThread && activeThread.messages.length <= 0}
+            <!-- {#if activeThread && allActiveThreadMessages.length <= 0}
               {#await isThreadADraftEmail(activeThread) then isDraft}
                 <div
                   class={`no-message-avatar-container ${
@@ -1837,140 +1862,139 @@
                   have been deleted in your provider inbox.`}
                 </div>
               {/await}
-            {:else}
-              <div class="from{_this.show_star ? '-star' : ''}">
-                {#if _this.show_star}
-                  <div class="starred">
-                    <button
-                      id={`thread-star-${_this.thread_id}`}
-                      class={activeThread.starred ? "starred" : ""}
-                      value={_this.thread_id}
-                      role="switch"
-                      aria-checked={activeThread.starred}
-                      on:click|preventDefault={handleThreadStarClick}
-                      aria-label={`Star button for thread ${_this.thread_id}`}
+            {:else} -->
+            <div class="from{_this.show_star ? '-star' : ''}">
+              {#if _this.show_star}
+                <div class="starred">
+                  <button
+                    id={`thread-star-${_this.thread_id}`}
+                    class={activeThread.starred ? "starred" : ""}
+                    value={_this.thread_id}
+                    role="switch"
+                    aria-checked={activeThread.starred}
+                    on:click|preventDefault={handleThreadStarClick}
+                    aria-label={`Star button for thread ${_this.thread_id}`}
+                  />
+                </div>
+              {/if}
+              <div class="from-message-count">
+                {#if _this.show_contact_avatar}
+                  <div class="default-avatar">
+                    <nylas-contact-image
+                      {contact_query}
+                      contact={activeThreadContact}
                     />
                   </div>
                 {/if}
-                <div class="from-message-count">
-                  {#if _this.show_contact_avatar}
-                    <div class="default-avatar">
-                      <nylas-contact-image
-                        {contact_query}
-                        contact={activeThreadContact}
-                      />
-                    </div>
-                  {/if}
-                  <div class="from-participants">
-                    <div
-                      class="participants-name"
-                      class:condensed={showSecondFromParticipant(
-                        activeThread.messages,
+                <div class="from-participants">
+                  <div
+                    class="participants-name"
+                    class:condensed={showSecondFromParticipant(
+                      allActiveThreadMessages,
+                      activeThread.participants,
+                    )}
+                  >
+                    <span class="from-sub-section">
+                      {showFromParticipants(
+                        allActiveThreadMessages,
                         activeThread.participants,
                       )}
-                    >
-                      <span class="from-sub-section">
-                        {showFromParticipants(
-                          activeThread.messages,
-                          activeThread.participants,
-                        )}
-                      </span>
-                    </div>
-                    <div class="participants-count">
-                      {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
-                        <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
-                        {#if activeThread.participants.length >= 2}
-                          <span class="show-on-mobile">
-                            &plus;{activeThread.participants.length -
-                              MAX_MOBILE_PARTICIPANTS}
-                          </span>
-                        {/if}
-                        <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
+                    </span>
+                  </div>
+                  <div class="participants-count">
+                    {#if showSecondFromParticipant(allActiveThreadMessages, activeThread.participants)}
+                      <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
+                      {#if activeThread.participants.length >= 2}
+                        <span class="show-on-mobile">
+                          &plus;{activeThread.participants.length -
+                            MAX_MOBILE_PARTICIPANTS}
+                        </span>
+                      {/if}
+                      <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
                         Note that this might not be exactly correct if the name of the first participant is too long 
                         and occupies entire width -->
-                        {#if activeThread.participants.length > 2}
-                          <span class="show-on-desktop">
-                            &nbsp; &plus; {activeThread.participants.length -
-                              MAX_DESKTOP_PARTICIPANTS}
-                          </span>
-                        {/if}
+                      {#if activeThread.participants.length > 2}
+                        <span class="show-on-desktop">
+                          &nbsp; &plus; {activeThread.participants.length -
+                            MAX_DESKTOP_PARTICIPANTS}
+                        </span>
                       {/if}
-                    </div>
+                    {/if}
                   </div>
                 </div>
               </div>
-              {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
-                <span class="thread-message-count">
-                  {activeThread.messages.length}
+            </div>
+            {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
+              <span class="thread-message-count">
+                {allActiveThreadMessages.length}
+              </span>
+            {/if}
+            <div class="subject-snippet-attachment">
+              <div class="subject-snippet">
+                {#if thread?.subject}<span class="subject"
+                    >{thread?.subject}</span
+                  >{/if}
+                <span class="snippet"
+                  >{thread.snippet.replace(/\u200C /g, "")}</span
+                >
+              </div>
+              {#if Object.keys(attachedFiles).length > 0}
+                <div class="attachment">
+                  {#each Object.values(attachedFiles) as files}
+                    {#each files as file}
+                      <button
+                        on:click={(event) => downloadSelectedFile(event, file)}
+                      >
+                        {file.filename || file.id}
+                      </button>
+                    {/each}
+                  {/each}
+                </div>
+              {/if}
+            </div>
+            <div
+              class:date={_this.show_received_timestamp}
+              class:action-icons={_this.show_thread_actions}
+            >
+              {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
+                <span><AttachmentIcon /></span>
+              {/if}
+              {#if _this.show_thread_actions}
+                <div class="delete">
+                  <button
+                    title="Delete thread"
+                    aria-label="Delete thread"
+                    on:click|stopPropagation={deleteEmail}
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+                <div class="read-status">
+                  <button
+                    title={`Mark thread as ${
+                      activeThread.unread ? "" : "un"
+                    }read`}
+                    aria-label={`Mark thread as ${
+                      activeThread.unread ? "" : "un"
+                    }read`}
+                    on:click|stopPropagation={toggleUnreadStatus}
+                  >
+                    {#if activeThread.unread}
+                      <MarkReadIcon aria-hidden="true" />
+                    {:else}
+                      <MarkUnreadIcon aria-hidden="true" />
+                    {/if}
+                  </button>
+                </div>
+              {:else if _this.show_received_timestamp}
+                <span>
+                  {formatPreviewDate(
+                    new Date(thread.last_message_timestamp * 1000),
+                  )}
                 </span>
               {/if}
-              <div class="subject-snippet-attachment">
-                <div class="subject-snippet">
-                  {#if thread?.subject}<span class="subject"
-                      >{thread?.subject}</span
-                    >{/if}
-                  <span class="snippet"
-                    >{thread.snippet.replace(/\u200C /g, "")}</span
-                  >
-                </div>
-                {#if Object.keys(attachedFiles).length > 0}
-                  <div class="attachment">
-                    {#each Object.values(attachedFiles) as files}
-                      {#each files as file}
-                        <button
-                          on:click={(event) =>
-                            downloadSelectedFile(event, file)}
-                        >
-                          {file.filename || file.id}
-                        </button>
-                      {/each}
-                    {/each}
-                  </div>
-                {/if}
-              </div>
-              <div
-                class:date={_this.show_received_timestamp}
-                class:action-icons={_this.show_thread_actions}
-              >
-                {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
-                  <span><AttachmentIcon /></span>
-                {/if}
-                {#if _this.show_thread_actions}
-                  <div class="delete">
-                    <button
-                      title="Delete thread"
-                      aria-label="Delete thread"
-                      on:click|stopPropagation={deleteEmail}
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                  <div class="read-status">
-                    <button
-                      title={`Mark thread as ${
-                        activeThread.unread ? "" : "un"
-                      }read`}
-                      aria-label={`Mark thread as ${
-                        activeThread.unread ? "" : "un"
-                      }read`}
-                      on:click|stopPropagation={toggleUnreadStatus}
-                    >
-                      {#if activeThread.unread}
-                        <MarkReadIcon aria-hidden="true" />
-                      {:else}
-                        <MarkUnreadIcon aria-hidden="true" />
-                      {/if}
-                    </button>
-                  </div>
-                {:else if _this.show_received_timestamp}
-                  <span>
-                    {formatPreviewDate(
-                      new Date(thread.last_message_timestamp * 1000),
-                    )}
-                  </span>
-                {/if}
-              </div>
-            {/if}
+            </div>
+            <!-- {/if} -->
           </div>
         {/if}
       {/if}
