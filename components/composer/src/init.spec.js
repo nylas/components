@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-xdescribe("Composer loading state", () => {
+describe("Composer loading state", () => {
   it("displays loading screen", () => {
     cy.visit("/components/composer/src/cypress.html");
 
@@ -8,7 +8,7 @@ xdescribe("Composer loading state", () => {
   });
 });
 
-xdescribe("Composer dispatches events", () => {
+describe("Composer dispatches events", () => {
   const eventsFired = {
     minimized: false,
     maximized: false,
@@ -96,7 +96,7 @@ xdescribe("Composer dispatches events", () => {
   });
 });
 
-xdescribe("Composer `to` prop", () => {
+describe("Composer `to` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -151,7 +151,7 @@ xdescribe("Composer `to` prop", () => {
   });
 });
 
-xdescribe("Composer interactions", () => {
+describe("Composer interactions", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -273,10 +273,9 @@ describe("Composer customizations", () => {
       { fixture: "composer/manifest.json" },
     ).as("getMiddlewareManifest");
 
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/account",
-    ).as("getMiddlewareAccount");
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/manifest.json",
+    }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
       { name: "Test User", email: "tester@nylas.com" },
@@ -286,6 +285,7 @@ describe("Composer customizations", () => {
     cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer").should("exist").as("composer");
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
   });
 
   it("show header", () => {
@@ -515,7 +515,7 @@ describe("Composer customizations", () => {
   });
 });
 
-xdescribe("Composer integration", () => {
+describe("Composer integration", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -646,7 +646,7 @@ xdescribe("Composer integration", () => {
   });
 });
 
-xdescribe("Composer callbacks and options", () => {
+describe("Composer callbacks and options", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -702,7 +702,7 @@ xdescribe("Composer callbacks and options", () => {
   });
 });
 
-xdescribe("Composer file upload", () => {
+describe("Composer file upload", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -800,7 +800,7 @@ xdescribe("Composer file upload", () => {
   });
 });
 
-xdescribe("Composer subject", () => {
+describe("Composer subject", () => {
   beforeEach(() => {
     cy.visitComponentPage(
       "/components/composer/src/index.html",
