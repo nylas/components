@@ -247,13 +247,11 @@
         );
       }
       if (currentlySelectedThread) {
-        currentlySelectedThread = {
-          ...currentlySelectedThread,
-          messages:
-            currentlySelectedThread.messages?.map((currentMessage) =>
-              currentMessage.id === message.id ? message : currentMessage,
-            ) ?? [],
-        };
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          ) ?? [];
+        currentlySelectedThread = currentlySelectedThread;
       }
     }
   }
@@ -300,13 +298,11 @@
         );
       }
       if (currentlySelectedThread) {
-        currentlySelectedThread = {
-          ...currentlySelectedThread,
-          messages:
-            currentlySelectedThread.messages?.map((currentMessage) =>
-              currentMessage.id === message.id ? message : currentMessage,
-            ) ?? [],
-        };
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          ) ?? [];
+        currentlySelectedThread = currentlySelectedThread;
       }
     }
   }
