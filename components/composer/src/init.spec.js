@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-describe("Composer loading state", () => {
+xdescribe("Composer loading state", () => {
   it("displays loading screen", () => {
     cy.visit("/components/composer/src/cypress.html");
 
@@ -8,7 +8,7 @@ describe("Composer loading state", () => {
   });
 });
 
-describe("Composer dispatches events", () => {
+xdescribe("Composer dispatches events", () => {
   const eventsFired = {
     minimized: false,
     maximized: false,
@@ -96,7 +96,7 @@ describe("Composer dispatches events", () => {
   });
 });
 
-describe("Composer `to` prop", () => {
+xdescribe("Composer `to` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -151,7 +151,7 @@ describe("Composer `to` prop", () => {
   });
 });
 
-describe("Composer interactions", () => {
+xdescribe("Composer interactions", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -273,9 +273,10 @@ describe("Composer customizations", () => {
       { fixture: "composer/manifest.json" },
     ).as("getMiddlewareManifest");
 
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "composer/manifest.json", // We don't want account loaded so from field is empty
-    }).as("getMiddlewareAccount");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/account",
+    ).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
       { name: "Test User", email: "tester@nylas.com" },
@@ -514,7 +515,7 @@ describe("Composer customizations", () => {
   });
 });
 
-describe("Composer integration", () => {
+xdescribe("Composer integration", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -645,7 +646,7 @@ describe("Composer integration", () => {
   });
 });
 
-describe("Composer callbacks and options", () => {
+xdescribe("Composer callbacks and options", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -701,7 +702,7 @@ describe("Composer callbacks and options", () => {
   });
 });
 
-describe("Composer file upload", () => {
+xdescribe("Composer file upload", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -799,7 +800,7 @@ describe("Composer file upload", () => {
   });
 });
 
-describe("Composer subject", () => {
+xdescribe("Composer subject", () => {
   beforeEach(() => {
     cy.visitComponentPage(
       "/components/composer/src/index.html",
