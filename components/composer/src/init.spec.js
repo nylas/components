@@ -274,7 +274,7 @@ describe("Composer customizations", () => {
     ).as("getMiddlewareManifest");
 
     cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "composer/manifest.json", // We don't want account loaded so from field is empty
+      fixture: "composer/manifest.json",
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
@@ -285,6 +285,7 @@ describe("Composer customizations", () => {
     cy.visit("/components/composer/src/cypress.html");
 
     cy.get("nylas-composer").should("exist").as("composer");
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
   });
 
   it("show header", () => {

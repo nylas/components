@@ -231,7 +231,7 @@
   async function messageClicked(event: CustomEvent) {
     let message = event.detail.message;
 
-    if (message && currentlySelectedThread) {
+    if (!_this.all_threads && message && currentlySelectedThread) {
       message = await fetchIndividualMessage(message);
       threads = MailboxStore.hydrateMessageInThread(
         message,
@@ -247,13 +247,11 @@
         );
       }
       if (currentlySelectedThread) {
-        currentlySelectedThread = {
-          ...currentlySelectedThread,
-          messages:
-            currentlySelectedThread.messages?.map((currentMessage) =>
-              currentMessage.id === message.id ? message : currentMessage,
-            ) ?? [],
-        };
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          ) ?? [];
+        currentlySelectedThread = currentlySelectedThread;
       }
     }
   }
@@ -277,7 +275,6 @@
   async function threadClicked(event: CustomEvent) {
     const thread = event.detail.thread;
 
-    dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {
@@ -301,13 +298,11 @@
         );
       }
       if (currentlySelectedThread) {
-        currentlySelectedThread = {
-          ...currentlySelectedThread,
-          messages:
-            currentlySelectedThread.messages?.map((currentMessage) =>
-              currentMessage.id === message.id ? message : currentMessage,
-            ) ?? [],
-        };
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          ) ?? [];
+        currentlySelectedThread = currentlySelectedThread;
       }
     }
   }
