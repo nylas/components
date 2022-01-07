@@ -864,7 +864,7 @@
           <label
             for="file-upload"
             class="composer-btn file-upload"
-            title="Attach Files (Up to 4MB)"
+            title="Attach Files (up to 4MB)"
           >
             <AttachmentIcon class="AttachmentIcon" />
             <span class="sr-only">Attach Files</span>

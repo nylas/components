@@ -13,6 +13,7 @@
 - Reset sendSuccess when composer is opened and closed [#300](https://github.com/nylas/components/pull/300)
 - Added a prop 'reset_after_close' which resets after closing[#301](https://github.com/nylas/components/pull/301)
 - Attachment icon size was too small making it inaccessible
+- Updated file size error copy, added tooltip label for attach icon[#317](https://github.com/nylas/components/pull/317)
 
 ## Breaking
 
