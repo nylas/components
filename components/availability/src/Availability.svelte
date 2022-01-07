@@ -574,6 +574,8 @@
         allCalendars,
         calendarID,
         requiredParticipants,
+        consecutiveOptions,
+        consecutiveParticipants,
         _this,
       ),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
