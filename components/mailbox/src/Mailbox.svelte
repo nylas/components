@@ -77,9 +77,13 @@
   let displayedThreadsPromise: Promise<Thread[]>;
 
   // paginations vars
+  const DEFAULT_NUM_PAGES = 1;
   let currentPage: number = 0;
-  let numPages: number = 1;
+  let numPages: number = DEFAULT_NUM_PAGES;
   let numThreads: number = 0;
+
+  // pagination when searching threads is limited to limit and offset, this cursor keeps track of the offset
+  let searchCursor: number = 0;
 
   onMount(async () => {
     await tick();
@@ -156,8 +160,11 @@
         new URLSearchParams(_this.query_string?.replaceAll(" ", "&")),
       ),
     };
+
     if (_this.keyword_to_search) {
       query.keywordToSearch = _this.keyword_to_search;
+      query.query.limit = _this.items_per_page + 1; // add one to check if there is another page of threads
+      query.query.offset = searchCursor;
     }
   }
 
@@ -197,7 +204,21 @@
           query,
           forceRefresh,
         );
+
         threads = (await displayedThreadsPromise) ?? [];
+
+        // We only display the number of messages in _this.items_per_page
+        if (_this.items_per_page + 1 === threads.length) {
+          if (searchCursor === 0) {
+            numPages = DEFAULT_NUM_PAGES + 1; // there is 1 more item in _this.items_per_page, meaning there's another page
+          } else {
+            numPages =
+              DEFAULT_NUM_PAGES +
+              Math.ceil(searchCursor / _this.items_per_page) +
+              1;
+          }
+          threads.pop(); // there is one additional item in threads to check for next page, we remove it to only display _this.items_per_page
+        }
       } else {
         displayedThreadsPromise = MailboxStore.getThreads(
           query,
@@ -489,8 +510,13 @@
   //#region pagination
   async function changePage(event: CustomEvent) {
     loading = true;
+
     currentPage = event.detail.newPage;
+
+    searchCursor = _this.items_per_page * currentPage;
+
     await updateDisplayedThreads();
+
     loading = false;
   }
   //#endregion pagination
@@ -909,13 +935,14 @@
             {/if} is empty!
           </div>
         {/each}
-        {#if !_this.keyword_to_search && threads && threads.length > 0}
+        {#if threads && threads.length > 0}
           <pagination-nav
             current_page={currentPage}
             items_per_page={_this.items_per_page}
             num_pages={numPages}
             num_items={numThreads}
             visible={true}
+            num_pages_visible={!_this.keyword_to_search}
             on:changePage={changePage}
           />
         {/if}
