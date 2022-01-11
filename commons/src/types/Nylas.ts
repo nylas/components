@@ -202,6 +202,7 @@ export interface EmailProperties extends Manifest {
   you: Partial<Account>;
   show_reply: boolean;
   show_reply_all: boolean;
+  show_forward: boolean;
 }
 
 export interface MailboxProperties extends Manifest {
@@ -216,6 +217,7 @@ export interface MailboxProperties extends Manifest {
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   show_reply: boolean;
   show_reply_all: boolean;
+  show_forward: boolean;
 }
 
 export type ContactSearchCallback = Participant[] | FetchContactsCallback;

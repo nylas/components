@@ -45,6 +45,7 @@
         mailbox.show_star = true;
         mailbox.show_reply = true;
         mailbox.show_reply_all = true;
+        mailbox.show_forward = true;
 
         const composer = document.querySelector("nylas-composer");
         composer.show_header = true;
@@ -72,6 +73,16 @@
           composer.from = c.value.from;
           composer.to = c.value.to;
 
+          composer.open();
+        });
+
+        mailbox.addEventListener("forwardClicked", (v) => {
+          composer.classList.remove("hidden");
+          composer.classList.add("active");
+
+          const c = v.detail;
+          console.log(c.value);
+          composer.value = c.value;
           composer.open();
         });
 

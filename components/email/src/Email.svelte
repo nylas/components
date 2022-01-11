@@ -54,6 +54,7 @@
   import { downloadFile } from "@commons/connections/files";
   import ReplyIcon from "./assets/reply.svg";
   import ReplyAllIcon from "./assets/reply-all.svg";
+  import ForwardIcon from "./assets/forward.svg";
   import {
     DisallowedContentTypes,
     InlineImageTypes,
@@ -86,6 +87,7 @@
   export let you: Partial<Account>;
   export let show_reply: boolean;
   export let show_reply_all: boolean;
+  export let show_forward: boolean;
 
   const defaultValueMap: Partial<EmailProperties> = {
     clean_conversation: false,
@@ -562,6 +564,22 @@
     dispatchEvent(event_identifier, {
       event,
       message: message,
+      thread: activeThread,
+      value,
+    });
+  }
+
+  async function handleForwardClick(event: CustomEvent, msgIndex: number) {
+    const currentMessage = activeThread.messages[msgIndex];
+    const subject = `Fwd: ${currentMessage.subject}`;
+    const value = {
+      reply_to_message_id: currentMessage.id,
+      subject: subject,
+      body: currentMessage.body,
+    };
+    dispatchEvent("forwardClicked", {
+      event,
+      message: activeThread.messages[msgIndex],
       thread: activeThread,
       value,
     });
@@ -1664,6 +1682,18 @@
                                   handleReplyClick(e, message, "reply_all")}
                               >
                                 <ReplyAllIcon aria-hidden="true" />
+                              </button>
+                            </div>
+                          {/if}
+                          {#if _this.show_forward}
+                            <div>
+                              <button
+                                title="Forward"
+                                aria-label="Forward"
+                                on:click|stopPropagation={(e) =>
+                                  handleForwardClick(e, msgIndex)}
+                              >
+                                <ForwardIcon aria-hidden="true" />
                               </button>
                             </div>
                           {/if}

@@ -93,5 +93,12 @@
     "type": "boolean",
     "options": [true, false],
     "value": true
+  },
+  {
+    "label": "show_forward",
+    "title": "Show forward button",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
   }
 ]
