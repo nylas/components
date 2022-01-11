@@ -46,7 +46,7 @@
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/MessageBody.svelte";
   import "@commons/components/Tooltip.svelte";
-  import { AccountOrganizationUnit } from "@commons/enums/Nylas";
+  import { AccountOrganizationUnit, MessageType } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
@@ -390,9 +390,7 @@
   }
 
   async function handleThread(event: MouseEvent | KeyboardEvent) {
-    const messageType = isThreadADraftEmail(activeThread)
-      ? "drafts"
-      : "messages";
+    const messageType = getMessageType(activeThread);
 
     if (activeThread[messageType].length <= 0) {
       return;
@@ -409,7 +407,7 @@
       }
       //#endregion read/unread
 
-      if (!emailManuallyPassed && messageType !== "drafts") {
+      if (!emailManuallyPassed && messageType !== MessageType.DRAFTS) {
         const { messages } = activeThread;
         const lastMsgIndex = messages.length - 1;
         messages[lastMsgIndex].expanded = !messages[lastMsgIndex].expanded;
@@ -423,11 +421,8 @@
         }
       }
 
-<<<<<<< HEAD
-      activeThread.expanded = !activeThread.expanded;
-=======
       //#region open thread + messages
-      if (messageType !== "drafts") {
+      if (messageType !== MessageType.DRAFTS) {
         activeThread.expanded = !activeThread.expanded;
         // Upon expansion / lastMessage existing, scroll to it
         if (activeThread.expanded && _this.click_action === "default") {
@@ -442,7 +437,6 @@
         }
       }
       //#endregion open thread + messages
->>>>>>> 6ed2449 (Fixed draft message styling)
     }
 
     dispatchEvent("threadClicked", {
@@ -859,7 +853,7 @@
   function isThreadADraftEmail(currentThread: Thread): boolean {
     return (
       currentThread &&
-      currentThread.labels?.find((label) => label.name === "drafts")
+      currentThread.labels?.some((label) => label.name === MessageType.DRAFTS)
     );
   }
 
@@ -889,6 +883,12 @@
       });
       scrolledToLatest = true;
     }
+
+    function getMessageType(currentThread: Thread): string {
+    return currentThread[MessageType.DRAFTS].length &&
+      currentThread[MessageType.MESSAGES].length
+      ? [MessageType.DRAFTS]
+      : [MessageType.MESSAGES];
   }
 </script>
 
@@ -1836,7 +1836,7 @@
               activeThread.messages.length <= 0 &&
               !activeThread.drafts.length}
           >
-            {#await isThreadADraftEmail(activeThread) then isDraft}
+            {#await getMessageType(activeThread) then isDraft}
               <div class="from{_this.show_star ? '-star' : ''}">
                 {#if _this.show_star}
                   <div class="starred">

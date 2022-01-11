@@ -6,6 +6,7 @@
   import {
     AccountOrganizationUnit,
     MailboxActions,
+    MessageType,
   } from "@commons/enums/Nylas";
   import {
     buildInternalProps,
@@ -300,7 +301,7 @@
     const messages = thread[messageType];
     let message = await fetchIndividualMessage(messages[messages.length - 1]);
 
-    if (messageType === "drafts") {
+    if (messageType === MessageType.DRAFTS) {
       await dispatchDraft(event);
       return;
     }

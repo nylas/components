@@ -15,3 +15,8 @@ export enum MailboxActions {
   STAR = "star",
   UNREAD = "unread",
 }
+
+export enum MessageType {
+  DRAFTS = "drafts",
+  MESSAGES = "messages",
+}
