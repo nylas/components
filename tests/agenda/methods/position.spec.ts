@@ -10,17 +10,17 @@ describe("Event positioning", () => {
   it("should correctly populate a position map based on a list of events", () => {
     const expectedPositionMap = {
       abc123: {
-        leftNeighbour: null,
+        leftNeighbour: <any>null,
         offset: 0,
         overlaps: [mockEvents.find((event) => event.id === "ghi789")],
       },
       def456: {
-        leftNeighbour: null,
+        leftNeighbour: <any>null,
         offset: 0,
         overlaps: [mockEvents.find((event) => event.id === "ghi789")],
       },
       ghi789: {
-        leftNeighbour: null,
+        leftNeighbour: <any>null,
         offset: 0,
         overlaps: [
           mockEvents.find((event) => event.id === "abc123"),
@@ -39,9 +39,9 @@ describe("Event positioning", () => {
   it("should position and size events with no overlaps to take up the full width of the calendar", () => {
     const positionMap = {
       abc123: {
-        leftNeighbour: null,
+        leftNeighbour: <any>null,
         offset: 0,
-        overlaps: [],
+        overlaps: <any>[],
       },
     };
     const mockEvent = <any>{

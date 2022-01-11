@@ -155,6 +155,7 @@
       {#each toolbar as item}
         <button
           on:click={handleAction(item)}
+          title={item.title}
           class={item.state && item.state() ? "active" : ""}
         >
           {#if item.icon}

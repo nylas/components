@@ -35,7 +35,7 @@ export async function createConsecutiveQueryKey(
       1000,
     end_time:
       timeHour(new Date(new Date(endDay).setHours(endHour))).getTime() / 1000,
-    free_busy: [],
+    free_busy: <any[]>[],
     open_hours: openHours,
     emails: emailsList,
     events,

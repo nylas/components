@@ -77,9 +77,13 @@
   let displayedThreadsPromise: Promise<Thread[]>;
 
   // paginations vars
+  const DEFAULT_NUM_PAGES = 1;
   let currentPage: number = 0;
-  let numPages: number = 1;
+  let numPages: number = DEFAULT_NUM_PAGES;
   let numThreads: number = 0;
+
+  // pagination when searching threads is limited to limit and offset, this cursor keeps track of the offset
+  let searchCursor: number = 0;
 
   onMount(async () => {
     await tick();
@@ -156,8 +160,11 @@
         new URLSearchParams(_this.query_string?.replaceAll(" ", "&")),
       ),
     };
+
     if (_this.keyword_to_search) {
       query.keywordToSearch = _this.keyword_to_search;
+      query.query.limit = _this.items_per_page + 1; // add one to check if there is another page of threads
+      query.query.offset = searchCursor;
     }
   }
 
@@ -197,7 +204,21 @@
           query,
           forceRefresh,
         );
+
         threads = (await displayedThreadsPromise) ?? [];
+
+        // We only display the number of messages in _this.items_per_page
+        if (_this.items_per_page + 1 === threads.length) {
+          if (searchCursor === 0) {
+            numPages = DEFAULT_NUM_PAGES + 1; // there is 1 more item in _this.items_per_page, meaning there's another page
+          } else {
+            numPages =
+              DEFAULT_NUM_PAGES +
+              Math.ceil(searchCursor / _this.items_per_page) +
+              1;
+          }
+          threads.pop(); // there is one additional item in threads to check for next page, we remove it to only display _this.items_per_page
+        }
       } else {
         displayedThreadsPromise = MailboxStore.getThreads(
           query,
@@ -223,15 +244,15 @@
     .filter((thread) => thread.selected)
     .some((thread) => thread.starred);
 
-  let areAllSelectedUnread = false;
-  $: areAllSelectedUnread = threads
+  let areAllSelectedRead = false;
+  $: areAllSelectedRead = threads
     .filter((thread) => thread.selected)
-    .some((thread) => thread.unread);
+    .some((thread) => !thread.unread);
 
   async function messageClicked(event: CustomEvent) {
     let message = event.detail.message;
 
-    if (message && currentlySelectedThread) {
+    if (!_this.all_threads && message && currentlySelectedThread) {
       message = await fetchIndividualMessage(message);
       threads = MailboxStore.hydrateMessageInThread(
         message,
@@ -245,6 +266,13 @@
           query,
           currentPage,
         );
+      }
+      if (currentlySelectedThread) {
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          ) ?? [];
+        currentlySelectedThread = currentlySelectedThread;
       }
     }
   }
@@ -268,7 +296,6 @@
   async function threadClicked(event: CustomEvent) {
     const thread = event.detail.thread;
 
-    dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {
@@ -291,6 +318,13 @@
           currentPage,
         );
       }
+      if (currentlySelectedThread) {
+        currentlySelectedThread.messages =
+          currentlySelectedThread.messages?.map((currentMessage) =>
+            currentMessage.id === message.id ? message : currentMessage,
+          ) ?? [];
+        currentlySelectedThread = currentlySelectedThread;
+      }
     }
   }
 
@@ -310,12 +344,12 @@
     return message;
   }
 
-  let refreshingMailbox = false;
+  let loading = false;
   async function refreshClicked(event: MouseEvent) {
-    refreshingMailbox = true;
+    loading = true;
     dispatchEvent("refreshClicked", { event });
     await updateDisplayedThreads(true);
-    refreshingMailbox = false;
+    loading = false;
   }
 
   function onSelectOne(event: MouseEvent, thread: Thread) {
@@ -396,14 +430,14 @@
     if (Array.isArray(_this.all_threads)) {
       threads = threads.map((thread) => {
         if (thread.selected) {
-          thread.unread = !areAllSelectedUnread;
+          thread.unread = areAllSelectedRead;
         }
         return { ...thread };
       });
     } else {
       const readStatusPromises = [];
       for (const thread of threads.filter((thread) => thread.selected)) {
-        thread.unread = !areAllSelectedUnread;
+        thread.unread = areAllSelectedRead;
         readStatusPromises.push(updateThreadStatus(thread));
       }
       await Promise.all(readStatusPromises);
@@ -475,8 +509,15 @@
 
   //#region pagination
   async function changePage(event: CustomEvent) {
+    loading = true;
+
     currentPage = event.detail.newPage;
+
+    searchCursor = _this.items_per_page * currentPage;
+
     await updateDisplayedThreads();
+
+    loading = false;
   }
   //#endregion pagination
 </script>
@@ -498,12 +539,14 @@
     grid-auto-rows: max-content;
     font-family: var(
       --mailbox-font-family,
-      "-apple-system, BlinkMacSystemFont, sans-serif"
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif
     );
 
     $outline-style: 1px solid var(--mailbox-border-color, var(--grey-lighter));
     @mixin barStyle {
-      outline: $outline-style;
+      border: $outline-style;
       display: flex;
       align-items: center;
       padding: 24px 16px;
@@ -512,6 +555,7 @@
 
     header {
       @include barStyle;
+      border-bottom: none;
       border-radius: 4px 4px 0 0;
       font-weight: bold;
       button {
@@ -531,8 +575,23 @@
 
     [role="toolbar"] {
       @include barStyle;
+      border-bottom: 0.5px solid
+        var(--mailbox-border-color, var(--grey-lighter));
       padding: $spacing-s $spacing-m;
       gap: $spacing-m;
+
+      .thread-checkbox {
+        display: flex;
+      }
+
+      button {
+        &[disabled] svg {
+          fill: var(--grey);
+        }
+        svg {
+          fill: var(--grey-dark);
+        }
+      }
     }
 
     // Toggle select-all checkbox and thread checkbox from CSS Var
@@ -557,13 +616,18 @@
           content: "\2605";
           display: inline-block;
           font-size: 1em;
-          color: var(--mailbox-starred-disabled-color, #ccc);
+          color: var(--mailbox-starred-disabled-color, var(--grey));
           -webkit-user-select: none;
           -moz-user-select: none;
           user-select: none;
         }
 
-        &.starred:before {
+        &:not([disabled]):before,
+        svg {
+          color: var(--mailbox-starred-unselected-color, #8d94a5);
+        }
+
+        &:not([disabled]).starred:before {
           color: var(--mailbox-starred-enabled-color, #ffc107);
         }
       }
@@ -575,6 +639,7 @@
       gap: 0.5rem;
       align-items: center;
       justify-content: left;
+      position: relative;
 
       .checkbox-container.thread-checkbox {
         padding: 1rem 0 0 1rem;
@@ -582,15 +647,35 @@
       }
 
       &:hover {
-        $hover-outline-width: 1px;
-        outline: $hover-outline-width solid
-          var(--mailbox-grey-warm-color, var(--grey-warm));
+        box-shadow: inset 1px 0 0
+            var(--mailbox-grey-warm-color, var(--grey-warm)),
+          inset -1px 0 0 var(--mailbox-grey-warm-color, var(--grey-warm)),
+          0 1px 2px 0 rgb(44 46 46 / 20%), 0 1px 3px 1px rgb(44 46 46 / 5%);
+        border-color: var(--mailbox-grey-warm-color, var(--grey-warm));
         cursor: pointer;
+        z-index: 1;
       }
 
       // #region define border styles
-      --nylas-email-border: none;
-      outline: $outline-style;
+      --email-border-style: none;
+      border: 1px solid var(--grey-lighter);
+      border-top: var(
+        --mailbox-vertical-border-style,
+        0.5px solid var(--grey-lighter)
+      );
+      border-bottom: var(
+        --mailbox-vertical-border-style,
+        0.5px solid var(--grey-lighter)
+      );
+      border-left: var(
+        --mailbox-horizontal-border-style,
+        1px solid var(--grey-lighter)
+      );
+      border-right: var(
+        --mailbox-horizontal-border-style,
+        1px solid var(--grey-lighter)
+      );
+
       // #endregion define border styles
 
       // #region define background styles
@@ -628,7 +713,11 @@
   }
 
   ul.refreshing {
-    filter: blur(0.2rem);
+    position: relative;
+    @include progress-bar(top, 0, left, 0, var(--blue), var(--blue-lighter));
+    &:before {
+      z-index: 1;
+    }
   }
 
   .checkbox-container {
@@ -660,8 +749,10 @@
     main {
       #mailboxlist li {
         .checkbox-container.thread-checkbox {
-          padding: 0 0 0 $spacing-m;
-          align-self: center;
+          padding: 0.6rem 0.5rem 0 $spacing-m;
+          display: flex;
+          min-height: 2rem;
+          align-items: center;
         }
       }
 
@@ -704,7 +795,7 @@
               width="16"
               height="16"
               viewBox="0 0 16 16"
-              class:refreshing={refreshingMailbox}
+              class:refreshing={loading}
             >
               <path
                 d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
@@ -738,6 +829,7 @@
               <div class="delete">
                 <button
                   title="Delete selected email(s)"
+                  disabled={!threads.filter((thread) => thread.selected).length}
                   aria-label="Delete selected email(s)"
                   on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
                 >
@@ -751,6 +843,8 @@
                     title={starAllTitle}
                     aria-label={starAllTitle}
                     role="switch"
+                    disabled={!threads.filter((thread) => thread.selected)
+                      .length}
                     aria-checked={areAllSelectedStarred}
                     on:click={(e) => onStarSelected(e)}
                   />
@@ -759,10 +853,12 @@
             {/if}
             {#if _this.actions_bar.includes(MailboxActions.UNREAD)}
               <div class="read-status">
-                {#if areAllSelectedUnread}
+                {#if !areAllSelectedRead}
                   <button
                     data-cy="mark-read"
                     title="Mark selected email(s) as read"
+                    disabled={!threads.filter((thread) => thread.selected)
+                      .length}
                     aria-label="Mark selected email(s) as read"
                     on:click={(e) => onChangeSelectedReadStatus(e)}
                   >
@@ -783,7 +879,7 @@
           {/if}
         </div>
       {/if}
-      <ul id="mailboxlist" class:refreshing={refreshingMailbox}>
+      <ul id="mailboxlist" class:refreshing={loading}>
         {#each threads as thread}
           {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
@@ -793,8 +889,8 @@
                 thread?.messages &&
                 thread?.messages?.length <= 0}
             >
-              {#if _this.show_thread_checkbox}
-                <div class="checkbox-container thread-checkbox">
+              <div class="checkbox-container thread-checkbox">
+                {#if _this.show_thread_checkbox}
                   <input
                     title={selectTitle}
                     aria-label={selectTitle}
@@ -805,8 +901,8 @@
                       thread?.messages?.length <= 0}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
-                </div>
-              {/if}
+                {/if}
+              </div>
               <div class="email-container">
                 {#key thread.id}
                   <nylas-email
@@ -839,13 +935,14 @@
             {/if} is empty!
           </div>
         {/each}
-        {#if !_this.keyword_to_search && threads && threads.length > 0}
+        {#if threads && threads.length > 0}
           <pagination-nav
             current_page={currentPage}
             items_per_page={_this.items_per_page}
             num_pages={numPages}
             num_items={numThreads}
             visible={true}
+            num_pages_visible={!_this.keyword_to_search}
             on:changePage={changePage}
           />
         {/if}

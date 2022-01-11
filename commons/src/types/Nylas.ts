@@ -225,6 +225,7 @@ export interface ComposerProperties extends Manifest {
   mode: "inline" | "popup";
   replace_fields: ReplaceFields[];
   reset_after_send: boolean;
+  reset_after_close: boolean;
   show_attachment_button: boolean;
   show_bcc_button: boolean;
   show_bcc: boolean;

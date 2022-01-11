@@ -5,6 +5,7 @@
   export let items_per_page: number;
   export let num_pages: number = 1;
   export let num_items: number;
+  export let num_pages_visible: boolean = true;
 
   import { getEventDispatcher } from "@commons/methods/component";
   import { get_current_component } from "svelte/internal";
@@ -64,17 +65,19 @@
 </style>
 
 <nav class="pagination-nav">
-  <span class="page-indicator">
-    <span class="page-start">
-      {current_page * items_per_page + 1}
+  {#if num_pages_visible}
+    <span class="page-indicator">
+      <span class="page-start">
+        {current_page * items_per_page + 1}
+      </span>
+      -
+      <span class="page-end">
+        {Math.min((current_page + 1) * items_per_page, num_items)}
+      </span>
+      of
+      <span class="total">{num_items}</span>
     </span>
-    -
-    <span class="page-end">
-      {Math.min((current_page + 1) * items_per_page, num_items)}
-    </span>
-    of
-    <span class="total">{num_items}</span>
-  </span>
+  {/if}
   {#if num_pages > 1}
     <button
       class="paginate-btn first-btn"
@@ -90,8 +93,6 @@
     >
       <BackIcon style="width: 24px; height: 24px;" />
     </button>
-  {/if}
-  {#if num_pages > 1}
     <button
       class="paginate-btn next-btn"
       on:click={() => changePage(current_page + 1)}

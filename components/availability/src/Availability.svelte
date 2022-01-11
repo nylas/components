@@ -3,6 +3,7 @@
 <script lang="ts">
   import {
     formatTimeSlot,
+    isValidTimezone,
     setTimeZoneOffset,
   } from "@commons/methods/convertDateTimeZone";
   import {
@@ -62,7 +63,7 @@
   import { createConsecutiveQueryKey } from "./method/consecutive";
   import type { EventDefinition } from "@commonstypes/ScheduleEditor";
   import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
-  import { generateDaySlots, overlap } from "./method/availabilityUtils";
+  import { generateDaySlots } from "./method/availabilityUtils";
 
   //#region props
   export let id: string = "";
@@ -102,7 +103,7 @@
   export let show_ticks: boolean;
   export let show_weekends: boolean;
   export let slot_size: number; // in minutes
-  export let start_date: Date;
+  export let start_date: Date | null;
   export let start_hour: number;
   export let timezone: string;
   export let view_as: "schedule" | "list";
@@ -243,6 +244,7 @@
     manifest = (await $ManifestStore[storeKey]) || {};
 
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
+    transformPropertyValues();
 
     const calendarQuery: CalendarQuery = {
       access_token,
@@ -264,6 +266,24 @@
         defaultValueMap,
       ) as Manifest;
       previousProps = $$props;
+
+      if (_this.timezone) {
+        if (!isValidTimezone(_this.timezone)) {
+          console.warn(`Invalid IANA time zone: ${_this.timezone}`);
+          _this.timezone = undefined;
+        } else if (
+          _this.timezone === Intl.DateTimeFormat().resolvedOptions().timeZone
+        ) {
+          _this.timezone = undefined;
+        }
+      }
+    }
+  }
+
+  // Properties requiring further manipulation:
+  function transformPropertyValues() {
+    if (!_this.start_date) {
+      _this.start_date = defaultValueMap.start_date;
     }
   }
 
@@ -554,6 +574,8 @@
         allCalendars,
         calendarID,
         requiredParticipants,
+        consecutiveOptions,
+        consecutiveParticipants,
         _this,
       ),
     ); // TODO: include other potential post-all-slots-established checks, like overbooked, in a single secondary run here.
@@ -679,7 +701,7 @@
       if (prevSlot && prevSlot.end_time === slot.start_time) {
         prevSlot.end_time = slot.end_time;
       } else {
-        groups.push({ ...slot }); // TODO: types ¯\_(ツ)_/¯
+        groups.push({ ...slot });
       }
       return groups;
     }, []);

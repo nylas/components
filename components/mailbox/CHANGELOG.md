@@ -1,16 +1,10 @@
-# Pending Changes
+# Unreleased
 
 ## Breaking
-
 ## New Features
 
-## Bug Fixes
-
-# v1.1.6 (2021-12-22)
-
-## New Features
-
-- [Mailbox] Added ability to reply to email/thread [#228](https://github.com/nylas/components/issues/228)
+- [Mailbox] Add pagination when `keyword_to_search` is used [#313](https://github.com/nylas/components/pull/313)
+- [Mailbox] Added ability to reply to email/thread [#311](https://github.com/nylas/components/pull/311)
 - Added dispatched event `replyAllClicked` with properties
   - event
   - message
@@ -30,13 +24,17 @@
 
 ## Bug Fixes
 
-- [Mailbox] Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
+- Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
+- Message content of emails failed to load if they were accessed while pagination was in progress [311](https://github.com/nylas/components/pull/311)
+- Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
+- Fixed TypeError was being thrown if all_threads prop was used and user clicked a message to expand it's body [315](https://github.com/nylas/components/pull/315)
+- Fixed dispatched event `threadClicked` being dispatched multiple times on a single click [315](https://github.com/nylas/components/pull/315)
 
 # v1.1.5 (2021-12-15)
 
 ## New Features
 
-- [Mailbox] Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
+- Added `onError` custom event when an error occurs [#262](https://github.com/nylas/components/pull/262)
 
 # v1.1.4 (2021-12-10)
 

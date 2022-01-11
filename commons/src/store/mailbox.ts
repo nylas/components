@@ -25,7 +25,7 @@ async function initializePaginatedThreads(totalPages: number) {
   for (let i = 0; i < totalPages; i++) {
     paginatedThreads.push({
       isLoaded: false,
-      threads: [],
+      threads: <Thread[]>[],
     });
   }
   return paginatedThreads;

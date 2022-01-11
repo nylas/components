@@ -247,7 +247,7 @@ describe("Optional Prop Handling", () => {
     cy.get("label.entry.filter").contains("Filter by email: ");
     cy.get("input#show-filter-input").should("exist");
     cy.get("input#show-filter-input").type("nylascypresstest");
-    cy.get("nylas-contact-list").find(".contact").should("have.length", 2);
+    cy.get("nylas-contact-list").find(".contact").should("have.length", 3);
   });
 
   it("Component loads and works for sort_by=last_emailed when account has email & contact scopes", () => {

@@ -165,17 +165,25 @@
   }
 
   // Properties requiring further manipulation:
-  let startDate: string = new Date().toLocaleDateString("en-CA");
+  let startDate: string | null = new Date().toLocaleDateString("en-CA");
+  let customStartDate: boolean = false;
 
   function transformPropertyValues() {
-    startDate = _this.start_date?.toLocaleDateString("en-CA");
+    startDate = _this.start_date?.toLocaleDateString("en-CA") as string;
+    customStartDate = _this.start_date ? true : false;
   }
 
   $: {
-    _this.start_date = new Date(
-      new Date(startDate).getTime() -
-        new Date(startDate).getTimezoneOffset() * -60000,
-    );
+    if (initialized) {
+      if (startDate) {
+        _this.start_date = new Date(
+          new Date(startDate).getTime() -
+            new Date(startDate).getTimezoneOffset() * -60000,
+        );
+      } else {
+        _this.start_date = null;
+      }
+    }
   }
   // #endregion mount and prop initialization
 
@@ -213,7 +221,7 @@
 
   // niceDate: shows date rules in a nice string format; selectively includes weekday if _this.show_as_week /  _this.show_weekends are set
   function niceDate(block: AvailabilityRule) {
-    let startMoment = new Date(
+    const startMoment = new Date(
       0,
       0,
       0,
@@ -225,7 +233,7 @@
       hour12: true,
     });
 
-    let endMoment = new Date(
+    const endMoment = new Date(
       0,
       0,
       0,
@@ -238,7 +246,7 @@
     });
 
     if ((_this.show_as_week || _this.show_weekends) && block.startWeekday) {
-      let weekday = weekdays[block.startWeekday];
+      const weekday = weekdays[block.startWeekday];
       return `${weekday}: ${startMoment} - ${endMoment}`;
     } else {
       return `${startMoment} - ${endMoment}`;
@@ -583,7 +591,27 @@
           </div>
           <label>
             <strong>Start Date</strong>
-            <input type="date" bind:value={startDate} />
+            <strong>
+              <input
+                type="checkbox"
+                name="custom_start_date"
+                bind:checked={customStartDate}
+                on:change={async () => {
+                  if (!customStartDate) {
+                    startDate = new Date().toLocaleDateString("en-CA");
+                    await tick();
+                    startDate = null;
+                  }
+                }}
+              />
+              Show a specific date
+            </strong>
+
+            <input
+              type="date"
+              bind:value={startDate}
+              disabled={!customStartDate}
+            />
           </label>
           <label>
             <strong>Time Zone</strong>

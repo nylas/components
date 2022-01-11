@@ -113,7 +113,7 @@ describe("MailBox  component", () => {
                 .find(".email-row.condensed .attachment")
                 .should("exist");
               cy.get(email)
-                .find(".email-row.condensed .attachment.desktop button")
+                .find(".email-row.condensed .attachment button")
                 .should("have.text", "invoice_2062.pdf ");
             });
         });
@@ -527,24 +527,6 @@ describe("MailBox  component", () => {
 
           cy.get(component)
             .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-unread]")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .click();
-          cy.get(component)
-            .find(".email-row")
-            .each((email) => {
-              cy.wrap(email).should("not.have.class", "unread");
-            });
-
-          cy.get(component)
-            .find("div[role='toolbar']")
             .find("div.read-status button[data-cy=mark-unread]")
             .should("exist");
           cy.get(component)
@@ -559,6 +541,24 @@ describe("MailBox  component", () => {
             .find(".email-row")
             .each((email) => {
               cy.wrap(email).should("have.class", "unread");
+            });
+
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .should("exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-unread]")
+            .should("not.exist");
+          cy.get(component)
+            .find("div[role='toolbar']")
+            .find("div.read-status button[data-cy=mark-read]")
+            .click();
+          cy.get(component)
+            .find(".email-row")
+            .each((email) => {
+              cy.wrap(email).should("not.have.class", "unread");
             });
         });
     });
@@ -675,6 +675,36 @@ describe("MailBox  component", () => {
   });
 
   describe("Custom data", () => {
+    it("Should successfully update a thread's message body when threadClicked is called", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const body = "This is a custom body";
+          const component = element[0];
+          component.addEventListener("threadClicked", function (v) {
+            let { thread } = v.detail;
+            thread = {
+              ...thread,
+              messages: thread.messages.map((m) => {
+                m.body = body;
+                return m;
+              }),
+            };
+          });
+          component.all_threads = threads;
+
+          const cyComponent = cy.wrap(component);
+          cyComponent.find(".email-row.condensed").then((emailRowElement) => {
+            const firstEmailRowElement = emailRowElement[0];
+            firstEmailRowElement.click();
+            cy.get("@mailbox")
+              .shadow()
+              .find("nylas-message-body", { timeout: 5000 })
+              .contains(body);
+          });
+        });
+    });
+
     it("Should toggle between threads via props and fetched threads", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")

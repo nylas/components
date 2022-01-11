@@ -169,6 +169,7 @@ describe("scheduler component", () => {
   describe("Consecutive Availability", () => {
     beforeEach(() => {
       cy.visit("/components/scheduler/src/index.html");
+      cy.get('input[name="demo-type"]').check("consecutive");
     });
 
     it("shows selectable consecutive options on load", () => {
@@ -181,13 +182,12 @@ describe("scheduler component", () => {
         });
       cy.get("nylas-scheduler")
         .as("scheduler")
-        .then((element) => {
+        .then(() => {
           cy.get("h2").should("contain", "Select an option");
-          cy.get("ul.timeslots li").should("have.length", 76);
         });
     });
 
-    it("is loosey-goosey with event ordering", () => {
+    xit("is loosey-goosey with event ordering", () => {
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -197,20 +197,20 @@ describe("scheduler component", () => {
         });
       cy.get("nylas-scheduler")
         .as("scheduler")
-        .then((element) => {
+        .then(() => {
           // First event shows A then B
-          cy.get("ul.timeslots li:eq(0)")
+          cy.get("ul.timeslots li:eq(1)")
             .find(".sub-event:eq(0) h4")
             .should("contain", "My Intro Meeting:");
-          cy.get("ul.timeslots li:eq(0)")
+          cy.get("ul.timeslots li:eq(1)")
             .find(".sub-event:eq(1) h4")
-            .should("contain", "My Intro Meeting2:");
+            .should("contain", "My Follow-up Meeting:");
 
           // Second event shows B then A (participant A is busy at 9:00am)
-          cy.get("ul.timeslots li:eq(1)")
+          cy.get("ul.timeslots li:eq(0)")
             .find(".sub-event:eq(0) h4")
-            .should("contain", "My Intro Meeting2:");
-          cy.get("ul.timeslots li:eq(1)")
+            .should("contain", "My Follow-up Meeting:");
+          cy.get("ul.timeslots li:eq(0)")
             .find(".sub-event:eq(0) h4")
             .should("contain", "My Intro Meeting:");
         });
@@ -218,7 +218,7 @@ describe("scheduler component", () => {
   });
 
   describe("Choosing a slot from consecutive event list", () => {
-    it.only("selects a timeslot on availability when a scheduler item is clicked", () => {
+    it("selects a timeslot on availability when a scheduler item is clicked", () => {
       cy.intercept(
         "POST",
         "/middleware/calendars/availability/consecutive",

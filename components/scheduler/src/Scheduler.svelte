@@ -117,7 +117,7 @@
 
   async function bookTimeSlots(events: BookableSlot[]) {
     const bookings = events.map(async (event) => {
-      let postableEvent: Partial<TimespanEvent> = {
+      const postableEvent: Partial<TimespanEvent> = {
         title: event.event_title,
         description: event.event_description,
         location: event.event_location,
@@ -129,11 +129,12 @@
               },
             }
           : undefined,
-        participants: event.available_calendars.map((calendar) => {
-          return {
-            email: calendar,
-          };
-        }),
+        participants: Array.from(
+          new Set([
+            ...event.available_calendars,
+            ...(event.participantEmails ?? []),
+          ]),
+        ).map((email) => ({ email })),
         calendar_id: event.calendar_id,
         when: {
           start_time: event.start_time.getTime() / 1000,
@@ -199,15 +200,17 @@
 
     if (_this.notification_mode === NotificationMode.SEND_MESSAGE) {
       eventBookings.map((event, i) => {
-        const event_participants = event.participants?.map((participant) => {
+        const eventParticipants = event.participants?.map((participant) => {
           const { email, name } = participant;
-          let to: { email: string; name?: string } = { email };
-          if (name) to["name"] = name; // Only assign name if not null, else we get error
+          const to: { email: string; name?: string } = { email };
+          if (name) {
+            to.name = name;
+          } // Only assign name if not null, else we get error
           return to;
         });
-        if (event_participants) {
+        if (eventParticipants) {
           sendMessage(id, {
-            to: event_participants,
+            to: eventParticipants,
             body: `${_this.notification_message}`,
             subject: `${_this.notification_subject}`,
           });
