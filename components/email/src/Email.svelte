@@ -520,19 +520,17 @@
   ) {
     event.stopImmediatePropagation();
 
-    const currentMessage = message;
-
     const me: Participant = {
       name: _this.you.name,
       email: _this.you.email_address,
     };
 
-    const subject = currentMessage.subject?.toLowerCase().startsWith("re:")
-      ? currentMessage.subject
-      : `Re: ${currentMessage.subject}`;
+    const subject = message.subject?.toLowerCase().startsWith("re:")
+      ? message.subject
+      : `Re: ${message.subject}`;
 
     const from = [me];
-    const to = buildTo({ message: currentMessage, type });
+    const to = buildTo({ message: message, type });
 
     let event_identitfier;
 
@@ -547,7 +545,7 @@
     }
 
     const value = {
-      reply_to_message_id: currentMessage.id,
+      reply_to_message_id: message.id,
       from: from,
       to: to,
       reply_to: from,
@@ -556,7 +554,7 @@
 
     dispatchEvent(event_identitfier, {
       event,
-      message: currentMessage,
+      message: message,
       thread: activeThread,
       value,
     });
