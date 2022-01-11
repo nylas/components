@@ -22,6 +22,7 @@
     downloadAttachedFile,
     getEventDispatcher,
   } from "@commons/methods/component";
+  import { isFromMe, buildParticipants } from "./methods/participants";
   import DropdownSymbol from "./assets/chevron-down.svg";
   import TrashIcon from "./assets/trash-alt.svg";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
@@ -530,29 +531,31 @@
       : `Re: ${message.subject}`;
 
     const from = [me];
-    const to = buildTo({ message: message, type });
+    const {to, cc} = buildParticipants({ myEmail: me.email, message: message, type });
 
-    let event_identitfier;
+    let event_identifier;
 
     switch (type) {
       case "reply":
-        event_identitfier = "replyClicked";
+        event_identifier = "replyClicked";
         break;
 
       case "reply_all":
-        event_identitfier = "replyAllClicked";
+        event_identifier = "replyAllClicked";
         break;
     }
 
     const value = {
       reply_to_message_id: message.id,
-      from: from,
-      to: to,
+      from,
+      to,
       reply_to: from,
+      cc,
+      bcc: message.bcc,
       subject: subject,
     };
 
-    dispatchEvent(event_identitfier, {
+    dispatchEvent(event_identifier, {
       event,
       message: message,
       thread: activeThread,
@@ -560,46 +563,11 @@
     });
   }
 
-  function buildTo({
-    message,
-    type,
-  }: {
-    message: Message;
-    type: "reply" | "reply_all";
-  }): Participant[] {
-    let to: Participant[];
-
-    switch (type) {
-      case "reply":
-        if (isFromMe(message)) {
-          to = message.to;
-        } else {
-          to = message.from;
-        }
-        break;
-
-      case "reply_all":
-        to = message.to;
-        break;
-    }
-
-    return to;
-  }
-
-  function isFromMe(message: Message): boolean {
-    if (!_this.you.email_address) {
-      return false;
-    }
-
-    return message.from
-      .map((f) => {
-        return f.email.toLowerCase();
-      })
-      .includes(_this.you.email_address?.toLowerCase());
-  }
-
   function canReplyAll(message: Message): boolean {
-    return message?.to?.length > 1 && !isFromMe(message);
+    return (
+      message?.to?.length + message?.cc?.length > 1 &&
+      !isFromMe(_this.you.email_address, message)
+    );
   }
 
   function handleEmailClick(event: MouseEvent, msgIndex: number) {

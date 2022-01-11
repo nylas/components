@@ -1,17 +1,10 @@
-# Pending Changes
+# Unreleased
 
 ## Breaking
 
 ## New Features
 
-## Bug Fixes
-
-# Unreleased (2022-01-07)
-# Pending Changes
-
-## Breaking
-
-## New Features
+- [Email] Show CC participants when reply all button is clicked [#319](https://github.com/nylas/components/pull/319)
 
 ## Bug Fixes
 
