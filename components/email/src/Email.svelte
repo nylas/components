@@ -1686,7 +1686,7 @@
                             </div>
                           {/if}
                           {#if _this.show_forward}
-                            <div>
+                            <div class="forward">
                               <button
                                 title="Forward"
                                 aria-label="Forward"
