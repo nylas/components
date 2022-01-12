@@ -480,9 +480,8 @@ describe("MailBox  component", () => {
     });
   });
 
-  describe("Delete action", () => {
-    // TODO: write when Folders are implemented
-    xit("Should delete selected email", () => {
+  describe.only("Delete action", () => {
+    it("Should show delete confirmation pop up", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")
         .then((element) => {
@@ -499,6 +498,20 @@ describe("MailBox  component", () => {
             .find("div.delete")
             .find("button")
             .click();
+          // Clicking delete should open modal
+          cy.get(".modal").should("exist");
+          // Clicking cancel should close the modal
+          cy.get(".modal").find("button.cancel").click();
+          cy.get(".modal").should("not.exist");
+
+          cy.get("div[role='toolbar']")
+            .find("div.delete")
+            .find("button")
+            .click();
+          cy.get(".modal").should("exist");
+          // Clicking confirm should delete email and close modal
+          cy.get(".modal").find("button.danger").click();
+          cy.get(".modal").should("not.exist");
           cy.get("nylas-email").should("have.length", threads.length - 1);
         });
     });
