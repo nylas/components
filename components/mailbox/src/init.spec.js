@@ -130,8 +130,7 @@ describe("MailBox  component", () => {
             .then((element) => {
               const email = element[0];
               cy.get(email)
-                .find(".no-messages-warning-container")
-                .should("exist")
+                .find(".snippet")
                 .and(($div) => {
                   expect($div).to.contain(
                     "Sorry, looks like this thread is currently unavailable",
@@ -152,10 +151,12 @@ describe("MailBox  component", () => {
             .then((element) => {
               const email = element[0];
               cy.get(email)
-                .find(".no-messages-warning-container")
+                .find(".snippet")
                 .should("exist")
                 .and(($div) => {
-                  expect($div).to.contain("This is a draft email");
+                  expect($div).to.contain(
+                    "Sorry, looks like this thread is currently unavailable",
+                  );
                 });
             });
         });
