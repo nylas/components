@@ -571,6 +571,59 @@ describe("Email: Unread status", () => {
   });
 });
 
+describe("Email: Reply, Reply-all, Forward", () => {
+  beforeEach(() => {
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "email/account.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+
+    cy.visit("/components/email/src/cypress.html");
+
+    cy.get("nylas-email")
+      .as("email")
+      .then((element) => {
+        const component = element[0];
+        component.thread_id = "83v13r9lj6kzh109c3l1yznnf";
+        component.show_expanded_email_view_onload = true;
+      });
+  });
+
+  it("shows reply icon", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_reply = true;
+    });
+
+    cy.get("@email").find(".reply").should("exist");
+  });
+
+  it("shows reply-all icon", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_reply_all = true;
+    });
+
+    cy.get("@email").find(".reply-all").should("exist");
+  });
+
+  it("shows forward icon", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.show_forward = true;
+    });
+
+    cy.get("@email").find(".forward").should("exist");
+  });
+});
+
 describe("Email: Toggle email of sender/recipient", () => {
   beforeEach(() => {
     cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {

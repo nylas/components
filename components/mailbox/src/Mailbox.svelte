@@ -58,6 +58,7 @@
   export let show_thread_checkbox: boolean;
   export let show_reply: boolean;
   export let show_reply_all: boolean;
+  export let show_forward: boolean;
 
   const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
@@ -67,6 +68,7 @@
     show_thread_checkbox: true,
     show_reply: false,
     show_reply_all: false,
+    show_forward: false,
   };
 
   let manifest: Partial<MailboxProperties> = {};
@@ -779,6 +781,7 @@
           click_action="mailbox"
           show_reply={_this.show_reply}
           show_reply_all={_this.show_reply_all}
+          show_forward={_this.show_forward}
           on:messageClicked={messageClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
@@ -913,6 +916,7 @@
                     click_action="mailbox"
                     show_reply={_this.show_reply}
                     show_reply_all={_this.show_reply_all}
+                    show_forward={_this.show_forward}
                     on:threadClicked={threadClicked}
                     on:messageClicked={messageClicked}
                     on:threadStarred={threadStarred}
