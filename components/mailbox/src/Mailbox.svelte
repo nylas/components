@@ -72,7 +72,7 @@
   };
 
   let mouseEvent: CustomEvent;
-  const showConfirmDelete: {
+  const confirmDeleteModal: {
     isOpen: boolean;
     type: string;
     event: CustomEvent;
@@ -464,22 +464,22 @@
     });
   }
 
-  function confirmDelete(event: CustomEvent, type = "") {
-    showConfirmDelete.isOpen = true;
-    showConfirmDelete.event = event;
-    showConfirmDelete.type = type;
+  function showConfirmDeleteModal(event: CustomEvent, type = "") {
+    confirmDeleteModal.isOpen = true;
+    confirmDeleteModal.event = event;
+    confirmDeleteModal.type = type;
   }
 
-  function handleConfirmDeleteClicked() {
-    if (showConfirmDelete.type === "selected") {
-      onDeleteSelected(showConfirmDelete.event);
+  function confirmDeleteClickHandler() {
+    if (confirmDeleteModal.type === "selected") {
+      onDeleteSelected(confirmDeleteModal.event);
     } else {
-      deleteThread(showConfirmDelete.event);
+      deleteThread(confirmDeleteModal.event);
     }
-    // reset showConfirmDelete
-    showConfirmDelete.isOpen = false;
-    showConfirmDelete.type = "";
-    showConfirmDelete.event = mouseEvent;
+    // reset confirmDeleteModal
+    confirmDeleteModal.isOpen = false;
+    confirmDeleteModal.type = "";
+    confirmDeleteModal.event = mouseEvent;
   }
 
   async function deleteThread(event: CustomEvent) {
@@ -820,7 +820,7 @@
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-          on:threadDeleted={confirmDelete}
+          on:threadDeleted={showConfirmDeleteModal}
           on:downloadClicked={downloadSelectedFile}
         />
       </div>
@@ -869,7 +869,7 @@
                   disabled={!threads.filter((thread) => thread.selected).length}
                   aria-label="Delete selected email(s)"
                   on:click={(e) => {
-                    confirmDelete(e, "selected");
+                    showConfirmDeleteModal(e, "selected");
                   }}><TrashIcon /></button
                 >
               </div>
@@ -958,7 +958,7 @@
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-                    on:threadDeleted={confirmDelete}
+                    on:threadDeleted={showConfirmDeleteModal}
                     on:downloadClicked={downloadSelectedFile}
                     show_thread_actions={thread.selected}
                   />
@@ -999,8 +999,8 @@
   {/if}
 </main>
 
-{#if showConfirmDelete.isOpen}
-  <div class="overlay" on:click={() => (showConfirmDelete.isOpen = false)}>
+{#if confirmDeleteModal.isOpen}
+  <div class="overlay" on:click={() => (confirmDeleteModal.isOpen = false)}>
     <div class="modal">
       {#await threads.filter((thread) => thread.selected).length > 1 then isDeletingMultipleEmails}
         <h3 class="title">
@@ -1016,12 +1016,12 @@
         </p>
       {/await}
       <div class="footer">
-        <button class="danger" on:click={handleConfirmDeleteClicked}>
+        <button class="danger" on:click={confirmDeleteClickHandler}>
           Confirm
         </button>
         <button
           class="cancel"
-          on:click={() => (showConfirmDelete.isOpen = false)}
+          on:click={() => (confirmDeleteModal.isOpen = false)}
         >
           Cancel
         </button>
