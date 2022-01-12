@@ -1,0 +1,10 @@
+{
+  "component": {
+    "theming": {
+      "theme": "theme-1",
+      "show_avatars": true,
+      "thread_id": "test-thread",
+      "show_reply": true
+    }
+  }
+}
