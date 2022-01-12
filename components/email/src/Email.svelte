@@ -569,17 +569,16 @@
     });
   }
 
-  async function handleForwardClick(event: CustomEvent, msgIndex: number) {
-    const currentMessage = activeThread.messages[msgIndex];
-    const subject = `Fwd: ${currentMessage.subject}`;
+  async function handleForwardClick(event: CustomEvent, message: Message) {
+    const subject = `Fwd: ${message.subject}`;
     const value = {
-      reply_to_message_id: currentMessage.id,
+      reply_to_message_id: message.id,
       subject: subject,
-      body: currentMessage.body,
+      body: message.body,
     };
     dispatchEvent("forwardClicked", {
       event,
-      message: activeThread.messages[msgIndex],
+      message,
       thread: activeThread,
       value,
     });
@@ -1691,7 +1690,7 @@
                                 title="Forward"
                                 aria-label="Forward"
                                 on:click|stopPropagation={(e) =>
-                                  handleForwardClick(e, msgIndex)}
+                                  handleForwardClick(e, message)}
                               >
                                 <ForwardIcon aria-hidden="true" />
                               </button>

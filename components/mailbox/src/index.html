@@ -63,38 +63,38 @@
           composer.classList.add("hidden");
         };
 
-        mailbox.addEventListener("replyClicked", (v) => {
+        mailbox.addEventListener("replyClicked", (event) => {
           composer.classList.remove("hidden");
           composer.classList.add("active");
 
-          const c = v.detail;
-          console.log(c.value);
-          composer.value = c.value;
-          composer.from = c.value.from;
-          composer.to = c.value.to;
+          const replyEvent = event.detail;
+          console.log(replyEvent.value);
+          composer.value = replyEvent.value;
+          composer.from = replyEvent.value.from;
+          composer.to = replyEvent.value.to;
 
           composer.open();
         });
 
-        mailbox.addEventListener("forwardClicked", (v) => {
+        mailbox.addEventListener("forwardClicked", (event) => {
           composer.classList.remove("hidden");
           composer.classList.add("active");
 
-          const c = v.detail;
-          console.log(c.value);
-          composer.value = c.value;
+          const forwardEvent = event.detail;
+          console.log(forwardEvent.value);
+          composer.value = forwardEvent.value;
           composer.open();
         });
 
-        mailbox.addEventListener("replyAllClicked", (v) => {
+        mailbox.addEventListener("replyAllClicked", (event) => {
           composer.classList.remove("hidden");
           composer.classList.add("active");
 
-          const c = v.detail;
-          console.log(c.value);
-          composer.value = c.value;
-          composer.from = c.value.from;
-          composer.to = c.value.to;
+          const replyAllEvent = event.detail;
+          console.log(replyAllEvent.value);
+          composer.value = replyAllEvent.value;
+          composer.from = replyAllEvent.value.from;
+          composer.to = replyAllEvent.value.to;
 
           composer.open();
         });
