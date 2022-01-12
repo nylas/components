@@ -1,50 +1,82 @@
-describe("Conversation component (Svelte)", () => {
+describe("Conversation Loading", () => {
   beforeEach(() => {
-    cy.visit("/components/conversation/src/index.html");
-    cy.get("nylas-conversation")
-      .should("exist")
-      .as("conversation")
-      .then(() => {
-        cy.get("header.mobile").as("mobile-header");
-        cy.get("header.tablet").as("tablet-header");
-      });
+    cy.visit("/components/conversation/src/cypress.html");
+    cy.get("nylas-conversation").should("exist").as("conversation");
+
+    cy.get("header.mobile").as("mobile-header");
+    cy.get("header.tablet").as("tablet-header");
   });
 
-  it("Shows Loading Animation for Mobile and Tablet Up", () => {
+  it("Shows Loading Animation for Mobile", () => {
     cy.viewport(320, 500);
+    cy.get("@conversation").invoke("attr", "thread_id", "test-thread");
     cy.get("header.mobile.loading").should("be.visible");
+  });
+
+  it("Shows Loading Animation for Tablet", () => {
     cy.viewport(768, 500);
     cy.get("header.tablet.loading").should("be.visible");
+  });
+});
+
+describe("Conversation Mobile/Tablet", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "conversation/manifest.json",
+      },
+    ).as("getManifest");
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "conversation/account.json",
+    }).as("getAccount");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads/test-thread?view=expanded",
+      {
+        fixture: "conversation/threadsId.json",
+      },
+    ).as("getThreadId");
+    cy.intercept(
+      "PUT",
+      "https://web-components.nylas.com/middleware/neural/conversation",
+    );
+
+    cy.visit("/components/conversation/src/cypress.html");
+    cy.get("nylas-conversation").should("exist").as("conversation");
+
+    cy.get("header.mobile").as("mobile-header");
+    cy.get("header.tablet").as("tablet-header");
+    cy.get("@conversation").invoke("attr", "thread_id", "test-thread");
   });
 
   it("Shows Mobile Header with 'to' Email Address", () => {
     cy.viewport(320, 500);
-    cy.get("@mobile-header").should("exist");
-    cy.get("@tablet-header").should("not.be.visible");
-    cy.get("@mobile-header").children().should("have.length", 2);
-    cy.get("@mobile-header")
-      .find("span")
-      .first()
-      .should("have.text", "to: nylascypresstest@gmail.com");
+    cy.get("header.tablet").should("not.be.visible");
+    cy.get("@mobile-header").contains("to: bill@outlook.com");
+  });
+
+  it("Shows all emails in mobile header when expanded", () => {
+    cy.viewport(320, 500);
     cy.get("@mobile-header").find("button").click();
-    cy.get("@mobile-header").children().should("have.length", 3);
+    cy.get("@mobile-header").contains("frank@yahoo.com");
   });
 
   it("Mobile Header Doesn't Show Duplicate CC Emails", () => {
     cy.viewport(320, 500);
     cy.get("@mobile-header").find("button").click();
-    cy.get("@mobile-header").find("button ~ span").should("have.length", 1);
     cy.get("@mobile-header")
       .find("button ~ span")
-      .should("have.text", "cc: pooja.g@nylas.com");
+      .should("have.text", "cc: frank@yahoo.com");
   });
 
   it("Tablet Header Doesn't Show Duplicate CC Emails", () => {
-    cy.viewport(320, 500);
+    cy.viewport(768, 500);
     cy.get("@tablet-header").find("span").should("have.length", 2);
     cy.get("@tablet-header")
       .find("span:nth-of-type(2)")
-      .should("have.text", "cc: pooja.g@nylas.com");
+      .should("have.text", "cc: frank@yahoo.com");
   });
 
   it("Shows Tablet Header with 'to' Email Address", () => {
@@ -54,7 +86,7 @@ describe("Conversation component (Svelte)", () => {
     cy.get("@tablet-header")
       .find("span")
       .first()
-      .should("have.text", "to: nylascypresstest@gmail.com");
+      .should("have.text", "to: bill@outlook.com");
     cy.get("header.tablet button").should("not.exist");
   });
 

@@ -1,0 +1,21 @@
+{
+  "component": {
+    "theming": {
+      "theme": "theme-1",
+      "show_avatars": true,
+      "thread_id": "",
+      "show_reply": true
+    }
+  },
+  "response": {
+    "account_id": "accountId",
+    "email_address": "testing@nylas.com",
+    "id": "accountId",
+    "linked_at": 1638292755,
+    "name": "Test Cypress",
+    "object": "account",
+    "organization_unit": "label",
+    "provider": "gmail",
+    "sync_state": "running"
+  }
+}
