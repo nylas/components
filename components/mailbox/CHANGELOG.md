@@ -1,6 +1,7 @@
 # Unreleased
 
 ## Breaking
+
 ## New Features
 
 - [Mailbox] Add pagination when `keyword_to_search` is used [#313](https://github.com/nylas/components/pull/313)
@@ -21,6 +22,8 @@
   - to
   - from
   - subject
+- Added ability to forward email [#320](https://github.com/nylas/components/pull/320)
+- Show confirmation pop up, when deleting emails
 
 ## Bug Fixes
 

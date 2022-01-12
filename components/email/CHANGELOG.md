@@ -5,6 +5,7 @@
 ## New Features
 
 - [Email] Show CC participants when reply all button is clicked [#319](https://github.com/nylas/components/pull/319)
+- [Email] Added ability to forward email [#320](https://github.com/nylas/components/pull/320)
 
 ## Bug Fixes
 
