@@ -101,8 +101,6 @@
     hasComponentLoaded = true;
   });
 
-  $: dispatchEvent("manifestLoaded", manifest);
-
   let previousProps = $$props;
   $: {
     if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
