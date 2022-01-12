@@ -913,7 +913,8 @@
               class:checked={thread.selected}
               class:no-messages={thread &&
                 thread?.messages &&
-                thread?.messages?.length <= 0}
+                thread?.messages?.length <= 0 &&
+                !thread?.drafts.length}
             >
               <div class="checkbox-container thread-checkbox">
                 {#if _this.show_thread_checkbox}
@@ -924,7 +925,8 @@
                     checked={thread.selected}
                     disabled={thread &&
                       thread?.messages &&
-                      thread?.messages?.length <= 0}
+                      thread?.messages?.length <= 0 &&
+                      !thread?.drafts.length}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
                 {/if}

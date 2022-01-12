@@ -886,9 +886,9 @@
 
     function getMessageType(currentThread: Thread): string {
     return currentThread[MessageType.DRAFTS].length &&
-      currentThread[MessageType.MESSAGES].length
-      ? [MessageType.DRAFTS]
-      : [MessageType.MESSAGES];
+      !currentThread[MessageType.MESSAGES].length
+      ? MessageType.DRAFTS
+      : MessageType.MESSAGES;
   }
 </script>
 
@@ -1904,7 +1904,9 @@
               </div>
               {#if _this.show_number_of_messages}
                 <span class="thread-message-count">
-                  {activeThread.messages.length ?? ""}
+                  {activeThread.messages.length
+                    ? activeThread.messages.length
+                    : ""}
                 </span>
               {/if}
               <div class="subject-snippet-attachment">

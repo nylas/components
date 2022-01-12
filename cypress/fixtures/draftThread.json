@@ -1,0 +1,88 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  },
+  "response": {
+    "account_id": "cou6r5tjgubx9rswikzvz9afb",
+    "bcc": [],
+    "drafts": [
+      {
+        "account_id": "cou6r5tjgubx9rswikzvz9afb",
+        "bcc": [],
+        "cc": [],
+        "date": 1642002063,
+        "files": [],
+        "body": "Testing with updated commons! --Sent with Nylas",
+        "from": [
+          {
+            "email": "nylascypresstest@gmail.com",
+            "name": "Test User"
+          }
+        ],
+        "id": "b1bkr18qmjzw6fxaqth2n5liq",
+        "labels": [
+          {
+            "display_name": "DRAFT",
+            "id": "qu2u9kjbafk1xgfd1qr3auv4",
+            "name": "drafts"
+          }
+        ],
+        "object": "draft",
+        "reply_to": [],
+        "reply_to_message_id": null,
+        "snippet": "Testing with updated commons! --Sent with Nylas",
+        "starred": false,
+        "subject": "This is a Super great test email.",
+        "thread_id": "2fn0nfkt9a9wi24t91104t83c",
+        "to": [
+          {
+            "email": "nylascypresstest2@gmail.com",
+            "name": ""
+          }
+        ],
+        "unread": false,
+        "version": 0
+      }
+    ],
+    "body": "Testing with updated commons! --Sent with Nylas",
+    "cc": [],
+    "date": 1641946338,
+    "events": [],
+    "files": [],
+    "from": [
+      {
+        "email": "nylascypresstest@gmail.com",
+        "name": "Test User"
+      }
+    ],
+    "id": "1cfdi7vazrpcbe1nfnjeobcdt",
+    "labels": [
+      {
+        "display_name": "DRAFT",
+        "id": "qu2u9kjbafk1xgfd1qr3auv4",
+        "name": "drafts"
+      }
+    ],
+    "object": "message",
+    "snippet": "Testing with updated commons! --Sent with Nylas",
+    "starred": false,
+    "subject": "This is a Super great test email.",
+    "thread_id": "2fn0nfkt9a9wi24t91104t83c",
+    "to": [
+      {
+        "email": "nylascypresstest2@gmail.com",
+        "name": ""
+      }
+    ],
+    "unread": true
+  }
+}
