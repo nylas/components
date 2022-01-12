@@ -22,7 +22,7 @@
     downloadAttachedFile,
     getEventDispatcher,
   } from "@commons/methods/component";
-  import { isFromMe, buildParticipants } from "./methods/participants";
+  import { buildParticipants, includesMyEmail } from "./methods/participants";
   import DropdownSymbol from "./assets/chevron-down.svg";
   import TrashIcon from "./assets/trash-alt.svg";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
@@ -531,7 +531,11 @@
       : `Re: ${message.subject}`;
 
     const from = [me];
-    const {to, cc} = buildParticipants({ myEmail: me.email, message: message, type });
+    const { to, cc } = buildParticipants({
+      myEmail: me.email,
+      message: message,
+      type,
+    });
 
     let event_identifier;
 
@@ -566,7 +570,7 @@
   function canReplyAll(message: Message): boolean {
     return (
       message?.to?.length + message?.cc?.length > 1 &&
-      !isFromMe(_this.you.email_address, message)
+      !includesMyEmail(_this.you.email_address, message, "from")
     );
   }
 

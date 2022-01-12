@@ -1,15 +1,13 @@
 import type { Message, Participant } from "@commons/types/Nylas";
 
-export function isFromMe(myEmail: string, message: Message): boolean {
-  if (!myEmail) {
-    return false;
-  }
-
-  return message.from
-    .map((f) => {
-      return f.email.toLowerCase();
-    })
-    .includes(myEmail.toLowerCase());
+export function includesMyEmail(
+  myEmail: string,
+  message: Message,
+  field: "to" | "from" | "cc" | "bcc",
+): boolean {
+  return message[field].some(
+    (e) => e.email.toLowerCase() === myEmail.toLowerCase(),
+  );
 }
 
 export function participantsWithoutMe(
@@ -22,11 +20,7 @@ export function participantsWithoutMe(
     ...message.cc,
     ...message.bcc,
   ];
-  return allParticipants.filter((e) => e.email != myEmail);
-}
-
-export function wasCCed(myEmail: string, message: Message): boolean {
-  return message.cc.some((e) => e.email === myEmail);
+  return allParticipants.filter((e) => e.email !== myEmail);
 }
 
 type BuildParticipant = {
@@ -45,14 +39,14 @@ export function buildParticipants({
 
   switch (type) {
     case "reply":
-      if (isFromMe(myEmail, message)) {
+      if (includesMyEmail(myEmail, message, "from")) {
         to = message.to;
       } else {
         to = message.from;
       }
       break;
     case "reply_all":
-      if (wasCCed(myEmail, message)) {
+      if (includesMyEmail(myEmail, message, "cc")) {
         to = participantsWithoutMe(myEmail, message);
       } else {
         to = message.from;
