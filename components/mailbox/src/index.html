@@ -8,27 +8,25 @@
     <script src="../index.js"></script>
     <script src="../../composer/index.js"></script>
     <style>
-      .composer {
-        z-index: 999;
-      }
-
-      .composer.hidden {
-        display: none;
-        height: 0;
-      }
-
-      .composer.active {
+      nylas-composer:not[hidden] {
         display: block;
-        position: fixed;
+        position: sticky;
         bottom: 0;
         left: 0;
-        height: unset;
+        height: initial;
         width: 100%;
         transition: height 0.125s cubic-bezier(0.075, 0.82, 0.165, 1);
       }
     </style>
     <script type="module">
       import { thread1, thread2 } from "./test-data.js";
+
+      function toggleComposer(event, component) {
+        component.removeAttribute("hidden");
+        component.value = event.detail.value;
+        component.open();
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const mailbox = document.querySelector("nylas-mailbox");
 
@@ -63,41 +61,10 @@
           composer.classList.add("hidden");
         };
 
-        mailbox.addEventListener("replyClicked", (event) => {
-          composer.classList.remove("hidden");
-          composer.classList.add("active");
-
-          const replyEvent = event.detail;
-          console.log(replyEvent.value);
-          composer.value = replyEvent.value;
-          composer.from = replyEvent.value.from;
-          composer.to = replyEvent.value.to;
-
-          composer.open();
-        });
-
-        mailbox.addEventListener("forwardClicked", (event) => {
-          composer.classList.remove("hidden");
-          composer.classList.add("active");
-
-          const forwardEvent = event.detail;
-          console.log(forwardEvent.value);
-          composer.value = forwardEvent.value;
-          composer.open();
-        });
-
-        mailbox.addEventListener("replyAllClicked", (event) => {
-          composer.classList.remove("hidden");
-          composer.classList.add("active");
-
-          const replyAllEvent = event.detail;
-          console.log(replyAllEvent.value);
-          composer.value = replyAllEvent.value;
-          composer.from = replyAllEvent.value.from;
-          composer.to = replyAllEvent.value.to;
-
-          composer.open();
-        });
+        const events = ["replyClicked", "replyAllClicked", "forwardClicked", "draftThreadEvent"];
+        events.forEach((event) =>
+          mailbox.addEventListener(event, (e) => toggleComposer(e, composer)),
+        );
       });
     </script>
   </head>
@@ -110,9 +77,9 @@
     ></nylas-mailbox>
     <nylas-composer
       id="demo-composer"
-      class="composer"
       show_header="true"
       show_subject="true"
+      hidden=""
     >
     </nylas-composer>
   </body>

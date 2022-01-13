@@ -46,7 +46,7 @@
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/MessageBody.svelte";
   import "@commons/components/Tooltip.svelte";
-  import { AccountOrganizationUnit } from "@commons/enums/Nylas";
+  import { AccountOrganizationUnit, MessageType } from "@commons/enums/Nylas";
   import { LabelStore } from "@commons/store/labels";
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
@@ -390,7 +390,9 @@
   }
 
   async function handleThread(event: MouseEvent | KeyboardEvent) {
-    if (activeThread.messages.length <= 0) {
+    const messageType = getMessageType(activeThread);
+
+    if (activeThread[messageType].length <= 0) {
       return;
     }
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
@@ -405,27 +407,42 @@
       }
       //#endregion read/unread
 
-      const lastMsgIndex = activeThread.messages.length - 1;
-      activeThread.messages[lastMsgIndex].expanded =
-        !activeThread.messages[lastMsgIndex].expanded;
+      if (!emailManuallyPassed && messageType !== MessageType.DRAFTS) {
+        const { messages } = activeThread;
+        const lastMsgIndex = messages.length - 1;
+        messages[lastMsgIndex].expanded = !messages[lastMsgIndex].expanded;
 
-      if (!emailManuallyPassed) {
         // fetch last message
-        if (!activeThread.messages[lastMsgIndex].body) {
-          activeThread.messages[lastMsgIndex].body =
-            await fetchIndividualMessage(
-              lastMsgIndex,
-              activeThread.messages[lastMsgIndex].id,
-            );
+        if (!messages[lastMsgIndex].body) {
+          messages[lastMsgIndex].body = await fetchIndividualMessage(
+            lastMsgIndex,
+            messages[lastMsgIndex].id,
+          );
         }
       }
 
-      activeThread.expanded = !activeThread.expanded;
+      //#region open thread + messages
+      if (messageType !== MessageType.DRAFTS) {
+        activeThread.expanded = !activeThread.expanded;
+        // Upon expansion / lastMessage existing, scroll to it
+        if (activeThread.expanded && _this.click_action === "default") {
+          // Timeout here is to ensure the element is available before trying
+          // to scroll it into view
+          setTimeout(() => {
+            messageRefs[lastMsgIndex].scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }, 50);
+        }
+      }
+      //#endregion open thread + messages
     }
 
     dispatchEvent("threadClicked", {
       event,
       thread: activeThread,
+      messageType,
     });
     currentTooltipId = "";
   }
@@ -836,7 +853,7 @@
   function isThreadADraftEmail(currentThread: Thread): boolean {
     return (
       currentThread &&
-      currentThread.labels?.find((label) => label.name === "drafts")
+      currentThread.labels?.some((label) => label.name === MessageType.DRAFTS)
     );
   }
 
@@ -866,6 +883,13 @@
       });
       scrolledToLatest = true;
     }
+  }
+
+  function getMessageType(currentThread: Thread): string {
+    return currentThread[MessageType.DRAFTS].length &&
+      !currentThread[MessageType.MESSAGES].length
+      ? MessageType.DRAFTS
+      : MessageType.MESSAGES;
   }
 </script>
 
@@ -1810,34 +1834,10 @@
             class:show_star={_this.show_star}
             class:unread={activeThread.unread}
             class:disable-click={activeThread &&
-              activeThread.messages.length <= 0}
+              activeThread.messages.length <= 0 &&
+              !activeThread.drafts.length}
           >
-            {#if activeThread && activeThread.messages.length <= 0}
-              {#await isThreadADraftEmail(activeThread) then isDraft}
-                <div
-                  class={`no-message-avatar-container ${
-                    _this.show_star ? "show-star" : ""
-                  }`}
-                >
-                  <div class="default-avatar" class:draft={isDraft}>
-                    {#if isDraft}
-                      <DraftIcon />
-                    {:else}
-                      <NoMessagesIcon />
-                    {/if}
-                  </div>
-                </div>
-                <div
-                  class="no-messages-warning-container"
-                  class:draft={isDraft}
-                >
-                  {isDraft
-                    ? `This is a draft email.`
-                    : `Sorry, looks like this thread is currently unavailable. It may
-                  have been deleted in your provider inbox.`}
-                </div>
-              {/await}
-            {:else}
+            {#await getMessageType(activeThread) then isDraft}
               <div class="from{_this.show_star ? '-star' : ''}">
                 {#if _this.show_star}
                   <div class="starred">
@@ -1854,11 +1854,15 @@
                 {/if}
                 <div class="from-message-count">
                   {#if _this.show_contact_avatar}
-                    <div class="default-avatar">
-                      <nylas-contact-image
-                        {contact_query}
-                        contact={activeThreadContact}
-                      />
+                    <div class="default-avatar" class:draft={isDraft}>
+                      {#if isDraft}
+                        <DraftIcon />
+                      {:else}
+                        <nylas-contact-image
+                          {contact_query}
+                          contact={activeThreadContact}
+                        />
+                      {/if}
                     </div>
                   {/if}
                   <div class="from-participants">
@@ -1899,9 +1903,11 @@
                   </div>
                 </div>
               </div>
-              {#if _this.show_number_of_messages && activeThread?.messages?.length > 0}
+              {#if _this.show_number_of_messages}
                 <span class="thread-message-count">
-                  {activeThread.messages.length}
+                  {activeThread.messages.length
+                    ? activeThread.messages.length
+                    : ""}
                 </span>
               {/if}
               <div class="subject-snippet-attachment">
@@ -1910,7 +1916,11 @@
                       >{thread?.subject}</span
                     >{/if}
                   <span class="snippet"
-                    >{thread.snippet.replace(/\u200C /g, "")}</span
+                    >{(isDraft && activeThread?.drafts.length) ||
+                    activeThread?.messages.length
+                      ? thread.snippet.replace(/\u200C /g, "")
+                      : `Sorry, looks like this thread is currently unavailable. It may
+                    have been deleted in your provider inbox.`}</span
                   >
                 </div>
                 {#if Object.keys(attachedFiles).length > 0}
@@ -1970,7 +1980,7 @@
                   </span>
                 {/if}
               </div>
-            {/if}
+            {/await}
           </div>
         {/if}
       {/if}

@@ -53,8 +53,47 @@ const EMPTY_THREAD = {
   version: 63,
 };
 
+const DRAFT_MESSAGE = {
+  account_id: "cou6r5tjgubx9rswikzvz9afb",
+  bcc: [],
+  cc: [],
+  date: 1642002063,
+  files: [],
+  body: "Testing with updated commons! --Sent with Nylas",
+  from: [
+    {
+      email: "nylascypresstest@gmail.com",
+      name: "Test User",
+    },
+  ],
+  id: "b1bkr18qmjzw6fxaqth2n5liq",
+  labels: [
+    {
+      display_name: "DRAFT",
+      id: "qu2u9kjbafk1xgfd1qr3auv4",
+      name: "drafts",
+    },
+  ],
+  object: "draft",
+  reply_to: [],
+  reply_to_message_id: null,
+  snippet: "Testing with updated commons! --Sent with Nylas",
+  starred: false,
+  subject: "This is a Super great test email.",
+  thread_id: "2fn0nfkt9a9wi24t91104t83c",
+  to: [
+    {
+      email: "nylascypresstest2@gmail.com",
+      name: "",
+    },
+  ],
+  unread: false,
+  version: 0,
+};
+
 const DRAFT_THREAD = {
   ...EMPTY_THREAD,
+  drafts: [DRAFT_MESSAGE],
   labels: [
     ...EMPTY_THREAD.labels,
     {
@@ -130,8 +169,7 @@ describe("MailBox  component", () => {
             .then((element) => {
               const email = element[0];
               cy.get(email)
-                .find(".no-messages-warning-container")
-                .should("exist")
+                .find(".snippet")
                 .and(($div) => {
                   expect($div).to.contain(
                     "Sorry, looks like this thread is currently unavailable",
@@ -152,11 +190,77 @@ describe("MailBox  component", () => {
             .then((element) => {
               const email = element[0];
               cy.get(email)
-                .find(".no-messages-warning-container")
+                .find(".snippet")
                 .should("exist")
                 .and(($div) => {
-                  expect($div).to.contain("This is a draft email");
+                  expect($div).to.contain(
+                    "Testing with updated commons! --Sent with Nylas",
+                  );
                 });
+            });
+        });
+    });
+
+    it("Clicking on a draft message opens composer", () => {
+      cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
+        fixture: "draftThread.json",
+      });
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = [DRAFT_THREAD];
+          cy.get("li.unread")
+            .click()
+            .then(() => {
+              cy.get("nylas-composer#demo-composer").as("composer");
+              cy.get("@composer")
+                .find(".contact-item__name")
+                .invoke("text")
+                .should("eq", "nylascypresstest2@gmail.com");
+              cy.get("@composer")
+                .find(".html-editor div[contenteditable=true]")
+                .invoke("text")
+                .should(
+                  "eq",
+                  "Testing with updated commons! --Sent with Nylas",
+                );
+              cy.get("@composer")
+                .find("input[name=subject]")
+                .invoke("val")
+                .should("eq", "This is a Super great test email.");
+            });
+        });
+    });
+
+    it("ENTER keydown on a draft message opens composer", () => {
+      cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
+        fixture: "draftThread.json",
+      });
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = [DRAFT_THREAD];
+          cy.get("li.unread")
+            .trigger("keypress", { code: "Enter" })
+            .then(() => {
+              cy.get("nylas-composer#demo-composer").as("composer");
+              cy.get("@composer")
+                .find(".contact-item__name")
+                .invoke("text")
+                .should("eq", "nylascypresstest2@gmail.com");
+              cy.get("@composer")
+                .find(".html-editor div[contenteditable=true]")
+                .invoke("text")
+                .should(
+                  "eq",
+                  "Testing with updated commons! --Sent with Nylas",
+                );
+              cy.get("@composer")
+                .find("input[name=subject]")
+                .invoke("val")
+                .should("eq", "This is a Super great test email.");
             });
         });
     });

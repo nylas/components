@@ -6,6 +6,7 @@
   import {
     AccountOrganizationUnit,
     MailboxActions,
+    MessageType,
   } from "@commons/enums/Nylas";
   import {
     buildInternalProps,
@@ -296,17 +297,22 @@
   }
 
   async function threadClicked(event: CustomEvent) {
-    const thread = event.detail.thread;
+    const { thread, messageType } = event.detail;
+    const messages = thread[messageType];
+    let message = await fetchIndividualMessage(messages[messages.length - 1]);
 
+    if (messageType === MessageType.DRAFTS) {
+      await dispatchDraft(event);
+      return;
+    }
+    dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {
         thread.unread = false;
         await updateThreadStatus(thread);
       }
-      let message = await fetchIndividualMessage(
-        thread.messages[thread.messages.length - 1],
-      );
+
       threads = MailboxStore.hydrateMessageInThread(
         message,
         query,
@@ -524,6 +530,21 @@
     loading = false;
   }
   //#endregion pagination
+
+  function dispatchDraft(event) {
+    const { thread } = event.detail;
+    const message = thread.drafts[0];
+    const value = {
+      to: message.to,
+      cc: message.cc,
+      bcc: message.bcc,
+      from: message.from,
+      subject: message.subject,
+      body: message.body,
+    };
+
+    dispatchEvent("draftThreadEvent", { event, message, thread, value });
+  }
 </script>
 
 <style lang="scss">
@@ -892,7 +913,8 @@
               class:checked={thread.selected}
               class:no-messages={thread &&
                 thread?.messages &&
-                thread?.messages?.length <= 0}
+                thread?.messages?.length <= 0 &&
+                !thread?.drafts.length}
             >
               <div class="checkbox-container thread-checkbox">
                 {#if _this.show_thread_checkbox}
@@ -903,7 +925,8 @@
                     checked={thread.selected}
                     disabled={thread &&
                       thread?.messages &&
-                      thread?.messages?.length <= 0}
+                      thread?.messages?.length <= 0 &&
+                      !thread?.drafts.length}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
                 {/if}
