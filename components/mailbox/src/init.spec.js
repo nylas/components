@@ -480,7 +480,7 @@ describe("MailBox  component", () => {
     });
   });
 
-  describe.only("Delete action", () => {
+  describe("Delete action", () => {
     it("Should show delete confirmation pop up", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")
