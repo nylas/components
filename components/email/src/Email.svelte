@@ -1837,7 +1837,7 @@
               activeThread.messages.length <= 0 &&
               !activeThread.drafts.length}
           >
-            {#await getMessageType(activeThread) then isDraft}
+            {#await isThreadADraftEmail(activeThread) then isDraft}
               <div class="from{_this.show_star ? '-star' : ''}">
                 {#if _this.show_star}
                   <div class="starred">
