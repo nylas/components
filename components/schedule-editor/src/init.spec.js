@@ -20,12 +20,12 @@ describe("schedule-editor component", () => {
   describe("Allows for multiple meetings", () => {
     it("Allows the user to add consecutive meetings", () => {
       cy.get(".basic-details button.add-event").click();
-      cy.get(".basic-details fieldset").should("have.length", 2);
-      cy.get(".basic-details button.add-event").click();
       cy.get(".basic-details fieldset").should("have.length", 3);
+      cy.get(".basic-details button.add-event").click();
+      cy.get(".basic-details fieldset").should("have.length", 4);
       cy.get(".basic-details button.remove-event").eq(0).click();
       cy.get(".basic-details button.remove-event").eq(0).click();
-      cy.get(".basic-details fieldset").should("have.length", 1);
+      cy.get(".basic-details fieldset").should("have.length", 2);
     });
   });
 });
