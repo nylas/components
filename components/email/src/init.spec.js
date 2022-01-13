@@ -446,7 +446,9 @@ describe("Email: Displays threads and messages", () => {
       .find(".snippet")
       .should("exist")
       .and(($div) => {
-        expect($div).to.contain("This is a draft email");
+        expect($div).to.contain(
+          "Sorry, looks like this thread is currently unavailable",
+        );
       });
   });
 });
