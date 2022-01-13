@@ -421,22 +421,9 @@
         }
       }
 
-      //#region open thread + messages
       if (messageType !== MessageType.DRAFTS) {
         activeThread.expanded = !activeThread.expanded;
-        // Upon expansion / lastMessage existing, scroll to it
-        if (activeThread.expanded && _this.click_action === "default") {
-          // Timeout here is to ensure the element is available before trying
-          // to scroll it into view
-          setTimeout(() => {
-            messageRefs[lastMsgIndex].scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-          }, 50);
-        }
       }
-      //#endregion open thread + messages
     }
 
     dispatchEvent("threadClicked", {
