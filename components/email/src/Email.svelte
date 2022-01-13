@@ -883,8 +883,9 @@
       });
       scrolledToLatest = true;
     }
+  }
 
-    function getMessageType(currentThread: Thread): string {
+  function getMessageType(currentThread: Thread): string {
     return currentThread[MessageType.DRAFTS].length &&
       !currentThread[MessageType.MESSAGES].length
       ? MessageType.DRAFTS
