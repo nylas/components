@@ -584,30 +584,6 @@ describe("MailBox  component", () => {
     });
   });
 
-  describe("Delete action", () => {
-    // TODO: write when Folders are implemented
-    xit("Should delete selected email", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.actions_bar = ["delete"];
-          cy.get("nylas-email").should("have.length", threads.length);
-          cy.get(component)
-            .find("div.checkbox-container")
-            .first()
-            .find("input")
-            .check();
-          cy.get("div[role='toolbar']")
-            .find("div.delete")
-            .find("button")
-            .click();
-          cy.get("nylas-email").should("have.length", threads.length - 1);
-        });
-    });
-  });
-
   describe("Bulk actions", () => {
     it("Should mark all unread then read", () => {
       cy.get("nylas-mailbox")
@@ -774,6 +750,43 @@ describe("MailBox  component", () => {
             .click();
           cy.get(component).find("nylas-email").should("not.exist");
           cy.get(component).find("mailbox-empty").should("exist");
+        });
+    });
+  });
+
+  describe("Delete action", () => {
+    it("Should show delete confirmation pop up", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          component.all_threads = threads;
+          component.actions_bar = ["delete"];
+          cy.get("nylas-email").should("have.length", threads.length);
+          cy.get(component)
+            .find("div.checkbox-container")
+            .first()
+            .find("input")
+            .check();
+          cy.get("div[role='toolbar']")
+            .find("div.delete")
+            .find("button")
+            .click();
+          // Clicking delete should open modal
+          cy.get(".modal").should("exist");
+          // Clicking cancel should close the modal
+          cy.get(".modal").find("button.cancel").click();
+          cy.get(".modal").should("not.exist");
+
+          cy.get("div[role='toolbar']")
+            .find("div.delete")
+            .find("button")
+            .click();
+          cy.get(".modal").should("exist");
+          // Clicking confirm should delete email and close modal
+          cy.get(".modal").find("button.danger").click();
+          cy.get(".modal").should("not.exist");
+          cy.get("nylas-email").should("have.length", threads.length - 1);
         });
     });
   });

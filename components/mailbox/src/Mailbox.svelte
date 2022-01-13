@@ -72,6 +72,17 @@
     show_forward: false,
   };
 
+  let mouseEvent: CustomEvent;
+  const confirmDeleteModal: {
+    isOpen: boolean;
+    type: string;
+    event: CustomEvent;
+  } = {
+    isOpen: false,
+    type: "",
+    event: mouseEvent,
+  };
+
   let manifest: Partial<MailboxProperties> = {};
   let _this = <MailboxProperties>buildInternalProps({}, {}, defaultValueMap);
 
@@ -459,6 +470,24 @@
     });
   }
 
+  function showConfirmDeleteModal(event: CustomEvent, type = "") {
+    confirmDeleteModal.isOpen = true;
+    confirmDeleteModal.event = event;
+    confirmDeleteModal.type = type;
+  }
+
+  function confirmDeleteClickHandler() {
+    if (confirmDeleteModal.type === "selected") {
+      onDeleteSelected(confirmDeleteModal.event);
+    } else {
+      deleteThread(confirmDeleteModal.event);
+    }
+    // reset confirmDeleteModal
+    confirmDeleteModal.isOpen = false;
+    confirmDeleteModal.type = "";
+    confirmDeleteModal.event = mouseEvent;
+  }
+
   async function deleteThread(event: CustomEvent) {
     const thread = event.detail.thread;
 
@@ -490,7 +519,7 @@
     downloadAttachedFile(downloadedFileData, file);
   }
 
-  async function onDeleteSelected(event: MouseEvent) {
+  async function onDeleteSelected(event: CustomEvent) {
     if (Array.isArray(_this.all_threads)) {
       const selectedThreads = threads.filter((thread) => thread.selected);
       threads = threads.filter((thread) => !selectedThreads.includes(thread));
@@ -553,9 +582,12 @@
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
   @import "../../../commons/src/components/checkbox.scss";
+  @import "./styles/modal.scss";
 
   $spacing-s: 0.5rem;
   $spacing-m: 1rem;
+
+  @include modal-styles;
   main {
     height: 100%;
     width: 100%;
@@ -809,7 +841,7 @@
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-          on:threadDeleted={deleteThread}
+          on:threadDeleted={showConfirmDeleteModal}
           on:downloadClicked={downloadSelectedFile}
         />
       </div>
@@ -857,7 +889,9 @@
                   title="Delete selected email(s)"
                   disabled={!threads.filter((thread) => thread.selected).length}
                   aria-label="Delete selected email(s)"
-                  on:click={(e) => onDeleteSelected(e)}><TrashIcon /></button
+                  on:click={(e) => {
+                    showConfirmDeleteModal(e, "selected");
+                  }}><TrashIcon /></button
                 >
               </div>
             {/if}
@@ -947,7 +981,7 @@
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-                    on:threadDeleted={deleteThread}
+                    on:threadDeleted={showConfirmDeleteModal}
                     on:downloadClicked={downloadSelectedFile}
                     show_thread_actions={thread.selected}
                   />
@@ -987,3 +1021,34 @@
     </div>
   {/if}
 </main>
+
+{#if confirmDeleteModal.isOpen}
+  <div class="overlay" on:click={() => (confirmDeleteModal.isOpen = false)}>
+    <div class="modal">
+      {#await threads.filter((thread) => thread.selected).length > 1 then isDeletingMultipleEmails}
+        <h3 class="title">
+          {`Are you sure you want to delete the selected email${
+            isDeletingMultipleEmails ? "s" : ""
+          }?`}
+        </h3>
+        <p class="description">
+          {`Once deleted, ${
+            isDeletingMultipleEmails ? "these emails" : "this email"
+          } can only be recovered from your native email
+        client.`}
+        </p>
+      {/await}
+      <div class="footer">
+        <button class="danger" on:click={confirmDeleteClickHandler}>
+          Confirm
+        </button>
+        <button
+          class="cancel"
+          on:click={() => (confirmDeleteModal.isOpen = false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
