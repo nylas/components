@@ -103,7 +103,6 @@ export interface SelectableSlot extends TimeSlot {
   selectionStatus: SelectionStatus;
   availability: AvailabilityStatus;
   selectionPending?: boolean;
-  hovering?: boolean;
   timezone?: string;
 }
 

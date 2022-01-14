@@ -250,8 +250,8 @@
       event,
     });
   }
-  function unhoverOption(event: ConsecutiveEvent[]) {
-    dispatchEvent("eventOptionUnhovered", {
+  function blurOption() {
+    dispatchEvent("eventOptionHovered", {
       event: null,
     });
   }
@@ -418,7 +418,7 @@
           <li
             aria-role="button"
             on:mouseenter={() => hoverOption(option)}
-            on:mouseleave={() => unhoverOption(option)}
+            on:mouseleave={() => blurOption()}
             on:click={() => selectOption(option)}
           >
             <span class="time"

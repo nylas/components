@@ -685,7 +685,6 @@
             <div class="availability-container">
               <nylas-availability
                 allow_booking={true}
-                max_bookable_slots={Infinity}
                 show_as_week={_this.show_as_week || _this.show_weekends}
                 show_weekends={_this.show_weekends}
                 start_hour={_this.start_hour}
