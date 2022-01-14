@@ -33,7 +33,6 @@
 
         // availability.participants = ["nylascypresstest@gmail.com"];
         availability.events = [EVENTS[0]];
-        scheduler.events = [EVENTS[0]];
         availability.open_hours = [
           {
             startWeekday: 0,
@@ -121,10 +120,8 @@
           elem.addEventListener("input", function (event) {
             if (event.target.value === "consecutive") {
               availability.events = EVENTS;
-              scheduler.events = EVENTS;
             } else {
               availability.events = [EVENTS[0]];
-              scheduler.events = [EVENTS[0]];
             }
           });
         });
