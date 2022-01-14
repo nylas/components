@@ -1,0 +1,209 @@
+{
+  "component": {
+    "theming": {
+      "prevent_zoom": false,
+      "show_as_busy": false,
+      "color_by": "event",
+      "header_type": "full",
+      "calendar_ids": "test-calendar-id",
+      "hide_current_time": false,
+      "condensed_view": false,
+      "theme": "theme-1",
+      "hide_ticks": false,
+      "allow_date_change": false,
+      "auto_time_box": true
+    }
+  },
+  "response": [
+    {
+      "account_id": "test-account-id",
+      "busy": true,
+      "calendar_id": "test-calendar-id",
+      "conferencing": {
+        "details": {
+          "url": "https://fake.zoom.us/j/fake-meeting-id"
+        },
+        "provider": "Zoom Meeting"
+      },
+      "description": "<a href=\"https://fake.zoom.us/j/fake-meeting-id</a>",
+      "ical_uid": "ical-uid@google.com",
+      "id": "zoom-meeting-id",
+      "location": "https://fake.zoom.us/j/fake-meeting-id",
+      "master_event_id": "master-event-id",
+      "message_id": null,
+      "object": "event",
+      "original_start_time": 1642086000,
+      "owner": " <zoom-owner@nylas.com>",
+      "participants": [
+        {
+          "comment": null,
+          "email": "participant1@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "no"
+        },
+        {
+          "comment": null,
+          "email": "participant2@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "yes"
+        }
+      ],
+      "read_only": false,
+      "reminders": null,
+      "status": "confirmed",
+      "title": "Sample Meeting 1",
+      "visibility": null,
+      "when": {
+        "end_time": 1642086900,
+        "object": "timespan",
+        "start_time": 1642086000
+      }
+    },
+    {
+      "account_id": "test-account-id",
+      "busy": true,
+      "calendar_id": "test-calendar-id",
+      "conferencing": {
+        "details": {
+          "meeting_code": "555 555 555",
+          "phone": ["+15555555555"],
+          "url": "https://fake.zoom.us/j/fake-meeting-id-2"
+        },
+        "provider": "Zoom Meeting"
+      },
+      "description": "This is a fake zoom meeting 2",
+      "ical_uid": "ical-uid@google.com",
+      "id": "zoom-meeting-id-2",
+      "location": "https://fake.zoom.us/j/fake-meeting-id-2",
+      "master_event_id": "master-event-id-2",
+      "message_id": null,
+      "object": "event",
+      "original_start_time": 1642095300,
+      "owner": "owner2@nylas.com",
+      "participants": [
+        {
+          "comment": null,
+          "email": "participant@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "noreply"
+        }
+      ],
+      "read_only": false,
+      "reminders": null,
+      "status": "confirmed",
+      "title": "Sample Meeting 2",
+      "visibility": null,
+      "when": {
+        "end_time": 1642096800,
+        "object": "timespan",
+        "start_time": 1642095300
+      }
+    },
+    {
+      "account_id": "test-account-id",
+      "busy": true,
+      "calendar_id": "test-calendar-id",
+      "conferencing": {
+        "details": {
+          "meeting_code": "86787249156",
+          "password": "555555",
+          "phone": ["+15555555555"],
+          "url": "https://fake.zoom.us/j/fake-meeting-id-3"
+        },
+        "provider": "Zoom Meeting"
+      },
+      "description": null,
+      "ical_uid": "ical-uid@google.com",
+      "id": "zoom-meeting-id-3",
+      "location": null,
+      "master_event_id": "master-event-id-3",
+      "object": "event",
+      "owner": " <owner@nylas.com>",
+      "participants": [
+        {
+          "comment": null,
+          "email": "participant1@nylas.com",
+          "name": "Participant 1",
+          "phone_number": null,
+          "status": "noreply"
+        },
+        {
+          "comment": null,
+          "email": "participant2@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "yes"
+        }
+      ],
+      "read_only": false,
+      "reminders": null,
+      "status": "confirmed",
+      "title": "Sample Meeting 3",
+      "visibility": null,
+      "when": {
+        "end_time": 1642109400,
+        "object": "timespan",
+        "start_time": 1642107600
+      }
+    },
+    {
+      "account_id": "test-account-id",
+      "busy": true,
+      "calendar_id": "test-calendar-id",
+      "conferencing": {
+        "details": {
+          "meeting_code": "83856930741",
+          "password": "555555",
+          "phone": ["+15555555555"],
+          "url": "https://fake.zoom.us/j/fake-meeting-id-4"
+        },
+        "provider": "Zoom Meeting"
+      },
+      "description": "This is a fake zoom meeting 4",
+      "ical_uid": "ical-uid@google.com",
+      "id": "zoom-meeting-id-4",
+      "location": null,
+      "master_event_id": "master-event-id-4",
+      "message_id": null,
+      "object": "event",
+      "original_start_time": 1642100400,
+      "owner": " <owner@nylas.com>",
+      "participants": [
+        {
+          "comment": null,
+          "email": "participant1@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "yes"
+        },
+        {
+          "comment": null,
+          "email": "participant2@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "noreply"
+        },
+        {
+          "comment": null,
+          "email": "participant3@nylas.com",
+          "name": null,
+          "phone_number": null,
+          "status": "yes"
+        }
+      ],
+      "read_only": false,
+      "reminders": null,
+      "status": "confirmed",
+      "title": "Sample Meeting 4",
+      "visibility": null,
+      "when": {
+        "end_time": 1642111200,
+        "object": "timespan",
+        "start_time": 1642109400
+      }
+    }
+  ]
+}

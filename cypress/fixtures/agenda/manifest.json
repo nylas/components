@@ -1,0 +1,17 @@
+{
+  "component": {
+    "theming": {
+      "prevent_zoom": false,
+      "show_as_busy": false,
+      "color_by": "event",
+      "header_type": "full",
+      "calendar_ids": "test-calendar-id",
+      "hide_current_time": false,
+      "condensed_view": false,
+      "theme": "theme-1",
+      "hide_ticks": false,
+      "allow_date_change": true,
+      "auto_time_box": true
+    }
+  }
+}
