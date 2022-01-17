@@ -24,6 +24,7 @@
   - subject
 - Added ability to forward email [#320](https://github.com/nylas/components/pull/320)
 - Show confirmation pop up, when deleting emails
+- Pass z-index css to confirmation pop up's modal & overalay using css variables `z-index-modal` & `z-index-overlay` respectively
 
 ## Bug Fixes
 
