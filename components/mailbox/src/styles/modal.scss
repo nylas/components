@@ -7,7 +7,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1001;
+    z-index: var(--z-index-overlay, 1001);
     overflow-x: hidden;
     overflow-y: auto;
     display: grid;
@@ -18,7 +18,7 @@
       width: calc(100% - 5rem);
       margin: 1rem;
 
-      z-index: 1002;
+      z-index: var(--z-index-modal, 1002);
 
       background-color: white;
       padding: 1.5rem;
@@ -50,7 +50,7 @@
       }
 
       .footer {
-        width: inherit;
+        width: 100%;
         display: flex;
         justify-content: flex-start;
         align-items: center;
@@ -82,6 +82,10 @@
     .overlay {
       .modal {
         width: 365px;
+
+        .footer {
+          width: inherit;
+        }
       }
     }
   }
