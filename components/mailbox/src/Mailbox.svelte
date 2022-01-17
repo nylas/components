@@ -940,55 +940,55 @@
         </div>
       {/if}
       <ul id="mailboxlist" class:refreshing={loading}>
-        {#each threads as thread}
-          {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
-            <li
-              class:unread={thread.unread}
-              class:checked={thread.selected}
-              class:no-messages={thread &&
-                thread?.messages &&
-                thread?.messages?.length <= 0 &&
-                !thread?.drafts.length}
-            >
-              <div class="checkbox-container thread-checkbox">
-                {#if _this.show_thread_checkbox}
-                  <input
-                    title={selectTitle}
-                    aria-label={selectTitle}
-                    type="checkbox"
-                    checked={thread.selected}
-                    disabled={thread &&
-                      thread?.messages &&
-                      thread?.messages?.length <= 0 &&
-                      !thread?.drafts.length}
-                    on:click={(e) => onSelectOne(e, thread)}
-                  />
-                {/if}
-              </div>
-              <div class="email-container">
-                {#key thread.id}
-                  <nylas-email
-                    clean_conversation={false}
-                    {thread}
-                    {you}
-                    show_star={_this.show_star}
-                    click_action="mailbox"
-                    show_reply={_this.show_reply}
-                    show_reply_all={_this.show_reply_all}
-                    show_forward={_this.show_forward}
-                    on:threadClicked={threadClicked}
-                    on:messageClicked={messageClicked}
-                    on:threadStarred={threadStarred}
-                    on:returnToMailbox={returnToMailbox}
-                    on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
-                    on:threadDeleted={showConfirmDeleteModal}
-                    on:downloadClicked={downloadSelectedFile}
-                    show_thread_actions={thread.selected}
-                  />
-                {/key}
-              </div>
-            </li>
-          {/each}
+        {#each threads as thread, i}
+          {#if thread.messages?.length || thread.drafts?.length}
+            {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
+              <li
+                class:unread={thread.unread}
+                class:checked={thread.selected}
+                class:no-messages={!thread?.messages?.length &&
+                  !thread?.drafts.length}
+              >
+                <div class="checkbox-container thread-checkbox">
+                  {#if _this.show_thread_checkbox}
+                    <input
+                      title={selectTitle}
+                      aria-label={selectTitle}
+                      type="checkbox"
+                      checked={thread.selected}
+                      disabled={thread &&
+                        thread?.messages &&
+                        thread?.messages?.length <= 0 &&
+                        !thread?.drafts.length}
+                      on:click={(e) => onSelectOne(e, thread)}
+                    />
+                  {/if}
+                </div>
+                <div class="email-container">
+                  {#key thread.id}
+                    <nylas-email
+                      clean_conversation={false}
+                      {thread}
+                      {you}
+                      show_star={_this.show_star}
+                      click_action="mailbox"
+                      show_reply={_this.show_reply}
+                      show_reply_all={_this.show_reply_all}
+                      show_forward={_this.show_forward}
+                      on:threadClicked={threadClicked}
+                      on:messageClicked={messageClicked}
+                      on:threadStarred={threadStarred}
+                      on:returnToMailbox={returnToMailbox}
+                      on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
+                      on:threadDeleted={showConfirmDeleteModal}
+                      on:downloadClicked={downloadSelectedFile}
+                      show_thread_actions={thread.selected}
+                    />
+                  {/key}
+                </div>
+              </li>
+            {/each}
+          {/if}
         {:else}
           <div class="mailbox-empty">
             {#if _this.header}
