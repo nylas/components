@@ -233,7 +233,8 @@
     // TODO - Use a library to calculate the diff between props so that
     // only updated props are reassigned instead of rebuilding the whole object.
     if (
-      previousProps.event_to_hover === $$props.event_to_hover &&
+      (!$$props.event_to_hover ||
+        previousProps.event_to_hover === $$props.event_to_hover) &&
       JSON.stringify(previousProps) !== JSON.stringify($$props)
     ) {
       _this = buildInternalProps(

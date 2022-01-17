@@ -103,7 +103,7 @@
           scheduler.event_options = event.detail.slots;
         });
 
-        scheduler.addEventListener("eventOptionHovered", (event) => {
+        scheduler.addEventListener("hoverOptionChange", (event) => {
           availability.event_to_hover = event.detail.event;
         });
         scheduler.addEventListener("eventOptionSelected", (event) => {

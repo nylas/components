@@ -246,12 +246,12 @@
   // Interface handling for when you've got multiple events to select from, like Consecutive Event options
 
   function hoverOption(event: ConsecutiveEvent[]) {
-    dispatchEvent("eventOptionHovered", {
+    dispatchEvent("hoverOptionChange", {
       event,
     });
   }
   function blurOption() {
-    dispatchEvent("eventOptionHovered", {
+    dispatchEvent("hoverOptionChange", {
       event: null,
     });
   }
