@@ -39,11 +39,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
-          registry-url: "https://registry.npmjs.org"
+          registry-url: "https://registry.yarnpkg.com/"
+
       - name: Install dependencies
-        run: npm install
+        run: yarn
+
       - name: Build Components
-        run: npm run build
+        run: yarn build
+
       - name: Cache build
         uses: actions/cache@v2
         env:
@@ -70,12 +73,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: 14
+
       - uses: actions/cache@v2
         id: restore-build
         with:
           path: ./*
           key: ${{ github.sha }}
+
       - name: Run linter
         run: npm run lint:ci
 
@@ -161,17 +166,17 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
-          registry-url: "https://registry.npmjs.org/"
+          registry-url: "https://registry.yarnpkg.com/"
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Components
-        run: npm run build
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
 
       - name: Configure Git CI User
         run: |
-          echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN  }}' > ${{ github.workspace }}/.npmrc
+          echo '//registry.yarnpkg.com/:_authToken=${{ secrets.NPM_TOKEN  }}' > ${{ github.workspace }}/.npmrc
 
       - name: Publish (canary)
         if: contains(github.ref, 'prerelease') == true

@@ -24,7 +24,6 @@
     "list": "lerna list",
     "new-component": "node ./scripts/new.js",
     "postinstall": "husky install",
-    "prepublishOnly": "yarn run build",
     "release:canary": "lerna version prerelease --no-private -m 'pre-release' --yes",
     "postrelease:canary": "DATE=`date '+prerelease/%Y%m%d%H%M%S'` && git tag $DATE && git push origin $DATE",
     "release:stable": "lerna version --no-private",
