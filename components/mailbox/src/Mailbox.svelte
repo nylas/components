@@ -2,6 +2,7 @@
 
 <script lang="ts">
   import { ErrorStore, fetchAccount, ManifestStore, silence } from "@commons";
+  import "@commons/components/NError.svelte";
   import { fetchMessage, updateMessage } from "@commons/connections/messages";
   import {
     AccountOrganizationUnit,

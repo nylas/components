@@ -776,7 +776,7 @@
           {/if}
           {#if _this.show_to}
             <ContactsSearch
-              data-cy="to-field"
+              id="to-field"
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
@@ -812,7 +812,7 @@
         {#if _this.show_cc}
           <div class="cc-container">
             <ContactsSearch
-              data-cy="cc-field"
+              id="cc-field"
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
@@ -835,7 +835,7 @@
         {#if _this.show_bcc}
           <div class="cc-container">
             <ContactsSearch
-              data-cy="bcc-field"
+              id="bcc-field"
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}
@@ -873,7 +873,6 @@
 
         <!-- HTML Editor -->
         <HTMLEditor
-          data-cy="html-editor"
           html={$message.body || template}
           onchange={handleBodyChange}
           focus_body_onload={_this.focus_body_onload}
