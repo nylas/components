@@ -588,6 +588,7 @@
   $spacing-m: 1rem;
 
   @include modal-styles;
+
   main {
     height: 100%;
     width: 100%;
@@ -824,7 +825,7 @@
   }
 </style>
 
-<main>
+<main id="component-mailbox">
   {#if hasComponentLoaded}
     {#if currentlySelectedThread}
       <div class="email-container">
