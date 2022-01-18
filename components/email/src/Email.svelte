@@ -1741,24 +1741,20 @@
                           we will keep loading, so the below is our fallback -->
                       {:else if !!_this.thread && !_this.thread_id && click_action != "mailbox"}
                         {message.body ?? message.snippet}
-                        {#if attachedFiles[message.id]}
-                          {#await attachedFiles[message.id] then files}
-                            {#if files && Array.isArray(files) && files.length > 0}
-                              <div class="attachment">
-                                {#each files as file}
-                                  <button
-                                    on:click|stopPropagation={(e) =>
-                                      dispatchEvent("fileClicked", {
-                                        event: e,
-                                        file: file,
-                                      })}
-                                  >
-                                    {file.filename || file.id}
-                                  </button>
-                                {/each}
-                              </div>
-                            {/if}
-                          {/await}
+                        {#if attachedFiles[message.id] && Array.isArray(attachedFiles[message.id]) && attachedFiles[message.id].length > 0}
+                          <div class="attachment">
+                            {#each attachedFiles[message.id] as file}
+                              <button
+                                on:click|stopPropagation={(e) =>
+                                  dispatchEvent("fileClicked", {
+                                    event: e,
+                                    file: file,
+                                  })}
+                              >
+                                {file.filename || file.id}
+                              </button>
+                            {/each}
+                          </div>
                         {/if}
                       {:else}
                         <div class="email-loader">
