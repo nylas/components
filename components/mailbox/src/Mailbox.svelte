@@ -53,8 +53,8 @@
   export let keyword_to_search: string;
   export let onSelectThread: (event: MouseEvent, t: Thread) => void =
     onSelectOne;
-  // query_string format => "in=trash from=phil.r@nylas.com"
   export let query_string: string; // Allowed query parameter list https://developer.nylas.com/docs/api/#get/threads
+  // query_string format => "in=trash from=phil.r@nylas.com"
   export let show_star: boolean;
   export let show_thread_checkbox: boolean;
   export let show_reply: boolean;
