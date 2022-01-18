@@ -74,17 +74,15 @@
       {@html DOMPurify.sanitize(body)}
     {/if}
     <div class="attachment">
-      {#await attachedFiles then files}
-        {#if files && Array.isArray(files) && files.length > 0}
-          {#each files as file}
-            <button
-              on:click|stopPropagation={(e) => downloadSelectedFile(e, file)}
-            >
-              {file.filename || file.id}
-            </button>
-          {/each}
-        {/if}
-      {/await}
+      {#if attachedFiles && Array.isArray(attachedFiles) && attachedFiles.length > 0}
+        {#each attachedFiles as file}
+          <button
+            on:click|stopPropagation={(e) => downloadSelectedFile(e, file)}
+          >
+            {file.filename || file.id}
+          </button>
+        {/each}
+      {/if}
     </div>
   {/if}
 </div>
