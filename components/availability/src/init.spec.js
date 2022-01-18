@@ -4,6 +4,15 @@ const testUser = ["nylascypresstest@gmail.com"];
 
 beforeEach(() => {
   cy.clock(frozenDateTime().getTime(), ["Date"]);
+  cy.intercept({
+    method: "POST",
+    url: "/middleware/calendars/availability",
+  }).as("availability");
+  cy.intercept({
+    method: "POST",
+    url: "/middleware/calendars/availability/consecutive",
+  }).as("consecutive");
+
   cy.visitComponentPage(
     "/components/availability/src/index.html",
     "nylas-availability",
@@ -52,10 +61,11 @@ describe("available times", () => {
 
 describe("Booking time slots", () => {
   it("Toggles (un)selected class", () => {
-    cy.get("@testComponent").invoke("attr", "slot_size", 30);
+    cy.get("@testComponent").invoke("attr", "slot_size", 15);
     const currentHour = frozenDateTime();
     currentHour.setMinutes(0, 0, 0);
-    currentHour.setHours(currentHour.getHours() - 1);
+    currentHour.setHours(currentHour.getHours() + 6);
+    cy.wait(["@consecutive", "@availability"]);
 
     //Get the closest full hour prior to current time, slots isBookable should be false
     cy.get(
@@ -558,9 +568,11 @@ describe("Booking time slots", () => {
     });
 
     it("should prevent booking on dates after max_book_ahead_days", (done) => {
+      cy.wait("@consecutive");
       // Check that we can book on current date if max_book_ahead_days is 0
       cy.get("@testComponent").invoke("attr", "max_book_ahead_days", 0);
       cy.get(".slot.free").should("exist");
+      cy.wait("@availability");
       expect(selectedTimeslots).to.have.lengthOf(0);
       cy.get(".slot.free")
         .eq(0)

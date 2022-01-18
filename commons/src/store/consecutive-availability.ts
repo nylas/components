@@ -1,10 +1,6 @@
 import { Writable, writable } from "svelte/store";
 import { fetchConsecutiveAvailability } from "../connections/availability";
-import type {
-  AvailabilityQuery,
-  ConsecutiveAvailabilityQuery,
-  TimeSlot,
-} from "@commons/types/Availability";
+import type { ConsecutiveAvailabilityQuery } from "@commons/types/Availability";
 import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
 type ConsecutiveAvailabilityStore = Record<
@@ -18,10 +14,6 @@ function initialize(): Writable<ConsecutiveAvailabilityStore> {
     key: string,
   ): Promise<ConsecutiveEvent[][]> | void => {
     const accessor: ConsecutiveAvailabilityQuery = JSON.parse(key);
-    // Avoid saving forceReload property as part of store key
-    const accessorCopy = { ...accessor };
-    delete accessorCopy.forceReload;
-    key = JSON.stringify(accessorCopy);
 
     if (
       !accessor.component_id ||
@@ -31,7 +23,7 @@ function initialize(): Writable<ConsecutiveAvailabilityStore> {
       return;
     }
 
-    if (!target[key] || accessor.forceReload) {
+    if (!target[key]) {
       const fetchPromise = fetchConsecutiveAvailability(accessor);
       store.update((store) => {
         store[key] = fetchPromise;

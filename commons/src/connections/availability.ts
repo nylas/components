@@ -85,7 +85,7 @@ export const fetchConsecutiveAvailability = async (
       const json = await handleResponse<
         MiddlewareResponse<PreDatedTimeSlot[][]>
       >(apiResponse);
-      let response: PreDatedTimeSlot[][] =
+      const response: PreDatedTimeSlot[][] =
         json.response?.map((blockSlot) => {
           blockSlot = blockSlot.map((slot: any) => {
             slot.start_time = new Date(slot.start_time * 1000);

@@ -246,12 +246,12 @@
   // Interface handling for when you've got multiple events to select from, like Consecutive Event options
 
   function hoverOption(event: ConsecutiveEvent[]) {
-    dispatchEvent("eventOptionHovered", {
+    dispatchEvent("hoverOptionChange", {
       event,
     });
   }
-  function unhoverOption(event: ConsecutiveEvent[]) {
-    dispatchEvent("eventOptionUnhovered", {
+  function blurOption() {
+    dispatchEvent("hoverOptionChange", {
       event: null,
     });
   }
@@ -418,7 +418,7 @@
           <li
             aria-role="button"
             on:mouseenter={() => hoverOption(option)}
-            on:mouseleave={() => unhoverOption(option)}
+            on:mouseleave={() => blurOption()}
             on:click={() => selectOption(option)}
           >
             <span class="time"

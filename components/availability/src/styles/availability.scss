@@ -335,12 +335,6 @@ main {
           margin-right: 1px;
         }
 
-        &.hovering {
-          margin-left: 9px;
-          margin-right: 1px;
-          z-index: 3;
-        }
-
         &.selected + .selected,
         &.pending + .pending {
           z-index: 2;
@@ -370,11 +364,6 @@ main {
 
         &.pending .selected-heading {
           width: auto;
-        }
-        &.hovering:not(.selected) .selected-heading {
-          color: var(--selected-color);
-          text-shadow: none;
-          top: 0;
         }
       }
     }

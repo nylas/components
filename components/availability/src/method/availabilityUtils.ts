@@ -2,15 +2,10 @@ import {
   SelectionStatus,
   AvailabilityStatus,
 } from "@commons/enums/Availability";
-import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
+import { timeDay, timeHour, timeMinute } from "d3-time";
 import { scaleTime } from "d3-scale";
 import type { TimeInterval } from "d3-time";
-import type {
-  Calendar,
-  Manifest,
-  TimeSlot,
-  SelectableSlot,
-} from "@commons/types/Availability";
+import type { Manifest, TimeSlot } from "@commons/types/Availability";
 import { arrayContainsArray } from "@commons/methods/component";
 import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
 
@@ -173,8 +168,8 @@ export const generateDaySlots = (
               rule.startWeekday === time.getDay() ||
               rule.endWeekday === time.getDay(),
           );
-          let slotExistsInOpenHours = dayRelevantRules.some((rule, iter) => {
-            let ruleStartAppliedDate = Object.prototype.hasOwnProperty.call(
+          const slotExistsInOpenHours = dayRelevantRules.some((rule) => {
+            const ruleStartAppliedDate = Object.prototype.hasOwnProperty.call(
               rule,
               "startWeekday",
             )
@@ -186,7 +181,7 @@ export const generateDaySlots = (
             ruleStartAppliedDate.setHours(rule.startHour);
             ruleStartAppliedDate.setMinutes(rule.startMinute);
 
-            let ruleEndAppliedDate = Object.prototype.hasOwnProperty.call(
+            const ruleEndAppliedDate = Object.prototype.hasOwnProperty.call(
               rule,
               "startWeekday",
             )

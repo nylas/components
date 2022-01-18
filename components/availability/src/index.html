@@ -16,6 +16,13 @@
           "input#overbooked-threshold",
         );
 
+        const event = {
+          event_title: "My Intro Meeting",
+          event_description: "My test desc",
+          slot_size: 15,
+          participantEmails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+        };
+
         const calendars = [
           {
             availability: "busy",
@@ -71,6 +78,7 @@
 
         component.calendars = calendars;
         component.participants = [];
+        component.events = [event];
 
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
