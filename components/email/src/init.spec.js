@@ -1237,31 +1237,28 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
   beforeEach(() => {
     cy.visit("/components/email/src/cypress.html");
 
-    cy.get("nylas-email").first().as("email");
+    cy.get("nylas-email").as("email");
 
     cy.get("@email").invoke("attr", "show_reply", "true");
   });
 
   it("Should Render Reply Button When Passed A Message", () => {
-    cy.get("@email").invoke("attr", "click_action", "default");
-
     cy.get("@email").then((elements) => {
       const component = elements[0];
       component.message = SINGLE_SENDER_MESSAGE;
-      cy.get("@email").should("exist");
       cy.get("@email").find("div.reply button").should("exist");
     });
   });
 
   it("Should Render Reply Button When Passed A Thread", () => {
-    cy.get("@email").invoke("attr", "click_action", "default");
     cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
 
     cy.get("@email").then((elements) => {
       const component = elements[0];
       component.thread = SAMPLE_THREAD;
-      cy.get(component).should("exist");
-      cy.get(component).find("div.reply button").should("exist");
+
+      cy.get("@email").find("div.reply button").as("replyButton");
+      cy.get("@replyButton").should("exist");
     });
   });
 
@@ -1279,7 +1276,6 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
     cy.get("@email").invoke("attr", "message_id", "d0byfc378l2728z35pax362ho");
     cy.wait("@messageRequest");
 
-    cy.get("@email").should("exist");
     cy.get("@email").find("div.reply button").should("exist");
   });
 
@@ -1304,17 +1300,13 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
       },
     );
 
-    cy.get("@email").invoke("attr", "click_action", "default");
     cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
     cy.get("@email").invoke("attr", "thread_id", "e2k5xktxejdok7d8x28ljf44d");
     cy.wait("@threadRequest");
-    cy.get("@email").should("exist");
     cy.get("@email").find("div.reply button").should("exist");
   });
 
   it("Should Dispatch Event When Reply Button Is Clicked", () => {
-    cy.get("@email").should("exist");
-
     cy.get("@email").then((elements) => {
       const component = elements[0];
       component.message = SINGLE_SENDER_MESSAGE;
@@ -1340,24 +1332,19 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
   });
 
   it("Should Render Reply All Button When Passed A Message", () => {
-    cy.get("@email").invoke("attr", "click_action", "default");
-
     cy.get("@email").then((elements) => {
       const component = elements[0];
       component.message = MULTIPLE_SENDER_MESSAGE;
-      cy.get("@email").should("exist");
       cy.get("@email").find("div.reply-all button").should("exist");
     });
   });
 
   it("Should Render Reply All Button When Passed A Thread", () => {
-    cy.get("@email").invoke("attr", "click_action", "default");
     cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
 
     cy.get("@email").then((elements) => {
       const component = elements[0];
       component.thread = MULTIPLE_SENDER_THREAD;
-      cy.get("@email").should("exist");
       cy.get("@email").find("div.reply-all button").should("exist");
     });
   });
@@ -1376,7 +1363,6 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
     cy.get("@email").invoke("attr", "message_id", "d0byfc378l2728z35pax362ho");
     cy.wait("@messageRequest");
 
-    cy.get("@email").should("exist");
     cy.get("@email").find("div.reply-all button").should("exist");
   });
 
@@ -1401,11 +1387,9 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
       },
     );
 
-    cy.get("@email").invoke("attr", "click_action", "default");
     cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
     cy.get("@email").invoke("attr", "thread_id", "e2k5xktxejdok7d8x28ljf44d");
     cy.wait("@threadRequest");
-    cy.get("@email").should("exist");
     cy.get("@email").find("div.reply-all button").should("exist");
   });
 
@@ -1419,8 +1403,6 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
   });
 
   it("Should Dispatch Event When Reply All Button Is Clicked", () => {
-    cy.get("@email").should("exist");
-
     cy.get("@email").then((elements) => {
       const component = elements[0];
       component.message = MULTIPLE_SENDER_MESSAGE;
