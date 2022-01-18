@@ -68,7 +68,7 @@
   }
 </style>
 
-<div id="component-message-body">
+<div>
   {#if message}
     {#if typeof body !== null}
       {@html DOMPurify.sanitize(body)}

@@ -825,7 +825,7 @@
   }
 </style>
 
-<main id="component-mailbox">
+<main>
   {#if hasComponentLoaded}
     {#if currentlySelectedThread}
       <div class="email-container">
