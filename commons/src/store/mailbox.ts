@@ -12,7 +12,7 @@ import type {
   Message,
   Conversation,
 } from "@commons/types/Nylas";
-import { silence } from "@commons";
+import { silence } from "@commons/methods/api";
 
 interface PaginatedThreads {
   isLoaded: boolean;
