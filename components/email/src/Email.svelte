@@ -1520,8 +1520,6 @@
 
 <nylas-error {id} />
 <main
-  id="component-email"
-  class:email-component={true}
   bind:this={main}
   on:click={handleThreadClick}
   tabindex="0"
