@@ -37,6 +37,7 @@
           !DisallowedContentTypes.includes(file.content_type)
         ) {
           attachedFiles.push(message.files[fileIndex]);
+          attachedFiles = attachedFiles;
         }
       }
     }
