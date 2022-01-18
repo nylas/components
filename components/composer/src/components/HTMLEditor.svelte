@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-html-editor" />
-
 <script lang="ts">
   import { onMount } from "svelte/internal";
   import { defaultActions } from "../lib/html-editor";
