@@ -176,7 +176,7 @@ jobs:
 
       - name: Configure Git CI User
         run: |
-          echo '//registry.yarnpkg.com/:_authToken=${{ secrets.NPM_TOKEN  }}' > ${{ github.workspace }}/.npmrc
+          echo '//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN  }}' > ${{ github.workspace }}/.npmrc
 
       - name: Publish (canary)
         if: contains(github.ref, 'prerelease') == true

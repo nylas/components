@@ -1523,7 +1523,8 @@
   bind:this={main}
   on:click={handleThreadClick}
   tabindex="0"
-  on:keypress={handleThreadKeypress}>
+  on:keypress={handleThreadKeypress}
+>
   {#if _this.thread || _this.thread_id}
     {#await activeThread}
       Loading...
@@ -1534,16 +1535,19 @@
             use:storeMessagesContainer
             class="email-row expanded {_this.click_action === 'mailbox'
               ? 'expanded-mailbox-thread'
-              : ''}">
+              : ''}"
+          >
             <header
               class="subject-title"
-              class:mailbox={_this.click_action === "mailbox"}>
+              class:mailbox={_this.click_action === "mailbox"}
+            >
               <div>
                 {#if _this.click_action === "mailbox"}
                   <button
                     title={"Return to Mailbox"}
                     aria-label={"Return to Mailbox"}
-                    on:click|stopPropagation={returnToMailbox}>
+                    on:click|stopPropagation={returnToMailbox}
+                  >
                     <LeftArrowLineIcon />
                   </button>
                 {/if}
@@ -1560,7 +1564,8 @@
                         : "Star thread"}
                       role="switch"
                       aria-checked={thread.starred}
-                      on:click|stopPropagation={handleThreadStarClick} />
+                      on:click|stopPropagation={handleThreadStarClick}
+                    />
                   </div>
                 {/if}
                 {#if _this.show_thread_actions}
@@ -1568,7 +1573,8 @@
                     <button
                       title="Delete thread / Move to trash"
                       aria-label="Delete thread (Move to trash)"
-                      on:click|stopPropagation={(e) => deleteEmail(e)}>
+                      on:click|stopPropagation={(e) => deleteEmail(e)}
+                    >
                       <TrashIcon />
                     </button>
                   </div>
@@ -1580,7 +1586,8 @@
                       aria-label={`Mark thread as ${
                         activeThread.unread ? "" : "un"
                       }read`}
-                      on:click|stopPropagation={toggleUnreadStatus}>
+                      on:click|stopPropagation={toggleUnreadStatus}
+                    >
                       {#if activeThread.unread}
                         <MarkReadIcon aria-hidden="true" />
                       {:else}
@@ -1606,7 +1613,8 @@
                   use:storeLatestMessageNode={{ msgIndex }}
                   on:click|stopPropagation={(e) =>
                     handleEmailClick(e, msgIndex)}
-                  on:keypress={(e) => handleEmailKeypress(e, msgIndex)}>
+                  on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
+                >
                   {#if message.expanded || msgIndex === activeThread.messages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
@@ -1615,7 +1623,8 @@
                             <div class="default-avatar">
                               <nylas-contact-image
                                 {contact_query}
-                                contact={contacts[message?.from[0].email]} />
+                                contact={contacts[message?.from[0].email]}
+                              />
                             </div>
                           {/if}
                           <div class="message-from">
@@ -1631,7 +1640,8 @@
                               id={message?.id.slice(0, 3)}
                               current_tooltip_id={currentTooltipId}
                               icon={DropdownSymbol}
-                              content={message?.from[0].email} />
+                              content={message?.from[0].email}
+                            />
                           </div>
                         </div>
                         <div class="message-to">
@@ -1662,7 +1672,8 @@
                                 } more`}
                                 content={`${message.to
                                   .map((to) => `${to.name} ${to.email}`)
-                                  .join(", ")}`} />
+                                  .join(", ")}`}
+                              />
                             </div>
                           {/if}
                         </div>
@@ -1684,7 +1695,8 @@
                                 title={"Reply"}
                                 aria-label={"Reply"}
                                 on:click|stopPropagation={(e) =>
-                                  handleReplyClick(e, message, "reply")}>
+                                  handleReplyClick(e, message, "reply")}
+                              >
                                 <ReplyIcon aria-hidden="true" />
                               </button>
                             </div>
@@ -1695,7 +1707,8 @@
                                 title={"Reply all"}
                                 aria-label={"Reply all"}
                                 on:click|stopPropagation={(e) =>
-                                  handleReplyClick(e, message, "reply_all")}>
+                                  handleReplyClick(e, message, "reply_all")}
+                              >
                                 <ReplyAllIcon aria-hidden="true" />
                               </button>
                             </div>
@@ -1706,7 +1719,8 @@
                                 title="Forward"
                                 aria-label="Forward"
                                 on:click|stopPropagation={(e) =>
-                                  handleForwardClick(e, message)}>
+                                  handleForwardClick(e, message)}
+                              >
                                 <ForwardIcon aria-hidden="true" />
                               </button>
                             </div>
@@ -1721,7 +1735,8 @@
                         <nylas-message-body
                           {message}
                           body={message.body}
-                          on:downloadClicked={handleDownloadFromMessage} />
+                          on:downloadClicked={handleDownloadFromMessage}
+                        />
                         <!-- If a thread is being passed manually and there is no body, 
                           we will keep loading, so the below is our fallback -->
                       {:else if !!_this.thread && !_this.thread_id && click_action != "mailbox"}
@@ -1734,7 +1749,8 @@
                                   dispatchEvent("fileClicked", {
                                     event: e,
                                     file: file,
-                                  })}>
+                                  })}
+                              >
                                 {file.filename || file.id}
                               </button>
                             {/each}
@@ -1754,7 +1770,8 @@
                           <div class="default-avatar">
                             <nylas-contact-image
                               {contact_query}
-                              contact={contacts[message?.from[0].email]} />
+                              contact={contacts[message?.from[0].email]}
+                            />
                           </div>
                         {/if}
                         <div class="message-from">
@@ -1762,14 +1779,16 @@
                             >{userEmail && message?.from[0].email === userEmail
                               ? "me"
                               : message?.from[0].name ||
-                                message?.from[0].email}</span>
+                                message?.from[0].email}</span
+                          >
                           <!-- tooltip component -->
                           <nylas-tooltip
                             on:toggleTooltip={setTooltip}
                             id={message?.id.slice(0, 3)}
                             current_tooltip_id={currentTooltipId}
                             icon={DropdownSymbol}
-                            content={message?.from[0].email} />
+                            content={message?.from[0].email}
+                          />
                         </div>
                       </div>
                       <section>
@@ -1801,7 +1820,8 @@
             class:unread={activeThread.unread}
             class:disable-click={activeThread &&
               activeThread.messages.length <= 0 &&
-              !activeThread.drafts.length}>
+              !activeThread.drafts.length}
+          >
             {#await isThreadADraftEmail(activeThread) then isDraft}
               <div class="from{_this.show_star ? '-star' : ''}">
                 {#if _this.show_star}
@@ -1813,7 +1833,8 @@
                       role="switch"
                       aria-checked={activeThread.starred}
                       on:click|preventDefault={handleThreadStarClick}
-                      aria-label={`Star button for thread ${_this.thread_id}`} />
+                      aria-label={`Star button for thread ${_this.thread_id}`}
+                    />
                   </div>
                 {/if}
                 <div class="from-message-count">
@@ -1824,7 +1845,8 @@
                       {:else}
                         <nylas-contact-image
                           {contact_query}
-                          contact={activeThreadContact} />
+                          contact={activeThreadContact}
+                        />
                       {/if}
                     </div>
                   {/if}
@@ -1834,7 +1856,8 @@
                       class:condensed={showSecondFromParticipant(
                         activeThread.messages,
                         activeThread.participants,
-                      )}>
+                      )}
+                    >
                       <span class="from-sub-section">
                         {showFromParticipants(
                           activeThread.messages,
@@ -1882,7 +1905,8 @@
                     activeThread?.messages.length
                       ? thread.snippet.replace(/\u200C /g, "")
                       : `Sorry, looks like this thread is currently unavailable. It may
-                    have been deleted in your provider inbox.`}</span>
+                    have been deleted in your provider inbox.`}</span
+                  >
                 </div>
                 {#if Object.keys(attachedFiles).length > 0}
                   <div class="attachment">
@@ -1890,7 +1914,8 @@
                       {#each files as file}
                         <button
                           on:click={(event) =>
-                            downloadSelectedFile(event, file)}>
+                            downloadSelectedFile(event, file)}
+                        >
                           {file.filename || file.id}
                         </button>
                       {/each}
@@ -1900,7 +1925,8 @@
               </div>
               <div
                 class:date={_this.show_received_timestamp}
-                class:action-icons={_this.show_thread_actions}>
+                class:action-icons={_this.show_thread_actions}
+              >
                 {#if activeThread.has_attachments && Object.keys(attachedFiles).length > 0}
                   <span><AttachmentIcon /></span>
                 {/if}
@@ -1909,7 +1935,8 @@
                     <button
                       title="Delete thread"
                       aria-label="Delete thread"
-                      on:click|stopPropagation={deleteEmail}>
+                      on:click|stopPropagation={deleteEmail}
+                    >
                       <TrashIcon />
                     </button>
                   </div>
@@ -1921,7 +1948,8 @@
                       aria-label={`Mark thread as ${
                         activeThread.unread ? "" : "un"
                       }read`}
-                      on:click|stopPropagation={toggleUnreadStatus}>
+                      on:click|stopPropagation={toggleUnreadStatus}
+                    >
                       {#if activeThread.unread}
                         <MarkReadIcon aria-hidden="true" />
                       {:else}
@@ -1954,7 +1982,8 @@
                   <div class="default-avatar">
                     <nylas-contact-image
                       {contact_query}
-                      contact={activeMessageContact} />
+                      contact={activeMessageContact}
+                    />
                   </div>
                 {/if}
                 <div class="message-from">
@@ -1962,14 +1991,16 @@
                     >{userEmail && _this.message?.from[0].email === userEmail
                       ? "me"
                       : _this.message?.from[0]?.name ||
-                        _this.message?.from[0]?.email}</span>
+                        _this.message?.from[0]?.email}</span
+                  >
                   <!-- tooltip component -->
                   <nylas-tooltip
                     on:toggleTooltip={setTooltip}
                     id={_this.message?.id}
                     current_tooltip_id={currentTooltipId}
                     icon={DropdownSymbol}
-                    content={_this.message?.from[0].email} />
+                    content={_this.message?.from[0].email}
+                  />
                 </div>
               </div>
 
@@ -2001,7 +2032,8 @@
                       } more`}
                       content={`${_this.message.to
                         .map((to) => `${to.name} ${to.email}`)
-                        .join(", ")}`} />
+                        .join(", ")}`}
+                    />
                   </div>
                 {/if}
               </div>
@@ -2021,7 +2053,8 @@
                       title={"Reply"}
                       aria-label={"Reply"}
                       on:click|stopPropagation={(e) =>
-                        handleReplyClick(e, _this.message, "reply")}>
+                        handleReplyClick(e, _this.message, "reply")}
+                    >
                       <ReplyIcon aria-hidden="true" />
                     </button>
                   </div>
@@ -2032,7 +2065,8 @@
                       title={"Reply all"}
                       aria-label={"Reply all"}
                       on:click|stopPropagation={(e) =>
-                        handleReplyClick(e, _this.message, "reply_all")}>
+                        handleReplyClick(e, _this.message, "reply_all")}
+                    >
                       <ReplyAllIcon aria-hidden="true" />
                     </button>
                   </div>
@@ -2047,7 +2081,8 @@
               <nylas-message-body
                 message={_this.message}
                 body={_this.message.body}
-                on:downloadClicked={handleDownloadFromMessage} />
+                on:downloadClicked={handleDownloadFromMessage}
+              />
             {/if}
           </div>
         </div>
