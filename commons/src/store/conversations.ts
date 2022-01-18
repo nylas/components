@@ -6,7 +6,7 @@ import type {
   ConversationQuery,
   StoredMessage,
 } from "@commons/types/Nylas";
-import { silence } from "@commons";
+import { silence } from "@commons/methods/api";
 
 function initializeConversations() {
   const { subscribe, set, update } = writable<Record<string, Conversation>>({});

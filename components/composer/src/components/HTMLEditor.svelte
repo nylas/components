@@ -4,7 +4,7 @@
 
   export let onchange = (_html: string) => Promise.resolve({});
   export let html = "";
-  export let show_editor_toolbar = true;
+  export let show_editor_toolbar: boolean;
   export let replace_fields: ReplaceFields[] | null = null;
 
   let container: HTMLDivElement;

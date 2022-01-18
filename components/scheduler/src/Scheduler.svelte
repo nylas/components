@@ -2,6 +2,7 @@
 
 <script lang="ts">
   import { ErrorStore, ManifestStore, sendMessage } from "@commons";
+  import "@commons/components/NError.svelte";
   import { createEvent } from "@commons/connections/events";
   import { get_current_component } from "svelte/internal";
   import {
