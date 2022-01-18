@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-contacts-search" immutable={true} />
-
 <script lang="ts">
   import { debounce, isValidEmail } from "../lib/utils";
   import { tick } from "svelte";

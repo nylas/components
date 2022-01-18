@@ -1,5 +1,3 @@
-<svelte:options tag="nylas-html-editor" />
-
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
