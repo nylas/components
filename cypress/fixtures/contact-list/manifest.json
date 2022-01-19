@@ -1,0 +1,12 @@
+{
+  "component": {
+    "theming": {
+      "show_filter": true,
+      "contacts_to_load": 100,
+      "theme": "theme-1",
+      "sort_by": "name",
+      "click_action": "select",
+      "show_names": true
+    }
+  }
+}

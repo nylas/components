@@ -1,223 +1,194 @@
 import { defaultPhoto } from "./default_photo.js";
 
-describe("Contact List initial states and thread/contact counts", () => {
-  it("Loads 100 contacts by default", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.wait("@contacts");
-    cy.get("nylas-contact-list")
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
-  });
-  xit("Loads 10 contacts", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("#contacts_to_load").contains("10").click();
-    cy.wait("@little-contacts");
-    cy.get("nylas-contact-list").find(".contact").should("have.length", 10);
-  });
-});
+const STATIC_CONTACTS = [
+  {
+    emails: [{ email: "tom@brightideas.com" }],
+    given_name: "Thomas Edison",
+  },
+  {
+    emails: [{ email: "alex@bell.com" }],
+    given_name: "Alexander Graham Bell",
+  },
+  {
+    emails: [{ email: "al@particletech.com" }],
+    given_name: "Albert Einstein",
+  },
+];
 
-describe("Contact List component (Svelte)", () => {
-  it("Shows Contact List", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
+describe("Contact List initial", () => {
+  it("shows loader", () => {
+    cy.visit("/components/contact-list/src/cypress.html");
+
     cy.get("nylas-contact-list").find(".loader").should("exist");
-    cy.get("nylas-contact-list").invoke("attr", "theme", "arbitrary thinger");
   });
 
-  it("Shows Empty state", () => {
+  it("shows empty state", () => {
     cy.intercept("/middleware/contact-list/contacts?limit=100&offset=0", {
       response: [],
     });
-    cy.visit("/components/contact-list/src/index.html");
 
-    cy.get("nylas-contact-list").then(() => {
-      cy.get(".empty-state").contains("Enter contacts using the contacts prop");
-    });
+    cy.visit("/components/contact-list/src/cypress.html");
+
+    cy.get("nylas-contact-list").contains(
+      "Enter contacts using the contacts prop",
+    );
+  });
+});
+
+describe("Contact List display contacts", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "contact-list/manifest.json" },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?limit=100&offset=0",
+      { fixture: "contact-list/contacts100.json" },
+    ).as("getContacts");
+
+    cy.visit("/components/contact-list/src/cypress.html");
+
+    cy.get("nylas-contact-list").should("exist").as("contactList");
+  });
+
+  it("Loads 100 contacts by default", () => {
+    cy.wait("@getContacts");
+    cy.get("@contactList").find(".contact").should("have.length", 100);
+  });
+
+  // TODO: Feature not implemented yet
+  xit("Loads 10 contacts", () => {
+    cy.get("@contactList").invoke("prop", "contacts_to_load", 10);
+    cy.get("@contactList").find(".contact").should("have.length", 10);
   });
 
   it("Sorts correctly (alphabetical)", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.wait("@contacts");
+    cy.wait("@getContacts");
 
-    cy.get("nylas-contact-list").should("exist");
     cy.get(".contact span.title").then(($contacts) => {
-      let titles = $contacts.map((index, contact) => contact.innerText);
+      const titles = $contacts.map((index, contact) => contact.innerText);
       expect(titles).to.deep.equal(titles.sort());
     });
   });
 
   it("Sorts correctly (last emailed)", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.wait("@contacts");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("nylas-contact-list")
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
-    cy.get("nylas-contact-list").invoke("attr", "sort_by", "last_emailed");
+    cy.wait("@getContacts");
+    cy.get("@contactList").invoke("prop", "sort_by", "last_emailed");
 
     cy.get(".contact").then(($contacts) => {
-      let lastContactedDates = $contacts.map((index, contact) => {
+      const lastContactedDates = $contacts.map((index, contact) => {
         return contact.getAttribute("data-last-contacted-date");
       });
       expect(lastContactedDates).to.deep.equal(lastContactedDates.sort());
     });
   });
-
-  it("handles selection properly", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.wait("@contacts");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("nylas-contact-list")
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
-    cy.get("nylas-contact-list").invoke("attr", "click_action", "select");
-    cy.get("[data-cy=0]");
-    cy.get("nylas-contact-list")
-      .find(".contact.selected")
-      .should("have.length", 0);
-    cy.get(".contact:eq(0)").click();
-    cy.get("nylas-contact-list")
-      .find(".contact.selected")
-      .should("have.length", 1);
-    cy.get(".contact:eq(0)").click();
-    cy.get("nylas-contact-list")
-      .find(".contact.selected")
-      .should("have.length", 0);
-  });
 });
 
 describe("Contact List Interaction", () => {
-  xit("Emits a contactClicked event", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.wait("@contacts");
-    let contactsCurrentlyClicked = 0;
-    cy.get("[data-cy=0]");
-    cy.document().then((document) => {
-      document
-        .getElementsByTagName("nylas-contact-list")[0]
-        .addEventListener("contactClicked", (event) => {
-          expect(event.detail).to.have.ownProperty("event");
-          contactsCurrentlyClicked = event.detail.contacts.filter(
-            (c) => c.selected,
-          ).length;
-        });
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "contact-list/manifest.json" },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?limit=100&offset=0",
+      { fixture: "contact-list/contacts100.json" },
+    ).as("getContacts");
 
-      cy.get(".contact:eq(0)")
-        .click()
-        .then(() => {
-          expect(contactsCurrentlyClicked).to.equal(1);
-        });
-      cy.get(".contact:eq(1)")
-        .click()
-        .then(() => {
-          expect(contactsCurrentlyClicked).to.equal(2);
-        });
+    cy.visit("/components/contact-list/src/cypress.html");
+
+    cy.get("nylas-contact-list").should("exist").as("contactList");
+  });
+
+  it("selects contact", () => {
+    cy.wait("@getContacts");
+    cy.get("@contactList").invoke("prop", "click_action", "select");
+
+    cy.get("[data-cy=0]");
+    cy.get("@contactList").find(".contact.selected").should("have.length", 0);
+    cy.get(".contact:eq(0)").click();
+
+    cy.get("@contactList").find(".contact.selected").should("have.length", 1);
+    cy.get(".contact:eq(0)").click();
+
+    cy.get("@contactList").find(".contact.selected").should("have.length", 0);
+  });
+
+  it("Emits a contactClicked event", () => {
+    let clicked = false;
+    cy.get("@contactList").then((el) => {
+      const component = el[0];
+
+      component.addEventListener("contactClicked", () => {
+        clicked = true;
+      });
     });
+
+    cy.wait("@getContacts");
+
+    cy.get(".contact")
+      .first()
+      .click()
+      .then(() => {
+        expect(clicked).to.be.true;
+      });
   });
 
   xit("Shows loading overlay and displays 1 or more contacts when user scrolls to the bottom of contact list element", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.wait("@contacts");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("nylas-contact-list")
+    cy.get("@contactList")
       .find(".contact")
       .should("have.length.greaterThan", 1);
     cy.get("[data-cy=99]").scrollIntoView();
-    cy.get("nylas-contact-list").find(".loading").should("exist");
+    cy.get("@contactList").find(".loading").should("exist");
     cy.wait("@one-hundred-more-contacts");
-    cy.get("nylas-contact-list").find(".loading").should("not.exist");
-    cy.get("nylas-contact-list").find("[data-cy=199]").should("exist");
-    cy.get("nylas-contact-list")
+    cy.get("@contactList").find(".loading").should("not.exist");
+    cy.get("@contactList").find("[data-cy=199]").should("exist");
+    cy.get("@contactList")
       .find(".contact")
       .should("have.length.greaterThan", 1);
   });
 
-  describe("Custom data", () => {
-    it("Toggles between custom and Nylas data", () => {
-      cy.loadContacts();
-      cy.visit("/components/contact-list/src/index.html");
-      cy.get("nylas-contact-list").should("exist");
-      cy.wait("@contacts").then(() => {
-        cy.get("nylas-contact-list")
-          .as("contacts")
-          .then((element) => {
-            const contactlist = element[0];
+  it("Toggles between custom and Nylas data", () => {
+    cy.wait("@getContacts");
+    cy.get("@contactList").invoke("prop", "contacts", STATIC_CONTACTS);
+    cy.get("@contactList").contains("Thomas Edison");
 
-            // Check to make sure it's using Nylas data (Test user is a signifier)
-            cy.get("ul.contacts").then((contactList) => {
-              expect(
-                contactList.find("li.contact .title:contains('Test User')"),
-              ).not.to.equal(undefined);
-
-              // Set custom data
-              contactlist.contacts = [
-                {
-                  emails: [{ email: "tom@brightideas.com" }],
-                  given_name: "Thomas Edison",
-                },
-                {
-                  emails: [{ email: "alex@bell.com" }],
-                  given_name: "Alexander Graham Bell",
-                },
-                {
-                  emails: [{ email: "al@particletech.com" }],
-                  given_name: "Albert Einstein",
-                },
-              ];
-
-              // Check to make sure it's using custom data (not Nylas data)
-              cy.get("ul.contacts")
-                .find("li.contact .title")
-                .should("not.contain", "Test User");
-              cy.get("ul.contacts")
-                .find("li.contact .title:contains('Thomas Edison')")
-                .should("exist")
-                .then(() => {
-                  // Revert custom data
-                  contactlist.contacts = null;
-
-                  // Check to make sure it's using Nylas data again
-                  cy.get("ul.contacts")
-                    .find("li.contact .title")
-                    .should("contain", "Test User");
-                  cy.get("ul.contacts")
-                    .find("li.contact .title")
-                    .should("not.contain", "Thomas Edison");
-                });
-            });
-          });
-      });
-    });
+    cy.get("@contactList").invoke("prop", "contacts", null);
+    cy.get("@contactList").contains("Adelaide Mack");
   });
 });
 
-describe("Optional Prop Handling", () => {
-  // todo: exing it, since html file doesn't have controls
-  xit("Hides names when show_names is false", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.wait("@contacts");
-    cy.get("#show_names").contains("false").click();
-    cy.get("nylas-contact-list")
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
-    cy.get(".email").should("not.exist");
+describe("Contact List props", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "contact-list/manifest.json" },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?limit=100&offset=0",
+      { fixture: "contact-list/contacts100.json" },
+    ).as("getContacts");
+
+    cy.visit("/components/contact-list/src/cypress.html");
+
+    cy.get("nylas-contact-list").should("exist").as("contactList");
   });
+
+  it("Hides names when show_names is false", () => {
+    cy.get("@contactList").invoke("prop", "show_names", false);
+    cy.get("@contactList")
+      .contains(".email", "Adelaide Mack")
+      .should("not.exist");
+  });
+
   xit("Loads default image passed by user", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html", {
+    cy.visit("/components/contact-list/src/cypress.html", {
       onBeforeLoad(win) {
         Object.defineProperty(win, "features", {
           writable: false,
@@ -229,56 +200,45 @@ describe("Optional Prop Handling", () => {
         });
       },
     });
-    cy.wait("@contacts");
-    cy.get("nylas-contact-list")
+    cy.wait("@getContacts");
+    cy.get("@contactList")
       .find("[data-cy=default_set_by_user]")
       .should("exist");
   });
 
   it("Component shows filter by email option when 'show_filter' is set to true", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("nylas-contact-list").then((element) => {
-      const component = element[0];
-      component.show_filter = true;
-    });
-    cy.wait("@contacts");
+    cy.get("@contactList").invoke("prop", "show_filter", true);
+    cy.wait("@getContacts");
+
     cy.get("label.entry.filter").contains("Filter by email: ");
     cy.get("input#show-filter-input").should("exist");
-    cy.get("input#show-filter-input").type("nylascypresstest");
-    cy.get("nylas-contact-list").find(".contact").should("have.length", 3);
+    cy.get("input#show-filter-input").type("ar");
+    cy.get("@contactList").find(".contact").should("have.length", 14);
   });
 
   it("Component loads and works for sort_by=last_emailed when account has email & contact scopes", () => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("nylas-contact-list").then((element) => {
-      const component = element[0];
-      component.sort_by = "last_emailed";
-    });
-    cy.get(".loader").should("not.exist");
-    cy.get("nylas-contact-list")
-      .find(".contact")
-      .should("have.length.greaterThan", 1);
+    cy.get("@contactList").invoke("prop", "sort_by", "last_emailed");
+
+    cy.get("@contactList").find(".contact").first().contains("Ashlee Ferguson");
+    cy.get("@contactList").find(".contact").last().contains("Ariana Peters");
   });
 });
 
-describe("ContactList component with contact scope (only) should work by default", () => {
+describe("ContactList edge cases", () => {
   beforeEach(() => {
-    cy.loadContacts();
-    cy.visit("/components/contact-list/src/index.html");
-    cy.get("nylas-contact-list").should("exist");
-    cy.get("nylas-contact-list").then((element) => {
-      const component = element[0];
-      component.id = "75f0cbc5-6b15-4bf1-894e-11eeb198cc34";
-      component.sort_by = "name";
-    });
+    cy.visit("/components/contact-list/src/cypress.html");
+
+    cy.get("nylas-contact-list").should("exist").as("contactList");
   });
 
-  it("Component loads and works for sort_by=name when account has only contact scope", () => {
-    cy.get("nylas-contact-list")
+  it("ContactList component with contact scope (only) should work by default", () => {
+    cy.get("@contactList").invoke(
+      "prop",
+      "id",
+      "75f0cbc5-6b15-4bf1-894e-11eeb198cc34",
+    );
+    cy.get("@contactList").invoke("prop", "sort_by", "name");
+    cy.get("@contactList")
       .find(".contact")
       .should("have.length.greaterThan", 1);
   });
