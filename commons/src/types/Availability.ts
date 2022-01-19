@@ -79,7 +79,7 @@ export interface TimeSlot {
   expirySelection?: string;
   recurrence_cadence?: string;
   recurrence_expiry?: Date | string;
-  isBookable: boolean;
+  fallsWithinAllowedTimeRange: boolean;
 }
 
 export interface BookableSlot extends TimeSlot {
