@@ -61,7 +61,17 @@
           composer.classList.add("hidden");
         };
 
-        const events = ["replyClicked", "replyAllClicked", "forwardClicked", "draftThreadEvent"];
+        composer.addEventListener("messageSent", (event) => {
+          const message = event.detail.message;
+          mailbox.sentMessageUpdate(message);
+        });
+
+        const events = [
+          "replyClicked",
+          "replyAllClicked",
+          "forwardClicked",
+          "draftThreadEvent",
+        ];
         events.forEach((event) =>
           mailbox.addEventListener(event, (e) => toggleComposer(e, composer)),
         );

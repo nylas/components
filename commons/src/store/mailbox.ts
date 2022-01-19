@@ -12,7 +12,7 @@ import type {
   Message,
   Conversation,
 } from "@commons/types/Nylas";
-import { silence } from "@commons/methods/api";
+import { silence } from "@commons";
 
 interface PaginatedThreads {
   isLoaded: boolean;
@@ -228,6 +228,25 @@ function initializeThreads() {
             }
             return { ...threads };
           });
+        } else {
+          // This happens when someone sends a message using composer and we want
+          // to update the existing thread with the sent message
+          update((threads) => {
+            if (incomingMessage.thread_id) {
+              let threadToUpdate = threads[queryKey][currentPage].threads.find(
+                (thread) => thread.id === foundThread.id,
+              );
+
+              if (threadToUpdate) {
+                const messages = foundThread.messages;
+                messages.push(incomingMessage);
+                foundThread.messages = messages;
+                foundThread.snippet = incomingMessage.snippet;
+                threadToUpdate = JSON.parse(JSON.stringify(foundThread));
+              }
+            }
+            return { ...threads };
+          });
         }
       }
 
@@ -244,9 +263,9 @@ export const EmailStore: Readable<Record<string, Thread[]>> = derived(
     const emailStore: Record<string, Thread[]> = {};
     Object.entries($MailboxStore).forEach(
       ([key, paginatedThreads]) =>
-        (emailStore[key] = paginatedThreads
-          .map((paginatedThread) => paginatedThread.threads)
-          .flat()),
+      (emailStore[key] = paginatedThreads
+        .map((paginatedThread) => paginatedThread.threads)
+        .flat()),
     );
     return emailStore;
   },

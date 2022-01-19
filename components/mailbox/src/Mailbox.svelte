@@ -251,6 +251,11 @@
 
   //#endregion methods
 
+  // Callbacks
+  export const sentMessageUpdate = async (message: Message): Promise<void> => {
+    threads = MailboxStore.hydrateMessageInThread(message, query, currentPage);
+  };
+
   //#region actions
   let areAllSelected = false;
   $: areAllSelected = threads.some((thread) => thread.selected);
