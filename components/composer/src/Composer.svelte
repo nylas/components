@@ -7,6 +7,7 @@
   import "./components/DatepickerModal.svelte";
   import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
+
   import {
     ErrorStore,
     ManifestStore,

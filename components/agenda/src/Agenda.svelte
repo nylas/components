@@ -16,7 +16,6 @@
   import * as DOMPurify from "dompurify";
   import { timeDay } from "d3-time";
   import { ErrorStore } from "@commons";
-
   import type {
     EventQuery,
     Event,

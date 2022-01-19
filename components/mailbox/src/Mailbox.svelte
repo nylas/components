@@ -8,6 +8,7 @@
     MailboxActions,
     MessageType,
   } from "@commons/enums/Nylas";
+
   import {
     buildInternalProps,
     downloadAttachedFile,
