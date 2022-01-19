@@ -94,7 +94,7 @@ export const svelteWebConfig = ({ svg = false, json = false }) => {
           includePaths: [`../../node_modules`],
         },
       }),
-      emitCss: false,
+      emitCss: true,
       compilerOptions: {
         customElement: false,
       },
