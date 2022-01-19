@@ -10,7 +10,7 @@
     ManifestStore,
     sendMessage,
   } from "@commons";
-
+  import "@commons/components/NError.svelte";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
   import {

@@ -1,12 +1,10 @@
-<svelte:options tag="nylas-html-editor" />
-
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
 
   export let onchange = (_html: string) => Promise.resolve({});
   export let html = "";
-  export let show_editor_toolbar = true;
+  export let show_editor_toolbar: boolean;
   export let replace_fields: ReplaceFields[] | null = null;
 
   let container: Element;

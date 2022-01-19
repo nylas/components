@@ -4,6 +4,7 @@
   import { tick } from "svelte";
   import { get_current_component, onMount } from "svelte/internal";
   import { spring } from "svelte/motion";
+  import "@commons/components/NError.svelte";
   import { CalendarStore, EventStore, ManifestStore } from "@commons";
   import {
     buildInternalProps,

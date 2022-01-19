@@ -1,14 +1,18 @@
 /* eslint-disable no-console */
-import autoPreprocess from "svelte-preprocess";
+import preprocess from "svelte-preprocess";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import livereload from "rollup-plugin-livereload";
 import replace from "@rollup/plugin-replace";
-import json from "@rollup/plugin-json";
 import alias from "@rollup/plugin-alias";
 import path from "path";
 import dotenv from "dotenv";
 import esbuild from "rollup-plugin-esbuild";
+import svelte from "rollup-plugin-svelte";
+import svelteSVG from "rollup-plugin-svelte-svg";
+import pluginJson from "@rollup/plugin-json";
+import css from "rollup-plugin-css-only";
+
 const ROOT = "../..";
 dotenv.config({ path: path.resolve(ROOT, ".env") });
 const production =
@@ -25,7 +29,7 @@ const config = {
     resolve({
       extensions: [".ts", ".js", ".json"],
       browser: true,
-      dedupe: ["svelte"],
+      dedupe: ["svelte", "wc.svelte"],
     }),
     replace({
       "process.env.API_GATEWAY": `'${process.env.API_GATEWAY}'`,
@@ -47,10 +51,11 @@ const config = {
       minify: !!production,
     }),
     commonjs(),
-    json(),
+    pluginJson(),
   ],
   watch: {
     clearScreen: false,
+    exclude: [".github/**", ".husky/**", ".vscode/**", ".git/**"],
   },
 };
 
@@ -70,15 +75,48 @@ if (process.env.ROLLUP_WATCH) {
 export default config;
 
 export const svelteConfig = {
-  dev: !production,
-  preprocess: autoPreprocess({
+  preprocess: preprocess({
     scss: {
       includePaths: [`${ROOT}/node_modules`],
     },
   }),
   emitCss: false,
   compilerOptions: {
-    dev: !production,
     customElement: true,
   },
+};
+
+export const svelteWebConfig = ({ svg = false, json = false }) => {
+  const config = [
+    svelte({
+      preprocess: preprocess({
+        scss: {
+          includePaths: [`../../node_modules`],
+        },
+      }),
+      emitCss: true,
+      compilerOptions: {
+        customElement: false,
+      },
+      exclude: /\.wc\.svelte$/,
+    }),
+    svelte({
+      preprocess: preprocess(),
+      emitCss: false,
+      compilerOptions: {
+        customElement: true,
+      },
+      include: /\.wc\.svelte$/,
+    }),
+    css({ output: "nylas-component.css" }),
+  ];
+
+  if (svg) {
+    config.unshift(svelteSVG());
+  }
+  if (json) {
+    config.push(pluginJson());
+  }
+
+  return config;
 };
