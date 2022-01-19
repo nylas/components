@@ -64,5 +64,11 @@
     "title": "Contacts object that you can pass in",
     "type": "HydratedContact[]",
     "noPreview": true
+  },
+  {
+    "label": "group",
+    "title": "Contacts in a group",
+    "type": "string",
+    "value": ""
   }
 ]

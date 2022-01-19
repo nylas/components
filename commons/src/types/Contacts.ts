@@ -58,6 +58,12 @@ export interface ContactPhoneNumber {
 
 export type ContactsQuery = CommonQuery;
 
+export type ContactsQueryParams = {
+  offset: number;
+  limit: number;
+  group?: string;
+};
+
 export interface ContactSearchQuery extends CommonQuery {
   query: string;
 }

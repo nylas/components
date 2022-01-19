@@ -277,6 +277,7 @@ export interface ContactListProperties extends Manifest {
   sort_by: "last_emailed" | "name";
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
   threads_to_load: number;
+  group?: string;
 }
 
 export interface ConversationProperties extends Manifest {
