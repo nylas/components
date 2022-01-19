@@ -5,10 +5,19 @@ export async function handleResponse<T = unknown>(
   response: Response,
 ): Promise<T> {
   if (!response.ok) {
-    const passedError = await response
-      .json()
-      .then((json: { message: string; name: string }) => json);
-    const error = new Error(passedError.message);
+    const passedError = await response.json().then(
+      (json: {
+        message: string;
+        name: string;
+        response?: {
+          error?: string;
+        };
+      }) => json,
+    );
+
+    const message = passedError?.response?.error || passedError?.message;
+
+    const error = new Error(message);
     error.name = passedError.name;
     return Promise.reject({ message: error, statusCode: response.status });
   }
