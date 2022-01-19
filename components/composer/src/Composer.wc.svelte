@@ -157,7 +157,7 @@
   onMount(async () => {
     const style = document.createElement("style");
     style.innerHTML = '@import "../nylas-component.css"';
-    document.querySelector("nylas-composer").shadowRoot.appendChild(style);
+    document.querySelector("nylas-composer").shadowRoot.prepend(style);
 
     isLoading = true;
     await tick();
