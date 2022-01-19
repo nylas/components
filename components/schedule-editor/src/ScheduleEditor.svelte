@@ -8,6 +8,7 @@
   } from "@commons/methods/component";
   import { weekdays } from "@commons/methods/datetime";
   import type { AvailabilityRule, TimeSlot } from "@commons/types/Availability";
+
   import type {
     Manifest,
     EventDefinition,
