@@ -7,7 +7,7 @@
   export let show_editor_toolbar: boolean;
   export let replace_fields: ReplaceFields[] | null = null;
 
-  let container: Element;
+  let container: HTMLDivElement;
   let toolbar: ToolbarItem[] = defaultActions;
 
   $: if (html) {
@@ -75,8 +75,15 @@
   }
 
   const handleAction = (item: ToolbarItem) => () => {
-    if (item.result) item.result();
+    if (item.result) {
+      item.result();
+    }
+
     updateToolbarUI();
+
+    if (container) {
+      container.focus();
+    }
   };
 
   // This function updates the toolbar UI state when you select text (eg. select bold text)
@@ -185,11 +192,12 @@
   {/if}
 
   <div
-    contenteditable="true"
-    class="html-editor"
-    on:keyup={updateToolbarUI}
-    on:mouseup={updateToolbarUI}
     bind:this={container}
     bind:innerHTML={html}
+    contenteditable="true"
+    class="html-editor"
+    role="textbox"
+    on:keyup={updateToolbarUI}
+    on:mouseup={updateToolbarUI}
   />
 </div>
