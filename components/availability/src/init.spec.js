@@ -70,9 +70,6 @@ describe("Booking time slots", () => {
     //Get the closest full hour prior to current time, slots fallsWithinAllowedTimeRange should be false
     cy.get(
       `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
-    ).should("have.class", "outside-of-time-range");
-    cy.get(
-      `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
     )
       .first()
       .click();
