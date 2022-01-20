@@ -875,7 +875,7 @@ describe("Email: Displays threads and messages", () => {
     });
   });
 
-  it("Renders inline file appropriately", () => {
+  it.only("Renders inline file appropriately", () => {
     cy.intercept("GET", "https://web-components.nylas.com/middleware/manifest");
 
     cy.get("@email").then((element) => {
@@ -885,8 +885,7 @@ describe("Email: Displays threads and messages", () => {
       component.click_action = "default";
     });
 
-    cy.get("@email").find(".email-row.condensed").click();
-
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", true);
     cy.wait("@filesDownload");
 
     cy.get("@email")
