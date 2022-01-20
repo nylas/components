@@ -15,7 +15,7 @@
     "label": "theme",
     "title": "Theme",
     "type": "string",
-    "options": ["light", "dark"],
+    "options": ["auto", "light", "dark"],
     "value": "light"
   },
   {
