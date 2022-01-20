@@ -1,96 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta content="width=device-width,initial-scale=1" name="viewport" />
-    <meta charset="UTF-8" />
-    <title>Mailbox Demo</title>
-    <link rel="shortcut icon" href="data:;base64,=" />
-    <script src="../index.js"></script>
-    <script src="../../composer/index.js"></script>
-    <style>
-      nylas-composer:not[hidden] {
-        display: block;
-        position: sticky;
-        bottom: 0;
-        left: 0;
-        height: initial;
-        width: 100%;
-        transition: height 0.125s cubic-bezier(0.075, 0.82, 0.165, 1);
-      }
-    </style>
-    <script type="module">
-      import { thread1, thread2 } from "./test-data.js";
 
-      function toggleComposer(event, component) {
-        component.removeAttribute("hidden");
-        component.value = event.detail.value;
-        component.open();
-      }
+<head>
+  <meta content="width=device-width,initial-scale=1" name="viewport" />
+  <meta charset="UTF-8" />
+  <title>Mailbox Demo</title>
+  <link rel="shortcut icon" href="data:;base64,=" />
+  <script src="../index.js"></script>
+  <script src="../../composer/index.js"></script>
+  <style>
+    nylas-composer:not[hidden] {
+      display: block;
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      height: initial;
+      width: 100%;
+      transition: height 0.125s cubic-bezier(0.075, 0.82, 0.165, 1);
+    }
+  </style>
+  <script type="module">
+    import { thread1, thread2 } from "./test-data.js";
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const mailbox = document.querySelector("nylas-mailbox");
+    function toggleComposer(event, component) {
+      component.removeAttribute("hidden");
+      component.value = event.detail.value;
+      component.open();
+    }
 
-        mailbox.addEventListener("returnToMailbox", (event) => {
-          console.log("returnToMailbox", event.detail);
-        });
-        // enable `header="string"` and click refresh button
-        // mailbox.addEventListener("refreshClicked", function (event) {
-        //   mailbox.all_threads = [...mailbox.all_threads, thread2];
-        // });
+    document.addEventListener("DOMContentLoaded", function () {
+      const mailbox = document.querySelector("nylas-mailbox");
 
-        // mailbox.all_threads = [thread1]; // enable to overwrite thread_id fetching
-        mailbox.actions_bar = ["selectall", "star", "delete", "unread"];
-        mailbox.show_star = true;
-        mailbox.show_reply = true;
-        mailbox.show_reply_all = true;
-        mailbox.show_forward = true;
-        mailbox.query_string = "";
-        const composer = document.querySelector("nylas-composer");
-        composer.show_header = true;
-        composer.show_minimize_button = false;
-        composer.show_from = false;
-        composer.show_bcc = false;
-        composer.show_cc = false;
-        composer.reset_after_send = true;
-        composer.reset_after_close = true;
-        composer.close();
-
-        composer.afterSendSuccess = async (data) => {
-          composer.close();
-          composer.classList.remove("active");
-          composer.classList.add("hidden");
-        };
-
-        composer.addEventListener("messageSent", (event) => {
-          const message = event.detail.message;
-          mailbox.sentMessageUpdate(message);
-        });
-
-        const events = [
-          "replyClicked",
-          "replyAllClicked",
-          "forwardClicked",
-          "draftThreadEvent",
-        ];
-        events.forEach((event) =>
-          mailbox.addEventListener(event, (e) => toggleComposer(e, composer)),
-        );
+      mailbox.addEventListener("returnToMailbox", (event) => {
+        console.log("returnToMailbox", event.detail);
       });
-    </script>
-  </head>
+      // enable `header="string"` and click refresh button
+      // mailbox.addEventListener("refreshClicked", function (event) {
+      //   mailbox.all_threads = [...mailbox.all_threads, thread2];
+      // });
 
-  <body>
-    <nylas-mailbox
-      id="demo-mailbox"
-      header="Mailbox"
-      show_star="true"
-    ></nylas-mailbox>
-    <nylas-composer
-      id="demo-composer"
-      show_header="true"
-      show_subject="true"
-      hidden=""
-    >
-    </nylas-composer>
-  </body>
+      // mailbox.all_threads = [thread1]; // enable to overwrite thread_id fetching
+      mailbox.actions_bar = ["selectall", "star", "delete", "unread"];
+      mailbox.show_star = true;
+      mailbox.show_reply = true;
+      mailbox.show_reply_all = true;
+      mailbox.show_forward = true;
+
+      const composer = document.querySelector("nylas-composer");
+      composer.show_header = true;
+      composer.show_minimize_button = false;
+      composer.show_from = false;
+      composer.show_bcc = false;
+      composer.show_cc = false;
+      composer.reset_after_send = true;
+      composer.reset_after_close = true;
+      composer.close();
+
+      composer.afterSendSuccess = async (data) => {
+        composer.close();
+        composer.classList.remove("active");
+        composer.classList.add("hidden");
+      };
+
+      composer.addEventListener("messageSent", (event) => {
+        const message = event.detail.message;
+        mailbox.sentMessageUpdate(message);
+      });
+
+      const events = [
+        "replyClicked",
+        "replyAllClicked",
+        "forwardClicked",
+        "draftThreadEvent",
+      ];
+      events.forEach((event) =>
+        mailbox.addEventListener(event, (e) => toggleComposer(e, composer)),
+      );
+    });
+  </script>
+</head>
+
+<body>
+  <nylas-mailbox id="demo-mailbox" header="Mailbox" show_star="true"></nylas-mailbox>
+  <nylas-composer id="demo-composer" show_header="true" show_subject="true" hidden="">
+  </nylas-composer>
+</body>
+
 </html>
