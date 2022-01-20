@@ -1,0 +1,58 @@
+/* auto.css based on user selected system theme */
+@media (prefers-color-scheme: light) {
+  .nylas-composer {
+    --composer-background-color: #fff;
+    --composer-background-muted-color: #fff;
+    --composer-text-color: #00000;
+    --composer-text-light-color: #6e6e7a;
+    --composer-text-secondary-color: #ffffff;
+    --composer-font: lato, sans-serif;
+    --composer-font-size: 14px;
+    --composer-font-size-small: 12px;
+
+    --composer-border-color: #f4f4f4;
+    --composer-primary-color: #012cb4;
+    --composer-primary-light-color: #0037e5;
+    --composer-primary-dark-color: #0037e5;
+    --composer-icons-color: #a5a6b9;
+    --composer-header-background-color: var(--composer-background-color);
+
+    --composer-success-color: white;
+    --composer-success-light-color: var(--composer-primary-color);
+
+    --composer-danger-color: #ff0000;
+    --composer-danger-light-color: #ffdddd;
+
+    --composer-info-color: var(--composer-primary-light-color);
+    --composer-info-light-color: #d2dcff;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .nylas-composer {
+    --composer-background-color: #1c1c1c;
+    --composer-background-muted-color: #1c1c1c;
+    --composer-text-color: #fff;
+    --composer-text-light-color: #b0b0c0;
+    --composer-text-secondary-color: #ffffff;
+    --composer-font: lato, sans-serif;
+    --composer-font-size: 14px;
+    --composer-font-size-small: 12px;
+
+    --composer-border-color: #282828;
+    --composer-primary-color: #012cb4;
+    --composer-primary-light-color: #0037e5;
+    --composer-primary-dark-color: #0037e5;
+    --composer-icons-color: #8e8e98;
+    --composer-header-background-color: var(--composer-background-color);
+
+    --composer-success-color: white;
+    --composer-success-light-color: var(--composer-primary-color);
+
+    --composer-danger-color: #ffffff;
+    --composer-danger-light-color: #ff5454;
+
+    --composer-info-color: var(--composer-primary-light-color);
+    --composer-info-light-color: #aebff9;
+  }
+}

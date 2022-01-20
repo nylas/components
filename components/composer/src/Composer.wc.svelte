@@ -123,7 +123,7 @@
     show_bcc_button: true,
     show_attachment_button: true,
     show_editor_toolbar: true,
-    theme: "theme-1",
+    theme: "auto",
   };
 
   // Callbacks
