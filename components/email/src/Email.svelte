@@ -421,8 +421,10 @@
           );
         }
       }
-    } else if (messageType !== MessageType.DRAFTS && !activeThread.expanded) {
-      activeThread.expanded = !activeThread.expanded;
+
+      if (messageType !== MessageType.DRAFTS) {
+        activeThread.expanded = !activeThread.expanded;
+      }
     }
 
     dispatchEvent("threadClicked", {

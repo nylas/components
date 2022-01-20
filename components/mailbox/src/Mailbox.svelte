@@ -323,9 +323,8 @@
       await dispatchDraft(event);
       return;
     }
-
+    dispatchEvent("threadClicked", { event, thread });
     currentlySelectedThread = thread;
-    thread.expanded = !thread.expanded;
     if (!_this.all_threads && thread?.expanded) {
       if (thread.unread) {
         thread.unread = false;
