@@ -2,7 +2,7 @@
 @media (prefers-color-scheme: light) {
   .nylas-composer {
     --composer-background-color: #fff;
-    --composer-background-muted-color: #fff;
+    --composer-background-muted-color: #edf1ff;
     --composer-text-color: #00000;
     --composer-text-light-color: #6e6e7a;
     --composer-text-secondary-color: #ffffff;
@@ -11,9 +11,9 @@
     --composer-font-size-small: 12px;
 
     --composer-border-color: #f4f4f4;
-    --composer-primary-color: #012cb4;
-    --composer-primary-light-color: #0037e5;
-    --composer-primary-dark-color: #0037e5;
+    --composer-primary-color: #0037e5;
+    --composer-primary-light-color: #3f6bff;
+    --composer-primary-dark-color: #00a88b;
     --composer-icons-color: #a5a6b9;
     --composer-header-background-color: var(--composer-background-color);
 
@@ -30,8 +30,8 @@
 
 @media (prefers-color-scheme: dark) {
   .nylas-composer {
-    --composer-background-color: #1c1c1c;
-    --composer-background-muted-color: #1c1c1c;
+    --composer-background-color: rgb(40, 43, 43);
+    --composer-background-muted-color: #454949;
     --composer-text-color: #fff;
     --composer-text-light-color: #b0b0c0;
     --composer-text-secondary-color: #ffffff;
@@ -40,9 +40,9 @@
     --composer-font-size-small: 12px;
 
     --composer-border-color: #282828;
-    --composer-primary-color: #012cb4;
-    --composer-primary-light-color: #0037e5;
-    --composer-primary-dark-color: #0037e5;
+    --composer-primary-color: #0037e5;
+    --composer-primary-light-color: #012cb4;
+    --composer-primary-dark-color: #00a88b;
     --composer-icons-color: #8e8e98;
     --composer-header-background-color: var(--composer-background-color);
 

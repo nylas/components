@@ -240,7 +240,7 @@ export interface ComposerProperties extends Manifest {
   show_minimize_button: boolean;
   show_subject: boolean;
   show_to: boolean;
-  theme: "string";
+  theme: "auto" | "light" | "dark" | "light-2" | "dark-2";
   visible: boolean;
 
   value: Partial<Message> | void;
