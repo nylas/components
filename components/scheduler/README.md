@@ -83,8 +83,8 @@ Properties you can pass to Nylas Scheduler are [`event_title`](<(#properties)>),
 
 | Name                 | Type                | Description                                                                      | Required | Default Value                                             |
 | -------------------- | ------------------- | -------------------------------------------------------------------------------- | -------- | --------------------------------------------------------- |
-| id                   | String              | The id of the Scheduler component                                                | true     |                                                           |
-| access_token         | String              | Authorization for component calendar actions                                     | false    |                                                           |
+| id                   | string              | The id of the Scheduler component                                                | true     |                                                           |
+| access_token         | string              | Authorization for component calendar actions                                     | false    |                                                           |
 | booking_label        | string              | Customize the text of the booking button                                         | false    | "Schedule time slots"                                     |
 | custom_fields        | CustomField[]       | Add custom fields to collect input data from users before booking                | false    | By default, the scheduler adds inputs for name, and email |
 | event_title          | string              | Set the title of the event to be scheduled.                                      | false    | "Meeting"                                                 |
