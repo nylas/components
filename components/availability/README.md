@@ -45,7 +45,7 @@ yarn add @nylas/components-availability
 or using the CDN by adding this script tag
 
 ```html
-<script src="https://unpkg.com/@nylas/components-email"></script>
+<script src="https://unpkg.com/@nylas/components-availability"></script>
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ If you haven't registered for a Nylas account yet, you can do so at dashboard.ny
 
 #### Allowed domains
 
-During the setup process, you'll be prompted to provide a list of [allowed domains](https://developer.nylas.com/docs/user-experience/components/email-component/#allowed-domains). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
+During the setup process, you'll be prompted to provide a list of [allowed domains](https://developer.nylas.com/docs/user-experience/components/availability-component/#allowed-domains). Be sure to add any domains you'll be testing your app on, including `localhost`, and any staging and production URLs you might use.
 
 ### Bring your own data
 
