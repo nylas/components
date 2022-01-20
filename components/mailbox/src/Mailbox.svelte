@@ -579,7 +579,6 @@
       subject: message.subject,
       body: message.body,
     };
-
     dispatchEvent("draftThreadEvent", { event, message, thread, value });
   }
 </script>
@@ -957,7 +956,7 @@
               class:no-messages={thread &&
                 thread?.messages &&
                 thread?.messages?.length <= 0 &&
-                !thread?.drafts.length}
+                !thread?.drafts?.length}
             >
               <div class="checkbox-container thread-checkbox">
                 {#if _this.show_thread_checkbox}
@@ -969,7 +968,7 @@
                     disabled={thread &&
                       thread?.messages &&
                       thread?.messages?.length <= 0 &&
-                      !thread?.drafts.length}
+                      !thread?.drafts?.length}
                     on:click={(e) => onSelectOne(e, thread)}
                   />
                 {/if}
