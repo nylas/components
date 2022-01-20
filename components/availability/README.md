@@ -11,7 +11,7 @@ Nylas Availability is currently in active development. Want to contribute? [Find
   - [Usage](#usage)
     - [Using Nylas Provider](#using-nylas-provider)
     - [Bring your own data](#bring-your-own-data)
-  - [Reference (Docs Site)](#reference-docs-site)
+  - [Reference](#reference)
     - [Properties](#properties)
     - [Events](#events)
     - [Types](#types)
@@ -74,7 +74,7 @@ Nylas Availability can be used as a UI for any calendar data you provide.
 
 Properties you can pass to Nylas Availability are [`calendars`](<(#properties)>), [`opening_hours`](#properties)
 
-## Reference (Docs Site)
+## Reference
 
 ### Properties
 

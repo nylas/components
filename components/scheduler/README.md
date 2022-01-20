@@ -11,10 +11,13 @@ Nylas Scheduler is currently in active development. Want to contribute? [Find ou
   - [Usage](#usage)
     - [Using Nylas Provider](#using-nylas-provider)
     - [Bring your own data](#bring-your-own-data)
-  - [Reference (Docs Site)](#reference-docs-site)
+  - [Reference](#reference)
     - [Properties](#properties)
     - [Events](#events)
     - [Types](#types)
+  - [Integrating with Other Components](#integrating-with-other-components)
+    - [Select Event with Nylas Availability](#select-event-with-nylas-availability)
+    - [Select Consecutive Events with Nylas Availability](#select-consecutive-events-with-nylas-availability)
 
 ## Getting Started
 
@@ -72,9 +75,9 @@ During the setup process, you'll be prompted to provide a list of [allowed domai
 
 Nylas Scheduler can be used as a UI for any calendar data you provide.
 
-Properties you can pass to Nylas Scheduler are [`event_title`](<(#properties)>), [`event_description`](#properties), [`event_location`](#properties), [`event_conferencing`](#properties)
+Properties you can pass to Nylas Scheduler are [`event_title`](<(#properties)>), [`event_description`](#properties), [`event_location`](#properties), [`event_conferencing`](#properties), [`slots_to_book`](#properties)
 
-## Reference (Docs Site)
+## Reference
 
 ### Properties
 
@@ -125,27 +128,15 @@ document
   });
 ```
 
-`eventOptionHovered`
-Listen to eventOptionHovered event. Responds with the actively hovered event.
+`hoverOptionChange`
+Listen to hoverOptionChange event. Responds with the actively hovered event when using consecutive mode.
 
 ```js
 document
   .querySelector("nylas-scheduler")
-  .addEventListener("eventOptionHovered", (event) => {
+  .addEventListener("hoverOptionChange", (event) => {
     let { detail } = event;
-    console.log("eventOptionHovered: ", detail.event);
-  });
-```
-
-`eventOptionUnhovered`
-Listen to eventOptionUnhovered event.
-
-```js
-document
-  .querySelector("nylas-scheduler")
-  .addEventListener("eventOptionUnhovered", (event) => {
-    let { detail } = event;
-    console.log("eventOptionUnhovered: ", detail.event);
+    console.log("hoverOptionChange: ", detail.event);
   });
 ```
 
@@ -214,4 +205,85 @@ interface BookableSlot extends TimeSlot {
     | "monthly";
   recurrence_expiry?: Date | string;
 }
+```
+
+## Integrating with Other Components
+
+Nylas Components can also work in coordination with one another. The sections below cover different scenarios.
+
+### Select Event with Nylas Availability
+
+With the Nylas Scheduler Component, you can configure actions based on events. The code below is an example of responding to the `timeSlotChosen` event from the Availability component.
+
+```ts
+document.addEventListener("DOMContentLoaded", function () {
+  const availability = document.querySelector("nylas-availability");
+  const scheduler = document.querySelector("nylas-scheduler");
+
+  // Set event definition
+  availability.events = [
+    {
+      event_title: "My Intro Meeting",
+      event_description: "Lets about nylas components!",
+      slot_size: 15,
+      participantEmails: ["example@example.com"],
+    },
+  ];
+
+  // When a timeslot is selected, set the slot to book on the
+  // scheduler.
+  availability.addEventListener("timeSlotChosen", (event) => {
+    console.log({ timeSlotChosen: event.detail.timeSlots });
+    scheduler.slots_to_book = event.detail.timeSlots;
+  });
+});
+```
+
+### Select Consecutive Events with Nylas Availability
+
+With the Nylas Scheduler Component, you can configure actions based on events. The code below is an example of responding to the `eventOptionSelected` event from the Availability component.
+
+```ts
+document.addEventListener("DOMContentLoaded", function () {
+  const availability = document.querySelector("nylas-availability");
+  const scheduler = document.querySelector("nylas-scheduler");
+
+  // Set event definition
+  availability.events = [
+    {
+      event_title: "My Intro Meeting",
+      event_description: "Lets about nylas components!",
+      slot_size: 15,
+      participantEmails: ["example@example.com"],
+    },
+    {
+      event_title: "Follow Up Meeting",
+      event_description: "Lets about nylas components... again!",
+      slot_size: 15,
+      participantEmails: ["example@example.com"],
+    },
+  ];
+
+  // When a timeslot is selected, set the slot to book on the
+  // scheduler.
+  availability.addEventListener("timeSlotChosen", (event) => {
+    console.log({ timeSlotChosen: event.detail.timeSlots });
+    scheduler.slots_to_book = event.detail.timeSlots;
+  });
+
+  availability.addEventListener("eventOptionsReady", (event) => {
+    console.log({ eventOptionsReady: event.detail.slots });
+    scheduler.event_options = event.detail.slots;
+  });
+
+  scheduler.addEventListener("hoverOptionChange", (event) => {
+    console.log({ eventOptionSelected: event.detail.event });
+    availability.event_to_hover = event.detail.event;
+  });
+
+  scheduler.addEventListener("eventOptionSelected", (event) => {
+    console.log({ eventOptionSelected: event.detail.event });
+    availability.event_to_select = event.detail.event;
+  });
+});
 ```
