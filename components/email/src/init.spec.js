@@ -235,7 +235,7 @@ const EMPTY_THREAD = {
       name: "Phil Renaud",
     },
   ],
-  snippet: "Testing with updated commons! --Sent with Nylas",
+  snippet: "",
   starred: false,
   subject: "This is a Super great test email.",
   unread: true,
