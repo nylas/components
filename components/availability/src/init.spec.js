@@ -67,7 +67,7 @@ describe("Booking time slots", () => {
     currentHour.setHours(currentHour.getHours() + 6);
     cy.wait(["@consecutive", "@availability"]);
 
-    //Get the closest full hour prior to current time, slots isBookable should be false
+    //Get the closest full hour prior to current time, slots fallsWithinAllowedTimeRange should be false
     cy.get(
       `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,
     )
@@ -75,7 +75,7 @@ describe("Booking time slots", () => {
       .click();
     cy.get(".slot.selected").should("not.exist");
 
-    //Get the closest next hour after the current hour, slots isBookable should be true
+    //Get the closest next hour after the current hour, slots fallsWithinAllowedTimeRange should be true
     currentHour.setHours(currentHour.getHours() + 2);
     cy.get(
       `button.slot.unselected[data-start-time="${currentHour.toLocaleString()}"]`,

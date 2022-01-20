@@ -42,7 +42,7 @@ export const generateDaySlots = (
           expirySelection: "",
           recurrence_cadence: "",
           recurrence_expiry: "",
-          isBookable: false,
+          fallsWithinAllowedTimeRange: false,
         };
         for (const calendar of allCalendars) {
           // Adjust calendar.timeslots for buffers
@@ -239,7 +239,7 @@ export const generateDaySlots = (
         available_calendars: freeCalendars,
         start_time: time,
         end_time: endTime,
-        isBookable:
+        fallsWithinAllowedTimeRange:
           timeOffset >= 0 &&
           dayOffset >= internalProps.min_book_ahead_days &&
           dayOffset <= internalProps.max_book_ahead_days,

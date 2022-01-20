@@ -27,7 +27,6 @@
   import { timeWeek, timeDay, timeHour, timeMinute } from "d3-time";
   import { scaleTime, scaleLinear } from "d3-scale";
   import { lightenHexColour } from "@commons/methods/colour";
-
   import {
     SelectionStatus,
     AvailabilityStatus,
@@ -1056,7 +1055,7 @@
 
   // Expand hovered / clicked time slots to show the full consecutive event span
   function inspectConsecutiveBlock(slot: TimeSlot) {
-    if (!slot.isBookable) {
+    if (!slot.fallsWithinAllowedTimeRange) {
       return null;
     }
 
@@ -1224,6 +1223,14 @@
                   class:pending={event_to_hover && slot.selectionPending}
                   data-start-time={new Date(slot.start_time).toLocaleString()}
                   data-end-time={new Date(slot.end_time).toLocaleString()}
+                  class:outside-of-time-range={!slot.fallsWithinAllowedTimeRange}
+                  title={slot.fallsWithinAllowedTimeRange
+                    ? null
+                    : `You may only select timeslots in the future, between ${timeDay
+                        .offset(new Date(), min_book_ahead_days)
+                        .toLocaleDateString()} and ${timeDay
+                        .offset(new Date(), max_book_ahead_days)
+                        .toLocaleDateString()}`}
                   on:click={() => {
                     handleSlotInteractionStart(slot);
                   }}
