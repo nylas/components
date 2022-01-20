@@ -155,10 +155,6 @@
   $: subject = value?.subject ?? $message.subject;
 
   onMount(async () => {
-    const style = document.createElement("style");
-    style.innerHTML = '@import "../nylas-component.css"';
-    document.querySelector("nylas-composer").shadowRoot.prepend(style);
-
     isLoading = true;
     await tick();
 
@@ -389,6 +385,7 @@
 
 <style lang="scss">
   @import "../../theming/reset.scss";
+  @import "../../composer/nylas-component.css";
 
   .nylas-composer {
     // setting vars that contact-search uses
