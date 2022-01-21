@@ -332,6 +332,9 @@
           if (_this.reset_after_send) resetAfterSend($message.from);
           sendPending = false;
           sendSuccess = true;
+          dispatchEvent("messageSent", {
+            message: res,
+          });
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
