@@ -25,7 +25,6 @@
     TimespanEvent,
     DateEvent,
   } from "@commons/types/Events";
-  import ErrorMessage from "@commonscomponents/ErrorMessage.svelte";
 
   // #region props
   const INTERNAL_EVENT_PROPS = Object.freeze([
