@@ -12,19 +12,5 @@
       "message": "publish"
     }
   },
-  "ignoreChanges": [
-    "**/*.md",
-    "**/node_modules/**",
-    "**/components/availability/**",
-    "**/components/email/**",
-    "**/components/mailbox/**",
-    "**/components/composer/**",
-    "**/components/datepicker/**",
-    "**/components/schedule-editor/**",
-    "**/components/scheduler/**",
-    "**/components/contact-list/**",
-    "**/components/conversation/**",
-    "**/*.spec.js",
-    "tests/**"
-  ]
+  "ignoreChanges": ["**/*.md", "**/node_modules/**", "**/*.spec.js", "tests/**"]
 }
