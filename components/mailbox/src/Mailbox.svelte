@@ -252,7 +252,7 @@
   //#endregion methods
 
   // Callbacks
-  export const sentMessageUpdate = async (message: Message): Promise<void> => {
+  export async function sentMessageUpdate (message: Message): Promise<void> {
     threads = MailboxStore.hydrateMessageInThread(message, query, currentPage);
   };
 
