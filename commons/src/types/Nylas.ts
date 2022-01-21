@@ -317,6 +317,7 @@ export interface Thread {
   folder_id?: string;
   label_ids?: string[];
   selected?: boolean;
+  drafts?: Message[];
 }
 export interface Conversation extends Thread {
   messages: Message[];

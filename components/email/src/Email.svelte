@@ -421,8 +421,10 @@
           );
         }
       }
-    } else if (messageType !== MessageType.DRAFTS && !activeThread.expanded) {
-      activeThread.expanded = !activeThread.expanded;
+
+      if (messageType !== MessageType.DRAFTS) {
+        activeThread.expanded = !activeThread.expanded;
+      }
     }
 
     dispatchEvent("threadClicked", {
@@ -899,11 +901,14 @@
         font-family: sans-serif;
         font-size: 1rem;
         font-weight: bold;
-        height: 31px;
+        height: 32px;
         line-height: 35px;
         text-align: center;
         text-transform: uppercase;
         width: 32px;
+        &.deleted {
+          background: var(--red);
+        }
       }
       header {
         font-size: 1.2rem;
@@ -923,32 +928,7 @@
           align-items: flex-start;
           background: var(--grey-lighter);
         }
-        .no-message-avatar-container {
-          display: grid;
-          &.show-star {
-            margin-left: calc(
-              25px + 0.5rem
-            ); //to account for space occupied by star
-          }
-          .default-avatar {
-            background: var(--red);
-            display: flex;
-            justify-content: center;
-            align-items: center;
 
-            &.draft {
-              background: var(--blue);
-            }
-          }
-        }
-        .no-messages-warning-container {
-          display: grid;
-          color: var(--red);
-          align-self: center;
-          &.draft {
-            color: var(--blue);
-          }
-        }
         .from-star {
           display: grid;
           grid-template-columns: 25px auto;
@@ -1281,6 +1261,9 @@
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+            &.deleted {
+              color: var(--red);
+            }
           }
         }
 
@@ -1492,7 +1475,7 @@
         .subject-snippet-attachment {
           .subject-snippet {
             display: grid;
-            grid-template-columns: auto auto;
+            grid-template-columns: auto 1fr;
             gap: 1rem;
           }
         }
@@ -1820,9 +1803,17 @@
                 {/if}
                 <div class="from-message-count">
                   {#if _this.show_contact_avatar}
-                    <div class="default-avatar" class:draft={isDraft}>
-                      {#if isDraft}
-                        <DraftIcon />
+                    <div
+                      class="default-avatar"
+                      class:deleted={activeThread.messages.length <= 0 &&
+                        !isDraft}
+                    >
+                      {#if activeThread && activeThread.messages.length <= 0}
+                        {#if isDraft}
+                          <DraftIcon />
+                        {:else}
+                          <NoMessagesIcon />
+                        {/if}
                       {:else}
                         <nylas-contact-image
                           {contact_query}
@@ -1840,10 +1831,14 @@
                       )}
                     >
                       <span class="from-sub-section">
-                        {showFromParticipants(
-                          activeThread.messages,
-                          activeThread.participants,
-                        )}
+                        {!activeThread.messages.length
+                          ? isDraft
+                            ? "Draft"
+                            : "Deleted Email"
+                          : showFromParticipants(
+                              activeThread.messages,
+                              activeThread.participants,
+                            )}
                       </span>
                     </div>
                     <div class="participants-count">
@@ -1871,23 +1866,31 @@
               </div>
               {#if _this.show_number_of_messages}
                 <span class="thread-message-count">
-                  {activeThread.messages.length
+                  {activeThread?.messages?.length > 0
                     ? activeThread.messages.length
                     : ""}
                 </span>
               {/if}
               <div class="subject-snippet-attachment">
                 <div class="subject-snippet">
-                  {#if thread?.subject}<span class="subject"
-                      >{thread?.subject}</span
-                    >{/if}
-                  <span class="snippet"
-                    >{(isDraft && activeThread?.drafts.length) ||
-                    activeThread?.messages.length
-                      ? thread.snippet.replace(/\u200C /g, "")
-                      : `Sorry, looks like this thread is currently unavailable. It may
-                    have been deleted in your provider inbox.`}</span
+                  {#if thread?.subject}
+                    <span class="subject">
+                      {thread?.subject}
+                    </span>
+                  {/if}
+                  <span
+                    class="snippet"
+                    class:deleted={activeThread.messages.length <= 0 && !isDraft}
                   >
+                    {activeThread.messages.length <= 0 && !isDraft
+                      ? `Sorry, looks like this thread is currently unavailable. It may
+                    have been deleted in your provider inbox.`
+                      : !thread?.snippet && isDraft
+                      ? "This is a draft email"
+                      : thread?.snippet
+                      ? thread.snippet.replace(/\u200C /g, "")
+                      : ""}
+                  </span>
                 </div>
                 {#if Object.keys(attachedFiles).length > 0}
                   <div class="attachment">
