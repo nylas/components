@@ -875,7 +875,7 @@ describe("Email: Displays threads and messages", () => {
     });
   });
 
-  it.only("Renders inline file appropriately", () => {
+  it("Renders inline file appropriately", () => {
     cy.intercept("GET", "https://web-components.nylas.com/middleware/manifest");
 
     cy.get("@email").then((element) => {
