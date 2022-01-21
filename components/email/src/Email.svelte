@@ -421,10 +421,8 @@
           );
         }
       }
-
-      if (messageType !== MessageType.DRAFTS) {
-        activeThread.expanded = !activeThread.expanded;
-      }
+    } else if (messageType !== MessageType.DRAFTS && !activeThread.expanded) {
+      activeThread.expanded = !activeThread.expanded;
     }
 
     dispatchEvent("threadClicked", {
@@ -845,30 +843,14 @@
     );
   }
 
-  let messagesContainerNode: HTMLElement | null = null;
   let latestMessageNode: HTMLElement | null = null;
+  $: latestMessageNode = messageRefs[activeThread?.messages?.length - 1];
   let scrolledToLatest = false;
 
-  function storeMessagesContainer(node: HTMLElement) {
-    messagesContainerNode = node;
-  }
-
-  function storeLatestMessageNode(
-    node: HTMLElement,
-    { msgIndex }: { msgIndex: number },
-  ) {
-    if (activeThread.messages.length - 1 === msgIndex) {
-      latestMessageNode = node;
-    }
-  }
-
-  $: if (messagesContainerNode && latestMessageNode && !scrolledToLatest) {
-    // scroll if latest message is not already at the top
-    if (latestMessageNode.offsetTop > 0) {
-      messagesContainerNode.scrollTo({
-        behavior: "smooth",
-        top: latestMessageNode.offsetTop,
-      });
+  $: if (latestMessageNode && !scrolledToLatest) {
+    // scroll to latest message if it's outside of the viewport
+    if (latestMessageNode.offsetTop > window.innerHeight) {
+      latestMessageNode.scrollIntoView({ behavior: "smooth", block: "end" });
       scrolledToLatest = true;
     }
   }
@@ -1533,7 +1515,6 @@
       {#if thread && activeThread}
         {#if activeThread.expanded}
           <div
-            use:storeMessagesContainer
             class="email-row expanded {_this.click_action === 'mailbox'
               ? 'expanded-mailbox-thread'
               : ''}"
@@ -1611,7 +1592,6 @@
                       : "condensed"
                   }`}
                   bind:this={messageRefs[msgIndex]}
-                  use:storeLatestMessageNode={{ msgIndex }}
                   on:click|stopPropagation={(e) =>
                     handleEmailClick(e, msgIndex)}
                   on:keypress={(e) => handleEmailKeypress(e, msgIndex)}
