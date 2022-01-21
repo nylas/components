@@ -1879,11 +1879,8 @@
                     </span>
                   {/if}
                   <span
-                    class={`snippet ${
-                      activeThread.messages.length <= 0 && !isDraft
-                        ? "deleted"
-                        : ""
-                    }`}
+                    class="snippet"
+                    class:deleted={activeThread.messages.length <= 0 && !isDraft}
                   >
                     {activeThread.messages.length <= 0 && !isDraft
                       ? `Sorry, looks like this thread is currently unavailable. It may
