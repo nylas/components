@@ -254,6 +254,498 @@ const DRAFT_THREAD = {
   ],
 };
 
+const SINGLE_SENDER_MESSAGE = {
+  account_id: "cou6r5tjgubx9rswikzvz9afb",
+  bcc: [],
+  cc: [
+    {
+      email: "phil.r@nylas.com",
+      name: "Phil Renaud",
+    },
+    {
+      email: "review_requested@noreply.github.com",
+      name: "Review requested",
+    },
+  ],
+  date: 1621472861,
+  files: [],
+  from: [
+    {
+      email: "notifications@github.com",
+      name: "Mostafa Rashed",
+    },
+  ],
+  id: "epgslj6wocxcnuyy6h9yyle6v",
+  labels: [
+    {
+      display_name: "Inbox",
+      id: "3fhdx7sufj12vbhhjm5ecwcm4",
+      name: "inbox",
+    },
+  ],
+  object: "message",
+  reply_to: [
+    {
+      email:
+        "reply+AAFOKBZZTCUKW3S3KF62NIF6WGLV3EVBNHHDK2QOAM@reply.github.com",
+      name: "nylas/nylas-nodejs",
+    },
+  ],
+  snippet:
+    "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+  starred: false,
+  subject:
+    "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+  thread_id: "db8z5xg97si2qio9z7md84fgk",
+  to: [
+    {
+      email: "nylas-nodejs@noreply.github.com",
+      name: "nylas/nylas-nodejs",
+    },
+  ],
+  unread: true,
+};
+
+const SINGLE_SENDER_THREAD = {
+  account_id: "cou6r5tjgubx9rswikzvz9afb",
+  drafts: [],
+  first_message_timestamp: 1621472861,
+  has_attachments: false,
+  id: "db8z5xg97si2qio9z7md84fgk",
+  labels: [
+    {
+      display_name: "Inbox",
+      id: "3fhdx7sufj12vbhhjm5ecwcm4",
+      name: "inbox",
+    },
+  ],
+  last_message_received_timestamp: 1621472865,
+  last_message_sent_timestamp: null,
+  last_message_timestamp: 1621472865,
+  messages: [
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      bcc: [],
+      cc: [
+        {
+          email: "phil.r@nylas.com",
+          name: "Phil Renaud",
+        },
+        {
+          email: "review_requested@noreply.github.com",
+          name: "Review requested",
+        },
+      ],
+      date: 1621472861,
+      files: [],
+      from: [
+        {
+          email: "notifications@github.com",
+          name: "Mostafa Rashed",
+        },
+      ],
+      id: "epgslj6wocxcnuyy6h9yyle6v",
+      labels: [
+        {
+          display_name: "Inbox",
+          id: "3fhdx7sufj12vbhhjm5ecwcm4",
+          name: "inbox",
+        },
+      ],
+      object: "message",
+      reply_to: [
+        {
+          email:
+            "reply+AAFOKBZZTCUKW3S3KF62NIF6WGLV3EVBNHHDK2QOAM@reply.github.com",
+          name: "nylas/nylas-nodejs",
+        },
+      ],
+      snippet:
+        "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+      starred: false,
+      subject:
+        "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      thread_id: "db8z5xg97si2qio9z7md84fgk",
+      to: [
+        {
+          email: "nylas-nodejs@noreply.github.com",
+          name: "nylas/nylas-nodejs",
+        },
+      ],
+      unread: true,
+    },
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      bcc: [],
+      body: "This is some manually-created body text. It's allowed to fully deviate from the snippet and you can even <marquee>include some html</marquee>",
+      cc: [
+        {
+          email: "phil.r@nylas.com",
+          name: "Phil Renaud",
+        },
+        {
+          email: "review_requested@noreply.github.com",
+          name: "Review requested",
+        },
+      ],
+      date: 1621472862,
+      files: [],
+      from: [
+        {
+          email: "notifications@github.com",
+          name: "Mostafa Rashed",
+        },
+      ],
+      id: "alix2bbga2afjikdma1q0jbyc",
+      labels: [
+        {
+          display_name: "Inbox",
+          id: "3fhdx7sufj12vbhhjm5ecwcm4",
+          name: "inbox",
+        },
+      ],
+      object: "message",
+      reply_to: [
+        {
+          email:
+            "reply+AAFOKBZZTCUKW3S3KF62NIF6WGLV3EVBNHHDK2QOAM@reply.github.com",
+          name: "nylas/nylas-nodejs",
+        },
+      ],
+      snippet:
+        "@mrashed-dev requested your review on: #228 [59911] Add support for querying event metadata. — You are receiving this because your review was requested. Reply to this email directly, view it ",
+      starred: false,
+      subject:
+        "Re: [nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      thread_id: "db8z5xg97si2qio9z7md84fgk",
+      to: [
+        {
+          email: "nylas-nodejs@noreply.github.com",
+          name: "nylas/nylas-nodejs",
+        },
+      ],
+      unread: true,
+    },
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      bcc: [],
+      cc: [
+        {
+          email: "phil.r@nylas.com",
+          name: "Phil Renaud",
+        },
+        {
+          email: "review_requested@noreply.github.com",
+          name: "Review requested",
+        },
+      ],
+      date: 1621472865,
+      files: [],
+      from: [
+        {
+          email: "notifications@github.com",
+          name: "clubhouse[bot]",
+        },
+      ],
+      id: "dyo31yp47hbrb5nj90a1s5j5c",
+      labels: [
+        {
+          display_name: "Inbox",
+          id: "3fhdx7sufj12vbhhjm5ecwcm4",
+          name: "inbox",
+        },
+      ],
+      object: "message",
+      reply_to: [
+        {
+          email:
+            "reply+AAFOKB4ULDXTTZHEL54A4LF6WGLWDEVBNHHDK2QOAM@reply.github.com",
+          name: "nylas/nylas-nodejs",
+        },
+      ],
+      snippet:
+        "This pull request has been linked to Clubhouse Story #59911: Node SDK - Add support for querying event metadata. — You are receiving this because your review was requested. Reply to this emai",
+      starred: false,
+      subject:
+        "Re: [nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      thread_id: "db8z5xg97si2qio9z7md84fgk",
+      to: [
+        {
+          email: "nylas-nodejs@noreply.github.com",
+          name: "nylas/nylas-nodejs",
+        },
+      ],
+      unread: true,
+    },
+  ],
+  object: "thread",
+  participants: [
+    {
+      email: "review_requested@noreply.github.com",
+      name: "Review requested",
+    },
+    {
+      email: "notifications@github.com",
+      name: "clubhouse[bot]",
+    },
+    {
+      email: "notifications@github.com",
+      name: "Mostafa Rashed",
+    },
+    {
+      email: "nylas-nodejs@noreply.github.com",
+      name: "nylas/nylas-nodejs",
+    },
+    {
+      email: "phil.r@nylas.com",
+      name: "Phil Renaud",
+    },
+  ],
+  snippet:
+    "This pull request has been linked to Clubhouse Story #59911: Node SDK - Add support for querying event metadata. — You are receiving this because your review was requested. Reply to this emai",
+  starred: false,
+  subject:
+    "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+  unread: true,
+  version: 1,
+};
+
+const MULTIPLE_SENDER_MESSAGE = {
+  account_id: "1xrddnl99frq3b7son9j32aba",
+  bcc: [],
+  body: "Allo bonjour <br /><br /> --Sent with Nylas",
+  cc: [
+    {
+      email: "test@nylas.com",
+      name: "Real User",
+    },
+  ],
+  date: 1634858431,
+  events: [],
+  files: [],
+  from: [
+    {
+      email: "c@c.com",
+      name: "The Letter C",
+    },
+  ],
+  id: "affxolvozy2pcqh4303w7pc9n",
+  labels: [
+    {
+      display_name: "INBOX",
+      id: "dx62wkpj57erbkargbr3zew3j",
+      name: "inbox",
+    },
+    {
+      display_name: "All Mail",
+      id: "78im4dxnn2mj0hl038vcnezwn",
+      name: "all",
+    },
+    {
+      display_name: "SENT",
+      id: "17ocjrnqb2w5m402t1lwswkkl",
+      name: "sent",
+    },
+  ],
+  object: "message",
+  reply_to: [],
+  snippet: "Allo bonjour --Sent with Nylas",
+  starred: false,
+  subject: "Alphabet Soup",
+  thread_id: "ak2q46em0srqkh7vri8f8vuqj",
+  to: [
+    {
+      email: "nylascypresstest@gmail.com",
+      name: "Test User",
+    },
+    {
+      email: "a@a.com",
+      name: "The Letter A",
+    },
+    {
+      email: "b@b.com",
+      name: "The Letter b",
+    },
+  ],
+  unread: false,
+};
+
+const MULTIPLE_SENDER_THREAD = {
+  account_id: "cou6r5tjgubx9rswikzvz9afb",
+  drafts: [],
+  first_message_timestamp: 1621472861,
+  has_attachments: false,
+  id: "db8z5xg97si2qio9z7md84fgk",
+  labels: [
+    {
+      display_name: "Inbox",
+      id: "3fhdx7sufj12vbhhjm5ecwcm4",
+      name: "inbox",
+    },
+  ],
+  last_message_received_timestamp: 1621472865,
+  last_message_sent_timestamp: null,
+  last_message_timestamp: 1621472865,
+  messages: [
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      bcc: [],
+      cc: [],
+      date: 1621472861,
+      files: [],
+      from: [
+        {
+          email: "c@c.com",
+          name: "The Letter C",
+        },
+      ],
+      id: "epgslj6wocxcnuyy6h9yyle6v",
+      labels: [
+        {
+          display_name: "Inbox",
+          id: "3fhdx7sufj12vbhhjm5ecwcm4",
+          name: "inbox",
+        },
+      ],
+      object: "message",
+      reply_to: [],
+      snippet:
+        "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+      starred: false,
+      subject:
+        "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      thread_id: "db8z5xg97si2qio9z7md84fgk",
+      to: [
+        {
+          email: "nylascypresstest@gmail.com",
+          name: "Test User",
+        },
+        {
+          email: "a@a.com",
+          name: "The Letter A",
+        },
+        {
+          email: "b@b.com",
+          name: "The Letter b",
+        },
+      ],
+      unread: true,
+    },
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      bcc: [],
+      cc: [],
+      date: 1621472861,
+      files: [],
+      from: [
+        {
+          email: "c@c.com",
+          name: "The Letter C",
+        },
+      ],
+      id: "epgslj6wocxcnuyy6h9yyle6v",
+      labels: [
+        {
+          display_name: "Inbox",
+          id: "3fhdx7sufj12vbhhjm5ecwcm4",
+          name: "inbox",
+        },
+      ],
+      object: "message",
+      reply_to: [],
+      snippet:
+        "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+      starred: false,
+      subject:
+        "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      thread_id: "db8z5xg97si2qio9z7md84fgk",
+      to: [
+        {
+          email: "nylascypresstest@gmail.com",
+          name: "Test User",
+        },
+        {
+          email: "a@a.com",
+          name: "The Letter A",
+        },
+        {
+          email: "b@b.com",
+          name: "The Letter b",
+        },
+      ],
+      unread: true,
+    },
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      bcc: [],
+      cc: [],
+      date: 1621472861,
+      files: [],
+      from: [
+        {
+          email: "c@c.com",
+          name: "The Letter C",
+        },
+      ],
+      id: "epgslj6wocxcnuyy6h9yyle6v",
+      labels: [
+        {
+          display_name: "Inbox",
+          id: "3fhdx7sufj12vbhhjm5ecwcm4",
+          name: "inbox",
+        },
+      ],
+      object: "message",
+      reply_to: [],
+      snippet:
+        "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+      starred: false,
+      subject:
+        "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+      thread_id: "db8z5xg97si2qio9z7md84fgk",
+      to: [
+        {
+          email: "nylascypresstest@gmail.com",
+          name: "Test User",
+        },
+        {
+          email: "a@a.com",
+          name: "The Letter A",
+        },
+        {
+          email: "b@b.com",
+          name: "The Letter b",
+        },
+      ],
+      unread: true,
+    },
+  ],
+  object: "thread",
+  participants: [
+    {
+      email: "nylascypresstest@gmail.com",
+      name: "Test User",
+    },
+    {
+      email: "a@a.com",
+      name: "The Letter A",
+    },
+    {
+      email: "b@b.com",
+      name: "The Letter b",
+    },
+    {
+      email: "c@c.com",
+      name: "The Letter C",
+    },
+  ],
+  snippet: "Alphabet Soup",
+  starred: false,
+  subject: "Alphabet Soup",
+  unread: true,
+  version: 1,
+};
+
 describe("Email: Displays threads and messages", () => {
   beforeEach(() => {
     cy.intercept(
@@ -793,5 +1285,170 @@ describe("Email: Toggle email of sender/recipient", () => {
             .should("eq", "show email");
         });
     });
+  });
+});
+
+describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
+  beforeEach(() => {
+    cy.visit("/components/email/src/cypress.html");
+
+    cy.get("nylas-email").as("email");
+
+    cy.get("@email").invoke("attr", "show_reply", "true");
+  });
+
+  it("Should Render Reply Button When Passed A Message", () => {
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply button").should("exist");
+  });
+
+  it("Should Render Reply Button When Passed A Thread", () => {
+    cy.get("@email").invoke("prop", "thread", SAMPLE_THREAD);
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").find("div.reply button").as("replyButton");
+    cy.get("@replyButton").should("exist");
+  });
+
+  it("Should Render Reply Button When Passed A Message ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/d0byfc378l2728z35pax362ho",
+      },
+      {
+        fixture: "email/messages/id.json",
+      },
+    ).as("messageRequest");
+
+    cy.get("@email").invoke("attr", "message_id", "d0byfc378l2728z35pax362ho");
+    cy.wait("@messageRequest");
+
+    cy.get("@email").find("div.reply button").should("exist");
+  });
+
+  it("Should Render Reply Button When Passed A Thread ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/threads/e2k5xktxejdok7d8x28ljf44d?view=expanded",
+      },
+      {
+        fixture: "email/threads/id.json",
+      },
+    ).as("threadRequest");
+
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/*",
+      },
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").invoke("attr", "thread_id", "e2k5xktxejdok7d8x28ljf44d");
+    cy.wait("@threadRequest");
+    cy.get("@email").find("div.reply button").should("exist");
+  });
+
+  it("Should Dispatch Event When Reply Button Is Clicked", () => {
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply button").as("replyButton");
+    cy.get("@replyButton").should("exist");
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      component.addEventListener("replyClicked", cy.stub().as("replyClicked"));
+    });
+    cy.get("@replyButton").click();
+    cy.get("@replyClicked").should("have.been.calledOnce");
+  });
+});
+
+describe("Should Render Reply All Button And Respond To Clicks", () => {
+  beforeEach(() => {
+    cy.visit("/components/email/src/cypress.html");
+
+    cy.get("nylas-email").as("email");
+
+    cy.get("@email").invoke("attr", "show_reply_all", "true");
+  });
+
+  it("Should Render Reply All Button When Passed A Message", () => {
+    cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply-all button").should("exist");
+  });
+
+  it("Should Render Reply All Button When Passed A Thread", () => {
+    cy.get("@email").invoke("prop", "thread", MULTIPLE_SENDER_THREAD);
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").find("div.reply-all button").should("exist");
+  });
+
+  it("Should Render Reply All Button When Passed A Message ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/d0byfc378l2728z35pax362ho",
+      },
+      {
+        fixture: "email/messages/idWithMultipleSenders.json",
+      },
+    ).as("messageRequest");
+
+    cy.get("@email").invoke("attr", "message_id", "d0byfc378l2728z35pax362ho");
+    cy.wait("@messageRequest");
+
+    cy.get("@email").find("div.reply-all button").should("exist");
+  });
+
+  it("Should Render Reply All Button When Passed A Thread ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/threads/e2k5xktxejdok7d8x28ljf44d?view=expanded",
+      },
+      {
+        fixture: "email/threads/idWithMultipleSenders.json",
+      },
+    ).as("threadRequest");
+
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/*",
+      },
+      {
+        fixture: "email/messages/idWithMultipleSenders.json",
+      },
+    );
+
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").invoke("attr", "thread_id", "e2k5xktxejdok7d8x28ljf44d");
+    cy.wait("@threadRequest");
+    cy.get("@email").find("div.reply-all button").should("exist");
+  });
+
+  it("Should Not Render Reply All Button When Reply All Option Is Not Available", () => {
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply-all button").should("not.exist");
+  });
+
+  it("Should Dispatch Event When Reply All Button Is Clicked", () => {
+    cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply-all button").as("replyAllButton");
+    cy.get("@replyAllButton").should("exist");
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      component.addEventListener(
+        "replyAllClicked",
+        cy.stub().as("replyAllClicked"),
+      );
+    });
+
+    cy.get("@replyAllButton").click();
+    cy.get("@replyAllClicked").should("have.been.calledOnce");
   });
 });

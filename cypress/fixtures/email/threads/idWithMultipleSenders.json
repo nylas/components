@@ -1,0 +1,183 @@
+{
+  "component": {
+    "theming": {
+      "show_received_timestamp": true,
+      "thread_id": "b3z0fd5kbbwcxvf4q1ele5us6",
+      "clean_conversation": false,
+      "unread": false,
+      "show_star": false,
+      "show_contact_avatar": true,
+      "show_number_of_messages": true,
+      "click_action": "select"
+    }
+  },
+  "response": {
+    "account_id": "cou6r5tjgubx9rswikzvz9afb",
+    "drafts": [],
+    "first_message_timestamp": 1621472861,
+    "has_attachments": false,
+    "id": "db8z5xg97si2qio9z7md84fgk",
+    "labels": [
+      {
+        "display_name": "Inbox",
+        "id": "3fhdx7sufj12vbhhjm5ecwcm4",
+        "name": "inbox"
+      }
+    ],
+    "last_message_received_timestamp": 1621472865,
+    "last_message_sent_timestamp": null,
+    "last_message_timestamp": 1621472865,
+    "messages": [
+      {
+        "account_id": "cou6r5tjgubx9rswikzvz9afb",
+        "bcc": [],
+        "cc": [],
+        "date": 1621472861,
+        "files": [],
+        "from": [
+          {
+            "email": "c@c.com",
+            "name": "The Letter C"
+          }
+        ],
+        "id": "epgslj6wocxcnuyy6h9yyle6v",
+        "labels": [
+          {
+            "display_name": "Inbox",
+            "id": "3fhdx7sufj12vbhhjm5ecwcm4",
+            "name": "inbox"
+          }
+        ],
+        "object": "message",
+        "reply_to": [],
+        "snippet": "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+        "starred": false,
+        "subject": "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+        "thread_id": "db8z5xg97si2qio9z7md84fgk",
+        "to": [
+          {
+            "email": "nylascypresstest@gmail.com",
+            "name": "Test User"
+          },
+          {
+            "email": "a@a.com",
+            "name": "The Letter A"
+          },
+          {
+            "email": "b@b.com",
+            "name": "The Letter b"
+          }
+        ],
+        "unread": true
+      },
+      {
+        "account_id": "cou6r5tjgubx9rswikzvz9afb",
+        "bcc": [],
+        "cc": [],
+        "date": 1621472861,
+        "files": [],
+        "from": [
+          {
+            "email": "c@c.com",
+            "name": "The Letter C"
+          }
+        ],
+        "id": "epgslj6wocxcnuyy6h9yyle6v",
+        "labels": [
+          {
+            "display_name": "Inbox",
+            "id": "3fhdx7sufj12vbhhjm5ecwcm4",
+            "name": "inbox"
+          }
+        ],
+        "object": "message",
+        "reply_to": [],
+        "snippet": "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+        "starred": false,
+        "subject": "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+        "thread_id": "db8z5xg97si2qio9z7md84fgk",
+        "to": [
+          {
+            "email": "nylascypresstest@gmail.com",
+            "name": "Test User"
+          },
+          {
+            "email": "a@a.com",
+            "name": "The Letter A"
+          },
+          {
+            "email": "b@b.com",
+            "name": "The Letter b"
+          }
+        ],
+        "unread": true
+      },
+      {
+        "account_id": "cou6r5tjgubx9rswikzvz9afb",
+        "bcc": [],
+        "cc": [],
+        "date": 1621472861,
+        "files": [],
+        "from": [
+          {
+            "email": "c@c.com",
+            "name": "The Letter C"
+          }
+        ],
+        "id": "epgslj6wocxcnuyy6h9yyle6v",
+        "labels": [
+          {
+            "display_name": "Inbox",
+            "id": "3fhdx7sufj12vbhhjm5ecwcm4",
+            "name": "inbox"
+          }
+        ],
+        "object": "message",
+        "reply_to": [],
+        "snippet": "Description #227 added support for event metadata, this PR enhances this feature and allows for a user to query metadata using either the metadata_key, or metadata_value, or metadata_pair par",
+        "starred": false,
+        "subject": "[nylas/nylas-nodejs] [59911] Add support for querying event metadata (#228)",
+        "thread_id": "db8z5xg97si2qio9z7md84fgk",
+        "to": [
+          {
+            "email": "nylascypresstest@gmail.com",
+            "name": "Test User"
+          },
+          {
+            "email": "a@a.com",
+            "name": "The Letter A"
+          },
+          {
+            "email": "b@b.com",
+            "name": "The Letter b"
+          }
+        ],
+        "unread": true
+      }
+    ],
+    "object": "thread",
+    "participants": [
+      {
+        "email": "nylascypresstest@gmail.com",
+        "name": "Test User"
+      },
+      {
+        "email": "a@a.com",
+        "name": "The Letter A"
+      },
+      {
+        "email": "b@b.com",
+        "name": "The Letter b"
+      },
+      {
+        "email": "c@c.com",
+        "name": "The Letter C"
+      }
+    ],
+    "snippet": "Alphabet Soup",
+    "starred": false,
+    "subject": "Alphabet Soup",
+    "unread": true,
+    "version": 1
+  }
+}
