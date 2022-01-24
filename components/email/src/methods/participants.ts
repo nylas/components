@@ -10,8 +10,8 @@ export function includesMyEmail(
   );
 }
 
-export function participantsWithoutMe(
-  myEmail: string,
+export function participantsWithoutGivenEmails(
+  emails: string[],
   message: Message,
 ): Participant[] {
   const allParticipants = [
@@ -20,7 +20,7 @@ export function participantsWithoutMe(
     ...message.cc,
     ...message.bcc,
   ];
-  return allParticipants.filter((e) => e.email !== myEmail);
+  return allParticipants.filter((e) => !emails.includes(e.email));
 }
 
 type BuildParticipant = {
@@ -47,10 +47,14 @@ export function buildParticipants({
       break;
     case "reply_all":
       if (includesMyEmail(myEmail, message, "cc")) {
-        to = participantsWithoutMe(myEmail, message);
+        to = participantsWithoutGivenEmails([myEmail], message);
       } else {
         to = message.from;
-        cc = message.cc;
+        const fromEmails = message.from?.map((i) => i.email);
+        cc = [
+          ...message.cc,
+          ...participantsWithoutGivenEmails([...fromEmails, myEmail], message),
+        ];
       }
       break;
   }
