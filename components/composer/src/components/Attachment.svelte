@@ -1,3 +1,5 @@
+<svelte:options tag="nylas-composer-attachment" />
+
 <script lang="ts">
   import CloseIcon from "../assets/close.svg";
   import LoadingIcon from "../assets/loading.svg";
@@ -17,7 +19,7 @@
 
 <style lang="scss">
   @import "../../../theming/variables.scss";
-  .composer-attachment {
+  .wrapper {
     padding: 0.3rem 0;
   }
 
@@ -85,7 +87,7 @@
 </style>
 
 {#if attachment}
-  <div class="composer-attachment">
+  <div class="wrapper">
     <div class="file-item">
       <div class="file-info">
         {#if !attachment.error}

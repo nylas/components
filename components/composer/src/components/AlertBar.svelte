@@ -1,3 +1,5 @@
+<svelte:options tag="nylas-composer-alert-bar" />
+
 <script>
   export let type = "primary";
   export let dismissible = true;

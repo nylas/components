@@ -1,5 +1,7 @@
+<svelte:options tag="nylas-composer-datepicker-modal" />
+
 <script type="ts">
-  import "../../../datepicker/src/Datepicker.wc.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
+  import "../../../datepicker/src/Datepicker.svelte"; // TODO: for local development. This'll update your bundle on commons changes.
   import CloseIcon from "../assets/close.svg";
   import type {
     DatepickerCallback,
