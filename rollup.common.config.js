@@ -103,10 +103,8 @@ export const svelteWebConfig = ({ svg = false, json = false }) => {
     css({ output: "nylas-component.css" }),
     svelte({
       preprocess: preprocess({
-        preserve: ["button", "button.svelte-1bkwwtq"],
         scss: {
-          prependData: `
-          @use "./nylas-component.css";`,
+          prependData: `@use "./nylas-component.css";`,
         },
       }),
       emitCss: false,
