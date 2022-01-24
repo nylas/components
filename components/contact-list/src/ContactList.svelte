@@ -2,7 +2,6 @@
 
 <script lang="ts">
   import formatDistanceStrict from "date-fns/formatDistanceStrict";
-  import "@commons/components/NError.svelte";
   import {
     ErrorStore,
     fetchContactImage,

@@ -1,3 +1,5 @@
+<svelte:options tag="nylas-contacts-search" immutable={true} />
+
 <script lang="ts">
   import { debounce, isValidEmail } from "../lib/utils";
   import { tick } from "svelte";
@@ -14,7 +16,6 @@
   export let single: boolean = false;
   export let change: ChangeCallback | void;
   export let show_dropdown: boolean = true;
-  export let id: string;
 
   let selectedContacts: Participant[] = [];
   let term: string = ""; // TODO: rename to "term"
@@ -325,7 +326,6 @@
     {#if (single && !selectedContacts.length) || !single}
       <form on:submit|preventDefault={handleSubmit} class="search-form">
         <input
-          {id}
           data-cy="contacts-search-field"
           type="text"
           name="email"

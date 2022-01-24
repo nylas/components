@@ -1,12 +1,11 @@
 <svelte:options tag="nylas-composer" immutable />
 
 <script lang="ts">
-  import HTMLEditor from "./components/HTMLEditor.svelte";
-  import AlertBar from "./components/AlertBar.svelte";
-  import ComposerAttachment from "./components/Attachment.svelte";
-  import DatepickerModal from "./components/DatepickerModal.svelte";
-  import ContactsSearch from "./components/ContactsSearch.svelte";
-  import NylasError from "@commons/components/DefaultError.svelte";
+  import "./components/HTMLEditor.svelte";
+  import "./components/AlertBar.svelte";
+  import "./components/Attachment.svelte";
+  import "./components/DatepickerModal.svelte";
+  import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
 
   import {
@@ -155,10 +154,6 @@
   $: subject = value?.subject ?? $message.subject;
 
   onMount(async () => {
-    const style = document.createElement("style");
-    style.innerHTML = '@import "../nylas-component.css"';
-    document.querySelector("nylas-composer").shadowRoot.prepend(style);
-
     isLoading = true;
     await tick();
 
@@ -671,7 +666,7 @@
   }
 </style>
 
-<NylasError {id} />
+<nylas-error {id} />
 
 {#if themeUrl}
   <link
@@ -748,8 +743,8 @@
             </div>
           {/if}
           {#if _this.show_to}
-            <ContactsSearch
-              id="to-field"
+            <nylas-contacts-search
+              data-cy="to-field"
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
@@ -784,8 +779,8 @@
         </div>
         {#if _this.show_cc}
           <div class="cc-container">
-            <ContactsSearch
-              id="cc-field"
+            <nylas-contacts-search
+              data-cy="cc-field"
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
@@ -807,8 +802,8 @@
         {/if}
         {#if _this.show_bcc}
           <div class="cc-container">
-            <ContactsSearch
-              id="bcc-field"
+            <nylas-contacts-search
+              data-cy="bcc-field"
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}
@@ -845,7 +840,8 @@
         {/if}
 
         <!-- HTML Editor -->
-        <HTMLEditor
+        <nylas-html-editor
+          data-cy="html-editor"
           html={$message.body || template}
           onchange={handleBodyChange}
           replace_fields={_this.replace_fields}
@@ -858,7 +854,7 @@
               <div class="attachments-caption">Attachments:</div>
 
               {#each $attachments as fileAttachment}
-                <ComposerAttachment
+                <nylas-composer-attachment
                   attachment={fileAttachment}
                   remove={handleRemoveFile}
                 />
@@ -895,25 +891,29 @@
       </footer>
       <!-- Date Picker Component -->
       {#if showDatepicker}
-        <DatepickerModal close={datePickerClose} {schedule} />
+        <nylas-composer-datepicker-modal close={datePickerClose} {schedule} />
       {/if}
       <!-- Datepicker Alert (if message is scheduled) -->
       {#if $message.send_at && !sendError && !sendSuccess}
-        <AlertBar type="info" dismissible={true} ondismiss={removeSchedule}>
+        <nylas-composer-alert-bar
+          type="info"
+          dismissible={true}
+          ondismiss={removeSchedule}
+        >
           Send scheduled for
           <span>{formatDate(new Date(datepickerTimestamp))}</span>
-        </AlertBar>
+        </nylas-composer-alert-bar>
       {/if}
       <!-- Alerts -->
       {#if sendError}
-        <AlertBar type="danger" dismissible={true}>
+        <nylas-composer-alert-bar type="danger" dismissible={true}>
           Error: Failed to send the message.
-        </AlertBar>
+        </nylas-composer-alert-bar>
       {/if}
       {#if sendSuccess}
-        <AlertBar type="success" dismissible={true}>
+        <nylas-composer-alert-bar type="success" dismissible={true}>
           Message sent successfully!
-        </AlertBar>
+        </nylas-composer-alert-bar>
       {/if}
     {/if}
   </div>

@@ -1,7 +1,6 @@
 <svelte:options tag="nylas-schedule-editor" />
 
 <script lang="ts">
-  import "@commons/components/NError.svelte";
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
   import { NotificationMode } from "@commons/enums/Scheduler";
   import parseStringToArray, {

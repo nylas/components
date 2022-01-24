@@ -181,11 +181,14 @@ describe("Composer interactions", () => {
   });
 
   it("minimizes composer", () => {
-    cy.get("@composer").invoke("prop", "minimized", false);
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.minimized = false;
+    });
 
     cy.get("@composer")
       .shadow()
-      .findByRole("button", { name: /Collapse Composer/i })
+      .findByRole("button", { name: /Collapse composer/i })
       .click();
     cy.get("@composer")
       .shadow()
@@ -347,19 +350,21 @@ describe("Composer customizations", () => {
   });
 
   it("hide to field", () => {
-    cy.get("@composer").invoke("prop", "show_to", false);
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_to = false;
+    });
 
-    cy.get("@composer")
-      .contains(".contacts-placeholder", "To:")
-      .should("not.exist");
+    cy.get("[data-cy=to-field]").should("not.exist");
   });
 
   it("show to field", () => {
-    cy.get("@composer").invoke("prop", "show_to", true);
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_to = true;
+    });
 
-    cy.get("@composer")
-      .contains(".contacts-placeholder", "To:")
-      .should("be.visible");
+    cy.get("[data-cy=to-field]").should("exist");
   });
 
   it("hide subject", () => {
@@ -387,14 +392,22 @@ describe("Composer customizations", () => {
   });
 
   it("hide edit toolbar", () => {
-    cy.get("@composer").invoke("prop", "show_editor_toolbar", false);
-
-    cy.get("@composer").find(".toolbar").should("not.exist");
+    cy.get("@composer")
+      .find("nylas-html-editor")
+      .then((el) => {
+        const component = el[0];
+        component.show_editor_toolbar = false;
+      });
+    cy.get(".toolbar").should("not.exist");
   });
 
   it("show edit toolbar", () => {
-    cy.get("@composer").invoke("prop", "show_editor_toolbar", true);
-
+    cy.get("@composer")
+      .find("nylas-html-editor")
+      .then((el) => {
+        const component = el[0];
+        component.show_editor_toolbar = true;
+      });
     cy.get(".toolbar").should("exist");
   });
 
@@ -525,14 +538,19 @@ describe("Composer integration", () => {
   });
 
   it("Search input populates contact search dropdown", () => {
-    cy.get("@composer").invoke("prop", "to", [
-      {
-        name: "Test User",
-        email: "luka.b@nylas.com",
-      },
-    ]);
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.to = [
+        {
+          name: "Test User",
+          email: "luka.b@nylas.com",
+        },
+      ];
+    });
 
-    cy.get("#to-field").type("Test", { force: true });
+    cy.get("[data-cy=to-field]")
+      .find("[data-cy=contacts-search-field]")
+      .type("Test", { force: true });
 
     cy.contains("Test User").should("be.visible");
   });
@@ -561,7 +579,10 @@ describe("Composer integration", () => {
     });
 
     cy.get(".send-btn").contains("Send").click();
-    cy.get(".alert-bar").should("contain", "Failed to send the message");
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Failed to send the message",
+    );
   });
 
   it("Displays success message after successfully sending email", () => {
@@ -588,7 +609,10 @@ describe("Composer integration", () => {
     });
 
     cy.get(".send-btn").contains("Send").click();
-    cy.get(".alert-bar").should("contain", "Message sent successfully!");
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Message sent successfully!",
+    );
   });
 
   it("Shows template in email body", () => {
@@ -731,11 +755,14 @@ describe("Composer file upload", () => {
     });
 
     cy.get("input[type=file]").attachFile(filePath);
-    cy.get(".composer-attachment")
+    cy.get("nylas-composer-attachment")
       .contains("example.json")
       .should("be.visible");
     cy.get(".send-btn").contains("Send").click();
-    cy.get(".alert-bar").should("contain", "Message sent successfully!");
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Message sent successfully!",
+    );
   });
 
   it("Failed upload", () => {
@@ -762,11 +789,14 @@ describe("Composer file upload", () => {
     });
     const filePath = "example.json";
     cy.get("input[type=file]").attachFile(filePath);
-    cy.get(".composer-attachment")
+    cy.get("nylas-composer-attachment")
       .contains("example.json")
       .should("be.visible");
     cy.get(".send-btn").contains("Send").click();
-    cy.get(".alert-bar").should("contain", "Failed to send the message");
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Failed to send the message",
+    );
   });
 });
 

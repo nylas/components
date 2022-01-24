@@ -10,7 +10,6 @@ npm/*
 *.log
 components/**/index.js
 components/**/index.js.map
-components/**/nylas-component.css
 components/**/main.js
 components/**/main.js.map
 components/**/styles.css

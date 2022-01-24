@@ -1,8 +1,7 @@
-const preprocess = require("svelte-preprocess");
+const sveltePreprocess = require("svelte-preprocess");
 
-// Only used for tests using @testing-library/svelte
 module.exports = {
-  preprocess: preprocess({
+  preprocess: sveltePreprocess({
     scss: {
       includePaths: [`./node_modules`],
     },

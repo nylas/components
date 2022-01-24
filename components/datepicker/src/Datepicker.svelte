@@ -286,9 +286,8 @@
   }
   $: currentMonth = currentDate.getMonth();
   $: currentYear = currentDate.getFullYear();
-  $: selectableMonth = dates.filter(
-    (d) => d.activeMonth && !d.isDisabled,
-  ).length;
+  $: selectableMonth = dates.filter((d) => d.activeMonth && !d.isDisabled)
+    .length;
   $: if (value || min || max || timepicker) {
     populate();
 

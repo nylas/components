@@ -15,7 +15,7 @@
     silence,
     FilesStore,
   } from "@commons";
-  import "@commons/components/NError.svelte";
+
   import type { Contact, ContactSearchQuery } from "@commons/types/Contacts";
   import { get_current_component, onMount, tick } from "svelte/internal";
   import {
