@@ -1,3 +1,13 @@
+# Unreleased
+
+## Breaking
+
+## New Features
+
+## Bug Fixes
+
+- [Agenda] Added min height to agenda body [#339](https://github.com/nylas/components/pull/339)
+
 # v1.1.5 (2021-12-15)
 
 ## New Features

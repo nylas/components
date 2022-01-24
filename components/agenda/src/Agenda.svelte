@@ -1088,6 +1088,7 @@
     grid-template-columns: 40px 1fr;
     overflow: hidden;
     line-height: 100%;
+    min-height: 200px;
 
     &.hide-ticks {
       grid-template-columns: 0px 1fr;
@@ -1424,7 +1425,6 @@
         </div>
       </header>
     {/if}
-
     <div class="all-day">
       {#if !_this.hide_all_day_events}
         <ul class="events {_this.theme}">
@@ -1493,7 +1493,7 @@
         class:overflowing
         class:scrolling
         style="transform:
-      translate({$dampener.x}px,0px)"
+        translate({$dampener.x}px,0px)"
         bind:this={agendaElement}
         bind:clientHeight
         on:wheel={_this.prevent_zoom || condensed ? () => {} : handleWheel}
@@ -1525,11 +1525,11 @@
                 class="event status-{event.attendeeStatus}"
                 data-calendar-id={calendarIDs?.indexOf(event.calendar_id) + 1}
                 style="top: {event.relativeStartTime * 100}%; height: 
-              {condensed
+                {condensed
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
                   : `calc(${event.relativeRunTime * 100}%  - 4px)`};
-              left: {event.relativeOverlapOffset * 100}%; 
-              width: calc({event.relativeOverlapWidth * 100}% - 4px)"
+                left: {event.relativeOverlapOffset * 100}%; 
+                width: calc({event.relativeOverlapWidth * 100}% - 4px)"
               >
                 <div
                   class="inner"
@@ -1584,7 +1584,9 @@
             </span>
           {/if}
         {:else if _this.show_no_events_message && !$loadingEvents && $EventStore[queryKey]}
-          <li class="no-events">No events for {selectedDate.toDateString()}</li>
+          <li class="no-events">
+            No events for {selectedDate.toDateString()}
+          </li>
         {/if}
       </ul>
     </div>
