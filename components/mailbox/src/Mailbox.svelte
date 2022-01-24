@@ -251,9 +251,9 @@
   //#endregion methods
 
   // Callbacks
-  export async function sentMessageUpdate (message: Message): Promise<void> {
+  export async function sentMessageUpdate(message: Message): Promise<void> {
     threads = MailboxStore.hydrateMessageInThread(message, query, currentPage);
-  };
+  }
 
   //#region actions
   let areAllSelected = false;
@@ -982,7 +982,7 @@
                     show_reply={_this.show_reply}
                     show_reply_all={_this.show_reply_all}
                     show_forward={_this.show_forward}
-                    on:threadClicked={threadClicked}
+                    on:threadClicked|stopPropagation={threadClicked}
                     on:messageClicked={messageClicked}
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
