@@ -15,6 +15,8 @@ Nylas Schedule Editor is currently in active development. Want to contribute? [F
     - [Properties](#properties)
     - [Events](#events)
     - [Types](#types)
+  - [Integrating with Other Components](#integrating-with-other-components)
+    - [Using Schedule Editor Configuration with Nylas Scheduler](#using-schedule-editor-configuration-with-nylas-scheduler)
 
 ## Getting Started
 
@@ -62,7 +64,7 @@ import "@nylas/components-scheduler-editor";
 
 #### Setup
 
-If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Scheduler component.
+If you haven't registered for a Nylas account yet, you can do so at dashboard.nylas.com. Once there, head to the **Components** tab and create a new Scheduler Editor component.
 
 #### Allowed domains
 
@@ -193,3 +195,13 @@ interface BookableSlot extends TimeSlot {
   recurrence_expiry?: Date | string;
 }
 ```
+
+## Integrating with Other Components
+
+Nylas Components can also work in coordination with one another. The sections below cover different scenarios.
+
+### Using Schedule Editor Configuration with Nylas Scheduler
+
+You can configure the Nylas Scheduler Component to use the settings from the Schedule Editor by setting the Schedule Editor ID.
+
+![Configure Schedule Editor](/./components/schedule-editor/docs/configure-schedule-editor-id.png)
