@@ -257,16 +257,7 @@ const DRAFT_THREAD = {
 const SINGLE_SENDER_MESSAGE = {
   account_id: "cou6r5tjgubx9rswikzvz9afb",
   bcc: [],
-  cc: [
-    {
-      email: "phil.r@nylas.com",
-      name: "Phil Renaud",
-    },
-    {
-      email: "review_requested@noreply.github.com",
-      name: "Review requested",
-    },
-  ],
+  cc: [],
   date: 1621472861,
   files: [],
   from: [
