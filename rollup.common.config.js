@@ -100,15 +100,21 @@ export const svelteWebConfig = ({ svg = false, json = false }) => {
       },
       exclude: /\.wc\.svelte$/,
     }),
+    css({ output: "nylas-component.css" }),
     svelte({
-      preprocess: preprocess(),
+      preprocess: preprocess({
+        preserve: ["button", "button.svelte-1bkwwtq"],
+        scss: {
+          prependData: `
+          @use "./nylas-component.css";`,
+        },
+      }),
       emitCss: false,
       compilerOptions: {
         customElement: true,
       },
       include: /\.wc\.svelte$/,
     }),
-    css({ output: "nylas-component.css" }),
   ];
 
   if (svg) {

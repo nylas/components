@@ -385,7 +385,6 @@
 
 <style lang="scss">
   @import "../../theming/reset.scss";
-  @import "../../composer/nylas-component.css";
 
   .nylas-composer {
     // setting vars that contact-search uses
