@@ -692,6 +692,49 @@ describe("Booking time slots", () => {
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "27 Mon");
       cy.get("div.day:eq(4) header h2").invoke("text").should("eq", "31 Fri");
     });
+
+    let mockParentStore = [];
+
+    it("Dispatches active dates to the parent application", () => {
+      cy.get("@testComponent").then((el) => {
+        // Event Listeners
+        const component = el[0];
+        component.addEventListener("dateChange", (e) => {
+          mockParentStore = e.detail.dates;
+        });
+      });
+
+      cy.get(".change-dates button:eq(1)")
+        .click()
+        .then(() => {
+          cy.get("div.day:eq(0) header h2")
+            .invoke("text")
+            .should("eq", "21 Tue");
+          expect(mockParentStore).to.have.length(1);
+          expect(mockParentStore[0].toString()).to.equal(
+            "Tue Dec 21 2021 00:00:00 GMT-0500 (Eastern Standard Time)",
+          );
+        });
+
+      cy.get(".change-dates button:eq(1)")
+        .click()
+        .then(() => {
+          cy.get("div.day:eq(0) header h2")
+            .invoke("text")
+            .should("eq", "22 Wed");
+          expect(mockParentStore).to.have.length(1);
+          expect(mockParentStore[0].toString()).to.equal(
+            "Wed Dec 22 2021 00:00:00 GMT-0500 (Eastern Standard Time)",
+          );
+        });
+
+      cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
+      cy.get(".change-dates button:eq(0)")
+        .click()
+        .then(() => {
+          expect(mockParentStore).to.have.length(7);
+        });
+    });
   });
 
   describe("change colours", () => {
