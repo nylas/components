@@ -56,10 +56,7 @@
   import ReplyIcon from "./assets/reply.svg";
   import ReplyAllIcon from "./assets/reply-all.svg";
   import ForwardIcon from "./assets/forward.svg";
-  import {
-    DisallowedContentTypes,
-    InlineImageTypes,
-  } from "@commons/constants/attachment-content-types";
+  import { isNonInlineAttachment } from "@commons/methods/isNonInlineAttachment";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -781,15 +778,7 @@
     attachedFiles = activeThread.messages?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
-          if (
-            file.content_disposition === "attachment" &&
-            !(
-              file.content_id &&
-              message.cids?.includes(file.content_id) &&
-              InlineImageTypes.includes(file.content_type)
-            ) &&
-            !DisallowedContentTypes.includes(file.content_type)
-          ) {
+          if (isNonInlineAttachment(message, file)) {
             if (!files[message.id]) {
               files[message.id] = [];
             }
