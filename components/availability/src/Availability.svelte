@@ -939,6 +939,8 @@
   //#region Consecutive Events
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
   let consecutiveOptions: ConsecutiveEvent[][] = [];
+  let dailyConsecutiveOptions: Record<string, ConsecutiveEvent[][]> = {};
+
   async function buildConsecutiveOptions() {
     // the availability/consecutive endpoint eagerly returns open timeslots;
     // establish open hours so the user isn't overburdened with the horrible freedom of choice.
@@ -976,6 +978,22 @@
       ];
     } else {
       consecutiveOptions = [];
+    }
+    dailyConsecutiveOptions = {};
+
+    for (const option of consecutiveOptions) {
+      if (!option[0]?.start_time) {
+        continue;
+      }
+
+      const day = new Date(
+        new Date(option[0].start_time).setHours(0, 0, 0, 0),
+      ).getTime();
+      if (dailyConsecutiveOptions[day]) {
+        dailyConsecutiveOptions[day].push(option);
+      } else {
+        dailyConsecutiveOptions[day] = [option];
+      }
     }
 
     // emit the awaited events list
@@ -1016,6 +1034,7 @@
       open_hours: openHours,
       emails: emailsList,
       events,
+      round_robin: "max-fairness",
     };
     return eventDetails;
   }
@@ -1058,8 +1077,12 @@
       return null;
     }
 
+    const day = new Date(
+      new Date(slot.start_time).setHours(0, 0, 0, 0),
+    ).getTime();
+
     const consecutiveBlocks =
-      consecutiveOptions.filter((block) => {
+      dailyConsecutiveOptions[day]?.filter((block) => {
         return (
           slot.start_time >= block[0].start_time &&
           slot.end_time <= block[block.length - 1].end_time
@@ -1074,11 +1097,7 @@
   // Consecutive Events present a challenge for List View; where we typically show a slot for every slot_size,
   // a user can only book several in a row. We should, therefore, only show those slots that exist within a consecutive series
   $: listViewOptions = (day: Day): SelectableSlot[] => {
-    return day.slots.filter((slot) =>
-      consecutiveOptions.find((block: ConsecutiveEvent[]) =>
-        inspectConsecutiveBlock(slot),
-      ),
-    );
+    return day.slots.filter((slot) => inspectConsecutiveBlock(slot));
   };
 
   //#endregion Consecutive Events
