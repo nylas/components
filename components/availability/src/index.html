@@ -80,6 +80,10 @@
         component.participants = [];
         component.events = [event];
 
+        component.addEventListener("dateChange", (event) => {
+          console.log("date change", event.detail.dates);
+        });
+
         component.addEventListener("timeSlotChosen", (event) => {
           console.log(event.detail.timeSlots);
         });

@@ -826,6 +826,19 @@
       slots: [],
     });
   }
+
+  // Track and dispatch active dates whenever they change
+  let canonicalDates: Date[] = [];
+  $: if (
+    JSON.stringify(canonicalDates) !==
+    JSON.stringify(days.map((d) => d.timestamp))
+  ) {
+    canonicalDates = days.map((day) => day.timestamp);
+    dispatchEvent("dateChange", {
+      dates: canonicalDates,
+    });
+  }
+
   // #endregion Date Change
 
   //#region slot selection
