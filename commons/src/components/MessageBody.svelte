@@ -33,11 +33,14 @@
       for (const [fileIndex, file] of message.files.entries()) {
         if (
           file.content_disposition === "attachment" &&
-          !(file.content_id && InlineImageTypes.includes(file.content_type)) && // treat all files with content_id as inline
+          !(
+            file.content_id &&
+            message.cids?.includes(file.content_id) &&
+            InlineImageTypes.includes(file.content_type)
+          ) &&
           !DisallowedContentTypes.includes(file.content_type)
         ) {
-          attachedFiles.push(message.files[fileIndex]);
-          attachedFiles = attachedFiles;
+          attachedFiles = [...attachedFiles, message.files[fileIndex]];
         }
       }
     }

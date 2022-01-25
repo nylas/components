@@ -784,14 +784,19 @@
           if (
             file.content_disposition === "attachment" &&
             !(
-              file.content_id && InlineImageTypes.includes(file.content_type)
-            ) && // treat all files with content_id as inline
+              file.content_id &&
+              message.cids?.includes(file.content_id) &&
+              InlineImageTypes.includes(file.content_type)
+            ) &&
             !DisallowedContentTypes.includes(file.content_type)
           ) {
             if (!files[message.id]) {
               files[message.id] = [];
             }
-            files[message.id].push(message.files[fileIndex]);
+            files[message.id] = [
+              ...files[message.id],
+              message.files[fileIndex],
+            ];
           }
         }
         return files;
@@ -1880,7 +1885,8 @@
                   {/if}
                   <span
                     class="snippet"
-                    class:deleted={activeThread.messages.length <= 0 && !isDraft}
+                    class:deleted={activeThread.messages.length <= 0 &&
+                      !isDraft}
                   >
                     {activeThread.messages.length <= 0 && !isDraft
                       ? `Sorry, looks like this thread is currently unavailable. It may
