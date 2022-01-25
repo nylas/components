@@ -1,3 +1,13 @@
+# Unreleased
+
+## Breaking
+
+## New Features
+
+- [ContactList] add `group` prop to fetch contacts by group id [#341](https://github.com/nylas/components/pull/341)
+
+## Bug Fixes
+
 # v1.1.4 (2021-12-15)
 
 ## New Features

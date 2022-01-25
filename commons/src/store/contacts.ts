@@ -8,6 +8,7 @@ import type {
   ContactEmail,
   ContactSearchQuery,
   ContactsQuery,
+  ContactsQueryParams,
 } from "@commons/types/Contacts";
 
 let contactsMap: Record<string, Contact[]> = {};
@@ -34,23 +35,19 @@ function initializeContacts() {
   const { subscribe, set, update } = writable<Record<string, Contact[]>>({});
   return {
     subscribe,
-    addContacts: async (
-      query: ContactsQuery,
-      offset: number,
-      limit: number,
-    ) => {
+    addContacts: async (query: ContactsQuery, params: ContactsQueryParams) => {
       const queryKey = JSON.stringify(query);
       if (
         !contactsMap[queryKey] &&
         (query.component_id || query.access_token)
       ) {
-        if (offset === 0) {
+        if (params.offset === 0) {
           // Ensure the store is empty if our offset is 0
           ContactStore.reset();
         }
 
         const contacts =
-          (await fetchContacts(query, offset, limit)
+          (await fetchContacts(query, params)
             .then((contacts) => filterContacts(contacts))
             .catch(() => [])) ?? [];
 

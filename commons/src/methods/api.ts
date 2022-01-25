@@ -64,3 +64,14 @@ export function getMiddlewareApiUrl(id: string): string {
 }
 
 export function silence(error: Error) {}
+
+export function buildQueryParams(params: Record<string, any>): string {
+  return Object.keys(params)
+    .reduce((acc, key) => {
+      if (params[key] !== undefined) {
+        acc.append(key, params[key]);
+      }
+      return acc;
+    }, new URLSearchParams())
+    .toString();
+}

@@ -23,9 +23,13 @@ describe("Contact List initial", () => {
   });
 
   it("shows empty state", () => {
-    cy.intercept("/middleware/contact-list/contacts?limit=100&offset=0", {
-      response: [],
-    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?offset=0&limit=100",
+      {
+        response: [],
+      },
+    );
 
     cy.visit("/components/contact-list/src/cypress.html");
 
@@ -44,7 +48,7 @@ describe("Contact List display contacts", () => {
     );
     cy.intercept(
       "GET",
-      "https://web-components.nylas.com/middleware/contact-list/contacts?limit=100&offset=0",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?offset=0&limit=100",
       { fixture: "contact-list/contacts100.json" },
     ).as("getContacts");
 
@@ -95,7 +99,7 @@ describe("Contact List Interaction", () => {
     );
     cy.intercept(
       "GET",
-      "https://web-components.nylas.com/middleware/contact-list/contacts?limit=100&offset=0",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?offset=0&limit=100",
       { fixture: "contact-list/contacts100.json" },
     ).as("getContacts");
 
@@ -171,7 +175,7 @@ describe("Contact List props", () => {
     );
     cy.intercept(
       "GET",
-      "https://web-components.nylas.com/middleware/contact-list/contacts?limit=100&offset=0",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?offset=0&limit=100",
       { fixture: "contact-list/contacts100.json" },
     ).as("getContacts");
 

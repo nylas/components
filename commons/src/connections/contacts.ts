@@ -3,23 +3,26 @@ import {
   handleError,
   handleResponse,
   getMiddlewareApiUrl,
+  buildQueryParams,
 } from "../methods/api";
 import type {
   ContactsQuery,
   Contact,
   ContactSearchQuery,
+  ContactsQueryParams,
 } from "@commons/types/Contacts";
 import type { MiddlewareResponse, Thread } from "@commons/types/Nylas";
 
 export const fetchContacts = async (
   query: ContactsQuery,
-  offset: number,
-  limit: number,
+  params: ContactsQueryParams,
 ): Promise<Contact[]> => {
+  const url = `${getMiddlewareApiUrl(
+    query.component_id,
+  )}/contact-list/contacts?${buildQueryParams(params)}`;
+
   const contacts = await fetch(
-    `${getMiddlewareApiUrl(
-      query.component_id,
-    )}/contact-list/contacts?limit=${limit}&offset=${offset}`,
+    url,
     getFetchConfig({
       component_id: query.component_id,
       access_token: query.access_token,

@@ -20,6 +20,7 @@
     HydratedContact,
     Contact,
     ContactsQuery,
+    ContactsQueryParams,
   } from "@commons/types/Contacts";
   import type { ContactListProperties } from "@commons/types/Nylas";
   import { sortingPredicates } from "../lib/sorting";
@@ -35,6 +36,7 @@
   export let show_names: boolean;
   export let sort_by: "last_emailed" | "name";
   export let theme: string = "theme-1";
+  export let group: string;
 
   const defaultValueMap: Partial<ContactListProperties> = {
     click_action: "email",
@@ -141,6 +143,13 @@
   let queryKey: string;
   $: queryKey = JSON.stringify(query);
 
+  let queryParams: ContactsQueryParams;
+  $: queryParams = {
+    offset,
+    limit: _this.contacts_to_load,
+    ...(_this.group ? { group: _this.group } : {}),
+  };
+
   // Gives ability to toggle between Nylas and custom contacts
   $: setHydratedContacts(), contacts, queryKey;
 
@@ -172,15 +181,13 @@
   */
   function setContacts() {
     status = "loading";
-    ContactStore.addContacts(query, offset, _this.contacts_to_load).then(
-      (results?: Contact[]) => {
-        if (results && results.length > 0) {
-          hydratedContacts = $ContactStore[queryKey] ?? results;
-          offset += _this.contacts_to_load;
-        }
-        status = "loaded";
-      },
-    );
+    ContactStore.addContacts(query, queryParams).then((results?: Contact[]) => {
+      if (results && results.length > 0) {
+        hydratedContacts = $ContactStore[queryKey] ?? results;
+        offset += _this.contacts_to_load;
+      }
+      status = "loaded";
+    });
   }
   // #endregion setting contacts
 
