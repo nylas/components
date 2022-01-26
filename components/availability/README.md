@@ -24,7 +24,7 @@ Nylas Availability is currently in active development. Want to contribute? [Find
 
 ## Documentation
 
-- [Nylas Availability reference](https://todo.developer.nylas.com/docs/user-experience/components/availiability-component/)
+- [Nylas Availability reference](https://developer.nylas.com/docs/user-experience/components/availiability-component/)
 
 - [Examples](https://components.nylas.io/components/availability/src/index.html)
 
