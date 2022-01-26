@@ -5,6 +5,10 @@ export function includesMyEmail(
   message: Message,
   field: "to" | "from" | "cc" | "bcc",
 ): boolean {
+  if (!myEmail) {
+    return false;
+  }
+
   return message[field].some(
     (e) => e.email.toLowerCase() === myEmail.toLowerCase(),
   );
