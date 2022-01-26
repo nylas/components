@@ -26,7 +26,7 @@ Nylas Schedule Editor is currently in active development. Want to contribute? [F
 
 ## Documentation
 
-- [Nylas Scheduler reference](https://todo.developer.nylas.com/docs/user-experience/components/scheduler-editor-component/)
+- [Nylas Scheduler reference](https://developer.nylas.com/docs/user-experience/components/scheduler-editor-component/)
 
 - [Examples](https://components.nylas.io/components/scheduler-editor/src/index.html)
 
@@ -91,7 +91,7 @@ Properties you can pass to Nylas Scheduler are [`event_title`](<(#properties)>),
 | show_as_week           | boolean             | Display component fixed length week.                                                                                                                                                                                                                       | false    | false                                                     |
 | show_weekends          | boolean             | Controls whether or not to include weekends when using `show_as_week`.                                                                                                                                                                                     | false    | true                                                      |
 | dates_to_show          | number              | Controls how many days to show. The actual number of days show may be less as the application will display the number of days that fit comfortably on the screen up to `dates_to_show`. When `show_as_week` is enabled, `dates_to_show` is not considered. | false    | 1                                                         |
-| show_preview           | boolean             | Toggles a preview of the editor settings in Availability and Scheduler components. TODO Unused                                                                                                                                                             | false    |                                                           |
+| show_preview           | boolean             | Toggles a preview of the editor settings in Availability and Scheduler components.                                                                                                                                                                         | false    |                                                           |
 | show_ticks             | boolean             | Display time of day.                                                                                                                                                                                                                                       | false    | true                                                      |
 | start_date             | Date                | Start availability component on a specific date. Used in combination with `dates_to_show = 1` to display availability for one day only.                                                                                                                    | false    | new Date()                                                |
 | start_hour             | number              | Controls the start time of each day.                                                                                                                                                                                                                       | false    | 0                                                         |

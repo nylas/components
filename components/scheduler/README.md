@@ -27,7 +27,7 @@ Nylas Scheduler is currently in active development. Want to contribute? [Find ou
 
 ## Documentation
 
-- [Nylas Scheduler reference](https://todo.developer.nylas.com/docs/user-experience/components/scheduler-component/)
+- [Nylas Scheduler reference](https://developer.nylas.com/docs/user-experience/components/scheduler-component/)
 
 - [Examples](https://components.nylas.io/components/scheduler/src/index.html)
 
@@ -81,24 +81,24 @@ Properties you can pass to Nylas Scheduler are [`event_title`](<(#properties)>),
 
 ### Properties
 
-| Name                 | Type                | Description                                                                      | Required | Default Value                                             |
-| -------------------- | ------------------- | -------------------------------------------------------------------------------- | -------- | --------------------------------------------------------- |
-| id                   | string              | The id of the Scheduler component                                                | true     |                                                           |
-| access_token         | string              | Authorization for component calendar actions                                     | false    |                                                           |
-| booking_label        | string              | Customize the text of the booking button                                         | false    | "Schedule time slots"                                     |
-| custom_fields        | CustomField[]       | Add custom fields to collect input data from users before booking                | false    | By default, the scheduler adds inputs for name, and email |
-| event_title          | string              | Set the title of the event to be scheduled.                                      | false    | "Meeting"                                                 |
-| event_description    | string              | Set the description of the event to be scheduled.                                | false    | ""                                                        |
-| event_location       | string              | Set the meeting location of the event to be scheduled.                           | false    | ""                                                        |
-| event_conferencing   | string              | Set the URL of the zoom meeting                                                  | false    | ""                                                        |
-| slots_to_book        | BookableSlot[]      | TODO                                                                             | false    | []                                                        |
-| notification_mode    | NotificationMode    | Choose whether to display a notification on the UI, or to send by email          | false    | "show_message"                                            |
-| notification_message | string              | Set the text of the notification displayed or sent                               | false    | "Thank you for scheduling!"                               |
-| notification_subject | string              | Set the subject of the notification when using `notification_mode="show_message" | false    | "Invitation"                                              |
-| recurrence           | Recurrence          | Choose whether event should repeat? TODO                                         | false    | "none"                                                    |
-| recurrence_cadence   | RecurrenceCadence[] | Set how often the event should recur.                                            | false    | ["none"]                                                  |
-| recurrence_expiry    | RecurrenceExpiry    | Set when recurring events should stop repeating.                                 | false    | null                                                      |
-| event_options        | any[]               | TODO                                                                             | false    | []                                                        |
+| Name                 | Type                | Description                                                                                                         | Required | Default Value                                             |
+| -------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------- |
+| id                   | string              | The id of the Scheduler component                                                                                   | true     |                                                           |
+| access_token         | string              | Authorization for component calendar actions                                                                        | false    |                                                           |
+| booking_label        | string              | Customize the text of the booking button                                                                            | false    | "Schedule time slots"                                     |
+| custom_fields        | CustomField[]       | Add custom fields to collect input data from users before booking                                                   | false    | By default, the scheduler adds inputs for name, and email |
+| event_title          | string              | Set the title of the event to be scheduled.                                                                         | false    | "Meeting"                                                 |
+| event_description    | string              | Set the description of the event to be scheduled.                                                                   | false    | ""                                                        |
+| event_location       | string              | Set the meeting location of the event to be scheduled.                                                              | false    | ""                                                        |
+| event_conferencing   | string              | Set the URL of the zoom meeting                                                                                     | false    | ""                                                        |
+| slots_to_book        | BookableSlot[]      | Pass a list of events for the scheduler to use for booking. If multiple events, then consecutive mode will be used. | false    | []                                                        |
+| notification_mode    | NotificationMode    | Choose whether to display a notification on the UI, or to send by email                                             | false    | "show_message"                                            |
+| notification_message | string              | Set the text of the notification displayed or sent                                                                  | false    | "Thank you for scheduling!"                               |
+| notification_subject | string              | Set the subject of the notification when using `notification_mode="show_message"                                    | false    | "Invitation"                                              |
+| recurrence           | Recurrence          | Choose whether event should repeat? TODO                                                                            | false    | "none"                                                    |
+| recurrence_cadence   | RecurrenceCadence[] | Set how often the event should recur.                                                                               | false    | ["none"]                                                  |
+| recurrence_expiry    | RecurrenceExpiry    | Set when recurring events should stop repeating.                                                                    | false    | null                                                      |
+| event_options        | any[]               | TODO                                                                                                                | false    | []                                                        |
 
 ### Events
 
