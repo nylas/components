@@ -4,6 +4,7 @@
   This is to ensure the styles in the html message body are encapsulated and 
   does not affect the global component enclosing it -->
 <script>
+  import { isFileAnAttachment } from "@commons/methods/isFileAnAttachment";
   import * as DOMPurify from "dompurify";
   import { getEventDispatcher } from "@commons/methods/component";
   import { get_current_component, onMount } from "svelte/internal";
@@ -31,13 +32,8 @@
   onMount(() => {
     if (message && message.files.length > 0) {
       for (const [fileIndex, file] of message.files.entries()) {
-        if (
-          file.content_disposition === "attachment" &&
-          !(file.content_id && InlineImageTypes.includes(file.content_type)) && // treat all files with content_id as inline
-          !DisallowedContentTypes.includes(file.content_type)
-        ) {
-          attachedFiles.push(message.files[fileIndex]);
-          attachedFiles = attachedFiles;
+        if (isFileAnAttachment(message, file)) {
+          attachedFiles = [...attachedFiles, message.files[fileIndex]];
         }
       }
     }

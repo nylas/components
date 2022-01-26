@@ -115,6 +115,7 @@ export interface Message {
   from: Participant[];
   to: Participant[];
   cc: Participant[];
+  cids?: string[];
   bcc: Participant[];
   conversation?: string;
   model_version?: string;
