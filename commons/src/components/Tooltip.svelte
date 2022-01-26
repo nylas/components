@@ -73,6 +73,7 @@
     max-height: 240px;
     overflow-y: scroll;
     word-break: break-word;
+    white-space: pre;
     z-index: 1;
   }
 </style>
