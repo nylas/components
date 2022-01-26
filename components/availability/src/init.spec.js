@@ -728,11 +728,28 @@ describe("Booking time slots", () => {
           );
         });
 
+      cy.viewport(1500, 550);
       cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
       cy.get(".change-dates button:eq(0)")
         .click()
         .then(() => {
           expect(mockParentStore).to.have.length(7);
+        });
+
+      cy.viewport(1200, 550);
+      cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
+      cy.get(".change-dates button:eq(0)")
+        .click()
+        .then(() => {
+          expect(mockParentStore).to.have.length(6);
+        });
+
+      cy.viewport(600, 550);
+      cy.get("@testComponent").invoke("attr", "dates_to_show", 7);
+      cy.get(".change-dates button:eq(0)")
+        .click()
+        .then(() => {
+          expect(mockParentStore).to.have.length(1);
         });
     });
   });
