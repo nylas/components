@@ -4,7 +4,7 @@ import {
   InlineImageTypes,
 } from "@commons/constants/attachment-content-types";
 
-export const isNonInlineAttachment = (message: Message, file: File): boolean =>
+export const isFileAnAttachment = (message: Message, file: File): boolean =>
   file.content_disposition === "attachment" &&
   !(
     file.content_id &&
