@@ -92,6 +92,7 @@
           },
         ];
         availability.addEventListener("timeSlotChosen", (event) => {
+          console.log({ timeSlotChosen: event.detail.timeSlots });
           scheduler.slots_to_book = event.detail.timeSlots;
         });
 
@@ -100,13 +101,17 @@
         });
 
         availability.addEventListener("eventOptionsReady", (event) => {
+          console.log({ eventOptionsReady: event.detail.slots });
           scheduler.event_options = event.detail.slots;
         });
 
         scheduler.addEventListener("hoverOptionChange", (event) => {
+          console.log({ eventOptionSelected: event.detail.event });
           availability.event_to_hover = event.detail.event;
         });
+
         scheduler.addEventListener("eventOptionSelected", (event) => {
+          console.log({ eventOptionSelected: event.detail.event });
           availability.event_to_select = event.detail.event;
         });
 
