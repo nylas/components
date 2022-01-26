@@ -831,7 +831,7 @@
   let canonicalDates: Date[] = [];
   $: if (
     JSON.stringify(canonicalDates) !==
-    JSON.stringify(days.map((d) => d.timestamp))
+    JSON.stringify(days.map((day) => day.timestamp))
   ) {
     canonicalDates = days.map((day) => day.timestamp);
     dispatchEvent("dateChange", {
