@@ -1656,47 +1656,50 @@
                           </div>
                         </div>
                         <div class="message-to">
-                          {#await getAllRecipients( { to: message.to, cc: message.cc, bcc: message.bcc }, ) then allRecipients}
-                            {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
-                              <p>
-                                {#if i === 0}
-                                  {`to ${
-                                    _this.you &&
-                                    recipient.email === _this.you.email_address
-                                      ? "Me"
-                                      : ""
-                                  }`}
-                                {:else if recipient._type === "cc" && i === message.to.length}
-                                  cc:
-                                {:else if recipient._type === "bcc" && i === message.to.length + message.cc.length}
-                                  bcc:
-                                {/if}
+                          {#if message?.to}
+                            {#await getAllRecipients( { to: message.to, cc: message.cc, bcc: message.bcc }, ) then allRecipients}
+                              {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
+                                <p>
+                                  {#if i === 0}
+                                    {`to ${
+                                      _this.you &&
+                                      recipient.email ===
+                                        _this.you.email_address
+                                        ? "Me"
+                                        : ""
+                                    }`}
+                                  {:else if recipient._type === "cc" && i === message.to.length}
+                                    cc:
+                                  {:else if recipient._type === "bcc" && i === message.to.length + message.cc.length}
+                                    bcc:
+                                  {/if}
 
-                                {#if recipient.email && recipient.name}
-                                  {recipient.name ?? _this.you.name} &lt;{recipient.email}&gt;
-                                {:else if recipient.email && !recipient.name}
-                                  {recipient.email}
-                                {/if}
-                              </p>
-                            {/each}
-                            {#if allRecipients.length > PARTICIPANTS_TO_TRUNCATE}
-                              <div>
-                                <nylas-tooltip
-                                  on:toggleTooltip={setTooltip}
-                                  id={`show-more-participants-${message.id}`}
-                                  current_tooltip_id={currentTooltipId}
-                                  icon={DropdownSymbol}
-                                  text={`And ${
-                                    allRecipients.length -
-                                    PARTICIPANTS_TO_TRUNCATE
-                                  } more`}
-                                  content={`${aggregateRecipientsString(
-                                    allRecipients,
-                                  )}`}
-                                />
-                              </div>
-                            {/if}
-                          {/await}
+                                  {#if recipient.email && recipient.name}
+                                    {recipient.name ?? _this.you.name} &lt;{recipient.email}&gt;
+                                  {:else if recipient.email && !recipient.name}
+                                    {recipient.email}
+                                  {/if}
+                                </p>
+                              {/each}
+                              {#if allRecipients.length > PARTICIPANTS_TO_TRUNCATE}
+                                <div>
+                                  <nylas-tooltip
+                                    on:toggleTooltip={setTooltip}
+                                    id={`show-more-participants-${message.id}`}
+                                    current_tooltip_id={currentTooltipId}
+                                    icon={DropdownSymbol}
+                                    text={`And ${
+                                      allRecipients.length -
+                                      PARTICIPANTS_TO_TRUNCATE
+                                    } more`}
+                                    content={`${aggregateRecipientsString(
+                                      allRecipients,
+                                    )}`}
+                                  />
+                                </div>
+                              {/if}
+                            {/await}
+                          {/if}
                         </div>
                       </div>
                       <div class="">
@@ -2047,7 +2050,7 @@
               </div>
 
               <div class="message-to">
-                {#await getAllRecipients( { to: message.to, cc: message.cc, bcc: message.bcc }, ) then allRecipients}
+                {#await getAllRecipients( { to: _this.message.to, cc: _this.message.cc, bcc: _this.message.bcc }, ) then allRecipients}
                   {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
                     <p>
                       {#if i === 0}
@@ -2057,9 +2060,9 @@
                             ? "Me"
                             : ""
                         }`}
-                      {:else if recipient._type === "cc" && i === message.to.length}
+                      {:else if recipient._type === "cc" && i === _this.message.to.length}
                         cc:
-                      {:else if recipient._type === "bcc" && i === message.to.length + message.cc.length}
+                      {:else if recipient._type === "bcc" && i === _this.message.to.length + _this.message.cc.length}
                         bcc:
                       {/if}
 
@@ -2074,7 +2077,7 @@
                     <div>
                       <nylas-tooltip
                         on:toggleTooltip={setTooltip}
-                        id={`show-more-participants-${message.id}`}
+                        id={`show-more-participants-${_this.message.id}`}
                         current_tooltip_id={currentTooltipId}
                         icon={DropdownSymbol}
                         text={`And ${
