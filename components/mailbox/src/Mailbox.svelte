@@ -482,7 +482,9 @@
     confirmDeleteModal.type = type;
   }
 
+  let deleting = false;
   function confirmDeleteClickHandler() {
+    deleting = true;
     if (confirmDeleteModal.type === "selected") {
       onDeleteSelected(confirmDeleteModal.event);
     } else {
@@ -512,6 +514,7 @@
       await updateThreadStatus(thread);
       await updateDisplayedThreads(true);
     }
+    deleting = false;
     returnToMailbox();
   }
 
@@ -542,6 +545,7 @@
         ? [currentlySelectedThread]
         : threads,
     });
+    deleting = false;
   }
 
   function returnToMailbox() {
@@ -775,11 +779,16 @@
     }
   }
 
-  ul.refreshing {
+  ul {
     position: relative;
-    @include progress-bar(top, 0, left, 0, var(--blue), var(--blue-lighter));
     &:before {
       z-index: 1;
+    }
+    &.refreshing {
+      @include progress-bar(top, 0, left, 0, var(--blue), var(--blue-lighter));
+    }
+    &.deleting {
+      @include progress-bar(top, 0, left, 0, var(--red), var(--red-lighter));
     }
   }
 
@@ -945,7 +954,7 @@
           {/if}
         </div>
       {/if}
-      <ul id="mailboxlist" class:refreshing={loading}>
+      <ul id="mailboxlist" class:refreshing={loading} class:deleting>
         {#each threads as thread}
           {#each [thread.selected ? `Deselect thread ${thread.subject}` : `Select thread ${thread.subject}`] as selectTitle}
             <li
