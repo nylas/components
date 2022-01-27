@@ -30,3 +30,15 @@ Cypress.Commands.add(
     });
   },
 );
+
+/**
+ * Define the fetch request `method` in the first parameter.
+ * The second parameter is a set of key:value pairs where the
+ * KEY is the url path to be intercepted and the VALUE is the
+ * path of the fixture for the response.
+ */
+Cypress.Commands.add("batchIntercept", (method, fixtures) => {
+  Object.entries(fixtures).forEach(([url, fixture]) => {
+    cy.intercept(method, url, { fixture }).as(fixture);
+  });
+});

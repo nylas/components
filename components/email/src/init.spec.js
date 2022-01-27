@@ -739,63 +739,30 @@ const MULTIPLE_SENDER_THREAD = {
 
 describe("Email: Displays threads and messages", () => {
   beforeEach(() => {
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/manifest",
-      {
-        fixture: "email/manifest.json",
-      },
-    ).as("manifest");
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
-      {
-        fixture: "email/messages/id.json",
-      },
-    );
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/messages/7w3i9u9xk95w331zuw40yvm4j",
-      {
-        fixture: "email/messages/idWithImage.json",
-      },
-    );
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "email/account.json",
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "email/manifest",
+      "**/middleware/account": "email/account",
+      "**/middleware/labels": "email/labels",
+      "**/middleware/threads/b3z0fd5kbbwcxbvf4q1ele5us6*": "email/threads/id",
+      "**/middleware/messages/c5xjcjlhzldqctpud8zeufa6t":
+        "email/messages/idWithImage",
+      "**/middleware/messages/affxolvozy2pcqh4303w7pc9n": "email/messages/id",
+      "**/middleware/files/6dywzoo80moag1it135co9zv8/download":
+        "email/files/download",
     });
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/files/6dywzoo80moag1it135co9zv8/download",
-      {
-        fixture: "email/files/download.json",
-      },
-    ).as("filesDownload");
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*",
-      {
-        fixture: "email/threads/id.json",
-      },
-    ).as("threads");
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads/c5xjcjlhzldqctpud8zeufa6t*",
-      {
-        fixture: "email/threads/idWithImage.json",
-      },
-    ).as("threadWithImage");
 
     cy.visit("/components/email/src/cypress.html");
 
-    cy.get("nylas-email").as("email");
-
-    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", false);
+    cy.get("nylas-email")
+      .as("email")
+      .invoke("prop", "show_expanded_email_view_onload", false);
   });
 
-  it("Shows Email with thread_id", () => {
-    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxvf4q1ele5us6");
+  it("Shows Email with demo id and thread", () => {
+    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxbvf4q1ele5us6");
 
-    cy.get("@email").find(".subject").should("contain", "Test Email Subject");
+    cy.get("@email").find(".subject").should("exist");
+    cy.get("@email").find(".subject").should("contain", "Test subject");
   });
 
   it("Shows Email with passed thread", () => {
@@ -873,34 +840,6 @@ describe("Email: Displays threads and messages", () => {
     });
   });
 
-  it.skip("Renders inline file appropriately", () => {
-    cy.get("@email").invoke("prop", "thread_id", "c5xjcjlhzldqctpud8zeufa6t");
-    cy.get("@email").invoke("prop", "click_action", "default");
-    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", true);
-
-    cy.wait("@filesDownload");
-
-    cy.get("@email")
-      .find("img[alt='Streams Automation.jpg']")
-      .should("have.attr", "src")
-      .and(($div) => {
-        expect($div).to.contain("data:image/jpeg");
-      });
-  });
-
-  it("Shows attached file when condensed", () => {
-    cy.get("@email").then((element) => {
-      const component = element[0];
-      component.show_expanded_email_view_onload = false;
-      component.thread = SAMPLE_THREAD;
-    });
-
-    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
-    cy.get("@email")
-      .find(".email-row.condensed .attachment button")
-      .should("have.text", "invoice_2062.pdf ");
-  });
-
   it("Shows empty message", () => {
     cy.get("@email").then((element) => {
       const component = element[0];
@@ -934,27 +873,60 @@ describe("Email: Displays threads and messages", () => {
   });
 });
 
-describe("Email: Stars", () => {
+describe("Email: Images and Files", () => {
   beforeEach(() => {
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "email/account.json",
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "email/manifest",
+      "**/middleware/account": "email/account",
+      "**/middleware/labels": "email/labels",
+      "**/middleware/threads/c5xjcjlhzldqctpud8zeufa6t*":
+        "email/threads/idWithImage",
+      "**/middleware/messages/7w3i9u9xk95w331zuw40yvm4j*":
+        "email/messages/idWithImage",
+      "**/middleware/files/b6113komjjjzsmhkphxf8nw8g/download*":
+        "email/files/download",
     });
 
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
-      {
-        fixture: "email/messages/id.json",
-      },
-    );
+    cy.visit("/components/email/src/cypress.html");
 
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*",
-      {
-        fixture: "email/threads/id.json",
-      },
-    );
+    cy.get("nylas-email").as("email");
+  });
+
+  it("Renders inline file appropriately", () => {
+    cy.get("@email").invoke("prop", "thread_id", "c5xjcjlhzldqctpud8zeufa6t");
+    cy.get("@email").invoke("prop", "click_action", "default");
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", true);
+
+    cy.wait("@email/files/download");
+
+    cy.get("@email")
+      .find("img[alt='Streams Automation.jpg']")
+      .should("have.attr", "src")
+      .and(($div) => {
+        expect($div).to.contain("data:image/jpeg");
+      });
+  });
+
+  it("Shows attached file when condensed", () => {
+    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", false);
+    cy.get("@email").invoke("prop", "thread", SAMPLE_THREAD);
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .should("have.text", "invoice_2062.pdf ");
+  });
+});
+
+describe("Email: Stars", () => {
+  beforeEach(() => {
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "email/manifest",
+      "**/middleware/account": "email/account",
+      "**/middleware/labels": "email/labels",
+      "**/middleware/messages/affxolvozy2pcqh4303w7pc9n": "email/messages/id",
+      "**/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*": "email/threads/id",
+    });
 
     cy.visit("/components/email/src/cypress.html");
 
@@ -1051,60 +1023,37 @@ describe("Email: Unread status", () => {
 
 describe("Email: Reply, Reply-all, Forward", () => {
   beforeEach(() => {
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "email/account.json",
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "email/manifest",
+      "**/middleware/account": "email/account",
+      "**/middleware/labels": "email/labels",
+      "**/middleware/threads/83v13r9lj6kzh109c3l1yznnf*":
+        "email/threads/idWithMultipleSenders",
+      "**/middleware/messages/epgslj6wocxcnuyy6h9yyle6v":
+        "email/messages/idWithMultipleSenders",
     });
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n",
-      {
-        fixture: "email/messages/id.json",
-      },
-    );
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/messages/epgslj6wocxcnuyy6h9yyle6v",
-      {
-        fixture: "email/messages/idWithMultipleSenders.json",
-      },
-    );
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*",
-      {
-        fixture: "email/threads/id.json",
-      },
-    ).as("threads");
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads/b3z0fd5multiplesenders*",
-      {
-        fixture: "email/threads/idWithMultipleSenders.json",
-      },
-    ).as("multipleSendersThread");
 
     cy.visit("/components/email/src/cypress.html");
 
-    cy.get("nylas-email").as("email");
+    cy.get("nylas-email")
+      .as("email")
+      .invoke("prop", "thread_id", "83v13r9lj6kzh109c3l1yznnf");
     cy.get("@email").invoke("prop", "show_expanded_email_view_onload", true);
   });
 
   it("shows reply icon", () => {
-    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxvf4q1ele5us6");
     cy.get("@email").invoke("prop", "show_reply", true);
 
     cy.get("@email").find(".reply").should("exist");
   });
 
   it("shows reply-all icon", () => {
-    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5multiplesenders");
     cy.get("@email").invoke("prop", "show_reply_all", true);
 
     cy.get("@email").find(".reply-all").should("exist");
   });
 
   it("shows forward icon", () => {
-    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxvf4q1ele5us6");
     cy.get("@email").invoke("prop", "show_forward", true);
 
     cy.get("@email").find(".forward").should("exist");
@@ -1113,30 +1062,19 @@ describe("Email: Reply, Reply-all, Forward", () => {
 
 describe("Email: Toggle email of sender/recipient", () => {
   beforeEach(() => {
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "email/account.json",
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "email/manifest",
+      "**/middleware/account": "email/account",
+      "**/middleware/labels": "email/labels",
+      "**/middleware/messages/affxolvozy2pcqh4303w7pc9n": "email/messages/id",
+      "**/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*": "email/threads/id",
     });
-
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/messages/affxolvozy2pcqh4303w7pc9n*",
-      {
-        fixture: "email/messages/id.json",
-      },
-    );
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*",
-      {
-        fixture: "email/threads/id.json",
-      },
-    );
 
     cy.visit("/components/email/src/cypress.html");
 
-    cy.get("nylas-email").as("email");
-
-    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxvf4q1ele5us6");
+    cy.get("nylas-email")
+      .as("email")
+      .invoke("prop", "thread_id", "b3z0fd5kbbwcxvf4q1ele5us6");
     cy.get("@email").invoke("prop", "show_expanded_email_view_onload", true);
   });
 
@@ -1350,16 +1288,23 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
     cy.get("@email").find("div.reply button").should("exist");
   });
 
-  xit("Should Dispatch Event When Reply Button Is Clicked", () => {
+  it("Should Dispatch Event When Reply Button Is Clicked", () => {
+    let replyClicked = false;
     cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
     cy.get("@email").find("div.reply button").as("replyButton");
     cy.get("@replyButton").should("exist");
     cy.get("@email").then((elements) => {
       const component = elements[0];
-      component.addEventListener("replyClicked", cy.stub().as("replyClicked"));
+      component.addEventListener("replyClicked", () => {
+        replyClicked = true;
+      });
     });
-    cy.get("@replyButton").click();
-    cy.get("@replyClicked").should("have.been.calledOnce");
+
+    cy.get("@replyButton")
+      .click()
+      .then(() => {
+        expect(replyClicked).to.be.true;
+      });
   });
 });
 
@@ -1372,18 +1317,18 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
     cy.get("@email").invoke("attr", "show_reply_all", "true");
   });
 
-  xit("Should Render Reply All Button When Passed A Message", () => {
+  it("Should Render Reply All Button When Passed A Message", () => {
     cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
     cy.get("@email").find("div.reply-all button").should("exist");
   });
 
-  xit("Should Render Reply All Button When Passed A Thread", () => {
+  it("Should Render Reply All Button When Passed A Thread", () => {
     cy.get("@email").invoke("prop", "thread", MULTIPLE_SENDER_THREAD);
     cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
     cy.get("@email").find("div.reply-all button").should("exist");
   });
 
-  xit("Should Render Reply All Button When Passed A Message ID", () => {
+  it("Should Render Reply All Button When Passed A Message ID", () => {
     cy.intercept(
       {
         method: "GET",
@@ -1400,7 +1345,7 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
     cy.get("@email").find("div.reply-all button").should("exist");
   });
 
-  xit("Should Render Reply All Button When Passed A Thread ID", () => {
+  it("Should Render Reply All Button When Passed A Thread ID", () => {
     cy.intercept(
       {
         method: "GET",
@@ -1432,20 +1377,23 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
     cy.get("@email").find("div.reply-all button").should("not.exist");
   });
 
-  xit("Should Dispatch Event When Reply All Button Is Clicked", () => {
+  it("Should Dispatch Event When Reply All Button Is Clicked", () => {
+    let replyAllClicked = false;
     cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
     cy.get("@email").find("div.reply-all button").as("replyAllButton");
     cy.get("@replyAllButton").should("exist");
 
     cy.get("@email").then((elements) => {
       const component = elements[0];
-      component.addEventListener(
-        "replyAllClicked",
-        cy.stub().as("replyAllClicked"),
-      );
+      component.addEventListener("replyAllClicked", () => {
+        replyAllClicked = true;
+      });
     });
 
-    cy.get("@replyAllButton").click();
-    cy.get("@replyAllClicked").should("have.been.calledOnce");
+    cy.get("@replyAllButton")
+      .click()
+      .then(() => {
+        expect(replyAllClicked).to.be.true;
+      });
   });
 });
