@@ -1,20 +1,18 @@
 import "@testing-library/cypress/add-commands";
 import "cypress-file-upload";
 
-Cypress.Commands.add("visitMailbox", () => {
-  cy.server();
-  cy.fixture("threadsMock").then((response) => {
-    cy.route({
-      method: "get",
-      url: "/middleware/threads?view=expanded",
-      response: {
-        component: { theming: {} },
-        response,
-      },
-    }).as("threads");
+Cypress.Commands.add("addComponent", (componentName, props) => {
+  cy.document().then(($document) => {
+    const component = $document.createElement(componentName);
+    component.setAttribute("id", `test-${componentName.replace("nylas-", "")}`);
 
-    cy.visit("/components/mailbox/src/index.html");
-    cy.get("nylas-mailbox").should("exist");
+    Object.entries(props).forEach(([key, value]) => {
+      component[key] = value;
+    });
+
+    cy.get("body").then(($body) => {
+      $body.append(component);
+    });
   });
 });
 

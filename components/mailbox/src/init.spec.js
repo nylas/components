@@ -1,5 +1,3 @@
-import { thread1, thread2 } from "./test-data.js";
-const threads = [thread1, thread2];
 const EMPTY_THREAD = {
   account_id: "cou6r5tjgubx9rswikzvz9afb",
   drafts: [],
@@ -104,744 +102,836 @@ const DRAFT_THREAD = {
   ],
 };
 
-// TODO: We need to intercept network requests in order to ensure we have less flaky tests
-// and they become more deterministic.
+const defaultSize = 13;
 
-describe("MailBox  component", () => {
-  const defaultSize = 13;
+describe("Mailbox Display", () => {
+  let thread1;
+  let thread2;
 
   beforeEach(() => {
-    cy.visitMailbox();
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/index.json",
+      },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&view=count&in=inbox",
+      {
+        fixture: "mailbox/threads/threadsWithCount.json",
+      },
+    );
+
+    cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
+      thread1 = f;
+    });
+    cy.fixture("mailbox/threads/SAMPLE_2.json").then((f) => {
+      thread2 = f;
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
   });
 
-  it("Shows Mailbox with demo id and threads", () => {
-    const nylasEmail = cy
-      .get("nylas-mailbox")
-      .shadow()
-      .find("nylas-email", { timeout: 10000 });
-    nylasEmail.should("exist");
-    nylasEmail.should("have.length.greaterThan", 1);
+  it("Shows attached file", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .should("have.text", "invoice_2062.pdf ");
   });
 
-  describe("Unread statuses", () => {
-    it("Shows Mailbox with unread status as default", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
+  it("Shows empty message", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [EMPTY_THREAD]);
+    cy.get("@email")
+      .find(".snippet")
+      .contains("Sorry, looks like this thread is currently unavailable");
+  });
+});
 
-          cy.get(component).find("nylas-email").should("have.length", 2);
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", 1);
-        });
+describe("Mailbox Files/Images", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadsWithImage",
+      },
+    ).as("threadsWithImage");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/message-id-with-inline-image",
+      {
+        fixture: "mailbox/messages/idWithImage",
+      },
+    );
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+  it("Renders inline file appropriately", () => {
+    cy.wait("@threadsWithImage");
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    cy.get("@mailbox")
+      .find('img[alt="Streams Automation.jpg"]')
+      .should("exist")
+      .as("messageImage");
+    cy.get("@messageImage").should("not.have.attr", "src", "cid:ii_kwwc5np40");
+    cy.get("@messageImage")
+      .should("have.attr", "src")
+      .and("contain", "data:image/jpeg");
+  });
+});
+
+describe("Mailbox Unread/Read", () => {
+  let thread1;
+  let thread2;
+
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
     });
 
-    it("Shows attached file", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          cy.get(component)
-            .find("nylas-email")
-            .then((element) => {
-              const email = element[0];
-              cy.get(email)
-                .find(".email-row.condensed .attachment")
-                .should("exist");
-              cy.get(email)
-                .find(".email-row.condensed .attachment button")
-                .should("have.text", "invoice_2062.pdf ");
-            });
-        });
+    cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
+      thread1 = f;
+    });
+    cy.fixture("mailbox/threads/SAMPLE_2.json").then((f) => {
+      thread2 = f;
     });
 
-    it("Shows empty message", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = [EMPTY_THREAD];
-          cy.get(component)
-            .find("nylas-email")
-            .then((element) => {
-              const email = element[0];
-              cy.get(email)
-                .find(".snippet")
-                .and(($div) => {
-                  expect($div).to.contain(
-                    "Sorry, looks like this thread is currently unavailable",
-                  );
-                });
-            });
-        });
-    });
+    cy.visit("/components/mailbox/src/cypress.html");
 
-    it("Shows draft message", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = [DRAFT_THREAD];
-          cy.get(component)
-            .find("nylas-email")
-            .then((element) => {
-              const email = element[0];
-              cy.get(email)
-                .find(".snippet")
-                .should("exist")
-                .and(($div) => {
-                  expect($div).to.contain(
-                    "Testing with updated commons! --Sent with Nylas",
-                  );
-                });
-            });
-        });
-    });
-
-    it("Clicking on a draft message opens composer", () => {
-      cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
-        fixture: "draftThread.json",
-      });
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = [DRAFT_THREAD];
-          cy.get("li.unread")
-            .click()
-            .then(() => {
-              cy.get("nylas-composer#demo-composer").as("composer");
-              cy.get("@composer")
-                .find(".contact-item__name")
-                .invoke("text")
-                .should("eq", "nylascypresstest2@gmail.com");
-              cy.get("@composer")
-                .find(".html-editor div[contenteditable=true]")
-                .invoke("text")
-                .should(
-                  "eq",
-                  "Testing with updated commons! --Sent with Nylas",
-                );
-              cy.get("@composer")
-                .find("input[name=subject]")
-                .invoke("val")
-                .should("eq", "This is a Super great test email.");
-            });
-        });
-    });
-
-    it("ENTER keydown on a draft message opens composer", () => {
-      cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
-        fixture: "draftThread.json",
-      });
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = [DRAFT_THREAD];
-          cy.get("li.unread")
-            .trigger("keypress", { code: "Enter" })
-            .then(() => {
-              cy.get("nylas-composer#demo-composer").as("composer");
-              cy.get("@composer")
-                .find(".contact-item__name")
-                .invoke("text")
-                .should("eq", "nylascypresstest2@gmail.com");
-              cy.get("@composer")
-                .find(".html-editor div[contenteditable=true]")
-                .invoke("text")
-                .should(
-                  "eq",
-                  "Testing with updated commons! --Sent with Nylas",
-                );
-              cy.get("@composer")
-                .find("input[name=subject]")
-                .invoke("val")
-                .should("eq", "This is a Super great test email.");
-            });
-        });
-    });
-
-    it("Renders inline file appropriately", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          // Assumes that this returns only 1 thread for this keyword
-          component.keyword_to_search = "Inline image rendering";
-          cy.get(component).find(".email-row.condensed").click();
-          cy.get(component)
-            .find("nylas-message-body")
-            .then((bodyElement) => {
-              const messageBodyComponent = bodyElement[0];
-              cy.get(messageBodyComponent)
-                .find('img[alt="Streams Automation.jpg"]')
-                .should("exist");
-              cy.get(messageBodyComponent)
-                .find('img[alt="Streams Automation.jpg"]')
-                .should("not.have.attr", "src", "cid:ii_kwwc5np40");
-              cy.get(messageBodyComponent)
-                .find('img[alt="Streams Automation.jpg"]')
-                .should("have.attr", "src")
-                .and(($div) => {
-                  expect($div).to.contain("data:image/jpeg");
-                });
-            });
-        });
-    });
-
-    it("Shows Mailbox with unread status as unread", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads.map((thread) => ({
-            ...thread,
-            unread: true,
-          }));
-
-          cy.get(component).find("nylas-email").should("have.length", 2);
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", 2);
-        });
-    });
-
-    it("Shows Mailbox with unread status as read", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads.map((thread) => ({
-            ...thread,
-            unread: false,
-          }));
-          cy.get(component).find("li").should("have.length", 2);
-          cy.get(component).find("li.unread").should("have.length", 0);
-        });
-    });
-
-    it("Marks emails as unread", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads.map((thread) => ({
-            ...thread,
-            unread: false,
-          }));
-
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", 0);
-
-          cy.get(component)
-            .find("div.checkbox-container")
-            .first()
-            .find("input")
-            .check();
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-read]")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-unread]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-unread]")
-            .click();
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", 1);
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-read]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-unread]")
-            .should("not.exist");
-        });
-    });
-
-    it("Marks emails as read", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads.map((thread) => ({
-            ...thread,
-            unread: true,
-          }));
-
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", threads.length);
-
-          cy.get(component)
-            .find("div.checkbox-container")
-            .first()
-            .find("input")
-            .check();
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-unread]")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-read]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-read]")
-            .click();
-          cy.get(component)
-            .find(".email-row.condensed.unread")
-            .should("have.length", 1);
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-unread]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status")
-            .find("button[data-cy=mark-read]")
-            .should("not.exist");
-        });
-    });
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
   });
 
-  describe("Stars", () => {
-    it("Shows mailbox with no stars when show_star=false", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.show_star = false;
+  it("Shows Mailbox with unread status as default", () => {
+    cy.fixture("mailbox/threads/SAMPLE_1.json").as("threads");
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
 
-          cy.get(component).find("nylas-email").should("have.length", 2);
-          cy.get(component)
-            .find(".email-row.condensed")
-            .find("div.starred")
-            .should("not.exist");
-        });
-    });
-
-    it("Shows mailbox with stars when show_star=true", () => {
-      cy.get("nylas-mailbox").then((element) => {
-        const component = element[0];
-        component.all_threads = threads;
-        component.show_star = true;
-
-        cy.get(component).find("nylas-email").should("have.length", 2);
-        cy.get(component)
-          .find(".email-row.condensed")
-          .find("div.starred")
-          .should("have.length", 2);
-      });
-    });
+    cy.get("@mailbox")
+      .find(".email-row.condensed.unread")
+      .should("have.length", 1);
   });
 
-  describe("Shows and hides thread checkbox", () => {
-    it("shows by default", () => {
-      cy.get("nylas-mailbox").then((element) => {
-        const component = element[0];
+  it("Shows Mailbox with unread status as unread", () => {
+    const unreadThreads = [thread1, thread2].map((thread) => ({
+      ...thread,
+      unread: true,
+    }));
+    cy.get("@mailbox").invoke("prop", "all_threads", unreadThreads);
 
-        cy.get(component)
-          .get(".thread-checkbox")
-          .should("have.length", defaultSize + 1);
-      });
-    });
-
-    it("hides if set to false", () => {
-      cy.get("nylas-mailbox").then(([element]) => {
-        element.show_thread_checkbox = false;
-        cy.get(element).get(".thread-checkbox").should("have.length", 0);
-      });
-    });
+    cy.get("@mailbox").find("nylas-email").should("have.length", 2);
+    cy.get("@mailbox")
+      .find(".email-row.condensed.unread")
+      .should("have.length", 2);
   });
 
-  describe("Mailbox header", () => {
-    it("Refresh button works", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const mailbox = element[0];
-          mailbox.header = "Default";
-          mailbox.all_threads = [thread1];
-          mailbox.addEventListener("refreshClicked", function () {
-            mailbox.all_threads = threads; // on click make it two threads
-          });
+  it("Shows Mailbox with unread status as read", () => {
+    const unreadThreads = [thread1, thread2].map((thread) => ({
+      ...thread,
+      unread: false,
+    }));
+    cy.get("@mailbox").invoke("prop", "all_threads", unreadThreads);
 
-          cy.get(mailbox).find("header").should("exist");
-          cy.get(mailbox).find(".email-row.condensed").should("have.length", 1);
-          cy.get(mailbox).find("header button").click();
-          cy.get(mailbox).find(".email-row.condensed").should("have.length", 2);
-        });
-    });
-
-    it("Shows and hides Mailbox actions bar", () => {
-      cy.get("nylas-mailbox").then(([el]) => {
-        el.actions_bar = ["selectall", "star", "delete", "unread"];
-        cy.get(el).find("div[role='toolbar']").should("exist");
-      });
-
-      cy.get("nylas-mailbox").then(([el]) => {
-        el.actions_bar = [];
-        cy.get(el).find("div[role='toolbar']").should("not.exist");
-      });
-    });
+    cy.get("@mailbox").find("li").should("have.length", 2);
+    cy.get("@mailbox").find("li.unread").should("have.length", 0);
   });
 
-  describe("Pagination", () => {
-    // change these if default emails per page and total number of demo mailbox threads are changed.
+  it("Marks emails as unread", () => {
+    const unreadThreads = [thread1, thread2].map((thread) => ({
+      ...thread,
+      unread: false,
+    }));
+    cy.get("@mailbox").invoke("prop", "all_threads", unreadThreads);
 
-    const demoThreadsCount = 39;
+    cy.get("@mailbox")
+      .find(".email-row.condensed.unread")
+      .should("have.length", 0);
+    cy.get("@mailbox").find(".checkbox-container input").first().check();
 
-    it(`Shows Mailbox with ${defaultSize} emails per page as default`, () => {
-      let remainingThreads = demoThreadsCount;
-      while (remainingThreads > 0) {
-        if (remainingThreads >= defaultSize) {
-          cy.get("nylas-mailbox")
-            .find("nylas-email", { timeout: 10000 })
-            .should("have.length", defaultSize);
-        } else {
-          cy.get("nylas-mailbox")
-            .find("nylas-email", { timeout: 10000 })
-            .should("have.length", remainingThreads);
-        }
-        remainingThreads -= defaultSize;
-        if (remainingThreads > 0) {
-          cy.get("pagination-nav").get(".next-btn").click();
-        }
-      }
+    cy.get("@mailbox").find("button[data-cy=mark-read]").should("not.exist");
+    cy.get("@mailbox").find("button[data-cy=mark-unread]").should("exist");
+    cy.get("@mailbox").find("button[data-cy=mark-unread]").click();
+
+    cy.get("@mailbox")
+      .find(".email-row.condensed.unread")
+      .should("have.length", 1);
+    cy.get("@mailbox").find("button[data-cy=mark-read]").should("exist");
+    cy.get("@mailbox").find("button[data-cy=mark-unread]").should("not.exist");
+  });
+
+  it("Marks emails as read", () => {
+    const unreadThreads = [thread1, thread2].map((thread) => ({
+      ...thread,
+      unread: true,
+    }));
+    cy.get("@mailbox").invoke("prop", "all_threads", unreadThreads);
+
+    cy.get("@mailbox")
+      .find(".email-row.condensed.unread")
+      .should("have.length", 2);
+    cy.get("@mailbox").find(".checkbox-container input").first().check();
+
+    cy.get("@mailbox").find("button[data-cy=mark-unread]").should("not.exist");
+    cy.get("@mailbox").find("button[data-cy=mark-read]").click();
+
+    cy.get("@mailbox")
+      .find(".email-row.condensed.unread")
+      .should("have.length", 1);
+    cy.get("@mailbox").find("button[data-cy=mark-unread]").should("exist");
+    cy.get("@mailbox").find("button[data-cy=mark-read]").should("not.exist");
+  });
+});
+
+describe("Mailbox Props", () => {
+  let thread1;
+  let thread2;
+
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&view=count&in=inbox",
+      {
+        fixture: "mailbox/threads/threadsWithCount.json",
+      },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/index.json",
+      },
+    ).as("threads");
+
+    cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
+      thread1 = f;
+    });
+    cy.fixture("mailbox/threads/SAMPLE_2.json").then((f) => {
+      thread2 = f;
     });
 
-    // TODO: write test with non-default pagination; tests for buttons
-    it("Number of emails per page changes when items_per_page prop is changed", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.items_per_page = 1;
+    cy.visit("/components/mailbox/src/cypress.html");
 
-          cy.get(component).find("nylas-email").should("have.length", 1);
-          cy.get(component).get("pagination-nav").get(".next-btn").click();
-          cy.get(component).find("nylas-email").should("have.length", 1);
-        });
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it("Shows mailbox with no stars when show_star=false", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "show_star", false);
+
+    cy.get("@email").should("have.length", 2);
+    cy.get("@mailbox")
+      .find(".email-row.condensed")
+      .find(".starred")
+      .should("not.exist");
+  });
+
+  it("Shows mailbox with stars when show_star=true", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "show_star", true);
+
+    cy.get("@email").should("have.length", 2);
+    cy.get("@mailbox")
+      .find(".email-row.condensed")
+      .find(".starred")
+      .should("have.length", 2);
+  });
+
+  it("shows thread checkbox by default", () => {
+    cy.get("@mailbox")
+      .find(".thread-checkbox")
+      .should("have.length", defaultSize + 1);
+  });
+
+  it("hides if show_thread_checkbox set to false", () => {
+    cy.get("@mailbox").invoke("prop", "show_thread_checkbox", false);
+
+    cy.get("@mailbox").find(".thread-checkbox input").should("not.exist");
+  });
+
+  it("Shows Mailbox actions bar", () => {
+    cy.get("@mailbox").invoke("prop", "actions_bar", [
+      "selectall",
+      "star",
+      "delete",
+      "unread",
+    ]);
+    cy.get("@mailbox").find("div[role='toolbar']").should("exist");
+  });
+
+  it("Hides Mailbox actions bar", () => {
+    cy.get("@mailbox").invoke("prop", "actions_bar", []);
+    cy.get("@mailbox").find("div[role='toolbar']").should("not.exist");
+  });
+
+  it("Number of emails per page is items_per_page prop", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "items_per_page", 1);
+
+    cy.get("@email").should("have.length", 1);
+    cy.get("@mailbox").get("pagination-nav").get(".next-btn").click();
+    cy.get("@email").should("have.length", 1);
+  });
+});
+
+describe("Mailbox Interactions", () => {
+  let thread1;
+  let thread2;
+
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
     });
 
-    it("Pagination buttons functionality", () => {
-      cy.get("pagination-nav").get(".last-btn").click();
-      cy.get("pagination-nav").get(".next-btn").should("be.disabled");
-      cy.get("pagination-nav").get(".last-btn").should("be.disabled");
-
-      cy.get("pagination-nav").get(".first-btn").click();
-      cy.get("pagination-nav").get(".first-btn").should("be.disabled");
-      cy.get("pagination-nav").get(".back-btn").should("be.disabled");
+    cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
+      thread1 = f;
+    });
+    cy.fixture("mailbox/threads/SAMPLE_2.json").then((f) => {
+      thread2 = f;
     });
 
-    it("Should display correct number of items on the last page", () => {
-      cy.get("nylas-mailbox").then((element) => {
-        const itemsPerPage = 10;
-        const component = element[0];
-        component.items_per_page = itemsPerPage;
+    cy.visit("/components/mailbox/src/cypress.html");
 
-        cy.get("pagination-nav").get(".last-btn").click();
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it("Refresh button works", () => {
+    let refreshed = false;
+    cy.get("@mailbox").invoke("prop", "header", "Test");
+    cy.get("@mailbox").then((element) => {
+      const component = element[0];
+      component.addEventListener("refreshClicked", function () {
+        refreshed = true;
+      });
+    });
+
+    cy.get("@mailbox")
+      .find("header button")
+      .click()
+      .then(() => {
+        expect(refreshed);
+      });
+  });
+
+  it("Cancel delete with delete confirmation pop up", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["delete"]);
+
+    cy.get("@email").should("have.length", 2);
+    cy.get("@mailbox").find("div.checkbox-container input").first().check();
+    cy.get("[role='toolbar']").find(".delete").find("button").click();
+    // Clicking delete should open modal
+    cy.get(".modal").should("exist");
+    // Clicking cancel should close the modal
+    cy.get(".modal").find("button.cancel").click();
+    cy.get(".modal").should("not.exist");
+  });
+
+  it("Confirm delete with delete confirmation pop up", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["delete"]);
+
+    cy.get("@email").should("have.length", 2);
+    cy.get("@mailbox").find("div.checkbox-container input").first().check();
+    cy.get("[role='toolbar']").find(".delete").find("button").click();
+    // Clicking delete should open modal
+    cy.get(".modal").should("exist");
+    // Clicking confirm should delete email and close modal
+    cy.get(".modal").find("button.danger").click();
+    cy.get(".modal").should("not.exist");
+    cy.get("@email").should("have.length", 1);
+  });
+});
+
+describe("Mailbox Pagination: threads not intercepted", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  // change these if default emails per page and total number of demo mailbox threads are changed.
+
+  it(`Shows Mailbox with 13 emails per page as default`, () => {
+    cy.get("@email").should("have.length", defaultSize);
+    cy.get("pagination-nav").get(".next-btn").click();
+
+    cy.get("@email").should("have.length", defaultSize);
+    cy.get("pagination-nav").get(".next-btn").click();
+
+    cy.get("@email").should("have.length", defaultSize);
+  });
+
+  it("Pagination buttons functionality", () => {
+    cy.get("pagination-nav").get(".last-btn").click();
+    cy.get("pagination-nav").get(".next-btn").should("be.disabled");
+    cy.get("pagination-nav").get(".last-btn").should("be.disabled");
+
+    cy.get("pagination-nav").get(".first-btn").click();
+    cy.get("pagination-nav").get(".first-btn").should("be.disabled");
+    cy.get("pagination-nav").get(".back-btn").should("be.disabled");
+  });
+
+  it("Should display correct number of items on the last page", () => {
+    const itemsPerPage = 10;
+    cy.get("@mailbox").invoke("prop", "items_per_page", itemsPerPage);
+
+    cy.get("pagination-nav").get(".last-btn").click();
+    cy.get("pagination-nav").get(".last-btn").click();
+
+    cy.get("pagination-nav")
+      .get(".page-indicator .page-end")
+      .then((pageEndElem) => {
+        const pageEnd = pageEndElem.text();
         cy.get("pagination-nav")
-          .get(".page-indicator .page-end")
-          .then((pageEndElem) => {
-            const pageEnd = pageEndElem.text();
-            cy.get("pagination-nav")
-              .get(".page-indicator .total")
-              .then((totalElem) => {
-                const total = totalElem.text();
-                expect(total).to.equal(pageEnd);
+          .find(".page-indicator .total")
+          .then((totalElem) => {
+            const total = totalElem.text();
+            expect(total).to.equal(pageEnd);
 
-                const lastPageitems = Number(total) % itemsPerPage;
-                cy.get(component)
-                  .find("nylas-email", { timeout: 10000 })
-                  .should("have.length", itemsPerPage);
-              });
+            const lastPageitems = Number(total) % itemsPerPage;
+            cy.get("@email").should("have.length", lastPageitems);
           });
       });
+  });
+});
+
+describe("Mailbox Bulk actions", () => {
+  let thread1;
+  let thread2;
+
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
     });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&view=count&in=inbox",
+      {
+        fixture: "mailbox/threads/threadsWithCount.json",
+      },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/index.json",
+      },
+    ).as("threads");
+
+    cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
+      thread1 = f;
+    });
+    cy.fixture("mailbox/threads/SAMPLE_2.json").then((f) => {
+      thread2 = f;
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
   });
 
-  describe("Bulk actions", () => {
-    it("Should mark all unread then read", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.actions_bar = ["selectall", "unread"];
+  it("Should mark all unread to read", () => {
+    const unreadThreads = [thread1, thread2].map((thread) => ({
+      ...thread,
+      unread: true,
+    }));
+    cy.get("@mailbox").invoke("prop", "all_threads", unreadThreads);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["selectall", "unread"]);
 
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.thread-checkbox")
-            .find("input")
-            .check();
-          cy.get(component)
-            .find("div.checkbox-container")
-            .find("input")
-            .each((checkbox) => {
-              expect(checkbox).to.be.checked;
-            });
+    cy.get("@mailbox").find(".thread-checkbox").find("input").check();
+    cy.get("@mailbox")
+      .find(".thread-checkbox input")
+      .each((checkbox) => {
+        expect(checkbox).to.be.checked;
+      });
 
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-unread]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-unread]")
-            .click();
-          cy.get(component)
-            .find(".email-row")
-            .each((email) => {
-              cy.wrap(email).should("have.class", "unread");
-            });
-
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .should("exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-unread]")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.read-status button[data-cy=mark-read]")
-            .click();
-          cy.get(component)
-            .find(".email-row")
-            .each((email) => {
-              cy.wrap(email).should("not.have.class", "unread");
-            });
-        });
-    });
-
-    it("Should star all the emails", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.actions_bar = ["selectall", "star"];
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.thread-checkbox")
-            .find("input")
-            .check();
-
-          cy.get(component)
-            .find("div.checkbox-container")
-            .find("input")
-            .each((checkbox) => {
-              expect(checkbox).to.be.checked;
-            });
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.starred button.starred")
-            .should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.starred button")
-            .click();
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.starred button.starred")
-            .should("exist");
-          cy.get(component)
-            .find("nylas-email")
-            .each((email) => {
-              cy.wrap(email)
-                .find("div.starred button")
-                .should("have.class", "starred");
-            });
-
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.starred button")
-            .click();
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.starred button.starred")
-            .should("not.exist");
-          cy.get(component)
-            .find("nylas-email")
-            .find("div.starred")
-            .find("button.starred")
-            .should("not.exist");
-        });
-    });
-
-    it("Should only show Mailbox actions when an email is selected", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          // component.actions_bar = ["selectall", "unread", "delete", "star"];
-          cy.get(component)
-            .get("div[role='toolbar']")
-            .find("div")
-            .should("have.length", 1);
-
-          cy.get(component)
-            .find("div.checkbox-container")
-            .first()
-            .find("input")
-            .check();
-          cy.get(component)
-            .get("div[role='toolbar']")
-            .find("div")
-            .should("have.length", 4);
-        });
-    });
-
-    // TODO: finish when Folders are implemented in Mailbox
-    xit("Should delete all the emails and show empty mailbox", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.actions_bar = ["selectall", "delete"];
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.thread-checkbox")
-            .find("input")
-            .check();
-
-          cy.get(component)
-            .find("div.checkbox-container")
-            .find("input")
-            .each((checkbox) => {
-              cy.wrap(checkbox).should("be.checked");
-            });
-          cy.get(component).find("nylas-email").should("not.have.length", 0);
-          cy.get(component).find("mailbox-empty").should("not.exist");
-          cy.get(component)
-            .find("div[role='toolbar']")
-            .find("div.delete button")
-            .click();
-          cy.get(component).find("nylas-email").should("not.exist");
-          cy.get(component).find("mailbox-empty").should("exist");
-        });
-    });
+    cy.get("@mailbox").find("[data-cy=mark-read]").click();
+    cy.get("@mailbox")
+      .find(".email-row")
+      .each((email) => {
+        cy.wrap(email).should("not.have.class", "unread");
+      });
   });
 
-  describe("Delete action", () => {
-    it("Should show delete confirmation pop up", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          component.all_threads = threads;
-          component.actions_bar = ["delete"];
-          cy.get("nylas-email").should("have.length", threads.length);
-          cy.get(component)
-            .find("div.checkbox-container")
-            .first()
-            .find("input")
-            .check();
-          cy.get("div[role='toolbar']")
-            .find("div.delete")
-            .find("button")
-            .click();
-          // Clicking delete should open modal
-          cy.get(".modal").should("exist");
-          // Clicking cancel should close the modal
-          cy.get(".modal").find("button.cancel").click();
-          cy.get(".modal").should("not.exist");
+  it("Should mark all read to unread", () => {
+    const readThreads = [thread1, thread2].map((thread) => ({
+      ...thread,
+      unread: false,
+    }));
+    cy.get("@mailbox").invoke("prop", "all_threads", readThreads);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["selectall", "unread"]);
 
-          cy.get("div[role='toolbar']")
-            .find("div.delete")
-            .find("button")
-            .click();
-          cy.get(".modal").should("exist");
-          // Clicking confirm should delete email and close modal
-          cy.get(".modal").find("button.danger").click();
-          cy.get(".modal").should("not.exist");
-          cy.get("nylas-email").should("have.length", threads.length - 1);
-        });
-    });
+    cy.get("@mailbox").find(".thread-checkbox").find("input").check();
+    cy.get("@mailbox")
+      .find(".thread-checkbox input")
+      .each((checkbox) => {
+        expect(checkbox).to.be.checked;
+      });
+
+    cy.get("@mailbox").find("[data-cy=mark-unread]").click();
+    cy.get("@mailbox")
+      .find(".email-row")
+      .each((email) => {
+        cy.wrap(email).should("have.class", "unread");
+      });
   });
 
-  describe("Custom data", () => {
-    it("Should toggle between threads via props and fetched threads", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          const cyComponent = cy.wrap(component);
-          component.all_threads = threads;
-          cy.get(component)
-            .get("ul#mailboxlist")
-            .find("li")
-            .should("have.length", 2)
-            .then(() => {
-              component.all_threads = null;
-              cy.wait(1000);
-              cyComponent
-                .get("ul#mailboxlist")
-                .find("li")
-                .should("have.length", 13);
-            });
-        });
+  it("Should star all the emails", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["selectall", "star"]);
+    cy.get("@mailbox").invoke("prop", "show_star", true);
+
+    cy.get("@mailbox").find(".thread-checkbox").find("input").check();
+
+    cy.get("@mailbox")
+      .find("div.checkbox-container")
+      .find("input")
+      .each((checkbox) => {
+        expect(checkbox).to.be.checked;
+      });
+    cy.get("@mailbox")
+      .find("[role='toolbar']")
+      .find("div.starred button.starred")
+      .should("not.exist");
+    cy.get("@mailbox")
+      .find("[role='toolbar']")
+      .find("div.starred button")
+      .click();
+    cy.get("@mailbox")
+      .find("[role='toolbar']")
+      .find("div.starred button.starred")
+      .should("exist");
+    cy.get("@email").each((email) => {
+      cy.wrap(email).find("div.starred button").should("have.class", "starred");
     });
 
-    xit("Should successfully update a thread's message body when threadClicked is called", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const body = "This is a custom body";
-          const component = element[0];
-          component.addEventListener("threadClicked", function (v) {
-            let { thread } = v.detail;
-            thread = {
-              ...thread,
-              messages: thread.messages.map((m) => {
-                m.body = body;
-                return m;
-              }),
-            };
+    cy.get("@mailbox")
+      .find("[role='toolbar']")
+      .find("div.starred button")
+      .click();
+    cy.get("@mailbox")
+      .find("[role='toolbar']")
+      .find("div.starred button.starred")
+      .should("not.exist");
+    cy.get("@email")
+      .find("div.starred")
+      .find("button.starred")
+      .should("not.exist");
+  });
+
+  it("Should only show Mailbox actions when an email is selected", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+
+    cy.get("@mailbox")
+      .get("[role='toolbar']")
+      .children("div")
+      .should("have.length", 1);
+
+    cy.get("@mailbox").find(".checkbox-container input").first().check();
+    cy.get("@mailbox")
+      .get("[role='toolbar']")
+      .children("div")
+      .should("have.length", 3);
+  });
+
+  it("Should delete all the emails and show empty mailbox", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["selectall", "delete"]);
+
+    cy.get("@mailbox").find(".thread-checkbox").find("input").check();
+
+    cy.get("@mailbox")
+      .find(".checkbox-container input")
+      .each((checkbox) => {
+        cy.wrap(checkbox).should("be.checked");
+      });
+    cy.get("@email").should("not.have.length", 0);
+    cy.get("@mailbox").find("mailbox-empty").should("not.exist");
+
+    cy.get("@mailbox").find("[role='toolbar']").find(".delete button").click();
+    cy.get("@mailbox").find(".overlay button.danger").click(); // confirm delete
+
+    cy.get("@email").should("not.exist");
+    cy.get("@mailbox").contains("Your Mailbox is empty!");
+  });
+});
+
+describe("Mailbox Custom events", () => {
+  let thread1;
+  let thread2;
+
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/index.json",
+      },
+    ).as("threads");
+
+    cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
+      thread1 = f;
+    });
+    cy.fixture("mailbox/threads/SAMPLE_2.json").then((f) => {
+      thread2 = f;
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  xit("Should successfully update a thread's message body when threadClicked is called", () => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/3ozrqu3obfwzmsltxj72ll86m ",
+      {
+        fixture: "mailbox/messages/id.json",
+      },
+    );
+
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").then((element) => {
+      const component = element[0];
+
+      component.addEventListener("threadClicked", function (event) {
+        let { thread } = event.detail;
+        thread = {
+          ...thread,
+          messages: thread.messages.map((m) => {
+            m.body = "This is a custom body";
+            return m;
+          }),
+        };
+      });
+    });
+
+    cy.get("@mailbox").find(".email-row.condensed").first().click();
+    cy.get("@mailbox").contains("This is a custom body");
+  });
+
+  it("Should toggle between threads via props and fetched threads", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [thread1, thread2]);
+    cy.get("@mailbox").find("#mailboxlist").find("li").should("have.length", 2);
+
+    cy.get("@mailbox").invoke("prop", "all_threads", null);
+    cy.get("@mailbox")
+      .find("#mailboxlist")
+      .find("li")
+      .should("have.length", 13);
+  });
+});
+
+describe("Mailbox Integration: Composer and Drafts", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+
+    cy.addComponent("nylas-composer", {
+      show_header: true,
+      show_minimize_button: false,
+      reset_after_send: true,
+      reset_after_close: true,
+    });
+
+    cy.get("@mailbox").then((el) => {
+      const mailbox = el[0];
+      cy.get("nylas-composer")
+        .should("exist")
+        .as("composer")
+        .then((el) => {
+          const composer = el[0];
+          composer.close();
+
+          composer.afterSendSuccess = (data) => {
+            composer.close();
+          };
+
+          mailbox.addEventListener("draftThreadEvent", (event) => {
+            composer.value = event.detail.value;
+            composer.open();
           });
-          component.all_threads = threads;
 
-          const cyComponent = cy.wrap(component);
-          cyComponent.find(".email-row.condensed").then((emailRowElement) => {
-            const firstEmailRowElement = emailRowElement[0];
-            firstEmailRowElement.click();
-            cy.get("@mailbox")
-              .shadow()
-              .find("nylas-message-body", { timeout: 5000 })
-              .contains(body);
+          composer.addEventListener("messageSent", (event) => {
+            const message = event.detail.message;
+            mailbox.sentMessageUpdate(message);
           });
         });
     });
+  });
+
+  it("Shows draft message", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [DRAFT_THREAD]);
+    cy.get("@email").find(".participants-name").contains("Draft");
+    cy.get("@email")
+      .find(".snippet")
+      .contains("Testing with updated commons! --Sent with Nylas");
+  });
+
+  it("Clicking on a draft message opens composer", () => {
+    cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
+      fixture: "draftThread.json",
+    });
+    cy.get("@mailbox").invoke("prop", "all_threads", [DRAFT_THREAD]);
+
+    cy.get("@mailbox").find(".email-row.unread").click();
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "This is a Super great test email.");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest2@gmail.com");
+    cy.get("@composer")
+      .find("nylas-html-editor")
+      .find("[role='textbox']")
+      .invoke("text")
+      .should("contain", "Testing with updated commons! --Sent with Nylas");
+  });
+
+  it("ENTER keydown on a draft message opens composer", () => {
+    cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
+      fixture: "draftThread.json",
+    });
+    cy.get("@mailbox").invoke("prop", "all_threads", [DRAFT_THREAD]);
+    cy.get("li.unread").trigger("keypress", { code: "Enter" });
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "This is a Super great test email.");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest2@gmail.com");
+    cy.get("@composer")
+      .find("nylas-html-editor")
+      .find("[role='textbox']")
+      .invoke("text")
+      .should("contain", "Testing with updated commons! --Sent with Nylas");
   });
 });

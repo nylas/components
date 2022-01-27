@@ -1,0 +1,86 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  },
+  "response": [
+    {
+      "account_id": "test-account-id",
+      "display_name": "All Mail",
+      "id": "9zis0rd4fcgrcmkyoezs3am8k",
+      "name": "all",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Drafts",
+      "id": "6zvielpbbdbjath9373hr65rt",
+      "name": "drafts",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Spam",
+      "id": "cjx9ikiwaa1157kqny00r2r34",
+      "name": "spam",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Important",
+      "id": "4yia6q96xy3cpg3nmrbkom931",
+      "name": "important",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Inbox",
+      "id": "bnhqa4ooydb2htmcshzqyqdwv",
+      "name": "inbox",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Trash",
+      "id": "4puir9dusy2dgtxlc803osk44",
+      "name": "trash",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Sent Mail",
+      "id": "6kojp9jt2v3yh37h7w2cno7yr",
+      "name": "sent",
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Accounts",
+      "id": "7s6wep7zdrufic05hvfkxt363",
+      "name": null,
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "HR",
+      "id": "22a2r5bryts29llkk90cw7xu9",
+      "name": null,
+      "object": "label"
+    },
+    {
+      "account_id": "test-account-id",
+      "display_name": "Quarantine",
+      "id": "b99ldnk20jzjcazh48il471m6",
+      "name": null,
+      "object": "label"
+    }
+  ]
+}

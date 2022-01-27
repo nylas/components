@@ -1,0 +1,2159 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  },
+  "response": [
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1641437857,
+      "has_attachments": true,
+      "id": "7lspiyq6d7mikbrkwikjaqf1r",
+      "labels": [
+        {
+          "display_name": "All Mail",
+          "id": "9zis0rd4fcgrcmkyoezs3am8k",
+          "name": "all"
+        },
+        {
+          "display_name": "Sent Mail",
+          "id": "6kojp9jt2v3yh37h7w2cno7yr",
+          "name": "sent"
+        },
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643213047,
+      "last_message_sent_timestamp": 1643209147,
+      "last_message_timestamp": 1643213047,
+      "last_updated_timestamp": 1643214067,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641437857,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "8slq10fs9kcxr3viru461n5pm",
+          "labels": [
+            {
+              "display_name": "All Mail",
+              "id": "9zis0rd4fcgrcmkyoezs3am8k",
+              "name": "all"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ",
+          "starred": true,
+          "subject": "Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant2@email.com",
+              "name": "participant2@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438005,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "aut1raejxvw92da5cmoi2usik",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "CAGE Am I... gonna make it? RITA No. I don't think so. But I'll stay with you until you die. CAGE You don't have to... thank you, I - RITA I need your battery. It's fresh. Looks like you hard",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [{ "email": "participant1@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438031,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "6ngjqjgt5svwcoqomptr8piw6",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "An alien race has hit the Earth in an unrelenting assault, unbeatable by any military unit in the world. Major William Cage (Cruise) is an officer who has never seen a day of combat when he i",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant2@email.com",
+              "name": "participant2@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438060,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "kawavdm9quz4xk7ckdx9dp00",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "CAGE I don't deserve it. Rita gently pushes Cage over, unhooking something on his back. Cage grimaces in pain. He shivers, bloody, crying. CAGE (CONT'D) I... I don't want to die. Rita looks a",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438085,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "e9fl24fwnwyj462ao15h9edqk",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438127,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "9g7356680xi9fqyhf0xnnziq4",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "SILVER-BLACK TENDRILS like melted plastic, CRACKLING with electrical charge, DRIZZLE ONTO CAGE'S BODY, at 600 degrees. CAGE SCREAMS as it BURNS INTO HIM. There are probably worse deaths, but ",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438154,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "elgq9wc3iwbumutxwsksku04f",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Vitae sapien pellentesque habitant morbi tristique senectus et. Placerat orci nulla pellentesque dignissim enim sit. Nisi porta lorem mollis aliquam ut porttitor leo. Malesuada nunc vel risus",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438182,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "7xbyqcw1905t5qv5lyqfcl7di",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Now I know that none of you exactly CHOSE to be here. I know that all the young ladies and gentlemen FIT for the International Marine Forces have long since been decimated by the MIMIC DISEAS",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438206,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "9cswzp3amdfy3kw34rhuhfe5t",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Magnis dis parturient montes nascetur ridiculus mus. Maecenas pharetra convallis posuere morbi leo urna molestie. Tincidunt tortor aliquam nulla facilisi cras fermentum. Ante in nibh mauris c",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438286,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "345osno27gdsxnl0kna7f4pm2",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "RITA How about you two save this for the battle? FORD muddily salutes. So does NANCE. So does SGT. FARELL. RITA (CONT'D) Why are these soldiers in PT the day before battle, Sergeant? SGT. FAR",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1641438306,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "3onhq9qecbmqcaft7vbl9uwvg",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Diam quam nulla porttitor massa id neque aliquam vestibulum morbi. Aliquet nibh praesent tristique magna sit amet purus gravida quis. Ac placerat vestibulum lectus mauris. Volutpat est velit ",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [{ "email": "participant3@email.com", "name": "" }],
+          "date": 1641849604,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "8cqmc2hz96codd6ks6q0y0pjb",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Testing some more things On Wed, Jan 5, 2022 at 10:05 PM participant1@email.com <participant1@email.com> wrote: Diam quam nulla porttitor massa id neque aliquam vestibulum morbi. Aliquet ni",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [
+            {
+              "email": "participant3@email.com",
+              "name": "participant3@email.com"
+            }
+          ],
+          "date": 1641910022,
+          "files": [],
+          "from": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "id": "65o2a5i7mc7nf5eyuoiadwn59",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "This is from outlook From: Participant 2 <participant2@email.com> Sent: Monday, January 10, 2022 9:20 PM To: participant1@email.com <participant1@email.com> Cc: participant3@email.com <Participant.nylas@y",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [{ "email": "recipient1@yahoo.com", "name": "" }],
+          "cc": [
+            {
+              "email": "participant3@email.com",
+              "name": "participant3@email.com"
+            }
+          ],
+          "date": 1642620798,
+          "files": [],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "25trfoyfr2w4vd727dcvo69in",
+          "labels": [
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Adding a CC and BCC field On Tue, Jan 11, 2022 at 9:07 AM participant1@email.com <participant1@email.com> wrote: This is from outlook From: Participant 2 <participant2@email.com> Sent: Monday, Ja",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "cids": [
+            "f8574981-8330-d371-bafc-2ba98ae89214@yahoo.com",
+            "eDBuFEnLIKRAksaWqMFQ",
+            "Nn1U4ph0r4jUeSI3myZv",
+            "17e96e4b435fef1f4e11",
+            "yxoibtvmWE3XoDrh5L41"
+          ],
+          "date": 1642623375,
+          "files": [
+            {
+              "content_disposition": "inline",
+              "content_id": "f8574981-8330-d371-bafc-2ba98ae89214@yahoo.com",
+              "content_type": "image/png",
+              "filename": "1642623322044blob.jpg",
+              "id": "52rwos57j12xhsgio4wy17dvz",
+              "size": 46340
+            }
+          ],
+          "from": [
+            { "email": "participant3@email.com", "name": "Participant 3" }
+          ],
+          "id": "8fny48glor248ctl7yu7iv1av",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Some HTML to render in React #​272 — JANUARY 19, 2022READ ON THE WEB React Status Your weekly React news digest, every Wednesday.Good Advice on JSX Conditionals — “Time after time I shoot mys",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" },
+            {
+              "email": "participant1@email.com",
+              "name": "participant1@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "cids": [
+            "f8574981-8330-d371-bafc-2ba98ae89214@yahoo.com",
+            "eDBuFEnLIKRAksaWqMFQ",
+            "Nn1U4ph0r4jUeSI3myZv",
+            "17e96e4b435fef1f4e11",
+            "yxoibtvmWE3XoDrh5L41"
+          ],
+          "date": 1643129527,
+          "files": [
+            {
+              "content_disposition": "inline",
+              "content_id": "eDBuFEnLIKRAksaWqMFQ",
+              "content_type": "image/png",
+              "filename": "1642623322044blob.jpg",
+              "id": "1tta3q00s37acbcsz824zo0no",
+              "size": 46340
+            }
+          ],
+          "from": [
+            { "email": "participant3@email.com", "name": "Participant 3" }
+          ],
+          "id": "2ce4fqw8de4tzjna031pb9ti3",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Testing a lot of to emails On Wednesday, January 19, 2022, 03:16:11 p.m. EST, Participant 3 <participant3@email.com> wrote: Some HTML to render in React #​272 — JANUARY 19, 2022READ ON THE WEB React S",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant1@email.com", "name": "" },
+            { "email": "participant2@email.com", "name": "Participant 2" },
+            {
+              "email": "participant4@email.com",
+              "name": "participant4@email.com"
+            },
+            {
+              "email": "participant5@email.com",
+              "name": "participant5@email.com"
+            },
+            {
+              "email": "participant6@email.com",
+              "name": "participant6@email.com"
+            },
+            {
+              "email": "participant7@email.com",
+              "name": "participant7@email.com"
+            },
+            {
+              "email": "participant8@email.com",
+              "name": "participant8@email.com"
+            },
+            {
+              "email": "participant9@email.com",
+              "name": "participant9@email.com"
+            },
+            {
+              "email": "participant10@email.com",
+              "name": "participant10@email.com"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [{ "email": "participant1@email.com", "name": "" }],
+          "cids": [
+            "f8574981-8330-d371-bafc-2ba98ae89214@yahoo.com",
+            "eDBuFEnLIKRAksaWqMFQ",
+            "Nn1U4ph0r4jUeSI3myZv",
+            "17e96e4b435fef1f4e11",
+            "yxoibtvmWE3XoDrh5L41"
+          ],
+          "date": 1643208966,
+          "files": [
+            {
+              "content_disposition": "inline",
+              "content_id": "Nn1U4ph0r4jUeSI3myZv",
+              "content_type": "image/png",
+              "filename": "1642623322044blob.jpg",
+              "id": "5doz57lv3u60xj7o5zgdzloj0",
+              "size": 46340
+            }
+          ],
+          "from": [
+            { "email": "participant3@email.com", "name": "Participant 3" }
+          ],
+          "id": "3eqihf1vwd2mvo8tswn9weqqv",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "On Tuesday, January 25, 2022, 11:52:04 a.m. EST, Participant 3 <participant3@email.com> wrote: Testing a lot of to emails On Wednesday, January 19, 2022, 03:16:11 p.m. EST, Participant 3 <Participant.nylas@yahoo.co",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [
+            { "email": "recipient4@yahoo.com", "name": "" },
+            { "email": "recipient2@yahoo.com", "name": "" },
+            { "email": "recipient3@yahoo.com", "name": "" }
+          ],
+          "cc": [
+            { "email": "participant3@email.com", "name": "" },
+            { "email": "recipient1@yahoo.com", "name": "" }
+          ],
+          "cids": [
+            "f8574981-8330-d371-bafc-2ba98ae89214@yahoo.com",
+            "eDBuFEnLIKRAksaWqMFQ",
+            "Nn1U4ph0r4jUeSI3myZv",
+            "17e96e4b435fef1f4e11",
+            "yxoibtvmWE3XoDrh5L41"
+          ],
+          "date": 1643209147,
+          "files": [
+            {
+              "content_disposition": "attachment",
+              "content_id": "17e96e4b435fef1f4e11",
+              "content_type": "image/jpeg",
+              "filename": "1642623322044blob.jpg",
+              "id": "7z619ftj4w85gorx2pp29t8l",
+              "size": 46340
+            }
+          ],
+          "from": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "id": "9h6rgfkgfn2qjk58f8g3cgqgg",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Sent Mail",
+              "id": "6kojp9jt2v3yh37h7w2cno7yr",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Adding 2 CCs and 3 BCCs On Wed, Jan 26, 2022 at 9:56 AM Participant 3 <participant3@email.com> wrote: On Tuesday, January 25, 2022, 11:52:04 a.m. EST, Participant 3 <participant3@email.com> wrote: Testing a lo",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [{ "email": "participant1@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [
+            { "email": "participant1@email.com", "name": "" },
+            { "email": "participant3@email.com", "name": "Participant 3" },
+            {
+              "email": "recipient1@yahoo.com",
+              "name": "recipient1@yahoo.com"
+            }
+          ],
+          "cids": [
+            "f8574981-8330-d371-bafc-2ba98ae89214@yahoo.com",
+            "eDBuFEnLIKRAksaWqMFQ",
+            "Nn1U4ph0r4jUeSI3myZv",
+            "17e96e4b435fef1f4e11",
+            "yxoibtvmWE3XoDrh5L41"
+          ],
+          "date": 1643213047,
+          "files": [
+            {
+              "content_disposition": "inline",
+              "content_id": "yxoibtvmWE3XoDrh5L41",
+              "content_type": "image/jpeg",
+              "filename": "1642623322044blob.jpg",
+              "id": "424zc6tyzqpm5xxofwyn9l247",
+              "size": 46340
+            }
+          ],
+          "from": [
+            { "email": "participant3@email.com", "name": "Participant 3" }
+          ],
+          "id": "1ztjbhsll3cpepmb4qxwrw2ei",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "3 CCs and 4 BCCs On Wednesday, January 26, 2022, 09:59:17 a.m. EST, Participant 2 <participant2@email.com> wrote: Adding 2 CCs and 3 BCCs On Wed, Jan 26, 2022 at 9:56 AM Participant 3 <Participant.nylas@yahoo.co",
+          "starred": true,
+          "subject": "Re: Testing scroll to latest message in thread",
+          "thread_id": "7lspiyq6d7mikbrkwikjaqf1r",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant3@email.com", "name": "participant3@email.com" },
+        { "email": "participant3@email.com", "name": "Participant 3" },
+        {
+          "email": "participant1@email.com",
+          "name": "participant1@email.com"
+        },
+        { "email": "recipient2@yahoo.com", "name": "" },
+        {
+          "email": "participant5@email.com",
+          "name": "participant5@email.com"
+        },
+        {
+          "email": "participant4@email.com",
+          "name": "participant4@email.com"
+        },
+        {
+          "email": "recipient1@yahoo.com",
+          "name": "recipient1@yahoo.com"
+        },
+        {
+          "email": "participant6@email.com",
+          "name": "participant6@email.com"
+        },
+        { "email": "participant9@email.com", "name": "participant9@email.com" },
+        {
+          "email": "participant7@email.com",
+          "name": "participant7@email.com"
+        },
+        { "email": "recipient3@yahoo.com", "name": "" },
+        {
+          "email": "participant8@email.com",
+          "name": "participant8@email.com"
+        },
+        { "email": "participant2@email.com", "name": "participant2@email.com" },
+        { "email": "participant2@email.com", "name": "Participant 2" },
+        {
+          "email": "participant10@email.com",
+          "name": "participant10@email.com"
+        },
+        { "email": "recipient4@yahoo.com", "name": "" }
+      ],
+      "snippet": "3 CCs and 4 BCCs On Wednesday, January 26, 2022, 09:59:17 a.m. EST, Participant 2 <participant2@email.com> wrote: Adding 2 CCs and 3 BCCs On Wed, Jan 26, 2022 at 9:56 AM Participant 3 <Participant.nylas@yahoo.co",
+      "starred": true,
+      "subject": "Testing scroll to latest message in thread",
+      "unread": false,
+      "version": 69
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1637791097,
+      "has_attachments": false,
+      "id": "1mby021j5b8td65ryz3iovsd8",
+      "labels": [
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        },
+        {
+          "display_name": "All Mail",
+          "id": "9zis0rd4fcgrcmkyoezs3am8k",
+          "name": "all"
+        },
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        }
+      ],
+      "last_message_received_timestamp": 1643206043,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643206043,
+      "last_updated_timestamp": 1643206078,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1638192168,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "370z8pzqr04vuukyi730kuk5a",
+          "labels": [
+            {
+              "display_name": "All Mail",
+              "id": "9zis0rd4fcgrcmkyoezs3am8k",
+              "name": "all"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "Test Snippet from email",
+          "starred": false,
+          "subject": "This is a test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642024788,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "eszuxes6jx3ecv9cweukrfb2p",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642111197,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "2toe03571h22prdo5sledixnj",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642629664,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "89bx68011ie2kbzx33rjm7ge3",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642716079,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "7na29gzhxvqapc92jz48wteqx",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642803106,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "f1en3uzeosdwn9955qpaxt9ol",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642889521,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "drwz8t8q7avges22yhtee1afg",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643033194,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "7eeyraoygm8786lh6r4050kpx",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643119609,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "akgfo6x9n1zlr353uavmag8i9",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643206043,
+          "files": [],
+          "from": [
+            { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" }
+          ],
+          "id": "3h4hjocbj1dxy38ffyfza02jb",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "no-reply-bounce@dropbox.com", "name": "" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "1mby021j5b8td65ryz3iovsd8",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "no-reply@dropbox.com", "name": "Dropbox Paper" },
+        { "email": "participant2@email.com", "name": "" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 19
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643145577,
+      "has_attachments": true,
+      "id": "bdyf0z4g1fr7mb5ue3yzhgj9g",
+      "labels": [
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        },
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        }
+      ],
+      "last_message_received_timestamp": 1643145577,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643145577,
+      "last_updated_timestamp": 1643145662,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643145577,
+          "files": [
+            {
+              "content_disposition": "attachment",
+              "content_type": "text/calendar",
+              "filename": null,
+              "id": "aaxkng8ug5ba1qlhygsmpfjms",
+              "size": 2408
+            },
+            {
+              "content_disposition": "attachment",
+              "content_type": "application/ics",
+              "filename": "invite.ics",
+              "id": "1fnvniqr88f816menphrb6f60",
+              "size": 2408
+            }
+          ],
+          "from": [{ "email": "recipient5@yahoo.com", "name": "Recipient 5" }],
+          "id": "9nppr82irsaikgjvzacjgxjvo",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            { "email": "recipient5@yahoo.com", "name": "Recipient 5" }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "bdyf0z4g1fr7mb5ue3yzhgj9g",
+          "to": [
+            { "email": "recipient6@email.com", "name": "" },
+            { "email": "participant2@email.com", "name": "" }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "" },
+        { "email": "recipient5@yahoo.com", "name": "Recipient 5" },
+        { "email": "recipient6@email.com", "name": "" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 3
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643131770,
+      "has_attachments": false,
+      "id": "adojks3vah79snizpf0xf6h0c",
+      "labels": [
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        },
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        }
+      ],
+      "last_message_received_timestamp": 1643134674,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643134674,
+      "last_updated_timestamp": 1643137469,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643131770,
+          "files": [],
+          "from": [
+            {
+              "email": "notifications@shortcut.com",
+              "name": "Recipient 5 via Shortcut"
+            }
+          ],
+          "id": "4incw7hv8cg24bk20epk6n44v",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            {
+              "email": "61f03372-7067-488a-9485-d74788533345@reply.shortcut.com",
+              "name": "Shortcut Notification"
+            }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "adojks3vah79snizpf0xf6h0c",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643134674,
+          "files": [],
+          "from": [
+            {
+              "email": "notifications@shortcut.com",
+              "name": "Recipient 7 via Shortcut"
+            }
+          ],
+          "id": "3v5mrgm5tngi8b2yctpx0sbv3",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            {
+              "email": "61f03ed1-e3c3-4daf-b9d6-37c0990146f2@reply.shortcut.com",
+              "name": "Shortcut Notification"
+            }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "adojks3vah79snizpf0xf6h0c",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "Participant 2" },
+        {
+          "email": "notifications@shortcut.com",
+          "name": "Recipient 7 via Shortcut"
+        },
+        {
+          "email": "notifications@shortcut.com",
+          "name": "Recipient 5 via Shortcut"
+        }
+      ],
+      "snippet": "Recipient 7 (@recipient7) commented on story [email] Rendering the email component in React does not work for HTML emails: Participant reached out and can confirm that the issue does not appear for me e",
+      "starred": false,
+      "subject": "[Wonka-Components] [email] Rendering the email component in React does not work for HTML emails",
+      "unread": false,
+      "version": 3
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643130991,
+      "has_attachments": false,
+      "id": "d7312c5avbm0xcth6hw6illku",
+      "labels": [
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643130991,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643130991,
+      "last_updated_timestamp": 1643131043,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643130991,
+          "files": [],
+          "from": [{ "email": "recipient8@email.com", "name": "Recipient 8" }],
+          "id": "8bknprn9hv8yza87nqsnmho5c",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            { "email": "recipient8@email.com", "name": "Recipient 8" }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "d7312c5avbm0xcth6hw6illku",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "" },
+        { "email": "recipient8@email.com", "name": "Recipient 8" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 1
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643128152,
+      "has_attachments": true,
+      "id": "ay40hfxjumuxo8mzhsl1lz0cq",
+      "labels": [
+        {
+          "display_name": "All Mail",
+          "id": "9zis0rd4fcgrcmkyoezs3am8k",
+          "name": "all"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643128152,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643128152,
+      "last_updated_timestamp": 1643128270,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "cids": ["image001.png@01D811DE.C671FA80"],
+          "date": 1643128152,
+          "files": [
+            {
+              "content_disposition": "inline",
+              "content_id": "image001.png@01D811DE.C671FA80",
+              "content_type": "image/png",
+              "filename": "image001.png",
+              "id": "4aw5mn1n3io68jgsxam063l5x",
+              "size": 27587
+            },
+            {
+              "content_disposition": "inline",
+              "content_id": "image002.gif@01D811DE.C671FA80",
+              "content_type": "image/gif",
+              "filename": "image002.gif",
+              "id": "ei20nzn33fl8dcswtynvis5cy",
+              "size": 2858
+            },
+            {
+              "content_disposition": "inline",
+              "content_id": "image003.gif@01D811DE.C671FA80",
+              "content_type": "image/gif",
+              "filename": "image003.gif",
+              "id": "4ld7kjhwvgx0s5f4ee3y93w15",
+              "size": 3254
+            },
+            {
+              "content_disposition": "inline",
+              "content_id": "image004.png@01D811DE.C671FA80",
+              "content_type": "image/png",
+              "filename": "image004.png",
+              "id": "dbp2k1leier4d99levaka5a6r",
+              "size": 804
+            },
+            {
+              "content_disposition": "inline",
+              "content_id": "image005.png@01D811DE.C671FA80",
+              "content_type": "image/png",
+              "filename": "image005.png",
+              "id": "4388b0gm33fkidz15p1okj3om",
+              "size": 648
+            }
+          ],
+          "from": [{ "email": "recipient1@yahoo.com", "name": "FNU LNU" }],
+          "id": "5b570n3bdnbeeua9769lot5y0",
+          "labels": [
+            {
+              "display_name": "All Mail",
+              "id": "9zis0rd4fcgrcmkyoezs3am8k",
+              "name": "all"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Creating Email Magic Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tempus adipiscing felis, sit amet blandit ipsum volutpat sed. Morbi porttitor, eget accumsan et dictum, nisi l",
+          "starred": false,
+          "subject": "HTML email",
+          "thread_id": "ay40hfxjumuxo8mzhsl1lz0cq",
+          "to": [
+            {
+              "email": "participant2@email.com",
+              "name": "participant2@email.com"
+            }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "participant2@email.com" },
+        { "email": "recipient1@yahoo.com", "name": "FNU LNU" }
+      ],
+      "snippet": "Creating Email Magic Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tempus adipiscing felis, sit amet blandit ipsum volutpat sed. Morbi porttitor, eget accumsan et dictum, nisi l",
+      "starred": false,
+      "subject": "HTML email",
+      "unread": false,
+      "version": 4
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643126867,
+      "has_attachments": false,
+      "id": "di6m6tf7d27im31e8zve3gwkm",
+      "labels": [
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        },
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        }
+      ],
+      "last_message_received_timestamp": 1643126867,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643126867,
+      "last_updated_timestamp": 1643127223,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643126867,
+          "files": [],
+          "from": [
+            { "email": "recipient10@email.com", "name": "Participant 2" }
+          ],
+          "id": "dtpjgb541u96175klu8pa2rgd",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "di6m6tf7d27im31e8zve3gwkm",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "" },
+        { "email": "recipient10@email.com", "name": "Participant 2" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 3
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643117694,
+      "has_attachments": false,
+      "id": "7nnd4kpzg8iek37uk7taa136s",
+      "labels": [
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643117694,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643117694,
+      "last_updated_timestamp": 1643221082,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643117694,
+          "files": [],
+          "from": [{ "email": "hello@whimsical.com", "name": "Whimsical" }],
+          "id": "6dd7nf9zvb6s28a4fujnuwgc4",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "Hi Participant, 21 is behind us and a New Year is a big deal! Whatever it holds, one thing you can always bet on are Whimsical updates packed with Diamonds. Update a Card, any Card! We brought cards",
+          "starred": false,
+          "subject": "We’re Flush with Whimsical Updates!",
+          "thread_id": "7nnd4kpzg8iek37uk7taa136s",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "Participant 2" },
+        { "email": "hello@whimsical.com", "name": "Whimsical" }
+      ],
+      "snippet": "Hi Participant, 21 is behind us and a New Year is a big deal! Whatever it holds, one thing you can always bet on are Whimsical updates packed with Diamonds. Update a Card, any Card! We brought cards",
+      "starred": false,
+      "subject": "We’re Flush with Whimsical Updates!",
+      "unread": false,
+      "version": 2
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1642099003,
+      "has_attachments": false,
+      "id": "4mabgp76a3bvegj4rxzhbg32l",
+      "labels": [
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643073848,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643073848,
+      "last_updated_timestamp": 1643073882,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1642099003,
+          "files": [],
+          "from": [
+            {
+              "email": "notifications@shortcut.com",
+              "name": "Solimar Beníquez Pagán via Shortcut"
+            }
+          ],
+          "id": "cuq6l5e1v3d2xxc9hmdonpx8k",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            {
+              "email": "61e0713a-ab37-4662-90c1-d4d8f7fd17fe@reply.shortcut.com",
+              "name": "Shortcut Notification"
+            }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "4mabgp76a3bvegj4rxzhbg32l",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643073848,
+          "files": [],
+          "from": [
+            {
+              "email": "notifications@shortcut.com",
+              "name": "Solimar Beníquez Pagán via Shortcut"
+            }
+          ],
+          "id": "28qgrezo5nsud151vr89zd77",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            },
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            {
+              "email": "61ef5137-1e6e-4fb7-8e3c-e5cf18e9e9da@reply.shortcut.com",
+              "name": "Shortcut Notification"
+            }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "4mabgp76a3bvegj4rxzhbg32l",
+          "to": [
+            { "email": "participant2@email.com", "name": "Participant 2" }
+          ],
+          "unread": true
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "Participant 2" },
+        {
+          "email": "notifications@shortcut.com",
+          "name": "Solimar Beníquez Pagán via Shortcut"
+        }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": true,
+      "version": 2
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643071117,
+      "has_attachments": true,
+      "id": "4wfbr9dfea17jgca4fuulayna",
+      "labels": [
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643071117,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643071117,
+      "last_updated_timestamp": 1643121346,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643071117,
+          "files": [
+            {
+              "content_disposition": "attachment",
+              "content_type": "text/calendar",
+              "filename": null,
+              "id": "cvkxsvryb6vp6v8lajdekgpv0",
+              "size": 1977
+            },
+            {
+              "content_disposition": "attachment",
+              "content_type": "application/ics",
+              "filename": "invite.ics",
+              "id": "cocm00k8pm2h8iqp6t1j4bwx9",
+              "size": 1977
+            }
+          ],
+          "from": [{ "email": "recipient5@yahoo.com", "name": "Recipient 5" }],
+          "id": "5pmfdt1zbhu8jlgc4a9gftjr",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            { "email": "recipient5@yahoo.com", "name": "Recipient 5" }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "4wfbr9dfea17jgca4fuulayna",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "" },
+        { "email": "recipient5@yahoo.com", "name": "Recipient 5" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 2
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643044743,
+      "has_attachments": false,
+      "id": "1xygp5zppzkspm9nn1hzbk1ei",
+      "labels": [
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643044743,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643044743,
+      "last_updated_timestamp": 1643121346,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643044743,
+          "files": [],
+          "from": [
+            { "email": "marketing@miro.com", "name": "Stephanie at Miro" }
+          ],
+          "id": "qy6cnv0p5b7c814b7ktnyvqh",
+          "labels": [
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "marketing@miro.com", "name": "" }],
+          "snippet": "Looking to facilitate a workshop? Our free course can help. Log in Workshop like a pro Running virtual workshops can be tough. The good news is we’ve got a great (and free) way for you to lea",
+          "starred": false,
+          "subject": "[Free Course] Upgrade Your Workshops In Miro",
+          "thread_id": "1xygp5zppzkspm9nn1hzbk1ei",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "participant2@email.com", "name": "" },
+        { "email": "marketing@miro.com", "name": "Stephanie at Miro" }
+      ],
+      "snippet": "Looking to facilitate a workshop? Our free course can help. Log in Workshop like a pro Running virtual workshops can be tough. The good news is we’ve got a great (and free) way for you to lea",
+      "starred": false,
+      "subject": "[Free Course] Upgrade Your Workshops In Miro",
+      "unread": false,
+      "version": 3
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643038938,
+      "has_attachments": true,
+      "id": "83p6m4bgvak14uv6fq4cnzhj4",
+      "labels": [
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643038938,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643038938,
+      "last_updated_timestamp": 1643121346,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643038938,
+          "files": [
+            {
+              "content_disposition": "attachment",
+              "content_type": "text/calendar",
+              "filename": null,
+              "id": "8doohagbqdnwsvmgdefxryxq8",
+              "size": 2936
+            },
+            {
+              "content_disposition": "attachment",
+              "content_type": "application/ics",
+              "filename": "invite.ics",
+              "id": "1r40yxc1qkysr3j55n7dfiqi6",
+              "size": 2936
+            }
+          ],
+          "from": [
+            { "email": "emailperson@email.com", "name": "Email Person" }
+          ],
+          "id": "ewda0rz7nbewcjph72g7sx3cl",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            { "email": "emailperson@email.com", "name": "Email Person" }
+          ],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "83p6m4bgvak14uv6fq4cnzhj4",
+          "to": [{ "email": "participant2@email.com", "name": "" }],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "emailperson@email.com", "name": "Email Person" },
+        { "email": "participant2@email.com", "name": "" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 3
+    },
+    {
+      "account_id": "test-account-id",
+      "drafts": [],
+      "first_message_timestamp": 1643037275,
+      "has_attachments": true,
+      "id": "7ehethahb12ch6xa04ix44jdj",
+      "labels": [
+        {
+          "display_name": "Important",
+          "id": "4yia6q96xy3cpg3nmrbkom931",
+          "name": "important"
+        },
+        {
+          "display_name": "Inbox",
+          "id": "bnhqa4ooydb2htmcshzqyqdwv",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643037275,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643037275,
+      "last_updated_timestamp": 1643121346,
+      "messages": [
+        {
+          "account_id": "test-account-id",
+          "bcc": [],
+          "cc": [],
+          "date": 1643037275,
+          "files": [
+            {
+              "content_disposition": "attachment",
+              "content_type": "text/calendar",
+              "filename": null,
+              "id": "2lhg58wvhhpcxakzf9bgdcp7i",
+              "size": 2862
+            },
+            {
+              "content_disposition": "attachment",
+              "content_type": "application/ics",
+              "filename": "invite.ics",
+              "id": "4sq5mrlb9muw51ngjo83qdbe4",
+              "size": 2862
+            }
+          ],
+          "from": [{ "email": "emailing@gmail.com", "name": "Email You" }],
+          "id": "1z14i1uo8v1vl4x9i2hd6hx3t",
+          "labels": [
+            {
+              "display_name": "Important",
+              "id": "4yia6q96xy3cpg3nmrbkom931",
+              "name": "important"
+            },
+            {
+              "display_name": "Inbox",
+              "id": "bnhqa4ooydb2htmcshzqyqdwv",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [{ "email": "emailing@gmail.com", "name": "Email You" }],
+          "snippet": "This is another test Snippet",
+          "starred": false,
+          "subject": "This is another test Subject",
+          "thread_id": "7ehethahb12ch6xa04ix44jdj",
+          "to": [
+            { "email": "recipient6@email.com", "name": "" },
+            { "email": "participant2@email.com", "name": "" },
+            { "email": "person@email.com", "name": "" },
+            { "email": "person2@email.com", "name": "" }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        { "email": "person2@email.com", "name": "" },
+        { "email": "participant2@email.com", "name": "" },
+        { "email": "emailing@gmail.com", "name": "Email You" },
+        { "email": "person@email.com", "name": "" },
+        { "email": "recipient6@email.com", "name": "" }
+      ],
+      "snippet": "This is another test Snippet",
+      "starred": false,
+      "subject": "This is another test Subject",
+      "unread": false,
+      "version": 2
+    }
+  ]
+}

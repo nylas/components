@@ -1,0 +1,14 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  }
+}

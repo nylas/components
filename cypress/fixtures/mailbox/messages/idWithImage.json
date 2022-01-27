@@ -1,0 +1,49 @@
+{
+  "component": { "theming": {} },
+  "response": {
+    "account_id": "byh51hf1ru70i28jkxapbwguc",
+    "bcc": [],
+    "body": "<div dir=\"ltr\"><div dir=\"ltr\" class=\"gmail_signature\" data-smartmail=\"gmail_signature\"><div dir=\"ltr\"><span><div dir=\"ltr\" style=\"margin-left:0pt\" align=\"left\">Inline image test:</div><div dir=\"ltr\" style=\"margin-left:0pt\" align=\"left\"><img src=\"cid:ii_kwwc5np40\" alt=\"Streams Automation.jpg\" width=\"542\" height=\"283\"><br>Does it render properly?<table style=\"border:none;border-collapse:collapse\"><colgroup><col width=\"84\"><col width=\"540\"></colgroup><tbody><tr style=\"height:79pt\"><td style=\"vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden\"></td><td style=\"vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden\"><p dir=\"ltr\" style=\"line-height:1.38;margin-top:0pt;margin-bottom:0pt\"><font color=\"#000000\" face=\"Source Sans Pro, sans-serif\"><span style=\"font-size:10.6667px;white-space:pre-wrap\">\n</span></font></p><p dir=\"ltr\" style=\"line-height:1.38;margin-top:0pt;margin-bottom:0pt\"><span><br></span></p><div dir=\"ltr\" style=\"margin-left:0pt\" align=\"left\"><table style=\"border:none;border-collapse:collapse\"><colgroup><col width=\"84\"><col width=\"540\"></colgroup><tbody><tr style=\"height:63pt\"><td colspan=\"2\" style=\"vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden\"><p dir=\"ltr\" style=\"line-height:1.2;margin-top:0pt;margin-bottom:0pt\"><span style=\"text-decoration:underline;font-size:11pt;font-family:Arial;color:rgb(17,85,204);background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;vertical-align:baseline;white-space:pre-wrap\"><span style=\"border:none;display:inline-block;overflow:hidden;width:306px;height:45px\"></span></span></p><div dir=\"ltr\" style=\"margin-left:0pt\" align=\"left\"><table style=\"border:none;border-collapse:collapse\"><colgroup><col width=\"84\"><col width=\"540\"></colgroup><tbody><tr style=\"height:63pt\"><td colspan=\"2\" style=\"vertical-align:top;padding:5pt 5pt 5pt 5pt;overflow:hidden\"><p dir=\"ltr\" style=\"line-height:1.2;margin-top:0pt;margin-bottom:0pt\"><span style=\"text-decoration:underline;font-size:11pt;font-family:Arial;color:rgb(17,85,204);background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;vertical-align:baseline;white-space:pre-wrap\"><span style=\"border:none;display:inline-block;overflow:hidden;width:306px;height:45px\"></span></span></p></td></tr></tbody></table></div></td></tr></tbody></table></div></td></tr></tbody></table></div></span></div></div></div>",
+    "cc": [],
+    "cids": ["ii_kwwc5np40"],
+    "date": 1638895701,
+    "events": [],
+    "files": [
+      {
+        "content_disposition": "inline",
+        "content_id": "ii_kwwc5np40",
+        "content_type": "image/jpeg",
+        "filename": "Streams Automation.jpg",
+        "id": "b6113komjjjzsmhkphxf8nw8g",
+        "size": 1022500
+      }
+    ],
+    "from": [{ "email": "pooja.g@nylas.com", "name": "Test Person" }],
+    "id": "c6uq0gr1g5f52mr0b8nzwx6br",
+    "labels": [
+      {
+        "display_name": "All Mail",
+        "id": "28hrl3nzl7tupfl0xd5zlfn6h",
+        "name": "all"
+      },
+      {
+        "display_name": "IMPORTANT",
+        "id": "6ile0fjv14zjg9k01m1595qm",
+        "name": "important"
+      },
+      {
+        "display_name": "INBOX",
+        "id": "26z3bxbz3c0grgr0u4ssx7k0g",
+        "name": "inbox"
+      }
+    ],
+    "object": "message",
+    "reply_to": [],
+    "snippet": "Inline image test: Does it render properly?",
+    "starred": false,
+    "subject": "Inline image rendering",
+    "thread_id": "bpp3gwfyloaf6tim7bpcxlxdz",
+    "to": [{ "email": "nylascypresstest@gmail.com", "name": "Test User" }],
+    "unread": false
+  }
+}

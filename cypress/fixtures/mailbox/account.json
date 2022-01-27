@@ -1,0 +1,28 @@
+{
+  "component": {
+    "theming": {
+      "mode": "inline",
+      "show_header": true,
+      "show_close_button": true,
+      "show_editor_toolbar": true,
+      "visible": true,
+      "show_minimize_button": true,
+      "theme": "light",
+      "show_attachment_button": true,
+      "show_from": true,
+      "minimized": false,
+      "show_subject": true
+    }
+  },
+  "response": {
+    "account_id": "test-account-id",
+    "email_address": "test-email@email.com",
+    "id": "test-account-id",
+    "linked_at": 1625065154,
+    "name": "Test User",
+    "object": "account",
+    "organization_unit": "label",
+    "provider": "gmail",
+    "sync_state": "running"
+  }
+}
