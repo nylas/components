@@ -151,7 +151,8 @@
   let showDatepicker = false;
   let themeLoaded = false;
   let visible = true;
-  $: subject = value?.subject ?? $message.subject;
+  let subject = _this.value?.subject ?? $message.subject;
+  $: subject = $message.subject;
 
   onMount(async () => {
     isLoading = true;
