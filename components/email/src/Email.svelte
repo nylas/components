@@ -24,6 +24,7 @@
     getEventDispatcher,
   } from "@commons/methods/component";
   import { buildParticipants, includesMyEmail } from "./methods/participants";
+  import { addKeyValue } from "./methods/lib";
   import DropdownSymbol from "./assets/chevron-down.svg";
   import TrashIcon from "./assets/trash-alt.svg";
   import MarkReadIcon from "./assets/envelope-open-text.svg";
@@ -857,6 +858,58 @@
       ? MessageType.DRAFTS
       : MessageType.MESSAGES;
   }
+
+  interface DisplayedParticipant extends Participant {
+    _type: "to" | "cc" | "bcc";
+  }
+  /**
+   * Returns an aggregated list of participants including their _type.
+   */
+  function getAllRecipients({
+    to,
+    cc,
+    bcc,
+  }: Record<"to" | "cc" | "bcc", Participant[]>): Promise<
+    DisplayedParticipant[]
+  > {
+    return Promise.resolve([
+      ...addKeyValue<DisplayedParticipant>(to, { _type: "to" }),
+      ...addKeyValue<DisplayedParticipant>(cc, { _type: "cc" }),
+      ...addKeyValue<DisplayedParticipant>(bcc, { _type: "bcc" }),
+    ]);
+  }
+
+  /**
+   * Returns a string of participants names and emails according to their _type (to, cc, bcc)
+   * eg. to: recipient@outlook.com, cc: recipient@yahoo.com, bcc: recipient@nylas.com
+   */
+  function aggregateRecipientsString(
+    allRecipients: DisplayedParticipant[],
+  ): string {
+    return allRecipients.reduce((aggregatedRecipients, recipient, i) => {
+      const emailText =
+        recipient.name && recipient.name !== recipient.email
+          ? `${recipient.name} <${recipient.email}>`
+          : recipient.email;
+
+      if (i === 0) {
+        aggregatedRecipients += `to: ${emailText},\n`;
+      } else if (
+        recipient._type === "cc" &&
+        !aggregatedRecipients.includes("cc:")
+      ) {
+        aggregatedRecipients += `cc: ${emailText},\n`;
+      } else if (
+        recipient._type === "bcc" &&
+        !aggregatedRecipients.includes("bcc:")
+      ) {
+        aggregatedRecipients += `bcc: ${emailText},\n`;
+      } else {
+        aggregatedRecipients += `${emailText},\n`;
+      }
+      return aggregatedRecipients;
+    }, "");
+  }
 </script>
 
 <style lang="scss">
@@ -1603,36 +1656,49 @@
                           </div>
                         </div>
                         <div class="message-to">
-                          {#each message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
-                            <div>
-                              <span>
-                                {i === 0 ? "to " : ""}
-                                {#if _this.you && to?.email === _this.you.email_address}
-                                  Me
-                                {/if}
-                                {#if to.email && to.name}
-                                  {to.name ?? _this.you.name} &lt;{to.email}&gt;
-                                {:else if to.email && !to.name}
-                                  {to.email}
-                                {/if}
-                              </span>
-                            </div>
-                          {/each}
-                          {#if message.to?.length > PARTICIPANTS_TO_TRUNCATE}
-                            <div>
-                              <nylas-tooltip
-                                on:toggleTooltip={setTooltip}
-                                id={`show-more-participants-${message.id}`}
-                                current_tooltip_id={currentTooltipId}
-                                icon={DropdownSymbol}
-                                text={`And ${
-                                  message.to?.length - PARTICIPANTS_TO_TRUNCATE
-                                } more`}
-                                content={`${message.to
-                                  .map((to) => `${to.name} ${to.email}`)
-                                  .join(", ")}`}
-                              />
-                            </div>
+                          {#if message?.to}
+                            {#await getAllRecipients( { to: message.to, cc: message.cc, bcc: message.bcc }, ) then allRecipients}
+                              {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
+                                <p>
+                                  {#if i === 0}
+                                    {`to ${
+                                      _this.you &&
+                                      recipient.email ===
+                                        _this.you.email_address
+                                        ? "Me"
+                                        : ""
+                                    }`}
+                                  {:else if recipient._type === "cc" && i === message.to.length}
+                                    cc:
+                                  {:else if recipient._type === "bcc" && i === message.to.length + message.cc.length}
+                                    bcc:
+                                  {/if}
+
+                                  {#if recipient.email && recipient.name}
+                                    {recipient.name ?? _this.you.name} &lt;{recipient.email}&gt;
+                                  {:else if recipient.email && !recipient.name}
+                                    {recipient.email}
+                                  {/if}
+                                </p>
+                              {/each}
+                              {#if allRecipients.length > PARTICIPANTS_TO_TRUNCATE}
+                                <div>
+                                  <nylas-tooltip
+                                    on:toggleTooltip={setTooltip}
+                                    id={`show-more-participants-${message.id}`}
+                                    current_tooltip_id={currentTooltipId}
+                                    icon={DropdownSymbol}
+                                    text={`And ${
+                                      allRecipients.length -
+                                      PARTICIPANTS_TO_TRUNCATE
+                                    } more`}
+                                    content={`${aggregateRecipientsString(
+                                      allRecipients,
+                                    )}`}
+                                  />
+                                </div>
+                              {/if}
+                            {/await}
                           {/if}
                         </div>
                       </div>
@@ -1984,37 +2050,44 @@
               </div>
 
               <div class="message-to">
-                {#each _this.message?.to.slice(0, PARTICIPANTS_TO_TRUNCATE) as to, i}
-                  <div>
-                    <span>
-                      {i === 0 ? "to " : ""}
-                      {#if _this.you && to?.email === _this.you.email_address}
-                        Me
+                {#await getAllRecipients( { to: _this.message.to, cc: _this.message.cc, bcc: _this.message.bcc }, ) then allRecipients}
+                  {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
+                    <p>
+                      {#if i === 0}
+                        {`to ${
+                          _this.you &&
+                          recipient.email === _this.you.email_address
+                            ? "Me"
+                            : ""
+                        }`}
+                      {:else if recipient._type === "cc" && i === _this.message.to.length}
+                        cc:
+                      {:else if recipient._type === "bcc" && i === _this.message.to.length + _this.message.cc.length}
+                        bcc:
                       {/if}
-                      {#if to.email && to.name}
-                        {to.name ?? _this.you.name} &lt;{to.email}&gt;
-                      {:else if to.email && !to.name}
-                        {to.email}
+
+                      {#if recipient.email && recipient.name}
+                        {recipient.name ?? _this.you.name} &lt;{recipient.email}&gt;
+                      {:else if recipient.email && !recipient.name}
+                        {recipient.email}
                       {/if}
-                    </span>
-                  </div>
-                {/each}
-                {#if _this.message.to?.length > PARTICIPANTS_TO_TRUNCATE}
-                  <div>
-                    <nylas-tooltip
-                      on:toggleTooltip={setTooltip}
-                      id={`show-more-participants-${_this.message.id}`}
-                      current_tooltip_id={currentTooltipId}
-                      icon={DropdownSymbol}
-                      text={`And ${
-                        _this.message.to?.length - PARTICIPANTS_TO_TRUNCATE
-                      } more`}
-                      content={`${_this.message.to
-                        .map((to) => `${to.name} ${to.email}`)
-                        .join(", ")}`}
-                    />
-                  </div>
-                {/if}
+                    </p>
+                  {/each}
+                  {#if allRecipients.length > PARTICIPANTS_TO_TRUNCATE}
+                    <div>
+                      <nylas-tooltip
+                        on:toggleTooltip={setTooltip}
+                        id={`show-more-participants-${_this.message.id}`}
+                        current_tooltip_id={currentTooltipId}
+                        icon={DropdownSymbol}
+                        text={`And ${
+                          allRecipients.length - PARTICIPANTS_TO_TRUNCATE
+                        } more`}
+                        content={`${aggregateRecipientsString(allRecipients)}`}
+                      />
+                    </div>
+                  {/if}
+                {/await}
               </div>
             </div>
             <section class="">
