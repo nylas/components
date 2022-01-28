@@ -9,6 +9,7 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
+  import { isValidTimezone } from "@commons/methods/convertDateTimeZone";
   import type { EventPosition } from "./methods/position";
   import { populatePositionMap, updateEventPosition } from "./methods/position";
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
@@ -70,6 +71,7 @@
   export let start_minute: number;
   export let theme: string;
   export let timezone_agnostic_all_day_events: boolean;
+  export let timezone: string;
 
   const defaultValueMap: Partial<AgendaProperties> = {
     allow_date_change: false,
@@ -92,6 +94,7 @@
     start_minute: 0,
     theme: "theme-1",
     timezone_agnostic_all_day_events: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
   let _this = <AgendaProperties>buildInternalProps({}, {}, defaultValueMap);
@@ -161,6 +164,17 @@
       themeUrl = _this.theme;
     }
 
+    if (_this.timezone) {
+      if (!isValidTimezone(_this.timezone)) {
+        console.warn(`Invalid IANA time zone: ${_this.timezone}`);
+        _this.timezone = undefined;
+      } else if (
+        _this.timezone === Intl.DateTimeFormat().resolvedOptions().timeZone
+      ) {
+        _this.timezone = undefined;
+      }
+    }
+
     if (_this.selected_date) {
       const date = convertToUTC(new Date(_this.selected_date));
       date.setHours(0, 0, 0, 0);
@@ -168,7 +182,12 @@
     } else if (allowedDates?.length) {
       selectedDate = allowedDates[0];
     } else {
-      const date = new Date();
+      let date = new Date();
+      if (_this.timezone) {
+        date = new Date(
+          date.toLocaleString("default", { timeZone: _this.timezone }),
+        );
+      }
       date.setHours(0, 0, 0, 0);
       selectedDate = date;
     }
@@ -421,16 +440,18 @@
             return event;
           }
 
+          let startTime = new Date(event.when.start_time * 1000);
+          if (_this.timezone) {
+            startTime = new Date(
+              startTime.toLocaleString("default", {
+                timeZone: _this.timezone,
+              }),
+            );
+          }
+
           let minutesInVisibleDay =
-            new Date(event.when.start_time * 1000).getTime() -
-            new Date(
-              new Date(event.when.start_time * 1000).setHours(
-                0,
-                startMinute,
-                0,
-                0,
-              ),
-            ).getTime();
+            startTime.getTime() -
+            new Date(startTime.setHours(0, startMinute, 0, 0)).getTime();
           minutesInVisibleDay = minutesInVisibleDay / 60000; // in minutes
 
           let runTime =
@@ -562,7 +583,9 @@
   });
 
   $: currentTimePosition = () => {
-    const date = new Date(now); // seems redundant, right? new Date() does the same thing. But, the inclusion of "now" means that changes to it are observed -- and we change every setInterval loop.
+    const date = new Date(
+      new Date(now).toLocaleString("default", { timeZone: _this.timezone }), // seems redundant, right? new Date() does the same thing. But, the inclusion of "now" means that changes to it are observed -- and we change every setInterval loop.
+    );
 
     const minutesInDayBeforeNow =
       (date.getTime() - startTime.getTime()) / 60000;
@@ -1148,6 +1171,7 @@
                       ).toLocaleTimeString(navigator.language, {
                         hour: "numeric",
                         minute: "2-digit",
+                        timeZone: _this.timezone,
                       })}
                     </span>
                   {/if}
