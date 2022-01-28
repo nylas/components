@@ -27,7 +27,6 @@
     "release:canary": "lerna version prerelease --no-private -m 'pre-release' --yes",
     "postrelease:canary": "DATE=`date '+prerelease/%Y%m%d%H%M%S'` && git tag $DATE && git push origin $DATE",
     "release:stable": "lerna version --no-private",
-    "postrelease:stable": "DATE=`date '+release/%Y%m%d%H%M%S'` && git tag $DATE && git push origin $DATE",
     "start": "concurrently \"live-server . --host=0.0.0.0 --port=8000\" \"yarn dev\"",
     "start:ci": "TZ=America/Toronto sirv . --port 8000 public",
     "test": "jest --no-cache --verbose --run-in-band",
