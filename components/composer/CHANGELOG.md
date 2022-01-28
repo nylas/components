@@ -7,6 +7,7 @@
 ## Bug Fixes
 
 - [Composer] focus the HTML editor textbox when a formatting option is clicked [#342](https://github.com/nylas/components/pull/342)
+- [Composer] Header should reactively update with the change in the subject [#367](https://github.com/nylas/components/pull/367)
 
 # v1.1.6 (Unreleased)
 
