@@ -1,4 +1,5 @@
 import type { Participant } from "@commons/types/Nylas";
+import type { File } from "@commons/types/Nylas";
 
 export interface Message {
   [key: string]: unknown;
@@ -8,8 +9,10 @@ export interface Message {
   from?: Participant[];
   to: Participant[];
   cc?: Participant[];
+  cids?: string[];
   bcc?: Participant[];
   file_ids?: string[];
+  files?: File[];
   send_at?: number | null;
   reply_to: Participant[];
   reply_to_message_id?: string;

@@ -7,6 +7,7 @@
   import "./components/DatepickerModal.svelte";
   import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
+  import { isFileAnAttachment } from "@commons/methods/isFileAnAttachment";
 
   import {
     ErrorStore,
@@ -70,6 +71,7 @@
   export let access_token: string = "";
 
   export let value: Message | void;
+  export let message_body: Message | void;
   export let to: ContactSearchCallback = [];
   export let from: ContactSearchCallback = [];
   export let cc: ContactSearchCallback = [];
@@ -204,6 +206,19 @@
 
   $: if (value) {
     mergeMessage(value);
+  }
+
+  $: if (message_body && message_body.files.length > 0) {
+    for (const [fileIndex, file] of message_body.files.entries()) {
+      if (isFileAnAttachment(message_body, file)) {
+        addAttachments({
+          account_id: message_body.account_id,
+          filename: file.filename,
+          size: file.size,
+          content_type: file.content_type,
+        });
+      }
+    }
   }
 
   const handleInputChange = (e: Event) => {

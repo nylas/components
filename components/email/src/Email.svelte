@@ -773,7 +773,8 @@
   $: activeThread ? initializeAttachedFiles() : "";
 
   function initializeAttachedFiles() {
-    attachedFiles = activeThread.messages?.reduce(
+    const messageType = getMessageType(activeThread);
+    attachedFiles = activeThread[messageType]?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
           if (isFileAnAttachment(message, file)) {
