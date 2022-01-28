@@ -1,12 +1,10 @@
-<svelte:options tag="nylas-html-editor" />
-
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
 
   export let onchange = (_html: string) => Promise.resolve({});
   export let html = "";
-  export let show_editor_toolbar = true;
+  export let show_editor_toolbar: boolean;
   export let replace_fields: ReplaceFields[] | null = null;
 
   let container: HTMLDivElement;
@@ -129,28 +127,28 @@
     justify-content: flex-start;
     border-bottom: 1px solid var(--composer-border-color, #f7f7f7);
     padding: 0 calc(var(--composer-outer-padding, 15px) / 2);
+  }
 
-    button {
-      color: var(--composer-text-light-color, #6e6e7a);
-      background: none;
-      border: 0;
-      cursor: pointer;
-      display: flex;
-      padding: 8px;
-      margin: 2px;
-      outline: 0;
-      border-radius: calc(var(--composer-border-radius, 6px) / 2);
-      transition: background-color 0.3s;
+  .toolbar-button {
+    color: var(--composer-text-light-color, #6e6e7a);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    padding: 8px;
+    margin: 2px;
+    outline: 0;
+    border-radius: calc(var(--composer-border-radius, 6px) / 2);
+    transition: background-color 0.3s;
 
-      &.active {
-        background: var(--composer-background-muted-color, #f0f2ff);
-      }
-      &:first-child {
-        margin-left: 0;
-      }
-      &:hover {
-        background: var(--composer-background-muted-color, #f0f2ff);
-      }
+    &.active {
+      background: var(--composer-background-muted-color, #f0f2ff);
+    }
+    &:first-child {
+      margin-left: 0;
+    }
+    &:hover {
+      background: var(--composer-background-muted-color, #f0f2ff);
     }
   }
 </style>
@@ -163,7 +161,8 @@
         <button
           on:click={handleAction(item)}
           title={item.title}
-          class={item.state && item.state() ? "active" : ""}
+          class:toolbar-button={true}
+          class:active={item.state && item.state()}
         >
           {#if item.icon}
             <svelte:component

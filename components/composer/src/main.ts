@@ -1,3 +1,3 @@
 import "@commons/define-component-patch";
-import Composer from "./Composer.svelte";
+import Composer from "./Composer.wc.svelte";
 export default Composer;

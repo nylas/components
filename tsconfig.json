@@ -29,7 +29,6 @@
     "node_modules/**/*",
     "**/node_modules/**/*",
     "**/public",
-    "**/rollup*.config.js",
-    "**/vue-composer-demo/**/*"
+    "**/rollup*.config.js"
   ]
 }
