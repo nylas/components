@@ -34,7 +34,6 @@ type BuildParticipant = {
 };
 
 export function buildParticipants({
-  myEmail,
   message,
   type,
 }: BuildParticipant): Record<string, Participant[]> {
@@ -43,23 +42,11 @@ export function buildParticipants({
 
   switch (type) {
     case "reply":
-      if (includesMyEmail(myEmail, message, "from")) {
-        to = message.to;
-      } else {
-        to = message.from;
-      }
+      to = message.reply_to;
       break;
     case "reply_all":
-      if (includesMyEmail(myEmail, message, "cc")) {
-        to = participantsWithoutGivenEmails([myEmail], message);
-      } else {
-        to = message.from;
-        const fromEmails = message.from?.map((i) => i.email);
-        cc = [
-          ...message.cc,
-          ...participantsWithoutGivenEmails([...fromEmails, myEmail], message),
-        ];
-      }
+      to = message.reply_to;
+      cc = [...message.cc];
       break;
   }
 

@@ -525,7 +525,6 @@
 
     const from = [me];
     const { to, cc } = buildParticipants({
-      myEmail: me.email,
       message: message,
       type,
     });
