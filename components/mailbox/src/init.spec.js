@@ -792,7 +792,29 @@ describe("MailBox  component", () => {
   });
 
   describe("Custom data", () => {
-    it("Should successfully update a thread's message body when threadClicked is called", () => {
+    it("Should toggle between threads via props and fetched threads", () => {
+      cy.get("nylas-mailbox")
+        .as("mailbox")
+        .then((element) => {
+          const component = element[0];
+          const cyComponent = cy.wrap(component);
+          component.all_threads = threads;
+          cy.get(component)
+            .get("ul#mailboxlist")
+            .find("li")
+            .should("have.length", 2)
+            .then(() => {
+              component.all_threads = null;
+              cy.wait(1000);
+              cyComponent
+                .get("ul#mailboxlist")
+                .find("li")
+                .should("have.length", 13);
+            });
+        });
+    });
+
+    xit("Should successfully update a thread's message body when threadClicked is called", () => {
       cy.get("nylas-mailbox")
         .as("mailbox")
         .then((element) => {
@@ -819,28 +841,6 @@ describe("MailBox  component", () => {
               .find("nylas-message-body", { timeout: 5000 })
               .contains(body);
           });
-        });
-    });
-
-    it("Should toggle between threads via props and fetched threads", () => {
-      cy.get("nylas-mailbox")
-        .as("mailbox")
-        .then((element) => {
-          const component = element[0];
-          const cyComponent = cy.wrap(component);
-          component.all_threads = threads;
-          cy.get(component)
-            .get("ul#mailboxlist")
-            .find("li")
-            .should("have.length", 2)
-            .then(() => {
-              component.all_threads = null;
-              cy.wait(1000);
-              cyComponent
-                .get("ul#mailboxlist")
-                .find("li")
-                .should("have.length", 13);
-            });
         });
     });
   });
