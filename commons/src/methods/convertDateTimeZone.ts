@@ -45,3 +45,18 @@ export function setTimeZoneOffset(slot: Date, zone?: string): string {
   }
   return dateTimeSlot.offsetNameShort;
 }
+
+/**
+ *
+ *
+ * @param zone string
+ * @returns number (in milliseconds)
+ */
+export function getSpecifiedTimeZoneOffset(zone?: string): number {
+  if (!zone || !isValidTimezone(zone)) {
+    return 0;
+  }
+  const dt = DateTime.now();
+  const dtz = DateTime.now().setZone(zone, { keepLocalTime: true });
+  return dt.diff(dtz).milliseconds;
+}

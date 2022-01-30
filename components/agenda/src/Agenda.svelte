@@ -9,7 +9,10 @@
     buildInternalProps,
     getEventDispatcher,
   } from "@commons/methods/component";
-  import { isValidTimezone } from "@commons/methods/convertDateTimeZone";
+  import {
+    isValidTimezone,
+    getSpecifiedTimeZoneOffset,
+  } from "@commons/methods/convertDateTimeZone";
   import type { EventPosition } from "./methods/position";
   import { populatePositionMap, updateEventPosition } from "./methods/position";
   import { getDynamicEndTime, getDynamicStartTime } from "./methods/time";
@@ -200,6 +203,15 @@
     calendarIDs = setCalendarIDs();
   }
 
+  let timezoneOffset: number;
+  $: {
+    if (_this.timezone && isValidTimezone(_this.timezone)) {
+      timezoneOffset = getSpecifiedTimeZoneOffset(_this.timezone);
+    } else {
+      timezoneOffset = 0;
+    }
+  }
+
   $: clickDefault = typeof click_action === "function" ? "none" : "expand";
   // #endregion props
 
@@ -255,9 +267,13 @@
   let endOfDay: number;
 
   $: startOfDay =
-    new Date(new Date(selectedDate).setHours(0, 0, 0, 0)).getTime() / 1000;
+    (new Date(new Date(selectedDate).setHours(0, 0, 0, 0)).getTime() -
+      timezoneOffset) /
+    1000;
   $: endOfDay =
-    new Date(new Date(selectedDate).setHours(24, 0, 0, 0)).getTime() / 1000;
+    (new Date(new Date(selectedDate).setHours(24, 0, 0, 0)).getTime() -
+      timezoneOffset) /
+    1000;
 
   // #endregion time constants
 
@@ -305,10 +321,12 @@
         access_token: access_token,
         calendarIDs: calendarIDs,
         starts_after:
-          new Date(new Date(previousDate).setHours(0, 0, 0, 0)).getTime() /
+          (new Date(new Date(previousDate).setHours(0, 0, 0, 0)).getTime() -
+            timezoneOffset) /
           1000,
         ends_before:
-          new Date(new Date(previousDate).setHours(24, 0, 0, 0)).getTime() /
+          (new Date(new Date(previousDate).setHours(24, 0, 0, 0)).getTime() -
+            timezoneOffset) /
           1000,
       },
       {
@@ -316,9 +334,13 @@
         access_token: access_token,
         calendarIDs: calendarIDs,
         starts_after:
-          new Date(new Date(nextDate).setHours(0, 0, 0, 0)).getTime() / 1000,
+          (new Date(new Date(nextDate).setHours(0, 0, 0, 0)).getTime() -
+            timezoneOffset) /
+          1000,
         ends_before:
-          new Date(new Date(nextDate).setHours(24, 0, 0, 0)).getTime() / 1000,
+          (new Date(new Date(nextDate).setHours(24, 0, 0, 0)).getTime() -
+            timezoneOffset) /
+          1000,
       },
     ];
   }
