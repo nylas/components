@@ -2,7 +2,7 @@ import type {
   AccountOrganizationUnit,
   AccountSyncState,
   MailboxActions,
-  MailboxClickAction,
+  MailboxThreadClickAction,
 } from "@commons/enums/Nylas";
 import type { Contact, HydratedContact } from "@commons/types/Contacts";
 import type { Event } from "@commons/types/Events";
@@ -220,7 +220,7 @@ export interface MailboxProperties extends Manifest {
   show_reply: boolean;
   show_reply_all: boolean;
   show_forward: boolean;
-  click_action: MailboxClickAction;
+  thread_click_action: MailboxThreadClickAction;
 }
 
 export type ContactSearchCallback = Participant[] | FetchContactsCallback;

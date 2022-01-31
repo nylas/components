@@ -21,7 +21,7 @@ export enum MessageType {
   MESSAGES = "messages",
 }
 
-export enum MailboxClickAction {
+export enum MailboxThreadClickAction {
   DEFAULT = "default",
   CUSTOM = "custom",
 }

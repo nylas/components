@@ -7,7 +7,7 @@
     AccountOrganizationUnit,
     MailboxActions,
     MessageType,
-    MailboxClickAction,
+    MailboxThreadClickAction,
   } from "@commons/enums/Nylas";
 
   import {
@@ -62,7 +62,8 @@
   export let show_reply: boolean;
   export let show_reply_all: boolean;
   export let show_forward: boolean;
-  export let click_action: MailboxClickAction = MailboxClickAction.DEFAULT;
+  export let thread_click_action: MailboxThreadClickAction =
+    MailboxThreadClickAction.DEFAULT;
 
   const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
@@ -73,7 +74,7 @@
     show_reply: false,
     show_reply_all: false,
     show_forward: false,
-    click_action: MailboxClickAction.DEFAULT,
+    thread_click_action: MailboxThreadClickAction.DEFAULT,
   };
 
   let mouseEvent: CustomEvent;
@@ -319,7 +320,7 @@
   async function threadClicked(event: CustomEvent) {
     const { thread, messageType } = event.detail;
     const messages = thread[messageType];
-    if (_this.click_action === MailboxClickAction.DEFAULT) {
+    if (_this.thread_click_action === MailboxThreadClickAction.DEFAULT) {
       let message = await fetchIndividualMessage(messages[messages.length - 1]);
 
       if (messageType === MessageType.DRAFTS) {
