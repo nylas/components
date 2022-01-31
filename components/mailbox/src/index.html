@@ -23,7 +23,7 @@
         component.removeAttribute("hidden");
         component.value = event.detail.value;
         if (Object.keys(event.detail.message).length) {
-          component.message_body = event.detail.message;
+          component.message_with_body = event.detail.message;
         }
         component.open();
       }

@@ -71,7 +71,7 @@
   export let access_token: string = "";
 
   export let value: Message | void;
-  export let message_body: Message | void;
+  export let message_with_body: Message | void;
   export let to: ContactSearchCallback = [];
   export let from: ContactSearchCallback = [];
   export let cc: ContactSearchCallback = [];
@@ -211,12 +211,16 @@
   }
 
   let isAttachmentLoaded = false;
-  $: if (message_body && message_body.files.length > 0 && !isAttachmentLoaded) {
-    for (const [fileIndex, file] of message_body.files.entries()) {
-      if (isFileAnAttachment(message_body, file)) {
+  $: if (
+    message_with_body &&
+    message_with_body.files.length > 0 &&
+    !isAttachmentLoaded
+  ) {
+    for (const [fileIndex, file] of message_with_body.files.entries()) {
+      if (isFileAnAttachment(message_with_body, file)) {
         addAttachments({
-          account_id: message_body.account_id,
-          id: message_body.id,
+          account_id: message_with_body.account_id,
+          id: message_with_body.id,
           filename: file.filename,
           size: file.size,
           content_type: file.content_type,
