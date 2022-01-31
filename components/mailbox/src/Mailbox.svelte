@@ -571,9 +571,15 @@
   }
   //#endregion pagination
 
-  function dispatchDraft(event) {
+  async function dispatchDraft(event) {
     const { thread } = event.detail;
     const message = thread.drafts[0];
+
+    if (message.cids?.length) {
+      const { body } = await getMessageWithInlineFiles(message);
+      message.body = body;
+    }
+
     const value = {
       to: message.to,
       cc: message.cc,

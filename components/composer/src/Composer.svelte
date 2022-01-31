@@ -219,6 +219,8 @@
         });
       }
     }
+  } else if (!message_body?.files?.length && $attachments.length) {
+    attachments.update(() => []);
   }
 
   const handleInputChange = (e: Event) => {
