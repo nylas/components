@@ -144,6 +144,8 @@
     if (_this.reset_after_close) {
       resetAfterSend($message.from);
     }
+    isAttachmentLoaded = false;
+    attachments.update(() => []);
     dispatchEvent("composerClosed", {});
   };
 
@@ -208,19 +210,20 @@
     mergeMessage(value);
   }
 
-  $: if (message_body && message_body.files.length > 0) {
+  let isAttachmentLoaded = false;
+  $: if (message_body && message_body.files.length > 0 && !isAttachmentLoaded) {
     for (const [fileIndex, file] of message_body.files.entries()) {
       if (isFileAnAttachment(message_body, file)) {
         addAttachments({
           account_id: message_body.account_id,
+          id: message_body.id,
           filename: file.filename,
           size: file.size,
           content_type: file.content_type,
         });
+        isAttachmentLoaded = true;
       }
     }
-  } else if (!message_body?.files?.length && $attachments.length) {
-    attachments.update(() => []);
   }
 
   const handleInputChange = (e: Event) => {
