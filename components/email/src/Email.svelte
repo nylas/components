@@ -312,7 +312,7 @@
   $: emailManuallyPassed = !!_this.thread;
 
   //#region Clean Conversation
-  // If a user sets message_body_type to "clean", expand their message to clean conversation.
+  // If a user sets message_with_body_type to "clean", expand their message to clean conversation.
   // This requires them to have access to the Nylas Neural API.
 
   const CONVERSATION_ENDPOINT_MAX_MESSAGES = 20;
@@ -546,6 +546,7 @@
       reply_to: from,
       cc,
       bcc: message.bcc,
+      body: message.body,
       subject: subject,
     };
 
@@ -773,7 +774,8 @@
   $: activeThread ? initializeAttachedFiles() : "";
 
   function initializeAttachedFiles() {
-    attachedFiles = activeThread.messages?.reduce(
+    const messageType = getMessageType(activeThread);
+    attachedFiles = activeThread[messageType]?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
           if (isFileAnAttachment(message, file)) {

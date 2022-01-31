@@ -7,6 +7,7 @@
   import "./components/DatepickerModal.svelte";
   import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
+  import { isFileAnAttachment } from "@commons/methods/isFileAnAttachment";
 
   import {
     ErrorStore,
@@ -70,6 +71,7 @@
   export let access_token: string = "";
 
   export let value: Message | void;
+  export let message_with_body: Message | void;
   export let to: ContactSearchCallback = [];
   export let from: ContactSearchCallback = [];
   export let cc: ContactSearchCallback = [];
@@ -142,6 +144,8 @@
     if (_this.reset_after_close) {
       resetAfterSend($message.from);
     }
+    isAttachmentLoaded = false;
+    attachments.update(() => []);
     dispatchEvent("composerClosed", {});
   };
 
@@ -204,6 +208,26 @@
 
   $: if (value) {
     mergeMessage(value);
+  }
+
+  let isAttachmentLoaded = false;
+  $: if (
+    message_with_body &&
+    message_with_body.files.length > 0 &&
+    !isAttachmentLoaded
+  ) {
+    for (const [fileIndex, file] of message_with_body.files.entries()) {
+      if (isFileAnAttachment(message_with_body, file)) {
+        addAttachments({
+          account_id: message_with_body.account_id,
+          id: message_with_body.id,
+          filename: file.filename,
+          size: file.size,
+          content_type: file.content_type,
+        });
+        isAttachmentLoaded = true;
+      }
+    }
   }
 
   const handleInputChange = (e: Event) => {
