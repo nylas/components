@@ -25,6 +25,7 @@
 - Added ability to forward email [#320](https://github.com/nylas/components/pull/320)
 - Show confirmation pop up, when deleting emails
 - Pass z-index css to confirmation pop up's modal & overlay using css variables `z-index-modal` & `z-index-overlay` respectively
+- Draft, reply, reply all and forwarded messages include inline images and attachments
 
 ## Bug Fixes
 

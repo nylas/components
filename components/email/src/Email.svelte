@@ -546,6 +546,7 @@
       reply_to: from,
       cc,
       bcc: message.bcc,
+      body: message.body,
       subject: subject,
     };
 

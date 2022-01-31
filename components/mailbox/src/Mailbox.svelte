@@ -576,8 +576,8 @@
     const message = thread.drafts[0];
 
     if (message.cids?.length) {
-      const { body } = await getMessageWithInlineFiles(message);
-      message.body = body;
+      const inlineMessage = await getMessageWithInlineFiles(message);
+      message.body = inlineMessage.body;
     }
 
     const value = {
