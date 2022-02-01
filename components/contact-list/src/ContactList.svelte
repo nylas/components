@@ -571,9 +571,13 @@
                 />
               {/if}
             {:else if contact.picture_url}
-              {#await fetchContactImage(query, contact.id).then((image) => (contact.picture = image))}
-                {(contact.picture = "Loading")}
-              {/await}
+              {#if _this.contacts.length}
+                <img src={contact.picture_url} alt={contact.emails[0].email} />
+              {:else}
+                {#await fetchContactImage(query, contact.id).then((image) => (contact.picture = image))}
+                  {(contact.picture = "Loading")}
+                {/await}
+              {/if}
             {:else if contact.default_picture}
               <img
                 src={contact.default_picture}
