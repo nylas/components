@@ -4,6 +4,8 @@
 
 ## New Features
 
+- [Agenda] Dispatch `eventClicked` when event is clicked [#372](https://github.com/nylas/components/pull/372)
+
 ## Bug Fixes
 
 - [Agenda] Added min height to agenda body [#339](https://github.com/nylas/components/pull/339)

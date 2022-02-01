@@ -657,6 +657,8 @@
     event: MouseEvent | KeyboardEvent,
     calendarEvent: Event,
   ) {
+    dispatchEvent("eventClicked", calendarEvent);
+
     if (typeof click_action === "function") {
       const clonedEvent = JSON.parse(JSON.stringify(calendarEvent));
       for (const internalProp of INTERNAL_EVENT_PROPS) {

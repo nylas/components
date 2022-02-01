@@ -288,27 +288,12 @@ describe("Agenda interactions", () => {
   beforeEach(() => {
     cy.clock(1642179039224);
 
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/manifest",
-      {
-        fixture: "agenda/manifest.json",
-      },
-    );
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/calendars/test-calendar-id",
-      {
-        fixture: "agenda/calendars/calendarId.json",
-      },
-    );
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/agenda/events?calendar_id=test-calendar-id*",
-      {
-        fixture: "agenda/events.json",
-      },
-    );
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "agenda/manifest",
+      "**/middleware/calendars/test-calendar-id": "agenda/calendars/calendarId",
+      "**/middleware/agenda/events?calendar_id=test-calendar-id*":
+        "agenda/events",
+    });
 
     cy.visit("/components/agenda/src/cypress.html");
     cy.get("nylas-agenda").should("exist").as("agenda");
@@ -326,5 +311,62 @@ describe("Agenda interactions", () => {
     cy.get("@agenda").contains("Friday 14");
     cy.get("button.prev").click();
     cy.get("@agenda").contains("Thursday 13");
+  });
+});
+
+describe("Agenda custom events", () => {
+  beforeEach(() => {
+    cy.clock(1642179039224);
+
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "agenda/manifest",
+      "**/middleware/calendars/test-calendar-id": "agenda/calendars/calendarId",
+      "**/middleware/agenda/events?*": "agenda/events",
+    });
+
+    cy.visit("/components/agenda/src/cypress.html");
+    cy.get("nylas-agenda").should("exist").as("agenda");
+  });
+
+  it("dispatches dateChange when date goes forward", () => {
+    const dateChangeStub = cy.stub().as("dateChange");
+    cy.get("@agenda").addListener("dateChange", dateChangeStub);
+
+    cy.get("@agenda")
+      .find(".next.change-date")
+      .click()
+      .then(() => {
+        const [event] = dateChangeStub.args[0];
+        expect(event.detail).to.deep.equal(
+          new Date("Sat, 15 Jan 2022 05:00:00 GMT"),
+        );
+      });
+  });
+
+  it("dispatches dateChange when date goes backward", () => {
+    const dateChangeStub = cy.stub().as("dateChange");
+    cy.get("@agenda").addListener("dateChange", dateChangeStub);
+
+    cy.get("@agenda")
+      .find(".prev.change-date")
+      .click()
+      .then(() => {
+        const [event] = dateChangeStub.args[0];
+        expect(event.detail).to.deep.equal(
+          new Date("Thu, 13 Jan 2022 05:00:00 GMT"),
+        );
+      });
+  });
+
+  it("dispatches eventClicked when calendar event clicked", () => {
+    const eventClickedStub = cy.stub().as("event");
+    cy.get("@agenda").addListener("eventClicked", eventClickedStub);
+
+    cy.get("@agenda").find("li.event").first().click();
+
+    cy.fixture("agenda/events").then((events) => {
+      const [event] = eventClickedStub.args[0];
+      expect(event.detail).to.deep.include(events.response[0]);
+    });
   });
 });

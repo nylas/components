@@ -40,3 +40,11 @@ Cypress.Commands.add("batchIntercept", (method, fixtures) => {
     cy.intercept(method, url, { fixture }).as(fixture);
   });
 });
+
+Cypress.Commands.add(
+  "addListener",
+  { prevSubject: "element" },
+  ($element, eventName, callbackFn) => {
+    $element[0].addEventListener(eventName, callbackFn);
+  },
+);
