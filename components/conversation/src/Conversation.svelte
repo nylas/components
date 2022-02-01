@@ -151,14 +151,14 @@
   };
 
   $: (async () => {
-    if (!contacts && conversation) {
-      await getContacts(conversation);
+    if (!contacts && conversationMessages) {
+      await getContacts(conversationMessages);
     }
   })();
 
-  async function getContacts(conversation: Conversation) {
+  async function getContacts(loadedMessages: Message[]) {
     const fromParticipants =
-      conversation.messages?.reduce<Record<string, Participant>>(
+      loadedMessages?.reduce<Record<string, Participant>>(
         (participants, message) => {
           const participant: Participant = message.from[0];
           participants[participant.email] = participant;
