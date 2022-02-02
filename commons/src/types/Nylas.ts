@@ -126,6 +126,8 @@ export interface Message {
   files: File[];
   reply_to: Participant[];
   reply_to_message_id?: string;
+  folder_id?: string;
+  label_ids?: string[];
 }
 
 export interface RadialMessage extends Message {

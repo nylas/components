@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import { ErrorStore, fetchAccount, ManifestStore } from "@commons";
-  import { fetchMessage } from "@commons/connections/messages";
+  import { fetchMessage, updateMessage } from "@commons/connections/messages";
   import {
     AccountOrganizationUnit,
     MailboxActions,
@@ -515,10 +515,24 @@
         const existingLabelIds =
           thread.labels?.map((label: any) => label.id) || [];
         thread.label_ids = [...existingLabelIds, trashLabelID];
+        await updateThreadStatus(thread);
       } else if (trashFolderID) {
         thread.folder_id = trashFolderID;
+        /**
+         * Our threads API does not allow moving a thread sent
+         * by self to trash for non-gmail accounts. Hence, moving
+         * individual messages to trash folder as a workaround
+         **/
+        if (id) {
+          thread.messages.forEach(async (message: Message, i: number) => {
+            await updateMessage(
+              query.component_id,
+              { ...message, folder_id: trashFolderID },
+              access_token,
+            );
+          });
+        }
       }
-      await updateThreadStatus(thread);
       await updateDisplayedThreads(true);
     }
     deleting = false;
