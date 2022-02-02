@@ -78,7 +78,7 @@
     ) as ConversationProperties;
 
     // Fetch Account
-    if (id && !_this.you?.id && !conversationManuallyPassed) {
+    if (id && !_this.you?.id) {
       _this.you = await fetchAccount({
         component_id: query.component_id,
         access_token,
