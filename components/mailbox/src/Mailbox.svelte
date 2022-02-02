@@ -7,6 +7,7 @@
     AccountOrganizationUnit,
     MailboxActions,
     MessageType,
+    MailboxThreadClickAction,
   } from "@commons/enums/Nylas";
 
   import {
@@ -61,6 +62,8 @@
   export let show_reply: boolean;
   export let show_reply_all: boolean;
   export let show_forward: boolean;
+  export let thread_click_action: MailboxThreadClickAction =
+    MailboxThreadClickAction.DEFAULT;
 
   const defaultValueMap: Partial<MailboxProperties> = {
     actions_bar: [],
@@ -71,6 +74,7 @@
     show_reply: false,
     show_reply_all: false,
     show_forward: false,
+    thread_click_action: MailboxThreadClickAction.DEFAULT,
   };
 
   let mouseEvent: CustomEvent;
@@ -316,42 +320,44 @@
   async function threadClicked(event: CustomEvent) {
     const { thread, messageType } = event.detail;
     const messages = thread[messageType];
-    let message = await fetchIndividualMessage(messages[messages.length - 1]);
+    if (_this.thread_click_action === MailboxThreadClickAction.DEFAULT) {
+      let message = await fetchIndividualMessage(messages[messages.length - 1]);
 
-    if (messageType === MessageType.DRAFTS) {
-      await dispatchDraft(event);
-      return;
-    }
-
-    currentlySelectedThread = thread;
-    thread.expanded = !thread.expanded;
-    if (!_this.all_threads && thread?.expanded) {
-      if (thread.unread) {
-        thread.unread = false;
-        await updateThreadStatus(thread);
+      if (messageType === MessageType.DRAFTS) {
+        await dispatchDraft(event);
+        return;
       }
 
-      threads = MailboxStore.hydrateMessageInThread(
-        message,
-        query,
-        currentPage,
-      );
+      currentlySelectedThread = thread;
+      thread.expanded = !thread.expanded;
+      if (!_this.all_threads && thread?.expanded) {
+        if (thread.unread) {
+          thread.unread = false;
+          await updateThreadStatus(thread);
+        }
 
-      if (FilesStore.hasInlineFiles(message)) {
-        message = await getMessageWithInlineFiles(message);
         threads = MailboxStore.hydrateMessageInThread(
           message,
           query,
           currentPage,
         );
-      }
 
-      if (currentlySelectedThread) {
-        currentlySelectedThread.messages =
-          currentlySelectedThread.messages?.map((currentMessage) =>
-            currentMessage.id === message.id ? message : currentMessage,
-          ) ?? [];
-        currentlySelectedThread = currentlySelectedThread;
+        if (FilesStore.hasInlineFiles(message)) {
+          message = await getMessageWithInlineFiles(message);
+          threads = MailboxStore.hydrateMessageInThread(
+            message,
+            query,
+            currentPage,
+          );
+        }
+
+        if (currentlySelectedThread) {
+          currentlySelectedThread.messages =
+            currentlySelectedThread.messages?.map((currentMessage) =>
+              currentMessage.id === message.id ? message : currentMessage,
+            ) ?? [];
+          currentlySelectedThread = currentlySelectedThread;
+        }
       }
     }
   }

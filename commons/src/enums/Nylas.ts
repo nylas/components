@@ -20,3 +20,8 @@ export enum MessageType {
   DRAFTS = "drafts",
   MESSAGES = "messages",
 }
+
+export enum MailboxThreadClickAction {
+  DEFAULT = "default",
+  CUSTOM = "custom",
+}

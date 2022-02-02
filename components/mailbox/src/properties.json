@@ -100,5 +100,12 @@
     "type": "boolean",
     "options": [true, false],
     "value": false
+  },
+  {
+    "label": "click_action",
+    "title": "This option allows to specify the type of click action. By setting it to 'custom', you can listen to 'threadClicked' event from email component to perform actions as per your need",
+    "type": "string",
+    "options": ["default", "custom"],
+    "value": "default"
   }
 ]
