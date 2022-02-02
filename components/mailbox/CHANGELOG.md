@@ -36,6 +36,7 @@
 - Fixed some attached files being treated as inline [283](https://github.com/nylas/components/pull/283)
 - Fixed TypeError was being thrown if all_threads prop was used and user clicked a message to expand it's body [315](https://github.com/nylas/components/pull/315)
 - Fixed dispatched event `threadClicked` being dispatched multiple times on a single click [315](https://github.com/nylas/components/pull/315)
+- Fixed the issue where deleting a sent thread by self using non-gmail account was not working [#374](https://github.com/nylas/components/pull/374)
 
 # v1.1.5 (2021-12-15)
 
