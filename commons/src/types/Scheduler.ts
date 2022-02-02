@@ -1,7 +1,6 @@
 import type {
   BookableSlot,
   Manifest as AvailabilityManifest,
-  TimeSlot,
 } from "@commons/types/Availability";
 import type { NotificationMode } from "@commons/enums/Scheduler";
 import type { EventDefinition } from "./ScheduleEditor";
