@@ -179,11 +179,12 @@
   $: activeThreadContact =
     activeThread && contacts
       ? contacts[
-          activeThread.messages[activeThread.messages.length - 1]?.from[0].email
+          activeThread.messages[activeThread.messages.length - 1]?.from[0]
+            ?.email
         ]
       : {};
   $: activeMessageContact =
-    _this.message && contacts ? contacts[_this.message?.from[0].email] : {};
+    _this.message && contacts ? contacts[_this.message?.from[0]?.email] : {};
 
   let threadIdChanged = false;
   $: _this.thread_id, (threadIdChanged = true);
@@ -197,7 +198,7 @@
         await getThreadContacts(activeThread);
       } else if (_this.message) {
         const participant = _this.message.from[0];
-        contacts[participant.email] = await getContact(participant);
+        contacts[participant?.email] = await getContact(participant);
       }
     }
   })();
@@ -207,7 +208,7 @@
       thread.messages?.reduce<Record<string, Participant>>(
         (participants, message) => {
           const participant: Participant = message.from[0];
-          participants[participant.email] = participant;
+          participants[participant?.email] = participant;
           return participants;
         },
         {},
@@ -216,6 +217,7 @@
       Array.from(Object.values(fromParticipants)) || [];
 
     for (const participant of fromParticipantsArray) {
+      if (!participant) continue;
       const participantEmail = participant.email;
       if (!contacts[participantEmail] && participantEmail) {
         contacts[participantEmail] = await getContact(participant);
@@ -1634,16 +1636,17 @@
                             <div class="default-avatar">
                               <nylas-contact-image
                                 {contact_query}
-                                contact={contacts[message?.from[0].email]}
+                                contact={contacts[message?.from[0]?.email]}
                               />
                             </div>
                           {/if}
                           <div class="message-from">
                             <span class="name">
-                              {userEmail && message?.from[0].email === userEmail
+                              {userEmail &&
+                              message?.from[0]?.email === userEmail
                                 ? "me"
-                                : message?.from[0].name ||
-                                  message?.from[0].email}
+                                : message?.from[0]?.name ||
+                                  message?.from[0]?.email}
                             </span>
                             <!-- tooltip component -->
                             <nylas-tooltip
@@ -1651,7 +1654,7 @@
                               id={message?.id.slice(0, 3)}
                               current_tooltip_id={currentTooltipId}
                               icon={DropdownSymbol}
-                              content={message?.from[0].email}
+                              content={message?.from[0]?.email}
                             />
                           </div>
                         </div>
@@ -1794,16 +1797,16 @@
                           <div class="default-avatar">
                             <nylas-contact-image
                               {contact_query}
-                              contact={contacts[message?.from[0].email]}
+                              contact={contacts[message?.from[0]?.email]}
                             />
                           </div>
                         {/if}
                         <div class="message-from">
                           <span class="name"
-                            >{userEmail && message?.from[0].email === userEmail
+                            >{userEmail && message?.from[0]?.email === userEmail
                               ? "me"
-                              : message?.from[0].name ||
-                                message?.from[0].email}</span
+                              : message?.from[0]?.name ||
+                                message?.from[0]?.email}</span
                           >
                           <!-- tooltip component -->
                           <nylas-tooltip
@@ -1811,7 +1814,7 @@
                             id={message?.id.slice(0, 3)}
                             current_tooltip_id={currentTooltipId}
                             icon={DropdownSymbol}
-                            content={message?.from[0].email}
+                            content={message?.from[0]?.email}
                           />
                         </div>
                       </div>
@@ -2033,7 +2036,7 @@
                 {/if}
                 <div class="message-from">
                   <span class="name"
-                    >{userEmail && _this.message?.from[0].email === userEmail
+                    >{userEmail && _this.message?.from[0]?.email === userEmail
                       ? "me"
                       : _this.message?.from[0]?.name ||
                         _this.message?.from[0]?.email}</span
@@ -2044,7 +2047,7 @@
                     id={_this.message?.id}
                     current_tooltip_id={currentTooltipId}
                     icon={DropdownSymbol}
-                    content={_this.message?.from[0].email}
+                    content={_this.message?.from[0]?.email}
                   />
                 </div>
               </div>
