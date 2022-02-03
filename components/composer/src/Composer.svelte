@@ -15,6 +15,8 @@
     sendMessage,
     fetchAccount,
     uploadFile as nylasUploadFile,
+    saveDraft,
+    updateDraft,
   } from "@commons";
   import {
     buildInternalProps,
@@ -46,6 +48,7 @@
   import CloseIcon from "./assets/close.svg";
   import MinimizeIcon from "./assets/dash.svg";
   import AttachmentIcon from "./assets/attachment.svg";
+  import DraftIcon from "./assets/drafts.svg";
   import ExpandIcon from "./assets/expand.svg";
   import type {
     Message,
@@ -77,6 +80,7 @@
   export let cc: ContactSearchCallback = [];
   export let bcc: ContactSearchCallback = [];
   export let send: SendCallback;
+  export let save: SendCallback;
   export let change: FetchContactsCallback | null = null;
   export let beforeSend: (msg: Message) => Message | void;
   export let afterSendSuccess: Function | null = null;
@@ -316,12 +320,12 @@
     );
   };
 
-  let sendPending = false;
+  let isPending = false;
   let sendError = false;
   let sendSuccess = false;
 
   const handleSend = async () => {
-    sendPending = true;
+    isPending = true;
     sendError = false;
     sendSuccess = false;
 
@@ -337,13 +341,13 @@
       send(msg)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
-          sendPending = false;
+          isPending = false;
           sendSuccess = true;
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
           if (_this.reset_after_send) resetAfterSend($message.from);
-          sendPending = false;
+          isPending = false;
           sendError = true;
         });
     } else if (id) {
@@ -352,7 +356,7 @@
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
           if (_this.reset_after_send) resetAfterSend($message.from);
-          sendPending = false;
+          isPending = false;
           sendSuccess = true;
           dispatchEvent("messageSent", {
             message: res,
@@ -360,9 +364,51 @@
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
-          sendPending = false;
+          isPending = false;
           sendError = true;
         });
+    }
+  };
+
+  let saveError = false;
+  let saveSuccess = false;
+  //Save Email Message as Draft
+  const handleSaveDraft = async () => {
+    isPending = true;
+    saveError = false;
+    saveSuccess = false;
+
+    let msg = $message;
+    try {
+      if (save) {
+        //Calling custom save callback
+        const res = await save(msg);
+        isPending = false;
+        saveSuccess = true;
+      } else if (id) {
+        // Middleware
+        if (msg.id && msg.version) {
+          //Update draft
+          const res = await updateDraft(id, msg, access_token);
+          isPending = false;
+          saveSuccess = true;
+          dispatchEvent("draftUpdated", {
+            message: res,
+          });
+        } else {
+          //Save new draft
+          const res = await saveDraft(id, msg, access_token);
+          isPending = false;
+          saveSuccess = true;
+          dispatchEvent("draftSaved", {
+            message: res,
+          });
+        }
+      }
+    } catch (err) {
+      if (afterSendError) afterSendError(err);
+      isPending = false;
+      saveError = true;
     }
   };
 
@@ -373,7 +419,7 @@
   $: datepickerTimestamp = $message.send_at * 1000;
 
   $: isSendable =
-    !sendPending &&
+    !isPending &&
     (id || send) &&
     $message.from.length &&
     ($message.to.length || $message.cc.length || $message.bcc.length);
@@ -609,7 +655,8 @@
       background: var(--composer-background-muted-color, #f0f2ff);
     }
   }
-  .composer-btn.file-upload {
+  .composer-btn.file-upload,
+  .composer-btn.save-draft {
     margin-right: 10px;
     width: 32px;
     height: 32px;
@@ -902,9 +949,19 @@
             <span class="sr-only">Attach Files</span>
           </label>
         {/if}
+
+        <label
+          for="save-draft"
+          class="composer-btn save-draft"
+          title="Save Email As Draft"
+          on:click={handleSaveDraft}
+        >
+          <DraftIcon class="AttachmentIcon" />
+          <span class="sr-only">Save Draft</span>
+        </label>
         <div class="btn-group">
           <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
-            {#if sendPending}Sending{:else}Send{/if}
+            {#if isPending}Sending{:else}Send{/if}
           </button>
         </div>
 
@@ -941,6 +998,16 @@
       {#if sendSuccess}
         <nylas-composer-alert-bar type="success" dismissible={true}>
           Message sent successfully!
+        </nylas-composer-alert-bar>
+      {/if}
+      {#if saveError}
+        <nylas-composer-alert-bar type="danger" dismissible={true}>
+          Error: Failed to save the draft.
+        </nylas-composer-alert-bar>
+      {/if}
+      {#if saveSuccess}
+        <nylas-composer-alert-bar type="success" dismissible={true}>
+          Message draft saved successfully!
         </nylas-composer-alert-bar>
       {/if}
     {/if}

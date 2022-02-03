@@ -852,3 +852,92 @@ describe("Composer subject", () => {
     cy.get("input.subject").invoke("val").should("eq", "New Message");
   });
 });
+
+describe("Save composer message as draft", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+  });
+
+  it("Save empty draft messege", () => {
+    const save = () => {
+      return Promise.resolve({ success: true });
+    };
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+      component.save = save;
+    });
+
+    cy.get(".save-draft").click();
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Message draft saved successfully!",
+    );
+  });
+
+  it("Successful upload", () => {
+    const filePath = "example.json";
+
+    const save = (data) => {
+      expect(data.file_ids).to.have.lengthOf(1);
+      return Promise.resolve({ success: true });
+    };
+    const uploadFile = (id, _file) => {
+      return Promise.resolve({ id });
+    };
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@nylas.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@nylas.com",
+          },
+        ],
+      };
+      component.save = save;
+      component.uploadFile = uploadFile;
+    });
+
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("example.json")
+      .should("be.visible");
+    cy.get(".save-draft").click();
+    cy.get("nylas-composer-alert-bar").should(
+      "contain",
+      "Message draft saved successfully!",
+    );
+  });
+});
