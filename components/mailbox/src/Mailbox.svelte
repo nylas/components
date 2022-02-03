@@ -1,7 +1,7 @@
 <svelte:options tag="nylas-mailbox" />
 
 <script lang="ts">
-  import { ErrorStore, fetchAccount, ManifestStore } from "@commons";
+  import { ErrorStore, fetchAccount, ManifestStore, silence } from "@commons";
   import { fetchMessage, updateMessage } from "@commons/connections/messages";
   import {
     AccountOrganizationUnit,
@@ -524,13 +524,16 @@
          * individual messages to trash folder as a workaround
          **/
         if (id) {
-          thread.messages.forEach(async (message: Message, i: number) => {
+          for (let message of thread.messages) {
             await updateMessage(
               query.component_id,
               { ...message, folder_id: trashFolderID },
               access_token,
-            );
-          });
+            ).catch((err) => {
+              silence(err);
+              deleting = false;
+            });
+          }
         }
       }
       await updateDisplayedThreads(true);
