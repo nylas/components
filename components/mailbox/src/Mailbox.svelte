@@ -1004,7 +1004,7 @@
                     show_reply={_this.show_reply}
                     show_reply_all={_this.show_reply_all}
                     show_forward={_this.show_forward}
-                    on:threadClicked|stopPropagation={threadClicked}
+                    on:threadClicked={threadClicked}
                     on:messageClicked={messageClicked}
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
