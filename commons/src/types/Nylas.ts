@@ -235,6 +235,7 @@ export interface ComposerProperties extends Manifest {
   reset_after_send: boolean;
   reset_after_close: boolean;
   show_attachment_button: boolean;
+  show_max_file_size: boolean;
   show_save_as_draft: boolean;
   show_bcc_button: boolean;
   show_bcc: boolean;

@@ -104,6 +104,7 @@
   export let show_cc_button: Attribute;
   export let show_bcc_button: Attribute;
   export let show_attachment_button: Attribute;
+  export let show_max_file_size: Attribute;
   export let show_save_as_draft: Attribute;
   export let show_editor_toolbar: Attribute;
   export let theme: string | void;
@@ -130,6 +131,7 @@
     show_cc_button: true,
     show_bcc_button: true,
     show_attachment_button: true,
+    show_max_file_size: true,
     show_save_as_draft: true,
     show_editor_toolbar: true,
     theme: "auto",
@@ -668,6 +670,15 @@
     justify-content: center;
     align-items: center;
   }
+  .file-size {
+    margin-left: 10px;
+    color: var(--composer-icons-color, #666774);
+    height: 32px;
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   .cc-btn {
     position: absolute;
@@ -952,17 +963,6 @@
             {#if isPending}Sending{:else}Send{/if}
           </button>
         </div>
-        {#if _this.show_attachment_button && (id || uploadFile)}
-          <label
-            for="file-upload"
-            class="composer-btn file-upload"
-            title="Attach Files (up to 4MB)"
-            tabindex="0"
-          >
-            <AttachmentIcon class="FooterIcon" />
-            <span class="sr-only">Attach Files</span>
-          </label>
-        {/if}
         {#if _this.show_save_as_draft}
           <button
             for="save-draft"
@@ -973,6 +973,22 @@
             <DraftIcon class="FooterIcon" />
             <span class="sr-only">Save Draft</span>
           </button>
+        {/if}
+        {#if _this.show_attachment_button && (id || uploadFile)}
+          <label
+            for="file-upload"
+            class="composer-btn file-upload"
+            title="Attach Files (up to 4MB)"
+            tabindex="0"
+          >
+            <AttachmentIcon class="FooterIcon" />
+            <span class="sr-only">Attach Files</span>
+          </label>
+          {#if _this.show_max_file_size}
+            <div class="file-size">
+              <span>Max file size: 4MB</span>
+            </div>
+          {/if}
         {/if}
 
         <form action="" enctype="multipart/form-data">
