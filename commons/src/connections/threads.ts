@@ -25,10 +25,23 @@ export const fetchThreads = (
       (param) => (queryString = queryString.concat(`&${param[0]}=${param[1]}`)),
     );
   }
-  return fetch(queryString, getFetchConfig(query))
-    .then((response) => handleResponse<MiddlewareResponse<Thread[]>>(response))
-    .then((json) => json.response)
-    .catch((error) => handleError(query.component_id, error));
+  return (
+    fetch(queryString, getFetchConfig(query))
+      .then((response) =>
+        handleResponse<MiddlewareResponse<Thread[]>>(response),
+      )
+      .then((json) => json.response)
+      // TODO: Remove this ugly hack when we fix the API from returning ghost messages (e.g. w/o a from/to field)
+      .then((threads) =>
+        threads.map((thread) => ({
+          ...thread,
+          messages: thread.messages.filter(
+            (message) => message.from.length !== 0 || message.to.length !== 0,
+          ),
+        })),
+      )
+      .catch((error) => handleError(query.component_id, error))
+  );
 };
 
 export function fetchThreadCount(query: MailboxQuery): Promise<number> {
