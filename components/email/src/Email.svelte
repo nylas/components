@@ -58,6 +58,7 @@
   import ReplyAllIcon from "./assets/reply-all.svg";
   import ForwardIcon from "./assets/forward.svg";
   import { isFileAnAttachment } from "@commons/methods/isFileAnAttachment";
+  import { updateMessage } from "@commons/connections/messages";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -448,10 +449,24 @@
       if (trashLabelID) {
         const existingLabelIds = activeThread.labels?.map((i) => i.id) || [];
         activeThread.label_ids = [...existingLabelIds, trashLabelID];
+        await saveActiveThread();
       } else if (trashFolderID) {
         activeThread.folder_id = trashFolderID;
+        /**
+         * Our threads API does not allow moving a thread sent
+         * by self to trash for non-gmail accounts. Hence, moving
+         * individual messages to trash folder as a workaround
+         **/
+        if (query.component_id && _this.thread_id) {
+          activeThread.messages.forEach(async (message, i) => {
+            await updateMessage(
+              query.component_id,
+              { ...message, folder_id: trashFolderID },
+              access_token,
+            );
+          });
+        }
       }
-      await saveActiveThread();
     }
     dispatchEvent("threadDeleted", {
       event,

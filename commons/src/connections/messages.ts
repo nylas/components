@@ -33,6 +33,28 @@ export const sendMessage = async (
     .catch((error) => handleError(component_id, error));
 };
 
+export async function updateMessage(
+  component_id: string,
+  message: NylasMessage,
+  access_token?: string,
+): Promise<NylasMessage> {
+  const url = `${getMiddlewareApiUrl(component_id)}/messages/${message.id}`;
+  const fetchConfig = getFetchConfig({
+    method: "PUT",
+    component_id,
+    access_token,
+    body: { folder_id: message.folder_id },
+  });
+  return await fetch(url, fetchConfig)
+    .then((response) =>
+      handleResponse<MiddlewareResponse<NylasMessage>>(response),
+    )
+    .then((json) => {
+      return json.response;
+    })
+    .catch((error) => handleError(component_id, error));
+}
+
 export const uploadFile = async (
   component_id: string,
   file: File,

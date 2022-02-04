@@ -107,6 +107,7 @@ const defaultSize = 13;
 describe("Mailbox Display", () => {
   let thread1;
   let thread2;
+  let THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS;
 
   beforeEach(() => {
     cy.intercept(
@@ -137,6 +138,21 @@ describe("Mailbox Display", () => {
       },
     );
 
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture:
+          "mailbox/threads/threadWithMessageThatDoesNotHaveFromOrToFields.json",
+      },
+    );
+
+    cy.fixture(
+      "mailbox/threads/threadWithMessageThatDoesNotHaveFromOrToFields.json",
+    ).then((f) => {
+      THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS = f.response;
+    });
+
     cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
       thread1 = f;
     });
@@ -161,6 +177,17 @@ describe("Mailbox Display", () => {
 
   it("Shows empty message", () => {
     cy.get("@mailbox").invoke("prop", "all_threads", [EMPTY_THREAD]);
+    cy.get("@email")
+      .find(".snippet")
+      .contains("Sorry, looks like this thread is currently unavailable");
+  });
+
+  it("Filters out messages with no 'to' or 'from' fields", () => {
+    cy.get("@mailbox").invoke(
+      "prop",
+      "all_threads",
+      THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS,
+    );
     cy.get("@email")
       .find(".snippet")
       .contains("Sorry, looks like this thread is currently unavailable");
