@@ -1,10 +1,10 @@
-@use 'sass:list';
 @import "../../../theming/reset";
 @import "../../../theming/variables";
 
-main {
-  @import "agenda-themes";
+@import "theme";
+@import "agenda-themes";
 
+main {
   text-align: center;
   height: 100%;
   margin: 0 auto;
@@ -21,16 +21,20 @@ main {
   }
 }
 
-@import "theme";
-
 header {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
   grid-column: 1/3;
-  color: var(--mainTextAndDeclinedEvents);
-  background: var(--headerBackground);
+  color: var(
+    --nylas-agenda-header-color,
+    var(--mainTextAndDeclinedEvents, var(--theme-header-color))
+  );
+  background: var(
+    --nylas-agenda-header-bg,
+    var(--headerBackground, var(--theme-header-bg))
+  );
   z-index: 1;
   padding-left: 10px;
 
@@ -43,7 +47,10 @@ header {
     }
 
     svg path {
-      fill: var(--linesAndIcons);
+      fill: var(
+        --nylas-agenda-icons-bg-color,
+        var(--linesAndIcons, var(--theme-icons-bg-color))
+      );
       transition: 0.2s;
     }
   }
@@ -87,7 +94,13 @@ header {
       &:hover,
       &:focus {
         svg path {
-          fill: hsl(var(--linesAndIcons), 50%);
+          fill: hsl(
+            var(
+              --nylas-agenda-icons-bg-color,
+              var(--linesAndIcons, var(--theme-icons-bg-color))
+            ),
+            50%
+          );
         }
       }
     }
@@ -96,8 +109,14 @@ header {
       margin: 0;
       font-weight: lighter;
       span {
-        background-color: var(--primaryAndMainCalendar);
-        color: var(--calendarEventText);
+        background-color: var(
+          --nylas-agenda-calendar-1-bg-color,
+          var(--primaryAndMainCalendar, var(--theme-calendar-1-bg-color))
+        );
+        color: var(
+          --nylas-agenda-event-color,
+          var(--calendarEventText, var(--theme-event-color))
+        );
         border-radius: 20px;
         display: inline-block;
         font-weight: bold;
@@ -161,8 +180,16 @@ h2 {
   gap: 1rem;
   position: relative;
   min-width: 100px;
-  border-left: 1px solid var(--linesAndIcons);
-  border-right: 1px solid var(--linesAndIcons);
+  border-left: 1px solid
+    var(
+      --nylas-agenda-dividers-border-color,
+      var(--linesAndIcons, var(--theme-dividers-border-color))
+    );
+  border-right: 1px solid
+    var(
+      --nylas-agenda-dividers-border-color,
+      var(--linesAndIcons, var(--theme-dividers-border-color))
+    );
 
   &.overflowing {
     overflow-y: auto;
@@ -182,10 +209,16 @@ h2 {
     position: absolute;
     overflow: hidden;
     opacity: 1;
-    background: var(--primaryAndMainCalendar);
+    background: var(
+      --nylas-agenda-calendar-1-bg-color,
+      var(--primaryAndMainCalendar, var(--theme-calendar-1-bg-color))
+    );
     border-radius: 4px;
     box-sizing: border-box;
-    color: var(--calendarEventText);
+    color: var(
+      --nylas-agenda-event-color,
+      var(--calendarEventText, var(--theme-event-color))
+    );
     cursor: pointer;
     text-align: left;
     font-size: 0.9rem;
@@ -210,9 +243,15 @@ h2 {
     }
 
     &.status-maybe {
-      background-color: var(--emptyEventBackground, #ddd) !important;
+      background-color: var(
+        --nylas-agenda-empty-event-bg-color,
+        var(--emptyEventBackground, #ddd)
+      ) !important;
       border-left-width: 7px;
-      color: var(--secondaryCalendar) !important;
+      color: var(
+        --nylas-agenda-calendar-2-bg-color,
+        var(--secondaryCalendar, var(--theme-calendar-2-bg-color))
+      ) !important;
 
       // diagonal stripes
       background-image: linear-gradient(
@@ -230,11 +269,20 @@ h2 {
     }
 
     &.status-noreply {
-      background-color: var(--emptyEventBackground, #ddd) !important;
-      color: var(--secondaryCalendar, #444) !important;
+      background-color: var(
+        --nylas-agenda-empty-event-bg-color,
+        var(--emptyEventBackground, #ddd)
+      ) !important;
+      color: var(
+        --nylas-agenda-calendar-2-bg-color,
+        var(--secondaryCalendar, var(--theme-calendar-2-bg-color, #444))
+      ) !important;
 
       a {
-        color: var(--secondaryCalendar) !important;
+        color: var(
+          --nylas-agenda-calendar-2-bg-color,
+          var(--secondaryCalendar, var(--theme-calendar-2-bg-color))
+        ) !important;
       }
     }
 
@@ -243,12 +291,24 @@ h2 {
         text-decoration: line-through;
       }
 
-      border-color: var(--alertWarningDeclined, #eb8f24);
-      color: var(--alertWarningDeclined, #eb8f24);
-      background-color: var(--emptyEventBackground, #ddd) !important;
+      border-color: var(
+        --nylas-agenda-declined-event-color,
+        var(--alertWarningDeclined, var(--theme-declined-event-color, #eb8f24))
+      );
+      color: var(
+        --nylas-agenda-declined-event-color,
+        var(--alertWarningDeclined, var(--theme-declined-event-color, #eb8f24))
+      );
+      background-color: var(
+        --nylas-agenda-empty-event-bg-color,
+        var(--emptyEventBackground, #ddd)
+      ) !important;
 
       a {
-        color: var(--secondaryCalendar) !important;
+        color: var(
+          --nylas-agenda-calendar-2-bg-color,
+          var(--secondaryCalendar, var(--theme-calendar-2-bg-color))
+        ) !important;
       }
     }
 
@@ -290,7 +350,11 @@ h2 {
       position: absolute;
       height: 1px;
       width: 100%;
-      border-top: 1px solid var(--linesAndIcons);
+      border-top: 1px solid
+        var(
+          --nylas-agenda-dividers-border-color,
+          var(--linesAndIcons, var(--theme-dividers-border-color))
+        );
       left: 0;
     }
   }
@@ -299,7 +363,10 @@ h2 {
 .ticks {
   pointer-events: none;
   height: 100%;
-  color: var(--mainTextAndDeclinedEvents);
+  color: var(
+    --nylas-agenda-ticks-color,
+    var(--mainTextAndDeclinedEvents, var(--theme-ticks-color))
+  );
   font-size: 12px;
   position: relative;
   overflow: hidden;
@@ -318,7 +385,10 @@ h2 {
   position: absolute;
   height: 4px;
   width: 100%;
-  background-color: var(--timeLine);
+  background-color: var(
+    --nylas-agenda-current-time-bg-color,
+    var(--timeLine, var(--theme-current-time-bg-color))
+  );
 
   svg {
     position: absolute;
@@ -328,7 +398,10 @@ h2 {
     width: 39px;
 
     path {
-      fill: var(--timeLine);
+      fill: var(
+        --nylas-agenda-current-time-bg-color,
+        var(--timeLine, var(--theme-current-time-bg-color))
+      );
     }
   }
 }

@@ -1,110 +1,110 @@
 .theme-1 {
-  --mainTextAndDeclinedEvents: #000000;
-  --calendarEventText: #ffffff;
-  --linesAndIcons: #d5d5d5;
-  --monthsOnMobileDropdown: #f1f1f1;
-  --primaryAndMainCalendar: #002db4;
-  --secondaryCalendar: #315df2;
-  --thirdCalendar: #078351;
-  --timeLine: #36d2ac;
-  --declinedEvent: #636671;
-  --alertWarningDeclined: #ba7122;
-  --headerBackground: #ffffff;
+  --theme-header-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-ticks-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-icons-bg-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-dividers-border-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-current-time-bg-color: #36d2ac; // deprecates timeLine
+  --theme-declined-event-color: #ba7122; // deprecates alertWarningDeclined
+  --theme-header-bg: #ffffff; // deprecates headerBackground
+  --theme-event-color: #ffffff; // deprecates calendarEventText
 
-  --calendarColour4: #5fdb58;
-  --calendarColour5: #49a643;
-  --calendarColour6: #54d3b3;
-  --calendarColour7: #648fdc;
-  --calendarColour8: #a3cc3a;
-  --calendarColour9: #9fce7b;
-  --calendarColour10: #779138;
+  --theme-calendar-1-bg-color: #002db4; // deprecates primaryAndMainCalendar
+  --theme-calendar-2-bg-color: #315df2; // deprecates secondaryCalendar
+  --theme-calendar-3-bg-color: #078351; // deprecates thirdCalendar
+  --theme-calendar-4-bg-color: #5fdb58; // deprecates calendarColour4
+  --theme-calendar-5-bg-color: #49a643; // deprecates calendarColour5
+  --theme-calendar-6-bg-color: #54d3b3; // deprecates calendarColour6
+  --theme-calendar-7-bg-color: #648fdc; // deprecates calendarColour7
+  --theme-calendar-8-bg-color: #a3cc3a; // deprecates calendarColour8
+  --theme-calendar-9-bg-color: #9fce7b; // deprecates calendarColour9
+  --theme-calendar-10-bg-color: #779138; // deprecates calendarColour10
 }
 
 .theme-2 {
-  --mainTextAndDeclinedEvents: #000000;
-  --calendarEventText: #ffffff;
-  --linesAndIcons: #d5d5d5;
-  --monthsOnMobileDropdown: #f1f1f1;
-  --primaryAndMainCalendar: #6300c6;
-  --secondaryCalendar: #170075;
-  --thirdCalendar: #003f9e;
-  --timeLine: #d23636;
-  --declinedEvent: #636671;
-  --alertWarningDeclined: #eb8f24;
-  --headerBackground: #ffffff;
+  --theme-header-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-ticks-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-icons-bg-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-dividers-border-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-current-time-bg-color: #d23636; // deprecates timeLine
+  --theme-declined-event-color: #eb8f24; // deprecates alertWarningDeclined
+  --theme-header-bg: #ffffff; // deprecates headerBackground
+  --theme-event-color: #ffffff; // deprecates calendarEventText
 
-  --calendarColour4: #813d9d;
-  --calendarColour5: #549dd0;
-  --calendarColour6: #c051dc;
-  --calendarColour7: #b788d4;
-  --calendarColour8: #674dd4;
-  --calendarColour9: #687cdc;
-  --calendarColour10: #5c518c;
+  --theme-calendar-1-bg-color: #6300c6; // deprecates primaryAndMainCalendar
+  --theme-calendar-2-bg-color: #170075; // deprecates secondaryCalendar
+  --theme-calendar-3-bg-color: #003f9e; // deprecates thirdCalendar
+  --theme-calendar-4-bg-color: #813d9d; // deprecates calendarColour4
+  --theme-calendar-5-bg-color: #549dd0; // deprecates calendarColour5
+  --theme-calendar-6-bg-color: #c051dc; // deprecates calendarColour6
+  --theme-calendar-7-bg-color: #b788d4; // deprecates calendarColour7
+  --theme-calendar-8-bg-color: #674dd4; // deprecates calendarColour8
+  --theme-calendar-9-bg-color: #687cdc; // deprecates calendarColour9
+  --theme-calendar-10-bg-color: #5c518c; // deprecates calendarColour10
 }
 
 .theme-3 {
-  --mainTextAndDeclinedEvents: #000000;
-  --calendarEventText: #ffffff;
-  --linesAndIcons: #d5d5d5;
-  --monthsOnMobileDropdown: #f1f1f1;
-  --primaryAndMainCalendar: #1d9f51;
-  --secondaryCalendar: #0400c4;
-  --thirdCalendar: #19a7b0;
-  --timeLine: #c12b73;
-  --declinedEvent: #636671;
-  --alertWarningDeclined: #ba1722;
-  --headerBackground: #ffffff;
+  --theme-header-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-ticks-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-icons-bg-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-dividers-border-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-current-time-bg-color: #c12b73; // deprecates timeLine
+  --theme-declined-event-color: #ba1722; // deprecates alertWarningDeclined
+  --theme-header-bg: #ffffff; // deprecates headerBackground
+  --theme-event-color: #ffffff; // deprecates calendarEventText
 
-  --calendarColour4: #65c444;
-  --calendarColour5: #4c7fdf;
-  --calendarColour6: #6a9fe1;
-  --calendarColour7: #70c08c;
-  --calendarColour8: #37629d;
-  --calendarColour9: #4dafd7;
-  --calendarColour10: #3f7339;
+  --theme-calendar-1-bg-color: #1d9f51; // deprecates primaryAndMainCalendar
+  --theme-calendar-2-bg-color: #0400c4; // deprecates secondaryCalendar
+  --theme-calendar-3-bg-color: #19a7b0; // deprecates thirdCalendar
+  --theme-calendar-4-bg-color: #65c444; // deprecates calendarColour4
+  --theme-calendar-5-bg-color: #4c7fdf; // deprecates calendarColour5
+  --theme-calendar-6-bg-color: #6a9fe1; // deprecates calendarColour6
+  --theme-calendar-7-bg-color: #70c08c; // deprecates calendarColour7
+  --theme-calendar-8-bg-color: #37629d; // deprecates calendarColour8
+  --theme-calendar-9-bg-color: #4dafd7; // deprecates calendarColour9
+  --theme-calendar-10-bg-color: #3f7339; // deprecates calendarColour10
 }
 
 .theme-4 {
-  --mainTextAndDeclinedEvents: #ffffff;
-  --calendarEventText: #ffffff;
+  --theme-header-color: #ffffff; // deprecates mainTextAndDeclinedEvents
+  --theme-ticks-color: #ffffff; // deprecates mainTextAndDeclinedEvents
   --secondaryText: #8b8e98;
-  --linesAndIcons: #414247;
-  --monthsOnMobileDropdown: #f1f1f1;
-  --primaryAndMainCalendar: #1951fa;
-  --secondaryCalendar: #002db4;
-  --thirdCalendar: #078351;
-  --timeLine: #7ae1c7;
-  --declinedEvent: #636671;
-  --alertWarningDeclined: #ba1722;
-  --headerBackground: #414247;
+  --theme-icons-bg-color: #414247; // deprecates linesAndIcons
+  --theme-dividers-border-color: #414247; // deprecates linesAndIcons
+  --theme-current-time-bg-color: #7ae1c7; // deprecates timeLine
+  --theme-declined-event-color: #ba1722; // deprecates alertWarningDeclined
+  --theme-event-color: #ffffff; // deprecates calendarEventText
+  --theme-header-bg: #414247; // deprecates headerBackground
 
-  --calendarColour4: #466edb;
-  --calendarColour5: #26af65;
-  --calendarColour6: #6a95de;
-  --calendarColour7: #335695;
-  --calendarColour8: #60cbae;
-  --calendarColour9: #308157;
-  --calendarColour10: #54afda;
+  --theme-calendar-1-bg-color: #1951fa; // deprecates primaryAndMainCalendar
+  --theme-calendar-2-bg-color: #002db4; // deprecates secondaryCalendar
+  --theme-calendar-3-bg-color: #078351; // deprecates thirdCalendar
+  --theme-calendar-4-bg-color: #466edb; // deprecates calendarColour4
+  --theme-calendar-5-bg-color: #26af65; // deprecates calendarColour5
+  --theme-calendar-6-bg-color: #6a95de; // deprecates calendarColour6
+  --theme-calendar-7-bg-color: #335695; // deprecates calendarColour7
+  --theme-calendar-8-bg-color: #60cbae; // deprecates calendarColour8
+  --theme-calendar-9-bg-color: #308157; // deprecates calendarColour9
+  --theme-calendar-10-bg-color: #54afda; // deprecates calendarColour10
 }
 
 .theme-5 {
-  --mainTextAndDeclinedEvents: #000000;
-  --calendarEventText: #ffffff;
-  --linesAndIcons: #d5d5d5;
-  --monthsOnMobileDropdown: #f2f1f2;
-  --primaryAndMainCalendar: #5285ed;
-  --secondaryCalendar: #ecb63f;
-  --thirdCalendar: #459a5f;
-  --timeLine: #cd5041;
-  --declinedEvent: #808080;
-  --alertWarningDeclined: #cd5041;
-  --headerBackground: #ffffff;
+  --theme-header-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-ticks-color: #000000; // deprecates mainTextAndDeclinedEvents
+  --theme-icons-bg-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-dividers-border-color: #d5d5d5; // deprecates linesAndIcons
+  --theme-current-time-bg-color: #cd5041; // deprecates timeLine
+  --theme-declined-event-color: #cd5041; // deprecates alertWarningDeclined
+  --theme-header-bg: #ffffff; // deprecates headerBackground
+  --theme-event-color: #ffffff; // deprecates calendarEventText
 
-  --calendarColour4: #8dd255;
-  --calendarColour5: #9845c4;
-  --calendarColour6: #d81b60;
-  --calendarColour7: #60cbae;
-  --calendarColour8: #528fc8;
-  --calendarColour9: #b39ddb;
-  --calendarColour10: #bf6342;
+  --theme-calendar-1-bg-color: #5285ed; // deprecates primaryAndMainCalendar
+  --theme-calendar-2-bg-color: #ecb63f; // deprecates secondaryCalendar
+  --theme-calendar-3-bg-color: #459a5f; // deprecates thirdCalendar
+  --theme-calendar-4-bg-color: #8dd255; // deprecates calendarColour4
+  --theme-calendar-5-bg-color: #9845c4; // deprecates calendarColour5
+  --theme-calendar-6-bg-color: #d81b60; // deprecates calendarColour6
+  --theme-calendar-7-bg-color: #60cbae; // deprecates calendarColour7
+  --theme-calendar-8-bg-color: #528fc8; // deprecates calendarColour8
+  --theme-calendar-9-bg-color: #b39ddb; // deprecates calendarColour9
+  --theme-calendar-10-bg-color: #bf6342; // deprecates calendarColour10
 }
