@@ -228,6 +228,44 @@ describe("Contact List props", () => {
   });
 });
 
+describe("Contact List display contacts", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "contact-list/manifest.json" },
+    );
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/contact-list/contacts?offset=0&limit=100",
+      { fixture: "contact-list/contactsWithPicture.json" },
+    ).as("getContacts");
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/contacts/1572prjpqtq8758xo9n0q1wtp/picture",
+      { fixture: "contact-list/contactPictureResponse.json" },
+    ).as("picture");
+
+    cy.visit("/components/contact-list/src/cypress.html");
+
+    cy.get("nylas-contact-list").should("exist").as("contactList");
+  });
+
+  it("Display contact with fetched image", () => {
+    cy.wait("@getContacts");
+    cy.wait("@picture");
+
+    cy.get("@contactList")
+      .find('img[alt="nylascypresstest@gmail.com"]')
+      .should("exist")
+      .as("contactImage");
+    cy.get("@contactImage")
+      .should("have.attr", "src")
+      .and("contain", "data:image/jpg");
+  });
+});
+
 describe("ContactList edge cases", () => {
   beforeEach(() => {
     cy.visit("/components/contact-list/src/cypress.html");
