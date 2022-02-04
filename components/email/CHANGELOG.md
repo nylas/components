@@ -7,6 +7,14 @@
 - [Email] Show CC participants when reply all button is clicked [#319](https://github.com/nylas/components/pull/319)
 - [Email] Added ability to forward email [#320](https://github.com/nylas/components/pull/320)
 - [Email] Show CC and BCC fields on expanded email [#361](https://github.com/nylas/components/pull/361)
+- [Email] Added customizable css variables for attachment button [#379](https://github.com/nylas/components/pull/379)
+
+```
+  -  --nylas-email-attachment-border-style
+  -  --nylas-email-attachment-button-color
+  -  --nylas-email-attachment-button-bg
+  -  --nylas-email-attachment-button-hover-bg
+```
 
 ## Bug Fixes
 
