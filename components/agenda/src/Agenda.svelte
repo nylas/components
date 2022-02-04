@@ -13,6 +13,7 @@
     isValidTimezone,
     getSpecifiedTimeZoneOffset,
     formatTimeSlot,
+    getTimeInTimezone,
   } from "@commons/methods/convertDateTimeZone";
   import type { EventPosition } from "./methods/position";
   import { populatePositionMap, updateEventPosition } from "./methods/position";
@@ -97,7 +98,7 @@
     show_no_events_message: false,
     start_minute: 0,
     theme: "theme-1",
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezone: undefined,
     timezone_agnostic_all_day_events: true,
   };
 
@@ -186,9 +187,7 @@
     } else {
       let date = new Date();
       if (_this.timezone) {
-        date = new Date(
-          date.toLocaleString("default", { timeZone: _this.timezone }),
-        );
+        date = new Date(getTimeInTimezone(date, _this.timezone));
       }
       date.setHours(0, 0, 0, 0);
       selectedDate = date;
@@ -464,11 +463,7 @@
 
           let startTime = new Date(event.when.start_time * 1000);
           if (_this.timezone) {
-            startTime = new Date(
-              startTime.toLocaleString("default", {
-                timeZone: _this.timezone,
-              }),
-            );
+            startTime = new Date(getTimeInTimezone(startTime, _this.timezone));
           }
 
           let minutesInVisibleDay =
@@ -604,9 +599,7 @@
     };
   });
 
-  $: currentTime = new Date(
-    new Date(now).toLocaleString("default", { timeZone: _this.timezone }), // seems redundant, right? new Date() does the same thing. But, the inclusion of "now" means that changes to it are observed -- and we change every setInterval loop.
-  );
+  $: currentTime = new Date(now + timezoneOffset); // seems redundant, right? new Date() does the same thing. But, the inclusion of "now" means that changes to it are observed -- and we change every setInterval loop.
 
   $: currentTimePosition = () => {
     let currentStart = new Date(currentTime.getTime());

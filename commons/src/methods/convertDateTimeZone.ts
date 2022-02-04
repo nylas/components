@@ -60,3 +60,14 @@ export function getSpecifiedTimeZoneOffset(zone?: string): number {
   const dtz = DateTime.now().setZone(zone, { keepLocalTime: true });
   return dt.diff(dtz).milliseconds;
 }
+
+/**
+ *
+ * @param date Date
+ * @param zone string
+ * @returns number (in milliseconds)
+ */
+export function getTimeInTimezone(date: Date, zone?: string): number {
+  const timeValue = date.getTime();
+  return timeValue + getSpecifiedTimeZoneOffset(zone);
+}
