@@ -1,9 +1,9 @@
 @use 'sass:list';
-@import "../../theming/reset.scss";
-@import "../../theming/variables.scss";
+@import "../../../theming/reset";
+@import "../../../theming/variables";
 
 main {
-  @import "./styles/agenda-themes.scss";
+  @import "agenda-themes";
 
   text-align: center;
   height: 100%;
@@ -21,11 +21,7 @@ main {
   }
 }
 
-@import "./themes/theme-1";
-@import "./themes/theme-2";
-@import "./themes/theme-3";
-@import "./themes/theme-4";
-@import "./themes/theme-5";
+@import "theme";
 
 header {
   display: flex;
