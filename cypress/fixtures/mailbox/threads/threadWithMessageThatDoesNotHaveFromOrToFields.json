@@ -1,0 +1,60 @@
+{
+  "component": {
+    "theming": {}
+  },
+  "response": [
+    {
+      "account_id": "1xrddnl99frq3b7son9j32aba",
+      "drafts": [],
+      "first_message_timestamp": 1643903027,
+      "has_attachments": false,
+      "id": "5xpfczn3ruyg21as6d0wxvefy",
+      "labels": [
+        {
+          "display_name": "INBOX",
+          "id": "dx62wkpj57erbkargbr3zew3j",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1643903027,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1643903027,
+      "last_updated_timestamp": 1643917866,
+      "messages": [
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "body": "",
+          "cc": [],
+          "date": 1643903027,
+          "events": [],
+          "files": [],
+          "from": [],
+          "id": "2hw263r2j8fu7h0gtj404uwm2",
+          "labels": [
+            {
+              "display_name": "INBOX",
+              "id": "dx62wkpj57erbkargbr3zew3j",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "",
+          "starred": false,
+          "subject": "",
+          "thread_id": "5xpfczn3ruyg21as6d0wxvefy",
+          "to": [],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [],
+      "snippet": "",
+      "starred": false,
+      "subject": "",
+      "unread": false,
+      "version": 1
+    }
+  ]
+}
