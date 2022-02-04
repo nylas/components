@@ -16,6 +16,7 @@ Nylas Agenda (`<nylas-agenda>`) is part of the Nylas Components library that let
     - [Passing in your own data](#passing-in-your-own-data)
     - [Properties](#properties)
     - [Events and Callbacks](#events-and-callbacks)
+    - [Theme Customization](#theme-customization)
   - [Contributing](#contributing)
     - [Testing](#testing)
   - [Additional Documentation](#additional-documentation)
@@ -118,6 +119,35 @@ document
 ```
 
 A list of emitted events is available on our [Documentation for Nylas Agenda](https://developer.nylas.com/docs/user-experience/components/agenda-component/#custom-callbacks)
+
+### Theme Customization
+
+You are able to easily override styles for pre-selected themes by writing your own css vars. Our css vars follow this naming convention - [nylas-component]-[child-component]-[shortform-css-property]. The value assigned should be a valid css property value.
+
+```
+nylas-agenda {
+  --nylas-agenda-calendar-1-bg-color: inherit;
+  --nylas-agenda-calendar-2-bg-color: inherit;
+  --nylas-agenda-calendar-3-bg-color: inherit;
+  --nylas-agenda-calendar-4-bg-color: inherit;
+  --nylas-agenda-calendar-5-bg-color: inherit;
+  --nylas-agenda-calendar-6-bg-color: inherit;
+  --nylas-agenda-calendar-7-bg-color: inherit;
+  --nylas-agenda-calendar-8-bg-color: inherit;
+  --nylas-agenda-calendar-9-bg-color: inherit;
+  --nylas-agenda-calendar-10-bg-color: inherit;
+
+  --nylas-agenda-empty-event-bg-color: inherit;
+  --nylas-agenda-current-time-bg-color: inherit;
+  --nylas-agenda-icons-bg-color: inherit;
+  --nylas-agenda-header-bg: inherit;
+  --nylas-agenda-header-color: inherit;
+  --nylas-agenda-declined-event-color: inherit;
+  --nylas-agenda-ticks-color: inherit;
+  --nylas-agenda-event-color: inherit;
+  --nylas-agenda-dividers-border-color: inherit;
+}
+```
 
 ## Contributing
 

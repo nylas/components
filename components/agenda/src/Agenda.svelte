@@ -941,31 +941,6 @@
 
 <style lang="scss">
   @import "./styles/agenda.scss";
-  /**
-    * All overrideable css vars for this component
-    
-    --nylas-agenda-calendar-1-bg-color: inherit; // deprecates primaryAndMainCalendar
-    --nylas-agenda-calendar-2-bg-color: inherit; // deprecates secondaryCalendar - TODO: add another var for uses as text
-    --nylas-agenda-calendar-3-bg-color: inherit; // deprecates thirdCalendar
-    --nylas-agenda-calendar-4-bg-color: inherit; // deprecates calendarColour4
-    --nylas-agenda-calendar-5-bg-color: inherit; // deprecates calendarColour5
-    --nylas-agenda-calendar-6-bg-color: inherit; // deprecates calendarColour6
-    --nylas-agenda-calendar-7-bg-color: inherit; // deprecates calendarColour7
-    --nylas-agenda-calendar-8-bg-color: inherit; // deprecates calendarColour8
-    --nylas-agenda-calendar-9-bg-color: inherit; // deprecates calendarColour9
-    --nylas-agenda-calendar-10-bg-color: inherit; // deprecates calendarColour10
-
-    --nylas-agenda-empty-event-bg-color: inherit; // deprecates emptyEventBackground
-    --nylas-agenda-current-time-bg-color: inherit; // deprecates timeLine
-    --nylas-agenda-icons-bg-color: inherit; /// deprecates linesAndIcons
-    --nylas-agenda-header-bg: inherit; // deprecates headerBackground
-
-    --nylas-agenda-header-color: inherit; // deprecates mainTextAndDeclinedEvents
-    --nylas-agenda-declined-event-color: inherit; // deprecates alertWarningDeclined
-    --nylas-agenda-ticks-color: inherit; // deprecates mainTextAndDeclinedEvents
-    --nylas-agenda-event-color: inherit; // deprecates calendarEventText
-    --nylas-agenda-dividers-border-color: inherit; // deprecates linesAndIcons
-    */
 </style>
 
 <nylas-error {id} />
