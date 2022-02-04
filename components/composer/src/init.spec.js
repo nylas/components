@@ -615,14 +615,14 @@ describe("Composer integration", () => {
     );
   });
 
-  it("Shows template in email body", () => {
+  it.only("Shows template in email body", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];
-      component.template = `Hey what up!<br />
+      component.template = `<div><br><br><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">Hey what up!<br />
       <br />
       <br />
       Thanks,
-      -Phil`;
+      -Phil</div></div>`;
     });
 
     cy.get(".html-editor[contenteditable=true]")
