@@ -244,6 +244,7 @@ export interface ComposerProperties extends Manifest {
   show_header: boolean;
   show_minimize_button: boolean;
   show_subject: boolean;
+  focus_body_onload: boolean;
   show_to: boolean;
   theme: "auto" | "light" | "dark" | "light-2" | "dark-2";
   visible: boolean;

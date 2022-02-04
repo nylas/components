@@ -19,11 +19,16 @@
       }
     </style>
     <script type="module">
-      function toggleComposer(event, component) {
+      function toggleComposer(event, component, eventType) {
         component.removeAttribute("hidden");
         component.value = event.detail.value;
         if (Object.keys(event.detail.message).length) {
           component.message_with_body = event.detail.message;
+        }
+        if (eventType === "replyClicked" || eventType === "replyAllClicked") {
+          component.focus_body_onload = true;
+        } else {
+          component.focus_body_onload = false;
         }
         component.open();
       }
@@ -67,8 +72,10 @@
           "forwardClicked",
           "draftThreadEvent",
         ];
-        events.forEach((event) =>
-          mailbox.addEventListener(event, (e) => toggleComposer(e, composer)),
+        events.forEach((eventType) =>
+          mailbox.addEventListener(eventType, (e) =>
+            toggleComposer(e, composer, eventType),
+          ),
         );
       });
     </script>
