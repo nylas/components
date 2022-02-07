@@ -1,0 +1,63 @@
+{
+  "component": {
+    "theming": {
+      "show_filter": true,
+      "contacts_to_load": 100,
+      "theme": "theme-1",
+      "sort_by": "name",
+      "click_action": "select",
+      "show_names": true
+    }
+  },
+  "response": [
+    {
+      "account_id": "test-account-id",
+      "birthday": null,
+      "company_name": null,
+      "emails": [{ "email": "ashlee.f@email.com", "type": null }],
+      "given_name": "Ashlee",
+      "groups": [],
+      "id": "id-vs337",
+      "im_addresses": [],
+      "job_title": null,
+      "manager_name": null,
+      "middle_name": null,
+      "nickname": null,
+      "notes": null,
+      "object": "contact",
+      "office_location": null,
+      "phone_numbers": [],
+      "physical_addresses": [],
+      "picture_url": null,
+      "source": "inbox",
+      "suffix": null,
+      "surname": "Ferguson",
+      "web_pages": []
+    },
+    {
+      "account_id": "1xrddnl99frq3b7son9j32aba",
+      "birthday": null,
+      "company_name": null,
+      "emails": [{ "email": "nylascypresstest@gmail.com", "type": "other" }],
+      "given_name": "Test",
+      "groups": [],
+      "id": "1572prjpqtq8758xo9n0q1wtp",
+      "im_addresses": [],
+      "job_title": null,
+      "manager_name": null,
+      "middle_name": null,
+      "nickname": null,
+      "notes": null,
+      "object": "contact",
+      "office_location": null,
+      "phone_numbers": [],
+      "physical_addresses": [],
+      "picture_url": "https://api.nylas.com/contacts/1572prjpqtq8758xo9n0q1wtp/picture",
+      "source": "address_book",
+      "suffix": null,
+      "surname": "User",
+      "web_pages": [],
+      "last_contacted_date": 1643917834
+    }
+  ]
+}
