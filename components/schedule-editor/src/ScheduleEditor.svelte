@@ -12,6 +12,8 @@
   import type {
     Manifest,
     EventDefinition,
+    Sections,
+    SectionNames,
   } from "@commons/types/ScheduleEditor";
   import type { CustomField } from "@commons/types/Scheduler";
   import { onDestroy, onMount, tick } from "svelte";
@@ -465,6 +467,40 @@
   }
 
   //#endregion consecutive events
+
+  //#region expand/collapse
+
+  const sections: Sections = {
+    "basic-details": {
+      expanded: true,
+      editable: true,
+    },
+    "time-date-details": {
+      expanded: false,
+      editable: true,
+    },
+    "style-details": {
+      expanded: false,
+      editable: true,
+    },
+    "booking-details": {
+      expanded: false,
+      editable: true,
+    },
+    "custom-fields": {
+      expanded: false,
+      editable: true,
+    },
+    "notification-details": {
+      expanded: false,
+      editable: true,
+    },
+  };
+  function toggleCollapse(section: SectionNames) {
+    // console.log("toggle", section, sections[section].expanded);
+    sections[section].expanded = !sections[section].expanded;
+  }
+  //#endregion expand/collapse
 </script>
 
 <style lang="scss">
@@ -482,9 +518,17 @@
     bind:this={main}
   >
     <div class="settings">
-      <section class="basic-details">
-        <h1>Event Details</h1>
-        <p>
+      <section
+        class="basic-details"
+        class:expanded={sections["basic-details"].expanded}
+      >
+        <header>
+          <h1>Event Details</h1>
+          <button on:click={() => toggleCollapse("basic-details")}
+            >Toggle!</button
+          >
+        </header>
+        <p class="intro">
           Edit the details for your meeting. You can add consecutive meetings to
           allow users to book back-to-back events.
         </p>
@@ -561,8 +605,17 @@
         >
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
-      <section class="time-date-details">
-        <h1>Date/Time Details</h1>
+      <section
+        class="time-date-details"
+        class:expanded={sections["time-date-details"].expanded}
+      >
+        <header>
+          <h1>Date/Time Details</h1>
+          <button on:click={() => toggleCollapse("time-date-details")}
+            >Toggle!</button
+          >
+        </header>
+
         <div class="contents">
           <div>
             <label>
@@ -716,8 +769,16 @@
         </div>
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
-      <section class="style-details">
-        <h1>Style Details</h1>
+      <section
+        class="style-details"
+        class:expanded={sections["style-details"].expanded}
+      >
+        <header>
+          <h1>Style Details</h1>
+          <button on:click={() => toggleCollapse("style-details")}
+            >Toggle!</button
+          >
+        </header>
         <div class="contents">
           <div role="checkbox" aria-labelledby="show_ticks">
             <strong id="show_ticks">Show ticks</strong>
@@ -763,8 +824,17 @@
         </div>
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
-      <section class="booking-details">
-        <h1>Booking Details</h1>
+      <section
+        class="booking-details"
+        class:expanded={sections["booking-details"].expanded}
+      >
+        <header>
+          <h1>Booking Details</h1>
+          <button on:click={() => toggleCollapse("booking-details")}
+            >Toggle!</button
+          >
+        </header>
+
         <div class="contents">
           <div role="checkbox" aria-labelledby="allow_booking">
             <strong id="allow_booking">Allow booking</strong>
@@ -914,8 +984,17 @@
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
 
-      <section class="custom-fields">
-        <h1>Custom Fields</h1>
+      <section
+        class="custom-fields"
+        class:expanded={sections["custom-fields"].expanded}
+      >
+        <header>
+          <h1>Custom Fields</h1>
+          <button on:click={() => toggleCollapse("custom-fields")}
+            >Toggle!</button
+          >
+        </header>
+
         <p class="intro">
           Ask users to fill out a few details before booking an event with you.
           By deafult, they will be asked for their name and email address.
@@ -1013,8 +1092,17 @@
         </div>
       </section>
 
-      <section class="Notification-details">
-        <h1>Notification Details</h1>
+      <section
+        class="notification-details"
+        class:expanded={sections["notification-details"].expanded}
+      >
+        <header>
+          <h1>Notification Details</h1>
+          <button on:click={() => toggleCollapse("notification-details")}
+            >Toggle!</button
+          >
+        </header>
+
         <div class="contents">
           <div role="radiogroup" aria-labelledby="notification_mode">
             <strong id="notification_mode"

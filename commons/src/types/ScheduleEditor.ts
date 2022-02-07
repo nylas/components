@@ -58,3 +58,20 @@ interface HostRules {
   method: "all" | "user_determined" | "random";
   host_count?: number;
 }
+
+interface SectionOptions {
+  expanded: boolean;
+  editable: boolean;
+}
+
+export type SectionNames =
+  | "basic-details"
+  | "time-date-details"
+  | "style-details"
+  | "booking-details"
+  | "custom-fields"
+  | "notification-details";
+
+export type Sections = {
+  [key in SectionNames]: SectionOptions;
+};

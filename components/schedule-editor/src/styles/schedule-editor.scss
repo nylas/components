@@ -17,11 +17,153 @@ main {
   display: grid;
   grid-template-columns: 1fr 5px auto;
   gap: 1rem;
-  padding: 0 1rem;
+  // padding: 0 1rem;
+  background: var(--grey-background);
 
   .settings {
     resize: both;
     overflow: auto;
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+
+    & > section {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+
+      & > header {
+        margin-bottom: 1rem;
+        display: grid;
+        grid-template-columns: auto 100px;
+        h1 {
+          font-weight: bold;
+          font-size: 1.5rem;
+        }
+      }
+
+      &:not(.expanded) .intro,
+      &:not(.expanded) .contents {
+        display: none;
+      }
+
+      .intro {
+        margin-top: 0;
+        padding-top: 0;
+        margin-bottom: 2rem;
+      }
+      .contents {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 24px;
+
+        table {
+          border-collapse: colapse;
+
+          tr.add-new td {
+            background-color: var(--grey-light);
+          }
+          th,
+          td {
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            padding: 0.25rem;
+
+            input[type="text"],
+            select {
+              padding: 0.25rem;
+            }
+
+            label {
+              display: block;
+              white-space: nowrap;
+            }
+
+            &.cta {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+
+            button {
+              &.add-custom-field {
+                background-color: var(--blue);
+
+                &:disabled {
+                  background-color: var(--grey-warm);
+                  cursor: not-allowed;
+                }
+              }
+              &.remove {
+                background-color: var(--red);
+              }
+            }
+          }
+
+          th {
+            text-transform: capitalize;
+            border-bottom: 2px solid black;
+          }
+
+          tr:last-child td {
+            border-bottom: none;
+          }
+        }
+
+        label {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          input {
+            padding: 12px;
+          }
+        }
+        [role="radiogroup"],
+        [role="checkbox"] {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+
+          label {
+            flex-direction: row;
+          }
+        }
+        & > .available-hours {
+          grid-column: -1 / 1;
+        }
+      }
+
+      button {
+        align-self: flex-end;
+        padding: 8px 16px;
+        border-radius: 4px;
+        background-color: var(--blue);
+        color: white;
+        border: none;
+        font-weight: 600;
+      }
+
+      &.basic-details .contents {
+        grid-template-columns: 1fr;
+        & > fieldset {
+          border: none;
+          padding: 0;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          padding: 1rem;
+          gap: 1rem;
+          background-color: var(--grey-background);
+
+          .remove-event {
+            grid-column: -1 / 1;
+            justify-self: end;
+          }
+        }
+      }
+    }
   }
 
   aside#preview {
@@ -37,125 +179,6 @@ main {
   .gutter {
     background: #999;
     cursor: col-resize;
-  }
-}
-section {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 96px;
-  .intro {
-    margin-top: 0;
-    padding-top: 0;
-    margin-bottom: 2rem;
-  }
-  .contents {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-    margin-bottom: 24px;
-
-    table {
-      border-collapse: colapse;
-
-      tr.add-new td {
-        background-color: var(--grey-light);
-      }
-      th,
-      td {
-        text-align: left;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-        padding: 0.25rem;
-
-        input[type="text"],
-        select {
-          padding: 0.25rem;
-        }
-
-        label {
-          display: block;
-          white-space: nowrap;
-        }
-
-        &.cta {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        button {
-          &.add-custom-field {
-            background-color: var(--blue);
-
-            &:disabled {
-              background-color: var(--grey-warm);
-              cursor: not-allowed;
-            }
-          }
-          &.remove {
-            background-color: var(--red);
-          }
-        }
-      }
-
-      th {
-        text-transform: capitalize;
-        border-bottom: 2px solid black;
-      }
-
-      tr:last-child td {
-        border-bottom: none;
-      }
-    }
-
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      input {
-        padding: 12px;
-      }
-    }
-    [role="radiogroup"],
-    [role="checkbox"] {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-
-      label {
-        flex-direction: row;
-      }
-    }
-    & > .available-hours {
-      grid-column: -1 / 1;
-    }
-  }
-
-  button {
-    align-self: flex-end;
-    padding: 8px 16px;
-    border-radius: 4px;
-    background-color: var(--blue);
-    color: white;
-    border: none;
-    font-weight: 600;
-  }
-
-  &.basic-details .contents {
-    grid-template-columns: 1fr;
-    & > fieldset {
-      border: none;
-      padding: 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      padding: 1rem;
-      gap: 1rem;
-      background-color: var(--grey-background);
-
-      .remove-event {
-        grid-column: -1 / 1;
-        justify-self: end;
-      }
-    }
   }
 }
 
