@@ -209,7 +209,6 @@
     contenteditable="true"
     class="html-editor"
     role="textbox"
-    class:focus_body_onload
     on:keyup={updateToolbarUI}
     on:mouseup={updateToolbarUI}
   />

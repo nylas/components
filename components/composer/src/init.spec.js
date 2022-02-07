@@ -524,7 +524,7 @@ describe("Composer customizations", () => {
       .get("nylas-html-editor")
       .shadow()
       .get("div.html-editor[contenteditable]")
-      .should("have.class", "focus_body_onload");
+      .should("have.focus");
   });
 
   it("should not focus body on load", () => {
@@ -537,7 +537,7 @@ describe("Composer customizations", () => {
       .get("nylas-html-editor")
       .shadow()
       .get("div.html-editor[contenteditable]")
-      .should("not.have.class", "focus_body_onload");
+      .should("not.have.focus");
   });
 });
 
