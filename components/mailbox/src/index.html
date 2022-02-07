@@ -22,13 +22,9 @@
       function toggleComposer(event, component, eventType) {
         component.removeAttribute("hidden");
         component.value = event.detail.value;
+        component.focus_body_onload = event.detail.focus_body_onload;
         if (Object.keys(event.detail.message).length) {
           component.message_with_body = event.detail.message;
-        }
-        if (eventType === "replyClicked" || eventType === "replyAllClicked") {
-          component.focus_body_onload = true;
-        } else {
-          component.focus_body_onload = false;
         }
         component.open();
       }

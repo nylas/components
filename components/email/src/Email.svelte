@@ -571,6 +571,7 @@
       message: message,
       thread: activeThread,
       value,
+      focus_body_onload: true,
     });
   }
 
@@ -586,6 +587,7 @@
       message,
       thread: activeThread,
       value,
+      focus_body_onload: false,
     });
   }
 

@@ -615,7 +615,7 @@ describe("Composer integration", () => {
     );
   });
 
-  it.only("Shows template in email body", () => {
+  it("Shows template in email body", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];
       component.template = `<div><br><br><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">Hey what up!<br />
