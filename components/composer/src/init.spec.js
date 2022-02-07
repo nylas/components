@@ -486,7 +486,7 @@ describe("Composer customizations", () => {
       .invoke("prop", "innerHTML")
       .then((html) => {
         expect(html).to.equal(
-          "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+          `<div><br><br><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil</div></div>`,
         );
       });
   });
