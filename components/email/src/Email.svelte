@@ -571,6 +571,7 @@
       message: message,
       thread: activeThread,
       value,
+      focus_body_onload: true,
     });
   }
 
@@ -586,6 +587,7 @@
       message,
       thread: activeThread,
       value,
+      focus_body_onload: false,
     });
   }
 
@@ -1154,12 +1156,20 @@
                 margin: $spacing-xs;
                 height: fit-content;
                 padding: 0.3rem 1rem;
-                border: 1px solid var(--grey);
+                border: var(
+                  --nylas-email-attachment-border-style,
+                  1px solid var(--grey)
+                );
                 border-radius: 30px;
-                background: white;
+                color: var(--nylas-email-attachment-button-color, inherit);
+                background: var(--nylas-email-attachment-button-bg, white);
                 cursor: pointer;
+
                 &:hover {
-                  background: var(--grey-light);
+                  background: var(
+                    --nylas-email-attachment-button-hover-bg,
+                    var(--grey-light)
+                  );
                 }
               }
             }
@@ -1337,12 +1347,19 @@
 
           button {
             padding: 0.3rem 1rem;
-            border: 1px solid var(--grey);
+            border: var(
+              --nylas-email-attachment-border-style,
+              1px solid var(--grey)
+            );
             border-radius: 30px;
-            background: white;
+            color: var(--nylas-email-attachment-button-color, inherit);
+            background: var(--nylas-email-attachment-button-bg, white);
             cursor: pointer;
             &:hover {
-              background: var(--grey-light);
+              background: var(
+                --nylas-email-attachment-button-hover-bg,
+                var(--grey-light)
+              );
             }
           }
         }

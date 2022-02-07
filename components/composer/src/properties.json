@@ -22,7 +22,9 @@
     "label": "value",
     "title": "Message object that you can pass in",
     "type": "Message",
-    "value": { "subject": "string" }
+    "value": {
+      "subject": "string"
+    }
   },
   {
     "label": "minimized",
@@ -129,5 +131,12 @@
     "type": "boolean",
     "options": [true, false],
     "value": true
+  },
+  {
+    "label": "focus_body_onload",
+    "title": "By default 'to' field is focussed, set this prop to set focus on the 'body' field.",
+    "type": "boolean",
+    "options": [true, false],
+    "value": false
   }
 ]

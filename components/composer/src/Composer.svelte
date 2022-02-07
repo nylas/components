@@ -108,6 +108,7 @@
   export let uploadFile: Function | null = null;
   export let beforeFileRemove: Function | null = null;
   export let afterFileRemove: Function | null = null;
+  export let focus_body_onload: boolean;
 
   const defaultValueMap: Partial<ComposerProperties> = {
     show_to: true,
@@ -125,6 +126,7 @@
     show_attachment_button: true,
     show_editor_toolbar: true,
     theme: "auto",
+    focus_body_onload: false,
   };
 
   // Callbacks
@@ -869,6 +871,7 @@
           data-cy="html-editor"
           html={$message.body || template}
           onchange={handleBodyChange}
+          focus_body_onload={_this.focus_body_onload}
           replace_fields={_this.replace_fields}
           show_editor_toolbar={_this.show_editor_toolbar}
           on:keydown={handleKeyDown}

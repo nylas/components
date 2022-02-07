@@ -486,7 +486,7 @@ describe("Composer customizations", () => {
       .invoke("prop", "innerHTML")
       .then((html) => {
         expect(html).to.equal(
-          "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
+          `<div><br><br><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil</div></div>`,
         );
       });
   });
@@ -512,6 +512,32 @@ describe("Composer customizations", () => {
           "hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil",
         );
       });
+  });
+
+  it("should focus body on load", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.focus_body_onload = true;
+    });
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get("div.html-editor[contenteditable]")
+      .should("have.focus");
+  });
+
+  it("should not focus body on load", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.focus_body_onload = false;
+    });
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get("div.html-editor[contenteditable]")
+      .should("not.have.focus");
   });
 });
 
@@ -618,11 +644,11 @@ describe("Composer integration", () => {
   it("Shows template in email body", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];
-      component.template = `Hey what up!<br />
+      component.template = `<div><br><br><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">Hey what up!<br />
       <br />
       <br />
       Thanks,
-      -Phil`;
+      -Phil</div></div>`;
     });
 
     cy.get(".html-editor[contenteditable=true]")

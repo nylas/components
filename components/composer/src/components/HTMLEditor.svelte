@@ -8,11 +8,21 @@
   export let html = "";
   export let show_editor_toolbar = true;
   export let replace_fields: ReplaceFields[] | null = null;
+  export let focus_body_onload: boolean = false;
 
   let container: HTMLDivElement;
   let toolbar: ToolbarItem[] = defaultActions;
+  let htmlUpdated = false;
+
+  $: if (focus_body_onload && container) {
+    container.focus();
+  }
 
   $: if (html) {
+    if (!htmlUpdated) {
+      htmlUpdated = true;
+      html = `<div><br/><br/><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">${html}</div></div>`;
+    }
     const selection = window.getSelection();
 
     if (typeof replace_fields === "string") {
