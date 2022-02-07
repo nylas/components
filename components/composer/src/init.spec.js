@@ -513,6 +513,32 @@ describe("Composer customizations", () => {
         );
       });
   });
+
+  it("should focus body on load", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.focus_body_onload = true;
+    });
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get("div.html-editor[contenteditable]")
+      .should("have.class", "focus_body_onload");
+  });
+
+  it("should not focus body on load", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.focus_body_onload = false;
+    });
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get("div.html-editor[contenteditable]")
+      .should("not.have.class", "focus_body_onload");
+  });
 });
 
 describe("Composer integration", () => {
