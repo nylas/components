@@ -12,6 +12,7 @@
   import {
     isValidTimezone,
     getSpecifiedTimeZoneOffset,
+    getSpecifiedTimeZoneOffsetName,
     formatTimeSlot,
     getTimeInTimezone,
   } from "@commons/methods/convertDateTimeZone";
@@ -98,7 +99,7 @@
     show_no_events_message: false,
     start_minute: 0,
     theme: "theme-1",
-    timezone: undefined,
+    timezone: "",
     timezone_agnostic_all_day_events: true,
   };
 
@@ -169,13 +170,12 @@
       themeUrl = _this.theme;
     }
 
-    if (!isValidTimezone(_this.timezone)) {
-      console.warn(`Invalid IANA time zone: ${_this.timezone}`);
-      _this.timezone = undefined;
-    } else if (
-      _this.timezone === Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (
+      _this.timezone &&
+      (!isValidTimezone(_this.timezone) ||
+        _this.timezone === Intl.DateTimeFormat().resolvedOptions().timeZone)
     ) {
-      _this.timezone = undefined;
+      _this.timezone = "";
     }
 
     if (_this.selected_date) {
@@ -195,20 +195,17 @@
 
     _this.hide_current_time =
       _this.hide_current_time ??
-      new Date().toLocaleDateString("default", { timeZone: _this.timezone }) !=
-        selectedDate.toLocaleDateString();
+      currentTime.toLocaleDateString() != selectedDate.toLocaleDateString();
 
     allowedDates = getAllowedDates();
     calendarIDs = setCalendarIDs();
   }
 
   let timezoneOffset: number;
+  let timezoneOffsetName: string;
   $: {
-    if (_this.timezone && isValidTimezone(_this.timezone)) {
-      timezoneOffset = getSpecifiedTimeZoneOffset(_this.timezone);
-    } else {
-      timezoneOffset = 0;
-    }
+    timezoneOffset = getSpecifiedTimeZoneOffset(_this.timezone);
+    timezoneOffsetName = getSpecifiedTimeZoneOffsetName(_this.timezone);
   }
 
   $: clickDefault = typeof click_action === "function" ? "none" : "expand";
@@ -262,17 +259,12 @@
   let timeSpan: number;
   $: timeSpan = Math.floor(endMinute - startMinute);
 
+  //startOfDay and endOfDay are used to fetch events within the date range
   let startOfDay: number;
   let endOfDay: number;
-
-  $: startOfDay =
-    (new Date(new Date(selectedDate).setHours(0, 0, 0, 0)).getTime() -
-      timezoneOffset) /
-    1000;
+  $: startOfDay = (new Date(selectedDate).getTime() - timezoneOffset) / 1000;
   $: endOfDay =
-    (new Date(new Date(selectedDate).setHours(24, 0, 0, 0)).getTime() -
-      timezoneOffset) /
-    1000;
+    (new Date(selectedDate).setHours(24, 0, 0, 0) - timezoneOffset) / 1000;
 
   // #endregion time constants
 
@@ -320,12 +312,9 @@
         access_token: access_token,
         calendarIDs: calendarIDs,
         starts_after:
-          (new Date(new Date(previousDate).setHours(0, 0, 0, 0)).getTime() -
-            timezoneOffset) /
-          1000,
+          (new Date(previousDate).setHours(0, 0, 0, 0) - timezoneOffset) / 1000,
         ends_before:
-          (new Date(new Date(previousDate).setHours(24, 0, 0, 0)).getTime() -
-            timezoneOffset) /
+          (new Date(previousDate).setHours(24, 0, 0, 0) - timezoneOffset) /
           1000,
       },
       {
@@ -333,13 +322,9 @@
         access_token: access_token,
         calendarIDs: calendarIDs,
         starts_after:
-          (new Date(new Date(nextDate).setHours(0, 0, 0, 0)).getTime() -
-            timezoneOffset) /
-          1000,
+          (new Date(nextDate).setHours(0, 0, 0, 0) - timezoneOffset) / 1000,
         ends_before:
-          (new Date(new Date(nextDate).setHours(24, 0, 0, 0)).getTime() -
-            timezoneOffset) /
-          1000,
+          (new Date(nextDate).setHours(24, 0, 0, 0) - timezoneOffset) / 1000,
       },
     ];
   }
@@ -467,9 +452,8 @@
           }
 
           let minutesInVisibleDay =
-            startTime.getTime() -
-            new Date(startTime.setHours(0, startMinute, 0, 0)).getTime();
-          minutesInVisibleDay = minutesInVisibleDay / 60000; // in minutes
+            (startTime.getTime() - startTime.setHours(0, startMinute, 0, 0)) /
+            60000; // in minutes
 
           let runTime =
             new Date(event.when.end_time * 1000).getTime() -
@@ -602,11 +586,11 @@
   $: currentTime = new Date(now + timezoneOffset); // seems redundant, right? new Date() does the same thing. But, the inclusion of "now" means that changes to it are observed -- and we change every setInterval loop.
 
   $: currentTimePosition = () => {
-    let currentStart = new Date(currentTime.getTime());
-    currentStart.setHours(0, startMinute, 0, 0);
+    let currentStart = new Date(currentTime);
 
     const minutesInDayBeforeNow =
-      (currentTime.getTime() - currentStart.getTime()) / 60000;
+      (currentTime.getTime() - currentStart.setHours(0, startMinute, 0, 0)) /
+      60000;
 
     const minutesInVisibleDay =
       (endTime.getTime() - startTime.getTime()) / 60000;
@@ -678,12 +662,13 @@
   $: {
     startMinute =
       _this.auto_time_box && timespanEvents?.length
-        ? getDynamicStartTime(timespanEvents[0])
+        ? getDynamicStartTime(timespanEvents[0]) + timezoneOffset / (1000 * 60)
         : _this.start_minute;
 
     endMinute =
       _this.auto_time_box && timespanEvents?.length
-        ? getDynamicEndTime(timespanEvents[timespanEvents.length - 1])
+        ? getDynamicEndTime(timespanEvents[timespanEvents.length - 1]) +
+          timezoneOffset / (1000 * 60)
         : _this.end_minute;
   }
 
@@ -870,19 +855,19 @@
 
       const currentDate = new Date(selectedDate);
       newEvent.when.start_time = Math.floor(
-        new Date(
-          currentDate.setHours(0, zoomAdjustedStartTime, 0, 0),
-        ).getTime() / 1000,
+        (currentDate.setHours(0, zoomAdjustedStartTime, 0, 0) -
+          timezoneOffset) /
+          1000,
       );
       newEvent.when.end_time = Math.floor(
-        new Date(
-          currentDate.setHours(
-            0,
-            zoomAdjustedStartTime + zoomAdjustedRunTime,
-            0,
-            0,
-          ),
-        ).getTime() / 1000,
+        (currentDate.setHours(
+          0,
+          zoomAdjustedStartTime + zoomAdjustedRunTime,
+          0,
+          0,
+        ) -
+          timezoneOffset) /
+          1000,
       );
       eventSource = [...eventSource, newEvent];
 
@@ -909,22 +894,30 @@
     dragState = { held: false, x: 0, y: 0 };
   }
 
-  function updateEvent(event: TimespanEvent) {
+  function cleanEvent(event: TimespanEvent) {
     if (typeof event.when.start_time === "object") {
       event.when.start_time = Math.floor(
-        (<Date>event.when.start_time).getTime() / 1000,
+        ((<Date>event.when.start_time).getTime() - timezoneOffset) / 1000,
       );
     } else {
-      event.when.start_time = Math.floor(event.when.start_time / 1000);
+      event.when.start_time = Math.floor(
+        (event.when.start_time - timezoneOffset) / 1000,
+      );
     }
 
     if (typeof event.when.end_time === "object") {
       event.when.end_time = Math.floor(
-        (<Date>event.when.end_time).getTime() / 1000,
+        ((<Date>event.when.end_time).getTime() - timezoneOffset) / 1000,
       );
     } else {
-      event.when.end_time = Math.floor(event.when.end_time / 1000);
+      event.when.end_time = Math.floor(
+        (event.when.end_time - timezoneOffset) / 1000,
+      );
     }
+  }
+
+  function updateEvent(event: TimespanEvent) {
+    cleanEvent(event);
 
     let minutesInVisibleDay =
       new Date(event.when.start_time * 1000).getTime() -
@@ -950,21 +943,8 @@
       console.warn("Invalid event object provided.");
       return;
     }
-    if (typeof event.when.start_time === "object") {
-      event.when.start_time = Math.floor(
-        (<Date>event.when.start_time).getTime() / 1000,
-      );
-    } else {
-      event.when.start_time = Math.floor(event.when.start_time / 1000);
-    }
 
-    if (typeof event.when.end_time === "object") {
-      event.when.end_time = Math.floor(
-        (<Date>event.when.end_time).getTime() / 1000,
-      );
-    } else {
-      event.when.end_time = Math.floor(event.when.end_time / 1000);
-    }
+    cleanEvent(event);
 
     EventStore.createEvent(event, query);
     eventSource[eventSource.length - 1].isNewEvent = false;
@@ -1121,6 +1101,11 @@
         }
       }}
     >
+      <div class="offset">
+        <span>
+          {timezoneOffsetName}
+        </span>
+      </div>
       <div class="ticks">
         {#each ticks as tick}
           <span style="top: {tick.relativeTickPosition * 100}%" class="tick">
