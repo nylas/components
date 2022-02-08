@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   position: absolute;
+  justify-content: space-between;
   z-index: 5;
 
   border-radius: 4px;
@@ -18,21 +19,14 @@
     align-items: center;
     padding: 0.25rem;
     box-sizing: border-box;
-
-    &:nth-last-of-type(1) {
-      margin-left: auto;
-    }
   }
 }
 
 button.drag {
   display: inline-flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: left;
   padding: 0.5rem;
   background-color: transparent;
-  border: 1px solid var(--grey-warm);
-  border-radius: 4px;
 
   &svg:nth-last-of-type(1) {
     margin-left: 0.5rem;

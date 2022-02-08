@@ -301,12 +301,7 @@
     required: false,
     id: "",
   };
-  const customFieldKeys: (keyof CustomField)[] = [
-    "title",
-    "description",
-    "type",
-    "required",
-  ];
+  const customFieldKeys: (keyof CustomField)[] = ["title", "type", "required"];
 
   let newCustomField: CustomField = { ...emptyCustomField };
   let editableCustomField: CustomField = { ...emptyCustomField };
@@ -590,11 +585,9 @@
                 {/if}
               </div>
               <div>
-                <div>
-                  <strong id="participants">
-                    Email Ids to include for scheduling
-                  </strong>
-                </div>
+                <strong id="participants">
+                  Email Ids to include for scheduling
+                </strong>
                 <label>
                   <textarea
                     name="participants"
@@ -1011,7 +1004,7 @@
             <table cellspacing="0" cellpadding="0">
               <thead>
                 <th />
-                <th>Title and Description</th>
+                <th>Title and description</th>
                 <th>Type</th>
                 <th>Required</th>
                 <th />
@@ -1040,7 +1033,7 @@
                       </button>
                     </td>
                     <td
-                      class:flex={field.description}
+                      class:multi-line={field.description}
                       class={"title-and-description"}
                     >
                       <span>{field.title ?? "—"}</span>
@@ -1057,6 +1050,7 @@
                     <td>
                       <button
                         class="edit"
+                        aria-label="Edit"
                         on:click={() => editCustomField(field)}
                       >
                         <PencilIcon />
@@ -1071,6 +1065,7 @@
                           <h3>Edit field</h3>
                           <button
                             class="delete"
+                            aria-label="Delete"
                             on:click={() => removeCustomField(field)}
                           >
                             <TrashIcon />
@@ -1079,7 +1074,7 @@
                         </div>
                         <div class="input-field">
                           <label>
-                            <div>Title</div>
+                            <div>Title *</div>
                             <input
                               type="text"
                               aria-label="Title"
@@ -1099,7 +1094,7 @@
                         </div>
                         <div class="input-field">
                           <label class="select">
-                            <div>Type</div>
+                            <div>Type *</div>
                             <select
                               bind:value={editableCustomField.type}
                               aria-label="Input Type"
@@ -1113,7 +1108,7 @@
                           <label class="checkbox">
                             <input
                               type="checkbox"
-                              aria-label="Required Field?"
+                              aria-label="Required field?"
                               bind:checked={editableCustomField.required}
                             />
                             <span>Required</span>
@@ -1132,6 +1127,8 @@
 
                           <button
                             class="save"
+                            disabled={editableCustomField.title?.length === 0 ||
+                              !editableCustomField.type}
                             on:click={() => {
                               currentlyEditedField = null;
                               field = { ...editableCustomField };
@@ -1149,7 +1146,10 @@
             </table>
             <div class="add-custom-field">
               {#if !isAddingCustomField}
-                <button on:click={() => (isAddingCustomField = true)}>
+                <button
+                  aria-label="Add a custom field"
+                  on:click={() => (isAddingCustomField = true)}
+                >
                   <PlusIcon />
                   <span>Add a custom field</span>
                 </button>
@@ -1210,7 +1210,12 @@
                     >
                       <span>Cancel</span>
                     </button>
-                    <button class="save" on:click={() => addNewField()}>
+                    <button
+                      class="save"
+                      disabled={newCustomField.title?.length === 0 ||
+                        !newCustomField.type}
+                      on:click={() => addNewField()}
+                    >
                       <span>Add field</span>
                     </button>
                   </div>

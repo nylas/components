@@ -20,10 +20,10 @@
     ? 'visible'
     : 'hidden'}"
 >
-  <slot />
   <div class="drag-preview-cell">
     <button class="drag">
       <DragIcon />
     </button>
   </div>
+  <slot />
 </div>
