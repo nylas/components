@@ -128,6 +128,10 @@
 
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
     transformPropertyValues();
+
+    // Initialize sections
+    establishSections();
+
     initialized = true;
 
     // Setup temporary ids for custom fields for drag reorder functionality
@@ -471,45 +475,20 @@
 
   //#region expand/collapse
 
-  const sections = {};
-  console.log("SECNAME", SectionNames);
+  let sections: Partial<Sections> = {};
 
-  for (const name in SectionNames) {
-    sections[SectionNames[name]] = {
-      expanded: name === "BASIC_DETAILS" ? true : false,
-      editable: true,
-    };
+  function establishSections() {
+    Object.values(SectionNames).forEach((name, iter) => {
+      sections[name] = {
+        expanded: iter === 0 ? true : false,
+        editable: true,
+      };
+    });
   }
 
-  // const sections: Sections = {
-  //   [SectionNames.BASIC_DETAILS]: {
-  //     expanded: true,
-  //     editable: true,
-  //   },
-  //   "time-date-details": {
-  //     expanded: false,
-  //     editable: true,
-  //   },
-  //   "style-details": {
-  //     expanded: false,
-  //     editable: true,
-  //   },
-  //   "booking-details": {
-  //     expanded: false,
-  //     editable: true,
-  //   },
-  //   "custom-fields": {
-  //     expanded: false,
-  //     editable: true,
-  //   },
-  //   "notification-details": {
-  //     expanded: false,
-  //     editable: true,
-  //   },
-  // };
-  function toggleCollapse(section: SectionNames) {
-    // console.log("toggle", section, sections[section]?.expanded);
-    sections[section]?.expanded = !sections[section]?.expanded;
+  function toggleCollapse(name: SectionNames) {
+    sections[name].expanded = !sections[name].expanded;
+    sections = { ...sections };
   }
   //#endregion expand/collapse
 </script>
@@ -531,11 +510,11 @@
     <div class="settings">
       <section
         class="basic-details"
-        class:expanded={sections["basic-details"]?.expanded}
+        class:expanded={sections[SectionNames.BASIC_DETAILS]?.expanded}
       >
         <header>
           <h1>Event Details</h1>
-          <button on:click={() => toggleCollapse("basic-details")}
+          <button on:click={() => toggleCollapse(SectionNames.BASIC_DETAILS)}
             >Toggle!</button
           >
         </header>
@@ -618,11 +597,12 @@
       </section>
       <section
         class="time-date-details"
-        class:expanded={sections["time-date-details"]?.expanded}
+        class:expanded={sections[SectionNames.TIME_DATE_DETAILS]?.expanded}
       >
         <header>
           <h1>Date/Time Details</h1>
-          <button on:click={() => toggleCollapse("time-date-details")}
+          <button
+            on:click={() => toggleCollapse(SectionNames.TIME_DATE_DETAILS)}
             >Toggle!</button
           >
         </header>
@@ -782,11 +762,11 @@
       </section>
       <section
         class="style-details"
-        class:expanded={sections["style-details"]?.expanded}
+        class:expanded={sections[SectionNames.STYLE_DETAILS]?.expanded}
       >
         <header>
           <h1>Style Details</h1>
-          <button on:click={() => toggleCollapse("style-details")}
+          <button on:click={() => toggleCollapse(SectionNames.STYLE_DETAILS)}
             >Toggle!</button
           >
         </header>
@@ -837,11 +817,11 @@
       </section>
       <section
         class="booking-details"
-        class:expanded={sections["booking-details"]?.expanded}
+        class:expanded={sections[SectionNames.BOOKING_DETAILS]?.expanded}
       >
         <header>
           <h1>Booking Details</h1>
-          <button on:click={() => toggleCollapse("booking-details")}
+          <button on:click={() => toggleCollapse(SectionNames.BOOKING_DETAILS)}
             >Toggle!</button
           >
         </header>
@@ -997,11 +977,11 @@
 
       <section
         class="custom-fields"
-        class:expanded={sections["custom-fields"]?.expanded}
+        class:expanded={sections[SectionNames.CUSTOM_FIELDS]?.expanded}
       >
         <header>
           <h1>Custom Fields</h1>
-          <button on:click={() => toggleCollapse("custom-fields")}
+          <button on:click={() => toggleCollapse(SectionNames.CUSTOM_FIELDS)}
             >Toggle!</button
           >
         </header>
@@ -1105,11 +1085,12 @@
 
       <section
         class="notification-details"
-        class:expanded={sections["notification-details"]?.expanded}
+        class:expanded={sections[SectionNames.NOTIFICATION_DETAILS]?.expanded}
       >
         <header>
           <h1>Notification Details</h1>
-          <button on:click={() => toggleCollapse("notification-details")}
+          <button
+            on:click={() => toggleCollapse(SectionNames.NOTIFICATION_DETAILS)}
             >Toggle!</button
           >
         </header>
