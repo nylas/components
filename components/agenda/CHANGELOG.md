@@ -4,6 +4,7 @@
 
 ## New Features
 
+- [Agenda] Add overrideable css vars to customize agenda appearance [#378](https://github.com/nylas/components/pull/378)
 - [Agenda] Dispatch `eventClicked` when event is clicked [#372](https://github.com/nylas/components/pull/372)
 
 ## Bug Fixes

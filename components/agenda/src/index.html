@@ -13,6 +13,7 @@
         const titleInput = document.querySelector("input#title");
         const startTimeInput = document.querySelector("input#start-time");
         const endTimeInput = document.querySelector("input#end-time");
+        const colorByInput = document.querySelector('[name="color-by-event"]');
 
         let newEvent, save, cancel, update;
         agenda.event_created = (event, saveEvent, cancelEvent, updateEvent) => {
@@ -162,6 +163,7 @@
         let checkbox = document.querySelector("input.auto-time");
         let condensedBox = document.querySelector("input.condensed-view");
         let tickBox = document.querySelector("input.hide-ticks");
+        let theme = document.querySelectorAll("input[name='theme']");
 
         i.addEventListener(
           "input",
@@ -217,6 +219,26 @@
           },
           false,
         );
+        colorByInput.addEventListener(
+          "input",
+          function () {
+            document.querySelectorAll("nylas-agenda").forEach((element) => {
+              element.color_by = colorByInput.checked ? "event" : "calendar";
+            });
+          },
+          false,
+        );
+        theme.forEach((themeNode) => {
+          themeNode.addEventListener(
+            "change",
+            function () {
+              document.querySelectorAll("nylas-agenda").forEach((element) => {
+                element.theme = themeNode.value;
+              });
+            },
+            false,
+          );
+        });
       });
     </script>
     <style>
@@ -255,6 +277,7 @@
         padding: 0.5rem;
         color: white;
       }
+
       div.save-event > div {
         display: flex;
         flex-direction: row;
@@ -298,6 +321,16 @@
       <hr />
       <strong>Condensed View</strong>
       <input type="checkbox" class="condensed-view" />
+      <hr />
+      <strong>Color By Event:</strong>
+      <input type="checkbox" name="color-by-event" />
+      <hr />
+      <strong>Theme:</strong>
+      <input type="radio" name="theme" value="theme-1" />
+      <input type="radio" name="theme" value="theme-2" />
+      <input type="radio" name="theme" value="theme-3" />
+      <input type="radio" name="theme" value="theme-4" />
+      <input type="radio" name="theme" value="theme-5" />
     </aside>
 
     <div class="save-event">
@@ -327,6 +360,8 @@
       auto_time_box="false"
       allow_event_creation="true"
       allow_date_change="true"
+      hide_current_time="false"
+      color_by="event"
     >
     </nylas-agenda>
   </body>

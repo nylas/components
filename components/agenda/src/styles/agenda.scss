@@ -1,0 +1,471 @@
+@import "../../../theming/reset";
+@import "../../../theming/variables";
+
+@import "theme";
+@import "agenda-themes";
+
+main {
+  text-align: center;
+  height: 100%;
+  margin: 0 auto;
+  font-family: Arial, Helvetica, sans-serif;
+  display: grid;
+  grid-template-rows: 80px auto 1fr;
+  grid-template-columns: 1fr;
+  grid-column-gap: 5px;
+  overflow: hidden;
+  line-height: 100%;
+  transition: 0.2s;
+  &.headless {
+    grid-template-rows: 1fr;
+  }
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  grid-column: 1/3;
+  color: var(
+    --nylas-agenda-header-color,
+    var(--mainTextAndDeclinedEvents, var(--theme-header-color))
+  );
+  background: var(
+    --nylas-agenda-header-bg,
+    var(--headerBackground, var(--theme-header-bg))
+  );
+  z-index: 1;
+  padding-left: 10px;
+
+  button {
+    padding: 0rem 0.5rem;
+    background: transparent;
+
+    &:first-of-type {
+      padding-left: 0;
+    }
+
+    svg path {
+      fill: var(
+        --nylas-agenda-icons-bg-color,
+        var(--linesAndIcons, var(--theme-icons-bg-color))
+      );
+      transition: 0.2s;
+    }
+  }
+
+  .month,
+  .day {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .month {
+    h1 {
+      font-size: 26px;
+      font-weight: bold;
+      margin: 0;
+      span {
+        font-weight: lighter;
+      }
+    }
+  }
+
+  .day {
+    white-space: nowrap;
+    display: grid;
+
+    &.allow_date_change {
+      grid-template-columns: 1fr auto 1fr;
+      width: 100%;
+    }
+    button {
+      cursor: pointer;
+      &.prev {
+        text-align: right;
+      }
+      &.next {
+        text-align: left;
+      }
+
+      &:hover,
+      &:focus {
+        svg path {
+          fill: hsl(
+            var(
+              --nylas-agenda-icons-bg-color,
+              var(--linesAndIcons, var(--theme-icons-bg-color))
+            ),
+            50%
+          );
+        }
+      }
+    }
+    h2 {
+      font-size: 20px;
+      margin: 0;
+      font-weight: lighter;
+      span {
+        background-color: var(
+          --nylas-agenda-calendar-1-bg-color,
+          var(--primaryAndMainCalendar, var(--theme-calendar-1-bg-color))
+        );
+        color: var(
+          --nylas-agenda-event-color,
+          var(--calendarEventText, var(--theme-event-color))
+        );
+        border-radius: 20px;
+        display: inline-block;
+        font-weight: bold;
+        padding: 4px;
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        font-weight: 300;
+        font-size: 14px;
+        text-align: center;
+        line-height: 22px;
+      }
+    }
+  }
+}
+
+h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  margin-bottom: 0px;
+  font-weight: 600;
+}
+
+.all-day {
+  display: grid;
+  grid-column: 1/3;
+  margin-bottom: 1rem;
+  max-height: 20vh;
+  overflow-y: scroll;
+
+  .events {
+    gap: 0;
+    .event {
+      height: 40px;
+      position: relative;
+      width: calc(100% - 4px);
+    }
+  }
+}
+
+.timespan {
+  display: grid;
+  grid-column: 1/3;
+  grid-template-columns: 40px 1fr;
+  overflow: hidden;
+  line-height: 100%;
+  min-height: 200px;
+
+  &.hide-ticks {
+    grid-template-columns: 0px 1fr;
+    grid-column-gap: 0;
+
+    .ticks {
+      visibility: hidden;
+    }
+  }
+}
+
+.events {
+  display: grid;
+  gap: 1rem;
+  position: relative;
+  min-width: 100px;
+  border-left: 1px solid
+    var(
+      --nylas-agenda-dividers-border-color,
+      var(--linesAndIcons, var(--theme-dividers-border-color))
+    );
+  border-right: 1px solid
+    var(
+      --nylas-agenda-dividers-border-color,
+      var(--linesAndIcons, var(--theme-dividers-border-color))
+    );
+
+  &.overflowing {
+    overflow-y: auto;
+  }
+
+  &.scrolling .event,
+  &.scrolling .tick {
+    transition: 0s;
+  }
+
+  .no-events {
+    background: #eee;
+    padding: 1rem;
+  }
+
+  .event {
+    position: absolute;
+    overflow: hidden;
+    opacity: 1;
+    background: var(
+      --nylas-agenda-calendar-1-bg-color,
+      var(--primaryAndMainCalendar, var(--theme-calendar-1-bg-color))
+    );
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: var(
+      --nylas-agenda-event-color,
+      var(--calendarEventText, var(--theme-event-color))
+    );
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+    letter-spacing: 0.01rem;
+    transition: 0.5s;
+    margin: 2px;
+    -webkit-font-smoothing: antialiased;
+
+    &.expanded {
+      top: 0 !important;
+      left: 0 !important;
+      width: calc(100% - 4px) !important; // factors in margin spacing
+      height: calc(100% - 4px) !important;
+      overflow-y: auto;
+      z-index: 1;
+    }
+
+    &.new-event {
+      transition: none;
+      animation-delay: 0s !important;
+      animation-duration: 0s !important;
+    }
+
+    &.status-maybe {
+      background-color: var(
+        --nylas-agenda-empty-event-bg-color,
+        var(--emptyEventBackground, #ddd)
+      ) !important;
+      border-left-width: 7px;
+      color: var(
+        --nylas-agenda-calendar-2-bg-color,
+        var(--secondaryCalendar, var(--theme-calendar-2-bg-color))
+      ) !important;
+
+      // diagonal stripes
+      background-image: linear-gradient(
+        45deg,
+        transparent,
+        transparent 40%,
+        rgba(0, 0, 0, 0.2) 40%,
+        rgba(0, 0, 0, 0.2) 50%,
+        transparent 50%,
+        transparent 90%,
+        rgba(0, 0, 0, 0.2) 90%,
+        rgba(0, 0, 0, 0.2)
+      );
+      background-size: 12px 12px;
+    }
+
+    &.status-noreply {
+      background-color: var(
+        --nylas-agenda-empty-event-bg-color,
+        var(--emptyEventBackground, #ddd)
+      ) !important;
+      color: var(
+        --nylas-agenda-calendar-2-bg-color,
+        var(--secondaryCalendar, var(--theme-calendar-2-bg-color, #444))
+      ) !important;
+
+      a {
+        color: var(
+          --nylas-agenda-calendar-2-bg-color,
+          var(--secondaryCalendar, var(--theme-calendar-2-bg-color))
+        ) !important;
+      }
+    }
+
+    &.status-no {
+      > .inner > h2 {
+        text-decoration: line-through;
+      }
+
+      border-color: var(
+        --nylas-agenda-declined-event-color,
+        var(--alertWarningDeclined, var(--theme-declined-event-color, #eb8f24))
+      );
+      color: var(
+        --nylas-agenda-declined-event-color,
+        var(--alertWarningDeclined, var(--theme-declined-event-color, #eb8f24))
+      );
+      background-color: var(
+        --nylas-agenda-empty-event-bg-color,
+        var(--emptyEventBackground, #ddd)
+      ) !important;
+
+      a {
+        color: var(
+          --nylas-agenda-calendar-2-bg-color,
+          var(--secondaryCalendar, var(--theme-calendar-2-bg-color))
+        ) !important;
+      }
+    }
+
+    @for $i from 1 through 50 {
+      &:nth-child(#{$i}) {
+        animation-name: eventsIn;
+        animation-duration: 0.5s;
+        animation-delay: 0.1s + (0.05 * $i);
+        animation-fill-mode: both;
+      }
+    }
+
+    a {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .inner {
+      padding: 5px 5px 8px;
+      &.tiny-event {
+        padding-top: 0;
+        h2,
+        span {
+          font-size: 70%;
+        }
+      }
+      span.time,
+      p {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .hour-ticks {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    span {
+      position: absolute;
+      height: 1px;
+      width: 100%;
+      border-top: 1px solid
+        var(
+          --nylas-agenda-dividers-border-color,
+          var(--linesAndIcons, var(--theme-dividers-border-color))
+        );
+      left: 0;
+    }
+  }
+}
+
+.ticks {
+  pointer-events: none;
+  height: 100%;
+  color: var(
+    --nylas-agenda-ticks-color,
+    var(--mainTextAndDeclinedEvents, var(--theme-ticks-color))
+  );
+  font-size: 12px;
+  position: relative;
+  overflow: hidden;
+  .tick {
+    position: absolute;
+    width: 100%;
+    text-align: right;
+    display: block;
+    white-space: nowrap;
+    font-size: 11px;
+    opacity: 0.5;
+  }
+}
+
+.now {
+  position: absolute;
+  height: 4px;
+  width: 100%;
+  background-color: var(
+    --nylas-agenda-current-time-bg-color,
+    var(--timeLine, var(--theme-current-time-bg-color))
+  );
+
+  svg {
+    position: absolute;
+    left: -39px;
+    top: -6px;
+    height: 16px;
+    width: 39px;
+
+    path {
+      fill: var(
+        --nylas-agenda-current-time-bg-color,
+        var(--timeLine, var(--theme-current-time-bg-color))
+      );
+    }
+  }
+}
+
+.condensed {
+  .events {
+    grid-auto-rows: min-content;
+    grid-column: 1/3;
+    gap: 5px;
+    .event {
+      transition: 0.5s;
+      .inner {
+        display: grid;
+        grid-template-columns: min-content 1fr;
+        gap: 1rem;
+        & > h2 {
+          grid-column: 2;
+          grid-row: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        & > span.time {
+          grid-column: 1;
+          grid-row: 1;
+          white-space: nowrap;
+        }
+        & > p,
+        & > .location {
+          grid-column: 1 / -1;
+        }
+      }
+      h2 {
+        float: left;
+      }
+      span {
+        float: left;
+      }
+      p {
+        clear: both;
+      }
+    }
+  }
+  .ticks,
+  .now {
+    display: none;
+  }
+}
+
+@media #{$desktop} {
+  main {
+    max-width: none;
+  }
+}
+
+@keyframes eventsIn {
+  0% {
+    transform: translate(0, 30px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
