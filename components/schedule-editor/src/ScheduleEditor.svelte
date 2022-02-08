@@ -13,8 +13,9 @@
     Manifest,
     EventDefinition,
     Sections,
-    SectionNames,
   } from "@commons/types/ScheduleEditor";
+  import { SectionNames } from "@commons/types/ScheduleEditor";
+
   import type { CustomField } from "@commons/types/Scheduler";
   import { onDestroy, onMount, tick } from "svelte";
   import timezones from "timezones-list";
@@ -470,35 +471,45 @@
 
   //#region expand/collapse
 
-  const sections: Sections = {
-    "basic-details": {
-      expanded: true,
+  const sections = {};
+  console.log("SECNAME", SectionNames);
+
+  for (const name in SectionNames) {
+    sections[SectionNames[name]] = {
+      expanded: name === "BASIC_DETAILS" ? true : false,
       editable: true,
-    },
-    "time-date-details": {
-      expanded: false,
-      editable: true,
-    },
-    "style-details": {
-      expanded: false,
-      editable: true,
-    },
-    "booking-details": {
-      expanded: false,
-      editable: true,
-    },
-    "custom-fields": {
-      expanded: false,
-      editable: true,
-    },
-    "notification-details": {
-      expanded: false,
-      editable: true,
-    },
-  };
+    };
+  }
+
+  // const sections: Sections = {
+  //   [SectionNames.BASIC_DETAILS]: {
+  //     expanded: true,
+  //     editable: true,
+  //   },
+  //   "time-date-details": {
+  //     expanded: false,
+  //     editable: true,
+  //   },
+  //   "style-details": {
+  //     expanded: false,
+  //     editable: true,
+  //   },
+  //   "booking-details": {
+  //     expanded: false,
+  //     editable: true,
+  //   },
+  //   "custom-fields": {
+  //     expanded: false,
+  //     editable: true,
+  //   },
+  //   "notification-details": {
+  //     expanded: false,
+  //     editable: true,
+  //   },
+  // };
   function toggleCollapse(section: SectionNames) {
-    // console.log("toggle", section, sections[section].expanded);
-    sections[section].expanded = !sections[section].expanded;
+    // console.log("toggle", section, sections[section]?.expanded);
+    sections[section]?.expanded = !sections[section]?.expanded;
   }
   //#endregion expand/collapse
 </script>
@@ -520,7 +531,7 @@
     <div class="settings">
       <section
         class="basic-details"
-        class:expanded={sections["basic-details"].expanded}
+        class:expanded={sections["basic-details"]?.expanded}
       >
         <header>
           <h1>Event Details</h1>
@@ -607,7 +618,7 @@
       </section>
       <section
         class="time-date-details"
-        class:expanded={sections["time-date-details"].expanded}
+        class:expanded={sections["time-date-details"]?.expanded}
       >
         <header>
           <h1>Date/Time Details</h1>
@@ -771,7 +782,7 @@
       </section>
       <section
         class="style-details"
-        class:expanded={sections["style-details"].expanded}
+        class:expanded={sections["style-details"]?.expanded}
       >
         <header>
           <h1>Style Details</h1>
@@ -826,7 +837,7 @@
       </section>
       <section
         class="booking-details"
-        class:expanded={sections["booking-details"].expanded}
+        class:expanded={sections["booking-details"]?.expanded}
       >
         <header>
           <h1>Booking Details</h1>
@@ -986,7 +997,7 @@
 
       <section
         class="custom-fields"
-        class:expanded={sections["custom-fields"].expanded}
+        class:expanded={sections["custom-fields"]?.expanded}
       >
         <header>
           <h1>Custom Fields</h1>
@@ -1094,7 +1105,7 @@
 
       <section
         class="notification-details"
-        class:expanded={sections["notification-details"].expanded}
+        class:expanded={sections["notification-details"]?.expanded}
       >
         <header>
           <h1>Notification Details</h1>

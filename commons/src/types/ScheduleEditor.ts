@@ -64,13 +64,14 @@ interface SectionOptions {
   editable: boolean;
 }
 
-export type SectionNames =
-  | "basic-details"
-  | "time-date-details"
-  | "style-details"
-  | "booking-details"
-  | "custom-fields"
-  | "notification-details";
+export enum SectionNames {
+  BASIC_DETAILS = "basic-details",
+  TIME_DATE_DETAILS = "time-date-details",
+  STYLE_DETAILS = "style-details",
+  BOOKING_DETAILS = "booking-details",
+  CUSTOM_FIELDS = "custom-fields",
+  NOTIFICATION_DETAILS = "notification-details",
+}
 
 export type Sections = {
   [key in SectionNames]: SectionOptions;
