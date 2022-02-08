@@ -1,6 +1,7 @@
 <svelte:options tag="nylas-html-editor" />
 
 <script lang="ts">
+  import { onMount } from "svelte/internal";
   import { defaultActions } from "../lib/html-editor";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
 
@@ -12,17 +13,20 @@
 
   let container: HTMLDivElement;
   let toolbar: ToolbarItem[] = defaultActions;
-  let htmlUpdated = false;
 
   $: if (focus_body_onload && container) {
     container.focus();
   }
 
-  $: if (html) {
-    if (!htmlUpdated) {
-      htmlUpdated = true;
+  onMount(() => {
+    // If html exist, means composer is loaded with a previous message,
+    // wrap it with border-left css to visually differentiate the current message
+    if (html) {
       html = `<div><br/><br/><div style="border-left: 3px solid #dfe1e8; padding-left: 1rem;">${html}</div></div>`;
     }
+  });
+
+  $: if (html) {
     const selection = window.getSelection();
 
     if (typeof replace_fields === "string") {
