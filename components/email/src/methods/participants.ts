@@ -53,7 +53,8 @@ export function buildParticipants({
   }
 
   if (type === "reply_all") {
-    cc = [...message.cc];
+    const fromEmails = message.from?.map((i) => i.email);
+    cc = [...participantsWithoutGivenEmails([...fromEmails, myEmail], message)];
   }
 
   return { to, cc };
