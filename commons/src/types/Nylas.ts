@@ -234,6 +234,7 @@ export interface ComposerProperties extends Manifest {
   reset_after_send: boolean;
   reset_after_close: boolean;
   show_attachment_button: boolean;
+  show_save_as_draft: boolean;
   show_bcc_button: boolean;
   show_bcc: boolean;
   show_cc_button: boolean;
@@ -261,6 +262,8 @@ export interface ComposerProperties extends Manifest {
   beforeSend: (msg: Message) => Message | void;
   afterSendSuccess?: () => void | null;
   afterSendError?: () => void | null;
+  afterSaveSuccess?: () => void | null;
+  afterSaveError?: () => void | null;
   template: string;
   tracking: Tracking | null;
 
