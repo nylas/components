@@ -58,3 +58,21 @@ interface HostRules {
   method: "all" | "user_determined" | "random";
   host_count?: number;
 }
+
+interface SectionOptions {
+  expanded: boolean;
+  editable: boolean;
+}
+
+export enum SectionNames {
+  BASIC_DETAILS = "basic-details",
+  TIME_DATE_DETAILS = "time-date-details",
+  STYLE_DETAILS = "style-details",
+  BOOKING_DETAILS = "booking-details",
+  CUSTOM_FIELDS = "custom-fields",
+  NOTIFICATION_DETAILS = "notification-details",
+}
+
+export type Sections = {
+  [key in SectionNames]: SectionOptions;
+};
