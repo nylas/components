@@ -828,17 +828,15 @@
 
   .mailbox-loader,
   .mailbox-empty {
+    position: absolute;
+    top: 0;
+    bottom: 0;
     width: calc(100% - 16px);
-    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: none;
-  }
-
-  .mailbox-loader {
-    position: absolute;
   }
 
   @keyframes rotate {
