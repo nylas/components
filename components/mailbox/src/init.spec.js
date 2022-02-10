@@ -615,7 +615,7 @@ describe("Mailbox: updating 'to' field correctly for reply and reply-all", () =>
       "https://web-components.nylas.com/middleware/account": "mailbox/account",
       "https://web-components.nylas.com/middleware/labels": "mailbox/labels",
       "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox":
-        "mailbox/threads/threadWithLastMessageFromSelf",
+        "mailbox/threads/threadWithlastMessageFromSelf.json",
       "https://web-components.nylas.com/middleware/messages/last-message-from-self":
         "mailbox/messages/idWithLastMessageFromSelf",
     });
@@ -627,7 +627,7 @@ describe("Mailbox: updating 'to' field correctly for reply and reply-all", () =>
   });
 
   it(`On click of reply, shows correct to field`, () => {
-    cy.wait("@mailbox/threads/threadWithLastMessageFromSelf");
+    cy.wait("@mailbox/threads/threadWithlastMessageFromSelf.json");
     cy.addComponent("nylas-composer", {
       show_header: true,
       show_minimize_button: false,
