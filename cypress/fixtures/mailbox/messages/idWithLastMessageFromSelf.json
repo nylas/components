@@ -1,0 +1,53 @@
+{
+  "component": {
+    "theming": {}
+  },
+  "response": {
+    "account_id": "1xrddnl99frq3b7son9j32aba",
+    "bcc": [],
+    "body": "<div>hello<br><br><div style=\"border-left: 3px solid #dfe1e8; padding-left: 1rem;\"><div dir=\"ltr\">hi</div></div></div>",
+    "cc": [],
+    "date": 1644426598,
+    "events": [],
+    "files": [],
+    "from": [
+      {
+        "email": "test-email@email.com",
+        "name": "Test User"
+      }
+    ],
+    "headers": {
+      "In-Reply-To": "<CAOBBZPEwHUGsQqy98g5SXk_bqFaZaOGK2C=Du26T=9u8LpoE3w@mail.gmail.com>",
+      "Message-Id": "<CAHKD5xsbf76cPH2qjk4_7YMp0hT9KGTmnKvuRiVhwGfJJhfBBw@mail.gmail.com>",
+      "References": [
+        "<CAOBBZPEwHUGsQqy98g5SXk_bqFaZaOGK2C=Du26T=9u8LpoE3w@mail.gmail.com>"
+      ]
+    },
+    "id": "efbfjmf2upk6by9z0nco1503c",
+    "labels": [
+      {
+        "display_name": "SENT",
+        "id": "17ocjrnqb2w5m402t1lwswkkl",
+        "name": "sent"
+      }
+    ],
+    "object": "message",
+    "reply_to": [
+      {
+        "email": "test-email@email.com",
+        "name": "Test User"
+      }
+    ],
+    "snippet": "hello hi",
+    "starred": false,
+    "subject": "Re: test reply",
+    "thread_id": "cdf9ysey0va6gowfytqzrtb80",
+    "to": [
+      {
+        "email": "nylasuser@gmail.com",
+        "name": "Nylas User"
+      }
+    ],
+    "unread": false
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "component": {
+    "theming": {}
+  },
+  "response": [
+    {
+      "account_id": "1xrddnl99frq3b7son9j32aba",
+      "drafts": [],
+      "first_message_timestamp": 1644426568,
+      "has_attachments": false,
+      "id": "cdf9ysey0va6gowfytqzrtb80",
+      "labels": [
+        {
+          "display_name": "SENT",
+          "id": "17ocjrnqb2w5m402t1lwswkkl",
+          "name": "sent"
+        },
+        {
+          "display_name": "INBOX",
+          "id": "dx62wkpj57erbkargbr3zew3j",
+          "name": "inbox"
+        },
+        {
+          "display_name": "IMPORTANT",
+          "id": "5852fv5ompdk51g0ve17mvej9",
+          "name": "important"
+        }
+      ],
+      "last_message_received_timestamp": 1644426568,
+      "last_message_sent_timestamp": 1644426598,
+      "last_message_timestamp": 1644426598,
+      "last_updated_timestamp": 1644426641,
+      "messages": [
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1644426568,
+          "files": [],
+          "from": [
+            {
+              "email": "nylasuser@gmail.com",
+              "name": "Nylas User"
+            }
+          ],
+          "id": "8tv9gohspmr32quh4los4dya9",
+          "labels": [
+            {
+              "display_name": "INBOX",
+              "id": "dx62wkpj57erbkargbr3zew3j",
+              "name": "inbox"
+            },
+            {
+              "display_name": "IMPORTANT",
+              "id": "5852fv5ompdk51g0ve17mvej9",
+              "name": "important"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "hi",
+          "starred": false,
+          "subject": "test reply",
+          "thread_id": "cdf9ysey0va6gowfytqzrtb80",
+          "to": [
+            {
+              "email": "test-email@email.com",
+              "name": "Test User"
+            }
+          ],
+          "unread": false
+        },
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1644426598,
+          "files": [],
+          "from": [
+            {
+              "email": "test-email@email.com",
+              "name": "Test User"
+            }
+          ],
+          "id": "last-message-from-self",
+          "labels": [
+            {
+              "display_name": "SENT",
+              "id": "17ocjrnqb2w5m402t1lwswkkl",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [
+            {
+              "email": "test-email@email.com",
+              "name": "Test User"
+            }
+          ],
+          "snippet": "hello hi",
+          "starred": false,
+          "subject": "Re: test reply",
+          "thread_id": "cdf9ysey0va6gowfytqzrtb80",
+          "to": [
+            {
+              "email": "nylasuser@gmail.com",
+              "name": "Nylas User"
+            }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        {
+          "email": "nylasuser@gmail.com",
+          "name": "Nylas User"
+        },
+        {
+          "email": "test-email@email.com",
+          "name": "Test User"
+        }
+      ],
+      "snippet": "hello hi",
+      "starred": false,
+      "subject": "test reply",
+      "unread": false,
+      "version": 7
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "component": {
+    "theming": {}
+  },
+  "response": {
+    "account_id": "1xrddnl99frq3b7son9j32aba",
+    "bcc": [],
+    "body": "<div dir=\"ltr\">hello</div>",
+    "cc": [],
+    "date": 1644426557,
+    "events": [],
+    "files": [],
+    "from": [
+      {
+        "email": "nylasuser@gmail.com",
+        "name": "Nylas User"
+      }
+    ],
+    "headers": {
+      "In-Reply-To": null,
+      "Message-Id": "<CAOBBZPF-Y5VdCD121YcaV+K4QMvdDnzrDVhfBueXdDATgGoo-g@mail.gmail.com>",
+      "References": []
+    },
+    "id": "7vg4n0vd5sa8zzqw4o5lmn5rq",
+    "labels": [
+      {
+        "display_name": "INBOX",
+        "id": "dx62wkpj57erbkargbr3zew3j",
+        "name": "inbox"
+      }
+    ],
+    "object": "message",
+    "reply_to": [],
+    "snippet": "hello",
+    "starred": false,
+    "subject": "test multi reply",
+    "thread_id": "t3mhi038ofjc4h6mxregyslk",
+    "to": [
+      {
+        "email": "test-email@email.com",
+        "name": ""
+      },
+      {
+        "email": "sdet-abcd@abcd.com",
+        "name": ""
+      },
+      {
+        "email": "nylas.test@gmail.com",
+        "name": "Nylas Test"
+      }
+    ],
+    "unread": false
+  }
+}

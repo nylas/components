@@ -607,6 +607,140 @@ describe("Mailbox Pagination: threads not intercepted", () => {
   });
 });
 
+describe("Mailbox: updating 'to' field correctly for reply and reply-all", () => {
+  beforeEach(() => {
+    cy.batchIntercept("GET", {
+      "https://web-components.nylas.com/middleware/manifest":
+        "mailbox/manifest",
+      "https://web-components.nylas.com/middleware/account": "mailbox/account",
+      "https://web-components.nylas.com/middleware/labels": "mailbox/labels",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox":
+        "mailbox/threads/threadWithlastMessageFromSelf",
+      "https://web-components.nylas.com/middleware/messages/last-message-from-self":
+        "mailbox/messages/idWithLastMessageFromSelf",
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it(`On click of reply, shows correct to field`, () => {
+    cy.wait("@mailbox/threads/threadWithlastMessageFromSelf");
+    cy.addComponent("nylas-composer", {
+      show_header: true,
+      show_minimize_button: false,
+      show_from: false,
+      show_bcc: false,
+      show_cc: false,
+      reset_after_send: true,
+      reset_after_close: true,
+    });
+
+    cy.get("nylas-composer")
+      .as("composer")
+      .then((element) => {
+        const composer = element[0];
+
+        cy.get("@mailbox").then((el) => {
+          const mailbox = el[0];
+
+          mailbox.addEventListener("replyClicked", (event) => {
+            composer.removeAttribute("hidden");
+            composer.value = event.detail.value;
+            composer.focus_body_onload = event.detail.focus_body_onload;
+            if (Object.keys(event.detail.message).length) {
+              composer.message_with_body = event.detail.message;
+            }
+            composer.open();
+          });
+        });
+        composer.close();
+      });
+    cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").invoke("prop", "show_reply_all", true);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    cy.get("@email").find(".reply").should("exist");
+    cy.get("@email").find(".reply").click();
+    cy.get("@composer").should("exist");
+    cy.get("@composer")
+      .find("[data-cy=to-field]")
+      .shadow()
+      .get(".contact-item__name")
+      .should("have.text", "Nylas User <nylasuser@gmail.com>");
+  });
+});
+
+describe("Mailbox: updating cc fields correctly for reply and reply-all", () => {
+  beforeEach(() => {
+    cy.batchIntercept("GET", {
+      "https://web-components.nylas.com/middleware/manifest":
+        "mailbox/manifest",
+      "https://web-components.nylas.com/middleware/account": "mailbox/account",
+      "https://web-components.nylas.com/middleware/labels": "mailbox/labels",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox":
+        "mailbox/threads/threadWithMultipleToParticipants",
+      "https://web-components.nylas.com/middleware/messages/message-with-multiple-to-paticipants*":
+        "mailbox/messages/idWithMultipleToParticipants",
+    });
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it(`On click of reply-all, shows correct cc fields`, () => {
+    cy.wait("@mailbox/threads/threadWithMultipleToParticipants");
+    cy.addComponent("nylas-composer", {
+      show_header: true,
+      show_minimize_button: false,
+      show_from: false,
+      show_bcc: false,
+      show_cc: true,
+      reset_after_send: true,
+      reset_after_close: true,
+    });
+
+    cy.get("nylas-composer")
+      .as("composer")
+      .then((element) => {
+        const composer = element[0];
+
+        cy.get("@mailbox").then((el) => {
+          const mailbox = el[0];
+
+          mailbox.addEventListener("replyAllClicked", (event) => {
+            composer.removeAttribute("hidden");
+            composer.value = event.detail.value;
+            composer.focus_body_onload = event.detail.focus_body_onload;
+            if (Object.keys(event.detail.message).length) {
+              composer.message_with_body = event.detail.message;
+            }
+            composer.open();
+          });
+        });
+        composer.close();
+      });
+    cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").invoke("prop", "show_reply_all", true);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    cy.get("@email").find(".reply-all").should("exist");
+    cy.get("@email").find(".reply-all").click();
+    cy.get("@composer").should("exist");
+    cy.get("@composer")
+      .find("[data-cy=cc-field]")
+      .shadow()
+      .get(".contact-item__name")
+      .should(
+        "have.text",
+        "Nylas User <nylasuser@gmail.com>sdet-abcd@abcd.comNylas Test <nylas.test@gmail.com>",
+      );
+  });
+});
+
 describe("Mailbox Bulk actions", () => {
   let thread1;
   let thread2;

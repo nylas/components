@@ -40,7 +40,7 @@ export function buildParticipants({
 }: BuildParticipant): Record<string, Participant[]> {
   let to: Participant[] = [];
   let cc: Participant[] = [];
-  to = message.reply_to;
+  to = message.reply_to.filter((e) => e.email !== myEmail);
   // if message does not have 'reply_to':
   // - AND if message from self set 'to' as the default 'to'
   // - else set 'from' as the default 'to'
