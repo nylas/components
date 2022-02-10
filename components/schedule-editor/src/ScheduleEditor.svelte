@@ -24,7 +24,11 @@
   import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
   import "../../scheduler/src/Scheduler.svelte";
+  import CheckmarkIcon from "./assets/checkmark-icon.svg";
   import DragIcon from "./assets/drag-icon.svg";
+  import PencilIcon from "./assets/pencil-icon.svg";
+  import PlusIcon from "./assets/plus-icon.svg";
+  import TrashIcon from "./assets/trash-icon.svg";
   import "./components/DragItemPlaceholder.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
   import { get_current_component } from "svelte/internal";
@@ -121,6 +125,7 @@
   let _this = <Manifest>buildInternalProps({}, {}, defaultValueMap);
   let initialized = false;
   let manifest: Partial<Manifest> = {};
+
   onMount(async () => {
     await tick();
     const storeKey = JSON.stringify({ component_id: id, access_token });
@@ -296,34 +301,40 @@
     required: false,
     id: "",
   };
-  const customFieldKeys: (keyof CustomField)[] = [
-    "title",
-    "description",
-    "type",
-    "required",
-  ];
+  const customFieldKeys: (keyof CustomField)[] = ["title", "type", "required"];
 
-  let newFieldTitleElement: HTMLElement;
   let newCustomField: CustomField = { ...emptyCustomField };
+  let editableCustomField: CustomField = { ...emptyCustomField };
+
+  let currentlyEditedField: string = null;
+  let isAddingCustomField = false;
 
   function removeCustomField(field: CustomField) {
     _this.custom_fields = _this.custom_fields.filter(
       (customField: CustomField) => customField !== field,
     );
+    currentlyEditedField = null;
   }
 
-  function addNewField(field: CustomField) {
+  function addNewField() {
     const fieldWithId = {
-      ...field,
+      ...newCustomField,
       id: String(_this.custom_fields.length),
     };
     _this.custom_fields = [..._this.custom_fields, fieldWithId];
 
     newCustomField = { ...emptyCustomField };
 
-    newFieldTitleElement.focus();
-
     customFieldDomRects = getDomRects(customFieldRefs);
+    isAddingCustomField = false;
+  }
+
+  function editCustomField(field: CustomField) {
+    editableCustomField = {
+      ...emptyCustomField,
+      ...field,
+    };
+    currentlyEditedField = field.id;
   }
 
   let draggedField: CustomField | null = null;
@@ -574,11 +585,9 @@
                 {/if}
               </div>
               <div>
-                <div>
-                  <strong id="participants"
-                    >Email Ids to include for scheduling</strong
-                  >
-                </div>
+                <strong id="participants">
+                  Email Ids to include for scheduling
+                </strong>
                 <label>
                   <textarea
                     name="participants"
@@ -590,9 +599,9 @@
             </fieldset>
           {/each}
         </div>
-        <button class="add-event" on:click={addConsecutiveEvent}
-          >Add a follow-up event</button
-        >
+        <button class="add-event" on:click={addConsecutiveEvent}>
+          Add a follow-up event
+        </button>
         <button on:click={saveProperties}>Save Editor Options</button>
       </section>
       <section
@@ -848,9 +857,9 @@
             />
           </label>
           <div role="checkbox" aria-labelledby="screen_bookings">
-            <strong id="screen_bookings"
-              >Scheduling on this calendar requires manual confirmation</strong
-            >
+            <strong id="screen_bookings">
+              Scheduling on this calendar requires manual confirmation
+            </strong>
             <label>
               <input
                 type="checkbox"
@@ -872,9 +881,9 @@
             {Math.floor(_this.partial_bookable_ratio * 100)}%
           </label>
           <div role="radiogroup" aria-labelledby="recurrence">
-            <strong id="recurrence"
-              >Allow, Disallow, or Mandate events to repeat?</strong
-            >
+            <strong id="recurrence">
+              Allow, Disallow, or Mandate events to repeat?
+            </strong>
             <label>
               <input
                 type="radio"
@@ -920,10 +929,10 @@
           </div>
           {#if _this.recurrence === "required" || _this.recurrence === "optional"}
             <div role="radiogroup" aria-labelledby="recurrence_cadence">
-              <strong id="recurrence_cadence"
-                >How often should events repeat{#if _this.recurrence === "optional"},
-                  if a user chooses to do so{/if}?</strong
-              >
+              <strong id="recurrence_cadence">
+                How often should events repeat{#if _this.recurrence === "optional"},
+                  if a user chooses to do so{/if}?
+              </strong>
               <label>
                 <input
                   type="checkbox"
@@ -987,21 +996,23 @@
         </header>
 
         <p class="intro">
-          Ask users to fill out a few details before booking an event with you.
-          By deafult, they will be asked for their name and email address.
+          Users will fill out these fields when booking an event with your team.
+          By default, they'll be asked for their name and email address.
         </p>
         <div class="contents">
           {#if _this.custom_fields}
             <table cellspacing="0" cellpadding="0">
               <thead>
-                {#each customFieldKeys as key}
-                  <th>{key}</th>
-                {/each}
+                <th />
+                <th>Title and description</th>
+                <th>Type</th>
+                <th>Required</th>
                 <th />
               </thead>
               <tbody>
                 {#each _this.custom_fields as field, i (field.id)}
                   <tr
+                    class:disabled={currentlyEditedField || isAddingCustomField}
                     class:drag-active={field.id === draggedField?.id}
                     on:mouseenter={() => {
                       if (draggedField && i !== draggedFieldIndex) {
@@ -1010,16 +1021,7 @@
                     }}
                     use:storeRef={{ id: field.id }}
                   >
-                    {#each customFieldKeys as key}
-                      <td>{field[key] || "—"}</td>
-                    {/each}
                     <td class="cta">
-                      <button
-                        class="remove"
-                        on:click={() => removeCustomField(field)}
-                      >
-                        Remove
-                      </button>
                       <button
                         class="drag"
                         on:mousedown={(event) => {
@@ -1030,37 +1032,166 @@
                         <DragIcon />
                       </button>
                     </td>
-                  </tr>
-                {/each}
-                <tr class="add-new">
-                  <td>
-                    <input
-                      type="text"
-                      placeholder="Title"
-                      aria-label="Title"
-                      bind:this={newFieldTitleElement}
-                      bind:value={newCustomField.title}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      aria-label="Description"
-                      bind:value={newCustomField.description}
-                    />
-                  </td>
-                  <td>
-                    <select
-                      bind:value={newCustomField.type}
-                      aria-label="Input Type"
+                    <td
+                      class:multi-line={field.description}
+                      class={"title-and-description"}
                     >
-                      <option value="text">Text</option>
-                      <option value="checkbox">Checkbox</option>
-                    </select>
-                  </td>
-                  <td>
+                      <span>{field.title ?? "—"}</span>
+                      {#if field.description}
+                        <span class="description">{field.description}</span>
+                      {/if}
+                    </td>
+                    <td class="type">{field.type ?? "—"}</td>
+                    <td class="required">
+                      {#if field.required}
+                        <CheckmarkIcon />
+                      {/if}
+                    </td>
+                    <td>
+                      <button
+                        class="edit"
+                        aria-label="Edit"
+                        on:click={() => editCustomField(field)}
+                      >
+                        <PencilIcon />
+                        <span>Edit</span>
+                      </button>
+                    </td>
+                  </tr>
+                  {#if currentlyEditedField === field.id}
+                    <tr class="edit-custom-field">
+                      <td colspan="5">
+                        <div class="header">
+                          <h3>Edit field</h3>
+                          <button
+                            class="delete"
+                            aria-label="Delete"
+                            on:click={() => removeCustomField(field)}
+                          >
+                            <TrashIcon />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                        <div class="input-field">
+                          <label>
+                            <div>Title *</div>
+                            <input
+                              type="text"
+                              aria-label="Title"
+                              bind:value={editableCustomField.title}
+                            />
+                          </label>
+                        </div>
+                        <div class="input-field">
+                          <label>
+                            <div>Description</div>
+                            <input
+                              type="text"
+                              aria-label="Description"
+                              bind:value={editableCustomField.description}
+                            />
+                          </label>
+                        </div>
+                        <div class="input-field">
+                          <label class="select">
+                            <div>Type *</div>
+                            <select
+                              bind:value={editableCustomField.type}
+                              aria-label="Input Type"
+                            >
+                              <option value="text">Text</option>
+                              <option value="checkbox">Checkbox</option>
+                            </select>
+                          </label>
+                        </div>
+                        <div class="input-field">
+                          <label class="checkbox">
+                            <input
+                              type="checkbox"
+                              aria-label="Required field?"
+                              bind:checked={editableCustomField.required}
+                            />
+                            <span>Required</span>
+                          </label>
+                        </div>
+                        <div class="footer">
+                          <button
+                            class="cancel"
+                            on:click={() => {
+                              currentlyEditedField = null;
+                              editableCustomField = { ...emptyCustomField };
+                            }}
+                          >
+                            <span>Cancel</span>
+                          </button>
+
+                          <button
+                            class="save"
+                            disabled={editableCustomField.title?.length === 0 ||
+                              !editableCustomField.type}
+                            on:click={() => {
+                              currentlyEditedField = null;
+                              field = { ...editableCustomField };
+                              editableCustomField = { ...emptyCustomField };
+                            }}
+                          >
+                            <span>Save changes</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  {/if}
+                {/each}
+              </tbody>
+            </table>
+            <div class="add-custom-field">
+              {#if !isAddingCustomField}
+                <button
+                  aria-label="Add a custom field"
+                  on:click={() => (isAddingCustomField = true)}
+                >
+                  <PlusIcon />
+                  <span>Add a custom field</span>
+                </button>
+              {:else}
+                <div class="edit-custom-field">
+                  <div class="header">
+                    <h3>Add a custom field</h3>
+                  </div>
+                  <div class="input-field">
                     <label>
+                      <div>Title</div>
+                      <input
+                        type="text"
+                        aria-label="Title"
+                        bind:value={newCustomField.title}
+                      />
+                    </label>
+                  </div>
+                  <div class="input-field">
+                    <label>
+                      <div>Description</div>
+                      <input
+                        type="text"
+                        aria-label="Description"
+                        bind:value={newCustomField.description}
+                      />
+                    </label>
+                  </div>
+                  <div class="input-field">
+                    <label class="select">
+                      <div>Type</div>
+                      <select
+                        bind:value={newCustomField.type}
+                        aria-label="Input Type"
+                      >
+                        <option value="text">Text</option>
+                        <option value="checkbox">Checkbox</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="input-field">
+                    <label class="checkbox">
                       <input
                         type="checkbox"
                         aria-label="Required Field?"
@@ -1068,17 +1199,29 @@
                       />
                       <span>Required</span>
                     </label>
-                  </td>
-                  <td>
+                  </div>
+                  <div class="footer">
                     <button
-                      disabled={!newCustomField.title || !newCustomField.type}
-                      on:click={() => addNewField(newCustomField)}
-                      class="add-custom-field">Add Field</button
+                      class="cancel"
+                      on:click={() => {
+                        newCustomField = { ...emptyCustomField };
+                        isAddingCustomField = false;
+                      }}
                     >
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      <span>Cancel</span>
+                    </button>
+                    <button
+                      class="save"
+                      disabled={newCustomField.title?.length === 0 ||
+                        !newCustomField.type}
+                      on:click={() => addNewField()}
+                    >
+                      <span>Add field</span>
+                    </button>
+                  </div>
+                </div>
+              {/if}
+            </div>
           {/if}
         </div>
       </section>
