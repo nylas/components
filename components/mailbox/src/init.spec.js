@@ -659,7 +659,7 @@ describe("Mailbox: updating 'to' field correctly for reply and reply-all", () =>
   });
 });
 
-describe.only("Mailbox: updating cc fields correctly for reply and reply-all", () => {
+describe("Mailbox: updating cc fields correctly for reply and reply-all", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
