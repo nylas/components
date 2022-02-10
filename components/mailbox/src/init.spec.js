@@ -607,6 +607,116 @@ describe("Mailbox Pagination: threads not intercepted", () => {
   });
 });
 
+describe("Mailbox: updating 'to' field correctly for reply and reply-all", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithLastMessageFromSelf",
+      },
+    ).as("threadWithLastMessagefromSelf");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/last-message-from-self",
+      {
+        fixture: "mailbox/messages/idWithLastMessageFromSelf",
+      },
+    );
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it(`On click of reply, shows correct to field`, () => {
+    cy.wait("@threadWithLastMessagefromSelf");
+    cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").invoke("prop", "show_reply_all", true);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    cy.get("@email").find(".reply").should("exist");
+    cy.get("@email").find(".reply").click();
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer")
+      .find("[data-cy=to-field] .contact-item__name")
+      .should("have.text", "Ricky Ropora <rickyropora@gmail.com>");
+  });
+});
+
+describe.only("Mailbox: updating cc fields correctly for reply and reply-all", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithMultipleToParticipants",
+      },
+    ).as("threadWithMultipleToParticipants");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/message-with-multiple-to-paticipants",
+      {
+        fixture: "mailbox/messages/idWithMultipleToParticipants",
+      },
+    );
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it(`On click of reply-all, shows correct cc fields`, () => {
+    cy.wait("@threadWithMultipleToParticipants");
+    cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").invoke("prop", "show_reply_all", true);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    cy.get("@email").find(".reply-all").should("exist");
+    cy.get("@email").find(".reply-all").click();
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("@composer").invoke("prop", "show_cc", true);
+    cy.get("nylas-composer")
+      .find("[data-cy=cc-field]")
+      .shadow()
+      .get(".contact-item__name")
+      .should(
+        "have.text",
+        "Ricky Ropora <rickyropora@gmail.com>sdet-acc4@nylasoffice365.comEric Chau <eric.chau@nylas.com>",
+      );
+  });
+});
+
 describe("Mailbox Bulk actions", () => {
   let thread1;
   let thread2;

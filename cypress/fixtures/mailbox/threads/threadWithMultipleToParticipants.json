@@ -1,0 +1,93 @@
+{
+  "component": {
+    "theming": {}
+  },
+  "response": [
+    {
+      "account_id": "1xrddnl99frq3b7son9j32aba",
+      "drafts": [],
+      "first_message_timestamp": 1644426557,
+      "has_attachments": false,
+      "id": "t3mhi038ofjc4h6mxregyslk",
+      "labels": [
+        {
+          "display_name": "INBOX",
+          "id": "dx62wkpj57erbkargbr3zew3j",
+          "name": "inbox"
+        }
+      ],
+      "last_message_received_timestamp": 1644426557,
+      "last_message_sent_timestamp": null,
+      "last_message_timestamp": 1644426557,
+      "last_updated_timestamp": 1644426641,
+      "messages": [
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1644426557,
+          "files": [],
+          "from": [
+            {
+              "email": "rickyropora@gmail.com",
+              "name": "Ricky Ropora"
+            }
+          ],
+          "id": "message-with-multiple-to-paticipants",
+          "labels": [
+            {
+              "display_name": "INBOX",
+              "id": "dx62wkpj57erbkargbr3zew3j",
+              "name": "inbox"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "hello",
+          "starred": false,
+          "subject": "test multi reply",
+          "thread_id": "t3mhi038ofjc4h6mxregyslk",
+          "to": [
+            {
+              "email": "test-email@email.com",
+              "name": ""
+            },
+            {
+              "email": "sdet-acc4@nylasoffice365.com",
+              "name": ""
+            },
+            {
+              "email": "eric.chau@nylas.com",
+              "name": "Eric Chau"
+            }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        {
+          "email": "sdet-acc4@nylasoffice365.com",
+          "name": ""
+        },
+        {
+          "email": "rickyropora@gmail.com",
+          "name": "Ricky Ropora"
+        },
+        {
+          "email": "eric.chau@nylas.com",
+          "name": "Eric Chau"
+        },
+        {
+          "email": "test-email@email.com",
+          "name": ""
+        }
+      ],
+      "snippet": "hello",
+      "starred": false,
+      "subject": "test multi reply",
+      "unread": false,
+      "version": 2
+    }
+  ]
+}
