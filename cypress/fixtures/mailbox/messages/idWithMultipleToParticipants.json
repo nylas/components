@@ -12,8 +12,8 @@
     "files": [],
     "from": [
       {
-        "email": "rickyropora@gmail.com",
-        "name": "Ricky Ropora"
+        "email": "nylasuser@gmail.com",
+        "name": "Nylas User"
       }
     ],
     "headers": {
@@ -41,12 +41,12 @@
         "name": ""
       },
       {
-        "email": "sdet-acc4@nylasoffice365.com",
+        "email": "sdet-abcd@abcd.com",
         "name": ""
       },
       {
-        "email": "eric.chau@nylas.com",
-        "name": "Eric Chau"
+        "email": "nylas.test@gmail.com",
+        "name": "Nylas Test"
       }
     ],
     "unread": false

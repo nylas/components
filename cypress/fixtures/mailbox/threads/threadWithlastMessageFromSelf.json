@@ -39,8 +39,8 @@
           "files": [],
           "from": [
             {
-              "email": "rickyropora@gmail.com",
-              "name": "Ricky Ropora"
+              "email": "nylasuser@gmail.com",
+              "name": "Nylas User"
             }
           ],
           "id": "8tv9gohspmr32quh4los4dya9",
@@ -64,8 +64,8 @@
           "thread_id": "cdf9ysey0va6gowfytqzrtb80",
           "to": [
             {
-              "email": "nylascypresstest@gmail.com",
-              "name": ""
+              "email": "test-email@email.com",
+              "name": "Test User"
             }
           ],
           "unread": false
@@ -103,8 +103,8 @@
           "thread_id": "cdf9ysey0va6gowfytqzrtb80",
           "to": [
             {
-              "email": "rickyropora@gmail.com",
-              "name": "Ricky Ropora"
+              "email": "nylasuser@gmail.com",
+              "name": "Nylas User"
             }
           ],
           "unread": false
@@ -113,11 +113,11 @@
       "object": "thread",
       "participants": [
         {
-          "email": "rickyropora@gmail.com",
-          "name": "Ricky Ropora"
+          "email": "nylasuser@gmail.com",
+          "name": "Nylas User"
         },
         {
-          "email": "nylascypresstest@gmail.com",
+          "email": "test-email@email.com",
           "name": "Test User"
         }
       ],
