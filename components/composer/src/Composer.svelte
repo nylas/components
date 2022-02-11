@@ -663,7 +663,7 @@
   }
   .composer-btn.file-upload,
   .composer-btn.save-draft {
-    margin-left: 10px;
+    margin-left: 6px;
     width: 32px;
     height: 32px;
     display: flex;
@@ -671,7 +671,7 @@
     align-items: center;
   }
   .file-size {
-    margin-left: 10px;
+    margin-left: 6px;
     color: var(--composer-icons-color, #666774);
     height: 32px;
     width: auto;
