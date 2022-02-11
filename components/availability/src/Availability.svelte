@@ -70,6 +70,8 @@
   export let allow_booking: boolean;
   export let allow_date_change: boolean;
   export let attendees_to_show: number;
+  export let availability: Availability;
+  export let booking_options: ConsecutiveEvent[][];
   export let booking_user_email: string;
   export let booking_user_token: string;
   export let busy_color: string;
@@ -268,7 +270,10 @@
   $: (async () => {
     if (id && Array.isArray(_this.events) && dayRange.length > 0) {
       await buildConsecutiveOptions();
+    } else if (_this.booking_options) {
+      consecutiveOptions = _this.booking_options;
     }
+    buildDailyConsecutiveOptions();
   })();
 
   //#endregion mount and prop initialization
@@ -623,12 +628,15 @@
   // Otherwise, assume consecutive.
   $: (async () => {
     if (
+      id &&
       ((Array.isArray(singleEventParticipants) &&
         singleEventParticipants.length > 0) ||
         (_this.booking_user_email && _this.booking_user_token)) &&
       _this.events?.length === 1
     ) {
       await getAvailability();
+    } else if (_this.availability) {
+      mapTimeslotsToCalendars(_this.availability);
     }
   })();
 
@@ -652,8 +660,6 @@
 
   async function getAvailability(forceReload = false) {
     loading = true;
-    let freeBusyCalendars: any = [];
-    // Free-Busy endpoint returns busy timeslots for given participants between start_time & end_time
 
     const calendarsToFetch: { email: string; token?: string }[] =
       singleEventParticipants.map((emailAddress) => {
@@ -698,37 +704,39 @@
       ) {
         return;
       }
-
-      const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
-
-      for (const user of fetchedCalendars?.order) {
-        timeSlotMap[user] = [];
-      }
-
-      for (const slot of fetchedCalendars.time_slots) {
-        slot.emails.forEach((e) => timeSlotMap[e].push(slot));
-      }
-
-      fetchedCalendars?.order.forEach((user: any) => {
-        freeBusyCalendars.push({
-          emailAddress: user,
-          account: {
-            emailAddress: user, // ¯\_(ツ)_/¯
-          },
-          availability: AvailabilityStatus.FREE,
-          timeslots: groupConsecutiveTimeslots(timeSlotMap[user]).map(
-            (slot: PreDatedTimeSlot) => ({
-              start_time: new Date(slot.start_time * 1000),
-              end_time: new Date(slot.end_time * 1000),
-            }),
-          ),
-        });
-      });
-
-      newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
+      mapTimeslotsToCalendars(fetchedCalendars);
 
       return newCalendarTimeslotsForGivenEmails;
     }
+  }
+
+  function mapTimeslotsToCalendars(calendarList: Calendar[]) {
+    const freeBusyCalendars: any = [];
+
+    const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
+
+    for (const user of calendarList?.order) {
+      timeSlotMap[user] = [];
+    }
+
+    for (const slot of calendarList.time_slots) {
+      slot.emails.forEach((e) => timeSlotMap[e].push(slot));
+    }
+
+    calendarList?.order.forEach((user: any) => {
+      freeBusyCalendars.push({
+        emailAddress: user,
+        availability: AvailabilityStatus.FREE,
+        timeslots: groupConsecutiveTimeslots(timeSlotMap[user]).map(
+          (slot: PreDatedTimeSlot) => ({
+            start_time: new Date(slot.start_time * 1000),
+            end_time: new Date(slot.end_time * 1000),
+          }),
+        ),
+      });
+    });
+
+    newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
   }
 
   // Figure out if a given TimeSlot is the first one in a pending, or selected, block.
@@ -992,6 +1000,14 @@
     } else {
       consecutiveOptions = [];
     }
+
+    // emit the awaited events list
+    dispatchEvent("eventOptionsReady", {
+      slots: consecutiveOptions,
+    });
+  }
+
+  function buildDailyConsecutiveOptions() {
     dailyConsecutiveOptions = {};
 
     for (const option of consecutiveOptions) {
@@ -1008,11 +1024,6 @@
         dailyConsecutiveOptions[day] = [option];
       }
     }
-
-    // emit the awaited events list
-    dispatchEvent("eventOptionsReady", {
-      slots: consecutiveOptions,
-    });
   }
 
   function createConsecutiveQueryKey(

@@ -8,11 +8,14 @@ import type {
 } from "@commons/types/Nylas";
 
 import type { EventDefinition } from "./ScheduleEditor";
+import type { ConsecutiveEvent } from "./Scheduler";
 
 export interface Manifest extends NylasManifest {
   allow_booking: boolean;
   allow_date_change: boolean;
   attendees_to_show: number;
+  availability: Availability;
+  booking_options: ConsecutiveEvent[][];
   booking_user_email: string;
   booking_user_token: string;
   busy_color: string;
@@ -46,6 +49,18 @@ export interface Manifest extends NylasManifest {
   view_as: "schedule" | "list";
   timezone: string;
   events: EventDefinition[];
+}
+
+export interface Availability {
+  order: string[];
+  time_slots: {
+    emails: string[];
+    end: number;
+    end_time: number;
+    start: number;
+    start_time: number;
+    status: AvailabilityStatus;
+  };
 }
 
 export interface AvailabilityRule {
