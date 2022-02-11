@@ -650,6 +650,19 @@
       gap: 8px;
     }
 
+    &.loading {
+      grid-template-rows: minmax(
+        auto,
+        calc(100vh - 16px)
+      ); /** loading mailbox minus padding **/
+    }
+    &.empty {
+      grid-template-rows: 68px 33.5px minmax(auto, calc(100vh - 117.5px)); /** header, toolbar, empty mailbox (100vh) minus header, toolbar and padding **/
+      ul {
+        height: 100%;
+      }
+    }
+
     header {
       @include barStyle;
       border-bottom: none;
@@ -810,10 +823,14 @@
   }
 
   ul {
-    position: relative;
-    &:before {
+    &::before {
       z-index: 1;
     }
+    &.deleting,
+    &.refreshing {
+      position: relative;
+    }
+
     &.refreshing {
       @include progress-bar(top, 0, left, 0, var(--blue), var(--blue-lighter));
     }
@@ -826,19 +843,16 @@
     padding: 4px;
   }
 
+  .mailbox-empty {
+    height: 100%;
+  }
   .mailbox-loader,
   .mailbox-empty {
-    width: calc(100% - 16px);
-    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: none;
-  }
-
-  .mailbox-loader {
-    position: absolute;
   }
 
   @keyframes rotate {
@@ -869,7 +883,10 @@
   }
 </style>
 
-<main>
+<main
+  class:loading={!hasComponentLoaded}
+  class:empty={!threads?.length && hasComponentLoaded}
+>
   {#if hasComponentLoaded}
     {#if currentlySelectedThread}
       <div class="email-container">
@@ -1036,11 +1053,13 @@
           {/each}
         {:else}
           <div class="mailbox-empty">
-            {#if _this.header}
-              {header}
-            {:else}
-              Your Mailbox
-            {/if} is empty!
+            <p>
+              {#if _this.header}
+                {header}
+              {:else}
+                Your Mailbox
+              {/if} is empty!
+            </p>
           </div>
         {/each}
         {#if threads && threads.length > 0}
@@ -1062,7 +1081,7 @@
         class="spinner"
         style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
       />
-      Loading...
+      <p>Loading...</p>
     </div>
   {/if}
 </main>
