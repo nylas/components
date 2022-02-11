@@ -882,7 +882,7 @@
 
 <main
   class:loading={!hasComponentLoaded}
-  class:empty={!(threads && threads?.length) && hasComponentLoaded}
+  class:empty={!threads?.length && hasComponentLoaded}
 >
   {#if hasComponentLoaded}
     {#if currentlySelectedThread}
