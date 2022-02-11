@@ -91,8 +91,14 @@
     "value": true
   },
   {
+    "label": "max_file_size",
+    "title": "Maximum attachment file size in MB",
+    "type": "number",
+    "value": 0
+  },
+  {
     "label": "show_max_file_size",
-    "title": "Show max file size",
+    "title": "Show maximum file size",
     "type": "boolean",
     "options": [true, false],
     "value": true

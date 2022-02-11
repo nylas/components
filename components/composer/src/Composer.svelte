@@ -104,6 +104,7 @@
   export let show_cc_button: Attribute;
   export let show_bcc_button: Attribute;
   export let show_attachment_button: Attribute;
+  export let max_file_size: number;
   export let show_max_file_size: Attribute;
   export let show_save_as_draft: Attribute;
   export let show_editor_toolbar: Attribute;
@@ -131,6 +132,7 @@
     show_cc_button: true,
     show_bcc_button: true,
     show_attachment_button: true,
+    max_file_size: 0,
     show_max_file_size: true,
     show_save_as_draft: true,
     show_editor_toolbar: true,
@@ -220,6 +222,21 @@
   $: if (value) {
     mergeMessage(value);
   }
+  let maxFileSize: number;
+  $: {
+    if (!uploadFile) {
+      //Using Nylas file upload api, default 4MB max size.
+      maxFileSize =
+        _this.max_file_size &&
+        _this.max_file_size < 4 &&
+        _this.max_file_size > 0
+          ? _this.max_file_size
+          : 4;
+    } else {
+      //Using custom uploadFile function
+      maxFileSize = _this.max_file_size;
+    }
+  }
 
   let isAttachmentLoaded = false;
   $: if (value?.files?.length > 0 && !isAttachmentLoaded) {
@@ -275,8 +292,8 @@
       fileSelector.value = "";
       if (beforeFileUpload) beforeFileUpload(file);
 
-      if (file.size >= 4000000) {
-        throw `Maximum file size is 4MB. Please upload a different file.`;
+      if (maxFileSize > 0 && file.size >= maxFileSize * 1000000) {
+        throw `Maximum file size is ${maxFileSize}MB. Please upload a different file.`;
       }
 
       const result = uploadFile
@@ -978,7 +995,7 @@
           <label
             for="file-upload"
             class="composer-btn file-upload"
-            title="Attach Files (up to 4MB)"
+            title="Attach Files (up to {maxFileSize}MB)"
             tabindex="0"
           >
             <AttachmentIcon class="FooterIcon" />
@@ -986,7 +1003,7 @@
           </label>
           {#if _this.show_max_file_size}
             <div class="file-size">
-              <span>Max file size: 4MB</span>
+              <span>Max file size: {maxFileSize}MB</span>
             </div>
           {/if}
         {/if}

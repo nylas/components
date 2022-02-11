@@ -840,6 +840,70 @@ describe("Composer file upload", () => {
       "Failed to send the message",
     );
   });
+
+  //Default maximum size for Nylas api is 4MB
+  it("Default maximum file size with Nylas file upload", () => {
+    //file size 5.7MB
+    const filePath = "composer/files/file_size_5.jpg";
+
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("Maximum file size is 4MB. Please upload a different file.")
+      .should("be.visible");
+  });
+
+  it("Maximum size set with Nylas file upload", () => {
+    //file size 3.4MB
+    const filePath = "composer/files/file_size_3.jpg";
+
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.max_file_size = 3;
+    });
+
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("Maximum file size is 3MB. Please upload a different file.")
+      .should("be.visible");
+  });
+
+  //Default maximum size for custom uploadFile function is disabled
+  it("Deafult maximum size is disabled with custom upload function", () => {
+    //file size 5.7MB
+    const filePath = "composer/files/file_size_5.jpg";
+
+    const uploadFile = (id, _file) => {
+      return Promise.resolve({ id });
+    };
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.uploadFile = uploadFile;
+    });
+
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("file_size_5.jpg")
+      .should("be.visible");
+  });
+
+  it("Set maximum size with custom upload function", () => {
+    //file size 5.7MB
+    const filePath = "composer/files/file_size_5.jpg";
+
+    const uploadFile = (id, _file) => {
+      return Promise.resolve({ id });
+    };
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.uploadFile = uploadFile;
+      component.max_file_size = 5;
+    });
+
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("nylas-composer-attachment")
+      .contains("Maximum file size is 5MB. Please upload a different file.")
+      .should("be.visible");
+  });
 });
 
 describe("Composer subject", () => {
