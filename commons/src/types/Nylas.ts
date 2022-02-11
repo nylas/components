@@ -179,13 +179,14 @@ export interface AgendaProperties extends Manifest {
   header_type: "full" | "day" | "none";
   hide_all_day_events: boolean;
   hide_current_time: boolean;
+  hide_ticks: boolean;
   prevent_zoom: boolean;
   selected_date: Date;
   show_as_busy: boolean;
   show_no_events_message: boolean;
   start_minute: number;
   theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
-  hide_ticks: boolean;
+  timezone: string;
   timezone_agnostic_all_day_events: boolean;
 }
 

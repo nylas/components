@@ -19,6 +19,12 @@
     "value": "theme-1"
   },
   {
+    "label": "timezone",
+    "title": "Specified timezone for agenda",
+    "type": "string",
+    "noPreview": true
+  },
+  {
     "label": "header_type",
     "title": "Header type",
     "type": "string",

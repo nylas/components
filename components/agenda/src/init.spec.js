@@ -370,3 +370,34 @@ describe("Agenda custom events", () => {
     });
   });
 });
+
+describe("Display events in different timezone is specified", () => {
+  beforeEach(() => {
+    //Set current time to 2am
+    cy.clock(1642143600000);
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "agenda/manifest",
+      "**/middleware/calendars/test-calendar-id": "agenda/calendars/calendarId",
+      "**/middleware/agenda/events?*": "agenda/events",
+    });
+
+    cy.visit("/components/agenda/src/cypress.html");
+    cy.get("nylas-agenda").should("exist").as("agenda");
+  });
+
+  it("displays current day of week and date in cooresponding timezone", () => {
+    cy.get("@agenda").invoke("attr", "timezone", "America/Toronto");
+    cy.get("@agenda").contains("Friday 14");
+    cy.get("@agenda").invoke("attr", "timezone", "America/Los_Angeles");
+    cy.get("@agenda").contains("Thursday 13");
+  });
+
+  it("displays fetched events time with corresponding timezone", () => {
+    cy.get("@agenda").invoke("attr", "timezone", "America/Toronto");
+    cy.get("@agenda").get(".event").eq(0).contains(".time", "10:00 AM");
+    cy.get("@agenda").get(".event").eq(1).contains(".time", "12:35 PM");
+    cy.get("@agenda").invoke("attr", "timezone", "America/Los_Angeles");
+    cy.get("@agenda").get(".event").eq(0).contains(".time", "7:00 AM");
+    cy.get("@agenda").get(".event").eq(1).contains(".time", "9:35 AM");
+  });
+});

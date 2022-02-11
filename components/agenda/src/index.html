@@ -26,6 +26,9 @@
             hour: "numeric",
             minute: "numeric",
             hour12: true,
+            timeZone:
+              agenda.timezone ??
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
           });
           endTimeInput.value = new Date(
             newEvent.when.end_time * 1000,
@@ -33,6 +36,9 @@
             hour: "numeric",
             minute: "numeric",
             hour12: true,
+            timeZone:
+              agenda.timezone ??
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
           });
           save = saveEvent;
           cancel = cancelEvent;
@@ -96,11 +102,17 @@
             return false;
           }
 
-          newEvent.when.start_time = new Date(
-            currentDay.setHours(startTime24h.hours, startTime24h.minutes, 0, 0),
+          newEvent.when.start_time = currentDay.setHours(
+            startTime24h.hours,
+            startTime24h.minutes,
+            0,
+            0,
           );
-          newEvent.when.end_time = new Date(
-            currentDay.setHours(endTime24h.hours, endTime24h.minutes, 0, 0),
+          newEvent.when.end_time = currentDay.setHours(
+            endTime24h.hours,
+            endTime24h.minutes,
+            0,
+            0,
           );
           return true;
         }
@@ -160,7 +172,7 @@
 
         let i = document.querySelector("input.start");
         let i2 = document.querySelector("input.end");
-        let checkbox = document.querySelector("input.auto-time");
+        let autoTimeCheckbox = document.querySelector("input.auto-time");
         let condensedBox = document.querySelector("input.condensed-view");
         let tickBox = document.querySelector("input.hide-ticks");
         let theme = document.querySelectorAll("input[name='theme']");
@@ -191,11 +203,11 @@
           false,
         );
 
-        checkbox.addEventListener(
+        autoTimeCheckbox.addEventListener(
           "input",
           function () {
             document.querySelectorAll("nylas-agenda").forEach((element) => {
-              element.auto_time_box = checkbox.checked;
+              element.auto_time_box = autoTimeCheckbox.checked;
             });
           },
           false,

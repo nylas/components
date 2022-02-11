@@ -45,3 +45,39 @@ export function setTimeZoneOffset(slot: Date, zone?: string): string {
   }
   return dateTimeSlot.offsetNameShort;
 }
+
+/**
+ * @param zone string
+ * @returns number (in milliseconds)
+ */
+export function getSpecifiedTimeZoneOffset(zone?: string): number {
+  if (!zone || !isValidTimezone(zone)) {
+    return 0;
+  }
+  const dt = DateTime.now();
+  const dtz = DateTime.now().setZone(zone, { keepLocalTime: true });
+  return dt.diff(dtz).milliseconds;
+}
+
+/**
+ * @param zone string
+ * @returns string (UTC Offset)
+ */
+export function getSpecifiedTimeZoneOffsetName(zone?: string): string {
+  if (!zone || !isValidTimezone(zone)) {
+    return DateTime.now().offsetNameShort;
+  }
+  const dt = DateTime.now().setZone(zone);
+  return dt.offsetNameShort;
+}
+
+/**
+ *
+ * @param date Date
+ * @param zone string
+ * @returns number (in milliseconds)
+ */
+export function getTimeInTimezone(date: Date, zone?: string): number {
+  const timeValue = date.getTime();
+  return timeValue + getSpecifiedTimeZoneOffset(zone);
+}
