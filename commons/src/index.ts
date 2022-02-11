@@ -18,6 +18,8 @@ export {
   fetchMessages,
   fetchMessage,
   fetchEmail,
+  saveDraft,
+  updateDraft,
 } from "./connections/messages";
 export { fetchAccount } from "./connections/accounts";
 export {

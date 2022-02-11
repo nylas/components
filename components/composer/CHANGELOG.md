@@ -19,6 +19,7 @@
 - Added a prop `reset_after_close` which resets composer fields after closing
 - Added a prop `focus_body_onload` which allows to set focus on the 'body' field on load [#379](https://github.com/nylas/components/pull/379)
 - Added border-left css to visually differentiate the current message from the previous messages [#379](https://github.com/nylas/components/pull/379)
+- Added button for user to save email message as draft [#383](https://github.com/nylas/components/pull/383)
 
 ## Bug Fixes
 

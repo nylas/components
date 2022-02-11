@@ -91,6 +91,13 @@
     "value": true
   },
   {
+    "label": "show_save_as_draft",
+    "title": "Show save as draft button",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
     "label": "show_subject",
     "title": "Show subject field",
     "type": "boolean",

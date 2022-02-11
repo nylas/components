@@ -15,6 +15,8 @@
     sendMessage,
     fetchAccount,
     uploadFile as nylasUploadFile,
+    saveDraft,
+    updateDraft,
   } from "@commons";
   import {
     buildInternalProps,
@@ -46,6 +48,7 @@
   import CloseIcon from "./assets/close.svg";
   import MinimizeIcon from "./assets/dash.svg";
   import AttachmentIcon from "./assets/attachment.svg";
+  import DraftIcon from "./assets/drafts.svg";
   import ExpandIcon from "./assets/expand.svg";
   import type {
     Message,
@@ -77,10 +80,13 @@
   export let cc: ContactSearchCallback = [];
   export let bcc: ContactSearchCallback = [];
   export let send: SendCallback;
+  export let save: SendCallback;
   export let change: FetchContactsCallback | null = null;
   export let beforeSend: (msg: Message) => Message | void;
   export let afterSendSuccess: Function | null = null;
   export let afterSendError: Function | null = null;
+  export let afterSaveSuccess: Function | null = null;
+  export let afterSaveError: Function | null = null;
   export let template: string = "";
   export let tracking: Tracking | null = null;
 
@@ -99,6 +105,7 @@
   export let show_cc_button: Attribute;
   export let show_bcc_button: Attribute;
   export let show_attachment_button: Attribute;
+  export let show_save_as_draft: Attribute;
   export let show_editor_toolbar: Attribute;
   export let theme: string | void;
   export let replace_fields: ReplaceFields[] | null = null;
@@ -124,6 +131,7 @@
     show_cc_button: true,
     show_bcc_button: true,
     show_attachment_button: true,
+    show_save_as_draft: true,
     show_editor_toolbar: true,
     theme: "auto",
     focus_body_onload: false,
@@ -316,12 +324,12 @@
     );
   };
 
-  let sendPending = false;
+  let isPending = false;
   let sendError = false;
   let sendSuccess = false;
 
   const handleSend = async () => {
-    sendPending = true;
+    isPending = true;
     sendError = false;
     sendSuccess = false;
 
@@ -337,13 +345,13 @@
       send(msg)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
-          sendPending = false;
+          isPending = false;
           sendSuccess = true;
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
           if (_this.reset_after_send) resetAfterSend($message.from);
-          sendPending = false;
+          isPending = false;
           sendError = true;
         });
     } else if (id) {
@@ -352,7 +360,7 @@
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
           if (_this.reset_after_send) resetAfterSend($message.from);
-          sendPending = false;
+          isPending = false;
           sendSuccess = true;
           dispatchEvent("messageSent", {
             message: res,
@@ -360,9 +368,56 @@
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
-          sendPending = false;
+          isPending = false;
           sendError = true;
         });
+    }
+  };
+
+  let saveError = false;
+  let saveSuccess = false;
+  //Save Email Message as Draft
+  const handleSaveDraft = async () => {
+    isPending = true;
+    saveError = false;
+    saveSuccess = false;
+
+    let msg = $message;
+    try {
+      if (save) {
+        //Calling custom save callback
+        const res = await save(msg);
+        if (afterSaveSuccess) afterSaveSuccess(res);
+        isPending = false;
+        saveSuccess = true;
+      } else if (id) {
+        // Middleware
+        if (msg.id && msg.version != null) {
+          //Update draft
+          const res = await updateDraft(id, msg, access_token);
+          if (res.id) mergeMessage({ ...res });
+          if (afterSaveSuccess) afterSaveSuccess(res);
+          isPending = false;
+          saveSuccess = true;
+          dispatchEvent("draftUpdated", {
+            message: res,
+          });
+        } else {
+          //Save new draft
+          const res = await saveDraft(id, msg, access_token);
+          if (res.id) mergeMessage({ ...res });
+          if (afterSaveSuccess) afterSaveSuccess(res);
+          isPending = false;
+          saveSuccess = true;
+          dispatchEvent("draftSaved", {
+            message: res,
+          });
+        }
+      }
+    } catch (err) {
+      if (afterSaveError) afterSaveError(err);
+      isPending = false;
+      saveError = true;
     }
   };
 
@@ -373,7 +428,7 @@
   $: datepickerTimestamp = $message.send_at * 1000;
 
   $: isSendable =
-    !sendPending &&
+    !isPending &&
     (id || send) &&
     $message.from.length &&
     ($message.to.length || $message.cc.length || $message.bcc.length);
@@ -502,7 +557,7 @@
     border-top: 1px solid var(--composer-border-color, #f7f7f7);
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     background: var(--bg);
   }
   .send-btn {
@@ -609,8 +664,9 @@
       background: var(--composer-background-muted-color, #f0f2ff);
     }
   }
-  .composer-btn.file-upload {
-    margin-right: 10px;
+  .composer-btn.file-upload,
+  .composer-btn.save-draft {
+    margin-left: 10px;
     width: 32px;
     height: 32px;
     display: flex;
@@ -681,7 +737,7 @@
     width: 10px;
     height: 10px;
   }
-  [class$="AttachmentIcon"] {
+  [class$="FooterIcon"] {
     width: 16px;
     height: 16px;
   }
@@ -892,21 +948,33 @@
         {/if}
       </main>
       <footer>
+        <div class="btn-group">
+          <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
+            {#if isPending}Sending{:else}Send{/if}
+          </button>
+        </div>
         {#if _this.show_attachment_button && (id || uploadFile)}
           <label
             for="file-upload"
             class="composer-btn file-upload"
             title="Attach Files (up to 4MB)"
+            tabindex="0"
           >
-            <AttachmentIcon class="AttachmentIcon" />
+            <AttachmentIcon class="FooterIcon" />
             <span class="sr-only">Attach Files</span>
           </label>
         {/if}
-        <div class="btn-group">
-          <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
-            {#if sendPending}Sending{:else}Send{/if}
+        {#if _this.show_save_as_draft}
+          <button
+            for="save-draft"
+            class="composer-btn save-draft"
+            title="Save Email As Draft"
+            on:click={handleSaveDraft}
+          >
+            <DraftIcon class="FooterIcon" />
+            <span class="sr-only">Save Draft</span>
           </button>
-        </div>
+        {/if}
 
         <form action="" enctype="multipart/form-data">
           <input
@@ -941,6 +1009,16 @@
       {#if sendSuccess}
         <nylas-composer-alert-bar type="success" dismissible={true}>
           Message sent successfully!
+        </nylas-composer-alert-bar>
+      {/if}
+      {#if saveError}
+        <nylas-composer-alert-bar type="danger" dismissible={true}>
+          Error: Failed to save the draft.
+        </nylas-composer-alert-bar>
+      {/if}
+      {#if saveSuccess}
+        <nylas-composer-alert-bar type="success" dismissible={true}>
+          Message draft saved successfully!
         </nylas-composer-alert-bar>
       {/if}
     {/if}

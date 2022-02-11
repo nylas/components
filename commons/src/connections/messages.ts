@@ -143,3 +143,39 @@ export const fetchEmail = async (
     })
     .catch((error) => handleError(query.component_id, error));
 };
+
+export const saveDraft = async (
+  component_id: string,
+  msg: Message,
+  access_token?: string,
+): Promise<NylasMessage> => {
+  return await fetch(
+    `${getMiddlewareApiUrl(component_id)}/drafts`,
+    getFetchConfig({ method: "POST", component_id, access_token, body: msg }),
+  )
+    .then((response) =>
+      handleResponse<MiddlewareResponse<NylasMessage>>(response),
+    )
+    .then((json) => {
+      return json.response;
+    })
+    .catch((error) => handleError(component_id, error));
+};
+
+export const updateDraft = async (
+  component_id: string,
+  msg: Message,
+  access_token?: string,
+): Promise<NylasMessage> => {
+  return await fetch(
+    `${getMiddlewareApiUrl(component_id)}/drafts/${msg.id}`,
+    getFetchConfig({ method: "PUT", component_id, access_token, body: msg }),
+  )
+    .then((response) =>
+      handleResponse<MiddlewareResponse<NylasMessage>>(response),
+    )
+    .then((json) => {
+      return json.response;
+    })
+    .catch((error) => handleError(component_id, error));
+};
