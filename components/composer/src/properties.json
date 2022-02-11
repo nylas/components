@@ -91,6 +91,13 @@
     "value": true
   },
   {
+    "label": "show_max_file_size",
+    "title": "Show max file size",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
     "label": "show_save_as_draft",
     "title": "Show save as draft button",
     "type": "boolean",

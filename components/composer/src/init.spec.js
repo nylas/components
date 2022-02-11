@@ -539,6 +539,22 @@ describe("Composer customizations", () => {
       .get("div.html-editor[contenteditable]")
       .should("not.have.focus");
   });
+
+  it("Hide attachment button", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_attachment_button = false;
+    });
+    cy.get(".file-upload").should("not.exist");
+  });
+
+  it("Hide attachment max file size", () => {
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.show_max_file_size = false;
+    });
+    cy.get(".file-size").should("not.exist");
+  });
 });
 
 describe("Composer integration", () => {
