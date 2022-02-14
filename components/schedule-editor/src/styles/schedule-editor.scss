@@ -1,6 +1,8 @@
 @import "../../../theming/variables.scss";
 @import "../../theming/reset.scss";
 
+// TODO: magic numbers cleanup (12, 16, 24)
+
 .loader {
   width: calc(100% - 16px);
   height: 100vh;
@@ -15,7 +17,6 @@
 main {
   font-family: system-ui, sans-serif;
   display: grid;
-  grid-template-columns: 1fr 5px auto;
   gap: 1rem;
   // padding: 0 1rem;
   background: var(--grey-background);
@@ -28,41 +29,29 @@ main {
     resize: both;
     overflow: auto;
     display: grid;
+    grid-auto-rows: min-content;
     gap: 1rem;
     padding: 1rem;
 
-    & > section {
-      display: flex;
-      flex-direction: column;
-      background-color: white;
-      box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
-      padding: 1rem;
-
-      & > header {
-        margin-bottom: 1rem;
-        display: grid;
-        grid-template-columns: auto 100px;
-        h1 {
-          font-weight: bold;
-          font-size: 1.5rem;
-        }
+    nylas-schedule-editor-section {
+      width: 100%;
+      overflow: auto;
+      h1 {
+        font-weight: bold;
+        font-size: 1.5rem;
       }
 
-      &:not(.expanded) .intro,
-      &:not(.expanded) .contents {
-        display: none;
-      }
-
-      .intro {
-        margin-top: 0;
-        padding-top: 0;
-        margin-bottom: 2rem;
-      }
       .contents {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 24px;
         margin-bottom: 24px;
+        overflow: auto;
+        width: 100%;
+
+        input[type="text"],
+        select {
+          width: calc(100% - 24px);
+        }
 
         table {
           border-bottom: 1px solid rgba(0, 0, 0, 0.25);
@@ -306,33 +295,38 @@ main {
         & > .available-hours {
           grid-column: -1 / 1;
         }
-      }
 
-      button {
-        align-self: flex-end;
-        padding: 8px 16px;
-        border-radius: 4px;
-        background-color: var(--blue);
-        color: white;
-        border: none;
-        font-weight: 600;
-      }
+        &.basic-details {
+          grid-template-columns: 1fr;
+          & > fieldset {
+            border: none;
+            padding: 0;
+            display: grid;
+            // grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            padding: 1rem;
+            gap: 1rem;
+            background-color: var(--grey-background);
 
-      &.basic-details .contents {
-        grid-template-columns: 1fr;
-        & > fieldset {
-          border: none;
-          padding: 0;
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          padding: 1rem;
-          gap: 1rem;
-          background-color: var(--grey-background);
-
-          .remove-event {
-            grid-column: -1 / 1;
-            justify-self: end;
+            .remove-event {
+              grid-column: -1 / 1;
+              justify-self: end;
+            }
           }
+        }
+      }
+
+      footer {
+        display: grid;
+        grid-auto-flow: column;
+        gap: 1rem;
+        button {
+          align-self: flex-end;
+          padding: 8px 16px;
+          border-radius: 4px;
+          background-color: var(--blue);
+          color: white;
+          border: none;
+          font-weight: 600;
         }
       }
     }
@@ -346,6 +340,11 @@ main {
     display: grid;
     grid-template-rows: auto 1fr 250px;
     gap: 1rem;
+    h1 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 1rem 0;
+    }
   }
 
   .gutter {

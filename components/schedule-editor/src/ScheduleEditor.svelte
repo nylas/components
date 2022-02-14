@@ -30,6 +30,7 @@
   import PlusIcon from "./assets/plus-icon.svg";
   import TrashIcon from "./assets/trash-icon.svg";
   import "./components/DragItemPlaceholder.svelte";
+  import "./components/EditorSection.svelte";
   import { getDomRects, getDomRectsFromParentAndChildren } from "./methods/dom";
   import { get_current_component } from "svelte/internal";
 
@@ -267,9 +268,9 @@
   }
   // #endregion unpersisted variables
 
-  let width = "60%";
+  let width = "640px";
   let gutterWidth = 35;
-  $: width = showPreview ? "60%" : "100%";
+  $: width = showPreview ? "640px" : "100%";
   let adjustingPreviewPane: boolean = false;
 
   function adjustColumns(e: MouseEvent) {
@@ -519,21 +520,16 @@
     bind:this={main}
   >
     <div class="settings">
-      <section
-        class="basic-details"
-        class:expanded={sections[SectionNames.BASIC_DETAILS]?.expanded}
+      <nylas-schedule-editor-section
+        section_title={SectionNames.BASIC_DETAILS}
+        expanded={true}
       >
-        <header>
-          <h1>Event Details</h1>
-          <button on:click={() => toggleCollapse(SectionNames.BASIC_DETAILS)}
-            >Toggle!</button
-          >
-        </header>
-        <p class="intro">
+        <h1 slot="title">Event Details</h1>
+        <p slot="intro" class="intro">
           Edit the details for your meeting. You can add consecutive meetings to
           allow users to book back-to-back events.
         </p>
-        <div class="contents">
+        <div slot="contents" class="contents basic-details">
           {#each _this.events as event, iter}
             <fieldset>
               {#if _this.events.length > 1}
@@ -545,7 +541,7 @@
                 </button>
               {/if}
               <label>
-                <strong>Event Title</strong>
+                <strong>Event Title!</strong>
                 <input type="text" bind:value={event.event_title} />
               </label>
               <label>
@@ -599,24 +595,19 @@
             </fieldset>
           {/each}
         </div>
-        <button class="add-event" on:click={addConsecutiveEvent}>
-          Add a follow-up event
-        </button>
-        <button on:click={saveProperties}>Save Editor Options</button>
-      </section>
-      <section
-        class="time-date-details"
-        class:expanded={sections[SectionNames.TIME_DATE_DETAILS]?.expanded}
-      >
-        <header>
-          <h1>Date/Time Details</h1>
-          <button
-            on:click={() => toggleCollapse(SectionNames.TIME_DATE_DETAILS)}
-            >Toggle!</button
+        <footer slot="footer">
+          <button class="add-event" on:click={addConsecutiveEvent}
+            >Add a follow-up event</button
           >
-        </header>
+          <button on:click={saveProperties}>Save Editor Options</button>
+        </footer>
+      </nylas-schedule-editor-section>
 
-        <div class="contents">
+      <nylas-schedule-editor-section
+        section_title={SectionNames.TIME_DATE_DETAILS}
+      >
+        <h1 slot="title">Date/Time Details</h1>
+        <div slot="contents" class="contents">
           <div>
             <label>
               <strong>Start Hour</strong>
@@ -767,19 +758,14 @@
             </ul>
           </div>
         </div>
-        <button on:click={saveProperties}>Save Editor Options</button>
-      </section>
-      <section
-        class="style-details"
-        class:expanded={sections[SectionNames.STYLE_DETAILS]?.expanded}
-      >
-        <header>
-          <h1>Style Details</h1>
-          <button on:click={() => toggleCollapse(SectionNames.STYLE_DETAILS)}
-            >Toggle!</button
-          >
-        </header>
-        <div class="contents">
+        <footer slot="footer">
+          <button on:click={saveProperties}>Save Editor Options</button>
+        </footer>
+      </nylas-schedule-editor-section>
+
+      <nylas-schedule-editor-section section_title={SectionNames.STYLE_DETAILS}>
+        <h1 slot="title">Style Details</h1>
+        <div slot="contents" class="contents">
           <div role="checkbox" aria-labelledby="show_ticks">
             <strong id="show_ticks">Show ticks</strong>
             <label>
@@ -822,20 +808,16 @@
             />
           </label>
         </div>
-        <button on:click={saveProperties}>Save Editor Options</button>
-      </section>
-      <section
-        class="booking-details"
-        class:expanded={sections[SectionNames.BOOKING_DETAILS]?.expanded}
-      >
-        <header>
-          <h1>Booking Details</h1>
-          <button on:click={() => toggleCollapse(SectionNames.BOOKING_DETAILS)}
-            >Toggle!</button
-          >
-        </header>
+        <footer slot="footer">
+          <button on:click={saveProperties}>Save Editor Options</button>
+        </footer>
+      </nylas-schedule-editor-section>
 
-        <div class="contents">
+      <nylas-schedule-editor-section
+        section_title={SectionNames.BOOKING_DETAILS}
+      >
+        <h1 slot="title">Booking Details</h1>
+        <div slot="contents" class="contents">
           <div role="checkbox" aria-labelledby="allow_booking">
             <strong id="allow_booking">Allow booking</strong>
             <label>
@@ -981,25 +963,18 @@
             </div>
           {/if}
         </div>
-        <button on:click={saveProperties}>Save Editor Options</button>
-      </section>
+        <footer slot="footer">
+          <button on:click={saveProperties}>Save Editor Options</button>
+        </footer>
+      </nylas-schedule-editor-section>
 
-      <section
-        class="custom-fields"
-        class:expanded={sections[SectionNames.CUSTOM_FIELDS]?.expanded}
-      >
-        <header>
-          <h1>Custom Fields</h1>
-          <button on:click={() => toggleCollapse(SectionNames.CUSTOM_FIELDS)}
-            >Toggle!</button
-          >
-        </header>
-
-        <p class="intro">
+      <nylas-schedule-editor-section section_title={SectionNames.CUSTOM_FIELDS}>
+        <h1 slot="title">Custom Fields</h1>
+        <p slot="intro" class="intro">
           Users will fill out these fields when booking an event with your team.
           By default, they'll be asked for their name and email address.
         </p>
-        <div class="contents">
+        <div slot="contents" class="contents">
           {#if _this.custom_fields}
             <table cellspacing="0" cellpadding="0">
               <thead>
@@ -1224,21 +1199,16 @@
             </div>
           {/if}
         </div>
-      </section>
+        <footer slot="footer">
+          <button on:click={saveProperties}>Save Editor Options</button>
+        </footer>
+      </nylas-schedule-editor-section>
 
-      <section
-        class="notification-details"
-        class:expanded={sections[SectionNames.NOTIFICATION_DETAILS]?.expanded}
+      <nylas-schedule-editor-section
+        section_title={SectionNames.NOTIFICATION_DETAILS}
       >
-        <header>
-          <h1>Notification Details</h1>
-          <button
-            on:click={() => toggleCollapse(SectionNames.NOTIFICATION_DETAILS)}
-            >Toggle!</button
-          >
-        </header>
-
-        <div class="contents">
+        <h1 slot="title">Notification Details</h1>
+        <div slot="contents" class="contents">
           <div role="radiogroup" aria-labelledby="notification_mode">
             <strong id="notification_mode"
               >How would you like to notify the customer on event creation?</strong
@@ -1271,8 +1241,10 @@
             <input type="text" bind:value={_this.notification_subject} />
           </label>
         </div>
-        <button on:click={saveProperties}>Save Editor Options</button>
-      </section>
+        <footer slot="footer">
+          <button on:click={saveProperties}>Save Editor Options</button>
+        </footer>
+      </nylas-schedule-editor-section>
     </div>
     {#if showPreview}
       <span class="gutter" on:mousedown={() => (adjustingPreviewPane = true)} />
