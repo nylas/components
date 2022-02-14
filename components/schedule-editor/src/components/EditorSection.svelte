@@ -29,10 +29,6 @@
         height: 16px;
         transform: scaleY(-1);
       }
-
-      intro {
-        background: #f0f;
-      }
     }
 
     &[open] {
