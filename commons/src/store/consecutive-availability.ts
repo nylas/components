@@ -1,7 +1,7 @@
 import { Writable, writable } from "svelte/store";
 import { fetchConsecutiveAvailability } from "../connections/availability";
 import type { ConsecutiveAvailabilityQuery } from "@commons/types/Availability";
-import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
+import type { ConsecutiveEvent } from "@commonstypes/Booking";
 
 type ConsecutiveAvailabilityStore = Record<
   string,

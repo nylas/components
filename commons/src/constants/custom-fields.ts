@@ -1,4 +1,4 @@
-import type { CustomField } from "@commons/types/Scheduler";
+import type { CustomField } from "@commonstypes/Booking";
 
 export const DefaultCustomFields: CustomField[] = [
   {
