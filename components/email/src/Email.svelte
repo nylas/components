@@ -1565,6 +1565,7 @@
 
 <nylas-error {id} />
 <main
+  data-cy="nylas-email"
   bind:this={main}
   on:click={handleThreadClick}
   tabindex="0"

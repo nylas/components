@@ -971,8 +971,8 @@
 {/if}
 
 <main
+  class:nylas-agenda={true}
   class:headless={_this.header_type === "none"}
-  data-cy="nylas-agenda"
   class={!!themeUrl ? "custom" : _this.theme}
 >
   {#await hydratedEvents}

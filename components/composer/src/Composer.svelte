@@ -767,7 +767,11 @@
 {/if}
 
 {#if visible && themeLoaded && !isLoading}
-  <div class="nylas-composer" class:minimized={_this.minimized}>
+  <div
+    class="nylas-composer"
+    data-cy="nylas-composer"
+    class:minimized={_this.minimized}
+  >
     {#if _this.show_header}
       <header class={_this.minimized ? "minimized" : undefined}>
         <span>{subject}</span>
