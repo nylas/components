@@ -1985,46 +1985,46 @@
     fastq "^1.6.0"
 
 "@nylas/components-agenda@file:components/agenda":
-  version "1.1.5-canary.1"
+  version "1.1.7-canary.1"
   dependencies:
     dompurify "^2.3.3"
 
 "@nylas/components-availability@file:components/availability":
-  version "1.1.4-canary.0"
+  version "1.1.5-canary.6"
   dependencies:
     d3-scale "^4.0.0"
     d3-time "^3.0.0"
     just-throttle "2.3.1"
 
+"@nylas/components-booking@file:components/booking":
+  version "1.1.4-canary.5"
+
 "@nylas/components-composer@file:components/composer":
-  version "1.1.6-canary.0"
+  version "1.1.6-canary.8"
 
 "@nylas/components-contact-list@file:components/contact-list":
-  version "1.1.4-canary.0"
+  version "1.1.4-canary.5"
 
 "@nylas/components-conversation@file:components/conversation":
-  version "1.1.6-canary.0"
+  version "1.1.6-canary.3"
   dependencies:
     dompurify "^2.3.3"
 
 "@nylas/components-datepicker@file:components/datepicker":
-  version "1.1.3"
+  version "1.1.4-canary.0"
 
 "@nylas/components-email@file:components/email":
-  version "1.1.6-canary.0"
+  version "1.1.7-canary.16"
   dependencies:
     dompurify "^2.3.3"
 
 "@nylas/components-mailbox@file:components/mailbox":
-  version "1.1.5-canary.0"
+  version "1.1.6-canary.14"
   dependencies:
     dompurify "^2.3.3"
 
 "@nylas/components-schedule-editor@file:components/schedule-editor":
-  version "1.1.4-canary.0"
-
-"@nylas/components-scheduler@file:components/scheduler":
-  version "1.1.4-canary.0"
+  version "1.1.4-canary.4"
 
 "@nylas/components-theming@file:components/theming":
   version "1.0.0"

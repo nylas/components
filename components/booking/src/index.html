@@ -3,11 +3,11 @@
   <head>
     <meta content="width=device-width,initial-scale=1" name="viewport" />
     <meta charset="UTF-8" />
-    <title>Scheduler Demo</title>
+    <title>Booking Demo</title>
     <script src="../index.js"></script>
     <script src="../../availability/index.js"></script>
     <script>
-      // Nylas Scheduler and Availability components work with two modes: Single event and Consecutive events.
+      // Nylas Booking and Availability components work with two modes: Single event and Consecutive events.
       // Mode is determined by length of the events array; if there are multiple, it will try to schedule
       // them consecutively and show timeslots as either free or busy.
       // Otherwise, with a single event, it will show you a scale of availability based on how many of the participantEmails'
@@ -29,7 +29,7 @@
 
       document.addEventListener("DOMContentLoaded", function () {
         const availability = document.querySelector("nylas-availability");
-        const scheduler = document.querySelector("nylas-scheduler");
+        const booking = document.querySelector("nylas-booking");
 
         // availability.participants = ["nylascypresstest@gmail.com"];
         availability.events = [EVENTS[0]];
@@ -93,29 +93,29 @@
         ];
         availability.addEventListener("timeSlotChosen", (event) => {
           console.log({ timeSlotChosen: event.detail.timeSlots });
-          scheduler.slots_to_book = event.detail.timeSlots;
+          booking.slots_to_book = event.detail.timeSlots;
         });
 
-        scheduler.addEventListener("bookedEvents", () => {
+        booking.addEventListener("bookedEvents", () => {
           availability.reload(true, true);
         });
 
         availability.addEventListener("eventOptionsReady", (event) => {
           console.log({ eventOptionsReady: event.detail.slots });
-          scheduler.event_options = event.detail.slots;
+          booking.event_options = event.detail.slots;
         });
 
-        scheduler.addEventListener("hoverOptionChange", (event) => {
+        booking.addEventListener("hoverOptionChange", (event) => {
           console.log({ eventOptionSelected: event.detail.event });
           availability.event_to_hover = event.detail.event;
         });
 
-        scheduler.addEventListener("eventOptionSelected", (event) => {
+        booking.addEventListener("eventOptionSelected", (event) => {
           console.log({ eventOptionSelected: event.detail.event });
           availability.event_to_select = event.detail.event;
         });
 
-        scheduler.recurrence_cadence = ["daily", "weekdays", "weekly"];
+        booking.recurrence_cadence = ["daily", "weekdays", "weekly"];
 
         // Interactive controls
         document.querySelectorAll('input[name="demo-type"]').forEach((elem) => {
@@ -194,7 +194,7 @@
         closed_color="#999"
       >
       </nylas-availability>
-      <nylas-scheduler id="demo-scheduler"> </nylas-scheduler>
+      <nylas-booking id="demo-scheduler"> </nylas-booking>
     </main>
   </body>
 </html>

@@ -1,16 +1,16 @@
-let schedulerTestComponent;
+let bookingTestComponent;
 let availabilityTestComponent;
 const frozenDateTime = () => new Date(2021, 11, 15, 9, 0, 0);
 beforeEach(() => {
   cy.clock(frozenDateTime().getTime(), ["Date"]);
-  cy.visit("/components/scheduler/src/index.html");
+  cy.visit("/components/booking/src/index.html");
 
-  // scheduler component
-  cy.get("nylas-scheduler").should("exist");
-  cy.get("nylas-scheduler").then((element) => {
+  // booking component
+  cy.get("nylas-booking").should("exist");
+  cy.get("nylas-booking").then((element) => {
     const component = element[0];
     component.setAttribute("id", "test-scheduler");
-    schedulerTestComponent = component;
+    bookingTestComponent = component;
   });
 
   // availability component
@@ -22,9 +22,9 @@ beforeEach(() => {
   });
 });
 
-describe("scheduler component", () => {
+describe("booking component", () => {
   it("Renders test component", () => {
-    cy.get(schedulerTestComponent)
+    cy.get(bookingTestComponent)
       .should("have.prop", "id")
       .and("equal", "test-scheduler");
     cy.get(availabilityTestComponent)
@@ -168,7 +168,7 @@ describe("scheduler component", () => {
 
   describe("Consecutive Availability", () => {
     beforeEach(() => {
-      cy.visit("/components/scheduler/src/index.html");
+      cy.visit("/components/booking/src/index.html");
       cy.get('input[name="demo-type"]').check("consecutive");
     });
 
@@ -180,8 +180,8 @@ describe("scheduler component", () => {
           component.show_weekends = false;
           component.start_date = CONSECUTIVE_START_DATE;
         });
-      cy.get("nylas-scheduler")
-        .as("scheduler")
+      cy.get("nylas-booking")
+        .as("booking")
         .then(() => {
           cy.get("h2").should("contain", "Select an option");
         });
@@ -195,8 +195,8 @@ describe("scheduler component", () => {
           component.show_weekends = false;
           component.start_date = CONSECUTIVE_START_DATE;
         });
-      cy.get("nylas-scheduler")
-        .as("scheduler")
+      cy.get("nylas-booking")
+        .as("booking")
         .then(() => {
           // First event shows A then B
           cy.get("ul.timeslots li:eq(1)")
@@ -218,14 +218,14 @@ describe("scheduler component", () => {
   });
 
   describe("Choosing a slot from consecutive event list", () => {
-    it("selects a timeslot on availability when a scheduler item is clicked", () => {
+    it("selects a timeslot on availability when a booking item is clicked", () => {
       cy.intercept(
         "POST",
         "/middleware/calendars/availability/consecutive",
         (req) =>
           req.reply({ ...COMPONENT_RESPONSE, response: CONSEC_RESPONSE }),
       );
-      cy.visit("/components/scheduler/src/index.html");
+      cy.visit("/components/booking/src/index.html");
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -238,8 +238,8 @@ describe("scheduler component", () => {
             .first()
             .check();
 
-          cy.get("nylas-scheduler")
-            .as("scheduler")
+          cy.get("nylas-booking")
+            .as("booking")
             .then(() => {
               cy.get("ul.timeslots li").should("have.length", 2);
               cy.get("ul.timeslots li:eq(0)").click();
@@ -258,46 +258,46 @@ describe("scheduler component", () => {
     });
     // TODO: test time/reorder deduplication (same time, different ordering)
     // TODO: test slot-click, emitted-event
-    // TODO: test slot de-select, scheduler back to options list
+    // TODO: test slot de-select, booking back to options list
   });
 
   describe("Inherits and passes properties", () => {
     it("has a default event title", () => {
-      schedulerTestComponent.slots_to_book = basic_slots_to_book;
-      cy.get(schedulerTestComponent).find("h3").contains("Meeting:");
+      bookingTestComponent.slots_to_book = basic_slots_to_book;
+      cy.get(bookingTestComponent).find("h3").contains("Meeting:");
     });
     // TODO - Re-enable this once we have dedicated test components
     xit("inherits event title from editor-manifest", () => {
       cy.document().then(($document) => {
-        $document.getElementsByTagName("nylas-scheduler")[0].remove();
-        let newScheduler = $document.createElement("nylas-scheduler");
-        newScheduler.setAttribute("id", "test-scheduler");
-        newScheduler.slots_to_book = basic_slots_to_book;
-        $document.body.getElementsByTagName("main")[0].append(newScheduler);
+        $document.getElementsByTagName("nylas-booking")[0].remove();
+        let newBooker = $document.createElement("nylas-booking");
+        newBooker.setAttribute("id", "test-scheduler");
+        newBooker.slots_to_book = basic_slots_to_book;
+        $document.body.getElementsByTagName("main")[0].append(newBooker);
       });
       cy.get("h3").contains("My Wonderful Event:");
     });
     it("inherits event title from passed-property if no event title", () => {
       cy.document().then(($document) => {
-        $document.getElementsByTagName("nylas-scheduler")[0].remove();
-        let newScheduler = $document.createElement("nylas-scheduler");
-        newScheduler.setAttribute("id", "test-scheduler");
-        newScheduler.editor_id = "test-schedule-editor";
-        newScheduler.event_title = "Test-Passed Title";
-        newScheduler.slots_to_book = basic_slots_to_book;
-        $document.body.getElementsByTagName("main")[0].append(newScheduler);
+        $document.getElementsByTagName("nylas-booking")[0].remove();
+        let newBooker = $document.createElement("nylas-booking");
+        newBooker.setAttribute("id", "test-scheduler");
+        newBooker.editor_id = "test-schedule-editor";
+        newBooker.event_title = "Test-Passed Title";
+        newBooker.slots_to_book = basic_slots_to_book;
+        $document.body.getElementsByTagName("main")[0].append(newBooker);
       });
       cy.get("h3").contains("Test-Passed Title:");
     });
     it("inherits event title events array's object title", () => {
       cy.document().then(($document) => {
-        $document.getElementsByTagName("nylas-scheduler")[0].remove();
-        let newScheduler = $document.createElement("nylas-scheduler");
-        newScheduler.id = "demo-scheduler";
-        newScheduler.editor_id = "demo-schedule-editor";
-        newScheduler.event_title = "Test-Passed Title";
-        newScheduler.slots_to_book = hydrated_slots_to_book;
-        $document.body.getElementsByTagName("main")[0].append(newScheduler);
+        $document.getElementsByTagName("nylas-booking")[0].remove();
+        let newBooker = $document.createElement("nylas-booking");
+        newBooker.id = "demo-scheduler";
+        newBooker.editor_id = "demo-schedule-editor";
+        newBooker.event_title = "Test-Passed Title";
+        newBooker.slots_to_book = hydrated_slots_to_book;
+        $document.body.getElementsByTagName("main")[0].append(newBooker);
       });
       cy.get("h3").contains("My event-hydrated title");
     });
@@ -305,14 +305,14 @@ describe("scheduler component", () => {
 
   describe("Custom Fields", () => {
     it("only shows custom fields when timeslots are selected", () => {
-      cy.get(schedulerTestComponent).then((element) => {
+      cy.get(bookingTestComponent).then((element) => {
         element[0].slots_to_book = [];
         cy.get("#custom-fields").should("not.exist");
       });
     });
 
     it("shows a single email address field by default", () => {
-      cy.get(schedulerTestComponent).then((element) => {
+      cy.get(bookingTestComponent).then((element) => {
         element[0].slots_to_book = basic_slots_to_book;
         cy.get("#custom-fields").should("exist");
         cy.get("#custom-fields strong").should("have.length", 2);
@@ -322,7 +322,7 @@ describe("scheduler component", () => {
     });
 
     it("doesnt let you submit form with required fields unfulfilled", () => {
-      cy.get(schedulerTestComponent).then((element) => {
+      cy.get(bookingTestComponent).then((element) => {
         const component = element[0];
         component.slots_to_book = basic_slots_to_book;
         cy.get("button.book").should("exist");
@@ -333,7 +333,7 @@ describe("scheduler component", () => {
     });
 
     it("lets you submit once required fields are filled out", () => {
-      cy.get(schedulerTestComponent).then((element) => {
+      cy.get(bookingTestComponent).then((element) => {
         const component = element[0];
         component.slots_to_book = basic_slots_to_book;
         cy.get("button.book").should("exist");
