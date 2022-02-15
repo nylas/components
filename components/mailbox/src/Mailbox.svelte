@@ -884,6 +884,7 @@
 </style>
 
 <main
+  data-cy="nylas-mailbox"
   class:loading={!hasComponentLoaded}
   class:empty={!threads?.length && hasComponentLoaded}
 >
