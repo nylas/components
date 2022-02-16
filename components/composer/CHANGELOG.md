@@ -28,7 +28,6 @@
 - Added a prop 'reset_after_close' which resets after closing[#301](https://github.com/nylas/components/pull/301)
 - Attachment icon size was too small making it inaccessible
 - Updated file size error copy, added tooltip label for attach icon[#317](https://github.com/nylas/components/pull/317)
-- Removed duplicate property `message_with_body` and added `body`, `cids`, `account_id`, and `ids` to `value` prop. [#396](https://github.com/nylas/components/pull/396)
 
 ## Breaking
 

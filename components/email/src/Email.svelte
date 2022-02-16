@@ -313,7 +313,7 @@
   $: emailManuallyPassed = !!_this.thread;
 
   //#region Clean Conversation
-  // If a user sets message_with_body_type to "clean", expand their message to clean conversation.
+  // If a user sets message_body_type to "clean", expand their message to clean conversation.
   // This requires them to have access to the Nylas Neural API.
 
   const CONVERSATION_ENDPOINT_MAX_MESSAGES = 20;
