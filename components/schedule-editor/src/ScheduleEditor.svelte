@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import { DefaultCustomFields } from "@commons/constants/custom-fields";
-  import { NotificationMode } from "@commons/enums/Scheduler";
+  import { NotificationMode } from "@commons/enums/Booking";
   import parseStringToArray, {
     buildInternalProps,
   } from "@commons/methods/component";
@@ -16,14 +16,14 @@
   } from "@commons/types/ScheduleEditor";
   import { SectionNames } from "@commons/types/ScheduleEditor";
 
-  import type { CustomField } from "@commons/types/Scheduler";
+  import type { CustomField } from "@commons/types/Booking";
   import { onDestroy, onMount, tick } from "svelte";
   import timezones from "timezones-list";
   import { ErrorStore, ManifestStore } from "@commons";
   import { getEventDispatcher } from "@commons/methods/component";
   import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
-  import "../../scheduler/src/Scheduler.svelte";
+  import "../../booking/src/Booking.svelte";
   import CheckmarkIcon from "./assets/checkmark-icon.svg";
   import DragIcon from "./assets/drag-icon.svg";
   import PencilIcon from "./assets/pencil-icon.svg";
@@ -1267,7 +1267,7 @@
             : []}
           {id}
         />
-        <nylas-scheduler
+        <nylas-booking
           {slots_to_book}
           {..._this}
           capacity={null}

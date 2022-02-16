@@ -56,8 +56,8 @@
     buildOpenHours,
     convertHourAssumptionsToOpenHours,
   } from "./method/openhours";
-  import type { EventDefinition } from "@commonstypes/ScheduleEditor";
-  import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
+  import type { EventDefinition } from "@commons/types/ScheduleEditor";
+  import type { ConsecutiveEvent } from "@commons/types/Booking";
   import { generateDaySlots } from "./method/availabilityUtils";
 
   //#region props
@@ -950,7 +950,7 @@
   //#endregion colours
 
   //#region Consecutive Events
-  // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-scheduler> or parent app to pick up.
+  // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-booking> or parent app to pick up.
   let consecutiveOptions: ConsecutiveEvent[][] = [];
   let dailyConsecutiveOptions: Record<string, ConsecutiveEvent[][]> = {};
 

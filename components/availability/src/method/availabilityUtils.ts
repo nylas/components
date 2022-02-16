@@ -7,7 +7,7 @@ import { scaleTime } from "d3-scale";
 import type { TimeInterval } from "d3-time";
 import type { Manifest, TimeSlot } from "@commons/types/Availability";
 import { arrayContainsArray } from "@commons/methods/component";
-import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
+import type { ConsecutiveEvent } from "@commons/types/Booking";
 
 // map over the ticks() of the time scale between your start day and end day
 // populate them with as many slots as your start_hour, end_hour, and slot_size dictate

@@ -1,7 +1,7 @@
 import type { Manifest as NylasManifest } from "@commons/types/Nylas";
-import type { NotificationMode } from "@commons/enums/Scheduler";
+import type { NotificationMode } from "@commons/enums/Booking";
 import type { AvailabilityRule } from "@commons/types/Availability";
-import type { CustomField } from "./Scheduler";
+import type { CustomField } from "./Booking";
 
 export interface Manifest extends NylasManifest {
   show_hosts: "show" | "hide";

@@ -27,6 +27,6 @@
     "@nylas/components-mailbox": "nylas/nylas-components/components/mailbox",
     "@nylas/components-theming": "nylas/nylas-components/components/theming",
     "@nylas/components-availability": "nylas/nylas-components/components/availability",
-    "@nylas/components-scheduler": "nylas/nylas-components/components/scheduler"
+    "@nylas/components-booking": "nylas/nylas-components/components/booking"
   }
 }

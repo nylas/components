@@ -1,4 +1,4 @@
-<svelte:options tag="nylas-scheduler" />
+<svelte:options tag="nylas-booking" />
 
 <script lang="ts">
   import { ErrorStore, ManifestStore, sendMessage } from "@commons";
@@ -14,10 +14,10 @@
     Manifest,
     CustomField,
     ConsecutiveEvent,
-  } from "@commons/types/Scheduler";
+  } from "@commons/types/Booking";
   import type { BookableSlot } from "@commons/types/Availability";
   import type { EventQuery, TimespanEvent } from "@commons/types/Events";
-  import { NotificationMode } from "@commons/enums/Scheduler";
+  import { NotificationMode } from "@commons/enums/Booking";
   import { onMount, tick } from "svelte";
 
   // #region props
@@ -266,7 +266,7 @@
 </script>
 
 <style lang="scss">
-  @import "./styles/scheduler.scss";
+  @import "./styles/booking.scss";
 </style>
 
 <nylas-error {id} />

@@ -13,7 +13,7 @@ import type {
 } from "@commons/types/Availability";
 import type { MiddlewareResponse } from "@commons/types/Nylas";
 import type { EventDefinition } from "@commons/types/ScheduleEditor";
-import type { ConsecutiveEvent } from "@commonstypes/Scheduler";
+import type { ConsecutiveEvent } from "@commons/types/Booking";
 
 // TODO: deprecate if we find /calendars/availability to be fully sufficient
 export const fetchFreeBusy = async (

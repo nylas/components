@@ -1,6 +1,6 @@
 {
-  "name": "@nylas/components-scheduler",
-  "version": "1.1.4-canary.5",
+  "name": "@nylas/components-booking",
+  "version": "1.0.0-canary.0",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",

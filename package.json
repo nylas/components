@@ -114,7 +114,7 @@
     "@nylas/components-email": "file:components/email",
     "@nylas/components-mailbox": "file:components/mailbox",
     "@nylas/components-schedule-editor": "file:components/schedule-editor",
-    "@nylas/components-scheduler": "file:components/scheduler",
+    "@nylas/components-booking": "file:components/booking",
     "@nylas/components-theming": "file:components/theming",
     "concurrently": "6.0.0"
   }

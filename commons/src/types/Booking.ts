@@ -2,7 +2,7 @@ import type {
   BookableSlot,
   Manifest as AvailabilityManifest,
 } from "@commons/types/Availability";
-import type { NotificationMode } from "@commons/enums/Scheduler";
+import type { NotificationMode } from "@commons/enums/Booking";
 import type { EventDefinition } from "./ScheduleEditor";
 
 export interface CustomField {
