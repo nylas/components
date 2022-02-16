@@ -4,6 +4,8 @@ import type { File } from "@commons/types/Nylas";
 export interface Message {
   [key: string]: unknown;
   component_id?: string;
+  account_id?: string;
+  id?: string;
   subject?: string;
   body?: string;
   from?: Participant[];
