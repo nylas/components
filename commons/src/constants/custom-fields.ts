@@ -1,4 +1,4 @@
-import type { CustomField } from "@commonstypes/Booking";
+import type { CustomField } from "@commons/types/Booking";
 
 export const DefaultCustomFields: CustomField[] = [
   {

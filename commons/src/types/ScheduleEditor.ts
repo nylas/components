@@ -1,5 +1,5 @@
 import type { Manifest as NylasManifest } from "@commons/types/Nylas";
-import type { NotificationMode } from "@commonsenums/Booking";
+import type { NotificationMode } from "@commons/enums/Booking";
 import type { AvailabilityRule } from "@commons/types/Availability";
 import type { CustomField } from "./Booking";
 

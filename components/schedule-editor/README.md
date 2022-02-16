@@ -16,7 +16,7 @@ Nylas Schedule Editor is currently in active development. Want to contribute? [F
     - [Events](#events)
     - [Types](#types)
   - [Integrating with Other Components](#integrating-with-other-components)
-    - [Using Schedule Editor Configuration with Nylas Booking](#using-schedule-editor-configuration-with-nylas-scheduler)
+    - [Using Schedule Editor Configuration with Nylas Booking](#using-schedule-editor-configuration-with-nylas-booking)
 
 ## Getting Started
 
@@ -26,7 +26,7 @@ Nylas Schedule Editor is currently in active development. Want to contribute? [F
 
 ## Documentation
 
-- [Nylas Booking reference](https://developer.nylas.com/docs/user-experience/components/scheduler-editor-component/)
+- [Nylas Booking reference](https://developer.nylas.com/docs/user-experience/components/schedule-editor-component/)
 
 - [Examples](https://components.nylas.io/components/schedule-editor/src/index.html)
 
