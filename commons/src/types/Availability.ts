@@ -8,7 +8,7 @@ import type {
 } from "@commons/types/Nylas";
 
 import type { EventDefinition } from "./ScheduleEditor";
-import type { ConsecutiveEvent } from "./Scheduler";
+import type { ConsecutiveEvent } from "./Booking";
 
 export interface Manifest extends NylasManifest {
   allow_booking: boolean;
