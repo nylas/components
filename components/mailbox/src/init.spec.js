@@ -651,7 +651,7 @@ describe("Mailbox: updating 'to' field correctly for reply and reply-all", () =>
             composer.value = event.detail.value;
             composer.focus_body_onload = event.detail.focus_body_onload;
             if (Object.keys(event.detail.message).length) {
-              composer.message_with_body = event.detail.message;
+              composer.value.body = event.detail.message.body;
             }
             composer.open();
           });
@@ -716,7 +716,7 @@ describe("Mailbox: updating cc fields correctly for reply and reply-all", () => 
             composer.value = event.detail.value;
             composer.focus_body_onload = event.detail.focus_body_onload;
             if (Object.keys(event.detail.message).length) {
-              composer.message_with_body = event.detail.message;
+              composer.value.body = event.detail.message;
             }
             composer.open();
           });
