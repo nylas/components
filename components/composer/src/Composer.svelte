@@ -51,7 +51,6 @@
   import DraftIcon from "./assets/drafts.svg";
   import ExpandIcon from "./assets/expand.svg";
   import type {
-    Message,
     SendCallback,
     FetchContactsCallback,
     Tracking,
@@ -60,6 +59,7 @@
     Attachment,
   } from "@commons/types/Composer";
   import type {
+    Message,
     ComposerProperties,
     Account,
     Participant,
@@ -157,7 +157,6 @@
     if (_this.reset_after_close) {
       resetAfterSend($message.from);
     }
-    isAttachmentLoaded = false;
     attachments.update(() => []);
     dispatchEvent("composerClosed", {});
   };
@@ -221,7 +220,21 @@
 
   $: if (value) {
     mergeMessage(value);
+    if (value.files?.length > 0) {
+      for (const [fileIndex, file] of value.files.entries()) {
+        if (isFileAnAttachment(value, file)) {
+          addAttachments({
+            account_id: value.account_id,
+            id: value.id,
+            filename: file.filename,
+            size: file.size,
+            content_type: file.content_type,
+          });
+        }
+      }
+    }
   }
+
   let maxFileSize: number;
   $: {
     if (!uploadFile) {
@@ -235,22 +248,6 @@
     } else {
       //Using custom uploadFile function
       maxFileSize = _this.max_file_size;
-    }
-  }
-
-  let isAttachmentLoaded = false;
-  $: if (value?.files?.length > 0 && !isAttachmentLoaded) {
-    for (const [fileIndex, file] of value.files.entries()) {
-      if (isFileAnAttachment(value, file)) {
-        addAttachments({
-          account_id: value.account_id,
-          id: value.id,
-          filename: file.filename,
-          size: file.size,
-          content_type: file.content_type,
-        });
-        isAttachmentLoaded = true;
-      }
     }
   }
 

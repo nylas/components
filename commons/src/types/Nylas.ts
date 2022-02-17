@@ -128,6 +128,8 @@ export interface Message {
   reply_to_message_id?: string;
   folder_id?: string;
   label_ids?: string[];
+  account_id?: string;
+  [key: string]: unknown;
 }
 
 export interface RadialMessage extends Message {
