@@ -91,6 +91,19 @@
     "value": true
   },
   {
+    "label": "max_file_size",
+    "title": "Maximum attachment file size in MB",
+    "type": "number",
+    "value": 0
+  },
+  {
+    "label": "show_max_file_size",
+    "title": "Show maximum file size",
+    "type": "boolean",
+    "options": [true, false],
+    "value": true
+  },
+  {
     "label": "show_save_as_draft",
     "title": "Show save as draft button",
     "type": "boolean",

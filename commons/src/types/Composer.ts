@@ -46,6 +46,7 @@ export interface Attributes {
   show_cc_button?: boolean;
   show_bcc_button?: boolean;
   show_attachment_button?: boolean;
+  show_max_file_size?: boolean;
   show_save_as_draft?: boolean;
   show_editor_toolbar?: boolean;
 }
