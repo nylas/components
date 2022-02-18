@@ -468,7 +468,7 @@ describe("Composer customizations", () => {
     cy.get(".nylas-composer").should("exist");
   });
 
-  it("Replaces merge fields as defined in replace_fields when passed as a strinigfied version", () => {
+  it("Replaces merge fields as defined in replace_fields when passed as a stringified version", () => {
     const value = {
       body: `[hi] what up!<br />
       <br />
@@ -481,10 +481,11 @@ describe("Composer customizations", () => {
     cy.get("@composer").invoke("prop", "replace_fields", [
       { from: "[hi]", to: "hello" },
     ]);
-    cy.get(".html-editor[contenteditable=true]").should("exist");
-    cy.get(".html-editor[contenteditable=true]")
+    cy.get(".html-editor-content[contenteditable]").should("exist");
+    cy.get(".html-editor-content[contenteditable]")
       .invoke("prop", "innerHTML")
       .then((html) => {
+        console.log("html:", html);
         expect(html).to.equal(
           `hello what up!<br>\n      <br>\n      <br>\n      Thanks,\n      -Phil`,
         );
@@ -505,7 +506,7 @@ describe("Composer customizations", () => {
       component.replace_fields = [{ from: "[hi]", to: "hello" }];
     });
 
-    cy.get(".html-editor[contenteditable=true]")
+    cy.get(".html-editor-content[contenteditable]")
       .invoke("prop", "innerHTML")
       .then((html) => {
         expect(html).to.include(
@@ -523,7 +524,7 @@ describe("Composer customizations", () => {
       .shadow()
       .get("nylas-html-editor")
       .shadow()
-      .get("div.html-editor[contenteditable]")
+      .get(".html-editor-content[contenteditable]")
       .should("have.focus");
   });
 
@@ -536,7 +537,7 @@ describe("Composer customizations", () => {
       .shadow()
       .get("nylas-html-editor")
       .shadow()
-      .get("div.html-editor[contenteditable]")
+      .get(".html-editor-content[contenteditable]")
       .should("not.have.focus");
   });
 
@@ -667,7 +668,7 @@ describe("Composer integration", () => {
       -Phil</div></div>`;
     });
 
-    cy.get(".html-editor[contenteditable=true]")
+    cy.get(".html-editor-content[contenteditable]")
       .invoke("prop", "innerHTML")
       .then((html) => {
         expect(html).to.include(
@@ -682,7 +683,7 @@ describe("Composer integration", () => {
       component.value = { body: "Test value body prop" };
     });
 
-    cy.get(".html-editor[contenteditable=true]")
+    cy.get(".html-editor-content[contenteditable=true]")
       .invoke("prop", "innerHTML")
       .should("include", "Test value body prop");
   });

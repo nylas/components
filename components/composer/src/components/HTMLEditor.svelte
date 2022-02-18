@@ -14,7 +14,7 @@
   let toolbar: ToolbarItem[] = defaultActions;
 
   $: if (focus_body_onload && container) {
-    container.focus();
+    handleHtmlBodyFocus();
   }
 
   $: if (html) {
@@ -102,6 +102,20 @@
       return item;
     });
   }
+
+  const handleHtmlBodyFocus = () => {
+    // if contenteditable area is empty we need to add something to add range
+    if (container.innerHTML === "") {
+      container.innerHTML = "\u00a0";
+    }
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(container);
+    range.collapse(false); // collapse range to the end
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
 </script>
 
 <style lang="scss">
@@ -111,6 +125,10 @@
     *:focus {
       outline: 5px auto var(--composer-primary-color, #5c77ff);
     }
+  }
+  .html-editor-content {
+    min-height: var(--composer-editor-min-height, 220px);
+    max-height: var(--composer-editor-max-height, 480px);
   }
   a {
     color: var(--composer-primary-color, #5c77ff);
@@ -201,9 +219,11 @@
   <div
     bind:this={container}
     bind:innerHTML={html}
+    on:focus={handleHtmlBodyFocus}
     contenteditable="true"
-    class="html-editor"
+    class="html-editor-content"
     role="textbox"
+    aria-label="HTML Editor"
     on:keyup={updateToolbarUI}
     on:mouseup={updateToolbarUI}
   />
