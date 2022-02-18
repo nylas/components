@@ -301,6 +301,19 @@
     }
   }
 
+  async function draftClicked(event: CustomEvent) {
+    let draft = event.detail.message;
+
+    if (!_this.all_threads && draft && currentlySelectedThread) {
+      draft = await fetchIndividualMessage(draft);
+      if (FilesStore.hasInlineFiles(draft)) {
+        draft = await getMessageWithInlineFiles(draft);
+      }
+      event.detail.focus_body_onload = true;
+      dispatchDraft(event);
+    }
+  }
+
   async function updateThreadStatus(updatedThread: any) {
     if (id && updatedThread && updatedThread.id) {
       await MailboxStore.updateThread(
@@ -595,7 +608,7 @@
   //#endregion pagination
 
   async function dispatchDraft(event) {
-    const { thread } = event.detail;
+    const { thread, focus_body_onload } = event.detail;
     const message = thread.drafts[0];
 
     if (message.cids?.length) {
@@ -611,7 +624,13 @@
       subject: message.subject,
       body: message.body,
     };
-    dispatchEvent("draftThreadEvent", { event, message, thread, value });
+    dispatchEvent("draftThreadEvent", {
+      event,
+      message,
+      thread,
+      value,
+      focus_body_onload,
+    });
   }
 </script>
 
@@ -901,6 +920,7 @@
           show_reply_all={_this.show_reply_all}
           show_forward={_this.show_forward}
           on:messageClicked={messageClicked}
+          on:draftClicked={draftClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
@@ -1041,6 +1061,7 @@
                     show_forward={_this.show_forward}
                     on:threadClicked={threadClicked}
                     on:messageClicked={messageClicked}
+                    on:draftClicked={draftClicked}
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
