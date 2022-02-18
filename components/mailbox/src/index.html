@@ -42,6 +42,7 @@
 
         mailbox.addEventListener("returnToMailbox", (event) => {
           console.log("returnToMailbox", event.detail);
+          composer.close();
         });
         mailbox.actions_bar = ["selectall", "star", "delete", "unread"];
         mailbox.show_star = true;
