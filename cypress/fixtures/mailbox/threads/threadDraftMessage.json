@@ -1,0 +1,65 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  },
+  "response": {
+    "account_id": "1xrddnl99frq3b7son9j32aba",
+    "bcc": [],
+    "body": "<div dir=\"ltr\">This is a new draft saved from composer in mailbox. This is testing in cypress.</div><div dir=\"ltr\"><br></div><div dir=\"ltr\">This is the second message sent back to me.</div><br><div class=\"gmail_quote\"><div dir=\"ltr\" class=\"gmail_attr\">On Thu, Feb 17, 2022 at 5:47 PM Test User &lt;<a href=\"mailto:nylascypresstest@gmail.com\">nylascypresstest@gmail.com</a>&gt; wrote:<br></div><blockquote class=\"gmail_quote\" style=\"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex\"><div dir=\"ltr\">This is the first message sent by me.&nbsp;</div>\n</blockquote></div>",
+    "cc": [],
+    "date": 1645142972,
+    "events": [],
+    "files": [
+      {
+        "content_disposition": "attachment",
+        "content_type": "text/plain",
+        "filename": "Tiny_text_file.txt",
+        "id": "27b1yxq5m61qdk47wz1xcix21",
+        "size": 14
+      }
+    ],
+    "from": [
+      {
+        "email": "nylascypresstest@gmail.com",
+        "name": "Test User"
+      }
+    ],
+    "id": "7edfoygcc0232fffeqvf0db52",
+    "labels": [
+      {
+        "display_name": "DRAFT",
+        "id": "7yv75k10rd3rw4kghwm9rxmqz",
+        "name": "drafts"
+      }
+    ],
+    "object": "draft",
+    "reply_to": [
+      {
+        "email": "nylascypresstest@gmail.com",
+        "name": "Test User"
+      }
+    ],
+    "reply_to_message_id": "5gvz6pav5vw467lagt40gfam4",
+    "snippet": "This is a new draft saved from composer in mailbox. along with a text file attachment. This is the second message sent back to me. On Thu, Feb 17, 2022 at 5:47 PM Test User <nylascypresstest@",
+    "starred": false,
+    "subject": "Re: Test Draft Messages In Thread",
+    "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+    "to": [
+      {
+        "email": "nylascypresstest+drafttest@gmail.com",
+        "name": "draft test"
+      }
+    ],
+    "unread": false,
+    "version": 0
+  }
+}

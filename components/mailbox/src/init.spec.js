@@ -1096,3 +1096,148 @@ describe("Mailbox Integration: Composer and Drafts", () => {
       .should("contain", "Testing with updated commons! --Sent with Nylas");
   });
 });
+
+//Draft messages in email thread
+describe("Mailbox Integration: Show draft message in Email thread", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithDraft.json",
+      },
+    );
+
+    cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
+      fixture: "mailbox/threads/threadDraftMessage.json",
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+
+    cy.addComponent("nylas-composer", {
+      show_header: true,
+      show_minimize_button: false,
+      show_from: false,
+      show_bcc: false,
+      show_cc: false,
+      reset_after_send: true,
+      reset_after_close: true,
+    });
+
+    cy.get("@mailbox").then((el) => {
+      const mailbox = el[0];
+      cy.get("nylas-composer")
+        .should("exist")
+        .as("composer")
+        .then((el) => {
+          const composer = el[0];
+          composer.close();
+
+          composer.afterSendSuccess = (data) => {
+            composer.close();
+          };
+
+          mailbox.addEventListener("draftThreadEvent", (event) => {
+            composer.value = {
+              ...event.detail.value,
+              body: event.detail.message.body ?? "",
+              files: event.detail.message.files ?? [],
+              account_id: event.detail.message.account_id ?? "",
+              id: event.detail.message.id ?? "",
+              cids: event.detail.message.cids ?? [],
+            };
+            composer.focus_body_onload = event.detail.focus_body_onload;
+            composer.open();
+          });
+
+          composer.addEventListener("messageSent", (event) => {
+            const message = event.detail.message;
+            mailbox.sentMessageUpdate(message);
+          });
+        });
+    });
+  });
+
+  it("Shows draft message in thread", () => {
+    cy.get("@email").find(".subject").contains("Test Draft Messages In Thread");
+    cy.get("@email")
+      .find("span.snippet")
+      .contains("This is the second message sent back to me.");
+  });
+
+  it("View draft message snippet in email thread", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .should("exist")
+      .as("draft");
+
+    cy.get("@draft")
+      .find(".draft-to")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+
+    cy.get("@draft")
+      .find(".snippet")
+      .should("contain", "This is a new draft saved from composer in mailbox.");
+  });
+
+  it("Click draft message in email thread opens composer", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email").find(".individual-message.draft-message").click();
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor[role='textbox']")
+      .invoke("text")
+      .should(
+        "contain",
+        "This is a new draft saved from composer in mailbox. This is testing in cypress.",
+      );
+  });
+
+  it("ENTER keydown on a draft message in thead opens composer", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .trigger("keypress", { code: "Enter" });
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor[role='textbox']")
+      .invoke("text")
+      .should(
+        "contain",
+        "This is a new draft saved from composer in mailbox. This is testing in cypress.",
+      );
+  });
+});

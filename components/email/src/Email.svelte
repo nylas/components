@@ -1562,6 +1562,12 @@
                 max-width: 95vw;
                 align-self: flex-start;
               }
+
+              div.message-head {
+                &.draft {
+                  flex-flow: row;
+                }
+              }
             }
 
             div.message-date {
@@ -1570,9 +1576,6 @@
             }
             &.expanded {
               div.message-head {
-                &.draft {
-                  flex-flow: row;
-                }
                 div.message-from-to {
                   margin: $spacing-xs 0;
                   div.message-to {
