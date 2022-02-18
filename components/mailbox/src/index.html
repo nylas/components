@@ -27,11 +27,7 @@
         if (Object.keys(event.detail.message).length) {
           component.value = {
             ...component.value,
-            body: event.detail.message.body ?? "",
-            files: event.detail.message.files ?? [],
-            account_id: event.detail.message.account_id ?? "",
-            id: event.detail.message.id ?? "",
-            cids: event.detail.message.cids ?? [],
+            ...event.detail.message,
           };
         }
         component.open();
