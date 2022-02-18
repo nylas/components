@@ -7,6 +7,7 @@
 - [Agenda] Add overrideable css vars to customize agenda appearance [#378](https://github.com/nylas/components/pull/378)
 - [Agenda] Dispatch `eventClicked` when event is clicked [#372](https://github.com/nylas/components/pull/372)
 - [Agenda] Added timezone prop support to Agenda [#368](https://github.com/nylas/components/pull/368)
+- [Agenda] All text will inherit `font-family` from `body` [#401](https://github.com/nylas/components/pull/401)
 
 ## Bug Fixes
 
