@@ -1022,3 +1022,122 @@ describe("Save composer message as draft", () => {
     );
   });
 });
+
+describe("Composer `value` prop", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@nylas.com" },
+      { name: "Secound Test User", email: "tester2@nylas.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("Set value.body", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.value = {
+          ...composer.value,
+          body: "<b>HTML Body Test</b>",
+        };
+      })
+      .wait(500);
+
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.equal(`<b>HTML Body Test</b>`);
+      });
+
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.value = {
+          ...composer.value,
+          body: "<b>Updated HTML Body</b>",
+        };
+      })
+      .wait(500);
+
+    cy.get(".html-editor[contenteditable=true]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.equal(`<b>Updated HTML Body</b>`);
+      });
+  });
+
+  it("Set value.files", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    const files_one = [
+      {
+        content_disposition: "attachment",
+        content_type: "text/calendar",
+        filename: null,
+        id: "file-id-1",
+        size: 636,
+      },
+      {
+        content_disposition: "attachment",
+        content_type: "application/ics",
+        filename: "invite.ics",
+        id: "file-id-2",
+        size: 636,
+      },
+    ];
+
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.value = {
+          ...composer.value,
+          files: files_one,
+        };
+      })
+      .wait(500);
+
+    cy.get(".file-item").then((el) => {
+      const fileItem = cy.wrap(el[0]);
+      fileItem.contains(files_one[1].filename);
+    });
+
+    const files_two = [
+      {
+        content_disposition: "attachment",
+        content_id: "some-content-id@email.mail",
+        content_type: "application/pdf",
+        filename: "invoice.pdf",
+        id: "file-id-3",
+        size: 26769,
+      },
+    ];
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.value = {
+          ...composer.value,
+          files: files_two,
+        };
+      })
+      .wait(500);
+
+    cy.get(".file-item").then((el) => {
+      const fileItem = cy.wrap(el[0]);
+      fileItem.contains(files_two[0].filename);
+    });
+  });
+});

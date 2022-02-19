@@ -65,6 +65,10 @@ export const removeAttachments = (item: Attachment): void => {
   ]);
 };
 
+export const resetAttachments = (): void => {
+  attachments.set(JSON.parse(JSON.stringify(attachmentsInitialState)));
+};
+
 export const resetAfterSend = (from: string[]): void => {
   message.set(JSON.parse(JSON.stringify({ ...messageInitialState, from })));
   attachments.set(JSON.parse(JSON.stringify(attachmentsInitialState)));
