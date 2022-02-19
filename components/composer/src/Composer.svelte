@@ -151,15 +151,19 @@
   };
 
   export const close = (): void => {
+    const msg = $message;
     visible = false;
     if (_this.reset_after_send || _this.reset_after_close) {
       sendSuccess = false;
+      saveSuccess = false;
     }
     if (_this.reset_after_close) {
       resetAfterSend($message.from);
     }
     attachments.update(() => []);
-    dispatchEvent("composerClosed", {});
+    dispatchEvent("composerClosed", {
+      message: msg,
+    });
   };
 
   let isLoading = false;
@@ -371,6 +375,14 @@
           sendError = true;
         });
     } else if (id) {
+      //If message is an existing draft
+      if (msg.object === "draft") {
+        const res = await updateDraft(id, msg, access_token);
+        if (res.id) {
+          mergeMessage({ ...res });
+          msg = { draft_id: res.id, ...res };
+        }
+      }
       // Middleware
       console.log(JSON.stringify(msg, null, 2));
       sendMessage(id, msg, access_token)

@@ -258,6 +258,9 @@
   export async function sentMessageUpdate(message: Message): Promise<void> {
     threads = MailboxStore.hydrateMessageInThread(message, query, currentPage);
   }
+  export async function draftMessageUpdate(message: Message): Promise<void> {
+    threads = MailboxStore.hydrateDraftInThread(message, query, currentPage);
+  }
 
   //#region actions
   let areAllSelected = false;
@@ -305,10 +308,13 @@
     let draft = event.detail.message;
 
     if (!_this.all_threads && draft && currentlySelectedThread) {
-      draft = await fetchIndividualMessage(draft);
+      if (!draft?.body) {
+        draft = await fetchIndividualMessage(draft);
+      }
       if (FilesStore.hasInlineFiles(draft)) {
         draft = await getMessageWithInlineFiles(draft);
       }
+      draft.draft_id = draft.id;
       event.detail.focus_body_onload = true;
       dispatchDraft(event);
     }

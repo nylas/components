@@ -112,6 +112,7 @@ export interface Message {
   subject?: null | string;
   body: null | string;
   id: string;
+  object: string;
   snippet: string;
   from: Participant[];
   to: Participant[];

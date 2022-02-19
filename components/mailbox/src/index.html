@@ -26,8 +26,8 @@
         component.focus_body_onload = event.detail.focus_body_onload;
         if (Object.keys(event.detail.message).length) {
           component.value = {
-            ...component.value,
             ...event.detail.message,
+            ...component.value,
           };
         }
         component.open();
@@ -77,6 +77,16 @@
           mailbox.addEventListener(eventType, (e) =>
             toggleComposer(e, composer, eventType),
           ),
+        );
+
+        const draftEvents = ["composerClosed", "draftUpdated", "draftSaved"];
+        draftEvents.forEach((eventType) =>
+          composer.addEventListener(eventType, (event) => {
+            const message = event.detail.message;
+            if (message.object === "draft") {
+              mailbox.draftMessageUpdate(message);
+            }
+          }),
         );
       });
     </script>
