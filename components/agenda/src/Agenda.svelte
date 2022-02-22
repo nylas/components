@@ -374,7 +374,7 @@
   let StoredAllDayEvents: DateEvent[] = [];
   $: {
     if (_this.events) {
-      StoredAllDayEvents = _this.events
+      StoredAllDayEvents = (<DateEvent[]>_this.events)
         .flat()
         .filter((event) => event.when?.date);
     } else {
