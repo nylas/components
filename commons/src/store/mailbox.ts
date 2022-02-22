@@ -242,27 +242,16 @@ function initializeThreads() {
                 messages.push(incomingMessage);
                 foundThread.messages = messages;
                 foundThread.snippet = incomingMessage.snippet;
+                //Remove draft with the same id as sent message
+                foundThread.drafts = foundThread.drafts.filter(
+                  (draft) => draft.id !== incomingMessage.id,
+                );
                 threadToUpdate = JSON.parse(JSON.stringify(foundThread));
               }
             }
             return { ...threads };
           });
         }
-
-        //Remove existing draft in thread if sent as draft
-        update((threads) => {
-          let threadToUpdate = threads[queryKey][currentPage].threads.find(
-            (thread) => thread.id === foundThread.id,
-          );
-          if (threadToUpdate) {
-            const filteredDrafts = foundThread.drafts.filter(
-              (draft) => draft.id !== incomingMessage.id,
-            );
-            foundThread.drafts = filteredDrafts;
-            threadToUpdate = JSON.parse(JSON.stringify(foundThread));
-          }
-          return { ...threads };
-        });
       }
 
       return threadsMap[queryKey][currentPage].threads;

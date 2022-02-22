@@ -1211,7 +1211,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       .find(".contacts-container")
       .should("contain", "nylascypresstest+drafttest@gmail.com");
     cy.get("@composer")
-      .find(".html-editor[role='textbox']")
+      .find(".html-editor-content[role='textbox']")
       .invoke("text")
       .should(
         "contain",
@@ -1233,7 +1233,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       .find(".contacts-container")
       .should("contain", "nylascypresstest+drafttest@gmail.com");
     cy.get("@composer")
-      .find(".html-editor[role='textbox']")
+      .find(".html-editor-content[role='textbox']")
       .invoke("text")
       .should(
         "contain",
