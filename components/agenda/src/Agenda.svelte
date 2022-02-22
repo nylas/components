@@ -372,11 +372,22 @@
   })();
 
   let StoredAllDayEvents: DateEvent[] = [];
-  $: Promise.all(Object.values($EventStore)).then((days: Event[][]) => {
-    StoredAllDayEvents = (<DateEvent[][]>days)
-      .flat()
-      .filter((event) => event.when?.date);
-  });
+  $: {
+    if (_this.events) {
+      StoredAllDayEvents = _this.events
+        .flat()
+        .filter((event) => event.when?.date);
+    } else {
+      Promise.all(Object.values($EventStore)).then((days: Event[][]) => {
+        console.log("uhhhh yes um", days);
+        StoredAllDayEvents = (<DateEvent[][]>days)
+          .flat()
+          .filter((event) => event.when?.date);
+      });
+    }
+  }
+
+  $: console.log({ StoredAllDayEvents });
 
   $: allDayEvents = StoredAllDayEvents?.filter((event: DateEvent) => {
     if (_this.timezone_agnostic_all_day_events) {
@@ -973,8 +984,7 @@
 <main
   class:nylas-agenda={true}
   class:headless={_this.header_type === "none"}
-  class={!!themeUrl ? "custom" : _this.theme}
->
+  class={!!themeUrl ? "custom" : _this.theme}>
   {#await hydratedEvents}
     (loading events)
   {:then loadedEvents}
@@ -983,8 +993,7 @@
         on:pointerdown={headerMouseDown}
         on:pointermove={headerMouseMove}
         on:pointerup={headerMouseUp}
-        on:mouseleave={headerMouseUp}
-      >
+        on:mouseleave={headerMouseUp}>
         {#if _this.header_type === "full"}
           <div class="month">
             <h1>
@@ -992,8 +1001,7 @@
               <span class="year"
                 >{selectedDate?.toLocaleString("default", {
                   year: "numeric",
-                })}</span
-              >
+                })}</span>
             </h1>
           </div>
         {/if}
@@ -1002,17 +1010,14 @@
             <button
               disabled={dateIsFirstAllowed}
               on:click={goToPreviousDate}
-              class="prev change-date"
-            >
+              class="prev change-date">
               <svg
                 width="14"
                 height="23"
                 viewBox="0 0 14 23"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
-                  d="M0.371272 12.413L10.6278 22.4264C11.1225 22.9093 11.9245 22.9093 12.4191 22.4264L13.6153 21.2585C14.1092 20.7764 14.1101 19.995 13.6175 19.5117L5.48895 11.5385L13.6175 3.56541C14.1101 3.08216 14.1092 2.30079 13.6153 1.81868L12.4191 0.650778C11.9244 0.167839 11.1224 0.167839 10.6278 0.650778L0.371272 10.6641C-0.123338 11.1471 -0.123338 11.93 0.371272 12.413Z"
-                />
+                  d="M0.371272 12.413L10.6278 22.4264C11.1225 22.9093 11.9245 22.9093 12.4191 22.4264L13.6153 21.2585C14.1092 20.7764 14.1101 19.995 13.6175 19.5117L5.48895 11.5385L13.6175 3.56541C14.1101 3.08216 14.1092 2.30079 13.6153 1.81868L12.4191 0.650778C11.9244 0.167839 11.1224 0.167839 10.6278 0.650778L0.371272 10.6641C-0.123338 11.1471 -0.123338 11.93 0.371272 12.413Z" />
               </svg>
             </button>
           {/if}
@@ -1030,17 +1035,14 @@
             <button
               disabled={dateIsLastAllowed}
               on:click={goToNextDate}
-              class="next change-date"
-            >
+              class="next change-date">
               <svg
                 width="14"
                 height="23"
                 viewBox="0 0 14 23"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
-                  d="M13.6153 10.6642L3.35873 0.650778C2.86407 0.16784 2.0621 0.16784 1.56749 0.650778L0.371229 1.81868C-0.12259 2.30079 -0.123539 3.08216 0.369118 3.56541L8.49763 11.5386L0.369118 19.5117C-0.123539 19.995 -0.12259 20.7764 0.371229 21.2585L1.56749 22.4264C2.06215 22.9093 2.86412 22.9093 3.35873 22.4264L13.6153 12.413C14.1099 11.9301 14.1099 11.1471 13.6153 10.6642Z"
-                />
+                  d="M13.6153 10.6642L3.35873 0.650778C2.86407 0.16784 2.0621 0.16784 1.56749 0.650778L0.371229 1.81868C-0.12259 2.30079 -0.123539 3.08216 0.369118 3.56541L8.49763 11.5386L0.369118 19.5117C-0.123539 19.995 -0.12259 20.7764 0.371229 21.2585L1.56749 22.4264C2.06215 22.9093 2.86412 22.9093 3.35873 22.4264L13.6153 12.413C14.1099 11.9301 14.1099 11.1471 13.6153 10.6642Z" />
               </svg>
             </button>
           {/if}
@@ -1061,8 +1063,7 @@
                   if (ev.key === "Enter") {
                     eventClicked(ev, event);
                   }
-                }}
-              >
+                }}>
                 <div class="inner">
                   {#if !showAsBusy}
                     <h2>{event.title}</h2>
@@ -1099,8 +1100,7 @@
         if (_this.allow_event_creation) {
           event.preventDefault();
         }
-      }}
-    >
+      }}>
       <div class="offset">
         <span>
           {timezoneOffsetName}
@@ -1127,8 +1127,7 @@
         on:pointerdown={agendaMouseDown}
         on:pointermove={agendaMouseMove}
         on:pointerup={agendaMouseUp}
-        on:mouseleave={agendaMouseUp}
-      >
+        on:mouseleave={agendaMouseUp}>
         {#if loadedEvents.length || (!_this.show_no_events_message && !$loadingEvents)}
           <div class="hour-ticks">
             {#each ticks as tick}
@@ -1156,12 +1155,10 @@
                   ? `calc(${event.relativeRunTime * 100}% - 4px)`
                   : `calc(${event.relativeRunTime * 100}%  - 4px)`};
                 left: {event.relativeOverlapOffset * 100}%; 
-                width: calc({event.relativeOverlapWidth * 100}% - 4px)"
-              >
+                width: calc({event.relativeOverlapWidth * 100}% - 4px)">
                 <div
                   class="inner"
-                  class:tiny-event={event.relativeRunTime <= 0.03}
-                >
+                  class:tiny-event={event.relativeRunTime <= 0.03}>
                   {#if !showAsBusy}
                     <h2>{event.title}</h2>
                   {:else}
@@ -1200,11 +1197,9 @@
                 height="16"
                 viewBox="0 0 39 16"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
-                  d="M8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16H24C27.7277 16 30.8599 13.4505 31.748 10H39V6H31.748C30.8599 2.54955 27.7277 0 24 0H8ZM4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8C28 10.2091 26.2091 12 24 12H8C5.79086 12 4 10.2091 4 8Z"
-                />
+                  d="M8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16H24C27.7277 16 30.8599 13.4505 31.748 10H39V6H31.748C30.8599 2.54955 27.7277 0 24 0H8ZM4 8C4 5.79086 5.79086 4 8 4H24C26.2091 4 28 5.79086 28 8C28 10.2091 26.2091 12 24 12H8C5.79086 12 4 10.2091 4 8Z" />
               </svg>
             </span>
           {/if}
