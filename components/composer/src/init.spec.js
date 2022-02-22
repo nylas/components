@@ -522,10 +522,14 @@ describe("Composer customizations", () => {
     });
     cy.get("@composer")
       .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer")
+      .shadow()
       .get("nylas-html-editor")
       .shadow()
       .get(".html-editor-content[contenteditable]")
-      .should("have.focus");
+      .should("have.focus", { timeout: 1000 });
   });
 
   it("should not focus body on load", () => {
@@ -1050,33 +1054,41 @@ describe("Composer `value` prop", () => {
 
   it("Set value.body", () => {
     cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
-    cy.get("@composer")
-      .then((el) => {
-        const composer = el[0];
-        composer.value = {
-          ...composer.value,
-          body: "<b>HTML Body Test</b>",
-        };
-      })
-      .wait(500);
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        body: "<b>HTML Body Test</b>",
+      };
+    });
 
-    cy.get(".html-editor[contenteditable=true]")
+    cy.get("@composer")
+      .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
       .invoke("prop", "innerHTML")
       .then((html) => {
         expect(html).to.equal(`<b>HTML Body Test</b>`);
       });
 
-    cy.get("@composer")
-      .then((el) => {
-        const composer = el[0];
-        composer.value = {
-          ...composer.value,
-          body: "<b>Updated HTML Body</b>",
-        };
-      })
-      .wait(500);
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        body: "<b>Updated HTML Body</b>",
+      };
+    });
 
-    cy.get(".html-editor[contenteditable=true]")
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
       .invoke("prop", "innerHTML")
       .then((html) => {
         expect(html).to.equal(`<b>Updated HTML Body</b>`);
@@ -1102,20 +1114,24 @@ describe("Composer `value` prop", () => {
       },
     ];
 
-    cy.get("@composer")
-      .then((el) => {
-        const composer = el[0];
-        composer.value = {
-          ...composer.value,
-          files: files_one,
-        };
-      })
-      .wait(500);
-
-    cy.get(".file-item").then((el) => {
-      const fileItem = cy.wrap(el[0]);
-      fileItem.contains(files_one[1].filename);
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        files: files_one,
+      };
     });
+    cy.get("@composer")
+      .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer")
+      .shadow()
+      .get(".file-item")
+      .then((el) => {
+        const fileItem = cy.wrap(el[0]);
+        fileItem.contains(files_one[1].filename);
+      });
 
     const files_two = [
       {
@@ -1127,24 +1143,23 @@ describe("Composer `value` prop", () => {
         size: 26769,
       },
     ];
-    cy.get("@composer")
-      .then((el) => {
-        const composer = el[0];
-        composer.value = {
-          ...composer.value,
-          files: files_two,
-        };
-      })
-      .wait(500);
-
-    cy.get(".file-item").then((el) => {
-      const fileItem = cy.wrap(el[0]);
-      fileItem.contains(files_two[0].filename);
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        files: files_two,
+      };
     });
+    cy.get("@composer")
+      .shadow()
+      .get(".file-item")
+      .then((el) => {
+        const fileItem = cy.wrap(el[0]);
+        fileItem.contains(files_two[0].filename);
+      });
   });
 
   it("Set value.files and send with correct file ids", () => {
-    const filePath = "example.json";
     const files = [
       {
         content_disposition: "attachment",
@@ -1191,11 +1206,14 @@ describe("Composer `value` prop", () => {
       component.send = send;
       component.uploadFile = uploadFile;
     });
-
-    cy.get(".send-btn").contains("Send").click();
-    cy.get("nylas-composer-alert-bar").should(
-      "contain",
-      "Message sent successfully!",
-    );
+    cy.get("@composer")
+      .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer").shadow().contains("Send").click();
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-composer-alert-bar")
+      .should("contain", "Message sent successfully!");
   });
 });
