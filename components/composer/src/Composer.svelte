@@ -222,9 +222,10 @@
   $: if (value) {
     mergeMessage(value);
     if (value.files?.length > 0) {
-      mergeMessage({ file_ids: value.files.map(({ id }) => id) });
+      let file_ids = [];
       resetAttachments();
-      for (const [fileIndex, file] of value.files.entries()) {
+      for (const [_, file] of value.files.entries()) {
+        file_ids.push(file.id);
         if (isFileAnAttachment(value, file)) {
           addAttachments({
             account_id: value.account_id,
@@ -235,6 +236,7 @@
           });
         }
       }
+      mergeMessage({ file_ids });
     }
   }
 
