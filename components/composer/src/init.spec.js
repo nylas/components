@@ -28,8 +28,8 @@ describe("Composer dispatches events", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -109,8 +109,8 @@ describe("Composer `to` prop", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -129,7 +129,7 @@ describe("Composer `to` prop", () => {
       })
       .wait(500);
 
-    cy.get("[data-cy=contacts-search-field]").first().click();
+    cy.get("[data-cy=contacts-search-field]").first().click().wait(500);
 
     cy.contains("test@test.com");
   });
@@ -164,8 +164,8 @@ describe("Composer interactions", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -227,7 +227,7 @@ describe("Composer interactions", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [],
@@ -278,8 +278,8 @@ describe("Composer customizations", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -333,13 +333,13 @@ describe("Composer customizations", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -522,10 +522,14 @@ describe("Composer customizations", () => {
     });
     cy.get("@composer")
       .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer")
+      .shadow()
       .get("nylas-html-editor")
       .shadow()
       .get(".html-editor-content[contenteditable]")
-      .should("have.focus");
+      .should("have.focus", { timeout: 1000 });
   });
 
   it("should not focus body on load", () => {
@@ -571,8 +575,8 @@ describe("Composer integration", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -586,7 +590,7 @@ describe("Composer integration", () => {
       component.to = [
         {
           name: "Test User",
-          email: "luka.b@nylas.com",
+          email: "luka.b@test.com",
         },
       ];
     });
@@ -605,13 +609,13 @@ describe("Composer integration", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -635,13 +639,13 @@ describe("Composer integration", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -702,8 +706,8 @@ describe("Composer callbacks and options", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -719,13 +723,13 @@ describe("Composer callbacks and options", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -758,8 +762,8 @@ describe("Composer file upload", () => {
     }).as("getMiddlewareAccount");
 
     cy.intercept("GET", "/users", [
-      { name: "Test User", email: "tester@nylas.com" },
-      { name: "Secound Test User", email: "tester2@nylas.com" },
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
     cy.visit("/components/composer/src/cypress.html");
@@ -783,13 +787,13 @@ describe("Composer file upload", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -819,13 +823,13 @@ describe("Composer file upload", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -920,9 +924,11 @@ describe("Composer subject", () => {
   });
 
   it("Sets subject", () => {
-    cy.get("@testComponent").then((element) => {
-      element[0].value = { subject: "Test subject" };
-    });
+    cy.get("@testComponent")
+      .then((element) => {
+        element[0].value = { subject: "Test subject" };
+      })
+      .wait(500);
 
     cy.get("input[name=subject]").should("have.value", "Test subject");
     cy.get("header span:eq(0)").contains("Test subject").should("be.visible");
@@ -961,13 +967,13 @@ describe("Save composer message as draft", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -997,13 +1003,13 @@ describe("Save composer message as draft", () => {
         from: [
           {
             name: "Luka Test",
-            email: "luka.b@nylas.com",
+            email: "luka.b@test.com",
           },
         ],
         to: [
           {
             name: "Dan Test",
-            email: "dan.r@nylas.com",
+            email: "dan.r@test.com",
           },
         ],
       };
@@ -1020,5 +1026,194 @@ describe("Save composer message as draft", () => {
       "contain",
       "Message draft saved successfully!",
     );
+  });
+});
+
+describe("Composer `value` prop", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/account.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
+    ]).as("getUsers");
+
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("Set value.body", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        body: "<b>HTML Body Test</b>",
+      };
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.equal(`<b>HTML Body Test</b>`);
+      });
+
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        body: "<b>Updated HTML Body</b>",
+      };
+    });
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("prop", "innerHTML")
+      .then((html) => {
+        expect(html).to.equal(`<b>Updated HTML Body</b>`);
+      });
+  });
+
+  it("Set value.files", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    const files_one = [
+      {
+        content_disposition: "attachment",
+        content_type: "text/calendar",
+        filename: null,
+        id: "file-id-1",
+        size: 636,
+      },
+      {
+        content_disposition: "attachment",
+        content_type: "application/ics",
+        filename: "invite.ics",
+        id: "file-id-2",
+        size: 636,
+      },
+    ];
+
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        files: files_one,
+      };
+    });
+    cy.get("@composer")
+      .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer")
+      .shadow()
+      .get(".file-item")
+      .then((el) => {
+        const fileItem = cy.wrap(el[0]);
+        fileItem.contains(files_one[1].filename);
+      });
+
+    const files_two = [
+      {
+        content_disposition: "attachment",
+        content_id: "some-content-id@email.mail",
+        content_type: "application/pdf",
+        filename: "invoice.pdf",
+        id: "file-id-3",
+        size: 26769,
+      },
+    ];
+    cy.get("@composer").then((el) => {
+      const composer = el[0];
+      composer.value = {
+        ...composer.value,
+        files: files_two,
+      };
+    });
+    cy.get("@composer")
+      .shadow()
+      .get(".file-item")
+      .then((el) => {
+        const fileItem = cy.wrap(el[0]);
+        fileItem.contains(files_two[0].filename);
+      });
+  });
+
+  it("Set value.files and send with correct file ids", () => {
+    const files = [
+      {
+        content_disposition: "attachment",
+        content_type: "text/calendar",
+        filename: null,
+        id: "file-id-1",
+        size: 636,
+      },
+      {
+        content_disposition: "attachment",
+        content_type: "application/ics",
+        filename: "invite.ics",
+        id: "file-id-2",
+        size: 636,
+      },
+    ];
+
+    const send = (data) => {
+      expect(data.file_ids).to.have.lengthOf(2);
+      expect(data.file_ids).to.contain(files[1].id);
+      return Promise.resolve({ success: true });
+    };
+    const uploadFile = (id, _file) => {
+      return Promise.resolve({ id });
+    };
+
+    cy.get("@composer").then((el) => {
+      const component = el[0];
+      component.value = {
+        files: files,
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka@test.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan@test.com",
+          },
+        ],
+      };
+      component.send = send;
+      component.uploadFile = uploadFile;
+    });
+    cy.get("@composer")
+      .shadow()
+      .get(".nylas-composer__loader")
+      .should("not.exist");
+    cy.get("@composer").shadow().contains("Send").click();
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-composer-alert-bar")
+      .should("contain", "Message sent successfully!");
   });
 });

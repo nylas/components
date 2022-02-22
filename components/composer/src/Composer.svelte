@@ -42,6 +42,7 @@
     removeAttachments,
     resetAfterSend,
     updateAttachment,
+    resetAttachments,
   } from "./lib/store";
   import { formatDate } from "./lib/format-date";
 
@@ -51,7 +52,6 @@
   import DraftIcon from "./assets/drafts.svg";
   import ExpandIcon from "./assets/expand.svg";
   import type {
-    Message,
     SendCallback,
     FetchContactsCallback,
     Tracking,
@@ -60,6 +60,7 @@
     Attachment,
   } from "@commons/types/Composer";
   import type {
+    Message,
     ComposerProperties,
     Account,
     Participant,
@@ -157,7 +158,6 @@
     if (_this.reset_after_close) {
       resetAfterSend($message.from);
     }
-    isAttachmentLoaded = false;
     attachments.update(() => []);
     dispatchEvent("composerClosed", {});
   };
@@ -221,7 +221,25 @@
 
   $: if (value) {
     mergeMessage(value);
+    if (value.files?.length > 0) {
+      let file_ids = [];
+      resetAttachments();
+      for (const [_, file] of value.files.entries()) {
+        file_ids.push(file.id);
+        if (isFileAnAttachment(value, file)) {
+          addAttachments({
+            account_id: value.account_id,
+            id: value.id,
+            filename: file.filename,
+            size: file.size,
+            content_type: file.content_type,
+          });
+        }
+      }
+      mergeMessage({ file_ids });
+    }
   }
+
   let maxFileSize: number;
   $: {
     if (!uploadFile) {
@@ -235,22 +253,6 @@
     } else {
       //Using custom uploadFile function
       maxFileSize = _this.max_file_size;
-    }
-  }
-
-  let isAttachmentLoaded = false;
-  $: if (value?.files?.length > 0 && !isAttachmentLoaded) {
-    for (const [fileIndex, file] of value.files.entries()) {
-      if (isFileAnAttachment(value, file)) {
-        addAttachments({
-          account_id: value.account_id,
-          id: value.id,
-          filename: file.filename,
-          size: file.size,
-          content_type: file.content_type,
-        });
-        isAttachmentLoaded = true;
-      }
     }
   }
 
@@ -370,6 +372,7 @@
         });
     } else if (id) {
       // Middleware
+      console.log(JSON.stringify(msg, null, 2));
       sendMessage(id, msg, access_token)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
@@ -779,8 +782,7 @@
     rel="stylesheet"
     href={themeUrl}
     on:load={() => (themeLoaded = true)}
-    on:error={() => (themeLoaded = true)}
-  />
+    on:error={() => (themeLoaded = true)} />
 {/if}
 {#if visible && isLoading}
   <div class="nylas-composer nylas-composer__loader">
@@ -793,8 +795,7 @@
   <div
     class="nylas-composer"
     data-cy="nylas-composer"
-    class:minimized={_this.minimized}
-  >
+    class:minimized={_this.minimized}>
     {#if _this.show_header}
       <header class={_this.minimized ? "minimized" : undefined}>
         <span>{subject}</span>
@@ -803,16 +804,14 @@
             {#if _this.minimized}
               <button
                 class="composer-btn"
-                on:click={() => handleMinimize(false)}
-              >
+                on:click={() => handleMinimize(false)}>
                 <span class="sr-only">Expand Composer</span>
                 <ExpandIcon class="ExpandIcon" />
               </button>
             {:else}
               <button
                 class="composer-btn"
-                on:click={() => handleMinimize(true)}
-              >
+                on:click={() => handleMinimize(true)}>
                 <span class="sr-only">Collapse Composer</span>
                 <MinimizeIcon class="MinimizeIcon" />
               </button>
@@ -858,8 +857,7 @@
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
-              value={$message.to}
-            />
+              value={$message.to} />
           {/if}
           <div class="addons">
             <button
@@ -870,8 +868,7 @@
               on:click={() => {
                 _this.show_cc = true;
                 previousProps = _this;
-              }}>CC</button
-            >
+              }}>CC</button>
 
             <button
               data-cy="toggle-bcc-field-btn"
@@ -883,8 +880,7 @@
               on:click={() => {
                 _this.show_bcc = true;
                 previousProps = _this;
-              }}>BCC</button
-            >
+              }}>BCC</button>
           </div>
         </div>
         {#if _this.show_cc}
@@ -894,8 +890,7 @@
               placeholder="CC:"
               contacts={cc}
               value={$message.cc}
-              change={handleContactsChange("cc")}
-            />
+              change={handleContactsChange("cc")} />
             <button
               type="button"
               class="composer-btn cc-btn"
@@ -904,8 +899,7 @@
                 _this.show_cc = false;
                 previousProps = _this;
               }}
-              aria-label="remove carbon copy field"
-            >
+              aria-label="remove carbon copy field">
               <CloseIcon class="CloseIcon" />
             </button>
           </div>
@@ -917,8 +911,7 @@
               placeholder="BCC:"
               contacts={bcc}
               value={$message.bcc}
-              change={handleContactsChange("bcc")}
-            />
+              change={handleContactsChange("bcc")} />
             <button
               type="button"
               class="composer-btn cc-btn"
@@ -927,8 +920,7 @@
                 _this.show_bcc = false;
                 previousProps = _this;
               }}
-              aria-label="remove blind carbon copy field"
-            >
+              aria-label="remove blind carbon copy field">
               <CloseIcon class="CloseIcon" />
             </button>
           </div>
@@ -944,8 +936,7 @@
               class="subject"
               value={subject}
               name="subject"
-              on:input={handleInputChange}
-            />
+              on:input={handleInputChange} />
           </label>
         {/if}
 
@@ -957,8 +948,7 @@
           focus_body_onload={_this.focus_body_onload}
           replace_fields={_this.replace_fields}
           show_editor_toolbar={_this.show_editor_toolbar}
-          on:keydown={handleKeyDown}
-        />
+          on:keydown={handleKeyDown} />
         {#if $attachments.length}
           <div class="nylas-attachments">
             <div class="attachments-wrapper">
@@ -967,8 +957,7 @@
               {#each $attachments as fileAttachment}
                 <nylas-composer-attachment
                   attachment={fileAttachment}
-                  remove={handleRemoveFile}
-                />
+                  remove={handleRemoveFile} />
               {/each}
             </div>
           </div>
@@ -985,8 +974,7 @@
             for="save-draft"
             class="composer-btn save-draft"
             title="Save Email As Draft"
-            on:click={handleSaveDraft}
-          >
+            on:click={handleSaveDraft}>
             <DraftIcon class="FooterIcon" />
             <span class="sr-only">Save Draft</span>
           </button>
@@ -996,8 +984,7 @@
             for="file-upload"
             class="composer-btn file-upload"
             title="Attach Files (up to {maxFileSize}MB)"
-            tabindex="0"
-          >
+            tabindex="0">
             <AttachmentIcon class="FooterIcon" />
             <span class="sr-only">Attach Files</span>
           </label>
@@ -1013,8 +1000,7 @@
             hidden
             type="file"
             id="file-upload"
-            on:change={handleFilesChange}
-          />
+            on:change={handleFilesChange} />
         </form>
       </footer>
       <!-- Date Picker Component -->
@@ -1026,8 +1012,7 @@
         <nylas-composer-alert-bar
           type="info"
           dismissible={true}
-          ondismiss={removeSchedule}
-        >
+          ondismiss={removeSchedule}>
           Send scheduled for
           <span>{formatDate(new Date(datepickerTimestamp))}</span>
         </nylas-composer-alert-bar>

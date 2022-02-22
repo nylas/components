@@ -25,11 +25,14 @@
         component.value = event.detail.value;
         component.focus_body_onload = event.detail.focus_body_onload;
         if (Object.keys(event.detail.message).length) {
-          component.value.body = event.detail.message.body ?? "";
-          component.value.files = event.detail.message.files ?? [];
-          component.value.account_id = event.detail.message.account_id ?? "";
-          component.value.id = event.detail.message.id ?? "";
-          component.value.cids = event.detail.message.cids ?? [];
+          component.value = {
+            ...component.value,
+            body: event.detail.message.body ?? "",
+            files: event.detail.message.files ?? [],
+            account_id: event.detail.message.account_id ?? "",
+            id: event.detail.message.id ?? "",
+            cids: event.detail.message.cids ?? [],
+          };
         }
         component.open();
       }
