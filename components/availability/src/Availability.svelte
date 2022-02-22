@@ -960,6 +960,8 @@
   //#region Consecutive Events
   // If manifest.events.length > 1, fetch consecutive events and emit them for <nylas-booking> or parent app to pick up.
   let consecutiveOptions: ConsecutiveEvent[][] = [];
+  $: console.log("consecOpt", consecutiveOptions, dailyConsecutiveOptions);
+  $: console.log("avail", availability);
   let dailyConsecutiveOptions: Record<string, ConsecutiveEvent[][]> = {};
 
   async function buildConsecutiveOptions() {
@@ -1112,6 +1114,7 @@
           slot.end_time <= block[block.length - 1].end_time
         );
       }) ?? [];
+    console.log("inscons", dailyConsecutiveOptions, day);
 
     // Use last block so that consecutive blocks always flow downwards
     // Sorting isn't needed since API responds with options sorted by start_date
@@ -1148,8 +1151,7 @@
     --selected-color-lightened: {lightenHexColour(_this.selected_color, 60)}; 
     --free-color: {_this.free_color}; --busy-color: {_this.busy_color}; 
     --closed-color: {_this.closed_color}; --partial-color: {_this.partial_color};
-    --selected-color: {_this.selected_color};"
-  >
+    --selected-color: {_this.selected_color};">
     <header class:dated={_this.allow_date_change}>
       <h2 class="month">{showDateRange(days)}</h2>
       {#if _this.allow_date_change}
@@ -1202,14 +1204,12 @@
       class:timezone={_this.timezone}
       class:error={hasError}
       bind:this={dayContainer}
-      bind:clientWidth={dayContainerWidth}
-    >
+      bind:clientWidth={dayContainerWidth}>
       {#each days as day, dayIndex (day.timestamp.toISOString())}
         <div
           class="day"
           data-timestamp={day.timestamp.toISOString()}
-          bind:this={dayRef[dayIndex]}
-        >
+          bind:this={dayRef[dayIndex]}>
           <header>
             <h2>
               {#if _this.date_format === "date" || _this.date_format === "full"}
@@ -1236,14 +1236,12 @@
                   style="height: {epoch.height}%; top: {epoch.offset}%;"
                   data-available-calendars={epoch.available_calendars.toString()}
                   data-start-time={new Date(epoch.start_time).toLocaleString()}
-                  data-end-time={new Date(epoch.end_time).toLocaleString()}
-                >
+                  data-end-time={new Date(epoch.end_time).toLocaleString()}>
                   <div
                     class="inner"
                     style="background-color: {partialScale(
                       epoch.available_calendars.length,
-                    )}"
-                  />
+                    )}" />
                 </div>
               {/each}
             </div>
@@ -1278,12 +1276,10 @@
                   }}
                   on:mouseenter={() => {
                     handleSlotHover(slot);
-                  }}
-                >
+                  }}>
                   {#if slot.selectionStatus === SelectionStatus.SELECTED || (event_to_hover && getBlockTimes(slot, day))}
                     <span class="selected-heading"
-                      >{getBlockTimes(slot, day)}</span
-                    >
+                      >{getBlockTimes(slot, day)}</span>
                   {/if}
                 </button>
               {/each}
@@ -1302,8 +1298,7 @@
                   class:pending={slot.selectionPending}
                   data-start-time={new Date(slot.start_time).toLocaleString()}
                   data-end-time={new Date(slot.end_time).toLocaleString()}
-                  on:click={() => toggleSlot(slot)}
-                >
+                  on:click={() => toggleSlot(slot)}>
                   {getTimeString(new Date(slot.start_time))}
                   {#if slot.availability === AvailabilityStatus.PARTIAL}
                     <span class="partial">
