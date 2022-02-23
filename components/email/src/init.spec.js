@@ -252,6 +252,42 @@ const DRAFT_THREAD = {
       name: "drafts",
     },
   ],
+  drafts: [
+    {
+      account_id: "cou6r5tjgubx9rswikzvz9afb",
+      date: 1645142972,
+      files: [],
+      from: [
+        {
+          email: "nylascypresstest@gmail.com",
+          name: "Test User",
+        },
+      ],
+      id: "draft_message_1",
+      labels: [
+        {
+          display_name: "DRAFT",
+          id: "7yv75k10rd3rw4kghwm9rxmqz",
+          name: "drafts",
+        },
+      ],
+      object: "draft",
+      reply_to: [{ email: "nylascypresstest@gmail.com", name: "Test User" }],
+      reply_to_message_id: "message-id-1",
+      snippet: "This is a draft email",
+      starred: false,
+      subject: "Re: This is a Super great test email.",
+      thread_id: "c7ksnn0zyweivc3bcjnd9miwb",
+      to: [
+        {
+          email: "nylascypresstest+drafttest@gmail.com",
+          name: "draft test",
+        },
+      ],
+      unread: false,
+      version: 0,
+    },
+  ],
 };
 
 const SINGLE_SENDER_MESSAGE = {
