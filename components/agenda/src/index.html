@@ -21,62 +21,6 @@
         const endTimeInput = document.querySelector("input#end-time");
         const colorByInput = document.querySelector('[name="color-by-event"]');
 
-        agenda.events = [
-          {
-            account_id: "1xrddnl99frq3b7son9j32aba",
-            busy: true,
-            calendar_id: "9ozdjxev7y3zrh3rdifzms8ok",
-            conferencing: null,
-            description: null,
-            hide_participants: false,
-            ical_uid: "38o0noqeqjb20cks7s6blec05t@google.com",
-            id: "5rt8qvw9n41jmz8csxpqy1kln_20220223T150000Z",
-            location: null,
-            master_event_id: "5rt8qvw9n41jmz8csxpqy1kln",
-            object: "event",
-            owner: " <nylascypresstest@gmail.com>",
-            participants: [],
-            read_only: false,
-            reminders: null,
-            status: "confirmed",
-            title: "another one",
-            visibility: null,
-            when: {
-              end_time: 1645630200,
-              object: "timespan",
-              start_time: 1645628400,
-            },
-            relativeStartTime: 0.4166666666666667,
-            relativeRunTime: 0.020833333333333332,
-            relativeOverlapWidth: 1,
-            relativeOverlapOffset: 0,
-          },
-          {
-            account_id: "1xrddnl99frq3b7son9j32aba",
-            busy: false,
-            calendar_id: "9ozdjxev7y3zrh3rdifzms8ok",
-            conferencing: null,
-            description: null,
-            hide_participants: false,
-            ical_uid: "205i39863jtag4bssaa79eoskl@google.com",
-            id: "2bx26nbemf5roon6gwkcmfkz_20220224",
-            location: null,
-            master_event_id: "2bx26nbemf5roon6gwkcmfkz",
-            object: "event",
-            owner: " <nylascypresstest@gmail.com>",
-            participants: [],
-            read_only: false,
-            reminders: null,
-            status: "confirmed",
-            title: "Test All Day Event",
-            visibility: null,
-            when: {
-              date: "2022-02-22",
-              object: "date",
-            },
-          },
-        ];
-
         let newEvent, save, cancel, update;
         agenda.event_created = (event, saveEvent, cancelEvent, updateEvent) => {
           saveEventModal.style.display = "block";
@@ -427,10 +371,13 @@
       </div>
     </div>
 
-    <!-- <nylas-agenda id="demo-agenda" auto_time_box="false" allow_event_creation="true" allow_date_change="true"
-    hide_current_time="false" color_by="event">
-  </nylas-agenda> -->
-
-    <nylas-agenda auto_time_box="false" color_by="event"> </nylas-agenda>
+    <nylas-agenda
+      id="demo-agenda"
+      auto_time_box="false"
+      allow_event_creation="true"
+      allow_date_change="true"
+      hide_current_time="false"
+      color_by="event">
+    </nylas-agenda>
   </body>
 </html>
