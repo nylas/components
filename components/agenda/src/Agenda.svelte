@@ -78,6 +78,7 @@
   export let theme: string;
   export let timezone: string;
   export let timezone_agnostic_all_day_events: boolean;
+  export let display_metadata: boolean;
 
   const defaultValueMap: Partial<AgendaProperties> = {
     allow_date_change: false,
@@ -101,6 +102,7 @@
     theme: "theme-1",
     timezone: "",
     timezone_agnostic_all_day_events: true,
+    display_metadata: true,
   };
 
   let _this = <AgendaProperties>buildInternalProps({}, {}, defaultValueMap);
@@ -1080,7 +1082,7 @@
                     <p>
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
-                    {#if event.metadata}
+                    {#if _this.display_metadata && event.metadata}
                       {#each Object.entries(event.metadata) as entry}
                         {@const key = entry[0]}
                         {@const value = entry[1]}
@@ -1192,7 +1194,7 @@
                     <p>
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
-                    {#if event.metadata}
+                    {#if _this.display_metadata && event.metadata}
                       {#each Object.entries(event.metadata) as entry}
                         {@const key = entry[0]}
                         {@const value = entry[1]}
