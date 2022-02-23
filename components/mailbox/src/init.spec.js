@@ -1122,9 +1122,26 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       },
     );
 
-    cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
-      fixture: "mailbox/threads/threadDraftMessage.json",
-    });
+    cy.intercept(
+      "https://web-components.nylas.com/middleware/messages/message-id-1",
+      {
+        fixture: "mailbox/messages/messageForDraftThread.json",
+      },
+    );
+
+    cy.intercept(
+      "https://web-components.nylas.com/middleware/messages/draft_message_1",
+      {
+        fixture: "mailbox/threads/draftMessage1.json",
+      },
+    );
+
+    cy.intercept(
+      "https://web-components.nylas.com/middleware/messages/draft_message_2",
+      {
+        fixture: "mailbox/threads/draftMessage2.json",
+      },
+    );
 
     cy.visit("/components/mailbox/src/cypress.html");
 
@@ -1150,7 +1167,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
           const composer = el[0];
           composer.close();
 
-          composer.afterSendSuccess = (data) => {
+          composer.afterSendSuccess = () => {
             composer.close();
           };
 
@@ -1187,22 +1204,30 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
     cy.get("@mailbox").find(".email-row.condensed").click();
     cy.get("@email")
       .find(".individual-message.draft-message")
+      .eq(0)
       .should("exist")
-      .as("draft");
+      .as("draft1");
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .eq(1)
+      .should("exist")
+      .as("draft2");
 
-    cy.get("@draft")
+    cy.get("@draft1")
       .find(".draft-to")
       .should("contain", "nylascypresstest+drafttest@gmail.com");
-
-    cy.get("@draft")
+    cy.get("@draft1")
       .find(".snippet")
       .should("contain", "This is a new draft saved from composer in mailbox.");
+    cy.get("@draft2")
+      .find(".snippet")
+      .should("contain", "Draft message number two");
   });
 
   it("Click draft message in email thread opens composer", () => {
     cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
     cy.get("@mailbox").find(".email-row.condensed").click();
-    cy.get("@email").find(".individual-message.draft-message").click();
+    cy.get("@email").find(".individual-message.draft-message").eq(0).click();
 
     cy.get("@composer")
       .find("header")
@@ -1224,6 +1249,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
     cy.get("@mailbox").find(".email-row.condensed").click();
     cy.get("@email")
       .find(".individual-message.draft-message")
+      .eq(0)
       .trigger("keypress", { code: "Enter" });
 
     cy.get("@composer")
@@ -1239,5 +1265,34 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
         "contain",
         "This is a new draft saved from composer in mailbox. This is testing in cypress.",
       );
+  });
+
+  it("Click on draft loads draft body when multiple drafts under the same thread", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email").find(".individual-message.draft-message").eq(0).click();
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should(
+        "contain",
+        "This is a new draft saved from composer in mailbox. This is testing in cypress.",
+      );
+
+    cy.get("@email").find(".individual-message.draft-message").eq(1).click();
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "Draft message number two");
   });
 });

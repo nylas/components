@@ -615,7 +615,7 @@
 
   async function dispatchDraft(event) {
     const { thread, focus_body_onload } = event.detail;
-    const message = thread.drafts[0];
+    const message = event.detail.message ?? thread.drafts[0];
 
     if (message.cids?.length) {
       const inlineMessage = await getMessageWithInlineFiles(message);

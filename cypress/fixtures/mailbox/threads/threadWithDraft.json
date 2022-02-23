@@ -35,7 +35,7 @@
               "name": "Test User"
             }
           ],
-          "id": "7edfoygcc0232fffeqvf0db52",
+          "id": "draft_message_1",
           "labels": [
             {
               "display_name": "DRAFT",
@@ -50,8 +50,49 @@
               "name": "Test User"
             }
           ],
-          "reply_to_message_id": "5gvz6pav5vw467lagt40gfam4",
-          "snippet": "This is a new draft saved from composer in mailbox. This is testing in cypress. This is the second message sent back to me. On Thu, Feb 17, 2022 at 5:47 PM Test User <nylascypresstest@",
+          "reply_to_message_id": "message-id-1",
+          "snippet": "This is a new draft saved from composer in mailbox. This is testing in cypress.",
+          "starred": false,
+          "subject": "Re: Test Draft Messages In Thread",
+          "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+          "to": [
+            {
+              "email": "nylascypresstest+drafttest@gmail.com",
+              "name": "draft test"
+            }
+          ],
+          "unread": false,
+          "version": 0
+        },
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1645142972,
+          "files": [],
+          "from": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "id": "draft_message_2",
+          "labels": [
+            {
+              "display_name": "DRAFT",
+              "id": "7yv75k10rd3rw4kghwm9rxmqz",
+              "name": "drafts"
+            }
+          ],
+          "object": "draft",
+          "reply_to": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "reply_to_message_id": "message-id-1",
+          "snippet": "Draft message number two",
           "starred": false,
           "subject": "Re: Test Draft Messages In Thread",
           "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
@@ -107,7 +148,7 @@
               "name": "Test User"
             }
           ],
-          "id": "8g5sbsa7n8saez1ge23dnfjx0",
+          "id": "message-id-1",
           "labels": [
             {
               "display_name": "SENT",
