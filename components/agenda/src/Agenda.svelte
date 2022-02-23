@@ -1080,6 +1080,16 @@
                     <p>
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
+                    {#if event.metadata}
+                      {#each Object.entries(event.metadata) as entry}
+                        {@const key = entry[0]}
+                        {@const value = entry[1]}
+                        <li>
+                          <strong>{key}:</strong>
+                          {value}
+                        </li>
+                      {/each}
+                    {/if}
                   {/if}
                 </div>
               </li>
@@ -1182,6 +1192,16 @@
                     <p>
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
+                    {#if event.metadata}
+                      {#each Object.entries(event.metadata) as entry}
+                        {@const key = entry[0]}
+                        {@const value = entry[1]}
+                        <li>
+                          <strong>{key}:</strong>
+                          {value}
+                        </li>
+                      {/each}
+                    {/if}
                   {/if}
                 </div>
               </li>
