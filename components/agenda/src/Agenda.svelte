@@ -379,15 +379,12 @@
         .filter((event) => event.when?.date);
     } else {
       Promise.all(Object.values($EventStore)).then((days: Event[][]) => {
-        console.log("uhhhh yes um", days);
         StoredAllDayEvents = (<DateEvent[][]>days)
           .flat()
           .filter((event) => event.when?.date);
       });
     }
   }
-
-  $: console.log({ StoredAllDayEvents });
 
   $: allDayEvents = StoredAllDayEvents?.filter((event: DateEvent) => {
     if (_this.timezone_agnostic_all_day_events) {
