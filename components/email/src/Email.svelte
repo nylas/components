@@ -110,6 +110,7 @@
   let _this = <EmailProperties>buildInternalProps({}, {}, defaultValueMap);
 
   let userEmail: string | undefined;
+  $: userEmail = <string>_this.you?.email_address;
   const PARTICIPANTS_TO_TRUNCATE = 3;
 
   onMount(async () => {
@@ -132,7 +133,6 @@
         component_id: query.component_id,
         access_token,
       });
-      userEmail = <string>_this.you?.email_address;
       // Initialize labels / folders
       const accountOrganizationUnitQuery = {
         component_id: id,
@@ -790,29 +790,49 @@
     currentTooltipId = event.detail.tooltipID;
   }
 
-  function showFromParticipants(
-    messages: Message[],
-    participants: Participant[],
-  ) {
-    let fromParticipants = messages[messages.length - 1]?.from;
-    const hasFirstFromParticipant =
-      messages &&
-      participants &&
-      messages.length > 0 &&
-      fromParticipants.length;
-    const hasMoreParticipants = showSecondFromParticipant(
-      messages,
-      participants,
-    );
-    let fromString = "";
-    if (hasFirstFromParticipant) {
-      fromString += fromParticipants[0].name || fromParticipants[0].email;
-      if (hasMoreParticipants) {
-        fromString += ", " + (participants[0].name || participants[0].email);
+  function getParticipants(thread: Thread): string[] {
+    const messages = thread.messages;
+    const drafts = thread.drafts;
+    const lastMessageFrom = messages[messages.length - 1]?.from;
+    const hasParticipant =
+      messages && participants && messages.length > 0 && lastMessageFrom.length;
+
+    let participantsList = [];
+    if (drafts.length) {
+      participantsList.push("Draft");
+    }
+    if (hasParticipant) {
+      const participantName =
+        lastMessageFrom[0].email === userEmail
+          ? "Me"
+          : lastMessageFrom[0].name || lastMessageFrom[0].email;
+      participantsList.push(participantName);
+
+      //Only display 2 participants
+      const secondParticipant = messages
+        .slice(0, -1)
+        .reverse()
+        .find((msg) => {
+          return (
+            msg.from?.length > 0 &&
+            msg.from[0].email !== lastMessageFrom[0].email
+          );
+        });
+
+      if (secondParticipant) {
+        const secondParticipantName =
+          secondParticipant.from[0].email === userEmail
+            ? "Me"
+            : secondParticipant.from[0].name || secondParticipant.from[0].email;
+        participantsList.push(secondParticipantName);
       }
     }
-    return fromString;
+    return participantsList;
   }
+
+  let isDeleted: boolean = false;
+  $: isDeleted =
+    !activeThread?.messages?.length && !activeThread?.drafts?.length;
 
   function showSecondFromParticipant(
     messages: Message[],
@@ -1353,8 +1373,22 @@
             white-space: nowrap;
             position: relative;
             text-overflow: ellipsis;
-            .from-sub-section.second {
-              display: none;
+            display: flex;
+            .from-sub-section {
+              &.deleted-email {
+                color: var(--nylas-email-snippet-color, var(--grey-dark));
+              }
+              &.second {
+                display: none;
+              }
+              &.participant-label {
+                text-overflow: ellipsis;
+                overflow: hidden;
+              }
+              &.draft-label {
+                color: var(--nylas-email-draft-label-color, #dd4b39);
+                overflow: visible;
+              }
             }
           }
           .participants-count {
@@ -1389,7 +1423,7 @@
             white-space: nowrap;
             text-overflow: ellipsis;
             &.deleted {
-              color: var(--red);
+              color: var(--nylas-email-snippet-color, var(--grey-dark));
             }
           }
         }
@@ -1483,19 +1517,6 @@
               position: relative;
               .from-sub-section.second {
                 display: inline-block;
-              }
-              &.condensed::after {
-                content: ".";
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                background: var(
-                  --nylas-email-body-background,
-                  var(--grey-lightest)
-                );
-              }
-              &.condensed.unread::after {
-                background: var(--nylas-email-body-background, var(--white));
               }
             }
             .participants-count {
@@ -2043,11 +2064,7 @@
                 {/if}
                 <div class="from-message-count">
                   {#if _this.show_contact_avatar}
-                    <div
-                      class="default-avatar"
-                      class:deleted={activeThread.messages.length <= 0 &&
-                        !isDraft}
-                    >
+                    <div class="default-avatar" class:deleted={isDeleted}>
                       {#if activeThread}
                         {#if isDraft && activeThread.drafts.length > 0}
                           <DraftIcon />
@@ -2063,44 +2080,55 @@
                     </div>
                   {/if}
                   <div class="from-participants">
-                    <div
-                      class="participants-name"
-                      class:condensed={showSecondFromParticipant(
-                        activeThread.messages,
-                        activeThread.participants,
-                      )}
-                    >
-                      <span class="from-sub-section">
-                        {!activeThread.messages.length
-                          ? isDraft
-                            ? "Draft"
-                            : "Deleted Email"
-                          : showFromParticipants(
-                              activeThread.messages,
-                              activeThread.participants,
-                            )}
+                    {#if isDeleted}
+                      <div class="participants-name">
+                        <span class="from-sub-section deleted-email">
+                          Deleted Email
+                        </span>
+                      </div>
+                    {:else}
+                      <span
+                        class="participants-name"
+                        class:condensed={showSecondFromParticipant(
+                          activeThread.messages,
+                          activeThread.participants,
+                        )}
+                      >
+                        {#await getParticipants(activeThread) then participants}
+                          {#each participants as name, idx}
+                            <span
+                              class="from-sub-section participant-label"
+                              class:draft-label={name === "Draft"}
+                            >
+                              {name}
+                            </span>
+                            {#if idx < participants.length - 1}
+                              <span class="from-sub-section">,&nbsp;</span>
+                            {/if}
+                          {/each}
+                        {/await}
                       </span>
-                    </div>
-                    <div class="participants-count">
-                      {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
-                        <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
-                        {#if activeThread.participants.length >= 2}
-                          <span class="show-on-mobile">
-                            &plus;{activeThread.participants.length -
-                              MAX_MOBILE_PARTICIPANTS}
-                          </span>
-                        {/if}
-                        <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
+                      <div class="participants-count">
+                        {#if showSecondFromParticipant(activeThread.messages, activeThread.participants)}
+                          <!-- If it is mobile, we only show 1 participant (latest from message), hence -1 -->
+                          {#if activeThread.participants.length >= 2}
+                            <span class="show-on-mobile">
+                              &plus;{activeThread.participants.length -
+                                MAX_MOBILE_PARTICIPANTS}
+                            </span>
+                          {/if}
+                          <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
                         Note that this might not be exactly correct if the name of the first participant is too long 
                         and occupies entire width -->
-                        {#if activeThread.participants.length > 2}
-                          <span class="show-on-desktop">
-                            &nbsp; &plus; {activeThread.participants.length -
-                              MAX_DESKTOP_PARTICIPANTS}
-                          </span>
+                          {#if activeThread.participants.length > 2}
+                            <span class="show-on-desktop">
+                              &nbsp; &plus; {activeThread.participants.length -
+                                MAX_DESKTOP_PARTICIPANTS}
+                            </span>
+                          {/if}
                         {/if}
-                      {/if}
-                    </div>
+                      </div>
+                    {/if}
                   </div>
                 </div>
               </div>
@@ -2118,12 +2146,8 @@
                       {thread?.subject}
                     </span>
                   {/if}
-                  <span
-                    class="snippet"
-                    class:deleted={activeThread.messages.length <= 0 &&
-                      !isDraft}
-                  >
-                    {activeThread.messages.length <= 0 && !isDraft
+                  <span class="snippet" class:deleted={isDeleted}>
+                    {isDeleted
                       ? `Sorry, looks like this thread is currently unavailable. It may
                     have been deleted in your provider inbox.`
                       : !thread?.snippet && isDraft
