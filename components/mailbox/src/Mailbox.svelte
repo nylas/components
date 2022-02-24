@@ -258,6 +258,9 @@
   export async function sentMessageUpdate(message: Message): Promise<void> {
     threads = MailboxStore.hydrateMessageInThread(message, query, currentPage);
   }
+  export async function draftMessageUpdate(message: Message): Promise<void> {
+    threads = MailboxStore.hydrateDraftInThread(message, query, currentPage);
+  }
 
   //#region actions
   let areAllSelected = false;
@@ -298,6 +301,22 @@
           ) ?? [];
         currentlySelectedThread = currentlySelectedThread;
       }
+    }
+  }
+
+  async function draftClicked(event: CustomEvent) {
+    let draft = event.detail.message;
+
+    if (!_this.all_threads && draft && currentlySelectedThread) {
+      if (!draft?.body) {
+        draft = await fetchIndividualMessage(draft);
+      }
+      if (FilesStore.hasInlineFiles(draft)) {
+        draft = await getMessageWithInlineFiles(draft);
+      }
+      draft.draft_id = draft.id;
+      event.detail.focus_body_onload = true;
+      dispatchDraft(event);
     }
   }
 
@@ -595,8 +614,8 @@
   //#endregion pagination
 
   async function dispatchDraft(event) {
-    const { thread } = event.detail;
-    const message = thread.drafts[0];
+    const { thread, focus_body_onload } = event.detail;
+    const message = event.detail.message ?? thread.drafts[0];
 
     if (message.cids?.length) {
       const inlineMessage = await getMessageWithInlineFiles(message);
@@ -611,7 +630,13 @@
       subject: message.subject,
       body: message.body,
     };
-    dispatchEvent("draftThreadEvent", { event, message, thread, value });
+    dispatchEvent("draftThreadEvent", {
+      event,
+      message,
+      thread,
+      value,
+      focus_body_onload,
+    });
   }
 </script>
 
@@ -901,6 +926,7 @@
           show_reply_all={_this.show_reply_all}
           show_forward={_this.show_forward}
           on:messageClicked={messageClicked}
+          on:draftClicked={draftClicked}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
@@ -1041,6 +1067,7 @@
                     show_forward={_this.show_forward}
                     on:threadClicked={threadClicked}
                     on:messageClicked={messageClicked}
+                    on:draftClicked={draftClicked}
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}

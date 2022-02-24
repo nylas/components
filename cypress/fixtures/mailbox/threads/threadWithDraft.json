@@ -1,0 +1,192 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  },
+  "response": [
+    {
+      "account_id": "1xrddnl99frq3b7son9j32aba",
+      "drafts": [
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1645142972,
+          "files": [],
+          "from": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "id": "draft_message_1",
+          "labels": [
+            {
+              "display_name": "DRAFT",
+              "id": "7yv75k10rd3rw4kghwm9rxmqz",
+              "name": "drafts"
+            }
+          ],
+          "object": "draft",
+          "reply_to": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "reply_to_message_id": "message-id-1",
+          "snippet": "This is a new draft number one.",
+          "starred": false,
+          "subject": "Re: Test Draft Messages In Thread",
+          "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+          "to": [
+            {
+              "email": "nylascypresstest+drafttest@gmail.com",
+              "name": "draft test"
+            }
+          ],
+          "unread": false,
+          "version": 0
+        },
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1645142972,
+          "files": [
+            {
+              "content_disposition": "attachment",
+              "content_type": "text/plain",
+              "filename": "tiny_text_file.txt",
+              "id": "27b1yxq5m61qdk47wz1xcix21",
+              "size": 14
+            }
+          ],
+          "from": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "id": "draft_message_2",
+          "labels": [
+            {
+              "display_name": "DRAFT",
+              "id": "7yv75k10rd3rw4kghwm9rxmqz",
+              "name": "drafts"
+            }
+          ],
+          "object": "draft",
+          "reply_to": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "reply_to_message_id": "message-id-1",
+          "snippet": "Draft message number two",
+          "starred": false,
+          "subject": "Re: Test Draft Messages In Thread",
+          "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+          "to": [
+            {
+              "email": "nylascypresstest+drafttest@gmail.com",
+              "name": "draft test"
+            }
+          ],
+          "unread": false,
+          "version": 0
+        }
+      ],
+      "first_message_timestamp": 1645138023,
+      "has_attachments": false,
+      "id": "c6h7xdze9tod0p03v8wkb01nf",
+      "labels": [
+        {
+          "display_name": "SENT",
+          "id": "17ocjrnqb2w5m402t1lwswkkl",
+          "name": "sent"
+        },
+        {
+          "display_name": "DRAFT",
+          "id": "7yv75k10rd3rw4kghwm9rxmqz",
+          "name": "drafts"
+        },
+        {
+          "display_name": "INBOX",
+          "id": "dx62wkpj57erbkargbr3zew3j",
+          "name": "inbox"
+        },
+        {
+          "display_name": "IMPORTANT",
+          "id": "5852fv5ompdk51g0ve17mvej9",
+          "name": "important"
+        }
+      ],
+      "last_message_received_timestamp": 1645138169,
+      "last_message_sent_timestamp": 1645138023,
+      "last_message_timestamp": 1645139358,
+      "last_updated_timestamp": 1645142972,
+      "messages": [
+        {
+          "account_id": "1xrddnl99frq3b7son9j32aba",
+          "bcc": [],
+          "cc": [],
+          "date": 1645138023,
+          "files": [],
+          "from": [
+            {
+              "email": "nylascypresstest@gmail.com",
+              "name": "Test User"
+            }
+          ],
+          "id": "message-id-1",
+          "labels": [
+            {
+              "display_name": "SENT",
+              "id": "17ocjrnqb2w5m402t1lwswkkl",
+              "name": "sent"
+            }
+          ],
+          "object": "message",
+          "reply_to": [],
+          "snippet": "This is the first message sent by me.",
+          "starred": false,
+          "subject": "Test Draft Messages In Thread",
+          "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+          "to": [
+            {
+              "email": "nylascypresstest+drafttest@gmail.com",
+              "name": "draft test"
+            }
+          ],
+          "unread": false
+        }
+      ],
+      "object": "thread",
+      "participants": [
+        {
+          "email": "nylascypresstest+drafttest@gmail.com",
+          "name": "draft test"
+        },
+        {
+          "email": "nylascypresstest@gmail.com",
+          "name": "Test User"
+        }
+      ],
+      "snippet": "This is the second message sent back to me.",
+      "starred": false,
+      "subject": "Test Draft Messages In Thread",
+      "unread": false,
+      "version": 11
+    }
+  ]
+}

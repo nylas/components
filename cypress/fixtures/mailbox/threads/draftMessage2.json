@@ -1,0 +1,65 @@
+{
+  "component": {
+    "theming": {
+      "items_per_page": 13,
+      "show_thread_checkbox": true,
+      "actions_bar": ["selectall", "star", "delete", "unread"],
+      "show_star": false,
+      "header": "",
+      "unread_status": "default",
+      "keyword_to_search": "",
+      "query_string": "in=inbox"
+    }
+  },
+  "response": {
+    "account_id": "1xrddnl99frq3b7son9j32aba",
+    "bcc": [],
+    "body": "<div dir=\"ltr\">Draft message number two</div>",
+    "cc": [],
+    "date": 1645142972,
+    "events": [],
+    "files": [
+      {
+        "content_disposition": "attachment",
+        "content_type": "text/plain",
+        "filename": "tiny_text_file.txt",
+        "id": "27b1yxq5m61qdk47wz1xcix21",
+        "size": 14
+      }
+    ],
+    "from": [
+      {
+        "email": "nylascypresstest@gmail.com",
+        "name": "Test User"
+      }
+    ],
+    "id": "draft_message_2",
+    "labels": [
+      {
+        "display_name": "DRAFT",
+        "id": "7yv75k10rd3rw4kghwm9rxmqz",
+        "name": "drafts"
+      }
+    ],
+    "object": "draft",
+    "reply_to": [
+      {
+        "email": "nylascypresstest@gmail.com",
+        "name": "Test User"
+      }
+    ],
+    "reply_to_message_id": "message-id-1",
+    "snippet": "Draft message number two",
+    "starred": false,
+    "subject": "Re: Test Draft Messages In Thread",
+    "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+    "to": [
+      {
+        "email": "nylascypresstest+drafttest@gmail.com",
+        "name": "draft test"
+      }
+    ],
+    "unread": false,
+    "version": 0
+  }
+}

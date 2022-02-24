@@ -1096,3 +1096,245 @@ describe("Mailbox Integration: Composer and Drafts", () => {
       .should("contain", "Testing with updated commons! --Sent with Nylas");
   });
 });
+
+//Draft messages in email thread
+describe("Mailbox Integration: Show draft message in Email thread", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithDraft.json",
+      },
+    );
+
+    cy.intercept(
+      "https://web-components.nylas.com/middleware/messages/message-id-1",
+      {
+        fixture: "mailbox/messages/messageForDraftThread.json",
+      },
+    );
+
+    cy.intercept(
+      "https://web-components.nylas.com/middleware/messages/draft_message_1",
+      {
+        fixture: "mailbox/threads/draftMessage1.json",
+      },
+    );
+
+    cy.intercept(
+      "https://web-components.nylas.com/middleware/messages/draft_message_2",
+      {
+        fixture: "mailbox/threads/draftMessage2.json",
+      },
+    );
+
+    cy.intercept("POST", "https://web-components.nylas.com/middleware/files", {
+      fixture: "composer/files/fileResponse.json",
+    });
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+
+    cy.addComponent("nylas-composer", {
+      show_header: true,
+      show_minimize_button: false,
+      show_from: false,
+      show_bcc: false,
+      show_cc: false,
+      reset_after_send: true,
+      reset_after_close: true,
+    });
+
+    cy.get("@mailbox").then((el) => {
+      const mailbox = el[0];
+      cy.get("nylas-composer")
+        .should("exist")
+        .as("composer")
+        .then((el) => {
+          const composer = el[0];
+          composer.close();
+
+          composer.afterSendSuccess = () => {
+            composer.close();
+          };
+
+          mailbox.addEventListener("draftThreadEvent", (event) => {
+            composer.value = event.detail.value;
+            composer.focus_body_onload = event.detail.focus_body_onload;
+            if (Object.keys(event.detail.message).length) {
+              composer.value = {
+                ...event.detail.message,
+                ...composer.value,
+              };
+            }
+            composer.open();
+          });
+
+          composer.addEventListener("messageSent", (event) => {
+            const message = event.detail.message;
+            mailbox.sentMessageUpdate(message);
+          });
+
+          const draftEvents = ["composerClosed", "draftUpdated", "draftSaved"];
+          draftEvents.forEach((eventType) =>
+            composer.addEventListener(eventType, (event) => {
+              const message = event.detail.message;
+              if (message.object === "draft") {
+                mailbox.draftMessageUpdate(message);
+              }
+            }),
+          );
+        });
+    });
+  });
+
+  it("Shows draft message in thread", () => {
+    cy.get("@email").find(".subject").contains("Test Draft Messages In Thread");
+    cy.get("@email")
+      .find("span.snippet")
+      .contains("This is the second message sent back to me.");
+  });
+
+  it("View draft message snippet in email thread", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .eq(0)
+      .should("exist")
+      .as("draft1");
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .eq(1)
+      .should("exist")
+      .as("draft2");
+
+    cy.get("@draft1")
+      .find(".draft-to")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@draft1")
+      .find(".snippet")
+      .should("contain", "This is a new draft number one.");
+    cy.get("@draft2")
+      .find(".snippet")
+      .should("contain", "Draft message number two");
+  });
+
+  it("Click draft message in email thread opens composer", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email").find(".individual-message.draft-message").eq(0).click();
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "This is a new draft number one.");
+  });
+
+  it("ENTER keydown on a draft message in thead opens composer", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .eq(0)
+      .trigger("keypress", { code: "Enter" });
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "This is a new draft number one.");
+  });
+
+  it("Click on draft loads draft body when multiple drafts under the same thread", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@email").find(".individual-message.draft-message").eq(0).click();
+
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "This is a new draft number one.");
+
+    cy.get("@email").find(".individual-message.draft-message").eq(1).click();
+    cy.get("@composer")
+      .find(".contacts-container")
+      .should("contain", "nylascypresstest+drafttest@gmail.com");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "Draft message number two");
+  });
+
+  it("Close draft will update thread store and attachment", () => {
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    cy.get("@email")
+      .find(".individual-message.draft-message")
+      .eq(0)
+      .should("exist")
+      .as("draft1");
+    cy.get("@draft1").click();
+
+    //Update message body and attach file to it
+    cy.get("@composer")
+      .find(".html-editor-content[contenteditable]")
+      .focus()
+      .type("Updated draft message.");
+    const filePath = "composer/files/tiny_text_file.txt";
+    cy.get("input[type=file]").attachFile(filePath);
+
+    cy.get("@composer").find("header .composer-btn .CloseIcon").click();
+    cy.get("@mailbox").find("button[aria-label='Return to Mailbox']").click();
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.get("@draft1").click();
+
+    //Should show updated message and attachment when reopened
+    cy.get("@composer")
+      .find(".html-editor-content[contenteditable]")
+      .invoke("text")
+      .should(
+        "contain",
+        "This is a new draft number one.Updated draft message.",
+      );
+
+    cy.get("nylas-composer-attachment")
+      .contains("tiny_text_file.txt")
+      .should("be.visible");
+  });
+});

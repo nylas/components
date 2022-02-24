@@ -673,6 +673,37 @@
     });
   }
 
+  function handleDraftClick(event: MouseEvent, draftIndex: number) {
+    event.stopImmediatePropagation();
+    dispatchDraftEvent(event, draftIndex);
+  }
+
+  function handleDraftKeypress(event: KeyboardEvent, draftIndex: number) {
+    event.stopImmediatePropagation();
+    if (event.code === "Enter") {
+      dispatchDraftEvent(event, draftIndex);
+    }
+  }
+
+  function dispatchDraftEvent(event: UIEvent, draftIndex: number) {
+    if (activeThread.drafts[draftIndex]) {
+      dispatchEvent("draftClicked", {
+        event,
+        message: activeThread.drafts[draftIndex],
+        thread: activeThread,
+      });
+      // Don't fetch message when thread is being passed manually
+      if (!_this.thread) {
+        fetchIndividualMessage(
+          draftIndex,
+          activeThread.drafts[draftIndex].id,
+        ).then((res) => {
+          activeThread.drafts[draftIndex].body = res;
+        });
+      }
+    }
+  }
+
   const weekdays = [
     "Sunday",
     "Monday",
@@ -973,6 +1004,9 @@
         &.deleted {
           background: var(--red);
         }
+        &.draft {
+          background: var(--nylas-email-snippet-color, var(--grey-dark));
+        }
       }
       header {
         font-size: 1.2rem;
@@ -1185,10 +1219,14 @@
               margin-top: $spacing-xs;
             }
             div.message-head {
-              .avatar-from {
+              .avatar-info {
                 display: flex;
                 align-items: center;
                 gap: $spacing-s;
+
+                & .draft-to {
+                  color: var(--nylas-email-snippet-color, var(--grey-dark));
+                }
               }
             }
           }
@@ -1234,9 +1272,12 @@
         }
         &.expanded {
           div.message-head {
+            &.draft {
+              flex-flow: column;
+            }
             div.message-from-to {
               margin: 0.5rem 0;
-              .avatar-from {
+              .avatar-info {
                 display: flex;
                 align-items: center;
                 gap: $spacing-s;
@@ -1521,6 +1562,12 @@
                 max-width: 95vw;
                 align-self: flex-start;
               }
+
+              div.message-head {
+                &.draft {
+                  flex-flow: row;
+                }
+              }
             }
 
             div.message-date {
@@ -1577,6 +1624,7 @@
     {:then thread}
       {#if thread && activeThread}
         {#if activeThread.expanded}
+          <!-- Expanded thread row -->
           <div
             class="email-row expanded {_this.click_action === 'mailbox'
               ? 'expanded-mailbox-thread'
@@ -1662,7 +1710,7 @@
                   {#if message.expanded || msgIndex === activeThread.messages.length - 1}
                     <div class="message-head">
                       <div class="message-from-to">
-                        <div class="avatar-from">
+                        <div class="avatar-info">
                           {#if _this.show_contact_avatar}
                             <div class="default-avatar">
                               <nylas-contact-image
@@ -1822,7 +1870,7 @@
                     </div>
                   {:else}
                     <div class="message-head">
-                      <div class="avatar-from">
+                      <div class="avatar-info">
                         {#if _this.show_contact_avatar}
                           <div class="default-avatar">
                             <nylas-contact-image
@@ -1869,8 +1917,93 @@
             {:else}
               <span class="snippet">{thread.snippet}</span>
             {/if}
+            <!-- Draft messages -->
+            {#if activeThread.drafts.length}
+              {#each activeThread.drafts as draft, draftIndex}
+                <div
+                  tabindex="0"
+                  class={`individual-message condensed draft-message`}
+                  bind:this={messageRefs[draftIndex]}
+                  on:click|stopPropagation={(e) =>
+                    handleDraftClick(e, draftIndex)}
+                  on:keypress={(e) => handleDraftKeypress(e, draftIndex)}
+                >
+                  <div class="message-head draft">
+                    <div class="avatar-info">
+                      {#if _this.show_contact_avatar}
+                        <div class="default-avatar draft">
+                          <DraftIcon />
+                        </div>
+                      {/if}
+                      <div class="draft-to">
+                        {#if draft?.to}
+                          {#await getAllRecipients( { to: draft.to, cc: draft.cc, bcc: draft.bcc }, ) then allRecipients}
+                            {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
+                              <p>
+                                Draft
+                                {#if i === 0}
+                                  {`to ${
+                                    _this.you &&
+                                    recipient.email === _this.you.email_address
+                                      ? "Me"
+                                      : ""
+                                  }`}
+                                {:else if recipient._type === "cc" && i === draft.to.length}
+                                  cc:
+                                {:else if recipient._type === "bcc" && i === draft.to.length + draft.cc.length}
+                                  bcc:
+                                {/if}
+
+                                {#if recipient.email && recipient.name}
+                                  {recipient.name ?? _this.you.name} &lt;{recipient.email}&gt;
+                                {:else if recipient.email && !recipient.name}
+                                  {recipient.email}
+                                {/if}
+                              </p>
+                            {/each}
+                            {#if allRecipients.length > PARTICIPANTS_TO_TRUNCATE}
+                              <div>
+                                <nylas-tooltip
+                                  on:toggleTooltip={setTooltip}
+                                  id={`show-more-participants-${draft.id}`}
+                                  current_tooltip_id={currentTooltipId}
+                                  icon={DropdownSymbol}
+                                  text={`And ${
+                                    allRecipients.length -
+                                    PARTICIPANTS_TO_TRUNCATE
+                                  } more`}
+                                  content={`${aggregateRecipientsString(
+                                    allRecipients,
+                                  )}`}
+                                />
+                              </div>
+                            {/if}
+                          {/await}
+                        {/if}
+                      </div>
+                    </div>
+
+                    <section>
+                      {#if _this.show_received_timestamp}
+                        <div class="message-date">
+                          <span>
+                            Saved at: {formatExpandedDate(
+                              new Date(draft.date * 1000),
+                            )}
+                          </span>
+                        </div>
+                      {/if}
+                    </section>
+                  </div>
+                  <div class="snippet">
+                    {draft.snippet}
+                  </div>
+                </div>
+              {/each}
+            {/if}
           </div>
         {:else}
+          <!-- Condensed thread row -->
           <div
             class="email-row condensed"
             class:show_star={_this.show_star}
@@ -1901,17 +2034,17 @@
                       class:deleted={activeThread.messages.length <= 0 &&
                         !isDraft}
                     >
-                      {#if activeThread && activeThread.messages.length <= 0}
-                        {#if isDraft}
+                      {#if activeThread}
+                        {#if isDraft && activeThread.drafts.length > 0}
                           <DraftIcon />
-                        {:else}
+                        {:else if activeThread.messages.length <= 0}
                           <NoMessagesIcon />
+                        {:else}
+                          <nylas-contact-image
+                            {contact_query}
+                            contact={activeThreadContact}
+                          />
                         {/if}
-                      {:else}
-                        <nylas-contact-image
-                          {contact_query}
-                          contact={activeThreadContact}
-                        />
                       {/if}
                     </div>
                   {/if}
@@ -2055,7 +2188,7 @@
         <div class="individual-message expanded">
           <div class="message-head">
             <div class="message-from-to">
-              <div class="avatar-from">
+              <div class="avatar-info">
                 {#if _this.show_contact_avatar}
                   <div class="default-avatar">
                     <nylas-contact-image

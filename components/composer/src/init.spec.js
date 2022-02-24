@@ -772,7 +772,7 @@ describe("Composer file upload", () => {
   });
 
   it("Successful upload", () => {
-    const filePath = "example.json";
+    const filePath = "composer/files/tiny_text_file.txt";
 
     const send = (data) => {
       expect(data.file_ids).to.have.lengthOf(1);
@@ -803,7 +803,7 @@ describe("Composer file upload", () => {
 
     cy.get("input[type=file]").attachFile(filePath);
     cy.get("nylas-composer-attachment")
-      .contains("example.json")
+      .contains("tiny_text_file.txt")
       .should("be.visible");
     cy.get(".send-btn").contains("Send").click();
     cy.get("nylas-composer-alert-bar").should(
@@ -988,7 +988,7 @@ describe("Save composer message as draft", () => {
   });
 
   it("Successful upload", () => {
-    const filePath = "example.json";
+    const filePath = "composer/files/tiny_text_file.txt";
 
     const save = (data) => {
       expect(data.file_ids).to.have.lengthOf(1);
@@ -1019,7 +1019,7 @@ describe("Save composer message as draft", () => {
 
     cy.get("input[type=file]").attachFile(filePath);
     cy.get("nylas-composer-attachment")
-      .contains("example.json")
+      .contains("tiny_text_file.txt")
       .should("be.visible");
     cy.get(".save-draft").click();
     cy.get("nylas-composer-alert-bar").should(

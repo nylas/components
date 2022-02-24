@@ -1,0 +1,42 @@
+{
+  "component": {
+    "theming": {
+      "show_received_timestamp": true,
+      "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+      "clean_conversation": false,
+      "unread": false,
+      "show_star": false,
+      "show_contact_avatar": true,
+      "show_number_of_messages": true,
+      "click_action": "select"
+    }
+  },
+  "response": {
+    "account_id": "1xrddnl99frq3b7son9j32aba",
+    "bcc": [],
+    "body": "<div dir=\"ltr\">This is the first message sent by me.</div>",
+    "cc": [{ "email": "test@nylas.com", "name": "Real User" }],
+    "date": 1634858431,
+    "events": [],
+    "files": [],
+    "from": [{ "email": "nylascypresstest@gmail.com", "name": "Test User" }],
+    "id": "message-id-1",
+    "labels": [
+      {
+        "display_name": "SENT",
+        "id": "17ocjrnqb2w5m402t1lwswkkl",
+        "name": "sent"
+      }
+    ],
+    "object": "message",
+    "reply_to": [],
+    "snippet": "This is the first message sent by me.",
+    "starred": false,
+    "subject": "Test Draft Messages In Thread",
+    "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
+    "to": [
+      { "email": "nylascypresstest+drafttest@gmail.com", "name": "draft test" }
+    ],
+    "unread": false
+  }
+}

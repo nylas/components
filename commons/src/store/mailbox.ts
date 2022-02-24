@@ -242,6 +242,10 @@ function initializeThreads() {
                 messages.push(incomingMessage);
                 foundThread.messages = messages;
                 foundThread.snippet = incomingMessage.snippet;
+                //Remove draft with the same id as sent message
+                foundThread.drafts = foundThread.drafts.filter(
+                  (draft) => draft.id !== incomingMessage.id,
+                );
                 threadToUpdate = JSON.parse(JSON.stringify(foundThread));
               }
             }
@@ -250,6 +254,52 @@ function initializeThreads() {
         }
       }
 
+      return threadsMap[queryKey][currentPage].threads;
+    },
+
+    //Update drafts in the threads store
+    hydrateDraftInThread: (
+      incomingDraft: Message,
+      query: MailboxQuery,
+      currentPage: number,
+    ) => {
+      const queryKey = JSON.stringify(query);
+
+      const foundThread = threadsMap[queryKey][currentPage]?.threads?.find(
+        (thread) => thread.id === incomingDraft.thread_id,
+      );
+      if (foundThread) {
+        //Update existing draft message in store
+        const foundDraft = foundThread.drafts?.find(
+          (draft) => draft.id === incomingDraft.id,
+        );
+
+        if (incomingDraft.thread_id) {
+          //Update the snippet showing on the condensed draft message
+          incomingDraft.snippet = incomingDraft.body
+            ?.replace(/<\/?[^>]+(>|$)/g, "")
+            .substring(0, 75);
+
+          if (foundDraft) {
+            Object.assign(foundDraft, incomingDraft);
+          } else {
+            const drafts = foundThread.drafts;
+            drafts.push(incomingDraft);
+            foundThread.drafts = drafts;
+          }
+
+          update((threads) => {
+            let threadToUpdate = threads[queryKey][currentPage].threads.find(
+              (thread) => thread.id === foundThread.id,
+            );
+            if (threadToUpdate) {
+              threadToUpdate = JSON.parse(JSON.stringify(foundThread));
+            }
+
+            return { ...threads };
+          });
+        }
+      }
       return threadsMap[queryKey][currentPage].threads;
     },
   };
@@ -263,9 +313,9 @@ export const EmailStore: Readable<Record<string, Thread[]>> = derived(
     const emailStore: Record<string, Thread[]> = {};
     Object.entries($MailboxStore).forEach(
       ([key, paginatedThreads]) =>
-      (emailStore[key] = paginatedThreads
-        .map((paginatedThread) => paginatedThread.threads)
-        .flat()),
+        (emailStore[key] = paginatedThreads
+          .map((paginatedThread) => paginatedThread.threads)
+          .flat()),
     );
     return emailStore;
   },
