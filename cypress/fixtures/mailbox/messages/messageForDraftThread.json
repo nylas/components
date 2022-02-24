@@ -19,7 +19,7 @@
     "date": 1634858431,
     "events": [],
     "files": [],
-    "from": [{ "email": "nylascypresstest@gmail.com", "name": "Test User" }],
+    "from": [{ "email": "test-email@email.com", "name": "Test User" }],
     "id": "message-id-1",
     "labels": [
       {

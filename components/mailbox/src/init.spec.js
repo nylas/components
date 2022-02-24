@@ -1368,3 +1368,45 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       .should("be.visible");
   });
 });
+
+describe("Display Participants in thread row", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      {
+        fixture: "mailbox/manifest.json",
+      },
+    );
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "mailbox/account.json",
+    });
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
+      fixture: "mailbox/labels.json",
+    });
+
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithDraft.json",
+      },
+    );
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+  });
+
+  it("Shows draft label in thread participant", () => {
+    cy.get("@email")
+      .find(".participants-name span.draft-label")
+      .contains("Draft");
+  });
+  it("Shows current user email as 'Me' in thread participant", () => {
+    cy.get("@email")
+      .find(".participants-name span.participant-label")
+      .contains("Me");
+  });
+});
