@@ -281,8 +281,7 @@ function initializeThreads() {
             .substring(0, 75);
 
           if (foundDraft) {
-            foundDraft.body = incomingDraft.body;
-            foundDraft.snippet = incomingDraft.snippet;
+            Object.assign(foundDraft, incomingDraft);
           } else {
             const drafts = foundThread.drafts;
             drafts.push(incomingDraft);

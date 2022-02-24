@@ -14,19 +14,11 @@
   "response": {
     "account_id": "1xrddnl99frq3b7son9j32aba",
     "bcc": [],
-    "body": "<div dir=\"ltr\">This is a new draft saved from composer in mailbox. This is testing in cypress.</div>",
+    "body": "<div dir=\"ltr\">This is a new draft number one.</div>",
     "cc": [],
     "date": 1645142972,
     "events": [],
-    "files": [
-      {
-        "content_disposition": "attachment",
-        "content_type": "text/plain",
-        "filename": "Tiny_text_file.txt",
-        "id": "27b1yxq5m61qdk47wz1xcix21",
-        "size": 14
-      }
-    ],
+    "files": [],
     "from": [
       {
         "email": "nylascypresstest@gmail.com",
@@ -49,7 +41,7 @@
       }
     ],
     "reply_to_message_id": "message-id-1",
-    "snippet": "This is a new draft saved from composer in mailbox. along with a text file attachment. This is the second message sent back to me. On Thu, Feb 17, 2022 at 5:47 PM Test User <nylascypresstest@",
+    "snippet": "This is a new draft number one.",
     "starred": false,
     "subject": "Re: Test Draft Messages In Thread",
     "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
