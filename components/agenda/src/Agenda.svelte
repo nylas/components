@@ -1082,7 +1082,7 @@
                     <p>
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
-                    {#if _this.display_metadata && event.metadata}
+                    {#if _this.display_metadata && Object.entries(event.metadata).length}
                       {#each Object.entries(event.metadata) as entry}
                         {@const key = entry[0]}
                         {@const value = entry[1]}
@@ -1194,7 +1194,7 @@
                     <p>
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
-                    {#if _this.display_metadata && event.metadata}
+                    {#if _this.display_metadata && Object.entries(event.metadata).length}
                       {#each Object.entries(event.metadata) as entry}
                         {@const key = entry[0]}
                         {@const value = entry[1]}
