@@ -49,6 +49,22 @@ const MIXED_TYPE_EVENTS = [
   },
 ];
 
+const METADATA_EVENTS = [
+  {
+    status: "confirmed",
+    title: "A metadata-laden event",
+    metadata: {
+      nananana: "nananana",
+      bat: "man",
+    },
+    when: {
+      end_time: 1642179600, //12:00
+      object: "timespan",
+      start_time: 1642176900, //11:15
+    },
+  },
+];
+
 describe("Agenda minimal display", () => {
   beforeEach(() => {
     cy.clock(1642179039224);
@@ -454,5 +470,60 @@ describe("Display events in different timezone is specified", () => {
     cy.get("@agenda").invoke("attr", "timezone", "America/Los_Angeles");
     cy.get("@agenda").get(".event").eq(0).contains(".time", "7:00 AM");
     cy.get("@agenda").get(".event").eq(1).contains(".time", "9:35 AM");
+  });
+});
+
+describe("Display event metadata", () => {
+  beforeEach(() => {
+    //Set current time to 2am
+    cy.clock(1642143600000);
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "agenda/manifest",
+      "**/middleware/calendars/test-calendar-id": "agenda/calendars/calendarId",
+      "**/middleware/agenda/events?*": "agenda/events",
+    });
+
+    cy.visit("/components/agenda/src/cypress.html");
+    cy.get("nylas-agenda").should("exist").as("agenda");
+  });
+
+  it("displays metadata on an event by default", () => {
+    cy.get("@agenda").then((element) => {
+      const agenda = element[0];
+      agenda.events = METADATA_EVENTS;
+      agenda.auto_time_box = false;
+      cy.get("@agenda").contains("A metadata-laden event").should("exist");
+      cy.get("@agenda")
+        .contains("A metadata-laden event")
+        .should("exist")
+        .get("ul.metadata")
+        .should("exist");
+      cy.get("@agenda")
+        .contains("A metadata-laden event")
+        .should("exist")
+        .get("ul.metadata li")
+        .should("have.length", 2);
+      cy.get("@agenda")
+        .contains("A metadata-laden event")
+        .should("exist")
+        .get("ul.metadata")
+        .should("contain", "bat: man");
+    });
+  });
+  it("hides metadata when display_metadata is false", () => {
+    cy.get("@agenda").then((element) => {
+      const agenda = element[0];
+      agenda.events = METADATA_EVENTS;
+      agenda.auto_time_box = false;
+      agenda.display_metadata = false;
+      cy.get("@agenda").contains("A metadata-laden event").should("exist");
+      cy.get("@agenda")
+        .contains("A metadata-laden event")
+        .get("ul.metadata")
+        .should("not.exist");
+      cy.get("@agenda")
+        .contains("A metadata-laden event")
+        .should("not.contain", "bat: man");
+    });
   });
 });

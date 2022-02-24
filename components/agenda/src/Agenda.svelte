@@ -1083,14 +1083,16 @@
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
                     {#if _this.display_metadata && event.metadata && Object.keys(event.metadata)?.length}
-                      {#each Object.entries(event.metadata) as entry}
-                        {@const key = entry[0]}
-                        {@const value = entry[1]}
-                        <li>
-                          <strong>{key}:</strong>
-                          {value}
-                        </li>
-                      {/each}
+                      <ul class="metadata">
+                        {#each Object.entries(event.metadata) as entry}
+                          {@const key = entry[0]}
+                          {@const value = entry[1]}
+                          <li>
+                            <strong>{key}:</strong>
+                            {value}
+                          </li>
+                        {/each}
+                      </ul>
                     {/if}
                   {/if}
                 </div>
@@ -1195,14 +1197,16 @@
                       {@html DOMPurify.sanitize(event.description ?? "")}
                     </p>
                     {#if _this.display_metadata && event.metadata && Object.keys(event.metadata)?.length}
-                      {#each Object.entries(event.metadata) as entry}
-                        {@const key = entry[0]}
-                        {@const value = entry[1]}
-                        <li>
-                          <strong>{key}:</strong>
-                          {value}
-                        </li>
-                      {/each}
+                      <ul class="metadata">
+                        {#each Object.entries(event.metadata) as entry}
+                          {@const key = entry[0]}
+                          {@const value = entry[1]}
+                          <li>
+                            <strong>{key}:</strong>
+                            {value}
+                          </li>
+                        {/each}
+                      </ul>
                     {/if}
                   {/if}
                 </div>
