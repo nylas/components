@@ -21,6 +21,34 @@ const AGENDA_EVENTS = [
   },
 ];
 
+const MIXED_TYPE_EVENTS = [
+  {
+    status: "confirmed",
+    title: "A limited-time event",
+    when: {
+      end_time: 1642179600, //12:00
+      object: "timespan",
+      start_time: 1642176900, //11:15
+    },
+  },
+  {
+    status: "confirmed",
+    title: "An All Day Event",
+    when: {
+      date: "2022-01-14",
+      object: "date",
+    },
+  },
+  {
+    status: "confirmed",
+    title: "Test All Day Event Two",
+    when: {
+      date: "2022-01-14",
+      object: "date",
+    },
+  },
+];
+
 describe("Agenda minimal display", () => {
   beforeEach(() => {
     cy.clock(1642179039224);
@@ -311,6 +339,33 @@ describe("Agenda interactions", () => {
     cy.get("@agenda").contains("Friday 14");
     cy.get("button.prev").click();
     cy.get("@agenda").contains("Thursday 13");
+  });
+});
+
+describe("Agenda Custom Data", () => {
+  beforeEach(() => {
+    cy.clock(1642179039224);
+
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "agenda/manifest",
+      "**/middleware/calendars/test-calendar-id": "agenda/calendars/calendarId",
+      "**/middleware/agenda/events?calendar_id=test-calendar-id*":
+        "agenda/events",
+    });
+
+    cy.visit("/components/agenda/src/cypress.html");
+    cy.get("nylas-agenda").should("exist").as("agenda");
+    cy.get("@agenda").invoke("attr", "timezone", "America/Toronto");
+  });
+  it("shows all-day events when passed", () => {
+    cy.get("@agenda").then((element) => {
+      const agenda = element[0];
+      agenda.events = MIXED_TYPE_EVENTS;
+      agenda.auto_time_box = false;
+      cy.get("@agenda").contains("An All Day Event").should("exist");
+      cy.get("@agenda").contains("Test All Day Event Two").should("exist");
+      cy.get("@agenda").contains("A limited-time event").should("exist");
+    });
   });
 });
 

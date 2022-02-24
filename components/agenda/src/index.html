@@ -5,6 +5,12 @@
     <meta charset="UTF-8" />
     <title>Agenda Demo</title>
     <link rel="shortcut icon" href="data:;base64,=" />
+    <style>
+      html,
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+    </style>
     <script src="../index.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -308,8 +314,7 @@
           min="0"
           max="1440"
           step="1"
-          value="1"
-        />
+          value="1" />
         <span class="start"></span>
       </label>
       <label>
@@ -320,8 +325,7 @@
           min="0"
           max="1440"
           step="1"
-          value="1440"
-        />
+          value="1440" />
         <span class="end"></span>
       </label>
       <hr />
@@ -373,8 +377,7 @@
       allow_event_creation="true"
       allow_date_change="true"
       hide_current_time="false"
-      color_by="event"
-    >
+      color_by="event">
     </nylas-agenda>
   </body>
 </html>
