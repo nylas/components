@@ -91,7 +91,7 @@
               "name": "Test User"
             }
           ],
-          "reply_to_message_id": "message-id-1",
+          "reply_to_message_id": "message-id-2",
           "snippet": "Draft message number two",
           "starred": false,
           "subject": "Re: Test Draft Messages In Thread",

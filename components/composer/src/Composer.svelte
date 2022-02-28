@@ -153,6 +153,7 @@
 
   export const close = (): void => {
     const msg = $message;
+    msg.active = false;
     visible = false;
     if (_this.reset_after_send || _this.reset_after_close) {
       sendSuccess = false;

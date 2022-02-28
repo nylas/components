@@ -613,7 +613,7 @@
   }
   //#endregion pagination
 
-  async function dispatchDraft(event) {
+  async function dispatchDraft(event: CustomEvent) {
     const { thread, focus_body_onload } = event.detail;
     const message = event.detail.message ?? thread.drafts[0];
 
@@ -621,6 +621,7 @@
       const inlineMessage = await getMessageWithInlineFiles(message);
       message.body = inlineMessage.body;
     }
+    draftMessageUpdate(message);
 
     const value = {
       to: message.to,
