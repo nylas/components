@@ -14,6 +14,7 @@
   let toolbar: ToolbarItem[] = defaultActions;
 
   $: if (focus_body_onload && container) {
+    container.focus();
     handleHtmlBodyFocus();
   }
 
