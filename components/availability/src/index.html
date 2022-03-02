@@ -89,10 +89,12 @@
         });
 
         startTimeInput.addEventListener("input", (event) => {
+          console.log("startTimeInput", event.target.value);
           component.start_hour = parseInt(event.target.value);
         });
 
         endTimeInput.addEventListener("input", (event) => {
+          console.log("endTimeInput", event.target.value);
           component.end_hour = parseInt(event.target.value);
         });
 
@@ -267,7 +269,7 @@
                     startHour: 13,
                     startMinute: 0,
                     endWeekday: 2,
-                    endHour: 24,
+                    endHour: 23,
                     endMinute: 0,
                   },
                   {
@@ -283,7 +285,7 @@
                     startHour: 13,
                     startMinute: 0,
                     endWeekday: 3,
-                    endHour: 24,
+                    endHour: 23,
                     endMinute: 0,
                   },
                   {
@@ -299,7 +301,7 @@
                     startHour: 13,
                     startMinute: 0,
                     endWeekday: 4,
-                    endHour: 24,
+                    endHour: 23,
                     endMinute: 0,
                   },
                   {
@@ -315,7 +317,7 @@
                     startHour: 13,
                     startMinute: 0,
                     endWeekday: 5,
-                    endHour: 24,
+                    endHour: 23,
                     endMinute: 0,
                   },
                 ];
@@ -400,9 +402,9 @@
           class="end"
           type="range"
           min="0"
-          max="24"
+          max="23"
           step="1"
-          value="24"
+          value="23"
         />
         <span class="end"></span>
       </label>
