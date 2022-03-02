@@ -75,7 +75,6 @@
   export let booking_user_email: string;
   export let booking_user_token: string;
   export let busy_color: string;
-  export let calendars: Calendar[];
   export let capacity: number | null;
   export let closed_color: string;
   export let date_format: "weekday" | "date" | "full" | "none";
@@ -268,10 +267,10 @@
   }
 
   $: (async () => {
-    if (id && Array.isArray(_this.events) && dayRange.length > 0) {
-      await buildConsecutiveOptions();
-    } else if (_this.booking_options) {
+    if (_this.booking_options) {
       consecutiveOptions = _this.booking_options;
+    } else if (id && Array.isArray(_this.events) && dayRange.length > 0) {
+      await buildConsecutiveOptions();
     }
     buildDailyConsecutiveOptions();
   })();
@@ -481,8 +480,8 @@
 
   function checkOverbooked(slots: SelectableSlot[]) {
     allCalendars.forEach((calendar) => {
-      let availableSlotsForCalendar = slots.filter((slot) =>
-        slot.available_calendars.includes(calendar.account?.emailAddress),
+      const availableSlotsForCalendar = slots.filter((slot) =>
+        slot.available_calendars.includes(calendar.emailAddress),
       );
       if (
         slots.length - availableSlotsForCalendar.length >
@@ -490,7 +489,7 @@
       ) {
         availableSlotsForCalendar.forEach((slot) => {
           slot.available_calendars = slot.available_calendars.filter(
-            (cal) => cal !== calendar.account?.emailAddress,
+            (cal) => cal !== calendar.emailAddress,
           );
           if (!slot.available_calendars.length) {
             // if it has no calendars available, it's busy
@@ -624,10 +623,11 @@
 
   let newCalendarTimeslotsForGivenEmails: any[] = [];
 
-  // Only make an availability request if you have a single event;
-  // Otherwise, assume consecutive.
   $: (async () => {
-    if (
+    if (_this.availability) {
+      // Need to wait a tick here to avoid race condition
+      setTimeout(() => mapTimeslotsToCalendars(_this.availability));
+    } else if (
       id &&
       ((Array.isArray(singleEventParticipants) &&
         singleEventParticipants.length > 0) ||
@@ -635,8 +635,6 @@
       _this.events?.length === 1
     ) {
       await getAvailability();
-    } else if (_this.availability) {
-      mapTimeslotsToCalendars(_this.availability);
     }
   })();
 
@@ -704,7 +702,10 @@
       ) {
         return;
       }
-      mapTimeslotsToCalendars(fetchedCalendars);
+
+      if (!_this.availability) {
+        mapTimeslotsToCalendars(fetchedCalendars);
+      }
 
       return newCalendarTimeslotsForGivenEmails;
     }
@@ -735,7 +736,6 @@
         ),
       });
     });
-
     newCalendarTimeslotsForGivenEmails = [...freeBusyCalendars];
   }
 
@@ -789,14 +789,10 @@
 
   $: allCalendars = [
     // TODO: consider merging these 2 into just calendars
-    ...(_this.calendars ?? []),
     ...newCalendarTimeslotsForGivenEmails,
     ...consecutiveParticipants.map((email) => {
       return {
         emailAddress: email,
-        account: {
-          emailAddress: email,
-        },
         availability: AvailabilityStatus.FREE,
         timeslots: [],
       };
@@ -1269,9 +1265,9 @@
                   title={slot.fallsWithinAllowedTimeRange
                     ? null
                     : `You may only select timeslots in the future, between ${timeDay
-                        .offset(new Date(), min_book_ahead_days)
+                        .offset(new Date(), _this.min_book_ahead_days)
                         .toLocaleDateString()} and ${timeDay
-                        .offset(new Date(), max_book_ahead_days)
+                        .offset(new Date(), _this.max_book_ahead_days)
                         .toLocaleDateString()}`}
                   on:click={() => {
                     handleSlotInteractionStart(slot);

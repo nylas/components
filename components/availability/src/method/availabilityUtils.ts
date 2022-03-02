@@ -96,9 +96,9 @@ export const generateDaySlots = (
               internalProps.capacity >= 1 &&
               concurrentSlotEventsForUser < internalProps.capacity
             ) {
-              freeCalendars.push(calendar?.account?.emailAddress || "");
+              freeCalendars.push(calendar?.emailAddress || "");
             } else if (!concurrentSlotEventsForUser) {
-              freeCalendars.push(calendar?.account?.emailAddress || "");
+              freeCalendars.push(calendar?.emailAddress || "");
             }
           } else if (
             calendar.availability === AvailabilityStatus.FREE ||
@@ -106,7 +106,7 @@ export const generateDaySlots = (
           ) {
             // if a calendar is passed in without availability, assume the timeslots are available.
             if (concurrentSlotEventsForUser) {
-              freeCalendars.push(calendar?.account?.emailAddress || "");
+              freeCalendars.push(calendar?.emailAddress || "");
             }
           }
         }

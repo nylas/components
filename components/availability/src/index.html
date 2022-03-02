@@ -23,62 +23,13 @@
           participantEmails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
         };
 
-        const calendars = [
-          {
-            availability: "busy",
-            timeslots: [
-              {
-                start_time: new Date(new Date().setHours(3, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(6, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(new Date().setHours(9, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(15, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "person@name.com",
-              firstName: "Jim",
-              lastName: "Person",
-              avatarUrl: "",
-            },
-          },
-          {
-            availability: "busy",
-            timeslots: [
-              {
-                start_time: new Date(new Date().setHours(4, 0, 0, 0)),
-                end_time: new Date(new Date().setHours(11, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "thelonious@nylas.com",
-              firstName: "Thelonious",
-              lastName: "",
-              avatarUrl: "",
-            },
-          },
-          {
-            emailAddress: "booker@nylas.com",
-            availability: "free",
-            timeslots: [
-              {
-                start_time: new Date(new Date().setHours(5, 15, 0, 0)),
-                end_time: new Date(new Date().setHours(16, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "booker@nylas.com",
-              firstName: "Bill",
-              lastName: "Ooker",
-              avatarUrl: "",
-            },
-          },
-        ];
-
-        component.calendars = calendars;
         component.participants = [];
         component.events = [event];
+        // component.availability = availability;
+        // component.booking_options = booking_options;
+
+        component.max_book_ahead_days = 0;
+        setTimeout(() => (component.max_book_ahead_days = 1), 5000);
 
         component.addEventListener("dateChange", (event) => {
           console.log("date change", event.detail.dates);
