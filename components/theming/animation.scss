@@ -50,6 +50,7 @@
   &::before {
     animation: progress 2s ease-in-out infinite;
     background-color: $backgroundColor;
+    z-index: 3;
   }
   &::before,
   &::after {
