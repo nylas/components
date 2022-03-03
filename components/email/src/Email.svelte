@@ -791,41 +791,27 @@
   }
 
   function getParticipants(thread: Thread): string[] {
+    let participantsList: string[] = [];
     const messages = thread.messages;
     const drafts = thread.drafts;
-    const lastMessageFrom = messages[messages.length - 1]?.from;
-    const hasParticipant =
-      messages && participants && messages.length > 0 && lastMessageFrom.length;
 
-    let participantsList = [];
-    if (drafts.length) {
-      participantsList.push("Draft");
-    }
-    if (hasParticipant) {
-      const participantName =
-        lastMessageFrom[0].email === userEmail
-          ? "Me"
-          : lastMessageFrom[0].name || lastMessageFrom[0].email;
-      participantsList.push(participantName);
-
-      //Only display 2 participants
-      const secondParticipant = messages
-        .slice(0, -1)
-        .reverse()
-        .find((msg) => {
-          return (
-            msg.from?.length > 0 &&
-            msg.from[0].email !== lastMessageFrom[0].email
-          );
-        });
-
-      if (secondParticipant) {
-        const secondParticipantName =
-          secondParticipant.from[0].email === userEmail
-            ? "Me"
-            : secondParticipant.from[0].name || secondParticipant.from[0].email;
-        participantsList.push(secondParticipantName);
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (participantsList.length == 2) {
+        break;
       }
+      const msgFrom = messages[i].from;
+      if (msgFrom && msgFrom.length > 0 && msgFrom) {
+        const participantName =
+          msgFrom[0].email === userEmail
+            ? "Me"
+            : msgFrom[0].name || msgFrom[0].email;
+        if (!participantsList.includes(participantName)) {
+          participantsList.push(participantName);
+        }
+      }
+    }
+    if (drafts.length) {
+      participantsList.unshift("Draft");
     }
     return participantsList;
   }
