@@ -28,6 +28,7 @@
 - Draft, reply, reply all and forwarded messages include inline images and attachments
 - [Mailbox] Added new prop 'thread_click_action' that allows to specify the action on clicking an email thread [#369](https://github.com/nylas/components/pull/369)
 - View/save/send draft messages in email thread [#399](https://github.com/nylas/components/pull/399)
+- Added `draft` label an email thread [#403](https://github.com/nylas/components/pull/403)
 
 ## Bug Fixes
 

@@ -23,7 +23,7 @@
           "files": [],
           "from": [
             {
-              "email": "nylascypresstest@gmail.com",
+              "email": "test-email@email.com",
               "name": "Test User"
             }
           ],
@@ -38,7 +38,7 @@
           "object": "draft",
           "reply_to": [
             {
-              "email": "nylascypresstest@gmail.com",
+              "email": "test-email@email.com",
               "name": "Test User"
             }
           ],
@@ -72,7 +72,7 @@
           ],
           "from": [
             {
-              "email": "nylascypresstest@gmail.com",
+              "email": "test-email@email.com",
               "name": "Test User"
             }
           ],
@@ -87,7 +87,7 @@
           "object": "draft",
           "reply_to": [
             {
-              "email": "nylascypresstest@gmail.com",
+              "email": "test-email@email.com",
               "name": "Test User"
             }
           ],
@@ -144,7 +144,7 @@
           "files": [],
           "from": [
             {
-              "email": "nylascypresstest@gmail.com",
+              "email": "test-email@email.com",
               "name": "Test User"
             }
           ],
@@ -178,7 +178,7 @@
           "name": "draft test"
         },
         {
-          "email": "nylascypresstest@gmail.com",
+          "email": "test-email@email.com",
           "name": "Test User"
         }
       ],
