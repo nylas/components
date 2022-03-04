@@ -19,8 +19,8 @@
       }
     </style>
     <script type="module">
-      function toggleComposer(event, component) {
-        console.log(event.detail);
+      function toggleComposer(event, component, type) {
+        console.log(type, event.detail);
         component.removeAttribute("hidden");
         component.value = event.detail.value;
         component.focus_body_onload = event.detail.focus_body_onload;

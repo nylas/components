@@ -1274,6 +1274,36 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       .should("contain", "This is a new draft number one.");
   });
 
+  it("Click reply/forward to message in thread opens existing draft", () => {
+    cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").invoke("prop", "show_forward", true);
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@mailbox").find(".email-row.condensed").click();
+
+    //Click on reply should open existing draft
+    cy.get("@email").find(".reply").should("exist");
+    cy.get("@email").find(".reply").click();
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "This is a new draft number one.");
+    cy.get("@composer").find("header .composer-btn .CloseIcon").click();
+
+    //Click on forward should open the same draft
+    cy.get("@email").find(".forward").should("exist");
+    cy.get("@email").find(".forward").click();
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "This is a new draft number one.");
+  });
+
   it("Click on draft loads draft body when multiple drafts under the same thread", () => {
     cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
     cy.get("@mailbox").find(".email-row.condensed").click();

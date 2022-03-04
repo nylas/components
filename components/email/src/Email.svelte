@@ -226,7 +226,6 @@
 
   let main: Element;
   let messageRefs: Element[] = [];
-  let messageLoadStatus: string[] = []; // "loading" | "loaded"
   const MAX_DESKTOP_PARTICIPANTS = 2;
   const MAX_MOBILE_PARTICIPANTS = 1;
 
@@ -276,7 +275,6 @@
       if (thread?.messages?.length > 0) {
         const lastMsgIndex = thread.messages.length - 1;
         thread.messages[lastMsgIndex].body = await fetchIndividualMessage(
-          lastMsgIndex,
           thread.messages[lastMsgIndex].id,
         );
       }
@@ -415,7 +413,6 @@
         // fetch last message
         if (!messages[lastMsgIndex].body) {
           messages[lastMsgIndex].body = await fetchIndividualMessage(
-            lastMsgIndex,
             messages[lastMsgIndex].id,
           );
         }
@@ -531,11 +528,6 @@
       name: _this.you.name,
       email: _this.you.email_address,
     };
-
-    const subject = message.subject?.toLowerCase().startsWith("re:")
-      ? message.subject
-      : `Re: ${message.subject}`;
-
     const from = [me];
     const { to, cc } = buildParticipants({
       myEmail: me.email,
@@ -543,52 +535,76 @@
       type,
     });
 
-    let event_identifier;
+    //Check existing draft
+    const existingDraft = activeThread?.drafts?.find(
+      (draft) => draft.reply_to_message_id === message.id,
+    );
+    if (existingDraft) {
+      existingDraft.to = to;
+      existingDraft.cc = cc;
+      dispatchDraftEvent(event, existingDraft);
+    } else {
+      //Creating new reply message
+      const subject = message.subject?.toLowerCase().startsWith("re:")
+        ? message.subject
+        : `Re: ${message.subject}`;
 
-    switch (type) {
-      case "reply":
-        event_identifier = "replyClicked";
-        break;
+      let event_identifier;
 
-      case "reply_all":
-        event_identifier = "replyAllClicked";
-        break;
+      switch (type) {
+        case "reply":
+          event_identifier = "replyClicked";
+          break;
+
+        case "reply_all":
+          event_identifier = "replyAllClicked";
+          break;
+      }
+
+      const value = {
+        reply_to_message_id: message.id,
+        from,
+        to,
+        reply_to: from,
+        cc,
+        bcc: message.bcc,
+        body: message.body,
+        subject: subject,
+      };
+
+      dispatchEvent(event_identifier, {
+        event,
+        message: message,
+        thread: activeThread,
+        value,
+        focus_body_onload: true,
+      });
     }
-
-    const value = {
-      reply_to_message_id: message.id,
-      from,
-      to,
-      reply_to: from,
-      cc,
-      bcc: message.bcc,
-      body: message.body,
-      subject: subject,
-    };
-
-    dispatchEvent(event_identifier, {
-      event,
-      message: message,
-      thread: activeThread,
-      value,
-      focus_body_onload: true,
-    });
   }
 
-  async function handleForwardClick(event: CustomEvent, message: Message) {
-    const subject = `Fwd: ${message.subject}`;
-    const value = {
-      reply_to_message_id: message.id,
-      subject: subject,
-      body: message.body,
-    };
-    dispatchEvent("forwardClicked", {
-      event,
-      message,
-      thread: activeThread,
-      value,
-      focus_body_onload: false,
-    });
+  async function handleForwardClick(event: MouseEvent, message: Message) {
+    //Check existing draft
+    const existingDraft = activeThread?.drafts?.find(
+      (draft) => draft.reply_to_message_id === message.id,
+    );
+    if (existingDraft) {
+      dispatchDraftEvent(event, existingDraft);
+    } else {
+      //Create new message
+      const subject = `Fwd: ${message.subject}`;
+      const value = {
+        reply_to_message_id: message.id,
+        subject: subject,
+        body: message.body,
+      };
+      dispatchEvent("forwardClicked", {
+        event,
+        message,
+        thread: activeThread,
+        value,
+        focus_body_onload: false,
+      });
+    }
   }
 
   function canReplyAll(message: Message): boolean {
@@ -613,12 +629,11 @@
       });
       // Don't fetch message when thread is being passed manually
       if (!_this.thread) {
-        fetchIndividualMessage(
-          msgIndex,
-          activeThread.messages[msgIndex].id,
-        ).then((res) => {
-          activeThread.messages[msgIndex].body = res;
-        });
+        fetchIndividualMessage(activeThread.messages[msgIndex].id).then(
+          (res) => {
+            activeThread.messages[msgIndex].body = res;
+          },
+        );
       }
     }
   }
@@ -635,14 +650,9 @@
     }
   }
 
-  function fetchIndividualMessage(
-    msgIndex: number,
-    messageID: string,
-  ): Promise<string | null> {
+  function fetchIndividualMessage(messageID: string): Promise<string | null> {
     if (id) {
-      messageLoadStatus[msgIndex] = "loading";
       return fetchMessage(query, messageID).then(async (json) => {
-        messageLoadStatus[msgIndex] = "loaded";
         if (FilesStore.hasInlineFiles(json)) {
           const messageWithInlineFiles = await getMessageWithInlineFiles(json);
           return messageWithInlineFiles.body;
@@ -665,7 +675,6 @@
       message_id: _this.message_id,
     }).then(async (json) => {
       _this.message = json;
-      messageLoadStatus[0] = "loaded";
       if (FilesStore.hasInlineFiles(_this.message)) {
         const message = await getMessageWithInlineFiles(_this.message);
         _this.message = message;
@@ -673,32 +682,33 @@
     });
   }
 
-  function handleDraftClick(event: MouseEvent, draftIndex: number) {
+  function handleDraftClick(event: MouseEvent, draft: Message) {
     event.stopImmediatePropagation();
-    dispatchDraftEvent(event, draftIndex);
+    dispatchDraftEvent(event, draft);
   }
 
-  function handleDraftKeypress(event: KeyboardEvent, draftIndex: number) {
+  function handleDraftKeypress(event: KeyboardEvent, draft: Message) {
     event.stopImmediatePropagation();
     if (event.code === "Enter") {
-      dispatchDraftEvent(event, draftIndex);
+      dispatchDraftEvent(event, draft);
     }
   }
 
-  function dispatchDraftEvent(event: UIEvent, draftIndex: number) {
-    if (activeThread.drafts[draftIndex]) {
+  function dispatchDraftEvent(event: UIEvent, draft: Message) {
+    if (draft) {
+      activeThread?.drafts?.forEach(
+        (threadDraft) => (threadDraft.active = threadDraft.id === draft.id),
+      );
+      draft.active = true;
       dispatchEvent("draftClicked", {
         event,
-        message: activeThread.drafts[draftIndex],
+        message: draft,
         thread: activeThread,
       });
       // Don't fetch message when thread is being passed manually
-      if (!_this.thread) {
-        fetchIndividualMessage(
-          draftIndex,
-          activeThread.drafts[draftIndex].id,
-        ).then((res) => {
-          activeThread.drafts[draftIndex].body = res;
+      if (!_this.thread && draft.id) {
+        fetchIndividualMessage(draft.id).then((res) => {
+          draft.body = res;
         });
       }
     }
@@ -1245,6 +1255,10 @@
             .message-body:hover {
               cursor: default;
             }
+          }
+
+          &.active-draft {
+            border: 1px solid var(--nylas-email-snippet-color, var(--grey-dark));
           }
 
           div.message-head {
@@ -1923,10 +1937,10 @@
                 <div
                   tabindex="0"
                   class={`individual-message condensed draft-message`}
+                  class:active-draft={draft.active}
                   bind:this={messageRefs[draftIndex]}
-                  on:click|stopPropagation={(e) =>
-                    handleDraftClick(e, draftIndex)}
-                  on:keypress={(e) => handleDraftKeypress(e, draftIndex)}
+                  on:click|stopPropagation={(e) => handleDraftClick(e, draft)}
+                  on:keypress={(e) => handleDraftKeypress(e, draft)}
                 >
                   <div class="message-head draft">
                     <div class="avatar-info">
