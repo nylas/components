@@ -2,6 +2,64 @@
 const frozenDateTime = () => new Date(2021, 11, 15, 9, 0, 0);
 const testUser = ["nylascypresstest@gmail.com"];
 
+function buildMockDataObjects(timeSlots, timeslotSize = 15) {
+  const emails = Array.from(
+    new Set(timeSlots.map((slot) => slot.emails).flat()),
+  );
+
+  const availability = {
+    object: "availability",
+    order: emails,
+    time_slots: timeSlots.map((slot) => {
+      return {
+        emails: slot.emails,
+        end: slot.end_time / 1000,
+        end_time: slot.end_time / 1000,
+        object: "time_slot",
+        start: slot.start_time / 1000,
+        start_time: slot.start_time / 1000,
+        status: "free",
+      };
+    }),
+  };
+
+  const bookingOptions = [];
+  for (const timeslot of timeSlots) {
+    const startHours = new Date(timeslot.start_time).getHours(),
+      startMinutes = new Date(timeslot.start_time).getMinutes(),
+      endHours = new Date(timeslot.start_time).getHours(),
+      endMinutes = new Date(timeslot.start_time).getMinutes();
+
+    const timeDifference =
+      new Date(timeslot.end_time).getTime() -
+      new Date(timeslot.start_time).getTime();
+
+    const timeslotSizeMS = timeslotSize * 60 * 1000;
+
+    for (let i = 0; i < Math.floor(timeDifference / timeslotSizeMS); i++) {
+      bookingOptions.push([
+        {
+          emails: emails,
+          start_time: new Date(timeslot.start_time).setHours(
+            startHours,
+            startMinutes + timeslotSize * i,
+            0,
+            0,
+          ),
+          end_time: new Date(timeslot.end_time).setHours(
+            endHours,
+            endMinutes + timeslotSize * i + timeslotSize,
+            0,
+            0,
+          ),
+        },
+      ]);
+    }
+  }
+
+  return { availability, bookingOptions };
+}
+
 beforeEach(() => {
   cy.clock(frozenDateTime().getTime(), ["Date"]);
   cy.intercept({
@@ -25,25 +83,23 @@ beforeEach(() => {
 });
 
 describe("available times", () => {
-  const calendars = [
+  const { availability, bookingOptions } = buildMockDataObjects([
     {
-      availability: "free",
-      timeslots: [
-        {
-          start_time: frozenDateTime().setHours(1, 0, 0, 0),
-          end_time: frozenDateTime().setHours(3, 0, 0, 0),
-        },
-        {
-          start_time: frozenDateTime().setHours(8, 0, 0, 0),
-          end_time: frozenDateTime().setHours(16, 0, 0, 0),
-        },
-      ],
+      emails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+      start_time: frozenDateTime().setHours(1, 0, 0, 0),
+      end_time: frozenDateTime().setHours(3, 0, 0, 0),
     },
-  ];
+    {
+      emails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+      start_time: frozenDateTime().setHours(8, 0, 0, 0),
+      end_time: frozenDateTime().setHours(16, 0, 0, 0),
+    },
+  ]);
 
   beforeEach(() => {
     cy.get("@testComponent").then((element) => {
-      element[0].calendars = calendars;
+      element[0].availability = availability;
+      element[0].bookingOptions = bookingOptions;
     });
   });
 
@@ -98,30 +154,34 @@ describe("Booking time slots", () => {
     it("observes unavailable times", () => {
       cy.get("@testComponent").then((element) => {
         element[0].participants = [];
-        element[0].calendars = [];
+        element[0].availability = [];
+        element[0].booking_options = [];
         cy.get(".slot.busy").should("not.exist");
       });
     });
 
     it("observes available times", () => {
-      const calendars = [
+      const { availability, bookingOptions } = buildMockDataObjects([
         {
-          availability: "busy",
-          timeslots: [
-            {
-              start_time: frozenDateTime().setHours(1, 0, 0, 0),
-              end_time: frozenDateTime().setHours(3, 0, 0, 0),
-            },
-            {
-              start_time: frozenDateTime().setHours(8, 0, 0, 0),
-              end_time: frozenDateTime().setHours(16, 0, 0, 0),
-            },
-          ],
+          emails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+          start_time: frozenDateTime().setHours(0, 0, 0, 0),
+          end_time: frozenDateTime().setHours(1, 0, 0, 0),
         },
-      ];
+        {
+          emails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+          start_time: frozenDateTime().setHours(3, 0, 0, 0),
+          end_time: frozenDateTime().setHours(8, 0, 0, 0),
+        },
+        {
+          emails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+          start_time: frozenDateTime().setHours(16, 0, 0, 0),
+          end_time: frozenDateTime().setHours(24, 0, 0, 0),
+        },
+      ]);
 
       cy.get("@testComponent").then((element) => {
-        element[0].calendars = calendars;
+        element[0].availability = availability;
+        element[0].bookingOptions = bookingOptions;
         cy.get(".slot.busy").should("exist");
         cy.get(".slot.free").should("have.length", 56);
       });
@@ -129,46 +189,48 @@ describe("Booking time slots", () => {
   });
 
   describe("multiple availability sets", () => {
-    const calendars = [
+    const { availability, bookingOptions } = buildMockDataObjects([
       {
-        emailAddress: "person@name.com",
-        availability: "busy",
-        timeslots: [
-          {
-            start_time: frozenDateTime().setHours(3, 0, 0, 0),
-            end_time: frozenDateTime().setHours(6, 0, 0, 0),
-          },
-          {
-            start_time: frozenDateTime().setHours(9, 0, 0, 0),
-            end_time: frozenDateTime().setHours(15, 0, 0, 0),
-          },
-        ],
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(3, 0, 0, 0),
       },
       {
-        emailAddress: "thelonious@nylas.com",
-        availability: "busy",
-        timeslots: [
-          {
-            start_time: frozenDateTime().setHours(4, 0, 0, 0),
-            end_time: frozenDateTime().setHours(11, 0, 0, 0),
-          },
-        ],
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(6, 0, 0, 0),
+        end_time: frozenDateTime().setHours(9, 0, 0, 0),
       },
       {
-        emailAddress: "booker@nylas.com",
-        availability: "busy",
-        timeslots: [
-          {
-            start_time: frozenDateTime().setHours(5, 30, 0, 0),
-            end_time: frozenDateTime().setHours(16, 0, 0, 0),
-          },
-        ],
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(15, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
       },
-    ];
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(4, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(11, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["booker@nylas.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(5, 30, 0, 0),
+      },
+      {
+        emails: ["booker@nylas.com"],
+        start_time: frozenDateTime().setHours(16, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+    ]);
 
     beforeEach(() => {
       cy.get("@testComponent").then((element) => {
-        element[0].calendars = calendars;
+        element[0].availability = availability;
+        element[0].bookingOptions = bookingOptions;
       });
     });
 
@@ -183,7 +245,7 @@ describe("Booking time slots", () => {
         `.slot[data-start-time='${frozenDateTime().toLocaleDateString()}, 6:30:00 AM']`,
       ).should("have.class", "partial");
       cy.get("@testComponent").then((element) => {
-        element[0].required_participants = [calendars[1].emailAddress];
+        element[0].required_participants = [availability.order[1]];
         cy.get(
           `.slot[data-start-time='${frozenDateTime().toLocaleDateString()}, 6:30:00 AM']`,
         ).should("have.class", "busy");
@@ -326,143 +388,40 @@ describe("Booking time slots", () => {
         const component = element[0];
 
         availabilityComponent = component;
+        const { availability, bookingOptions } = buildMockDataObjects([
+          {
+            emails: [
+              "person@name.com",
+              "thelonious@nylas.com",
+              "booker@nylas.com",
+            ],
+            start_time: frozenDateTime().setHours(15 - 24, 0, 0, 0),
+            end_time: frozenDateTime().setHours(17 - 24, 0, 0, 0),
+          },
+          {
+            emails: [
+              "person@name.com",
+              "thelonious@nylas.com",
+              "booker@nylas.com",
+            ],
+            start_time: frozenDateTime().setHours(15, 0, 0, 0),
+            end_time: frozenDateTime().setHours(17, 0, 0, 0),
+          },
+          {
+            emails: [
+              "person@name.com",
+              "thelonious@nylas.com",
+              "booker@nylas.com",
+            ],
+            start_time: frozenDateTime().setHours(15 + 24, 0, 0, 0),
+            end_time: frozenDateTime().setHours(17 + 24, 0, 0, 0),
+          },
+        ]);
+
+        component.availability = availability;
+        component.booking_options = bookingOptions;
         component.participants = [];
         component.allow_booking = true;
-        component.max_bookable_slots = 3;
-
-        component.calendars = [
-          {
-            availability: "free",
-            timeslots: [
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
-                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
-                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "person@name.com",
-              firstName: "Jim",
-              lastName: "Person",
-              avatarUrl: "",
-            },
-          },
-          {
-            emailAddress: "thelonious@nylas.com",
-            availability: "free",
-            timeslots: [
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
-                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
-                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "thelonious@nylas.com",
-              firstName: "Thelonious",
-              lastName: "",
-              avatarUrl: "",
-            },
-          },
-          {
-            emailAddress: "booker@nylas.com",
-            availability: "free",
-            timeslots: [
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(15 - 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(16 - 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(16 - 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(17 - 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(frozenDateTime().setHours(15, 0, 0, 0)),
-                end_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(frozenDateTime().setHours(16, 0, 0, 0)),
-                end_time: new Date(frozenDateTime().setHours(17, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(15 + 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(16 + 24, 0, 0, 0)),
-              },
-              {
-                start_time: new Date(
-                  frozenDateTime().setHours(16 + 24, 0, 0, 0),
-                ),
-                end_time: new Date(frozenDateTime().setHours(17 + 24, 0, 0, 0)),
-              },
-            ],
-            account: {
-              emailAddress: "booker@nylas.com",
-              firstName: "Bill",
-              lastName: "Ooker",
-              avatarUrl: "",
-            },
-          },
-        ];
 
         component.addEventListener("timeSlotChosen", (event) => {
           // expect(event.detail).to.have.ownProperty("timeSlots");
@@ -568,11 +527,9 @@ describe("Booking time slots", () => {
     });
 
     it("should prevent booking on dates after max_book_ahead_days", (done) => {
-      cy.wait("@consecutive");
       // Check that we can book on current date if max_book_ahead_days is 0
       cy.get("@testComponent").invoke("attr", "max_book_ahead_days", 0);
       cy.get(".slot.free").should("exist");
-      cy.wait("@availability");
       expect(selectedTimeslots).to.have.lengthOf(0);
       cy.get(".slot.free")
         .eq(0)
@@ -755,6 +712,48 @@ describe("Booking time slots", () => {
   });
 
   describe("change colours", () => {
+    const { availability, bookingOptions } = buildMockDataObjects([
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(3, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(6, 0, 0, 0),
+        end_time: frozenDateTime().setHours(9, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(15, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(4, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(11, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["booker@nylas.com"],
+        start_time: frozenDateTime().setHours(5, 15, 0, 0),
+        end_time: frozenDateTime().setHours(16, 0, 0, 0),
+      },
+    ]);
+
+    beforeEach(() => {
+      cy.get("@testComponent").then((element) => {
+        const component = element[0];
+
+        component.availability = availability;
+        component.booking_options = bookingOptions;
+      });
+    });
+
     it("changes colour by prop", () => {
       cy.get(".epoch.partial .inner").should(
         "not.have.css",
@@ -768,7 +767,7 @@ describe("Booking time slots", () => {
         "have.css",
         "background-color",
         "rgb(45, 45, 45)",
-      ); // 45: 2/3 availability = 2/3 distance between 000 and 444 in base RGB.
+      ); // 45: 1/3 availability = 1/3 distance between 000 and 444 in base RGB.
     });
   });
 
@@ -830,6 +829,48 @@ describe("Booking time slots", () => {
   });
 
   describe("Event Buffer", () => {
+    const { availability, bookingOptions } = buildMockDataObjects([
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(3, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(6, 0, 0, 0),
+        end_time: frozenDateTime().setHours(9, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(15, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(4, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(11, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["booker@nylas.com"],
+        start_time: frozenDateTime().setHours(5, 15, 0, 0),
+        end_time: frozenDateTime().setHours(16, 0, 0, 0),
+      },
+    ]);
+
+    beforeEach(() => {
+      cy.get("@testComponent").then((element) => {
+        const component = element[0];
+
+        component.availability = availability;
+        component.booking_options = bookingOptions;
+      });
+    });
+
     it("Default buffer time is 0 minutes", () => {
       cy.get(".slot.busy").should("have.length", 5);
       cy.get(".slot.free").should("have.length", 4);
@@ -880,8 +921,27 @@ describe("Booking time slots", () => {
       },
     ];
     beforeEach(() => {
+      const { availability, bookingOptions } = buildMockDataObjects([
+        {
+          emails: ["person@name.com"],
+          start_time: frozenDateTime().setHours(6, 0, 0, 0),
+          end_time: frozenDateTime().setHours(24, 0, 0, 0),
+        },
+        {
+          emails: ["thelonious@nylas.com"],
+          start_time: frozenDateTime().setHours(0, 0, 0, 0),
+          end_time: frozenDateTime().setHours(5, 0, 0, 0),
+        },
+        {
+          emails: ["thelonious@nylas.com"],
+          start_time: frozenDateTime().setHours(12, 0, 0, 0),
+          end_time: frozenDateTime().setHours(24, 0, 0, 0),
+        },
+      ]);
+
       cy.get("@testComponent").then((element) => {
-        element[0].calendars = calendars;
+        element[0].availability = availability;
+        element[0].booking_options = bookingOptions;
       });
     });
 
@@ -932,9 +992,22 @@ describe("Booking time slots", () => {
         ],
       },
     ];
+    const { availability, bookingOptions } = buildMockDataObjects([
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(3, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(6, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+    ]);
     beforeEach(() => {
       cy.get("@testComponent").then((element) => {
-        element[0].calendars = calendar;
+        element[0].availability = availability;
+        element[0].booking_options = bookingOptions;
       });
     });
 
@@ -961,6 +1034,47 @@ describe("Booking time slots", () => {
   });
 
   describe("Dynamically generate time slots based on manifest", () => {
+    const { availability, bookingOptions } = buildMockDataObjects([
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(3, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(6, 0, 0, 0),
+        end_time: frozenDateTime().setHours(9, 0, 0, 0),
+      },
+      {
+        emails: ["person@name.com"],
+        start_time: frozenDateTime().setHours(15, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(0, 0, 0, 0),
+        end_time: frozenDateTime().setHours(4, 0, 0, 0),
+      },
+      {
+        emails: ["thelonious@nylas.com"],
+        start_time: frozenDateTime().setHours(11, 0, 0, 0),
+        end_time: frozenDateTime().setHours(24, 0, 0, 0),
+      },
+      {
+        emails: ["booker@nylas.com"],
+        start_time: frozenDateTime().setHours(5, 15, 0, 0),
+        end_time: frozenDateTime().setHours(16, 0, 0, 0),
+      },
+    ]);
+
+    beforeEach(() => {
+      cy.get("@testComponent").then((element) => {
+        const component = element[0];
+        component.availability = availability;
+        component.booking_options = bookingOptions;
+      });
+    });
+
     it("Updates partial_bookable_ratio/Participant Threshold will change availability", () => {
       cy.get("@testComponent").invoke("attr", "partial_bookable_ratio", 0.5);
       cy.get("button.slot.busy").should("have.length", 20);
