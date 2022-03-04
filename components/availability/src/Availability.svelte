@@ -41,6 +41,7 @@
     Day,
     PreDatedTimeSlot,
     OpenHours,
+    AvailabilityResponse,
   } from "@commons/types/Availability";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/ErrorMessage.svelte";
@@ -70,7 +71,7 @@
   export let allow_booking: boolean;
   export let allow_date_change: boolean;
   export let attendees_to_show: number;
-  export let availability: Availability;
+  export let availability: AvailabilityResponse;
   export let booking_options: ConsecutiveEvent[][];
   export let booking_user_email: string;
   export let booking_user_token: string;
@@ -234,7 +235,7 @@
     // TODO - Use a library to calculate the diff between props so that
     // only updated props are reassigned instead of rebuilding the whole object.
     if (
-      (!$$props.event_to_hover ||
+      ($$props.event_to_hover === undefined ||
         previousProps.event_to_hover === $$props.event_to_hover) &&
       JSON.stringify(previousProps) !== JSON.stringify($$props)
     ) {
@@ -269,7 +270,12 @@
   $: (async () => {
     if (_this.booking_options) {
       consecutiveOptions = _this.booking_options;
-    } else if (id && Array.isArray(_this.events) && dayRange.length > 0) {
+    } else if (
+      !loading &&
+      id &&
+      Array.isArray(_this.events) &&
+      dayRange.length > 0
+    ) {
       await buildConsecutiveOptions();
     }
     buildDailyConsecutiveOptions();
@@ -711,7 +717,7 @@
     }
   }
 
-  function mapTimeslotsToCalendars(calendarList: Calendar[]) {
+  function mapTimeslotsToCalendars(calendarList: AvailabilityResponse) {
     const freeBusyCalendars: any = [];
 
     const timeSlotMap: Record<string, PreDatedTimeSlot[]> = {};
