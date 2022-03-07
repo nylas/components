@@ -71,6 +71,7 @@
   export let screen_bookings: boolean;
   export let timezone: string;
   export let events: EventDefinition[];
+  export let sections: Partial<Sections>;
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -118,6 +119,7 @@
     screen_bookings: false,
     timezone: "",
     events: [{ ...eventTemplate }],
+    sections: {},
   };
 
   let main: HTMLElement;
@@ -487,21 +489,40 @@
 
   //#region expand/collapse
 
-  let sections: Partial<Sections> = {};
+  // let sections: Partial<Sections> = {};
 
   function establishSections() {
-    Object.values(SectionNames).forEach((name, iter) => {
-      sections[name] = {
-        expanded: iter === 0 ? true : false,
-        editable: true,
-      };
-    });
+    if (!Object.entries(_this.sections).length) {
+      Object.values(SectionNames).forEach((name, iter) => {
+        _this.sections[name] = {
+          expanded: iter === 0 ? true : false,
+          editable: true,
+        };
+      });
+    } else {
+      Object.values(SectionNames).forEach((name) => {
+        // If a section doesnt appear in the passed property,
+        // normalize it with uneditable properties here to preserve expected format
+        if (!_this.sections[name]) {
+          _this.sections[name] = {
+            expanded: false,
+            editable: false,
+          };
+        } else {
+          // If the section is passed in but lacks an "editable" property, assume positive intent.
+          if (!Object.keys(_this.sections[name]).includes("editable")) {
+            _this.sections[name].editable = true;
+          }
+        }
+      });
+    }
   }
+  $: console.log({ sections });
 
-  function toggleCollapse(name: SectionNames) {
-    sections[name].expanded = !sections[name].expanded;
-    sections = { ...sections };
-  }
+  // function toggleCollapse(name: SectionNames) {
+  //   _this.sections[name].expanded = !_this.sections[name].expanded;
+  //   _this.sections = { ..._this.sections };
+  // }
   //#endregion expand/collapse
 </script>
 
@@ -519,676 +540,705 @@
     bind:clientWidth={mainElementWidth}
     bind:this={main}>
     <div class="settings">
-      <nylas-schedule-editor-section
-        section_title={SectionNames.BASIC_DETAILS}
-        expanded={true}>
-        <h1 slot="title">Event Details</h1>
-        <p slot="intro" class="intro">
-          Edit the details for your meeting. You can add consecutive meetings to
-          allow users to book back-to-back events.
-        </p>
-        <div slot="contents" class="contents basic-details">
-          {#each _this.events as event, iter}
-            <fieldset>
-              {#if _this.events.length > 1}
-                <button
-                  class="remove-event"
-                  on:click={() => removeConsecutiveEvent(event)}>
-                  Remove this event
-                </button>
-              {/if}
-              <label>
-                <strong>Event Title!</strong>
-                <input type="text" bind:value={event.event_title} />
-              </label>
-              <label>
-                <strong>Event Description</strong>
-                <input type="text" bind:value={event.event_description} />
-              </label>
-              <label>
-                <strong>Event Location</strong>
-                <input type="text" bind:value={event.event_location} />
-              </label>
-              <label>
-                <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
-                <input type="url" bind:value={event.event_conferencing} />
-              </label>
-              <div role="radiogroup" aria-labelledby="slot_size">
-                <strong id="slot_size">Meeting Length</strong>
-                <label>
-                  <input type="radio" value={15} bind:group={event.slot_size} />
-                  <span>15 minutes</span>
-                </label>
-                <label>
-                  <input type="radio" value={30} bind:group={event.slot_size} />
-                  <span>30 minutes</span>
-                </label>
-                <label>
-                  <input type="radio" value={60} bind:group={event.slot_size} />
-                  <span>60 minutes</span>
-                </label>
-                {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
-                  <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
-                  <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
-                  <p class="warning">
-                    Note: different meeting lengths in a conecutive chain are
-                    not currently supported; all meetings in this chain will
-                    fall back to {_this.events[0].slot_size} minutes.
-                  </p>
+      {#if _this.sections[SectionNames.BASIC_DETAILS].editable}
+        <nylas-schedule-editor-section
+          section_title={SectionNames.BASIC_DETAILS}
+          expanded={_this.sections[SectionNames.BASIC_DETAILS].expanded}>
+          <h1 slot="title">Event Details</h1>
+          <p slot="intro" class="intro">
+            Edit the details for your meeting. You can add consecutive meetings
+            to allow users to book back-to-back events.
+          </p>
+          <div slot="contents" class="contents basic-details">
+            {#each _this.events as event, iter}
+              <fieldset>
+                {#if _this.events.length > 1}
+                  <button
+                    class="remove-event"
+                    on:click={() => removeConsecutiveEvent(event)}>
+                    Remove this event
+                  </button>
                 {/if}
-              </div>
-              <div>
-                <strong id="participants">
-                  Email Ids to include for scheduling
-                </strong>
                 <label>
-                  <textarea
-                    name="participants"
-                    on:input={(e) => debounceEmailInput(e, event)}
-                    value={event.participantEmails} />
+                  <strong>Event Title!</strong>
+                  <input type="text" bind:value={event.event_title} />
+                </label>
+                <label>
+                  <strong>Event Description</strong>
+                  <input type="text" bind:value={event.event_description} />
+                </label>
+                <label>
+                  <strong>Event Location</strong>
+                  <input type="text" bind:value={event.event_location} />
+                </label>
+                <label>
+                  <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
+                  <input type="url" bind:value={event.event_conferencing} />
+                </label>
+                <div role="radiogroup" aria-labelledby="slot_size">
+                  <strong id="slot_size">Meeting Length</strong>
+                  <label>
+                    <input
+                      type="radio"
+                      value={15}
+                      bind:group={event.slot_size} />
+                    <span>15 minutes</span>
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      value={30}
+                      bind:group={event.slot_size} />
+                    <span>30 minutes</span>
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      value={60}
+                      bind:group={event.slot_size} />
+                    <span>60 minutes</span>
+                  </label>
+                  {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
+                    <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
+                    <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
+                    <p class="warning">
+                      Note: different meeting lengths in a conecutive chain are
+                      not currently supported; all meetings in this chain will
+                      fall back to {_this.events[0].slot_size} minutes.
+                    </p>
+                  {/if}
+                </div>
+                <div>
+                  <strong id="participants">
+                    Email Ids to include for scheduling
+                  </strong>
+                  <label>
+                    <textarea
+                      name="participants"
+                      on:input={(e) => debounceEmailInput(e, event)}
+                      value={event.participantEmails} />
+                  </label>
+                </div>
+              </fieldset>
+            {/each}
+          </div>
+          <footer slot="footer">
+            <button class="add-event" on:click={addConsecutiveEvent}
+              >Add a follow-up event</button>
+            <button on:click={saveProperties}>Save Editor Options</button>
+          </footer>
+        </nylas-schedule-editor-section>
+      {/if}
+
+      {#if _this.sections[SectionNames.TIME_DATE_DETAILS].editable}
+        <nylas-schedule-editor-section
+          section_title={SectionNames.TIME_DATE_DETAILS}
+          expanded={_this.sections[SectionNames.TIME_DATE_DETAILS].expanded}>
+          <h1 slot="title">Date/Time Details</h1>
+          <div slot="contents" class="contents">
+            <div>
+              <label>
+                <strong>Start Hour</strong>
+                <input
+                  type="range"
+                  min={0}
+                  max={24}
+                  step={1}
+                  bind:value={_this.start_hour} />
+              </label>
+              {_this.start_hour}:00
+            </div>
+            <div>
+              <label>
+                <strong>End Hour</strong>
+                <input
+                  type="range"
+                  min={0}
+                  max={24}
+                  step={1}
+                  bind:value={_this.end_hour} />
+              </label>
+              {_this.end_hour}:00
+            </div>
+            <label>
+              <strong>Start Date</strong>
+              <strong>
+                <input
+                  type="checkbox"
+                  name="custom_start_date"
+                  bind:checked={customStartDate}
+                  on:change={async () => {
+                    if (!customStartDate) {
+                      startDate = new Date().toLocaleDateString("en-CA");
+                      await tick();
+                      startDate = null;
+                    }
+                  }} />
+                Show a specific date
+              </strong>
+
+              <input
+                type="date"
+                bind:value={startDate}
+                disabled={!customStartDate} />
+            </label>
+            <label>
+              <strong>Time Zone</strong>
+              <select bind:value={_this.timezone}>
+                {#each timezones.default as timezone}
+                  <option value={timezone.tzCode}>{timezone.name}</option>
+                {/each}
+              </select>
+            </label>
+            <div>
+              <label>
+                <strong>Days to show</strong>
+                <input
+                  type="range"
+                  min={1}
+                  max={7}
+                  step={1}
+                  bind:value={_this.dates_to_show} />
+              </label>
+              {_this.dates_to_show}
+            </div>
+            <div role="checkbox" aria-labelledby="show_as_week">
+              <strong id="show_as_week">Show as week</strong>
+              <label>
+                <input
+                  type="checkbox"
+                  name="show_as_week"
+                  bind:checked={_this.show_as_week} />
+                Show whole week
+              </label>
+            </div>
+            <div role="checkbox" aria-labelledby="show_weekends">
+              <strong id="show_weekends">Show weekends</strong>
+              <label>
+                <input
+                  type="checkbox"
+                  name="show_weekends"
+                  bind:checked={_this.show_weekends} />
+                Keep weekends on
+              </label>
+            </div>
+            <div class="available-hours">
+              <strong>Available Hours</strong>
+              <p>
+                Drag over the hours want to be availble for booking. All other
+                hours will always show up as "busy" to your users.
+              </p>
+              <div role="checkbox" aria-labelledby="show_as_week">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="_this.show_as_week"
+                    bind:checked={_this.show_as_week} />
+                  Customize each weekday
                 </label>
               </div>
-            </fieldset>
-          {/each}
-        </div>
-        <footer slot="footer">
-          <button class="add-event" on:click={addConsecutiveEvent}
-            >Add a follow-up event</button>
-          <button on:click={saveProperties}>Save Editor Options</button>
-        </footer>
-      </nylas-schedule-editor-section>
-
-      <nylas-schedule-editor-section
-        section_title={SectionNames.TIME_DATE_DETAILS}>
-        <h1 slot="title">Date/Time Details</h1>
-        <div slot="contents" class="contents">
-          <div>
-            <label>
-              <strong>Start Hour</strong>
-              <input
-                type="range"
-                min={0}
-                max={24}
-                step={1}
-                bind:value={_this.start_hour} />
-            </label>
-            {_this.start_hour}:00
+              <div role="checkbox" aria-labelledby="show_as_week">
+                <label>
+                  <input
+                    type="checkbox"
+                    name=" _this.show_weekends"
+                    bind:checked={_this.show_weekends} />
+                  Allow booking on weekends
+                </label>
+              </div>
+              <div class="availability-container">
+                <nylas-availability
+                  allow_booking={true}
+                  show_as_week={_this.show_as_week || _this.show_weekends}
+                  show_weekends={_this.show_weekends}
+                  start_hour={_this.start_hour}
+                  end_hour={_this.end_hour}
+                  allow_date_change={false}
+                  partial_bookable_ratio="0"
+                  show_header={false}
+                  date_format={_this.show_as_week || _this.show_weekends
+                    ? "weekday"
+                    : "none"}
+                  busy_color="#000"
+                  closed_color="#999"
+                  selected_color="#095"
+                  slot_size="15"
+                  on:timeSlotChosen={availabilityChosen} />
+              </div>
+              <ul class="availability">
+                {#each _this.open_hours || [] as availability}
+                  <li>
+                    <span class="date">
+                      {niceDate(availability)}
+                    </span>
+                  </li>
+                {/each}
+              </ul>
+            </div>
           </div>
-          <div>
-            <label>
-              <strong>End Hour</strong>
-              <input
-                type="range"
-                min={0}
-                max={24}
-                step={1}
-                bind:value={_this.end_hour} />
-            </label>
-            {_this.end_hour}:00
-          </div>
-          <label>
-            <strong>Start Date</strong>
-            <strong>
-              <input
-                type="checkbox"
-                name="custom_start_date"
-                bind:checked={customStartDate}
-                on:change={async () => {
-                  if (!customStartDate) {
-                    startDate = new Date().toLocaleDateString("en-CA");
-                    await tick();
-                    startDate = null;
-                  }
-                }} />
-              Show a specific date
-            </strong>
+          <footer slot="footer">
+            <button on:click={saveProperties}>Save Editor Options</button>
+          </footer>
+        </nylas-schedule-editor-section>
+      {/if}
 
-            <input
-              type="date"
-              bind:value={startDate}
-              disabled={!customStartDate} />
-          </label>
-          <label>
-            <strong>Time Zone</strong>
-            <select bind:value={_this.timezone}>
-              {#each timezones.default as timezone}
-                <option value={timezone.tzCode}>{timezone.name}</option>
-              {/each}
-            </select>
-          </label>
-          <div>
+      {#if _this.sections[SectionNames.STYLE_DETAILS].editable}
+        <nylas-schedule-editor-section
+          section_title={SectionNames.STYLE_DETAILS}
+          expanded={_this.sections[SectionNames.STYLE_DETAILS].expanded}>
+          <h1 slot="title">Style Details</h1>
+          <div slot="contents" class="contents">
+            <div role="checkbox" aria-labelledby="show_ticks">
+              <strong id="show_ticks">Show ticks</strong>
+              <label>
+                <input
+                  type="checkbox"
+                  name="show_ticks"
+                  bind:checked={_this.show_ticks} />
+                Show tick marks on left side
+              </label>
+            </div>
+            <div role="radiogroup" aria-labelledby="view_as">
+              <strong id="view_as">View as a Schedule, or as a List?</strong>
+              <label>
+                <input
+                  type="radio"
+                  name="view_as"
+                  bind:group={_this.view_as}
+                  value="schedule" />
+                <span>Schedule</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="view_as"
+                  bind:group={_this.view_as}
+                  value="list" />
+                <span>List</span>
+              </label>
+            </div>
             <label>
-              <strong>Days to show</strong>
+              <strong>Attendees to show</strong>
               <input
-                type="range"
+                type="number"
                 min={1}
-                max={7}
-                step={1}
-                bind:value={_this.dates_to_show} />
-            </label>
-            {_this.dates_to_show}
-          </div>
-          <div role="checkbox" aria-labelledby="show_as_week">
-            <strong id="show_as_week">Show as week</strong>
-            <label>
-              <input
-                type="checkbox"
-                name="show_as_week"
-                bind:checked={_this.show_as_week} />
-              Show whole week
+                max={20}
+                bind:value={_this.attendees_to_show} />
             </label>
           </div>
-          <div role="checkbox" aria-labelledby="show_weekends">
-            <strong id="show_weekends">Show weekends</strong>
-            <label>
-              <input
-                type="checkbox"
-                name="show_weekends"
-                bind:checked={_this.show_weekends} />
-              Keep weekends on
-            </label>
-          </div>
-          <div class="available-hours">
-            <strong>Available Hours</strong>
-            <p>
-              Drag over the hours want to be availble for booking. All other
-              hours will always show up as "busy" to your users.
-            </p>
-            <div role="checkbox" aria-labelledby="show_as_week">
+          <footer slot="footer">
+            <button on:click={saveProperties}>Save Editor Options</button>
+          </footer>
+        </nylas-schedule-editor-section>
+      {/if}
+
+      {#if _this.sections[SectionNames.BOOKING_DETAILS].editable}
+        <nylas-schedule-editor-section
+          section_title={SectionNames.BOOKING_DETAILS}
+          expanded={_this.sections[SectionNames.BOOKING_DETAILS].expanded}>
+          <h1 slot="title">Booking Details</h1>
+          <div slot="contents" class="contents">
+            <div role="checkbox" aria-labelledby="allow_booking">
+              <strong id="allow_booking">Allow booking</strong>
               <label>
                 <input
                   type="checkbox"
-                  name="_this.show_as_week"
-                  bind:checked={_this.show_as_week} />
-                Customize each weekday
+                  name="allow_booking"
+                  bind:checked={_this.allow_booking} />
+                Allow bookings to be made
               </label>
             </div>
-            <div role="checkbox" aria-labelledby="show_as_week">
-              <label>
-                <input
-                  type="checkbox"
-                  name=" _this.show_weekends"
-                  bind:checked={_this.show_weekends} />
-                Allow booking on weekends
-              </label>
-            </div>
-            <div class="availability-container">
-              <nylas-availability
-                allow_booking={true}
-                show_as_week={_this.show_as_week || _this.show_weekends}
-                show_weekends={_this.show_weekends}
-                start_hour={_this.start_hour}
-                end_hour={_this.end_hour}
-                allow_date_change={false}
-                partial_bookable_ratio="0"
-                show_header={false}
-                date_format={_this.show_as_week || _this.show_weekends
-                  ? "weekday"
-                  : "none"}
-                busy_color="#000"
-                closed_color="#999"
-                selected_color="#095"
-                slot_size="15"
-                on:timeSlotChosen={availabilityChosen} />
-            </div>
-            <ul class="availability">
-              {#each _this.open_hours || [] as availability}
-                <li>
-                  <span class="date">
-                    {niceDate(availability)}
-                  </span>
-                </li>
-              {/each}
-            </ul>
-          </div>
-        </div>
-        <footer slot="footer">
-          <button on:click={saveProperties}>Save Editor Options</button>
-        </footer>
-      </nylas-schedule-editor-section>
-
-      <nylas-schedule-editor-section section_title={SectionNames.STYLE_DETAILS}>
-        <h1 slot="title">Style Details</h1>
-        <div slot="contents" class="contents">
-          <div role="checkbox" aria-labelledby="show_ticks">
-            <strong id="show_ticks">Show ticks</strong>
             <label>
+              <strong>Maximum slots that can be booked at once</strong>
               <input
-                type="checkbox"
-                name="show_ticks"
-                bind:checked={_this.show_ticks} />
-              Show tick marks on left side
+                type="number"
+                min={1}
+                max={20}
+                bind:value={_this.max_bookable_slots} />
             </label>
-          </div>
-          <div role="radiogroup" aria-labelledby="view_as">
-            <strong id="view_as">View as a Schedule, or as a List?</strong>
-            <label>
-              <input
-                type="radio"
-                name="view_as"
-                bind:group={_this.view_as}
-                value="schedule" />
-              <span>Schedule</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="view_as"
-                bind:group={_this.view_as}
-                value="list" />
-              <span>List</span>
-            </label>
-          </div>
-          <label>
-            <strong>Attendees to show</strong>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              bind:value={_this.attendees_to_show} />
-          </label>
-        </div>
-        <footer slot="footer">
-          <button on:click={saveProperties}>Save Editor Options</button>
-        </footer>
-      </nylas-schedule-editor-section>
-
-      <nylas-schedule-editor-section
-        section_title={SectionNames.BOOKING_DETAILS}>
-        <h1 slot="title">Booking Details</h1>
-        <div slot="contents" class="contents">
-          <div role="checkbox" aria-labelledby="allow_booking">
-            <strong id="allow_booking">Allow booking</strong>
-            <label>
-              <input
-                type="checkbox"
-                name="allow_booking"
-                bind:checked={_this.allow_booking} />
-              Allow bookings to be made
-            </label>
-          </div>
-          <label>
-            <strong>Maximum slots that can be booked at once</strong>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              bind:value={_this.max_bookable_slots} />
-          </label>
-          <div role="checkbox" aria-labelledby="screen_bookings">
-            <strong id="screen_bookings">
-              Scheduling on this calendar requires manual confirmation
-            </strong>
-            <label>
-              <input
-                type="checkbox"
-                name="screen_bookings"
-                bind:checked={_this.screen_bookings} />
-              Let the meeting host screen bookings before they're made official
-            </label>
-          </div>
-          <label>
-            <strong>Participant Threshold / Partial bookable ratio</strong>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              bind:value={_this.partial_bookable_ratio} />
-            {Math.floor(_this.partial_bookable_ratio * 100)}%
-          </label>
-          <div role="radiogroup" aria-labelledby="recurrence">
-            <strong id="recurrence">
-              Allow, Disallow, or Mandate events to repeat?
-            </strong>
-            <label>
-              <input
-                type="radio"
-                name="recurrence"
-                bind:group={_this.recurrence}
-                value="none" />
-              <span>Don't Repeat Events</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="recurrence"
-                bind:group={_this.recurrence}
-                value="optional" />
-              <span>Users May Repeat Events</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="recurrence"
-                bind:group={_this.recurrence}
-                value="required" />
-              <span>Events Always Repeat</span>
-            </label>
-          </div>
-          <label>
-            <strong>Capacity</strong>
-            <input type="number" min={1} bind:value={_this.capacity} />
-          </label>
-          <div role="checkbox" aria-labelledby="allow_booking">
-            <strong>Top of the Hour Events</strong>
-            <label>
-              <input
-                type="checkbox"
-                name="mandate_top_of_hour"
-                bind:checked={_this.mandate_top_of_hour} />
-              Only allow events to be booked at the Top of the Hour
-            </label>
-          </div>
-          {#if _this.recurrence === "required" || _this.recurrence === "optional"}
-            <div role="radiogroup" aria-labelledby="recurrence_cadence">
-              <strong id="recurrence_cadence">
-                How often should events repeat{#if _this.recurrence === "optional"},
-                  if a user chooses to do so{/if}?
+            <div role="checkbox" aria-labelledby="screen_bookings">
+              <strong id="screen_bookings">
+                Scheduling on this calendar requires manual confirmation
               </strong>
               <label>
                 <input
                   type="checkbox"
-                  name="recurrence_cadence"
-                  bind:group={_this.recurrence_cadence}
-                  value="daily" />
-                <span>Daily</span>
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="recurrence_cadence"
-                  bind:group={_this.recurrence_cadence}
-                  value="weekdays" />
-                <span>Daily, only on weekdays</span>
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="recurrence_cadence"
-                  bind:group={_this.recurrence_cadence}
-                  value="weekly" />
-                <span>Weekly</span>
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="recurrence_cadence"
-                  bind:group={_this.recurrence_cadence}
-                  value="biweekly" />
-                <span>Biweekly</span>
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="recurrence_cadence"
-                  bind:group={_this.recurrence_cadence}
-                  value="monthly" />
-                <span>Monthly</span>
+                  name="screen_bookings"
+                  bind:checked={_this.screen_bookings} />
+                Let the meeting host screen bookings before they're made official
               </label>
             </div>
-          {/if}
-        </div>
-        <footer slot="footer">
-          <button on:click={saveProperties}>Save Editor Options</button>
-        </footer>
-      </nylas-schedule-editor-section>
+            <label>
+              <strong>Participant Threshold / Partial bookable ratio</strong>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                bind:value={_this.partial_bookable_ratio} />
+              {Math.floor(_this.partial_bookable_ratio * 100)}%
+            </label>
+            <div role="radiogroup" aria-labelledby="recurrence">
+              <strong id="recurrence">
+                Allow, Disallow, or Mandate events to repeat?
+              </strong>
+              <label>
+                <input
+                  type="radio"
+                  name="recurrence"
+                  bind:group={_this.recurrence}
+                  value="none" />
+                <span>Don't Repeat Events</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="recurrence"
+                  bind:group={_this.recurrence}
+                  value="optional" />
+                <span>Users May Repeat Events</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="recurrence"
+                  bind:group={_this.recurrence}
+                  value="required" />
+                <span>Events Always Repeat</span>
+              </label>
+            </div>
+            <label>
+              <strong>Capacity</strong>
+              <input type="number" min={1} bind:value={_this.capacity} />
+            </label>
+            <div role="checkbox" aria-labelledby="allow_booking">
+              <strong>Top of the Hour Events</strong>
+              <label>
+                <input
+                  type="checkbox"
+                  name="mandate_top_of_hour"
+                  bind:checked={_this.mandate_top_of_hour} />
+                Only allow events to be booked at the Top of the Hour
+              </label>
+            </div>
+            {#if _this.recurrence === "required" || _this.recurrence === "optional"}
+              <div role="radiogroup" aria-labelledby="recurrence_cadence">
+                <strong id="recurrence_cadence">
+                  How often should events repeat{#if _this.recurrence === "optional"},
+                    if a user chooses to do so{/if}?
+                </strong>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="recurrence_cadence"
+                    bind:group={_this.recurrence_cadence}
+                    value="daily" />
+                  <span>Daily</span>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="recurrence_cadence"
+                    bind:group={_this.recurrence_cadence}
+                    value="weekdays" />
+                  <span>Daily, only on weekdays</span>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="recurrence_cadence"
+                    bind:group={_this.recurrence_cadence}
+                    value="weekly" />
+                  <span>Weekly</span>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="recurrence_cadence"
+                    bind:group={_this.recurrence_cadence}
+                    value="biweekly" />
+                  <span>Biweekly</span>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="recurrence_cadence"
+                    bind:group={_this.recurrence_cadence}
+                    value="monthly" />
+                  <span>Monthly</span>
+                </label>
+              </div>
+            {/if}
+          </div>
+          <footer slot="footer">
+            <button on:click={saveProperties}>Save Editor Options</button>
+          </footer>
+        </nylas-schedule-editor-section>
+      {/if}
 
-      <nylas-schedule-editor-section section_title={SectionNames.CUSTOM_FIELDS}>
-        <h1 slot="title">Custom Fields</h1>
-        <p slot="intro" class="intro">
-          Users will fill out these fields when booking an event with your team.
-          By default, they'll be asked for their name and email address.
-        </p>
-        <div slot="contents" class="contents">
-          {#if _this.custom_fields}
-            <table cellspacing="0" cellpadding="0">
-              <thead>
-                <th />
-                <th>Title and description</th>
-                <th>Type</th>
-                <th>Required</th>
-                <th />
-              </thead>
-              <tbody>
-                {#each _this.custom_fields as field, i (field.id)}
-                  <tr
-                    class:disabled={currentlyEditedField || isAddingCustomField}
-                    class:drag-active={field.id === draggedField?.id}
-                    on:mouseenter={() => {
-                      if (draggedField && i !== draggedFieldIndex) {
-                        swapDraggedWithHovered(i);
-                      }
-                    }}
-                    use:storeRef={{ id: field.id }}>
-                    <td class="cta">
-                      <button
-                        class="drag"
-                        on:mousedown={(event) => {
-                          handleCustomFieldDrag(event, field, i);
-                        }}>
-                        <span class="sr-only">Reorder custom field</span>
-                        <DragIcon />
-                      </button>
-                    </td>
-                    <td
-                      class:multi-line={field.description}
-                      class={"title-and-description"}>
-                      <span>{field.title ?? "—"}</span>
-                      {#if field.description}
-                        <span class="description">{field.description}</span>
-                      {/if}
-                    </td>
-                    <td class="type">{field.type ?? "—"}</td>
-                    <td class="required">
-                      {#if field.required}
-                        <CheckmarkIcon />
-                      {/if}
-                    </td>
-                    <td>
-                      <button
-                        class="edit"
-                        aria-label="Edit"
-                        on:click={() => editCustomField(field)}>
-                        <PencilIcon />
-                        <span>Edit</span>
-                      </button>
-                    </td>
-                  </tr>
-                  {#if currentlyEditedField === field.id}
-                    <tr class="edit-custom-field">
-                      <td colspan="5">
-                        <div class="header">
-                          <h3>Edit field</h3>
-                          <button
-                            class="delete"
-                            aria-label="Delete"
-                            on:click={() => removeCustomField(field)}>
-                            <TrashIcon />
-                            <span>Delete</span>
-                          </button>
-                        </div>
-                        <div class="input-field">
-                          <label>
-                            <div>Title *</div>
-                            <input
-                              type="text"
-                              aria-label="Title"
-                              bind:value={editableCustomField.title} />
-                          </label>
-                        </div>
-                        <div class="input-field">
-                          <label>
-                            <div>Description</div>
-                            <input
-                              type="text"
-                              aria-label="Description"
-                              bind:value={editableCustomField.description} />
-                          </label>
-                        </div>
-                        <div class="input-field">
-                          <label class="select">
-                            <div>Type *</div>
-                            <select
-                              bind:value={editableCustomField.type}
-                              aria-label="Input Type">
-                              <option value="text">Text</option>
-                              <option value="checkbox">Checkbox</option>
-                            </select>
-                          </label>
-                        </div>
-                        <div class="input-field">
-                          <label class="checkbox">
-                            <input
-                              type="checkbox"
-                              aria-label="Required field?"
-                              bind:checked={editableCustomField.required} />
-                            <span>Required</span>
-                          </label>
-                        </div>
-                        <div class="footer">
-                          <button
-                            class="cancel"
-                            on:click={() => {
-                              currentlyEditedField = null;
-                              editableCustomField = { ...emptyCustomField };
-                            }}>
-                            <span>Cancel</span>
-                          </button>
-
-                          <button
-                            class="save"
-                            disabled={editableCustomField.title?.length === 0 ||
-                              !editableCustomField.type}
-                            on:click={() => {
-                              currentlyEditedField = null;
-                              field = { ...editableCustomField };
-                              editableCustomField = { ...emptyCustomField };
-                            }}>
-                            <span>Save changes</span>
-                          </button>
-                        </div>
+      {#if _this.sections[SectionNames.CUSTOM_FIELDS].editable}
+        <nylas-schedule-editor-section
+          section_title={SectionNames.CUSTOM_FIELDS}
+          expanded={_this.sections[SectionNames.CUSTOM_FIELDS].expanded}>
+          <h1 slot="title">Custom Fields</h1>
+          <p slot="intro" class="intro">
+            Users will fill out these fields when booking an event with your
+            team. By default, they'll be asked for their name and email address.
+          </p>
+          <div slot="contents" class="contents">
+            {#if _this.custom_fields}
+              <table cellspacing="0" cellpadding="0">
+                <thead>
+                  <th />
+                  <th>Title and description</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th />
+                </thead>
+                <tbody>
+                  {#each _this.custom_fields as field, i (field.id)}
+                    <tr
+                      class:disabled={currentlyEditedField ||
+                        isAddingCustomField}
+                      class:drag-active={field.id === draggedField?.id}
+                      on:mouseenter={() => {
+                        if (draggedField && i !== draggedFieldIndex) {
+                          swapDraggedWithHovered(i);
+                        }
+                      }}
+                      use:storeRef={{ id: field.id }}>
+                      <td class="cta">
+                        <button
+                          class="drag"
+                          on:mousedown={(event) => {
+                            handleCustomFieldDrag(event, field, i);
+                          }}>
+                          <span class="sr-only">Reorder custom field</span>
+                          <DragIcon />
+                        </button>
+                      </td>
+                      <td
+                        class:multi-line={field.description}
+                        class={"title-and-description"}>
+                        <span>{field.title ?? "—"}</span>
+                        {#if field.description}
+                          <span class="description">{field.description}</span>
+                        {/if}
+                      </td>
+                      <td class="type">{field.type ?? "—"}</td>
+                      <td class="required">
+                        {#if field.required}
+                          <CheckmarkIcon />
+                        {/if}
+                      </td>
+                      <td>
+                        <button
+                          class="edit"
+                          aria-label="Edit"
+                          on:click={() => editCustomField(field)}>
+                          <PencilIcon />
+                          <span>Edit</span>
+                        </button>
                       </td>
                     </tr>
-                  {/if}
-                {/each}
-              </tbody>
-            </table>
-            <div class="add-custom-field">
-              {#if !isAddingCustomField}
-                <button
-                  aria-label="Add a custom field"
-                  on:click={() => (isAddingCustomField = true)}>
-                  <PlusIcon />
-                  <span>Add a custom field</span>
-                </button>
-              {:else}
-                <div class="edit-custom-field">
-                  <div class="header">
-                    <h3>Add a custom field</h3>
-                  </div>
-                  <div class="input-field">
-                    <label>
-                      <div>Title</div>
-                      <input
-                        type="text"
-                        aria-label="Title"
-                        bind:value={newCustomField.title} />
-                    </label>
-                  </div>
-                  <div class="input-field">
-                    <label>
-                      <div>Description</div>
-                      <input
-                        type="text"
-                        aria-label="Description"
-                        bind:value={newCustomField.description} />
-                    </label>
-                  </div>
-                  <div class="input-field">
-                    <label class="select">
-                      <div>Type</div>
-                      <select
-                        bind:value={newCustomField.type}
-                        aria-label="Input Type">
-                        <option value="text">Text</option>
-                        <option value="checkbox">Checkbox</option>
-                      </select>
-                    </label>
-                  </div>
-                  <div class="input-field">
-                    <label class="checkbox">
-                      <input
-                        type="checkbox"
-                        aria-label="Required Field?"
-                        bind:checked={newCustomField.required} />
-                      <span>Required</span>
-                    </label>
-                  </div>
-                  <div class="footer">
-                    <button
-                      class="cancel"
-                      on:click={() => {
-                        newCustomField = { ...emptyCustomField };
-                        isAddingCustomField = false;
-                      }}>
-                      <span>Cancel</span>
-                    </button>
-                    <button
-                      class="save"
-                      disabled={newCustomField.title?.length === 0 ||
-                        !newCustomField.type}
-                      on:click={() => addNewField()}>
-                      <span>Add field</span>
-                    </button>
-                  </div>
-                </div>
-              {/if}
-            </div>
-          {/if}
-        </div>
-        <footer slot="footer">
-          <button on:click={saveProperties}>Save Editor Options</button>
-        </footer>
-      </nylas-schedule-editor-section>
+                    {#if currentlyEditedField === field.id}
+                      <tr class="edit-custom-field">
+                        <td colspan="5">
+                          <div class="header">
+                            <h3>Edit field</h3>
+                            <button
+                              class="delete"
+                              aria-label="Delete"
+                              on:click={() => removeCustomField(field)}>
+                              <TrashIcon />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                          <div class="input-field">
+                            <label>
+                              <div>Title *</div>
+                              <input
+                                type="text"
+                                aria-label="Title"
+                                bind:value={editableCustomField.title} />
+                            </label>
+                          </div>
+                          <div class="input-field">
+                            <label>
+                              <div>Description</div>
+                              <input
+                                type="text"
+                                aria-label="Description"
+                                bind:value={editableCustomField.description} />
+                            </label>
+                          </div>
+                          <div class="input-field">
+                            <label class="select">
+                              <div>Type *</div>
+                              <select
+                                bind:value={editableCustomField.type}
+                                aria-label="Input Type">
+                                <option value="text">Text</option>
+                                <option value="checkbox">Checkbox</option>
+                              </select>
+                            </label>
+                          </div>
+                          <div class="input-field">
+                            <label class="checkbox">
+                              <input
+                                type="checkbox"
+                                aria-label="Required field?"
+                                bind:checked={editableCustomField.required} />
+                              <span>Required</span>
+                            </label>
+                          </div>
+                          <div class="footer">
+                            <button
+                              class="cancel"
+                              on:click={() => {
+                                currentlyEditedField = null;
+                                editableCustomField = { ...emptyCustomField };
+                              }}>
+                              <span>Cancel</span>
+                            </button>
 
-      <nylas-schedule-editor-section
-        section_title={SectionNames.NOTIFICATION_DETAILS}>
-        <h1 slot="title">Notification Details</h1>
-        <div slot="contents" class="contents">
-          <div role="radiogroup" aria-labelledby="notification_mode">
-            <strong id="notification_mode"
-              >How would you like to notify the customer on event creation?</strong>
+                            <button
+                              class="save"
+                              disabled={editableCustomField.title?.length ===
+                                0 || !editableCustomField.type}
+                              on:click={() => {
+                                currentlyEditedField = null;
+                                field = { ...editableCustomField };
+                                editableCustomField = { ...emptyCustomField };
+                              }}>
+                              <span>Save changes</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    {/if}
+                  {/each}
+                </tbody>
+              </table>
+              <div class="add-custom-field">
+                {#if !isAddingCustomField}
+                  <button
+                    aria-label="Add a custom field"
+                    on:click={() => (isAddingCustomField = true)}>
+                    <PlusIcon />
+                    <span>Add a custom field</span>
+                  </button>
+                {:else}
+                  <div class="edit-custom-field">
+                    <div class="header">
+                      <h3>Add a custom field</h3>
+                    </div>
+                    <div class="input-field">
+                      <label>
+                        <div>Title</div>
+                        <input
+                          type="text"
+                          aria-label="Title"
+                          bind:value={newCustomField.title} />
+                      </label>
+                    </div>
+                    <div class="input-field">
+                      <label>
+                        <div>Description</div>
+                        <input
+                          type="text"
+                          aria-label="Description"
+                          bind:value={newCustomField.description} />
+                      </label>
+                    </div>
+                    <div class="input-field">
+                      <label class="select">
+                        <div>Type</div>
+                        <select
+                          bind:value={newCustomField.type}
+                          aria-label="Input Type">
+                          <option value="text">Text</option>
+                          <option value="checkbox">Checkbox</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="input-field">
+                      <label class="checkbox">
+                        <input
+                          type="checkbox"
+                          aria-label="Required Field?"
+                          bind:checked={newCustomField.required} />
+                        <span>Required</span>
+                      </label>
+                    </div>
+                    <div class="footer">
+                      <button
+                        class="cancel"
+                        on:click={() => {
+                          newCustomField = { ...emptyCustomField };
+                          isAddingCustomField = false;
+                        }}>
+                        <span>Cancel</span>
+                      </button>
+                      <button
+                        class="save"
+                        disabled={newCustomField.title?.length === 0 ||
+                          !newCustomField.type}
+                        on:click={() => addNewField()}>
+                        <span>Add field</span>
+                      </button>
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            {/if}
+          </div>
+          <footer slot="footer">
+            <button on:click={saveProperties}>Save Editor Options</button>
+          </footer>
+        </nylas-schedule-editor-section>
+      {/if}
+
+      {#if _this.sections[SectionNames.NOTIFICATION_DETAILS].editable}
+        <nylas-schedule-editor-section
+          section_title={SectionNames.NOTIFICATION_DETAILS}
+          expanded={_this.sections[SectionNames.NOTIFICATION_DETAILS].expanded}>
+          <h1 slot="title">Notification Details</h1>
+          <div slot="contents" class="contents">
+            <div role="radiogroup" aria-labelledby="notification_mode">
+              <strong id="notification_mode"
+                >How would you like to notify the customer on event creation?</strong>
+              <label>
+                <input
+                  type="radio"
+                  name="notification_mode"
+                  value={NotificationMode.SHOW_MESSAGE}
+                  bind:group={_this.notification_mode} />
+                <span>Show Message on UI</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="notification_mode"
+                  value={NotificationMode.SEND_MESSAGE}
+                  bind:group={_this.notification_mode} />
+                <span>Send message via email</span>
+              </label>
+            </div>
             <label>
-              <input
-                type="radio"
-                name="notification_mode"
-                value={NotificationMode.SHOW_MESSAGE}
-                bind:group={_this.notification_mode} />
-              <span>Show Message on UI</span>
+              <strong>Notification message</strong>
+              <input type="text" bind:value={_this.notification_message} />
             </label>
             <label>
-              <input
-                type="radio"
-                name="notification_mode"
-                value={NotificationMode.SEND_MESSAGE}
-                bind:group={_this.notification_mode} />
-              <span>Send message via email</span>
+              <strong>Notification Subject</strong>
+              <input type="text" bind:value={_this.notification_subject} />
             </label>
           </div>
-          <label>
-            <strong>Notification message</strong>
-            <input type="text" bind:value={_this.notification_message} />
-          </label>
-          <label>
-            <strong>Notification Subject</strong>
-            <input type="text" bind:value={_this.notification_subject} />
-          </label>
-        </div>
-        <footer slot="footer">
-          <button on:click={saveProperties}>Save Editor Options</button>
-        </footer>
-      </nylas-schedule-editor-section>
+          <footer slot="footer">
+            <button on:click={saveProperties}>Save Editor Options</button>
+          </footer>
+        </nylas-schedule-editor-section>
+      {/if}
     </div>
     {#if showPreview}
       <span class="gutter" on:mousedown={() => (adjustingPreviewPane = true)} />

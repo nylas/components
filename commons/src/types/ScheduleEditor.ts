@@ -42,6 +42,7 @@ export interface Manifest extends NylasManifest {
   min_book_ahead_days: number;
   custom_fields: CustomField[];
   events: EventDefinition[];
+  sections: Sections;
 }
 
 export interface EventDefinition {
@@ -62,6 +63,7 @@ interface HostRules {
 interface SectionOptions {
   expanded: boolean;
   editable: boolean;
+  hidden_fields?: string[];
 }
 
 export enum SectionNames {
@@ -74,5 +76,5 @@ export enum SectionNames {
 }
 
 export type Sections = {
-  [key in SectionNames]: SectionOptions;
+  [key in SectionNames]?: SectionOptions;
 };
