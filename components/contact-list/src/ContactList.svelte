@@ -492,8 +492,7 @@
   on:scroll={_this.contacts ? () => {} : debounceScroll}
   bind:clientHeight
   bind:clientWidth
-  class={!!themeUrl ? "custom" : _this.theme}
->
+  class={!!themeUrl ? "custom" : _this.theme}>
   {#if status === "loading" && hydratedContacts.length <= 0}
     <div class="loader" />
   {:else if hydratedContacts.length === 0}
@@ -506,8 +505,7 @@
       <p>
         See our <a
           href="https://docs.nylas.com/docs/contact-list-component"
-          target="_blank">Docs</a
-        >
+          target="_blank">Docs</a>
         for more details.
       </p>
     </div>
@@ -516,8 +514,7 @@
     {#if status === "loading" && results.length >= _this.contacts_to_load}
       <span
         class="loading"
-        style="--height: {clientHeight}px; --width: {clientWidth}px"
-      >
+        style="--height: {clientHeight}px; --width: {clientWidth}px">
         Loading More Contacts
       </span>
     {/if}
@@ -527,8 +524,7 @@
         Filter by email: <input
           id="show-filter-input"
           type="text"
-          bind:value={filterValue}
-        />
+          bind:value={filterValue} />
       </label>
     {/if}
 
@@ -546,20 +542,17 @@
           data-cy={i}
           data-last-contacted-date={contact.last_contacted_date || -1}
           class:selectable={_this.click_action === "select"}
-          class:selected={contact.selected}
-        >
+          class:selected={contact.selected}>
           <span class="checkbox">
             {#if _this.click_action === "select"}
               <input
                 type="checkbox"
                 bind:checked={contact.selected}
-                id="contact-{i}-checkbox"
-              />
+                id="contact-{i}-checkbox" />
               <label for="contact-{i}-checkbox"
                 >{contact.selected ? "Deselect" : "Select"}
                 {contact.given_name}
-                {contact.surname}</label
-              >
+                {contact.surname}</label>
             {/if}
           </span>
           <span class="image">
@@ -567,8 +560,7 @@
               {#if contact.picture !== "Loading"}
                 <img
                   alt={contact.emails[0].email}
-                  src="data:image/jpg;base64,{contact.picture}"
-                />
+                  src="data:image/jpg;base64,{contact.picture}" />
               {/if}
             {:else if contact.picture_url}
               {#if _this.contacts?.length}
@@ -582,8 +574,7 @@
               <img
                 src={contact.default_picture}
                 alt={contact.emails[0].email}
-                data-cy="default_set_by_user"
-              />
+                data-cy="default_set_by_user" />
             {:else if _this.default_photo}
               {(contact.default_picture = _this.default_photo)}
             {:else}
@@ -617,8 +608,7 @@
             <span
               class="recency"
               class:no-last-contact-data={!contact.last_contacted_date}
-              >{contact.time_ago}</span
-            >
+              >{contact.time_ago}</span>
           {/if}
         </li>
       {/each}

@@ -912,8 +912,7 @@
 <main
   data-cy="nylas-mailbox"
   class:loading={!hasComponentLoaded}
-  class:empty={!threads?.length && hasComponentLoaded}
->
+  class:empty={!threads?.length && hasComponentLoaded}>
   {#if hasComponentLoaded}
     {#if currentlySelectedThread}
       <div class="email-container">
@@ -932,8 +931,7 @@
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
           on:threadDeleted={showConfirmDeleteModal}
-          on:downloadClicked={downloadSelectedFile}
-        />
+          on:downloadClicked={downloadSelectedFile} />
       </div>
     {:else}
       {#if _this.header}
@@ -943,11 +941,9 @@
               width="16"
               height="16"
               viewBox="0 0 16 16"
-              class:refreshing={loading}
-            >
+              class:refreshing={loading}>
               <path
-                d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z"
-              />
+                d="M9.41757 0.780979L9.57471 0.00782773C12.9388 0.717887 15.4617 3.80648 15.4617 7.49954C15.4617 8.7935 15.1519 10.0136 14.6046 11.083L16 12.458L11.6994 13.7113L12.7846 9.28951L14.0208 10.5077C14.4473 9.60009 14.6869 8.5795 14.6869 7.49954C14.6869 4.17742 12.4188 1.41444 9.41757 0.780979ZM0 2.90469L4.24241 1.46013L3.3489 5.92625L2.06118 4.7644C1.71079 5.60175 1.51627 6.5265 1.51627 7.49954C1.51627 10.8217 3.7844 13.5847 6.78563 14.2182L6.62849 14.9913C3.26437 14.2812 0.741524 11.1926 0.741524 7.49954C0.741524 6.32506 0.996751 5.21133 1.45323 4.21587L0 2.90469Z" />
             </svg>
           </button>
           <h1>{header}</h1>
@@ -957,8 +953,7 @@
         <div
           role="toolbar"
           aria-label="Bulk actions"
-          aria-controls="mailboxlist"
-        >
+          aria-controls="mailboxlist">
           {#if _this.show_thread_checkbox && _this.actions_bar.includes(MailboxActions.SELECTALL)}
             <div class="thread-checkbox">
               {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
@@ -967,8 +962,7 @@
                   aria-label={selectAllTitle}
                   type="checkbox"
                   checked={areAllSelected}
-                  on:click={onSelectAll}
-                />
+                  on:click={onSelectAll} />
               {/each}
             </div>
           {/if}
@@ -981,8 +975,7 @@
                   aria-label="Delete selected email(s)"
                   on:click={(e) => {
                     showConfirmDeleteModal(e, "selected");
-                  }}><TrashIcon /></button
-                >
+                  }}><TrashIcon /></button>
               </div>
             {/if}
             {#if _this.show_star && _this.actions_bar.includes(MailboxActions.STAR)}
@@ -996,8 +989,7 @@
                     disabled={!threads.filter((thread) => thread.selected)
                       .length}
                     aria-checked={areAllSelectedStarred}
-                    on:click={(e) => onStarSelected(e)}
-                  />
+                    on:click={(e) => onStarSelected(e)} />
                 {/each}
               </div>
             {/if}
@@ -1010,8 +1002,7 @@
                     disabled={!threads.filter((thread) => thread.selected)
                       .length}
                     aria-label="Mark selected email(s) as read"
-                    on:click={(e) => onChangeSelectedReadStatus(e)}
-                  >
+                    on:click={(e) => onChangeSelectedReadStatus(e)}>
                     <MarkReadIcon />
                   </button>
                 {:else}
@@ -1019,8 +1010,7 @@
                     data-cy="mark-unread"
                     title="Mark selected email(s) as unread"
                     aria-label="Mark selected email(s) as unread"
-                    on:click={(e) => onChangeSelectedReadStatus(e)}
-                  >
+                    on:click={(e) => onChangeSelectedReadStatus(e)}>
                     <MarkUnreadIcon />
                   </button>
                 {/if}
@@ -1038,8 +1028,7 @@
               class:no-messages={thread &&
                 thread?.messages &&
                 thread?.messages?.length <= 0 &&
-                !thread?.drafts?.length}
-            >
+                !thread?.drafts?.length}>
               <div class="checkbox-container thread-checkbox">
                 {#if _this.show_thread_checkbox}
                   <input
@@ -1051,8 +1040,7 @@
                       thread?.messages &&
                       thread?.messages?.length <= 0 &&
                       !thread?.drafts?.length}
-                    on:click={(e) => onSelectOne(e, thread)}
-                  />
+                    on:click={(e) => onSelectOne(e, thread)} />
                 {/if}
               </div>
               <div class="email-container">
@@ -1074,8 +1062,7 @@
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
                     on:threadDeleted={showConfirmDeleteModal}
                     on:downloadClicked={downloadSelectedFile}
-                    show_thread_actions={thread.selected}
-                  />
+                    show_thread_actions={thread.selected} />
                 {/key}
               </div>
             </li>
@@ -1099,8 +1086,7 @@
             num_items={numThreads}
             visible={true}
             num_pages_visible={!_this.keyword_to_search}
-            on:changePage={changePage}
-          />
+            on:changePage={changePage} />
         {/if}
       </ul>
     {/if}
@@ -1108,8 +1094,7 @@
     <div class="mailbox-loader">
       <LoadingIcon
         class="spinner"
-        style="height:18px; animation: rotate 2s linear infinite; margin:10px;"
-      />
+        style="height:18px; animation: rotate 2s linear infinite; margin:10px;" />
       <p>Loading...</p>
     </div>
   {/if}
@@ -1137,8 +1122,7 @@
         </button>
         <button
           class="cancel"
-          on:click={() => (confirmDeleteModal.isOpen = false)}
-        >
+          on:click={() => (confirmDeleteModal.isOpen = false)}>
           Cancel
         </button>
       </div>
