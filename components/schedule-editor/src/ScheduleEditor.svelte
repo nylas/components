@@ -487,9 +487,7 @@
 
   //#endregion consecutive events
 
-  //#region expand/collapse
-
-  // let sections: Partial<Sections> = {};
+  //#region initialize sections
 
   function establishSections() {
     if (!Object.entries(_this.sections).length) {
@@ -517,13 +515,7 @@
       });
     }
   }
-  $: console.log({ sections });
-
-  // function toggleCollapse(name: SectionNames) {
-  //   _this.sections[name].expanded = !_this.sections[name].expanded;
-  //   _this.sections = { ..._this.sections };
-  // }
-  //#endregion expand/collapse
+  //#endregion initialize sections
 </script>
 
 <style lang="scss">
