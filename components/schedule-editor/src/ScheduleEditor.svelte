@@ -517,13 +517,11 @@
     on:mousemove={adjustColumns}
     on:mouseup={() => (adjustingPreviewPane = false)}
     bind:clientWidth={mainElementWidth}
-    bind:this={main}
-  >
+    bind:this={main}>
     <div class="settings">
       <nylas-schedule-editor-section
         section_title={SectionNames.BASIC_DETAILS}
-        expanded={true}
-      >
+        expanded={true}>
         <h1 slot="title">Event Details</h1>
         <p slot="intro" class="intro">
           Edit the details for your meeting. You can add consecutive meetings to
@@ -535,8 +533,7 @@
               {#if _this.events.length > 1}
                 <button
                   class="remove-event"
-                  on:click={() => removeConsecutiveEvent(event)}
-                >
+                  on:click={() => removeConsecutiveEvent(event)}>
                   Remove this event
                 </button>
               {/if}
@@ -588,8 +585,7 @@
                   <textarea
                     name="participants"
                     on:input={(e) => debounceEmailInput(e, event)}
-                    value={event.participantEmails}
-                  />
+                    value={event.participantEmails} />
                 </label>
               </div>
             </fieldset>
@@ -597,15 +593,13 @@
         </div>
         <footer slot="footer">
           <button class="add-event" on:click={addConsecutiveEvent}
-            >Add a follow-up event</button
-          >
+            >Add a follow-up event</button>
           <button on:click={saveProperties}>Save Editor Options</button>
         </footer>
       </nylas-schedule-editor-section>
 
       <nylas-schedule-editor-section
-        section_title={SectionNames.TIME_DATE_DETAILS}
-      >
+        section_title={SectionNames.TIME_DATE_DETAILS}>
         <h1 slot="title">Date/Time Details</h1>
         <div slot="contents" class="contents">
           <div>
@@ -616,8 +610,7 @@
                 min={0}
                 max={24}
                 step={1}
-                bind:value={_this.start_hour}
-              />
+                bind:value={_this.start_hour} />
             </label>
             {_this.start_hour}:00
           </div>
@@ -629,8 +622,7 @@
                 min={0}
                 max={24}
                 step={1}
-                bind:value={_this.end_hour}
-              />
+                bind:value={_this.end_hour} />
             </label>
             {_this.end_hour}:00
           </div>
@@ -647,16 +639,14 @@
                     await tick();
                     startDate = null;
                   }
-                }}
-              />
+                }} />
               Show a specific date
             </strong>
 
             <input
               type="date"
               bind:value={startDate}
-              disabled={!customStartDate}
-            />
+              disabled={!customStartDate} />
           </label>
           <label>
             <strong>Time Zone</strong>
@@ -674,8 +664,7 @@
                 min={1}
                 max={7}
                 step={1}
-                bind:value={_this.dates_to_show}
-              />
+                bind:value={_this.dates_to_show} />
             </label>
             {_this.dates_to_show}
           </div>
@@ -685,8 +674,7 @@
               <input
                 type="checkbox"
                 name="show_as_week"
-                bind:checked={_this.show_as_week}
-              />
+                bind:checked={_this.show_as_week} />
               Show whole week
             </label>
           </div>
@@ -696,8 +684,7 @@
               <input
                 type="checkbox"
                 name="show_weekends"
-                bind:checked={_this.show_weekends}
-              />
+                bind:checked={_this.show_weekends} />
               Keep weekends on
             </label>
           </div>
@@ -712,8 +699,7 @@
                 <input
                   type="checkbox"
                   name="_this.show_as_week"
-                  bind:checked={_this.show_as_week}
-                />
+                  bind:checked={_this.show_as_week} />
                 Customize each weekday
               </label>
             </div>
@@ -722,8 +708,7 @@
                 <input
                   type="checkbox"
                   name=" _this.show_weekends"
-                  bind:checked={_this.show_weekends}
-                />
+                  bind:checked={_this.show_weekends} />
                 Allow booking on weekends
               </label>
             </div>
@@ -744,8 +729,7 @@
                 closed_color="#999"
                 selected_color="#095"
                 slot_size="15"
-                on:timeSlotChosen={availabilityChosen}
-              />
+                on:timeSlotChosen={availabilityChosen} />
             </div>
             <ul class="availability">
               {#each _this.open_hours || [] as availability}
@@ -772,8 +756,7 @@
               <input
                 type="checkbox"
                 name="show_ticks"
-                bind:checked={_this.show_ticks}
-              />
+                bind:checked={_this.show_ticks} />
               Show tick marks on left side
             </label>
           </div>
@@ -784,8 +767,7 @@
                 type="radio"
                 name="view_as"
                 bind:group={_this.view_as}
-                value="schedule"
-              />
+                value="schedule" />
               <span>Schedule</span>
             </label>
             <label>
@@ -793,8 +775,7 @@
                 type="radio"
                 name="view_as"
                 bind:group={_this.view_as}
-                value="list"
-              />
+                value="list" />
               <span>List</span>
             </label>
           </div>
@@ -804,8 +785,7 @@
               type="number"
               min={1}
               max={20}
-              bind:value={_this.attendees_to_show}
-            />
+              bind:value={_this.attendees_to_show} />
           </label>
         </div>
         <footer slot="footer">
@@ -814,8 +794,7 @@
       </nylas-schedule-editor-section>
 
       <nylas-schedule-editor-section
-        section_title={SectionNames.BOOKING_DETAILS}
-      >
+        section_title={SectionNames.BOOKING_DETAILS}>
         <h1 slot="title">Booking Details</h1>
         <div slot="contents" class="contents">
           <div role="checkbox" aria-labelledby="allow_booking">
@@ -824,8 +803,7 @@
               <input
                 type="checkbox"
                 name="allow_booking"
-                bind:checked={_this.allow_booking}
-              />
+                bind:checked={_this.allow_booking} />
               Allow bookings to be made
             </label>
           </div>
@@ -835,8 +813,7 @@
               type="number"
               min={1}
               max={20}
-              bind:value={_this.max_bookable_slots}
-            />
+              bind:value={_this.max_bookable_slots} />
           </label>
           <div role="checkbox" aria-labelledby="screen_bookings">
             <strong id="screen_bookings">
@@ -846,8 +823,7 @@
               <input
                 type="checkbox"
                 name="screen_bookings"
-                bind:checked={_this.screen_bookings}
-              />
+                bind:checked={_this.screen_bookings} />
               Let the meeting host screen bookings before they're made official
             </label>
           </div>
@@ -858,8 +834,7 @@
               min={0}
               max={1}
               step={0.01}
-              bind:value={_this.partial_bookable_ratio}
-            />
+              bind:value={_this.partial_bookable_ratio} />
             {Math.floor(_this.partial_bookable_ratio * 100)}%
           </label>
           <div role="radiogroup" aria-labelledby="recurrence">
@@ -871,8 +846,7 @@
                 type="radio"
                 name="recurrence"
                 bind:group={_this.recurrence}
-                value="none"
-              />
+                value="none" />
               <span>Don't Repeat Events</span>
             </label>
             <label>
@@ -880,8 +854,7 @@
                 type="radio"
                 name="recurrence"
                 bind:group={_this.recurrence}
-                value="optional"
-              />
+                value="optional" />
               <span>Users May Repeat Events</span>
             </label>
             <label>
@@ -889,8 +862,7 @@
                 type="radio"
                 name="recurrence"
                 bind:group={_this.recurrence}
-                value="required"
-              />
+                value="required" />
               <span>Events Always Repeat</span>
             </label>
           </div>
@@ -904,8 +876,7 @@
               <input
                 type="checkbox"
                 name="mandate_top_of_hour"
-                bind:checked={_this.mandate_top_of_hour}
-              />
+                bind:checked={_this.mandate_top_of_hour} />
               Only allow events to be booked at the Top of the Hour
             </label>
           </div>
@@ -920,8 +891,7 @@
                   type="checkbox"
                   name="recurrence_cadence"
                   bind:group={_this.recurrence_cadence}
-                  value="daily"
-                />
+                  value="daily" />
                 <span>Daily</span>
               </label>
               <label>
@@ -929,8 +899,7 @@
                   type="checkbox"
                   name="recurrence_cadence"
                   bind:group={_this.recurrence_cadence}
-                  value="weekdays"
-                />
+                  value="weekdays" />
                 <span>Daily, only on weekdays</span>
               </label>
               <label>
@@ -938,8 +907,7 @@
                   type="checkbox"
                   name="recurrence_cadence"
                   bind:group={_this.recurrence_cadence}
-                  value="weekly"
-                />
+                  value="weekly" />
                 <span>Weekly</span>
               </label>
               <label>
@@ -947,8 +915,7 @@
                   type="checkbox"
                   name="recurrence_cadence"
                   bind:group={_this.recurrence_cadence}
-                  value="biweekly"
-                />
+                  value="biweekly" />
                 <span>Biweekly</span>
               </label>
               <label>
@@ -956,8 +923,7 @@
                   type="checkbox"
                   name="recurrence_cadence"
                   bind:group={_this.recurrence_cadence}
-                  value="monthly"
-                />
+                  value="monthly" />
                 <span>Monthly</span>
               </label>
             </div>
@@ -994,23 +960,20 @@
                         swapDraggedWithHovered(i);
                       }
                     }}
-                    use:storeRef={{ id: field.id }}
-                  >
+                    use:storeRef={{ id: field.id }}>
                     <td class="cta">
                       <button
                         class="drag"
                         on:mousedown={(event) => {
                           handleCustomFieldDrag(event, field, i);
-                        }}
-                      >
+                        }}>
                         <span class="sr-only">Reorder custom field</span>
                         <DragIcon />
                       </button>
                     </td>
                     <td
                       class:multi-line={field.description}
-                      class={"title-and-description"}
-                    >
+                      class={"title-and-description"}>
                       <span>{field.title ?? "—"}</span>
                       {#if field.description}
                         <span class="description">{field.description}</span>
@@ -1026,8 +989,7 @@
                       <button
                         class="edit"
                         aria-label="Edit"
-                        on:click={() => editCustomField(field)}
-                      >
+                        on:click={() => editCustomField(field)}>
                         <PencilIcon />
                         <span>Edit</span>
                       </button>
@@ -1041,8 +1003,7 @@
                           <button
                             class="delete"
                             aria-label="Delete"
-                            on:click={() => removeCustomField(field)}
-                          >
+                            on:click={() => removeCustomField(field)}>
                             <TrashIcon />
                             <span>Delete</span>
                           </button>
@@ -1053,8 +1014,7 @@
                             <input
                               type="text"
                               aria-label="Title"
-                              bind:value={editableCustomField.title}
-                            />
+                              bind:value={editableCustomField.title} />
                           </label>
                         </div>
                         <div class="input-field">
@@ -1063,8 +1023,7 @@
                             <input
                               type="text"
                               aria-label="Description"
-                              bind:value={editableCustomField.description}
-                            />
+                              bind:value={editableCustomField.description} />
                           </label>
                         </div>
                         <div class="input-field">
@@ -1072,8 +1031,7 @@
                             <div>Type *</div>
                             <select
                               bind:value={editableCustomField.type}
-                              aria-label="Input Type"
-                            >
+                              aria-label="Input Type">
                               <option value="text">Text</option>
                               <option value="checkbox">Checkbox</option>
                             </select>
@@ -1084,8 +1042,7 @@
                             <input
                               type="checkbox"
                               aria-label="Required field?"
-                              bind:checked={editableCustomField.required}
-                            />
+                              bind:checked={editableCustomField.required} />
                             <span>Required</span>
                           </label>
                         </div>
@@ -1095,8 +1052,7 @@
                             on:click={() => {
                               currentlyEditedField = null;
                               editableCustomField = { ...emptyCustomField };
-                            }}
-                          >
+                            }}>
                             <span>Cancel</span>
                           </button>
 
@@ -1108,8 +1064,7 @@
                               currentlyEditedField = null;
                               field = { ...editableCustomField };
                               editableCustomField = { ...emptyCustomField };
-                            }}
-                          >
+                            }}>
                             <span>Save changes</span>
                           </button>
                         </div>
@@ -1123,8 +1078,7 @@
               {#if !isAddingCustomField}
                 <button
                   aria-label="Add a custom field"
-                  on:click={() => (isAddingCustomField = true)}
-                >
+                  on:click={() => (isAddingCustomField = true)}>
                   <PlusIcon />
                   <span>Add a custom field</span>
                 </button>
@@ -1139,8 +1093,7 @@
                       <input
                         type="text"
                         aria-label="Title"
-                        bind:value={newCustomField.title}
-                      />
+                        bind:value={newCustomField.title} />
                     </label>
                   </div>
                   <div class="input-field">
@@ -1149,8 +1102,7 @@
                       <input
                         type="text"
                         aria-label="Description"
-                        bind:value={newCustomField.description}
-                      />
+                        bind:value={newCustomField.description} />
                     </label>
                   </div>
                   <div class="input-field">
@@ -1158,8 +1110,7 @@
                       <div>Type</div>
                       <select
                         bind:value={newCustomField.type}
-                        aria-label="Input Type"
-                      >
+                        aria-label="Input Type">
                         <option value="text">Text</option>
                         <option value="checkbox">Checkbox</option>
                       </select>
@@ -1170,8 +1121,7 @@
                       <input
                         type="checkbox"
                         aria-label="Required Field?"
-                        bind:checked={newCustomField.required}
-                      />
+                        bind:checked={newCustomField.required} />
                       <span>Required</span>
                     </label>
                   </div>
@@ -1181,16 +1131,14 @@
                       on:click={() => {
                         newCustomField = { ...emptyCustomField };
                         isAddingCustomField = false;
-                      }}
-                    >
+                      }}>
                       <span>Cancel</span>
                     </button>
                     <button
                       class="save"
                       disabled={newCustomField.title?.length === 0 ||
                         !newCustomField.type}
-                      on:click={() => addNewField()}
-                    >
+                      on:click={() => addNewField()}>
                       <span>Add field</span>
                     </button>
                   </div>
@@ -1205,21 +1153,18 @@
       </nylas-schedule-editor-section>
 
       <nylas-schedule-editor-section
-        section_title={SectionNames.NOTIFICATION_DETAILS}
-      >
+        section_title={SectionNames.NOTIFICATION_DETAILS}>
         <h1 slot="title">Notification Details</h1>
         <div slot="contents" class="contents">
           <div role="radiogroup" aria-labelledby="notification_mode">
             <strong id="notification_mode"
-              >How would you like to notify the customer on event creation?</strong
-            >
+              >How would you like to notify the customer on event creation?</strong>
             <label>
               <input
                 type="radio"
                 name="notification_mode"
                 value={NotificationMode.SHOW_MESSAGE}
-                bind:group={_this.notification_mode}
-              />
+                bind:group={_this.notification_mode} />
               <span>Show Message on UI</span>
             </label>
             <label>
@@ -1227,8 +1172,7 @@
                 type="radio"
                 name="notification_mode"
                 value={NotificationMode.SEND_MESSAGE}
-                bind:group={_this.notification_mode}
-              />
+                bind:group={_this.notification_mode} />
               <span>Send message via email</span>
             </label>
           </div>
@@ -1265,8 +1209,7 @@
                 },
               ]
             : []}
-          {id}
-        />
+          {id} />
         <nylas-booking
           {slots_to_book}
           {..._this}
@@ -1279,8 +1222,7 @@
                 },
               ]
             : []}
-          {id}
-        />
+          {id} />
       </aside>
     {/if}
 
@@ -1290,14 +1232,12 @@
         top={dragPlaceholder.top}
         height={tablerowRect.height}
         width={tablerowRect.width}
-        visible={!!draggedField}
-      >
+        visible={!!draggedField}>
         {#each customFieldKeys as key, i}
           <div
             class="drag-preview-cell"
             style="width: {tablecellRect[i].width}px; height: {tablecellRect[i]
-              .height}px;"
-          >
+              .height}px;">
             {(draggedField && draggedField[key]) || "—"}
           </div>
         {/each}

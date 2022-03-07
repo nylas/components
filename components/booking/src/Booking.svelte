@@ -289,37 +289,31 @@
               -
               {timeSlot.end_time.toLocaleTimeString([], {
                 timeStyle: "short",
-              })}</span
-            >
+              })}</span>
             <span class="date"
               >{timeSlot.start_time.toLocaleDateString("default", {
                 dateStyle: "full",
-              })}</span
-            >
+              })}</span>
             {#if _this.recurrence !== "none"}
               <footer>
                 {#if _this.recurrence === "optional"}
                   <strong>How often should this event repeat?</strong>
                   <div class="cadences">
                     <label
-                      class:checked={timeSlot.recurrence_cadence === "none"}
-                    >
+                      class:checked={timeSlot.recurrence_cadence === "none"}>
                       <input
                         type="radio"
                         value="none"
-                        bind:group={timeSlot.recurrence_cadence}
-                      />
+                        bind:group={timeSlot.recurrence_cadence} />
                       <span>never</span>
                     </label>
                     {#each _this.recurrence_cadence as cadence}
                       <label
-                        class:checked={timeSlot.recurrence_cadence === cadence}
-                      >
+                        class:checked={timeSlot.recurrence_cadence === cadence}>
                         <input
                           type="radio"
                           value={cadence}
-                          bind:group={timeSlot.recurrence_cadence}
-                        />
+                          bind:group={timeSlot.recurrence_cadence} />
                         <span>{cadence}</span>
                       </label>
                     {/each}
@@ -334,24 +328,21 @@
                       <input
                         type="radio"
                         value="none"
-                        bind:group={timeSlot.expirySelection}
-                      />
+                        bind:group={timeSlot.expirySelection} />
                       <span>never</span>
                     </label>
                     <label class:checked={timeSlot.expirySelection === "after"}>
                       <input
                         type="radio"
                         value="after"
-                        bind:group={timeSlot.expirySelection}
-                      />
+                        bind:group={timeSlot.expirySelection} />
                       <span>After</span>
                       {#if timeSlot.expirySelection === "after"}
                         <input
                           class="after"
                           type="number"
                           min="1"
-                          bind:value={timeSlot.recurrence_expiry}
-                        />
+                          bind:value={timeSlot.recurrence_expiry} />
                         <span>occurrences</span>
                       {/if}
                     </label>
@@ -359,8 +350,7 @@
                       <input
                         type="radio"
                         value="on"
-                        bind:group={timeSlot.expirySelection}
-                      />
+                        bind:group={timeSlot.expirySelection} />
                       <span>On</span>
                       {#if timeSlot.expirySelection === "on"}
                         <input
@@ -368,8 +358,7 @@
                           min={timeSlot.start_time
                             .toISOString()
                             .substring(0, 10)}
-                          bind:value={timeSlot.recurrence_expiry}
-                        />
+                          bind:value={timeSlot.recurrence_expiry} />
                       {/if}
                     </label>
                   </div>
@@ -388,16 +377,14 @@
                 <!-- TODO: see if we can make type="text" dynamic for email case. Svelte doesnt care for it as is. -->
                 <input
                   type="email"
-                  bind:value={customFieldResponses[field.title]}
-                />
+                  bind:value={customFieldResponses[field.title]} />
               </label>
             {:else}
               <label data-required={field.required}>
                 <strong>{field.title}</strong>
                 <input
                   type="text"
-                  bind:value={customFieldResponses[field.title]}
-                />
+                  bind:value={customFieldResponses[field.title]} />
               </label>
             {/if}
           {/each}
@@ -410,8 +397,7 @@
           : undefined}
         class="book"
         on:click={() => bookTimeSlots(slotsToBook)}
-        >{_this.booking_label}</button
-      >
+        >{_this.booking_label}</button>
     {:else if _this.event_options.length}
       <h2>Select an option</h2>
       <ul class="timeslots timeslot-options">
@@ -420,8 +406,7 @@
             aria-role="button"
             on:mouseenter={() => hoverOption(option)}
             on:mouseleave={() => blurOption()}
-            on:click={() => selectOption(option)}
-          >
+            on:click={() => selectOption(option)}>
             <span class="time"
               >{option[0].start_time.toLocaleString([], {
                 dateStyle: "medium",
@@ -431,8 +416,7 @@
               {option[option.length - 1].end_time.toLocaleString([], {
                 dateStyle: "medium",
                 timeStyle: "short",
-              })}</span
-            >
+              })}</span>
             <div class="sub-events">
               {#each option as subevent, iter}
                 <span class="sub-event">
