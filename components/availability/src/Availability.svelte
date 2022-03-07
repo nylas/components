@@ -113,7 +113,7 @@
     date_format: "full",
     dates_to_show: 1,
     participants: [],
-    end_hour: 23,
+    end_hour: 24,
     event_buffer: 0,
     free_color: "#078351cc",
     mandate_top_of_hour: false,
