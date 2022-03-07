@@ -495,6 +495,7 @@
         _this.sections[name] = {
           expanded: iter === 0,
           editable: true,
+          hidden_fields: [],
         };
       });
     } else {
@@ -505,15 +506,25 @@
           _this.sections[name] = {
             expanded: false,
             editable: false,
+            hidden_fields: [],
           };
         } else {
           // If the section is passed in but lacks an "editable" property, assume positive intent.
           if (!Object.keys(_this.sections[name]).includes("editable")) {
             _this.sections[name].editable = true;
           }
+          // Establish a default empty list for hidden fields
+          if (!Object.keys(_this.sections[name]).includes("hidden_fields")) {
+            _this.sections[name].hidden_fields = [];
+          }
         }
       });
     }
+  }
+
+  function fieldIsEditable(sectionName: SectionNames, fieldName: string) {
+    console.log("is field editable?", sectionName, fieldName);
+    return !_this.sections[sectionName].hidden_fields.includes(fieldName);
   }
   //#endregion initialize sections
 </script>
@@ -780,16 +791,18 @@
           expanded={_this.sections[SectionNames.STYLE_DETAILS].expanded}>
           <h1 slot="title">Style Details</h1>
           <div slot="contents" class="contents">
-            <div role="checkbox" aria-labelledby="show_ticks">
-              <strong id="show_ticks">Show ticks</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="show_ticks"
-                  bind:checked={_this.show_ticks} />
-                Show tick marks on left side
-              </label>
-            </div>
+            {#if fieldIsEditable(SectionNames.STYLE_DETAILS, "show_ticks")}
+              <div role="checkbox" aria-labelledby="show_ticks">
+                <strong id="show_ticks">Show ticks</strong>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="show_ticks"
+                    bind:checked={_this.show_ticks} />
+                  Show tick marks on left side
+                </label>
+              </div>
+            {/if}
             <div role="radiogroup" aria-labelledby="view_as">
               <strong id="view_as">View as a Schedule, or as a List?</strong>
               <label>

@@ -63,7 +63,7 @@ interface HostRules {
 interface SectionOptions {
   expanded: boolean;
   editable: boolean;
-  hidden_fields?: string[];
+  hidden_fields: string[];
 }
 
 export enum SectionNames {

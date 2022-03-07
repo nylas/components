@@ -139,4 +139,35 @@ describe("Editable Sections", () => {
         .should("have.length", 2);
     });
   });
+
+  it("Allows specific fields to be hidden", () => {
+    const sectionConfigWithHiddenFields = {
+      "style-details": {
+        expanded: true,
+        editable: true,
+        hidden_fields: ["show_ticks"],
+      },
+      "booking-details": {
+        expanded: false,
+        editable: true,
+      },
+    };
+
+    cy.get(testScheduleEditor).then((element) => {
+      const component = element[0];
+      component.sections = sectionConfigWithHiddenFields;
+      cy.get("nylas-schedule-editor-section")
+        .eq(0)
+        .shadow()
+        .get(".contents")
+        .children()
+        .should("contain", "View as a Schedule");
+      cy.get("nylas-schedule-editor-section")
+        .eq(0)
+        .shadow()
+        .get(".contents")
+        .children()
+        .should("not.contain", "Show ticks");
+    });
+  });
 });
