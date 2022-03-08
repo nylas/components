@@ -29,3 +29,114 @@ describe("schedule-editor component", () => {
     });
   });
 });
+
+describe("Editable Sections", () => {
+  it("Expands the first section by default", () => {
+    cy.get(testScheduleEditor)
+      .get("nylas-schedule-editor-section")
+      .should("have.length", 6);
+    cy.get(testScheduleEditor).get("details[open]").should("have.length", 1);
+    cy.get(testScheduleEditor).get("details").eq(0).should("have.attr", "open");
+  });
+
+  it("Allows a custom section to be expanded", () => {
+    const sectionConfig = {
+      "basic-details": {
+        expanded: false,
+        editable: true,
+      },
+      "time-date-details": {
+        expanded: true,
+        editable: true,
+      },
+      "style-details": {
+        expanded: false,
+        editable: true,
+      },
+      "booking-details": {
+        expanded: true,
+        editable: true,
+      },
+      "custom-fields": {
+        expanded: false,
+        editable: true,
+      },
+      "notification-details": {
+        expanded: false,
+        editable: true,
+      },
+    };
+
+    cy.get(testScheduleEditor).then((element) => {
+      const component = element[0];
+      component.sections = sectionConfig;
+
+      cy.get(testScheduleEditor).get("details[open]").should("have.length", 2);
+      cy.get(testScheduleEditor)
+        .get("details")
+        .eq(0)
+        .should("not.have.attr", "open");
+      cy.get(testScheduleEditor)
+        .get("details")
+        .eq(1)
+        .should("have.attr", "open");
+      cy.get(testScheduleEditor)
+        .get("details")
+        .eq(3)
+        .should("have.attr", "open");
+
+      cy.get(testScheduleEditor)
+        .get("nylas-schedule-editor-section:eq(1) h1")
+        .click();
+      cy.get(testScheduleEditor).get("details[open]").should("have.length", 1);
+      cy.get(testScheduleEditor)
+        .get("nylas-schedule-editor-section:eq(3) h1")
+        .click();
+      cy.get(testScheduleEditor).get("details[open]").should("have.length", 0);
+      cy.get(testScheduleEditor)
+        .get("nylas-schedule-editor-section:eq(5) h1")
+        .click();
+      cy.get(testScheduleEditor).get("details[open]").should("have.length", 1);
+    });
+  });
+
+  it("Doesn't show sections not included in passed prop", () => {
+    const sectionConfig = {
+      "custom-fields": {
+        expanded: true,
+        editable: true,
+      },
+      "notification-details": {
+        expanded: false,
+        editable: true,
+      },
+    };
+
+    cy.get(testScheduleEditor).then((element) => {
+      const component = element[0];
+      component.sections = sectionConfig;
+      cy.get(testScheduleEditor)
+        .get("nylas-schedule-editor-section")
+        .should("have.length", 2);
+    });
+  });
+
+  it("Is pretty chill about editable property not being there", () => {
+    const sectionConfig = {
+      "custom-fields": {
+        expanded: true,
+      },
+      "notification-details": {
+        expanded: false,
+      },
+    };
+
+    cy.get(testScheduleEditor).then((element) => {
+      const component = element[0];
+      component.sections = sectionConfig;
+      cy.get(testScheduleEditor)
+        .get("nylas-schedule-editor-section")
+        .should("have.length", 2);
+    });
+  });
+});
