@@ -21,34 +21,42 @@
         // which start as expanded by default, and which specific questions to hide.
         // <3, Nylas
 
-        // let sectionConfig = {
-        //   "basic-details": {
-        //     expanded: false,
-        //     editable: true,
-        //   },
-        //   "time-date-details": {
-        //     expanded: true,
-        //     editable: true,
-        //   },
-        //   "style-details": {
-        //     expanded: false,
-        //     editable: true,
-        //   },
-        //   "booking-details": {
-        //     expanded: true,
-        //     editable: true,
-        //   },
-        //   "custom-fields": {
-        //     expanded: false,
-        //     editable: true,
-        //   },
-        //   "notification-details": {
-        //     expanded: false,
-        //     editable: true,
-        //   }
-        // }
+        let sectionConfig = {
+          // "basic-details": {
+          //   expanded: false,
+          //   editable: true,
+          // },
+          "time-date-details": {
+            expanded: true,
+            editable: true,
+            hidden_fields: [
+              "available_hours",
+              "time_zone",
+              "days_to_show",
+              "show_weekends",
+              "show_as_week",
+            ],
+          },
+          "style-details": {
+            expanded: true,
+            editable: true,
+            hidden_fields: ["show_ticks"],
+          },
+          // "booking-details": {
+          //   expanded: true,
+          //   editable: true,
+          // },
+          // "custom-fields": {
+          //   expanded: false,
+          //   editable: true,
+          // },
+          // "notification-details": {
+          //   expanded: false,
+          //   editable: true,
+          // }
+        };
 
-        // component.sections = sectionConfig;
+        component.sections = sectionConfig;
       });
     </script>
   </head>

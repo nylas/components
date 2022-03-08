@@ -523,7 +523,7 @@
   }
 
   function fieldIsEditable(sectionName: SectionNames, fieldName: string) {
-    console.log("is field editable?", sectionName, fieldName);
+    // console.log("is field editable?", sectionName, fieldName);
     return !_this.sections[sectionName].hidden_fields.includes(fieldName);
   }
   //#endregion initialize sections
@@ -639,7 +639,7 @@
           expanded={_this.sections[SectionNames.TIME_DATE_DETAILS].expanded}>
           <h1 slot="title">Date/Time Details</h1>
           <div slot="contents" class="contents">
-            <div>
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "start_hour")}
               <label>
                 <strong>Start Hour</strong>
                 <input
@@ -648,10 +648,10 @@
                   max={24}
                   step={1}
                   bind:value={_this.start_hour} />
+                {_this.start_hour}:00
               </label>
-              {_this.start_hour}:00
-            </div>
-            <div>
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "end_hour")}
               <label>
                 <strong>End Hour</strong>
                 <input
@@ -660,40 +660,44 @@
                   max={24}
                   step={1}
                   bind:value={_this.end_hour} />
+                {_this.end_hour}:00
               </label>
-              {_this.end_hour}:00
-            </div>
-            <label>
-              <strong>Start Date</strong>
-              <strong>
-                <input
-                  type="checkbox"
-                  name="custom_start_date"
-                  bind:checked={customStartDate}
-                  on:change={async () => {
-                    if (!customStartDate) {
-                      startDate = new Date().toLocaleDateString("en-CA");
-                      await tick();
-                      startDate = null;
-                    }
-                  }} />
-                Show a specific date
-              </strong>
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "start_date")}
+              <label>
+                <strong>Start Date</strong>
+                <strong>
+                  <input
+                    type="checkbox"
+                    name="custom_start_date"
+                    bind:checked={customStartDate}
+                    on:change={async () => {
+                      if (!customStartDate) {
+                        startDate = new Date().toLocaleDateString("en-CA");
+                        await tick();
+                        startDate = null;
+                      }
+                    }} />
+                  Show a specific date
+                </strong>
 
-              <input
-                type="date"
-                bind:value={startDate}
-                disabled={!customStartDate} />
-            </label>
-            <label>
-              <strong>Time Zone</strong>
-              <select bind:value={_this.timezone}>
-                {#each timezones.default as timezone}
-                  <option value={timezone.tzCode}>{timezone.name}</option>
-                {/each}
-              </select>
-            </label>
-            <div>
+                <input
+                  type="date"
+                  bind:value={startDate}
+                  disabled={!customStartDate} />
+              </label>
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "time_zone")}
+              <label>
+                <strong>Time Zone</strong>
+                <select bind:value={_this.timezone}>
+                  {#each timezones.default as timezone}
+                    <option value={timezone.tzCode}>{timezone.name}</option>
+                  {/each}
+                </select>
+              </label>
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "days_to_show")}
               <label>
                 <strong>Days to show</strong>
                 <input
@@ -702,82 +706,88 @@
                   max={7}
                   step={1}
                   bind:value={_this.dates_to_show} />
+                {_this.dates_to_show}
               </label>
-              {_this.dates_to_show}
-            </div>
-            <div role="checkbox" aria-labelledby="show_as_week">
-              <strong id="show_as_week">Show as week</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="show_as_week"
-                  bind:checked={_this.show_as_week} />
-                Show whole week
-              </label>
-            </div>
-            <div role="checkbox" aria-labelledby="show_weekends">
-              <strong id="show_weekends">Show weekends</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="show_weekends"
-                  bind:checked={_this.show_weekends} />
-                Keep weekends on
-              </label>
-            </div>
-            <div class="available-hours">
-              <strong>Available Hours</strong>
-              <p>
-                Drag over the hours want to be availble for booking. All other
-                hours will always show up as "busy" to your users.
-              </p>
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "show_as_week")}
               <div role="checkbox" aria-labelledby="show_as_week">
+                <strong id="show_as_week">Show as week</strong>
                 <label>
                   <input
                     type="checkbox"
-                    name="_this.show_as_week"
+                    name="show_as_week"
                     bind:checked={_this.show_as_week} />
-                  Customize each weekday
+                  Show whole week
                 </label>
               </div>
-              <div role="checkbox" aria-labelledby="show_as_week">
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "show_weekends")}
+              <div role="checkbox" aria-labelledby="show_weekends">
+                <strong id="show_weekends">Show weekends</strong>
                 <label>
                   <input
                     type="checkbox"
-                    name=" _this.show_weekends"
+                    name="show_weekends"
                     bind:checked={_this.show_weekends} />
-                  Allow booking on weekends
+                  Keep weekends on
                 </label>
               </div>
-              <div class="availability-container">
-                <nylas-availability
-                  allow_booking={true}
-                  show_as_week={_this.show_as_week || _this.show_weekends}
-                  show_weekends={_this.show_weekends}
-                  start_hour={_this.start_hour}
-                  end_hour={_this.end_hour}
-                  allow_date_change={false}
-                  partial_bookable_ratio="0"
-                  show_header={false}
-                  date_format={_this.show_as_week || _this.show_weekends
-                    ? "weekday"
-                    : "none"}
-                  busy_color="#000"
-                  closed_color="#999"
-                  selected_color="#095"
-                  slot_size="15"
-                  on:timeSlotChosen={availabilityChosen} />
+            {/if}
+            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "available_hours")}
+              <div class="available-hours">
+                <strong>Available Hours</strong>
+                <p>
+                  Drag over the hours want to be availble for booking. All other
+                  hours will always show up as "busy" to your users.
+                </p>
+                <div role="checkbox" aria-labelledby="show_as_week">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="_this.show_as_week"
+                      bind:checked={_this.show_as_week} />
+                    Customize each weekday
+                  </label>
+                </div>
+                <div role="checkbox" aria-labelledby="show_as_week">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name=" _this.show_weekends"
+                      bind:checked={_this.show_weekends} />
+                    Allow booking on weekends
+                  </label>
+                </div>
+                <div class="availability-container">
+                  <nylas-availability
+                    allow_booking={true}
+                    show_as_week={_this.show_as_week || _this.show_weekends}
+                    show_weekends={_this.show_weekends}
+                    start_hour={_this.start_hour}
+                    end_hour={_this.end_hour}
+                    allow_date_change={false}
+                    partial_bookable_ratio="0"
+                    show_header={false}
+                    date_format={_this.show_as_week || _this.show_weekends
+                      ? "weekday"
+                      : "none"}
+                    busy_color="#000"
+                    closed_color="#999"
+                    selected_color="#095"
+                    slot_size="15"
+                    on:timeSlotChosen={availabilityChosen} />
+                </div>
+                <ul class="availability">
+                  {#each _this.open_hours || [] as availability}
+                    <li>
+                      <span class="date">
+                        {niceDate(availability)}
+                      </span>
+                    </li>
+                  {/each}
+                </ul>
               </div>
-              <ul class="availability">
-                {#each _this.open_hours || [] as availability}
-                  <li>
-                    <span class="date">
-                      {niceDate(availability)}
-                    </span>
-                  </li>
-                {/each}
-              </ul>
-            </div>
+            {/if}
           </div>
           <footer slot="footer">
             <button on:click={saveProperties}>Save Editor Options</button>
@@ -803,33 +813,27 @@
                 </label>
               </div>
             {/if}
-            <div role="radiogroup" aria-labelledby="view_as">
-              <strong id="view_as">View as a Schedule, or as a List?</strong>
-              <label>
-                <input
-                  type="radio"
-                  name="view_as"
-                  bind:group={_this.view_as}
-                  value="schedule" />
-                <span>Schedule</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="view_as"
-                  bind:group={_this.view_as}
-                  value="list" />
-                <span>List</span>
-              </label>
-            </div>
-            <label>
-              <strong>Attendees to show</strong>
-              <input
-                type="number"
-                min={1}
-                max={20}
-                bind:value={_this.attendees_to_show} />
-            </label>
+            {#if fieldIsEditable(SectionNames.STYLE_DETAILS, "view_as_schedule")}
+              <div role="radiogroup" aria-labelledby="view_as">
+                <strong id="view_as">View as a Schedule, or as a List?</strong>
+                <label>
+                  <input
+                    type="radio"
+                    name="view_as"
+                    bind:group={_this.view_as}
+                    value="schedule" />
+                  <span>Schedule</span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="view_as"
+                    bind:group={_this.view_as}
+                    value="list" />
+                  <span>List</span>
+                </label>
+              </div>
+            {/if}
           </div>
           <footer slot="footer">
             <button on:click={saveProperties}>Save Editor Options</button>
