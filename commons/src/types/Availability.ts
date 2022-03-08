@@ -14,7 +14,7 @@ export interface Manifest extends NylasManifest {
   allow_booking: boolean;
   allow_date_change: boolean;
   attendees_to_show: number;
-  availability: Availability;
+  availability: AvailabilityResponse;
   booking_options: ConsecutiveEvent[][];
   booking_user_email: string;
   booking_user_token: string;
@@ -105,12 +105,12 @@ export interface BookableSlot extends TimeSlot {
   expirySelection: string;
   participantEmails: string[];
   recurrence_cadence?:
-    | "none"
-    | "daily"
-    | "weekdays"
-    | "biweekly"
-    | "weekly"
-    | "monthly";
+  | "none"
+  | "daily"
+  | "weekdays"
+  | "biweekly"
+  | "weekly"
+  | "monthly";
   recurrence_expiry?: Date | string;
 }
 
