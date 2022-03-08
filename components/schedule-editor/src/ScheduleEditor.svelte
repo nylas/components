@@ -493,7 +493,7 @@
     if (!Object.entries(_this.sections).length) {
       Object.values(SectionNames).forEach((name, iter) => {
         _this.sections[name] = {
-          expanded: iter === 0 ? true : false,
+          expanded: iter === 0,
           editable: true,
         };
       });
