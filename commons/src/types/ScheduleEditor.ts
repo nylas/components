@@ -67,7 +67,7 @@ interface SectionOptions {
 }
 
 export enum SectionNames {
-  BASIC_DETAILS = "basic-details",
+  EVENT_DETAILS = "event-details",
   TIME_DATE_DETAILS = "time-date-details",
   STYLE_DETAILS = "style-details",
   BOOKING_DETAILS = "booking-details",

@@ -56,10 +56,11 @@ main {
         table {
           border-bottom: 1px solid rgba(0, 0, 0, 0.25);
           grid-column: span 2;
-  
+
           tr.disabled {
             opacity: 0.6;
-            pointer-events: none;cursor: not-allowed;
+            pointer-events: none;
+            cursor: not-allowed;
           }
 
           th,
@@ -114,11 +115,11 @@ main {
                 align-items: center;
                 padding: 0.5rem;
                 background-color: transparent;
-              
+
                 &svg:nth-last-of-type(1) {
                   margin-left: 0.5rem;
                 }
-              
+
                 &:hover {
                   cursor: pointer;
                 }
@@ -129,7 +130,7 @@ main {
                 color: var(--blue);
                 font-size: 16px;
                 font-weight: normal;
-    
+
                 span {
                   margin-left: 0.5rem;
                 }
@@ -227,12 +228,16 @@ main {
               select {
                 -moz-appearance: none;
                 -webkit-appearance: none;
-    
+
                 &::-ms-expand {
                   display: none;
                 }
-    
-                background-image: linear-gradient(45deg, transparent 50%, black 50%),
+
+                background-image: linear-gradient(
+                    45deg,
+                    transparent 50%,
+                    black 50%
+                  ),
                   linear-gradient(135deg, black 50%, transparent 50%);
                 background-position: calc(100% - 20px) calc(1em + 4px),
                   calc(100% - 15px) calc(1em + 4px), calc(100% - 2.5em) 0.5em;
@@ -296,7 +301,7 @@ main {
           grid-column: -1 / 1;
         }
 
-        &.basic-details {
+        &.event-details {
           grid-template-columns: 1fr;
           & > fieldset {
             border: none;
@@ -351,7 +356,6 @@ main {
     cursor: col-resize;
   }
 }
-
 
 .warning {
   background-color: var(--red-lighter);

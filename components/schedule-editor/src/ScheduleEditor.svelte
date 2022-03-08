@@ -543,16 +543,16 @@
     bind:clientWidth={mainElementWidth}
     bind:this={main}>
     <div class="settings">
-      {#if _this.sections[SectionNames.BASIC_DETAILS].editable}
+      {#if _this.sections[SectionNames.EVENT_DETAILS].editable}
         <nylas-schedule-editor-section
-          section_title={SectionNames.BASIC_DETAILS}
-          expanded={_this.sections[SectionNames.BASIC_DETAILS].expanded}>
+          section_title={SectionNames.EVENT_DETAILS}
+          expanded={_this.sections[SectionNames.EVENT_DETAILS].expanded}>
           <h1 slot="title">Event Details</h1>
           <p slot="intro" class="intro">
             Edit the details for your meeting. You can add consecutive meetings
             to allow users to book back-to-back events.
           </p>
-          <div slot="contents" class="contents basic-details">
+          <div slot="contents" class="contents event-details">
             {#each _this.events as event, iter}
               <fieldset>
                 {#if _this.events.length > 1}
@@ -562,32 +562,32 @@
                     Remove this event
                   </button>
                 {/if}
-                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "event_title")}
+                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "event_title")}
                   <label>
                     <strong>Event Title</strong>
                     <input type="text" bind:value={event.event_title} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "event_description")}
+                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "event_description")}
                   <label>
                     <strong>Event Description</strong>
                     <input type="text" bind:value={event.event_description} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "event_location")}
+                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "event_location")}
                   <label>
                     <strong>Event Location</strong>
                     <input type="text" bind:value={event.event_location} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "conferencing_link")}
+                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "conferencing_link")}
                   <label>
                     <strong
                       >Conferencing Link (Zoom, Teams, or Meet URL)</strong>
                     <input type="url" bind:value={event.event_conferencing} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "meeting_length")}
+                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "meeting_length")}
                   <div role="radiogroup" aria-labelledby="slot_size">
                     <strong id="slot_size">Meeting Length</strong>
                     <label>
@@ -622,7 +622,7 @@
                     {/if}
                   </div>
                 {/if}
-                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "participants")}
+                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "participants")}
                   <div>
                     <strong id="participants">
                       Email Ids to include for scheduling
