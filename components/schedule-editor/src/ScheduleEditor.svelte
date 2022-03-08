@@ -562,66 +562,79 @@
                     Remove this event
                   </button>
                 {/if}
-                <label>
-                  <strong>Event Title!</strong>
-                  <input type="text" bind:value={event.event_title} />
-                </label>
-                <label>
-                  <strong>Event Description</strong>
-                  <input type="text" bind:value={event.event_description} />
-                </label>
-                <label>
-                  <strong>Event Location</strong>
-                  <input type="text" bind:value={event.event_location} />
-                </label>
-                <label>
-                  <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
-                  <input type="url" bind:value={event.event_conferencing} />
-                </label>
-                <div role="radiogroup" aria-labelledby="slot_size">
-                  <strong id="slot_size">Meeting Length</strong>
+                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "event_title")}
                   <label>
-                    <input
-                      type="radio"
-                      value={15}
-                      bind:group={event.slot_size} />
-                    <span>15 minutes</span>
+                    <strong>Event Title</strong>
+                    <input type="text" bind:value={event.event_title} />
                   </label>
+                {/if}
+                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "event_description")}
                   <label>
-                    <input
-                      type="radio"
-                      value={30}
-                      bind:group={event.slot_size} />
-                    <span>30 minutes</span>
+                    <strong>Event Description</strong>
+                    <input type="text" bind:value={event.event_description} />
                   </label>
+                {/if}
+                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "event_location")}
                   <label>
-                    <input
-                      type="radio"
-                      value={60}
-                      bind:group={event.slot_size} />
-                    <span>60 minutes</span>
+                    <strong>Event Location</strong>
+                    <input type="text" bind:value={event.event_location} />
                   </label>
-                  {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
-                    <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
-                    <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
-                    <p class="warning">
-                      Note: different meeting lengths in a conecutive chain are
-                      not currently supported; all meetings in this chain will
-                      fall back to {_this.events[0].slot_size} minutes.
-                    </p>
-                  {/if}
-                </div>
-                <div>
-                  <strong id="participants">
-                    Email Ids to include for scheduling
-                  </strong>
+                {/if}
+                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "conferencing_link")}
                   <label>
-                    <textarea
-                      name="participants"
-                      on:input={(e) => debounceEmailInput(e, event)}
-                      value={event.participantEmails} />
+                    <strong
+                      >Conferencing Link (Zoom, Teams, or Meet URL)</strong>
+                    <input type="url" bind:value={event.event_conferencing} />
                   </label>
-                </div>
+                {/if}
+                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "meeting_length")}
+                  <div role="radiogroup" aria-labelledby="slot_size">
+                    <strong id="slot_size">Meeting Length</strong>
+                    <label>
+                      <input
+                        type="radio"
+                        value={15}
+                        bind:group={event.slot_size} />
+                      <span>15 minutes</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value={30}
+                        bind:group={event.slot_size} />
+                      <span>30 minutes</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value={60}
+                        bind:group={event.slot_size} />
+                      <span>60 minutes</span>
+                    </label>
+                    {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
+                      <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
+                      <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
+                      <p class="warning">
+                        Note: different meeting lengths in a conecutive chain
+                        are not currently supported; all meetings in this chain
+                        will fall back to {_this.events[0].slot_size} minutes.
+                      </p>
+                    {/if}
+                  </div>
+                {/if}
+                {#if fieldIsEditable(SectionNames.BASIC_DETAILS, "participants")}
+                  <div>
+                    <strong id="participants">
+                      Email Ids to include for scheduling
+                    </strong>
+                    <label>
+                      <textarea
+                        name="participants"
+                        on:input={(e) => debounceEmailInput(e, event)}
+                        value={event.participantEmails} />
+                    </label>
+                  </div>
+                {/if}
               </fieldset>
             {/each}
           </div>

@@ -22,10 +22,16 @@
         // <3, Nylas
 
         let sectionConfig = {
-          // "basic-details": {
-          //   expanded: false,
-          //   editable: true,
-          // },
+          "basic-details": {
+            expanded: true,
+            editable: true,
+            hidden_fields: [
+              "event_location",
+              "participants",
+              "meeting_length",
+              "conferencing_link",
+            ],
+          },
           "time-date-details": {
             expanded: true,
             editable: true,
