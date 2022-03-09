@@ -987,7 +987,7 @@
                 {/if}
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "capcity")}
+            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "capacity")}
               <label>
                 <strong>Capacity</strong>
                 <input type="number" min={1} bind:value={_this.capacity} />
