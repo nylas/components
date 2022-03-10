@@ -40,7 +40,7 @@ function coerceEndTime({
   hour: number;
   minute?: number;
 }) {
-  if (hour === 24 && minute === 0) {
+  if (hour >= 24) {
     return `${formatTime(23)}:${formatTime(59)}`;
   }
 
