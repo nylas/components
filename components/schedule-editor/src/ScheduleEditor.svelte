@@ -522,9 +522,9 @@
     }
   }
 
-  function fieldIsEditable(sectionName: SectionNames, fieldName: string) {
+  function fieldIsHidden(sectionName: SectionNames, fieldName: string) {
     // console.log("is field editable?", sectionName, fieldName);
-    return !_this.sections[sectionName].hidden_fields.includes(fieldName);
+    return _this.sections[sectionName].hidden_fields.includes(fieldName);
   }
   //#endregion initialize sections
 </script>
@@ -562,32 +562,32 @@
                     Remove this event
                   </button>
                 {/if}
-                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "event_title")}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "event_title")}
                   <label>
                     <strong>Event Title</strong>
                     <input type="text" bind:value={event.event_title} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "event_description")}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "event_description")}
                   <label>
                     <strong>Event Description</strong>
                     <input type="text" bind:value={event.event_description} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "event_location")}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "event_location")}
                   <label>
                     <strong>Event Location</strong>
                     <input type="text" bind:value={event.event_location} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "conferencing_link")}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "conferencing_link")}
                   <label>
                     <strong
                       >Conferencing Link (Zoom, Teams, or Meet URL)</strong>
                     <input type="url" bind:value={event.event_conferencing} />
                   </label>
                 {/if}
-                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "meeting_length")}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "meeting_length")}
                   <div role="radiogroup" aria-labelledby="slot_size">
                     <strong id="slot_size">Meeting Length</strong>
                     <label>
@@ -622,7 +622,7 @@
                     {/if}
                   </div>
                 {/if}
-                {#if fieldIsEditable(SectionNames.EVENT_DETAILS, "participants")}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "participants")}
                   <div>
                     <strong id="participants">
                       Email Ids to include for scheduling
@@ -652,7 +652,7 @@
           expanded={_this.sections[SectionNames.TIME_DATE_DETAILS].expanded}>
           <h1 slot="title">Date/Time Details</h1>
           <div slot="contents" class="contents">
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "start_hour")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "start_hour")}
               <label>
                 <strong>Start Hour</strong>
                 <input
@@ -664,7 +664,7 @@
                 {_this.start_hour}:00
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "end_hour")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "end_hour")}
               <label>
                 <strong>End Hour</strong>
                 <input
@@ -676,7 +676,7 @@
                 {_this.end_hour}:00
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "start_date")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "start_date")}
               <label>
                 <strong>Start Date</strong>
                 <strong>
@@ -700,7 +700,7 @@
                   disabled={!customStartDate} />
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "time_zone")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "time_zone")}
               <label>
                 <strong>Time Zone</strong>
                 <select bind:value={_this.timezone}>
@@ -710,7 +710,7 @@
                 </select>
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "days_to_show")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "days_to_show")}
               <label>
                 <strong>Days to show</strong>
                 <input
@@ -722,7 +722,7 @@
                 {_this.dates_to_show}
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "show_as_week")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "show_as_week")}
               <div role="checkbox" aria-labelledby="show_as_week">
                 <strong id="show_as_week">Show as week</strong>
                 <label>
@@ -734,7 +734,7 @@
                 </label>
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "show_weekends")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "show_weekends")}
               <div role="checkbox" aria-labelledby="show_weekends">
                 <strong id="show_weekends">Show weekends</strong>
                 <label>
@@ -746,7 +746,7 @@
                 </label>
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.TIME_DATE_DETAILS, "available_hours")}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "available_hours")}
               <div class="available-hours">
                 <strong>Available Hours</strong>
                 <p>
@@ -814,7 +814,7 @@
           expanded={_this.sections[SectionNames.STYLE_DETAILS].expanded}>
           <h1 slot="title">Style Details</h1>
           <div slot="contents" class="contents">
-            {#if fieldIsEditable(SectionNames.STYLE_DETAILS, "show_ticks")}
+            {#if !fieldIsHidden(SectionNames.STYLE_DETAILS, "show_ticks")}
               <div role="checkbox" aria-labelledby="show_ticks">
                 <strong id="show_ticks">Show ticks</strong>
                 <label>
@@ -826,7 +826,7 @@
                 </label>
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.STYLE_DETAILS, "view_as_schedule")}
+            {#if !fieldIsHidden(SectionNames.STYLE_DETAILS, "view_as_schedule")}
               <div role="radiogroup" aria-labelledby="view_as">
                 <strong id="view_as">View as a Schedule, or as a List?</strong>
                 <label>
@@ -860,7 +860,7 @@
           expanded={_this.sections[SectionNames.BOOKING_DETAILS].expanded}>
           <h1 slot="title">Booking Details</h1>
           <div slot="contents" class="contents">
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "allow_booking")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "allow_booking")}
               <div role="checkbox" aria-labelledby="allow_booking">
                 <strong id="allow_booking">Allow booking</strong>
                 <label>
@@ -872,7 +872,7 @@
                 </label>
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "maximum_slots")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "maximum_slots")}
               <label>
                 <strong>Maximum slots that can be booked at once</strong>
                 <input
@@ -882,7 +882,7 @@
                   bind:value={_this.max_bookable_slots} />
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "screen_bookings")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "screen_bookings")}
               <div role="checkbox" aria-labelledby="screen_bookings">
                 <strong id="screen_bookings">
                   Scheduling on this calendar requires manual confirmation
@@ -896,7 +896,7 @@
                 </label>
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "bookable_ratio")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "bookable_ratio")}
               <label>
                 <strong>Participant Threshold / Partial bookable ratio</strong>
                 <input
@@ -908,7 +908,7 @@
                 {Math.floor(_this.partial_bookable_ratio * 100)}%
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "recurrence")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "recurrence")}
               <div role="radiogroup" aria-labelledby="recurrence">
                 <strong id="recurrence">
                   Allow, Disallow, or Mandate events to repeat?
@@ -987,13 +987,13 @@
                 {/if}
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "capacity")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "capacity")}
               <label>
                 <strong>Capacity</strong>
                 <input type="number" min={1} bind:value={_this.capacity} />
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.BOOKING_DETAILS, "mandate_top_of_hour")}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "mandate_top_of_hour")}
               <div role="checkbox" aria-labelledby="mandate_top_of_hour">
                 <strong>Top of the Hour Events</strong>
                 <label>
@@ -1241,7 +1241,7 @@
           expanded={_this.sections[SectionNames.NOTIFICATION_DETAILS].expanded}>
           <h1 slot="title">Notification Details</h1>
           <div slot="contents" class="contents">
-            {#if fieldIsEditable(SectionNames.NOTIFICATION_DETAILS, "notification_mode")}
+            {#if !fieldIsHidden(SectionNames.NOTIFICATION_DETAILS, "notification_mode")}
               <div role="radiogroup" aria-labelledby="notification_mode">
                 <strong id="notification_mode"
                   >How would you like to notify the customer on event creation?</strong>
@@ -1263,13 +1263,13 @@
                 </label>
               </div>
             {/if}
-            {#if fieldIsEditable(SectionNames.NOTIFICATION_DETAILS, "notification_message")}
+            {#if !fieldIsHidden(SectionNames.NOTIFICATION_DETAILS, "notification_message")}
               <label>
                 <strong>Notification message</strong>
                 <input type="text" bind:value={_this.notification_message} />
               </label>
             {/if}
-            {#if fieldIsEditable(SectionNames.NOTIFICATION_DETAILS, "notification_subject")}
+            {#if !fieldIsHidden(SectionNames.NOTIFICATION_DETAILS, "notification_subject")}
               <label>
                 <strong>Notification Subject</strong>
                 <input type="text" bind:value={_this.notification_subject} />
