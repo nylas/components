@@ -523,7 +523,6 @@
   }
 
   function fieldIsHidden(sectionName: SectionNames, fieldName: string) {
-    // console.log("is field editable?", sectionName, fieldName);
     return _this.sections[sectionName].hidden_fields.includes(fieldName);
   }
   //#endregion initialize sections
