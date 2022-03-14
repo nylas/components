@@ -80,7 +80,6 @@
   export let closed_color: string;
   export let date_format: "weekday" | "date" | "full" | "none";
   export let dates_to_show: number;
-  export let participants: string[];
   export let end_hour: number;
   export let event_buffer: number;
   export let free_color: string;
@@ -114,7 +113,6 @@
     closed_color: "#EE3248cc",
     date_format: "full",
     dates_to_show: 1,
-    participants: [],
     end_hour: 24,
     event_buffer: 0,
     free_color: "#078351cc",
@@ -205,7 +203,6 @@
     }
   }
 
-  $: calendarID = "";
   onMount(async () => {
     await tick();
     loading = true;
@@ -220,13 +217,6 @@
     _this = buildInternalProps($$props, manifest, defaultValueMap) as Manifest;
     transformPropertyValues();
 
-    // TODO: we probably dont want to expose a list of all a users calendars to the end-user here.
-    const calendarsList = await CalendarStore.getCalendars({
-      access_token,
-      component_id: id,
-      calendarIDs: [], // empty array will fetch all calendars
-    });
-    calendarID = calendarsList?.find((cal) => cal.is_primary)?.id || "";
     loading = false;
   });
 
@@ -520,7 +510,6 @@
       generateDaySlots(
         timestamp,
         allCalendars,
-        calendarID,
         requiredParticipants,
         consecutiveOptions,
         consecutiveParticipants,

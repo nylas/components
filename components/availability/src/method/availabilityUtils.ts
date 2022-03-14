@@ -14,7 +14,6 @@ import type { ConsecutiveEvent } from "@commons/types/Booking";
 export const generateDaySlots = (
   timestamp: Date,
   allCalendars: any[],
-  calendarID: string,
   requiredParticipants: string[],
   consecutiveOptions: ConsecutiveEvent[][],
   consecutiveParticipants: string[],
@@ -234,7 +233,6 @@ export const generateDaySlots = (
 
       return {
         selectionStatus: SelectionStatus.UNSELECTED,
-        calendar_id: calendarID,
         availability: availability,
         available_calendars: freeCalendars,
         start_time: time,
