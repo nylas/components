@@ -24,12 +24,10 @@ export interface Manifest extends NylasManifest {
   closed_color: string;
   date_format: "full" | "weekday" | "date" | "none";
   dates_to_show: number;
-  participants: string[];
   end_hour: number;
   event_buffer: number;
   free_color: string;
   mandate_top_of_hour: boolean;
-  max_bookable_slots: number;
   max_book_ahead_days: number;
   min_book_ahead_days: number;
   open_hours: AvailabilityRule[];
@@ -105,12 +103,12 @@ export interface BookableSlot extends TimeSlot {
   expirySelection: string;
   participantEmails: string[];
   recurrence_cadence?:
-  | "none"
-  | "daily"
-  | "weekdays"
-  | "biweekly"
-  | "weekly"
-  | "monthly";
+    | "none"
+    | "daily"
+    | "weekdays"
+    | "biweekly"
+    | "weekly"
+    | "monthly";
   recurrence_expiry?: Date | string;
 }
 

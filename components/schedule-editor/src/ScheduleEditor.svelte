@@ -44,7 +44,6 @@
   export let dates_to_show: number;
   export let end_hour: number;
   export let mandate_top_of_hour: boolean;
-  export let max_bookable_slots: number;
   export let max_book_ahead_days: number;
   export let min_book_ahead_days: number;
   export let notification_message: string;
@@ -100,7 +99,6 @@
     dates_to_show: 1,
     end_hour: 17,
     mandate_top_of_hour: false,
-    max_bookable_slots: 1,
     max_book_ahead_days: 30,
     min_book_ahead_days: 0,
     notification_message: "Thank you for scheduling!",
@@ -840,14 +838,6 @@
                 Allow bookings to be made
               </label>
             </div>
-            <label>
-              <strong>Maximum slots that can be booked at once</strong>
-              <input
-                type="number"
-                min={1}
-                max={20}
-                bind:value={_this.max_bookable_slots} />
-            </label>
             <div role="checkbox" aria-labelledby="screen_bookings">
               <strong id="screen_bookings">
                 Scheduling on this calendar requires manual confirmation

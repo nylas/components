@@ -76,7 +76,6 @@ beforeEach(() => {
     "nylas-availability",
     "demo-availability",
   );
-  cy.get("@testComponent").invoke("attr", "participants", testUser);
   cy.get("@testComponent")
     .should("have.prop", "id")
     .and("equal", "test-availability");
@@ -153,7 +152,6 @@ describe("Booking time slots", () => {
   describe("Single availability", () => {
     it("observes unavailable times", () => {
       cy.get("@testComponent").then((element) => {
-        element[0].participants = [];
         element[0].availability = [];
         element[0].booking_options = [];
         cy.get(".slot.busy").should("not.exist");
@@ -420,7 +418,6 @@ describe("Booking time slots", () => {
 
         component.availability = availability;
         component.booking_options = bookingOptions;
-        component.participants = [];
         component.allow_booking = true;
 
         component.addEventListener("timeSlotChosen", (event) => {
@@ -575,10 +572,8 @@ describe("Booking time slots", () => {
       cy.viewport(1800, 550);
       cy.get("@testComponent").invoke("attr", "show_as_week", true);
       cy.intercept("/middleware/calendars").as("calendars");
-      cy.wait("@calendars").then(() => {
-        cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "12 Sun");
-        cy.get("div.day:eq(6) header h2").invoke("text").should("eq", "18 Sat");
-      });
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "12 Sun");
+      cy.get("div.day:eq(6) header h2").invoke("text").should("eq", "18 Sat");
     });
 
     it("Drops weekends like a bad habit: today view", () => {

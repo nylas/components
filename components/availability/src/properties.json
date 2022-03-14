@@ -12,12 +12,6 @@
     "noPreview": true
   },
   {
-    "label": "editor_id",
-    "title": "Schedule Editor Component ID",
-    "type": "string",
-    "noPreview": true
-  },
-  {
     "label": "email_ids",
     "title": "Emails of whose calendars to include",
     "type": "string[]",
@@ -70,13 +64,6 @@
     "type": "boolean",
     "options": [true, false],
     "value": false
-  },
-  {
-    "label": "max_bookable_slots",
-    "title": "Maximum bookable slots",
-    "type": "number",
-    "options": [1, 2, 3],
-    "value": 1
   },
   {
     "label": "max_book_ahead_days",

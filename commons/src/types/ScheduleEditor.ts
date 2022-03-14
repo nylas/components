@@ -11,7 +11,6 @@ export interface Manifest extends NylasManifest {
   dates_to_show: number;
   show_ticks: boolean;
   allow_booking: boolean;
-  max_bookable_slots: number;
   partial_bookable_ratio: number;
   show_as_week: boolean;
   show_weekends: boolean;
