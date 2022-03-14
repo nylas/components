@@ -63,11 +63,11 @@ interface HostRules {
 interface SectionOptions {
   expanded: boolean;
   editable: boolean;
-  hidden_fields: string[];
+  hidden_fields?: string[];
 }
 
 export enum SectionNames {
-  EVENT_DETAILS = "event-details",
+  BASIC_DETAILS = "basic-details",
   TIME_DATE_DETAILS = "time-date-details",
   STYLE_DETAILS = "style-details",
   BOOKING_DETAILS = "booking-details",
