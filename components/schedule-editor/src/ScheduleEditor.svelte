@@ -495,6 +495,7 @@
         _this.sections[name] = {
           expanded: iter === 0,
           editable: true,
+          hidden_fields: [],
         };
       });
     } else {
@@ -505,15 +506,24 @@
           _this.sections[name] = {
             expanded: false,
             editable: false,
+            hidden_fields: [],
           };
         } else {
           // If the section is passed in but lacks an "editable" property, assume positive intent.
           if (!Object.keys(_this.sections[name]).includes("editable")) {
             _this.sections[name].editable = true;
           }
+          // Establish a default empty list for hidden fields
+          if (!Object.keys(_this.sections[name]).includes("hidden_fields")) {
+            _this.sections[name].hidden_fields = [];
+          }
         }
       });
     }
+  }
+
+  function fieldIsHidden(sectionName: SectionNames, fieldName: string) {
+    return _this.sections[sectionName].hidden_fields.includes(fieldName);
   }
   //#endregion initialize sections
 </script>
@@ -532,16 +542,16 @@
     bind:clientWidth={mainElementWidth}
     bind:this={main}>
     <div class="settings">
-      {#if _this.sections[SectionNames.BASIC_DETAILS].editable}
+      {#if _this.sections[SectionNames.EVENT_DETAILS].editable}
         <nylas-schedule-editor-section
-          section_title={SectionNames.BASIC_DETAILS}
-          expanded={_this.sections[SectionNames.BASIC_DETAILS].expanded}>
+          section_title={SectionNames.EVENT_DETAILS}
+          expanded={_this.sections[SectionNames.EVENT_DETAILS].expanded}>
           <h1 slot="title">Event Details</h1>
           <p slot="intro" class="intro">
             Edit the details for your meeting. You can add consecutive meetings
             to allow users to book back-to-back events.
           </p>
-          <div slot="contents" class="contents basic-details">
+          <div slot="contents" class="contents event-details">
             {#each _this.events as event, iter}
               <fieldset>
                 {#if _this.events.length > 1}
@@ -551,66 +561,79 @@
                     Remove this event
                   </button>
                 {/if}
-                <label>
-                  <strong>Event Title!</strong>
-                  <input type="text" bind:value={event.event_title} />
-                </label>
-                <label>
-                  <strong>Event Description</strong>
-                  <input type="text" bind:value={event.event_description} />
-                </label>
-                <label>
-                  <strong>Event Location</strong>
-                  <input type="text" bind:value={event.event_location} />
-                </label>
-                <label>
-                  <strong>Conferencing Link (Zoom, Teams, or Meet URL)</strong>
-                  <input type="url" bind:value={event.event_conferencing} />
-                </label>
-                <div role="radiogroup" aria-labelledby="slot_size">
-                  <strong id="slot_size">Meeting Length</strong>
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "event_title")}
                   <label>
-                    <input
-                      type="radio"
-                      value={15}
-                      bind:group={event.slot_size} />
-                    <span>15 minutes</span>
+                    <strong>Event Title</strong>
+                    <input type="text" bind:value={event.event_title} />
                   </label>
+                {/if}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "event_description")}
                   <label>
-                    <input
-                      type="radio"
-                      value={30}
-                      bind:group={event.slot_size} />
-                    <span>30 minutes</span>
+                    <strong>Event Description</strong>
+                    <input type="text" bind:value={event.event_description} />
                   </label>
+                {/if}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "event_location")}
                   <label>
-                    <input
-                      type="radio"
-                      value={60}
-                      bind:group={event.slot_size} />
-                    <span>60 minutes</span>
+                    <strong>Event Location</strong>
+                    <input type="text" bind:value={event.event_location} />
                   </label>
-                  {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
-                    <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
-                    <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
-                    <p class="warning">
-                      Note: different meeting lengths in a conecutive chain are
-                      not currently supported; all meetings in this chain will
-                      fall back to {_this.events[0].slot_size} minutes.
-                    </p>
-                  {/if}
-                </div>
-                <div>
-                  <strong id="participants">
-                    Email Ids to include for scheduling
-                  </strong>
+                {/if}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "conferencing_link")}
                   <label>
-                    <textarea
-                      name="participants"
-                      on:input={(e) => debounceEmailInput(e, event)}
-                      value={event.participantEmails} />
+                    <strong
+                      >Conferencing Link (Zoom, Teams, or Meet URL)</strong>
+                    <input type="url" bind:value={event.event_conferencing} />
                   </label>
-                </div>
+                {/if}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "meeting_length")}
+                  <div role="radiogroup" aria-labelledby="slot_size">
+                    <strong id="slot_size">Meeting Length</strong>
+                    <label>
+                      <input
+                        type="radio"
+                        value={15}
+                        bind:group={event.slot_size} />
+                      <span>15 minutes</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value={30}
+                        bind:group={event.slot_size} />
+                      <span>30 minutes</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value={60}
+                        bind:group={event.slot_size} />
+                      <span>60 minutes</span>
+                    </label>
+                    {#if iter !== 0 && event.slot_size !== _this.events[0].slot_size}
+                      <!-- Temporary! Nylas' Consecutive Availabiilty API does not support variant time lengths between meetings -->
+                      <!-- https://app.shortcut.com/nylas/story/74514/consecutive-availability-allow-to-specify-duration-minutes-per-meeting -->
+                      <p class="warning">
+                        Note: different meeting lengths in a conecutive chain
+                        are not currently supported; all meetings in this chain
+                        will fall back to {_this.events[0].slot_size} minutes.
+                      </p>
+                    {/if}
+                  </div>
+                {/if}
+                {#if !fieldIsHidden(SectionNames.EVENT_DETAILS, "participants")}
+                  <div>
+                    <strong id="participants">
+                      Email Ids to include for scheduling
+                    </strong>
+                    <label>
+                      <textarea
+                        name="participants"
+                        on:input={(e) => debounceEmailInput(e, event)}
+                        value={event.participantEmails} />
+                    </label>
+                  </div>
+                {/if}
               </fieldset>
             {/each}
           </div>
@@ -628,7 +651,7 @@
           expanded={_this.sections[SectionNames.TIME_DATE_DETAILS].expanded}>
           <h1 slot="title">Date/Time Details</h1>
           <div slot="contents" class="contents">
-            <div>
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "start_hour")}
               <label>
                 <strong>Start Hour</strong>
                 <input
@@ -637,10 +660,10 @@
                   max={24}
                   step={1}
                   bind:value={_this.start_hour} />
+                {_this.start_hour}:00
               </label>
-              {_this.start_hour}:00
-            </div>
-            <div>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "end_hour")}
               <label>
                 <strong>End Hour</strong>
                 <input
@@ -649,40 +672,44 @@
                   max={24}
                   step={1}
                   bind:value={_this.end_hour} />
+                {_this.end_hour}:00
               </label>
-              {_this.end_hour}:00
-            </div>
-            <label>
-              <strong>Start Date</strong>
-              <strong>
-                <input
-                  type="checkbox"
-                  name="custom_start_date"
-                  bind:checked={customStartDate}
-                  on:change={async () => {
-                    if (!customStartDate) {
-                      startDate = new Date().toLocaleDateString("en-CA");
-                      await tick();
-                      startDate = null;
-                    }
-                  }} />
-                Show a specific date
-              </strong>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "start_date")}
+              <label>
+                <strong>Start Date</strong>
+                <strong>
+                  <input
+                    type="checkbox"
+                    name="custom_start_date"
+                    bind:checked={customStartDate}
+                    on:change={async () => {
+                      if (!customStartDate) {
+                        startDate = new Date().toLocaleDateString("en-CA");
+                        await tick();
+                        startDate = null;
+                      }
+                    }} />
+                  Show a specific date
+                </strong>
 
-              <input
-                type="date"
-                bind:value={startDate}
-                disabled={!customStartDate} />
-            </label>
-            <label>
-              <strong>Time Zone</strong>
-              <select bind:value={_this.timezone}>
-                {#each timezones.default as timezone}
-                  <option value={timezone.tzCode}>{timezone.name}</option>
-                {/each}
-              </select>
-            </label>
-            <div>
+                <input
+                  type="date"
+                  bind:value={startDate}
+                  disabled={!customStartDate} />
+              </label>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "time_zone")}
+              <label>
+                <strong>Time Zone</strong>
+                <select bind:value={_this.timezone}>
+                  {#each timezones.default as timezone}
+                    <option value={timezone.tzCode}>{timezone.name}</option>
+                  {/each}
+                </select>
+              </label>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "days_to_show")}
               <label>
                 <strong>Days to show</strong>
                 <input
@@ -691,82 +718,88 @@
                   max={7}
                   step={1}
                   bind:value={_this.dates_to_show} />
+                {_this.dates_to_show}
               </label>
-              {_this.dates_to_show}
-            </div>
-            <div role="checkbox" aria-labelledby="show_as_week">
-              <strong id="show_as_week">Show as week</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="show_as_week"
-                  bind:checked={_this.show_as_week} />
-                Show whole week
-              </label>
-            </div>
-            <div role="checkbox" aria-labelledby="show_weekends">
-              <strong id="show_weekends">Show weekends</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="show_weekends"
-                  bind:checked={_this.show_weekends} />
-                Keep weekends on
-              </label>
-            </div>
-            <div class="available-hours">
-              <strong>Available Hours</strong>
-              <p>
-                Drag over the hours want to be availble for booking. All other
-                hours will always show up as "busy" to your users.
-              </p>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "show_as_week")}
               <div role="checkbox" aria-labelledby="show_as_week">
+                <strong id="show_as_week">Show as week</strong>
                 <label>
                   <input
                     type="checkbox"
-                    name="_this.show_as_week"
+                    name="show_as_week"
                     bind:checked={_this.show_as_week} />
-                  Customize each weekday
+                  Show whole week
                 </label>
               </div>
-              <div role="checkbox" aria-labelledby="show_as_week">
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "show_weekends")}
+              <div role="checkbox" aria-labelledby="show_weekends">
+                <strong id="show_weekends">Show weekends</strong>
                 <label>
                   <input
                     type="checkbox"
-                    name=" _this.show_weekends"
+                    name="show_weekends"
                     bind:checked={_this.show_weekends} />
-                  Allow booking on weekends
+                  Keep weekends on
                 </label>
               </div>
-              <div class="availability-container">
-                <nylas-availability
-                  allow_booking={true}
-                  show_as_week={_this.show_as_week || _this.show_weekends}
-                  show_weekends={_this.show_weekends}
-                  start_hour={_this.start_hour}
-                  end_hour={_this.end_hour}
-                  allow_date_change={false}
-                  partial_bookable_ratio="0"
-                  show_header={false}
-                  date_format={_this.show_as_week || _this.show_weekends
-                    ? "weekday"
-                    : "none"}
-                  busy_color="#000"
-                  closed_color="#999"
-                  selected_color="#095"
-                  slot_size="15"
-                  on:timeSlotChosen={availabilityChosen} />
+            {/if}
+            {#if !fieldIsHidden(SectionNames.TIME_DATE_DETAILS, "available_hours")}
+              <div class="available-hours">
+                <strong>Available Hours</strong>
+                <p>
+                  Drag over the hours want to be availble for booking. All other
+                  hours will always show up as "busy" to your users.
+                </p>
+                <div role="checkbox" aria-labelledby="show_as_week">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="_this.show_as_week"
+                      bind:checked={_this.show_as_week} />
+                    Customize each weekday
+                  </label>
+                </div>
+                <div role="checkbox" aria-labelledby="show_as_week">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name=" _this.show_weekends"
+                      bind:checked={_this.show_weekends} />
+                    Allow booking on weekends
+                  </label>
+                </div>
+                <div class="availability-container">
+                  <nylas-availability
+                    allow_booking={true}
+                    show_as_week={_this.show_as_week || _this.show_weekends}
+                    show_weekends={_this.show_weekends}
+                    start_hour={_this.start_hour}
+                    end_hour={_this.end_hour}
+                    allow_date_change={false}
+                    partial_bookable_ratio="0"
+                    show_header={false}
+                    date_format={_this.show_as_week || _this.show_weekends
+                      ? "weekday"
+                      : "none"}
+                    busy_color="#000"
+                    closed_color="#999"
+                    selected_color="#095"
+                    slot_size="15"
+                    on:timeSlotChosen={availabilityChosen} />
+                </div>
+                <ul class="availability">
+                  {#each _this.open_hours || [] as availability}
+                    <li>
+                      <span class="date">
+                        {niceDate(availability)}
+                      </span>
+                    </li>
+                  {/each}
+                </ul>
               </div>
-              <ul class="availability">
-                {#each _this.open_hours || [] as availability}
-                  <li>
-                    <span class="date">
-                      {niceDate(availability)}
-                    </span>
-                  </li>
-                {/each}
-              </ul>
-            </div>
+            {/if}
           </div>
           <footer slot="footer">
             <button on:click={saveProperties}>Save Editor Options</button>
@@ -780,43 +813,39 @@
           expanded={_this.sections[SectionNames.STYLE_DETAILS].expanded}>
           <h1 slot="title">Style Details</h1>
           <div slot="contents" class="contents">
-            <div role="checkbox" aria-labelledby="show_ticks">
-              <strong id="show_ticks">Show ticks</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="show_ticks"
-                  bind:checked={_this.show_ticks} />
-                Show tick marks on left side
-              </label>
-            </div>
-            <div role="radiogroup" aria-labelledby="view_as">
-              <strong id="view_as">View as a Schedule, or as a List?</strong>
-              <label>
-                <input
-                  type="radio"
-                  name="view_as"
-                  bind:group={_this.view_as}
-                  value="schedule" />
-                <span>Schedule</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="view_as"
-                  bind:group={_this.view_as}
-                  value="list" />
-                <span>List</span>
-              </label>
-            </div>
-            <label>
-              <strong>Attendees to show</strong>
-              <input
-                type="number"
-                min={1}
-                max={20}
-                bind:value={_this.attendees_to_show} />
-            </label>
+            {#if !fieldIsHidden(SectionNames.STYLE_DETAILS, "show_ticks")}
+              <div role="checkbox" aria-labelledby="show_ticks">
+                <strong id="show_ticks">Show ticks</strong>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="show_ticks"
+                    bind:checked={_this.show_ticks} />
+                  Show tick marks on left side
+                </label>
+              </div>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.STYLE_DETAILS, "view_as_schedule")}
+              <div role="radiogroup" aria-labelledby="view_as">
+                <strong id="view_as">View as a Schedule, or as a List?</strong>
+                <label>
+                  <input
+                    type="radio"
+                    name="view_as"
+                    bind:group={_this.view_as}
+                    value="schedule" />
+                  <span>Schedule</span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="view_as"
+                    bind:group={_this.view_as}
+                    value="list" />
+                  <span>List</span>
+                </label>
+              </div>
+            {/if}
           </div>
           <footer slot="footer">
             <button on:click={saveProperties}>Save Editor Options</button>
@@ -830,134 +859,148 @@
           expanded={_this.sections[SectionNames.BOOKING_DETAILS].expanded}>
           <h1 slot="title">Booking Details</h1>
           <div slot="contents" class="contents">
-            <div role="checkbox" aria-labelledby="allow_booking">
-              <strong id="allow_booking">Allow booking</strong>
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "allow_booking")}
+              <div role="checkbox" aria-labelledby="allow_booking">
+                <strong id="allow_booking">Allow booking</strong>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="allow_booking"
+                    bind:checked={_this.allow_booking} />
+                  Allow bookings to be made
+                </label>
+              </div>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "maximum_slots")}
               <label>
+                <strong>Maximum slots that can be booked at once</strong>
                 <input
-                  type="checkbox"
-                  name="allow_booking"
-                  bind:checked={_this.allow_booking} />
-                Allow bookings to be made
+                  type="number"
+                  min={1}
+                  max={20}
+                  bind:value={_this.max_bookable_slots} />
               </label>
-            </div>
-            <label>
-              <strong>Maximum slots that can be booked at once</strong>
-              <input
-                type="number"
-                min={1}
-                max={20}
-                bind:value={_this.max_bookable_slots} />
-            </label>
-            <div role="checkbox" aria-labelledby="screen_bookings">
-              <strong id="screen_bookings">
-                Scheduling on this calendar requires manual confirmation
-              </strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="screen_bookings"
-                  bind:checked={_this.screen_bookings} />
-                Let the meeting host screen bookings before they're made official
-              </label>
-            </div>
-            <label>
-              <strong>Participant Threshold / Partial bookable ratio</strong>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                bind:value={_this.partial_bookable_ratio} />
-              {Math.floor(_this.partial_bookable_ratio * 100)}%
-            </label>
-            <div role="radiogroup" aria-labelledby="recurrence">
-              <strong id="recurrence">
-                Allow, Disallow, or Mandate events to repeat?
-              </strong>
-              <label>
-                <input
-                  type="radio"
-                  name="recurrence"
-                  bind:group={_this.recurrence}
-                  value="none" />
-                <span>Don't Repeat Events</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="recurrence"
-                  bind:group={_this.recurrence}
-                  value="optional" />
-                <span>Users May Repeat Events</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="recurrence"
-                  bind:group={_this.recurrence}
-                  value="required" />
-                <span>Events Always Repeat</span>
-              </label>
-            </div>
-            <label>
-              <strong>Capacity</strong>
-              <input type="number" min={1} bind:value={_this.capacity} />
-            </label>
-            <div role="checkbox" aria-labelledby="allow_booking">
-              <strong>Top of the Hour Events</strong>
-              <label>
-                <input
-                  type="checkbox"
-                  name="mandate_top_of_hour"
-                  bind:checked={_this.mandate_top_of_hour} />
-                Only allow events to be booked at the Top of the Hour
-              </label>
-            </div>
-            {#if _this.recurrence === "required" || _this.recurrence === "optional"}
-              <div role="radiogroup" aria-labelledby="recurrence_cadence">
-                <strong id="recurrence_cadence">
-                  How often should events repeat{#if _this.recurrence === "optional"},
-                    if a user chooses to do so{/if}?
+            {/if}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "screen_bookings")}
+              <div role="checkbox" aria-labelledby="screen_bookings">
+                <strong id="screen_bookings">
+                  Scheduling on this calendar requires manual confirmation
                 </strong>
                 <label>
                   <input
                     type="checkbox"
-                    name="recurrence_cadence"
-                    bind:group={_this.recurrence_cadence}
-                    value="daily" />
-                  <span>Daily</span>
+                    name="screen_bookings"
+                    bind:checked={_this.screen_bookings} />
+                  Let the meeting host screen bookings before they're made official
+                </label>
+              </div>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "bookable_ratio")}
+              <label>
+                <strong>Participant Threshold / Partial bookable ratio</strong>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  bind:value={_this.partial_bookable_ratio} />
+                {Math.floor(_this.partial_bookable_ratio * 100)}%
+              </label>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "recurrence")}
+              <div role="radiogroup" aria-labelledby="recurrence">
+                <strong id="recurrence">
+                  Allow, Disallow, or Mandate events to repeat?
+                </strong>
+                <label>
+                  <input
+                    type="radio"
+                    name="recurrence"
+                    bind:group={_this.recurrence}
+                    value="none" />
+                  <span>Don't Repeat Events</span>
                 </label>
                 <label>
                   <input
-                    type="checkbox"
-                    name="recurrence_cadence"
-                    bind:group={_this.recurrence_cadence}
-                    value="weekdays" />
-                  <span>Daily, only on weekdays</span>
+                    type="radio"
+                    name="recurrence"
+                    bind:group={_this.recurrence}
+                    value="optional" />
+                  <span>Users May Repeat Events</span>
                 </label>
                 <label>
                   <input
-                    type="checkbox"
-                    name="recurrence_cadence"
-                    bind:group={_this.recurrence_cadence}
-                    value="weekly" />
-                  <span>Weekly</span>
+                    type="radio"
+                    name="recurrence"
+                    bind:group={_this.recurrence}
+                    value="required" />
+                  <span>Events Always Repeat</span>
                 </label>
+                {#if _this.recurrence === "required" || _this.recurrence === "optional"}
+                  <div role="radiogroup" aria-labelledby="recurrence_cadence">
+                    <strong id="recurrence_cadence">
+                      How often should events repeat{#if _this.recurrence === "optional"},
+                        if a user chooses to do so{/if}?
+                    </strong>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="recurrence_cadence"
+                        bind:group={_this.recurrence_cadence}
+                        value="daily" />
+                      <span>Daily</span>
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="recurrence_cadence"
+                        bind:group={_this.recurrence_cadence}
+                        value="weekdays" />
+                      <span>Daily, only on weekdays</span>
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="recurrence_cadence"
+                        bind:group={_this.recurrence_cadence}
+                        value="weekly" />
+                      <span>Weekly</span>
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="recurrence_cadence"
+                        bind:group={_this.recurrence_cadence}
+                        value="biweekly" />
+                      <span>Biweekly</span>
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="recurrence_cadence"
+                        bind:group={_this.recurrence_cadence}
+                        value="monthly" />
+                      <span>Monthly</span>
+                    </label>
+                  </div>
+                {/if}
+              </div>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "capacity")}
+              <label>
+                <strong>Capacity</strong>
+                <input type="number" min={1} bind:value={_this.capacity} />
+              </label>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.BOOKING_DETAILS, "mandate_top_of_hour")}
+              <div role="checkbox" aria-labelledby="mandate_top_of_hour">
+                <strong>Top of the Hour Events</strong>
                 <label>
                   <input
                     type="checkbox"
-                    name="recurrence_cadence"
-                    bind:group={_this.recurrence_cadence}
-                    value="biweekly" />
-                  <span>Biweekly</span>
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    name="recurrence_cadence"
-                    bind:group={_this.recurrence_cadence}
-                    value="monthly" />
-                  <span>Monthly</span>
+                    name="mandate_top_of_hour"
+                    bind:checked={_this.mandate_top_of_hour} />
+                  Only allow events to be booked at the Top of the Hour
                 </label>
               </div>
             {/if}
@@ -1197,34 +1240,40 @@
           expanded={_this.sections[SectionNames.NOTIFICATION_DETAILS].expanded}>
           <h1 slot="title">Notification Details</h1>
           <div slot="contents" class="contents">
-            <div role="radiogroup" aria-labelledby="notification_mode">
-              <strong id="notification_mode"
-                >How would you like to notify the customer on event creation?</strong>
+            {#if !fieldIsHidden(SectionNames.NOTIFICATION_DETAILS, "notification_mode")}
+              <div role="radiogroup" aria-labelledby="notification_mode">
+                <strong id="notification_mode"
+                  >How would you like to notify the customer on event creation?</strong>
+                <label>
+                  <input
+                    type="radio"
+                    name="notification_mode"
+                    value={NotificationMode.SHOW_MESSAGE}
+                    bind:group={_this.notification_mode} />
+                  <span>Show Message on UI</span>
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="notification_mode"
+                    value={NotificationMode.SEND_MESSAGE}
+                    bind:group={_this.notification_mode} />
+                  <span>Send message via email</span>
+                </label>
+              </div>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.NOTIFICATION_DETAILS, "notification_message")}
               <label>
-                <input
-                  type="radio"
-                  name="notification_mode"
-                  value={NotificationMode.SHOW_MESSAGE}
-                  bind:group={_this.notification_mode} />
-                <span>Show Message on UI</span>
+                <strong>Notification message</strong>
+                <input type="text" bind:value={_this.notification_message} />
               </label>
+            {/if}
+            {#if !fieldIsHidden(SectionNames.NOTIFICATION_DETAILS, "notification_subject")}
               <label>
-                <input
-                  type="radio"
-                  name="notification_mode"
-                  value={NotificationMode.SEND_MESSAGE}
-                  bind:group={_this.notification_mode} />
-                <span>Send message via email</span>
+                <strong>Notification Subject</strong>
+                <input type="text" bind:value={_this.notification_subject} />
               </label>
-            </div>
-            <label>
-              <strong>Notification message</strong>
-              <input type="text" bind:value={_this.notification_message} />
-            </label>
-            <label>
-              <strong>Notification Subject</strong>
-              <input type="text" bind:value={_this.notification_subject} />
-            </label>
+            {/if}
           </div>
           <footer slot="footer">
             <button on:click={saveProperties}>Save Editor Options</button>

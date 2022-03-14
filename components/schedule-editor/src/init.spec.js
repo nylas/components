@@ -20,12 +20,12 @@ describe("schedule-editor component", () => {
   describe("Allows for multiple meetings", () => {
     it("Allows the user to add consecutive meetings", () => {
       cy.get("button.add-event").click();
-      cy.get(".basic-details fieldset").should("have.length", 3);
+      cy.get(".event-details fieldset").should("have.length", 3);
       cy.get("button.add-event").click();
-      cy.get(".basic-details fieldset").should("have.length", 4);
+      cy.get(".event-details fieldset").should("have.length", 4);
       cy.get("button.remove-event").eq(0).click();
       cy.get("button.remove-event").eq(0).click();
-      cy.get(".basic-details fieldset").should("have.length", 2);
+      cy.get(".event-details fieldset").should("have.length", 2);
     });
   });
 });
@@ -41,7 +41,7 @@ describe("Editable Sections", () => {
 
   it("Allows a custom section to be expanded", () => {
     const sectionConfig = {
-      "basic-details": {
+      "event-details": {
         expanded: false,
         editable: true,
       },
@@ -137,6 +137,37 @@ describe("Editable Sections", () => {
       cy.get(testScheduleEditor)
         .get("nylas-schedule-editor-section")
         .should("have.length", 2);
+    });
+  });
+
+  it("Allows specific fields to be hidden", () => {
+    const sectionConfigWithHiddenFields = {
+      "style-details": {
+        expanded: true,
+        editable: true,
+        hidden_fields: ["show_ticks"],
+      },
+      "booking-details": {
+        expanded: false,
+        editable: true,
+      },
+    };
+
+    cy.get(testScheduleEditor).then((element) => {
+      const component = element[0];
+      component.sections = sectionConfigWithHiddenFields;
+      cy.get("nylas-schedule-editor-section")
+        .eq(0)
+        .shadow()
+        .get(".contents")
+        .children()
+        .should("contain", "View as a Schedule");
+      cy.get("nylas-schedule-editor-section")
+        .eq(0)
+        .shadow()
+        .get(".contents")
+        .children()
+        .should("not.contain", "Show ticks");
     });
   });
 });
