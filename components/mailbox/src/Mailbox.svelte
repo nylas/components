@@ -543,7 +543,8 @@
          * individual messages to trash folder as a workaround
          **/
         if (id) {
-          for (let message of thread.messages) {
+          const allMessages = [...thread.messages, ...thread.drafts];
+          for (let message of allMessages) {
             await updateMessage(
               query.component_id,
               { ...message, folder_id: trashFolderID },
