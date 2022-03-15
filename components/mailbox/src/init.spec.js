@@ -104,7 +104,7 @@ const DRAFT_THREAD = {
 
 const defaultSize = 13;
 
-xdescribe("Mailbox Display", () => {
+describe("Mailbox Display", () => {
   let thread1;
   let thread2;
   let THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS;
@@ -194,7 +194,7 @@ xdescribe("Mailbox Display", () => {
   });
 });
 
-xdescribe("Mailbox Files/Images", () => {
+describe("Mailbox Files/Images", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -244,7 +244,7 @@ xdescribe("Mailbox Files/Images", () => {
   });
 });
 
-xdescribe("Mailbox Unread/Read", () => {
+describe("Mailbox Unread/Read", () => {
   let thread1;
   let thread2;
 
@@ -354,7 +354,7 @@ xdescribe("Mailbox Unread/Read", () => {
   });
 });
 
-xdescribe("Mailbox Props", () => {
+describe("Mailbox Props", () => {
   let thread1;
   let thread2;
 
@@ -459,7 +459,7 @@ xdescribe("Mailbox Props", () => {
   });
 });
 
-xdescribe("Mailbox Interactions", () => {
+describe("Mailbox Interactions", () => {
   let thread1;
   let thread2;
 
@@ -539,7 +539,7 @@ xdescribe("Mailbox Interactions", () => {
   });
 });
 
-xdescribe("Mailbox Pagination: threads not intercepted", () => {
+describe("Mailbox Pagination: threads not intercepted", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -607,7 +607,7 @@ xdescribe("Mailbox Pagination: threads not intercepted", () => {
   });
 });
 
-xdescribe("Mailbox: updating 'to' field correctly for reply and reply-all", () => {
+describe("Mailbox: updating 'to' field correctly for reply and reply-all", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "https://web-components.nylas.com/middleware/manifest":
@@ -673,7 +673,7 @@ xdescribe("Mailbox: updating 'to' field correctly for reply and reply-all", () =
   });
 });
 
-xdescribe("Mailbox: updating cc fields correctly for reply and reply-all", () => {
+describe("Mailbox: updating cc fields correctly for reply and reply-all", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "https://web-components.nylas.com/middleware/manifest":
@@ -741,7 +741,7 @@ xdescribe("Mailbox: updating cc fields correctly for reply and reply-all", () =>
   });
 });
 
-xdescribe("Mailbox Bulk actions", () => {
+describe("Mailbox Bulk actions", () => {
   let thread1;
   let thread2;
 
@@ -913,7 +913,7 @@ xdescribe("Mailbox Bulk actions", () => {
   });
 });
 
-xdescribe("Mailbox Custom events", () => {
+describe("Mailbox Custom events", () => {
   let thread1;
   let thread2;
 
@@ -993,20 +993,13 @@ xdescribe("Mailbox Custom events", () => {
   });
 });
 
-xdescribe("Mailbox Integration: Composer and Drafts", () => {
+describe("Mailbox Integration: Composer and Drafts", () => {
   beforeEach(() => {
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/manifest",
-      {
-        fixture: "mailbox/manifest.json",
-      },
-    );
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "mailbox/account.json",
-    });
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
-      fixture: "mailbox/labels.json",
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "mailbox/manifest",
+      "**/middleware/account": "mailbox/account",
+      "**/middleware/labels": "mailbox/labels",
+      "**/middleware/messages/*": "draftThread",
     });
 
     cy.visit("/components/mailbox/src/cypress.html");
@@ -1056,9 +1049,6 @@ xdescribe("Mailbox Integration: Composer and Drafts", () => {
   });
 
   it("Clicking on a draft message opens composer", () => {
-    cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
-      fixture: "draftThread.json",
-    });
     cy.get("@mailbox").invoke("prop", "all_threads", [DRAFT_THREAD]);
 
     cy.get("@mailbox").find(".email-row.unread").click();
@@ -1077,9 +1067,6 @@ xdescribe("Mailbox Integration: Composer and Drafts", () => {
   });
 
   it("ENTER keydown on a draft message opens composer", () => {
-    cy.intercept("https://web-components.nylas.com/middleware/messages/*", {
-      fixture: "draftThread.json",
-    });
     cy.get("@mailbox").invoke("prop", "all_threads", [DRAFT_THREAD]);
     cy.get("li.unread").trigger("keypress", { code: "Enter" });
 
@@ -1095,10 +1082,27 @@ xdescribe("Mailbox Integration: Composer and Drafts", () => {
       .invoke("text")
       .should("contain", "Testing with updated commons! --Sent with Nylas");
   });
+
+  it("Delete selected draft thread", () => {
+    cy.get("@mailbox").invoke("prop", "all_threads", [DRAFT_THREAD]);
+    cy.get("@mailbox").invoke("prop", "actions_bar", ["delete"]);
+
+    cy.get("@email").should("have.length", 1);
+    cy.get("@mailbox").find("div.checkbox-container input").first().check();
+    cy.get("[role='toolbar']").find(".delete").find("button").click();
+    // // Clicking delete should open modal
+    cy.get(".modal").should("exist");
+    // // Clicking confirm should delete email and close modal
+    cy.get(".modal").find("button.danger").click();
+    cy.get(".modal").should("not.exist");
+
+    cy.get("@email").should("not.exist");
+    cy.get("@mailbox").contains("Your Mailbox is empty!");
+  });
 });
 
 //Draft messages in email thread
-xdescribe("Mailbox Integration: Show draft message in Email thread", () => {
+describe("Mailbox Integration: Show draft message in Email thread", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
