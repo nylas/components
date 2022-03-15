@@ -662,6 +662,64 @@ describe("Composer integration", () => {
     );
   });
 
+  it("Displays sending messages on send button when sending email", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@test.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@test.com",
+          },
+        ],
+      };
+
+      component.send = () => {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve("success"), 1000);
+        });
+      };
+    });
+
+    cy.get(".send-btn").contains("Send").click();
+    cy.get(".send-btn").should("contain", "Sending");
+  });
+
+  it("Displays saving messages on send button when saving draft", () => {
+    cy.get("@composer").then((element) => {
+      const component = element[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@test.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@test.com",
+          },
+        ],
+      };
+
+      component.save = () => {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve("success"), 1000);
+        });
+      };
+    });
+
+    cy.get(".save-draft").click();
+    cy.get(".send-btn").should("contain", "Saving");
+  });
+
   it("Shows template in email body", () => {
     cy.get("@composer").then((element) => {
       const component = element[0];

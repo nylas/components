@@ -415,11 +415,12 @@
     }
   };
 
+  let isSaving = false;
   let saveError = false;
   let saveSuccess = false;
   //Save Email Message as Draft
   const handleSaveDraft = async () => {
-    isPending = true;
+    isSaving = true;
     saveError = false;
     saveSuccess = false;
 
@@ -429,7 +430,7 @@
         //Calling custom save callback
         const res = await save(msg);
         if (afterSaveSuccess) afterSaveSuccess(res);
-        isPending = false;
+        isSaving = false;
         saveSuccess = true;
       } else if (id) {
         // Middleware
@@ -438,7 +439,7 @@
           const res = await updateDraft(id, msg, access_token);
           if (res.id) mergeMessage({ ...res });
           if (afterSaveSuccess) afterSaveSuccess(res);
-          isPending = false;
+          isSaving = false;
           saveSuccess = true;
           dispatchEvent("draftUpdated", {
             message: res,
@@ -448,7 +449,7 @@
           const res = await saveDraft(id, msg, access_token);
           if (res.id) mergeMessage({ ...res });
           if (afterSaveSuccess) afterSaveSuccess(res);
-          isPending = false;
+          isSaving = false;
           saveSuccess = true;
           dispatchEvent("draftSaved", {
             message: res,
@@ -457,7 +458,7 @@
       }
     } catch (err) {
       if (afterSaveError) afterSaveError(err);
-      isPending = false;
+      isSaving = false;
       saveError = true;
     }
   };
@@ -468,8 +469,18 @@
   // @ts-ignore
   $: datepickerTimestamp = $message.send_at * 1000;
 
-  $: isSendable =
+  let sendButtonText: string = "Send";
+  $: if (isPending) {
+    sendButtonText = "Sending";
+  } else if (isSaving) {
+    sendButtonText = "Saving";
+  } else {
+    sendButtonText = "Send";
+  }
+
+  $: sendEnabled =
     !isPending &&
+    !isSaving &&
     (id || send) &&
     $message.from.length &&
     ($message.to.length || $message.cc.length || $message.bcc.length);
@@ -498,7 +509,7 @@
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter" && e.metaKey) {
-      if (isSendable) {
+      if (sendEnabled) {
         handleSend();
       }
     }
@@ -989,8 +1000,11 @@
       </main>
       <footer>
         <div class="btn-group">
-          <button class="send-btn" on:click={handleSend} disabled={!isSendable}>
-            {#if isPending}Sending{:else}Send{/if}
+          <button
+            class="send-btn"
+            on:click={handleSend}
+            disabled={!sendEnabled}>
+            {sendButtonText}
           </button>
         </div>
         {#if _this.show_save_as_draft}
