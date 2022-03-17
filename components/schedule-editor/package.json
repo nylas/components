@@ -1,6 +1,6 @@
 {
   "name": "@nylas/components-schedule-editor",
-  "version": "1.1.4-canary.7",
+  "version": "1.1.4-canary.8",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
