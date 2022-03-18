@@ -535,6 +535,22 @@
           thread.labels?.map((label: any) => label.id) || [];
         thread.label_ids = [...existingLabelIds, trashLabelID];
         await updateThreadStatus(thread);
+
+        /**
+         * Nylas thread update API does not update label of the drafts in thread currently
+         * As a workaround, any drafts in thread needs to be deleted individually
+         **/
+        const allDrafts = [...thread.drafts];
+        for (let draft of allDrafts) {
+          const draftLabels = draft.labels?.map((label: any) => label.id) || [];
+          await updateMessage(
+            query.component_id,
+            { ...draft, label_ids: [...draftLabels, trashLabelID] },
+            access_token,
+          ).catch((err) => {
+            silence(err);
+          });
+        }
       } else if (trashFolderID) {
         thread.folder_id = trashFolderID;
         /**

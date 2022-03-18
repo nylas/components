@@ -43,7 +43,7 @@ export async function updateMessage(
     method: "PUT",
     component_id,
     access_token,
-    body: { folder_id: message.folder_id },
+    body: { folder_id: message.folder_id, label_ids: message.label_ids },
   });
   return await fetch(url, fetchConfig)
     .then((response) =>
