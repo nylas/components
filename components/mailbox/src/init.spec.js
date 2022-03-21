@@ -1373,6 +1373,87 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
   });
 });
 
+describe("Mailbox Integration: Save draft and update draft", () => {
+  beforeEach(() => {
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "mailbox/manifest",
+      "**/middleware/account": "mailbox/account",
+      "**/middleware/labels": "mailbox/labels",
+      "**/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox":
+        "mailbox/threads/threadRegular",
+    });
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/message-id-1",
+      {
+        fixture: "mailbox/messages/messageForDraftThread.json",
+      },
+    ).as("message");
+    cy.intercept("POST", "https://web-components.nylas.com/middleware/drafts", {
+      fixture: "mailbox/threads/draftMessage1.json",
+    }).as("saveDraft");
+
+    cy.visit("/components/mailbox/src/cypress.html");
+
+    cy.get("nylas-mailbox").should("exist").as("mailbox");
+    cy.get("@mailbox").find("nylas-email").as("email");
+
+    cy.addComponent("nylas-composer", {
+      show_header: true,
+    });
+
+    cy.get("@mailbox").then((el) => {
+      const mailbox = el[0];
+      cy.get("nylas-composer")
+        .should("exist")
+        .as("composer")
+        .then((el) => {
+          const composer = el[0];
+          composer.close();
+
+          composer.afterSendSuccess = () => {
+            composer.close();
+          };
+
+          mailbox.addEventListener("replyClicked", (event) => {
+            composer.focus_body_onload = true;
+            if (Object.keys(event.detail.message).length) {
+              composer.value = {
+                ...event.detail.message,
+                ...composer.value,
+              };
+            }
+            composer.open();
+          });
+          composer.addEventListener("draftSaved", (event) => {
+            const message = event.detail.message;
+            if (message.object === "draft") {
+              mailbox.draftMessageUpdate(message);
+            }
+          });
+        });
+    });
+  });
+
+  it("Save draft will update draft icon on mailbox thread", () => {
+    cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
+    cy.get("@email").find(".default-avatar.draft-icon").should("not.exist");
+    cy.get("@mailbox").find(".email-row.condensed").click();
+    cy.wait("@message");
+    //Click on reply should open existing draft
+    cy.get("@email").find(".reply").should("exist");
+    cy.get("@email").find(".reply").click();
+    cy.get("@composer").should("exist");
+    cy.get("@composer").find(".save-draft").click();
+    cy.wait("@saveDraft");
+    cy.get("@composer").find("header .composer-btn .CloseIcon").click();
+    cy.get("@mailbox").find("button[aria-label='Return to Mailbox']").click();
+    //Draft icon should be updated on thread
+    cy.get("@email").find(".default-avatar.draft-icon").should("exist");
+  });
+});
+
 describe("Display Participants in thread row", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
