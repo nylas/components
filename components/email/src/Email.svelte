@@ -537,6 +537,16 @@
     const subject = message.subject?.toLowerCase().startsWith("re:")
       ? message.subject
       : `Re: ${message.subject}`;
+    const value = {
+      reply_to_message_id: message.id,
+      from,
+      to,
+      reply_to: from,
+      cc,
+      bcc: message.bcc,
+      body: message.body,
+      subject: subject,
+    };
 
     let event_identifier;
     switch (type) {
@@ -554,30 +564,18 @@
       (draft) => draft.reply_to_message_id === message.id,
     );
     if (existingDraft) {
-      existingDraft.to = to;
-      existingDraft.cc = cc;
-      existingDraft.subject = subject;
+      value.body = existingDraft.body;
       dispatchEvent(event_identifier, {
         event,
-        message: existingDraft,
+        message: { ...existingDraft, subject, to, cc },
         thread: activeThread,
+        value,
       });
     } else {
       //Creating new reply message
-      const value = {
-        reply_to_message_id: message.id,
-        from,
-        to,
-        reply_to: from,
-        cc,
-        bcc: message.bcc,
-        body: message.body,
-        subject: subject,
-      };
-
       dispatchEvent(event_identifier, {
         event,
-        message: message,
+        message: { ...message, subject, to, cc },
         thread: activeThread,
         value,
       });
@@ -590,12 +588,18 @@
       (draft) => draft.reply_to_message_id === message.id,
     );
     const subject = `Fwd: ${message.subject}`;
+    const value = {
+      reply_to_message_id: message.id,
+      subject: subject,
+      body: message.body,
+    };
     if (existingDraft) {
-      existingDraft.subject = subject;
+      value.body = existingDraft.body;
       dispatchEvent("forwardClicked", {
         event,
-        message: existingDraft,
+        message: { ...existingDraft, subject },
         thread: activeThread,
+        value,
       });
     } else {
       //Create new message
@@ -603,6 +607,7 @@
         event,
         message: { ...message, subject },
         thread: activeThread,
+        value,
       });
     }
   }

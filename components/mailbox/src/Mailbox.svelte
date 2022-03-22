@@ -646,19 +646,32 @@
     }
     draftMessageUpdate(message);
 
+    const value = {
+      to: message.to,
+      cc: message.cc,
+      bcc: message.bcc,
+      from: message.from,
+      subject: message.subject,
+      body: message.body,
+    };
     dispatchEvent("draftThreadClicked", {
       event,
       message,
       thread,
+      value,
     });
 
     //Deprecated: DO NOT USE draftThreadEvent
+    console.warn(
+      "draftThreadEvent is Deprecated and will be removed in a future stable release; Please use draftThreadClicked instead",
+    );
     dispatchEvent("draftThreadEvent", {
       warning:
         "draftThreadEvent is Deprecated and will be removed in a future stable release; Please use draftThreadClicked instead.",
       event,
       message,
       thread,
+      value,
     });
   }
 </script>
