@@ -9,7 +9,6 @@
   import {
     ManifestStore,
     AvailabilityStore,
-    CalendarStore,
     ErrorStore,
     ConsecutiveAvailabilityStore,
   } from "../../../commons/src";
@@ -32,7 +31,6 @@
   } from "@commons/enums/Availability";
 
   import type {
-    Calendar,
     Manifest,
     TimeSlot,
     SelectableSlot,
@@ -1136,20 +1134,33 @@
     style="
     --busy-color-lightened: {lightenHexColour(_this.busy_color, 90)};
     --closed-color-lightened: {lightenHexColour(_this.closed_color, 90)};
-    --selected-color-lightened: {lightenHexColour(_this.selected_color, 60)}; 
-    --free-color: {_this.free_color}; --busy-color: {_this.busy_color}; 
+    --selected-color-lightened: {lightenHexColour(_this.selected_color, 60)};
+    --free-color: {_this.free_color}; --busy-color: {_this.busy_color};
     --closed-color: {_this.closed_color}; --partial-color: {_this.partial_color};
     --selected-color: {_this.selected_color};">
     <header class:dated={_this.allow_date_change}>
       <h2 class="month">{showDateRange(days)}</h2>
       {#if _this.allow_date_change}
         <div class="change-dates">
-          <button on:click={goToPreviousDate} aria-label="Previous date">
-            <BackIcon style="height:32px;width:32px;" />
-          </button>
-          <button on:click={goToNextDate} aria-label="Next date">
-            <NextIcon style="height:32px;width:32px;" />
-          </button>
+          {#if !dayOrder.includes(timeDay
+              .offset(new Date(), _this.min_book_ahead_days)
+              .toLocaleDateString())}
+            <button on:click={goToPreviousDate} aria-label="Previous date">
+              <BackIcon style="height:32px;width:32px;" />
+            </button>
+          {:else}
+            <span />
+          {/if}
+
+          {#if !dayOrder.includes(timeDay
+              .offset(new Date(), _this.max_book_ahead_days)
+              .toLocaleDateString())}
+            <button on:click={goToNextDate} aria-label="Next date">
+              <NextIcon style="height:32px;width:32px;" />
+            </button>
+          {:else}
+            <span />
+          {/if}
         </div>
       {/if}
       <div class="legend">

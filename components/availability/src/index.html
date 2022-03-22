@@ -27,9 +27,6 @@
         // component.availability = availability;
         // component.booking_options = booking_options;
 
-        component.max_book_ahead_days = 0;
-        setTimeout(() => (component.max_book_ahead_days = 1), 5000);
-
         component.addEventListener("dateChange", (event) => {
           console.log("date change", event.detail.dates);
         });
@@ -430,13 +427,6 @@
         <label>
           <input type="radio" name="show-header" value="false" />
           False
-        </label>
-      </fieldset>
-
-      <fieldset>
-        <label>
-          Max Bookable Slots
-          <input type="number" name="max-slots" min="1" value="1" />
         </label>
       </fieldset>
 
