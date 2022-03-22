@@ -344,7 +344,7 @@ main {
         }
 
         &.outside-of-time-range {
-          background-color: #ddd;
+          background-color: var(--unavailable-color, #ddd);
 
           &:hover {
             cursor: not-allowed;
