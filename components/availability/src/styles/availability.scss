@@ -305,8 +305,6 @@ main {
       list-style-type: none;
       margin: 0;
       padding: 0;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-bottom: none;
 
       .slot {
         border: none;
@@ -343,11 +341,14 @@ main {
         &.busy:not(.pending),
         &.closed:not(.pending) {
           cursor: not-allowed;
-          margin-left: 8px;
         }
 
-        &.outside-of-time-range:hover {
-          cursor: not-allowed;
+        &.outside-of-time-range {
+          background-color: var(--unavailable-color, #ddd);
+
+          &:hover {
+            cursor: not-allowed;
+          }
         }
 
         .selected-heading {

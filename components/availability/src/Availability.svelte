@@ -9,7 +9,6 @@
   import {
     ManifestStore,
     AvailabilityStore,
-    CalendarStore,
     ErrorStore,
     ConsecutiveAvailabilityStore,
   } from "../../../commons/src";
@@ -32,7 +31,6 @@
   } from "@commons/enums/Availability";
 
   import type {
-    Calendar,
     Manifest,
     TimeSlot,
     SelectableSlot,
@@ -102,6 +100,7 @@
   export let start_hour: number;
   export let timezone: string;
   export let view_as: "schedule" | "list";
+  export let unavailable_color: string;
   export let events: EventDefinition[];
 
   const defaultValueMap: Partial<Manifest> = {
@@ -135,6 +134,7 @@
     start_hour: 0,
     timezone: "",
     view_as: "schedule",
+    unavailable_color: "#DDD",
     events: [],
   };
 
@@ -328,6 +328,17 @@
       : timeDay.floor(_this.start_date);
 
   $: endDay = dayRange[dayRange.length - 1];
+
+  let maxBookAheadOffset: string;
+  let minBookAheadOffset: string;
+
+  $: maxBookAheadOffset = timeDay
+    .offset(new Date(), _this.max_book_ahead_days)
+    .toLocaleDateString();
+
+  $: minBookAheadOffset = timeDay
+    .offset(new Date(), _this.min_book_ahead_days)
+    .toLocaleDateString();
 
   let ticks: Date[] = [];
 
@@ -1136,20 +1147,30 @@
     style="
     --busy-color-lightened: {lightenHexColour(_this.busy_color, 90)};
     --closed-color-lightened: {lightenHexColour(_this.closed_color, 90)};
-    --selected-color-lightened: {lightenHexColour(_this.selected_color, 60)}; 
-    --free-color: {_this.free_color}; --busy-color: {_this.busy_color}; 
+    --selected-color-lightened: {lightenHexColour(_this.selected_color, 60)};
+    --free-color: {_this.free_color}; --busy-color: {_this.busy_color};
     --closed-color: {_this.closed_color}; --partial-color: {_this.partial_color};
-    --selected-color: {_this.selected_color};">
+    --selected-color: {_this.selected_color};
+    --unavailable-color: {_this.unavailable_color}">
     <header class:dated={_this.allow_date_change}>
       <h2 class="month">{showDateRange(days)}</h2>
       {#if _this.allow_date_change}
         <div class="change-dates">
-          <button on:click={goToPreviousDate} aria-label="Previous date">
-            <BackIcon style="height:32px;width:32px;" />
-          </button>
-          <button on:click={goToNextDate} aria-label="Next date">
-            <NextIcon style="height:32px;width:32px;" />
-          </button>
+          {#if !dayOrder.includes(minBookAheadOffset)}
+            <button on:click={goToPreviousDate} aria-label="Previous date">
+              <BackIcon style="height:32px;width:32px;" />
+            </button>
+          {:else}
+            <span />
+          {/if}
+
+          {#if !dayOrder.includes(maxBookAheadOffset)}
+            <button on:click={goToNextDate} aria-label="Next date">
+              <NextIcon style="height:32px;width:32px;" />
+            </button>
+          {:else}
+            <span />
+          {/if}
         </div>
       {/if}
       <div class="legend">
@@ -1254,11 +1275,7 @@
                   class:outside-of-time-range={!slot.fallsWithinAllowedTimeRange}
                   title={slot.fallsWithinAllowedTimeRange
                     ? null
-                    : `You may only select timeslots in the future, between ${timeDay
-                        .offset(new Date(), _this.min_book_ahead_days)
-                        .toLocaleDateString()} and ${timeDay
-                        .offset(new Date(), _this.max_book_ahead_days)
-                        .toLocaleDateString()}`}
+                    : `You may only select timeslots in the future, between ${minBookAheadOffset} and ${maxBookAheadOffset}`}
                   on:click={() => {
                     handleSlotInteractionStart(slot);
                   }}

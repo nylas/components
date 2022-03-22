@@ -27,9 +27,6 @@
         // component.availability = availability;
         // component.booking_options = booking_options;
 
-        component.max_book_ahead_days = 0;
-        setTimeout(() => (component.max_book_ahead_days = 1), 5000);
-
         component.addEventListener("dateChange", (event) => {
           console.log("date change", event.detail.dates);
         });
@@ -435,13 +432,6 @@
 
       <fieldset>
         <label>
-          Max Bookable Slots
-          <input type="number" name="max-slots" min="1" value="1" />
-        </label>
-      </fieldset>
-
-      <fieldset>
-        <label>
           Max Book Ahead Days
           <input type="number" name="max-book-ahead" min="1" value="30" />
         </label>
@@ -567,6 +557,14 @@
             data-type="closed_color"
             value="#EE3248" />
           Closed color
+        </label>
+        <label>
+          <input
+            type="color"
+            name="color-unavailable"
+            data-type="unavailable_color"
+            value="#DDDDDD" />
+          Unavailable color
         </label>
       </fieldset>
       <fieldset>
