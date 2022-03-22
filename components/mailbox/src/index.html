@@ -20,10 +20,9 @@
     </style>
     <script type="module">
       function toggleComposer(event, component, type) {
-        console.log(type, event.detail);
         component.removeAttribute("hidden");
         component.value = event.detail.value;
-        component.focus_body_onload = event.detail.focus_body_onload;
+        component.focus_body_onload = true;
         if (Object.keys(event.detail.message).length) {
           component.value = {
             ...event.detail.message,
@@ -67,21 +66,24 @@
           mailbox.sentMessageUpdate(message);
         });
 
-        const events = [
+        const mailboxEvents = [
           "replyClicked",
           "replyAllClicked",
           "forwardClicked",
-          "draftThreadEvent",
+          "draftThreadClicked",
+          "draftClicked",
         ];
-        events.forEach((eventType) =>
-          mailbox.addEventListener(eventType, (e) =>
-            toggleComposer(e, composer, eventType),
-          ),
+        mailboxEvents.forEach((eventType) =>
+          mailbox.addEventListener(eventType, (event) => {
+            console.log(eventType, { ...event.detail });
+            toggleComposer(event, composer, eventType);
+          }),
         );
 
-        const draftEvents = ["composerClosed", "draftUpdated", "draftSaved"];
-        draftEvents.forEach((eventType) =>
+        const composerEvents = ["composerClosed", "draftUpdated", "draftSaved"];
+        composerEvents.forEach((eventType) =>
           composer.addEventListener(eventType, (event) => {
+            console.log(eventType, { ...event.detail });
             const message = event.detail.message;
             if (message.object === "draft") {
               mailbox.draftMessageUpdate(message);

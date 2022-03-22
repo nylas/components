@@ -306,20 +306,24 @@
     }
   }
 
-  async function draftClicked(event: CustomEvent) {
+  async function handleEmailDraftOpened(event: CustomEvent) {
     let draft = event.detail.message;
 
-    if (!_this.all_threads && draft && currentlySelectedThread) {
+    //Fetch draft body for draft in email
+    if (
+      !_this.all_threads &&
+      draft?.object === "draft" &&
+      currentlySelectedThread
+    ) {
       if (!draft?.body) {
         draft = await fetchIndividualMessage(draft);
       }
       if (FilesStore.hasInlineFiles(draft)) {
         draft = await getMessageWithInlineFiles(draft);
       }
-      draft.draft_id = draft.id;
-      event.detail.focus_body_onload = true;
-      dispatchDraft(event);
+      draftMessageUpdate(draft);
     }
+    dispatchEvent(event.type, event.detail);
   }
 
   async function updateThreadStatus(updatedThread: any) {
@@ -345,7 +349,7 @@
       let message = await fetchIndividualMessage(messages[messages.length - 1]);
 
       if (messageType === MessageType.DRAFTS) {
-        await dispatchDraft(event);
+        await dispatchDraftThreadClicked(event);
         return;
       }
 
@@ -632,8 +636,8 @@
   }
   //#endregion pagination
 
-  async function dispatchDraft(event: CustomEvent) {
-    const { thread, focus_body_onload } = event.detail;
+  async function dispatchDraftThreadClicked(event: CustomEvent) {
+    const { thread } = event.detail;
     const message = event.detail.message ?? thread.drafts[0];
 
     if (message.cids?.length) {
@@ -642,20 +646,19 @@
     }
     draftMessageUpdate(message);
 
-    const value = {
-      to: message.to,
-      cc: message.cc,
-      bcc: message.bcc,
-      from: message.from,
-      subject: message.subject,
-      body: message.body,
-    };
-    dispatchEvent("draftThreadEvent", {
+    dispatchEvent("draftThreadClicked", {
       event,
       message,
       thread,
-      value,
-      focus_body_onload,
+    });
+
+    //Deprecated: DO NOT USE draftThreadEvent
+    dispatchEvent("draftThreadEvent", {
+      warning:
+        "draftThreadEvent is Deprecated and will be removed in a future stable release; Please use draftThreadClicked instead.",
+      event,
+      message,
+      thread,
     });
   }
 </script>
@@ -945,7 +948,10 @@
           show_reply_all={_this.show_reply_all}
           show_forward={_this.show_forward}
           on:messageClicked={messageClicked}
-          on:draftClicked={draftClicked}
+          on:draftClicked|stopPropagation={handleEmailDraftOpened}
+          on:forwardClicked|stopPropagation={handleEmailDraftOpened}
+          on:replyClicked|stopPropagation={handleEmailDraftOpened}
+          on:replyAllClicked|stopPropagation={handleEmailDraftOpened}
           on:threadStarred={threadStarred}
           on:returnToMailbox={returnToMailbox}
           on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}
@@ -1075,7 +1081,10 @@
                     show_forward={_this.show_forward}
                     on:threadClicked={threadClicked}
                     on:messageClicked={messageClicked}
-                    on:draftClicked={draftClicked}
+                    on:draftClicked|stopPropagation={handleEmailDraftOpened}
+                    on:forwardClicked|stopPropagation={handleEmailDraftOpened}
+                    on:replyClicked|stopPropagation={handleEmailDraftOpened}
+                    on:replyAllClicked|stopPropagation={handleEmailDraftOpened}
                     on:threadStarred={threadStarred}
                     on:returnToMailbox={returnToMailbox}
                     on:toggleThreadUnreadStatus={toggleThreadUnreadStatus}

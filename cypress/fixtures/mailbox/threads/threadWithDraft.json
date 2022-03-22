@@ -144,8 +144,8 @@
           "files": [],
           "from": [
             {
-              "email": "test-email@email.com",
-              "name": "Test User"
+              "email": "nylascypresstest+drafttest@gmail.com",
+              "name": "draft test"
             }
           ],
           "id": "message-id-1",
@@ -164,8 +164,12 @@
           "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
           "to": [
             {
-              "email": "nylascypresstest+drafttest@gmail.com",
-              "name": "draft test"
+              "email": "test-email@email.com",
+              "name": "Test User"
+            },
+            {
+              "email": "nylascypresstest+drafttest2@gmail.com",
+              "name": "draft test2"
             }
           ],
           "unread": false
@@ -180,6 +184,10 @@
         {
           "email": "test-email@email.com",
           "name": "Test User"
+        },
+        {
+          "email": "nylascypresstest+drafttest2@gmail.com",
+          "name": "draft test2"
         }
       ],
       "snippet": "This is the second message sent back to me.",
