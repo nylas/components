@@ -898,10 +898,7 @@
   }
 
   function isThreadADraftEmail(currentThread: Thread): boolean {
-    return (
-      currentThread &&
-      currentThread.labels?.some((label) => label.name === MessageType.DRAFTS)
-    );
+    return currentThread && currentThread.drafts?.length > 0;
   }
 
   let latestMessageNode: HTMLElement | null = null;
@@ -2027,9 +2024,12 @@
                 {/if}
                 <div class="from-message-count">
                   {#if _this.show_contact_avatar}
-                    <div class="default-avatar" class:deleted={isDeleted}>
+                    <div
+                      class="default-avatar"
+                      class:deleted={isDeleted}
+                      class:draft-icon={isDraft}>
                       {#if activeThread}
-                        {#if isDraft && activeThread.drafts.length > 0}
+                        {#if isDraft}
                           <DraftIcon />
                         {:else if activeThread.messages.length <= 0}
                           <NoMessagesIcon />
