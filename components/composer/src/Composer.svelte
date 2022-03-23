@@ -8,6 +8,7 @@
   import "./components/ContactsSearch.svelte";
   import LoadingIcon from "./assets/loading.svg";
   import { isFileAnAttachment } from "@commons/methods/isFileAnAttachment";
+  import { calculateMessageTempSnippet } from "./lib/utils";
 
   import {
     ErrorStore,
@@ -162,6 +163,8 @@
     if (_this.reset_after_close) {
       resetAfterSend($message.from);
     }
+    // Update the snippet showing on the condensed draft message
+    msg.snippet = calculateMessageTempSnippet(msg.body);
     attachments.update(() => []);
     dispatchEvent("composerClosed", {
       message: msg,
