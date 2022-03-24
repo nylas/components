@@ -308,6 +308,7 @@
 
   async function handleEmailDraftOpened(event: CustomEvent) {
     let draft = event.detail.message;
+    const value = event.detail.value;
 
     //Fetch draft body for draft in email
     if (
@@ -320,6 +321,9 @@
       }
       if (FilesStore.hasInlineFiles(draft)) {
         draft = await getMessageWithInlineFiles(draft);
+      }
+      if (value) {
+        value.body = draft.body;
       }
       draftMessageUpdate(draft);
     }

@@ -564,7 +564,11 @@
       (draft) => draft.reply_to_message_id === message.id,
     );
     if (existingDraft) {
-      value.body = existingDraft.body;
+      if (!_this.thread && existingDraft.id) {
+        const res = await fetchIndividualMessage(existingDraft.id);
+        existingDraft.body = res.body;
+        value.body = res.body;
+      }
       dispatchEvent(event_identifier, {
         event,
         message: { ...existingDraft, subject, to, cc },
@@ -594,7 +598,11 @@
       body: message.body,
     };
     if (existingDraft) {
-      value.body = existingDraft.body;
+      if (!_this.thread && existingDraft.id) {
+        const res = await fetchIndividualMessage(existingDraft.id);
+        existingDraft.body = res.body;
+        value.body = res.body;
+      }
       dispatchEvent("forwardClicked", {
         event,
         message: { ...existingDraft, subject },
@@ -699,24 +707,24 @@
     }
   }
 
-  function dispatchDraftClickEvent(event: UIEvent, draft: Message) {
+  async function dispatchDraftClickEvent(event: UIEvent, draft: Message) {
     if (draft) {
       draft.draft_id = draft.id;
       activeThread?.drafts?.forEach(
         (threadDraft) => (threadDraft.active = threadDraft.id === draft.id),
       );
+
+      // Don't fetch message body when thread is being passed manually
+      if (!_this.thread && draft.id) {
+        const res = await fetchIndividualMessage(draft.id);
+        draft.body = res.body;
+      }
+
       dispatchEvent("draftClicked", {
         event,
         message: draft,
         thread: activeThread,
       });
-
-      // Don't fetch message body when thread is being passed manually
-      if (!_this.thread && draft.id) {
-        fetchIndividualMessage(draft.id).then((res) => {
-          draft.body = res.body;
-        });
-      }
     }
   }
 
