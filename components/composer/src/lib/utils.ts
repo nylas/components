@@ -1,4 +1,5 @@
 import type { CallbackDebounceFunction } from "@commons/types/ContactsSearch";
+import * as DOMPurify from "dompurify";
 
 export const debounce = (
   func: CallbackDebounceFunction,
@@ -21,14 +22,15 @@ export const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
-export const calculateMessageTempSnippet = (body: string): string => {
+export const cleanMessageForSnippet = (body: string): string => {
   if (!body) return "";
   return (
-    body
-      // Remove style and script tag and content
-      .replace(/<style|script([\S\s]*?)>([\S\s]*?)<\/style|script>/g, "")
-      // Remove all tags and keep content / Remove all HTML entities
-      ?.replace(/<\/?[^>]+(>|$)|(&.+?;)/g, "")
+    DOMPurify.sanitize(body, {
+      ALLOWED_TAGS: [],
+      KEEP_CONTENT: true,
+    })
+      //Remove all HTML entities
+      ?.replace(/(&.+?;)/g, "")
       // Remove extra spaces
       ?.replace(/\s+/g, " ")
       // Remove leading and trailing space
