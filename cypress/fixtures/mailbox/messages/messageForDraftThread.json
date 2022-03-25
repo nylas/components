@@ -19,7 +19,12 @@
     "date": 1634858431,
     "events": [],
     "files": [],
-    "from": [{ "email": "test-email@email.com", "name": "Test User" }],
+    "from": [
+      {
+        "email": "nylascypresstest+drafttest@gmail.com",
+        "name": "draft test"
+      }
+    ],
     "id": "message-id-1",
     "labels": [
       {
@@ -35,7 +40,14 @@
     "subject": "Test Draft Messages In Thread",
     "thread_id": "c6h7xdze9tod0p03v8wkb01nf",
     "to": [
-      { "email": "nylascypresstest+drafttest@gmail.com", "name": "draft test" }
+      {
+        "email": "test-email@email.com",
+        "name": "Test User"
+      },
+      {
+        "email": "nylascypresstest+drafttest2@gmail.com",
+        "name": "draft test2"
+      }
     ],
     "unread": false
   }

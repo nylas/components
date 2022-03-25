@@ -29,6 +29,8 @@
 - [Mailbox] Added new prop 'thread_click_action' that allows to specify the action on clicking an email thread [#369](https://github.com/nylas/components/pull/369)
 - View/save/send draft messages in email thread [#399](https://github.com/nylas/components/pull/399)
 - Added `draft` label an email thread [#403](https://github.com/nylas/components/pull/403)
+- Removed `event.detail.value` from custom events `draftThreadClicked`, `replyClicked`, `replyAllClicked`, `forwardClicked` and `draftClicked`, message value will be passed by `event.detail.message`. [#417](https://github.com/nylas/components/pull/417)
+- Deprecated `draftThreadEvent` event and renamed it to `draftThreadClicked`. [#417](https://github.com/nylas/components/pull/417)
 
 ## Bug Fixes
 

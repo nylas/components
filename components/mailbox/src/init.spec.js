@@ -714,9 +714,12 @@ describe("Mailbox: updating cc fields correctly for reply and reply-all", () => 
           mailbox.addEventListener("replyAllClicked", (event) => {
             composer.removeAttribute("hidden");
             composer.value = event.detail.value;
-            composer.focus_body_onload = event.detail.focus_body_onload;
+            composer.focus_body_onload = true;
             if (Object.keys(event.detail.message).length) {
-              composer.value.body = event.detail.message;
+              composer.value = {
+                ...event.detail.message,
+                ...composer.value,
+              };
             }
             composer.open();
           });
@@ -1027,8 +1030,8 @@ describe("Mailbox Integration: Composer and Drafts", () => {
             composer.close();
           };
 
-          mailbox.addEventListener("draftThreadEvent", (event) => {
-            composer.value = event.detail.value;
+          mailbox.addEventListener("draftThreadClicked", (event) => {
+            composer.value = event.detail.message;
             composer.open();
           });
 
@@ -1104,48 +1107,20 @@ describe("Mailbox Integration: Composer and Drafts", () => {
 //Draft messages in email thread
 describe("Mailbox Integration: Show draft message in Email thread", () => {
   beforeEach(() => {
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/manifest",
-      {
-        fixture: "mailbox/manifest.json",
-      },
-    );
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
-      fixture: "mailbox/account.json",
+    cy.batchIntercept("GET", {
+      "https://web-components.nylas.com/middleware/manifest":
+        "mailbox/manifest",
+      "https://web-components.nylas.com/middleware/account": "mailbox/account",
+      "https://web-components.nylas.com/middleware/labels": "mailbox/labels",
+      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox":
+        "mailbox/threads/threadWithDraft",
+      "https://web-components.nylas.com/middleware/messages/message-id-1":
+        "mailbox/messages/messageForDraftThread",
+      "https://web-components.nylas.com/middleware/messages/draft_message_1":
+        "mailbox/threads/draftMessage1",
+      "https://web-components.nylas.com/middleware/messages/draft_message_2":
+        "mailbox/threads/draftMessage2",
     });
-    cy.intercept("GET", "https://web-components.nylas.com/middleware/labels", {
-      fixture: "mailbox/labels.json",
-    });
-
-    cy.intercept(
-      "GET",
-      "https://web-components.nylas.com/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
-      {
-        fixture: "mailbox/threads/threadWithDraft.json",
-      },
-    );
-
-    cy.intercept(
-      "https://web-components.nylas.com/middleware/messages/message-id-1",
-      {
-        fixture: "mailbox/messages/messageForDraftThread.json",
-      },
-    );
-
-    cy.intercept(
-      "https://web-components.nylas.com/middleware/messages/draft_message_1",
-      {
-        fixture: "mailbox/threads/draftMessage1.json",
-      },
-    );
-
-    cy.intercept(
-      "https://web-components.nylas.com/middleware/messages/draft_message_2",
-      {
-        fixture: "mailbox/threads/draftMessage2.json",
-      },
-    );
 
     cy.intercept("POST", "https://web-components.nylas.com/middleware/files", {
       fixture: "composer/files/fileResponse.json",
@@ -1178,17 +1153,25 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
           composer.afterSendSuccess = () => {
             composer.close();
           };
-
-          mailbox.addEventListener("draftThreadEvent", (event) => {
-            composer.value = event.detail.value;
-            composer.focus_body_onload = event.detail.focus_body_onload;
-            if (Object.keys(event.detail.message).length) {
-              composer.value = {
-                ...event.detail.message,
-                ...composer.value,
-              };
-            }
-            composer.open();
+          const mailboxEvents = [
+            "replyClicked",
+            "replyAllClicked",
+            "forwardClicked",
+            "draftClicked",
+          ];
+          mailboxEvents.forEach((eventType) => {
+            mailbox.addEventListener(eventType, (event) => {
+              composer.value = event.detail.value;
+              composer.focus_body_onload = true;
+              if (Object.keys(event.detail.message).length) {
+                composer.value = {
+                  ...event.detail.message,
+                  ...composer.value,
+                };
+              }
+              composer.open();
+            });
+            mailbox.addEventListener(eventType, cy.stub().as(eventType));
           });
 
           composer.addEventListener("messageSent", (event) => {
@@ -1245,6 +1228,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
     cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
     cy.get("@mailbox").find(".email-row.condensed").click();
     cy.get("@email").find(".individual-message.draft-message").eq(0).click();
+    cy.get("@draftClicked").should("have.been.calledOnce");
 
     cy.get("@composer")
       .find("header")
@@ -1265,6 +1249,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       .find(".individual-message.draft-message")
       .eq(0)
       .trigger("keypress", { code: "Enter" });
+    cy.get("@draftClicked").should("have.been.calledOnce");
 
     cy.get("@composer")
       .find("header")
@@ -1280,6 +1265,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
 
   it("Click reply/forward to message in thread opens existing draft", () => {
     cy.get("@mailbox").invoke("prop", "show_reply", true);
+    cy.get("@mailbox").invoke("prop", "show_reply_all", true);
     cy.get("@mailbox").invoke("prop", "show_forward", true);
     cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
     cy.get("@mailbox").find(".email-row.condensed").click();
@@ -1287,6 +1273,20 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
     //Click on reply should open existing draft
     cy.get("@email").find(".reply").should("exist");
     cy.get("@email").find(".reply").click();
+    cy.get("@replyClicked").should("have.been.calledOnce");
+    cy.get("@composer")
+      .find("header")
+      .should("contain", "Re: Test Draft Messages In Thread");
+    cy.get("@composer")
+      .find(".html-editor-content[role='textbox']")
+      .invoke("text")
+      .should("contain", "This is a new draft number one.");
+    cy.get("@composer").find("header .composer-btn .CloseIcon").click();
+
+    //Click on reply all should open existing draft
+    cy.get("@email").find(".reply-all").should("exist");
+    cy.get("@email").find(".reply-all").click();
+    cy.get("@replyAllClicked").should("have.been.calledOnce");
     cy.get("@composer")
       .find("header")
       .should("contain", "Re: Test Draft Messages In Thread");
@@ -1299,9 +1299,10 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
     //Click on forward should open the same draft
     cy.get("@email").find(".forward").should("exist");
     cy.get("@email").find(".forward").click();
+    cy.get("@forwardClicked").should("have.been.calledOnce");
     cy.get("@composer")
       .find("header")
-      .should("contain", "Re: Test Draft Messages In Thread");
+      .should("contain", "Fwd: Test Draft Messages In Thread");
     cy.get("@composer")
       .find(".html-editor-content[role='textbox']")
       .invoke("text")
@@ -1460,8 +1461,6 @@ describe("Display Participants in thread row", () => {
       "**/middleware/manifest": "mailbox/manifest",
       "**/middleware/account": "mailbox/account",
       "**/middleware/labels": "mailbox/labels",
-      "**/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox":
-        "mailbox/threads/threadWithDraft",
     });
 
     cy.visit("/components/mailbox/src/cypress.html");
@@ -1471,11 +1470,27 @@ describe("Display Participants in thread row", () => {
   });
 
   it("Shows draft label in thread participant", () => {
+    cy.intercept(
+      "GET",
+      "**/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithDraft",
+      },
+    ).as("threads");
+    cy.wait("@threads");
     cy.get("@email")
       .find(".participants-name span.draft-label")
       .contains("Draft");
   });
   it("Shows current user email as 'Me' in thread participant", () => {
+    cy.intercept(
+      "GET",
+      "**/middleware/threads?view=expanded&not_in=trash&limit=13&offset=0&in=inbox",
+      {
+        fixture: "mailbox/threads/threadWithlastMessageFromSelf",
+      },
+    ).as("threads");
+    cy.wait("@threads");
     cy.get("@email")
       .find(".participants-name span.participant-label")
       .contains("Me");
