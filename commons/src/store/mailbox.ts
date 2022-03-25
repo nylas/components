@@ -275,11 +275,6 @@ function initializeThreads() {
         );
 
         if (incomingDraft.thread_id) {
-          //Update the snippet showing on the condensed draft message
-          incomingDraft.snippet = incomingDraft.body
-            ?.replace(/<\/?[^>]+(>|$)/g, "")
-            .substring(0, 75);
-
           if (foundDraft) {
             Object.assign(foundDraft, incomingDraft);
           } else {
