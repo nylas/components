@@ -261,7 +261,9 @@
   export async function draftMessageUpdate(message: Message): Promise<void> {
     threads = MailboxStore.hydrateDraftInThread(message, query, currentPage);
     const updatedThread = threads.find((t) => t.id === message.thread_id);
-    currentlySelectedThread.drafts = updatedThread.drafts;
+    if (currentlySelectedThread) {
+      currentlySelectedThread.drafts = updatedThread.drafts;
+    }
   }
 
   //#region actions
