@@ -503,8 +503,7 @@ describe("Mailbox Interactions", () => {
     cy.get("@mailbox").find(".email-row.condensed").as("emailRow");
     cy.get("@mailbox").find(".email-row.expanded").should("not.exist");
 
-    cy.get("@emailRow").first().click();
-    cy.get("@emailRow").first().click();
+    cy.get("@emailRow").first().dblclick();
     cy.get("@mailbox").find(".email-row.expanded").should("have.length", 1);
   });
 
