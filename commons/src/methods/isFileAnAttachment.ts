@@ -6,6 +6,7 @@ import {
 
 export const isFileAnAttachment = (message: Message, file: File): boolean =>
   file.content_disposition === "attachment" &&
+  file.filename &&
   !(
     file.content_id &&
     message.cids?.includes(file.content_id) &&
