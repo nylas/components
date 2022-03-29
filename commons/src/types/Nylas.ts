@@ -160,7 +160,7 @@ export interface MiddlewareResponse<T = unknown> {
 export interface NError {
   name?: string;
   message?: Error | string;
-  linkName?: string;
+  link_name?: string;
   link?: string;
 }
 

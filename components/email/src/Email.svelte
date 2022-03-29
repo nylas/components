@@ -190,7 +190,7 @@
             message:
               "Email data is not populated with Email component, please find more details on how to setup Email component in Nylas docs:",
             link: "https://developer.nylas.com/docs/user-experience/components/email-component/",
-            linkName: "Setup Email Component",
+            link_name: "Setup Email Component",
           });
         } catch (error) {
           console.error(
@@ -199,7 +199,7 @@
           );
         }
       } else {
-        clearError(id);
+        clearError(id, "MissingDataProperties");
       }
     }
   })();

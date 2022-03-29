@@ -54,8 +54,10 @@ export function handleError(id: string, error: Manifest["error"]): never {
   throw error;
 }
 
-export function clearError(id: string): void {
-  ErrorStore.update((errorMap) => ({ ...errorMap, [id]: {} }));
+export function clearError(id: string, name: string): void {
+  ErrorStore.update((errorMap) => {
+    return errorMap[id]?.name === name ? { ...errorMap, [id]: {} } : errorMap;
+  });
 }
 
 const REGION_MAPPING: Record<string, string> = {
