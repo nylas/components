@@ -160,6 +160,8 @@ export interface MiddlewareResponse<T = unknown> {
 export interface NError {
   name?: string;
   message?: Error | string;
+  linkName?: string;
+  link?: string;
 }
 
 export interface Manifest {
@@ -212,6 +214,7 @@ export interface EmailProperties extends Manifest {
   show_reply: boolean;
   show_reply_all: boolean;
   show_forward: boolean;
+  loading: boolean;
 }
 
 export interface MailboxProperties extends Manifest {

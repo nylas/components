@@ -54,6 +54,10 @@ export function handleError(id: string, error: Manifest["error"]): never {
   throw error;
 }
 
+export function clearError(id: string): void {
+  ErrorStore.update((errorMap) => ({ ...errorMap, [id]: {} }));
+}
+
 const REGION_MAPPING: Record<string, string> = {
   "001": "", // US
   "002": "ireland-", // EU

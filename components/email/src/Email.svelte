@@ -17,7 +17,12 @@
   } from "@commons";
 
   import type { Contact, ContactSearchQuery } from "@commons/types/Contacts";
-  import { get_current_component, onMount, tick } from "svelte/internal";
+  import {
+    get_current_component,
+    onMount,
+    tick,
+    afterUpdate,
+  } from "svelte/internal";
   import {
     buildInternalProps,
     downloadAttachedFile,
@@ -45,6 +50,7 @@
     Folder,
     File,
   } from "@commons/types/Nylas";
+  import { handleError, clearError } from "@commons/methods/api";
   import "@commons/components/ContactImage/ContactImage.svelte";
   import "@commons/components/MessageBody.svelte";
   import "@commons/components/Tooltip.svelte";
@@ -88,6 +94,7 @@
   export let show_reply: boolean;
   export let show_reply_all: boolean;
   export let show_forward: boolean;
+  export let loading: boolean;
 
   const defaultValueMap: Partial<EmailProperties> = {
     clean_conversation: false,
@@ -104,6 +111,7 @@
     you: {},
     show_reply: false,
     show_reply_all: false,
+    loading: false,
   };
 
   let manifest: Partial<EmailProperties> = {};
@@ -113,6 +121,7 @@
   $: userEmail = <string>_this.you?.email_address;
   const PARTICIPANTS_TO_TRUNCATE = 3;
 
+  let mounted = false;
   onMount(async () => {
     await tick();
     manifest = ((await $ManifestStore[
@@ -146,6 +155,7 @@
         folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
       }
     }
+    mounted = true;
   });
 
   let previousProps = $$props;
@@ -159,6 +169,38 @@
 
       await transformPropertyValues();
       previousProps = $$props;
+    }
+  })();
+
+  let hasEmailData = false;
+  $: {
+    hasEmailData =
+      !!_this.thread_id ||
+      !!_this.thread ||
+      !!_this.message_id ||
+      !!_this.message;
+  }
+
+  $: (async () => {
+    if (mounted) {
+      if (!loading && !hasEmailData) {
+        try {
+          handleError(id, {
+            name: "MissingDataProperties",
+            message:
+              "Email data is not populated with Email component, please find more details on how to setup Email component in Nylas docs:",
+            link: "https://developer.nylas.com/docs/user-experience/components/email-component/",
+            linkName: "Setup Email Component",
+          });
+        } catch (error) {
+          console.error(
+            "Email data is not populated with Email component, please find more details on how to setup Email component in Nylas docs:",
+            "https://developer.nylas.com/docs/user-experience/components/email-component/",
+          );
+        }
+      } else {
+        clearError(id);
+      }
     }
   })();
 
@@ -2318,5 +2360,16 @@
         </div>
       </div>
     {/if}
+  {:else if _this.loading}
+    <div class="email-row expanded singular">
+      <div class="individual-message expanded">
+        <div class="message-head">
+          <div class="email-loader">
+            <LoadingIcon class="spinner" />
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
   {/if}
 </main>

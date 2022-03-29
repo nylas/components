@@ -59,6 +59,15 @@
       </h4>
     {:else if errorName === "IncompatibleProperties"}
       <h3>Your component properties do not work with each other.</h3>
+    {:else if errorName === "MissingDataProperties"}
+      <div>
+        <h3>
+          {error.message ?? ""}
+          {#if error.link}
+            <a href={error.link} target="_blank">{error.linkName}</a>
+          {/if}
+        </h3>
+      </div>
     {/if}
     <span class="details">Debug info:</span>
     <textarea class="details" readonly>
