@@ -348,9 +348,14 @@
     }
   }
 
+  let loading = false;
   async function threadClicked(event: CustomEvent) {
     const { thread, messageType } = event.detail;
     const messages = thread[messageType];
+    if (loading) {
+      return;
+    }
+    loading = true;
     if (_this.thread_click_action === MailboxThreadClickAction.DEFAULT) {
       let message = await fetchIndividualMessage(messages[messages.length - 1]);
 
@@ -391,6 +396,7 @@
         }
       }
     }
+    loading = false;
   }
 
   async function getMessageWithInlineFiles(message: Message): Promise<Message> {
@@ -409,7 +415,6 @@
     return message;
   }
 
-  let loading = false;
   async function refreshClicked(event: MouseEvent) {
     loading = true;
     dispatchEvent("refreshClicked", { event });

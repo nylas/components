@@ -387,12 +387,18 @@
     }
   }
 
+  let loading: boolean = false;
   async function handleThread(event: MouseEvent | KeyboardEvent) {
+    if (loading) {
+      return;
+    }
+
     const messageType = getMessageType(activeThread);
 
     if (activeThread[messageType].length <= 0) {
       return;
     }
+    loading = true;
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
       //#region read/unread
       if (
@@ -420,6 +426,7 @@
     } else if (messageType !== MessageType.DRAFTS && !activeThread.expanded) {
       activeThread.expanded = !activeThread.expanded;
     }
+    loading = false;
 
     dispatchEvent("threadClicked", {
       event,
@@ -927,7 +934,9 @@
     }
   }
 
-  function getMessageType(currentThread: Thread): string {
+  function getMessageType(
+    currentThread: Thread,
+  ): keyof Pick<Conversation, "messages" | "drafts"> {
     return currentThread[MessageType.DRAFTS].length &&
       !currentThread[MessageType.MESSAGES].length
       ? MessageType.DRAFTS

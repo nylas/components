@@ -24,6 +24,7 @@
 - [Email] UI tweaks that improve design [#270](https://github.com/nylas/components/pull/270)
 - [Email] Added new loading indicator [#270](https://github.com/nylas/components/pull/270)
 - [Email] Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
+- Fixed double clicking a thread caused the component to become unresponsive [#425](https://github.com/nylas/components/pull/425)
 
 # v1.1.7 (2021-12-22)
 

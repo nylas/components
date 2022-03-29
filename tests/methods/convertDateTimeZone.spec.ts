@@ -8,7 +8,12 @@ const date = new Date("2041-11-01T17:00:00.000Z");
 const simpleTimeString = "5:00 pm";
 const atlanticZone = "Atlantic/South_Georgia";
 
-Settings.defaultLocale = "en-CA";
+const defaults = () => {
+  Settings.defaultLocale = "en-CA";
+  Settings.defaultZone = "system";
+};
+
+beforeEach(defaults);
 
 describe("Format a time slot", () => {
   it("should convert a JS Date object to simple time string", () => {
@@ -29,6 +34,7 @@ describe("Format a time slot", () => {
   });
 
   it("should convert a JS Date object to simple time string in another timezone", () => {
+    Settings.defaultZone = "Europe/London";
     const timeSlot = formatTimeSlot(date, DateTime.local().zoneName);
     expect(timeSlot).toEqual(simpleTimeString);
   });

@@ -491,6 +491,22 @@ describe("Mailbox Interactions", () => {
     cy.get("@mailbox").find("nylas-email").as("email");
   });
 
+  it("Should expand a thread when clicked once", () => {
+    cy.get("@mailbox").find(".email-row.condensed").as("emailRow");
+    cy.get("@mailbox").find(".email-row.expanded").should("not.exist");
+
+    cy.get("@emailRow").first().click();
+    cy.get("@mailbox").find(".email-row.expanded").should("have.length", 1);
+  });
+
+  it.only("Should expand a thread when clicked twice", () => {
+    cy.get("@mailbox").find(".email-row.condensed").as("emailRow");
+    cy.get("@mailbox").find(".email-row.expanded").should("not.exist");
+
+    cy.get("@emailRow").first().dblclick();
+    cy.get("@mailbox").find(".email-row.expanded").should("have.length", 1);
+  });
+
   it("Refresh button works", () => {
     let refreshed = false;
     cy.get("@mailbox").invoke("prop", "header", "Test");
