@@ -537,7 +537,7 @@ describe("Booking time slots", () => {
 
           // Change to next date
           cy.get("div.change-dates").should("exist");
-          cy.get(".change-dates button:eq(1)").click();
+          cy.get(".change-dates button").should("not.exist");
 
           expect(selectedTimeslots).to.have.lengthOf(0);
           cy.get(".slot.free")
@@ -803,23 +803,26 @@ describe("Booking time slots", () => {
       cy.get("@testComponent").invoke("attr", "show_as_week", false);
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "15 Wed");
       cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "17 Fri");
-      cy.get(".change-dates button:eq(1)").click();
+      cy.get(".change-dates button[aria-label='Next date']").click();
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "18 Sat");
       cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "20 Mon");
     });
 
     it("Handles moving forward show_as_week gracefully when squashed", () => {
       cy.viewport(800, 550);
-      cy.get(".change-dates button:eq(1)").click();
+      cy.get(".change-dates button[aria-label='Next date']").click();
       cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "18 Sat");
       cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "20 Mon");
     });
 
     it("Handles moving backward show_as_week gracefully when squashed", () => {
       cy.viewport(800, 550);
-      cy.get(".change-dates button:eq(0)").click();
-      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "12 Sun");
-      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "14 Tue");
+      cy.get(".change-dates button[aria-label='Next date']").click(); // Move forward 1 day
+      cy.get(".change-dates button[aria-label='Next date']").click(); // Move forward 1 more day
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "21 Tue");
+      cy.get(".change-dates button[aria-label='Previous date']").click(); // Move backward 1 day
+      cy.get("div.day:eq(0) header h2").invoke("text").should("eq", "18 Sat");
+      cy.get("div.day:eq(2) header h2").invoke("text").should("eq", "20 Mon");
     });
   });
 
