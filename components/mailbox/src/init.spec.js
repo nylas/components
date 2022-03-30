@@ -108,6 +108,7 @@ describe("Mailbox Display", () => {
   let thread1;
   let thread2;
   let THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS;
+  let THREAD_WITH_CALENDAR_ATTACHMENTS;
 
   beforeEach(() => {
     cy.intercept(
@@ -153,6 +154,12 @@ describe("Mailbox Display", () => {
       THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS = f.response;
     });
 
+    cy.fixture("mailbox/threads/threadWithCalendarAttachments.json").then(
+      (f) => {
+        THREAD_WITH_CALENDAR_ATTACHMENTS = f.response;
+      },
+    );
+
     cy.fixture("mailbox/threads/SAMPLE_1.json").then((f) => {
       thread1 = f;
     });
@@ -191,6 +198,32 @@ describe("Mailbox Display", () => {
     cy.get("@email")
       .find(".snippet")
       .contains("Sorry, looks like this thread is currently unavailable");
+  });
+
+  it("Shows both .ics files and calendar invites as attachments", () => {
+    cy.get("@mailbox").invoke(
+      "prop",
+      "all_threads",
+      THREAD_WITH_CALENDAR_ATTACHMENTS,
+    );
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .should("have.text", "invite.ics US_Holidays.ics ");
+  });
+
+  it.only("Does not show attachment button for unnamed .ics files attached with invites", () => {
+    cy.get("@mailbox").invoke(
+      "prop",
+      "all_threads",
+      THREAD_WITH_CALENDAR_ATTACHMENTS,
+    );
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .should("not.include.text", "32yf13av2aiq6is5t1jov7ofd");
   });
 });
 
