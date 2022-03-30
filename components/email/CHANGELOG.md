@@ -13,6 +13,7 @@
 - [Email] Added customizable css variables for attachment button [#379](https://github.com/nylas/components/pull/379)
 
 ```
+  -  --nylas-email-font-family
   -  --nylas-email-attachment-border-style
   -  --nylas-email-attachment-button-color
   -  --nylas-email-attachment-button-bg
