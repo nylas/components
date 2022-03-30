@@ -50,6 +50,14 @@ const SAMPLE_THREAD = {
           content_type: "application/ics",
           filename: "invite.ics",
           id: "cvmampvjwqvunwmey4b5fp84f",
+          size: 1005,
+        },
+        {
+          content_disposition: "attachment",
+          content_type: "text/calendar",
+          filename: "US_Holidays.ics",
+          id: "64qp23bc3asd6ih7t47ofd",
+          size: 4321,
         },
       ],
       from: [
@@ -965,6 +973,30 @@ describe("Email: Images and Files", () => {
       .find(".email-row.condensed .attachment button")
       .first()
       .should("have.text", "invoice_2062.pdf ");
+  });
+
+  it("Shows .ics attachments when condensed", () => {
+    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", false);
+    cy.get("@email").invoke("prop", "thread", SAMPLE_THREAD);
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .first()
+      .nextAll()
+      .should("have.text", "invite.ics US_Holidays.ics ");
+  });
+
+  it("Does not show ghost/unnamed .ics attachments included in calendar invites", () => {
+    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", false);
+    cy.get("@email").invoke("prop", "thread", SAMPLE_THREAD);
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .first()
+      .nextAll()
+      .should("not.include.text", "32yf13av2aiq6is5t1jov7ofd");
   });
 });
 
