@@ -38,6 +38,19 @@ const SAMPLE_THREAD = {
           id: "d1fop1j6savk2dqex9uvwvclt",
           size: 27174,
         },
+        {
+          content_disposition: "attachment",
+          content_type: "text/calendar",
+          filename: null,
+          id: "32yf13av2aiq6is5t1jov7ofd",
+          size: 1005,
+        },
+        {
+          content_disposition: "attachment",
+          content_type: "application/ics",
+          filename: "invite.ics",
+          id: "cvmampvjwqvunwmey4b5fp84f",
+        },
       ],
       from: [
         {
@@ -950,6 +963,7 @@ describe("Email: Images and Files", () => {
     cy.get("@email").find(".email-row.condensed .attachment").should("exist");
     cy.get("@email")
       .find(".email-row.condensed .attachment button")
+      .first()
       .should("have.text", "invoice_2062.pdf ");
   });
 });
