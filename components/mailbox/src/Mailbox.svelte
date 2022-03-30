@@ -361,6 +361,7 @@
 
       if (messageType === MessageType.DRAFTS) {
         await dispatchDraftThreadClicked(event);
+        loading = false;
         return;
       }
 

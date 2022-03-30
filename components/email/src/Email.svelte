@@ -1017,7 +1017,12 @@
     width: 100%;
     position: relative;
     display: grid;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(
+      --nylas-email-font-family,
+      -apple-system,
+      BlinkMacSystemFont,
+      sans-serif
+    );
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
       border: var(--email-border-style, 1px solid var(--grey-lighter));

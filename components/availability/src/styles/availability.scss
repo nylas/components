@@ -120,6 +120,9 @@ main {
         var(--blue),
         var(--blue-lighter)
       );
+      &::before {
+        z-index: 3;
+      }
     }
     &.timezone.loading {
       &::before,
@@ -130,6 +133,9 @@ main {
     &.loading.error {
       @include progress-bar(top, 36px, left, 0, var(--red), var(--red));
       animation: none;
+      &::before {
+        z-index: 3;
+      }
     }
 
     &.schedule {
