@@ -907,6 +907,24 @@ describe("Email: Displays threads and messages", () => {
         expect($div).to.contain("This is a draft email");
       });
   });
+
+  it("Shows error message when no email data is found", () => {
+    cy.get("@email").find(".snippet").should("not.exist");
+    cy.get("@email").find("nylas-error").should("exist").as("error");
+    cy.get("@error")
+      .find(".message-container")
+      .contains("Email data is not populated with Email component");
+  });
+
+  it("Shows loading status when no email data and loading is true", () => {
+    cy.get("@email").then((element) => {
+      const component = element[0];
+      component.loading = true;
+    });
+
+    cy.get("@email").find(".snippet").should("not.exist");
+    cy.get("@email").find(".email-loader .spinner").should("exist");
+  });
 });
 
 describe("Email: Images and Files", () => {

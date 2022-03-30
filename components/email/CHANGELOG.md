@@ -2,6 +2,8 @@
 
 - [Email] Checks existing draft in thread when clicking on reply/forward, and opens composer with draft if exists. [#405](https://github.com/nylas/components/pull/405)
 - [Email] Highlights draft in thread when its opened with Composer. [#405](https://github.com/nylas/components/pull/405)
+- [Email] Show and log an error message when no email data is passed in component, instead of showing blank page. [#424](https://github.com/nylas/components/pull/424)
+- [Email] Added boolean propety `loading` that user can passing to indicate loading status of the component. [#424](https://github.com/nylas/components/pull/424)
 
 ## Breaking
 
