@@ -84,7 +84,6 @@
 
   const handleAction = (item: ToolbarItem) => () => {
     const selection = window.getSelection();
-    console.log("before focus", selection);
     if (item.result) {
       if (container) {
         container.focus();
@@ -116,6 +115,7 @@
       const selection = window.getSelection();
       const range = document.createRange();
       range.selectNodeContents(container);
+      range.deleteContents(); // delete dummy character once range selected
       range.collapse(false); // collapse range to the end
 
       selection.removeAllRanges();
