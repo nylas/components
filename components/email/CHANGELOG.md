@@ -26,6 +26,7 @@
 - [Email] Added new loading indicator [#270](https://github.com/nylas/components/pull/270)
 - [Email] Updated border style + variables [#270](https://github.com/nylas/components/pull/270)
 - Fixed double clicking a thread caused the component to become unresponsive [#425](https://github.com/nylas/components/pull/425)
+- Fixed mutation of the `event.detail.message` object submitted when the `replyAllClicked` or `replyClicked` events were fired [#428](https://github.com/nylas/components/pull/428)
 
 # v1.1.7 (2021-12-22)
 
