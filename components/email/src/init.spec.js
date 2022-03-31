@@ -1342,6 +1342,43 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
         expect(replyClicked).to.be.true;
       });
   });
+
+  it("Should Dispatch Event When Reply Button Is Clicked With Proper Event Message", () => {
+    let container = {};
+    const EVENT_ID = "replyClicked";
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply button").as("replyButton");
+    cy.get("@replyButton").should("exist");
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      const listener = (event) => {
+        component.removeEventListener(EVENT_ID, listener);
+        container.e = event;
+      };
+      component.addEventListener(EVENT_ID, listener);
+    });
+
+    cy.get("@replyButton")
+      .click()
+      .then(() => {
+        cy.wrap(container).should(
+          (container) => expect(container.e).not.to.be.undefined,
+        );
+        cy.wrap(container).then((container) => {
+          expect(container.e.detail.message).to.not.to.be.undefined;
+          expect(container.e.detail.message.to).to.equal(
+            SINGLE_SENDER_MESSAGE.to,
+          );
+          expect(container.e.detail.message.from).to.equal(
+            SINGLE_SENDER_MESSAGE.from,
+          );
+          expect(container.e.detail.message.subject).to.equal(
+            SINGLE_SENDER_MESSAGE.subject,
+          );
+        });
+      });
+  });
 });
 
 describe("Should Render Reply All Button And Respond To Clicks", () => {
@@ -1430,6 +1467,43 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
       .click()
       .then(() => {
         expect(replyAllClicked).to.be.true;
+      });
+  });
+
+  it("Should Dispatch Event When Reply All Button Is Clicked With Proper Event Message", () => {
+    let container = {};
+    const EVENT_ID = "replyAllClicked";
+    cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply-all button").as("replyAllButton");
+    cy.get("@replyAllButton").should("exist");
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      const listener = (event) => {
+        component.removeEventListener(EVENT_ID, listener);
+        container.e = event;
+      };
+      component.addEventListener(EVENT_ID, listener);
+    });
+
+    cy.get("@replyAllButton")
+      .click()
+      .then(() => {
+        cy.wrap(container).should(
+          (container) => expect(container.e).not.to.be.undefined,
+        );
+        cy.wrap(container).then((container) => {
+          expect(container.e.detail.message).to.not.to.be.undefined;
+          expect(container.e.detail.message.to).to.equal(
+            MULTIPLE_SENDER_MESSAGE.to,
+          );
+          expect(container.e.detail.message.from).to.equal(
+            MULTIPLE_SENDER_MESSAGE.from,
+          );
+          expect(container.e.detail.message.subject).to.equal(
+            MULTIPLE_SENDER_MESSAGE.subject,
+          );
+        });
       });
   });
 });

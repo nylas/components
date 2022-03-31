@@ -578,7 +578,7 @@
       }
       dispatchEvent(event_identifier, {
         event,
-        message: { ...existingDraft, subject, to, cc },
+        message: { ...existingDraft },
         thread: activeThread,
         value,
       });
@@ -586,7 +586,7 @@
       //Creating new reply message
       dispatchEvent(event_identifier, {
         event,
-        message: { ...message, subject, to, cc },
+        message: { ...message },
         thread: activeThread,
         value,
       });
@@ -612,7 +612,7 @@
       }
       dispatchEvent("forwardClicked", {
         event,
-        message: { ...existingDraft, subject },
+        message: { ...existingDraft },
         thread: activeThread,
         value,
       });
@@ -620,7 +620,7 @@
       //Create new message
       dispatchEvent("forwardClicked", {
         event,
-        message: { ...message, subject },
+        message: { ...message },
         thread: activeThread,
         value,
       });
