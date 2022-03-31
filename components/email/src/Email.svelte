@@ -104,6 +104,7 @@
     you: {},
     show_reply: false,
     show_reply_all: false,
+    show_forward: false,
   };
 
   let manifest: Partial<EmailProperties> = {};
