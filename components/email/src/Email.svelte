@@ -2308,6 +2308,17 @@
                     </button>
                   </div>
                 {/if}
+                {#if _this.show_forward}
+                  <div class="forward">
+                    <button
+                      title="Forward"
+                      aria-label="Forward"
+                      on:click|stopPropagation={(e) =>
+                        handleForwardClick(e, message)}>
+                      <ForwardIcon aria-hidden="true" />
+                    </button>
+                  </div>
+                {/if}
               </div>
             </section>
           </div>

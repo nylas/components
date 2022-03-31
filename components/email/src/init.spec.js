@@ -1270,6 +1270,7 @@ describe("Should Render Forward Button And Dispatch Event When Clicked", () => {
 
   it("Should Render Forward Button When Passed A Message", () => {
     cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
     cy.get("@email").find("div.forward button").should("exist");
   });
 
