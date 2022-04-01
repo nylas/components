@@ -26,7 +26,6 @@
     MailboxQuery,
     Message,
     Thread,
-    File,
   } from "@commons/types/Nylas";
   import { downloadFile } from "@commons/connections/files";
   import { get_current_component, onMount, tick } from "svelte/internal";
