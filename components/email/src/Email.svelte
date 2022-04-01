@@ -104,6 +104,7 @@
     you: {},
     show_reply: false,
     show_reply_all: false,
+    show_forward: false,
   };
 
   let manifest: Partial<EmailProperties> = {};
@@ -578,7 +579,7 @@
       }
       dispatchEvent(event_identifier, {
         event,
-        message: { ...existingDraft, subject, to, cc },
+        message: { ...existingDraft },
         thread: activeThread,
         value,
       });
@@ -586,7 +587,7 @@
       //Creating new reply message
       dispatchEvent(event_identifier, {
         event,
-        message: { ...message, subject, to, cc },
+        message: { ...message },
         thread: activeThread,
         value,
       });
@@ -612,7 +613,7 @@
       }
       dispatchEvent("forwardClicked", {
         event,
-        message: { ...existingDraft, subject },
+        message: { ...existingDraft },
         thread: activeThread,
         value,
       });
@@ -620,7 +621,7 @@
       //Create new message
       dispatchEvent("forwardClicked", {
         event,
-        message: { ...message, subject },
+        message: { ...message },
         thread: activeThread,
         value,
       });
@@ -2304,6 +2305,17 @@
                       on:click|stopPropagation={(e) =>
                         handleReplyClick(e, _this.message, "reply_all")}>
                       <ReplyAllIcon aria-hidden="true" />
+                    </button>
+                  </div>
+                {/if}
+                {#if _this.show_forward}
+                  <div class="forward">
+                    <button
+                      title="Forward"
+                      aria-label="Forward"
+                      on:click|stopPropagation={(e) =>
+                        handleForwardClick(e, message)}>
+                      <ForwardIcon aria-hidden="true" />
                     </button>
                   </div>
                 {/if}

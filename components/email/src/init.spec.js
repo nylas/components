@@ -1259,6 +1259,129 @@ describe("Email: Toggle email of sender/recipient", () => {
   });
 });
 
+describe("Should Render Forward Button And Dispatch Event When Clicked", () => {
+  beforeEach(() => {
+    cy.visit("/components/email/src/cypress.html");
+
+    cy.get("nylas-email").as("email");
+
+    cy.get("@email").invoke("prop", "show_forward", true);
+  });
+
+  it("Should Render Forward Button When Passed A Message", () => {
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").find("div.forward button").should("exist");
+  });
+
+  it("Should Render Forward Button When Passed A Thread", () => {
+    cy.get("@email").invoke("prop", "thread", SAMPLE_THREAD);
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").find("div.forward button").as("forwardButton");
+    cy.get("@forwardButton").should("exist");
+  });
+
+  it("Should Render Forward Button When Passed A Message ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/d0byfc378l2728z35pax362ho",
+      },
+      {
+        fixture: "email/messages/id.json",
+      },
+    ).as("messageRequest");
+
+    cy.get("@email").invoke("attr", "message_id", "d0byfc378l2728z35pax362ho");
+    cy.wait("@messageRequest");
+
+    cy.get("@email").find("div.forward button").should("exist");
+  });
+
+  it("Should Render Forward Button When Passed A Thread ID", () => {
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/threads/e2k5xktxejdok7d8x28ljf44d?view=expanded",
+      },
+      {
+        fixture: "email/threads/id.json",
+      },
+    ).as("threadRequest");
+
+    cy.intercept(
+      {
+        method: "GET",
+        url: "**/messages/*",
+      },
+      {
+        fixture: "email/messages/id.json",
+      },
+    );
+
+    cy.get("@email").invoke("attr", "show_expanded_email_view_onload", "true");
+    cy.get("@email").invoke("attr", "thread_id", "e2k5xktxejdok7d8x28ljf44d");
+    cy.wait("@threadRequest");
+    cy.get("@email").find("div.forward button").should("exist");
+  });
+
+  it("Should Dispatch Event When Forward Button Is Clicked", () => {
+    let forwardClicked = false;
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.forward button").as("forwardButton");
+    cy.get("@forwardButton").should("exist");
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      component.addEventListener("forwardClicked", () => {
+        forwardClicked = true;
+      });
+    });
+
+    cy.get("@forwardButton")
+      .click()
+      .then(() => {
+        expect(forwardClicked).to.be.true;
+      });
+  });
+
+  it("Should Dispatch Event When Forward Button Is Clicked With Proper Event Message", () => {
+    let container = {};
+    const EVENT_ID = "forwardClicked";
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.forward button").as("forwardButton");
+    cy.get("@forwardButton").should("exist");
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      const listener = (event) => {
+        component.removeEventListener(EVENT_ID, listener);
+        container.e = event;
+      };
+      component.addEventListener(EVENT_ID, listener);
+    });
+
+    cy.get("@forwardButton")
+      .click()
+      .then(() => {
+        cy.wrap(container).should(
+          (container) => expect(container.e).not.to.be.undefined,
+        );
+        cy.wrap(container).then((container) => {
+          expect(container.e.detail.message).to.not.to.be.undefined;
+          expect(container.e.detail.message.to).to.equal(
+            SINGLE_SENDER_MESSAGE.to,
+          );
+          expect(container.e.detail.message.from).to.equal(
+            SINGLE_SENDER_MESSAGE.from,
+          );
+          expect(container.e.detail.message.subject).to.equal(
+            SINGLE_SENDER_MESSAGE.subject,
+          );
+        });
+      });
+  });
+});
+
 describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
   beforeEach(() => {
     cy.visit("/components/email/src/cypress.html");
@@ -1340,6 +1463,43 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
       .click()
       .then(() => {
         expect(replyClicked).to.be.true;
+      });
+  });
+
+  it("Should Dispatch Event When Reply Button Is Clicked With Proper Event Message", () => {
+    let container = {};
+    const EVENT_ID = "replyClicked";
+    cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply button").as("replyButton");
+    cy.get("@replyButton").should("exist");
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      const listener = (event) => {
+        component.removeEventListener(EVENT_ID, listener);
+        container.e = event;
+      };
+      component.addEventListener(EVENT_ID, listener);
+    });
+
+    cy.get("@replyButton")
+      .click()
+      .then(() => {
+        cy.wrap(container).should(
+          (container) => expect(container.e).not.to.be.undefined,
+        );
+        cy.wrap(container).then((container) => {
+          expect(container.e.detail.message).to.not.to.be.undefined;
+          expect(container.e.detail.message.to).to.equal(
+            SINGLE_SENDER_MESSAGE.to,
+          );
+          expect(container.e.detail.message.from).to.equal(
+            SINGLE_SENDER_MESSAGE.from,
+          );
+          expect(container.e.detail.message.subject).to.equal(
+            SINGLE_SENDER_MESSAGE.subject,
+          );
+        });
       });
   });
 });
@@ -1430,6 +1590,43 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
       .click()
       .then(() => {
         expect(replyAllClicked).to.be.true;
+      });
+  });
+
+  it("Should Dispatch Event When Reply All Button Is Clicked With Proper Event Message", () => {
+    let container = {};
+    const EVENT_ID = "replyAllClicked";
+    cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
+    cy.get("@email").find("div.reply-all button").as("replyAllButton");
+    cy.get("@replyAllButton").should("exist");
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      const listener = (event) => {
+        component.removeEventListener(EVENT_ID, listener);
+        container.e = event;
+      };
+      component.addEventListener(EVENT_ID, listener);
+    });
+
+    cy.get("@replyAllButton")
+      .click()
+      .then(() => {
+        cy.wrap(container).should(
+          (container) => expect(container.e).not.to.be.undefined,
+        );
+        cy.wrap(container).then((container) => {
+          expect(container.e.detail.message).to.not.to.be.undefined;
+          expect(container.e.detail.message.to).to.equal(
+            MULTIPLE_SENDER_MESSAGE.to,
+          );
+          expect(container.e.detail.message.from).to.equal(
+            MULTIPLE_SENDER_MESSAGE.from,
+          );
+          expect(container.e.detail.message.subject).to.equal(
+            MULTIPLE_SENDER_MESSAGE.subject,
+          );
+        });
       });
   });
 });
