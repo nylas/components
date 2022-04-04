@@ -1291,7 +1291,7 @@ describe("Composer formatting", () => {
       .shadow()
       .findByRole("button", { name: /Bold/i })
       .click()
-      .focus();
+      .type("hello");
 
     // Try to get focus textbox after click
     // cy.get("@composer")
