@@ -3,6 +3,7 @@
 <script lang="ts">
   import { defaultActions } from "../lib/html-editor";
   import type { ReplaceFields, ToolbarItem } from "@commons/types/Composer";
+  import { get_current_component } from "Svelte/internal";
 
   export let onchange = (_html: string) => Promise.resolve({});
   export let html = "";
@@ -12,6 +13,7 @@
 
   let container: HTMLDivElement;
   let toolbar: ToolbarItem[] = defaultActions;
+  const component = get_current_component();
 
   $: if (focus_body_onload && container) {
     container.focus();
@@ -20,6 +22,8 @@
 
   $: if (html) {
     const selection = window.getSelection();
+    // console.log(container.shadowRoot);
+    // console.log(component.shadowRoot);
 
     if (typeof replace_fields === "string") {
       replace_fields = JSON.parse(replace_fields);
@@ -83,11 +87,14 @@
   }
 
   const handleAction = (item: ToolbarItem) => () => {
-    const selection = window.getSelection();
+    // const selection = window.getSelection();
+    // console.log("butttttton pressed");
+
     if (item.result) {
       if (container) {
         container.focus();
       }
+      // component.shadowRoot.querySelector(".html-editor-content").focus();
       item.result();
     }
 
@@ -95,7 +102,9 @@
 
     if (container) {
       container.focus();
+      // component.shadowRoot.querySelector(".html-editor-content").focus();
     }
+    console.log("got here");
   };
 
   // This function updates the toolbar UI state when you select text (eg. select bold text)
@@ -115,11 +124,12 @@
       const selection = window.getSelection();
       const range = document.createRange();
       range.selectNodeContents(container);
-      range.deleteContents(); // delete dummy character once range selected
+      // range.deleteContents(); // delete dummy character once range selecteda
       range.collapse(false); // collapse range to the end
-
       selection.removeAllRanges();
       selection.addRange(range);
+    } else {
+      console.log(component.shadowRoot.getSelection());
     }
   };
 </script>

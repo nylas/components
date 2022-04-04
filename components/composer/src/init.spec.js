@@ -1275,3 +1275,37 @@ describe("Composer `value` prop", () => {
       .should("contain", "Message sent successfully!");
   });
 });
+
+describe("Composer formatting", () => {
+  beforeEach(() => {
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it.only("Bold button sets editor focus and begins typing in bold", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .click()
+      .focus();
+
+    // Try to get focus textbox after click
+    // cy.get("@composer")
+    //   .shadow()
+    //   .get("nylas-html-editor")
+    //   .shadow()
+    //   .findByRole("button", { name: /Bold/i })
+    //   .click();
+
+    // cy.get("@composer")
+    //   .shadow()
+    //   .get("nylas-html-editor")
+    //   .shadow()
+    //   .get(".html-editor-content[contenteditable]")
+    //   .type("hello");
+  });
+});
