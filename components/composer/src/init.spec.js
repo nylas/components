@@ -1290,10 +1290,16 @@ describe("Composer formatting", () => {
       .get("nylas-html-editor")
       .shadow()
       .findByRole("button", { name: /Bold/i })
-      .click()
-      .type("hello");
+      .click();
 
-    // Try to get focus textbox after click
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .focused()
+      .should("have.class", "html-editor-content");
+
+    // Try to get focus textbox after click (formatting doesn't hold)
     // cy.get("@composer")
     //   .shadow()
     //   .get("nylas-html-editor")
