@@ -101,8 +101,7 @@
     updateToolbarUI();
 
     if (container) {
-      container.focus();
-      // component.shadowRoot.querySelector(".html-editor-content").focus();
+      setTimeout(() => container.focus(), 0);
     }
     console.log("got here");
   };
