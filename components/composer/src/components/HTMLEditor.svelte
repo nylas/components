@@ -108,14 +108,14 @@
     // if contenteditable area is empty we need to add something to add range
     if (container.innerHTML === "") {
       container.innerHTML = "\u00a0";
-    }
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(container);
-    range.collapse(false); // collapse range to the end
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(container);
+      range.collapse(false); // collapse range to the end
 
-    selection.removeAllRanges();
-    selection.addRange(range);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
   };
 </script>
 
@@ -187,14 +187,12 @@
         <button
           on:click={handleAction(item)}
           title={item.title}
-          class={item.state && item.state() ? "active" : ""}
-        >
+          class={item.state && item.state() ? "active" : ""}>
           {#if item.icon}
             <svelte:component
               this={item.icon}
               class="icon"
-              style="fill: var(--composer-icons-color, #666774) !important; width: 12px; height: 12px;"
-            />
+              style="fill: var(--composer-icons-color, #666774) !important; width: 12px; height: 12px;" />
           {:else}{item.title.charAt(0)}{/if}
         </button>
       {/each}
@@ -226,6 +224,5 @@
     role="textbox"
     aria-label="HTML Editor"
     on:keyup={updateToolbarUI}
-    on:mouseup={updateToolbarUI}
-  />
+    on:mouseup={updateToolbarUI} />
 </div>
