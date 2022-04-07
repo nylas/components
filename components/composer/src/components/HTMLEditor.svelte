@@ -84,14 +84,13 @@
 
   const handleAction = (item: ToolbarItem) => () => {
     if (item.result) {
+      if (container) {
+        container.focus();
+      }
       item.result();
     }
 
     updateToolbarUI();
-
-    if (container) {
-      container.focus();
-    }
   };
 
   // This function updates the toolbar UI state when you select text (eg. select bold text)
