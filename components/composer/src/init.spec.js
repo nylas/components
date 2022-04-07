@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-xdescribe("Composer loading state", () => {
+describe("Composer loading state", () => {
   it("displays loading screen", () => {
     cy.visit("/components/composer/src/cypress.html");
 
@@ -8,7 +8,7 @@ xdescribe("Composer loading state", () => {
   });
 });
 
-xdescribe("Composer dispatches events", () => {
+describe("Composer dispatches events", () => {
   const eventsFired = {
     minimized: false,
     maximized: false,
@@ -96,7 +96,7 @@ xdescribe("Composer dispatches events", () => {
   });
 });
 
-xdescribe("Composer `to` prop", () => {
+describe("Composer `to` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -151,7 +151,7 @@ xdescribe("Composer `to` prop", () => {
   });
 });
 
-xdescribe("Composer interactions", () => {
+describe("Composer interactions", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -265,7 +265,7 @@ xdescribe("Composer interactions", () => {
   });
 });
 
-xdescribe("Composer customizations", () => {
+describe("Composer customizations", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -562,7 +562,7 @@ xdescribe("Composer customizations", () => {
   });
 });
 
-xdescribe("Composer integration", () => {
+describe("Composer integration", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -751,7 +751,7 @@ xdescribe("Composer integration", () => {
   });
 });
 
-xdescribe("Composer callbacks and options", () => {
+describe("Composer callbacks and options", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -807,7 +807,7 @@ xdescribe("Composer callbacks and options", () => {
   });
 });
 
-xdescribe("Composer file upload", () => {
+describe("Composer file upload", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -969,7 +969,7 @@ xdescribe("Composer file upload", () => {
   });
 });
 
-xdescribe("Composer subject", () => {
+describe("Composer subject", () => {
   beforeEach(() => {
     cy.visitComponentPage(
       "/components/composer/src/index.html",
@@ -998,7 +998,7 @@ xdescribe("Composer subject", () => {
   });
 });
 
-xdescribe("Save composer message as draft", () => {
+describe("Save composer message as draft", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -1087,7 +1087,7 @@ xdescribe("Save composer message as draft", () => {
   });
 });
 
-xdescribe("Composer `value` prop", () => {
+describe("Composer `value` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -1370,7 +1370,7 @@ describe("Composer formatting", () => {
       .should("contain", "<b><i><u>hello</u></i></b>");
   });
 
-  it.only("Existing text can be selected, formatted, and formatting holds for continued text", () => {
+  it("Existing text can be selected, formatted, and formatting holds for continued text", () => {
     cy.get("@composer")
       .shadow()
       .get("nylas-html-editor")
