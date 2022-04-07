@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-describe("Composer loading state", () => {
+xdescribe("Composer loading state", () => {
   it("displays loading screen", () => {
     cy.visit("/components/composer/src/cypress.html");
 
@@ -8,7 +8,7 @@ describe("Composer loading state", () => {
   });
 });
 
-describe("Composer dispatches events", () => {
+xdescribe("Composer dispatches events", () => {
   const eventsFired = {
     minimized: false,
     maximized: false,
@@ -96,7 +96,7 @@ describe("Composer dispatches events", () => {
   });
 });
 
-describe("Composer `to` prop", () => {
+xdescribe("Composer `to` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -151,7 +151,7 @@ describe("Composer `to` prop", () => {
   });
 });
 
-describe("Composer interactions", () => {
+xdescribe("Composer interactions", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -265,7 +265,7 @@ describe("Composer interactions", () => {
   });
 });
 
-describe("Composer customizations", () => {
+xdescribe("Composer customizations", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -562,7 +562,7 @@ describe("Composer customizations", () => {
   });
 });
 
-describe("Composer integration", () => {
+xdescribe("Composer integration", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -751,7 +751,7 @@ describe("Composer integration", () => {
   });
 });
 
-describe("Composer callbacks and options", () => {
+xdescribe("Composer callbacks and options", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -807,7 +807,7 @@ describe("Composer callbacks and options", () => {
   });
 });
 
-describe("Composer file upload", () => {
+xdescribe("Composer file upload", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -969,7 +969,7 @@ describe("Composer file upload", () => {
   });
 });
 
-describe("Composer subject", () => {
+xdescribe("Composer subject", () => {
   beforeEach(() => {
     cy.visitComponentPage(
       "/components/composer/src/index.html",
@@ -998,7 +998,7 @@ describe("Composer subject", () => {
   });
 });
 
-describe("Save composer message as draft", () => {
+xdescribe("Save composer message as draft", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -1087,7 +1087,7 @@ describe("Save composer message as draft", () => {
   });
 });
 
-describe("Composer `value` prop", () => {
+xdescribe("Composer `value` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -1273,5 +1273,132 @@ describe("Composer `value` prop", () => {
       .shadow()
       .get("nylas-composer-alert-bar")
       .should("contain", "Message sent successfully!");
+  });
+});
+
+describe("Composer formatting", () => {
+  beforeEach(() => {
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("With editor empty, 'Bold' button sets editor focus and begins typing in bold", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .focus()
+      .type("hello"); // focus leaves editor when grabbing .focused() element; use .type()'s implicit submission instead
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b>hello</b>");
+  });
+
+  it("With editor empty, 'Italics' button sets editor focus and begins typing italics", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Italic/i })
+      .focus()
+      .type("hello"); // using .type()'s implicit submission; focus leaves editor when grabbing .focused() element
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<i>hello</i>");
+  });
+
+  it("With editor empty, 'Underline' button sets editor focus and begins typing with underline", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Underline/i })
+      .focus()
+      .type("hello"); // using .type()'s implicit submission; focus leaves editor when grabbing .focused() element
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<u>hello</u>");
+  });
+
+  it("Selecting all three text formatting options begins typing bold, italic, and underlined text", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .click();
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Italic/i })
+      .click();
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Underline/i })
+      .focus()
+      .type("hello"); // using .type()'s implicit submission; focus leaves editor when grabbing .focused() element
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b><i><u>hello</u></i></b>");
+  });
+
+  it.only("Existing text can be selected, formatted, and formatting holds for continued text", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .type("{selectall}{backspace}hello{selectAll}");
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .click();
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .clear()
+      .type("{rightArrow}, world!");
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b>hello, world!</b>");
   });
 });
