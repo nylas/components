@@ -1275,3 +1275,130 @@ describe("Composer `value` prop", () => {
       .should("contain", "Message sent successfully!");
   });
 });
+
+describe("Composer formatting", () => {
+  beforeEach(() => {
+    cy.visit("/components/composer/src/cypress.html");
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("With editor empty, 'Bold' button sets editor focus and begins typing in bold", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .focus()
+      .type("hello"); // focus leaves editor when grabbing .focused() element; use .type()'s implicit submission instead
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b>hello</b>");
+  });
+
+  it("With editor empty, 'Italics' button sets editor focus and begins typing italics", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Italic/i })
+      .focus()
+      .type("hello"); // using .type()'s implicit submission; focus leaves editor when grabbing .focused() element
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<i>hello</i>");
+  });
+
+  it("With editor empty, 'Underline' button sets editor focus and begins typing with underline", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Underline/i })
+      .focus()
+      .type("hello"); // using .type()'s implicit submission; focus leaves editor when grabbing .focused() element
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<u>hello</u>");
+  });
+
+  it("Selecting all three text formatting options begins typing bold, italic, and underlined text", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .click();
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Italic/i })
+      .click();
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Underline/i })
+      .focus()
+      .type("hello"); // using .type()'s implicit submission; focus leaves editor when grabbing .focused() element
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b><i><u>hello</u></i></b>");
+  });
+
+  it("Existing text can be selected, formatted, and formatting holds for continued text", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .type("{selectall}{backspace}hello{selectAll}");
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .click();
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .clear()
+      .type("{rightArrow}, world!");
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b>hello, world!</b>");
+  });
+});
