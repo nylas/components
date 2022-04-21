@@ -301,7 +301,7 @@
         {
           from: reply.from,
           to: reply.to,
-          body: `${replyBody} <br /><br /> --Sent with Nylas`,
+          body: replyBody,
           subject: conversation.subject,
           cc: reply.cc,
           reply_to_message_id: lastMessage.id,
@@ -334,7 +334,7 @@
 </script>
 
 <style lang="scss">
-  @use 'sass:list';
+  @use "sass:list";
   @import "../../theming/reset.scss";
   @import "../../theming/animation.scss";
   @import "../../theming/variables.scss";
@@ -613,16 +613,14 @@
       class="mobile"
       class:loading={!!(status === "loading")}
       class:error={hasError}
-      class:expanded={headerExpanded}
-    >
+      class:expanded={headerExpanded}>
       {#if reply.to.length}
         <span>to: {reply.to[0].email}</span>
       {/if}
       {#if reply.to.length > 1 || reply.cc.length}
         <button
           on:click={() => (headerExpanded = !headerExpanded)}
-          aria-label="Toggle showing additional emails in this thread"
-        >
+          aria-label="Toggle showing additional emails in this thread">
           <ToggleIcon aria-hidden="true" />
         </button>
       {/if}
@@ -639,8 +637,7 @@
     <header
       class="tablet"
       class:error={hasError}
-      class:loading={!!(status === "loading")}
-    >
+      class:loading={!!(status === "loading")}>
       {#if reply.to.length}
         <span>to: {reply.to.map((p) => p.email).join(", ")} </span>
       {/if}
@@ -650,16 +647,14 @@
     </header>
     <div
       class="messages {_this.theme}"
-      class:dont-show-avatars={!_this.show_avatars}
-    >
+      class:dont-show-avatars={!_this.show_avatars}>
       {#each conversationMessages as message, i}
         {#await message.from[0] then from}
           {#await from.email === _this.you.email_address then isYou}
             {#await participants.findIndex((p) => p.email === from.email && p.name === from.name) then participantIndex}
               <article
                 class="message member-{participantIndex + 1}"
-                class:you={isYou}
-              >
+                class:you={isYou}>
                 <div class="contact">
                   {#await contacts[from.email] then contact}
                     <div class="avatar">
@@ -667,8 +662,7 @@
                         {contact_query}
                         {contact}
                         height="32px"
-                        width="32px"
-                      />
+                        width="32px" />
                     </div>
                   {/await}
                 </div>
@@ -706,13 +700,11 @@
             id="send-response"
             type="text"
             placeholder="Type a Response"
-            bind:value={replyBody}
-          />
+            bind:value={replyBody} />
           <button
             type="submit"
             disabled={!reply.to.length}
-            aria-label={`Send${replyStatus ? "ing" : ""} email`}
-          >
+            aria-label={`Send${replyStatus ? "ing" : ""} email`}>
             {#if replyStatus === "sending"}...{:else}
               <SendIcon aria-hidden="true" />
             {/if}
