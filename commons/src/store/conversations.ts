@@ -50,16 +50,19 @@ function initializeConversations() {
     },
     addMessageToThread: (incomingMessage: StoredMessage) => {
       update((thread) => {
-        thread[incomingMessage.queryKey].messages = thread[
-          incomingMessage.queryKey
-        ].messages.map((_message) => {
-          if (_message.id === incomingMessage.data.id) {
-            _message = incomingMessage.data;
-          }
-          return _message;
-        });
+        let foundMessage = thread[incomingMessage.queryKey].messages?.find(
+          (message) => message.id === incomingMessage.data.id,
+        );
+        if (foundMessage) {
+          foundMessage = incomingMessage.data;
+        } else {
+          const messages = thread[incomingMessage.queryKey].messages;
+          messages.push(incomingMessage.data);
+          thread[incomingMessage.queryKey].messages = messages;
+        }
         return { ...thread };
       });
+      return threadsMap[incomingMessage.queryKey];
     },
     reset: () => set({}),
   };
