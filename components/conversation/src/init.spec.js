@@ -1,4 +1,4 @@
-xdescribe("Conversation Loading", () => {
+describe("Conversation Loading", () => {
   beforeEach(() => {
     cy.visit("/components/conversation/src/cypress.html");
     cy.get("nylas-conversation").should("exist").as("conversation");
@@ -19,7 +19,7 @@ xdescribe("Conversation Loading", () => {
   });
 });
 
-xdescribe("Conversation Mobile/Tablet", () => {
+describe("Conversation Mobile/Tablet", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
