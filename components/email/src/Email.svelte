@@ -114,8 +114,11 @@
   $: userEmail = <string>_this.you?.email_address;
   const PARTICIPANTS_TO_TRUNCATE = 3;
 
+  let propsLoaded = false;
   onMount(async () => {
     await tick();
+    propsLoaded = true;
+
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
@@ -150,18 +153,19 @@
   });
 
   let previousProps = $$props;
-  $: (async () => {
-    if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
-      _this = buildInternalProps(
-        $$props,
-        manifest,
-        defaultValueMap,
-      ) as EmailProperties;
+  $: propsLoaded &&
+    (async () => {
+      if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
+        _this = buildInternalProps(
+          $$props,
+          manifest,
+          defaultValueMap,
+        ) as EmailProperties;
 
-      await transformPropertyValues();
-      previousProps = $$props;
-    }
-  })();
+        await transformPropertyValues();
+        previousProps = $$props;
+      }
+    })();
 
   async function transformPropertyValues() {
     _this.thread_id = !thread && !message_id && !message ? _this.thread_id : "";
