@@ -88,6 +88,7 @@
 
   $: hasError = Object.keys($ErrorStore).length ? true : false;
 
+  let conversationMessages: Message[];
   $: conversationMessages = conversationManuallyPassed
     ? _this.messages
     : conversation?.messages || [];
@@ -310,7 +311,7 @@
         access_token,
       ).then((res) => {
         const conversationQuery = { queryKey: queryKey, data: res };
-        ConversationStore.addMessageToThread(conversationQuery);
+        conversation = ConversationStore.addMessageToThread(conversationQuery);
         replyStatus = "";
         replyBody = "";
       });
