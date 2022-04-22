@@ -1,0 +1,46 @@
+{
+  "component": {
+    "theming": {
+      "theme": "theme-1",
+      "show_avatars": true,
+      "thread_id": "test-converstation-thread-id",
+      "show_reply": true
+    }
+  },
+  "response": {
+    "account_id": "accountId",
+    "bcc": [],
+    "body": "New cypress test message",
+    "cc": [],
+    "date": 1650595918,
+    "events": [],
+    "files": [],
+    "from": [
+      {
+        "email": "testing@nylas.com",
+        "name": "Test User"
+      }
+    ],
+    "id": "ajg13juc3o84qimtbprc8cdvf",
+    "labels": [
+      {
+        "display_name": "SENT",
+        "id": "4rfh7visxepajc8bzv42y9pnj",
+        "name": "sent"
+      }
+    ],
+    "object": "message",
+    "reply_to": [],
+    "snippet": "New cypress test message",
+    "starred": false,
+    "subject": "Test conversation message",
+    "thread_id": "test-converstation-thread-id",
+    "to": [
+      {
+        "email": "bill@test.com",
+        "name": "Bill Test"
+      }
+    ],
+    "unread": false
+  }
+}

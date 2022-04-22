@@ -1,4 +1,4 @@
-describe("Conversation Loading", () => {
+xdescribe("Conversation Loading", () => {
   beforeEach(() => {
     cy.visit("/components/conversation/src/cypress.html");
     cy.get("nylas-conversation").should("exist").as("conversation");
@@ -19,7 +19,7 @@ describe("Conversation Loading", () => {
   });
 });
 
-describe("Conversation Mobile/Tablet", () => {
+xdescribe("Conversation Mobile/Tablet", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -101,5 +101,51 @@ describe("Conversation Mobile/Tablet", () => {
 
   it("Scrolls to most recent message", () => {
     cy.get(".message").last().should("be.visible");
+  });
+});
+
+describe("Conversation Mobile/Tablet", () => {
+  beforeEach(() => {
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "conversation/manifest",
+      "**/middleware/account": "conversation/account",
+      "**/middleware/threads/test-converstation-thread-id?view=expanded":
+        "conversation/testConversationThread",
+    });
+    cy.intercept(
+      "PUT",
+      "https://web-components.nylas.com/middleware/neural/conversation",
+    );
+    cy.intercept("POST", "https://web-components.nylas.com/middleware/send", {
+      fixture: "conversation/sendMessageResponse.json",
+    }).as("sendResponse");
+
+    cy.visit("/components/conversation/src/cypress.html");
+    cy.get("nylas-conversation").should("exist").as("conversation");
+
+    cy.get("header.mobile").as("mobile-header");
+    cy.get("header.tablet").as("tablet-header");
+    cy.get("@conversation").invoke(
+      "attr",
+      "thread_id",
+      "test-converstation-thread-id",
+    );
+  });
+
+  it("Sent message will be updated in the view as new message", () => {
+    cy.get("@conversation")
+      .find(".reply-box input")
+      .type("New cypress test message");
+    cy.get("@conversation").find(".reply-box form").submit();
+    cy.wait("@sendResponse");
+    cy.get("@conversation")
+      .find(".messages")
+      .find("article")
+      .should("have.length", 3);
+    cy.get("@conversation")
+      .find(".messages")
+      .find("article")
+      .last()
+      .should("contain", "New cypress test message");
   });
 });
