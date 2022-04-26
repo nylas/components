@@ -1,7 +1,11 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "schedule-editor/src/cypress.html"
+  : "/components/schedule-editor/src/index.html";
+
 let testScheduleEditor;
 
 beforeEach(() => {
-  cy.visit("/components/schedule-editor/src/index.html");
+  cy.visit(BASE_PATH);
   cy.get("nylas-schedule-editor").should("exist");
   cy.get("nylas-schedule-editor").then((element) => {
     const component = element[0];

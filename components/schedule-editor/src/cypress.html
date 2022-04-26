@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Cypress | Mailbox</title>
+    <script src="../index.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const component = document.querySelector("nylas-schedule-editor");
+
+        // Hey you! Uncomment the below in your own <nylas-schedule-editor> to control which sections get shown,
+        // which start as expanded by default, and which specific questions to hide.
+        // <3, Nylas
+
+        // let sectionConfig = {
+        //   "basic-details": {
+        //     expanded: false,
+        //     editable: true,
+        //   },
+        //   "time-date-details": {
+        //     expanded: true,
+        //     editable: true,
+        //   },
+        //   "style-details": {
+        //     expanded: false,
+        //     editable: true,
+        //   },
+        //   "booking-details": {
+        //     expanded: true,
+        //     editable: true,
+        //   },
+        //   "custom-fields": {
+        //     expanded: false,
+        //     editable: true,
+        //   },
+        //   "notification-details": {
+        //     expanded: false,
+        //     editable: true,
+        //   }
+        // }
+
+        // component.sections = sectionConfig;
+      });
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <nylas-schedule-editor id="demo-schedule-editor"></nylas-schedule-editor>
+    </main>
+  </body>
+</html>

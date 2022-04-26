@@ -1,3 +1,7 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "contact-list/src/cypress.html"
+  : "/components/contact-list/src/index.html";
+
 import { defaultPhoto } from "./default_photo.js";
 
 const STATIC_CONTACTS = [
@@ -17,7 +21,7 @@ const STATIC_CONTACTS = [
 
 describe("Contact List initial", () => {
   it("shows loader", () => {
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").find(".loader").should("exist");
   });
@@ -31,7 +35,7 @@ describe("Contact List initial", () => {
       },
     );
 
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").contains(
       "Enter contacts using the contacts prop",
@@ -52,7 +56,7 @@ describe("Contact List display contacts", () => {
       { fixture: "contact-list/contacts100.json" },
     ).as("getContacts");
 
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").should("exist").as("contactList");
   });
@@ -103,7 +107,7 @@ describe("Contact List Interaction", () => {
       { fixture: "contact-list/contacts100.json" },
     ).as("getContacts");
 
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").should("exist").as("contactList");
   });
@@ -179,7 +183,7 @@ describe("Contact List props", () => {
       { fixture: "contact-list/contacts100.json" },
     ).as("getContacts");
 
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").should("exist").as("contactList");
   });
@@ -247,7 +251,7 @@ describe("Contact List display contacts", () => {
       { fixture: "contact-list/contactPictureResponse.json" },
     ).as("picture");
 
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").should("exist").as("contactList");
   });
@@ -268,7 +272,7 @@ describe("Contact List display contacts", () => {
 
 describe("ContactList edge cases", () => {
   beforeEach(() => {
-    cy.visit("/components/contact-list/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-contact-list").should("exist").as("contactList");
   });

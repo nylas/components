@@ -1,3 +1,7 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "email/src/cypress.html"
+  : "/components/email/src/cypress.html";
+
 const SAMPLE_THREAD = {
   account_id: "cou6r5tjgubx9rswikzvz9afb",
   drafts: [],
@@ -808,7 +812,7 @@ describe("Email: Displays threads and messages", () => {
         "email/files/download",
     });
 
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email")
       .as("email")
@@ -944,7 +948,7 @@ describe("Email: Images and Files", () => {
         "email/files/download",
     });
 
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
   });
@@ -1010,7 +1014,7 @@ describe("Email: Stars", () => {
       "**/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*": "email/threads/id",
     });
 
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
 
@@ -1069,7 +1073,7 @@ describe("Email: Unread status", () => {
       },
     );
 
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
   });
@@ -1115,7 +1119,7 @@ describe("Email: Reply, Reply-all, Forward", () => {
         "email/messages/idWithMultipleSenders",
     });
 
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email")
       .as("email")
@@ -1152,7 +1156,7 @@ describe("Email: Toggle email of sender/recipient", () => {
       "**/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*": "email/threads/id",
     });
 
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email")
       .as("email")
@@ -1307,7 +1311,7 @@ describe("Email: Toggle email of sender/recipient", () => {
 
 describe("Should Render Forward Button And Dispatch Event When Clicked", () => {
   beforeEach(() => {
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
 
@@ -1391,7 +1395,7 @@ describe("Should Render Forward Button And Dispatch Event When Clicked", () => {
   });
 
   it("Should Dispatch Event When Forward Button Is Clicked With Proper Event Message", () => {
-    let container = {};
+    const container = {};
     const EVENT_ID = "forwardClicked";
     cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
     cy.get("@email").find("div.forward button").as("forwardButton");
@@ -1430,7 +1434,7 @@ describe("Should Render Forward Button And Dispatch Event When Clicked", () => {
 
 describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
   beforeEach(() => {
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
 
@@ -1513,7 +1517,7 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
   });
 
   it("Should Dispatch Event When Reply Button Is Clicked With Proper Event Message", () => {
-    let container = {};
+    const container = {};
     const EVENT_ID = "replyClicked";
     cy.get("@email").invoke("prop", "message", SINGLE_SENDER_MESSAGE);
     cy.get("@email").find("div.reply button").as("replyButton");
@@ -1552,7 +1556,7 @@ describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
 
 describe("Should Render Reply All Button And Respond To Clicks", () => {
   beforeEach(() => {
-    cy.visit("/components/email/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
 
@@ -1640,7 +1644,7 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
   });
 
   it("Should Dispatch Event When Reply All Button Is Clicked With Proper Event Message", () => {
-    let container = {};
+    const container = {};
     const EVENT_ID = "replyAllClicked";
     cy.get("@email").invoke("prop", "message", MULTIPLE_SENDER_MESSAGE);
     cy.get("@email").find("div.reply-all button").as("replyAllButton");

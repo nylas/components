@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "composer/src/cypress.html"
+  : "/components/composer/src/index.html";
 
 describe("Composer loading state", () => {
   it("displays loading screen", () => {
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.contains("Loading");
   });
@@ -32,7 +35,7 @@ describe("Composer dispatches events", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer")
       .should("exist")
@@ -113,7 +116,7 @@ describe("Composer `to` prop", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
     cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
@@ -168,7 +171,7 @@ describe("Composer interactions", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer")
       .should("exist")
@@ -282,7 +285,7 @@ describe("Composer customizations", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
     cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
@@ -579,7 +582,7 @@ describe("Composer integration", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
   });
@@ -768,7 +771,7 @@ describe("Composer callbacks and options", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
   });
@@ -824,7 +827,7 @@ describe("Composer file upload", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
   });
@@ -971,11 +974,7 @@ describe("Composer file upload", () => {
 
 describe("Composer subject", () => {
   beforeEach(() => {
-    cy.visitComponentPage(
-      "/components/composer/src/index.html",
-      "nylas-composer",
-      "demo-composer",
-    );
+    cy.visitComponentPage(BASE_PATH, "nylas-composer", "demo-composer");
     cy.get("@testComponent")
       .should("have.prop", "id")
       .and("equal", "test-composer");
@@ -1010,7 +1009,7 @@ describe("Save composer message as draft", () => {
       fixture: "composer/account.json",
     }).as("getMiddlewareAccount");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
   });
@@ -1104,7 +1103,7 @@ describe("Composer `value` prop", () => {
       { name: "Secound Test User", email: "tester2@test.com" },
     ]).as("getUsers");
 
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
     cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
@@ -1278,7 +1277,7 @@ describe("Composer `value` prop", () => {
 
 describe("Composer formatting", () => {
   beforeEach(() => {
-    cy.visit("/components/composer/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-composer").should("exist").as("composer");
     cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");

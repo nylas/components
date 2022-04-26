@@ -13,6 +13,10 @@
   },
   "scripts": {
     "build": "lerna run --parallel build",
+    "build:test": "yarn nyc instrument components instrumented && live-server --no-browser instrumented --host=0.0.0.0 --port=8000",
+    "coverage:report": "yarn nyc report --reporter=html",
+    "cy:coverage": "TZ=America/Toronto CYPRESS_TEST_COVERAGE=true yarn cypress run",
+    "view:coverage": "open coverage/index.html",
     "cy:open": "TZ=America/Toronto cypress open",
     "cy:run": "TZ=America/Toronto cypress run",
     "dev": "lerna run --parallel dev --concurrency 8",
@@ -44,6 +48,8 @@
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.16.4",
     "@babel/preset-env": "^7.16.4",
+    "@cypress/code-coverage": "^3.9.12",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@rollup/plugin-alias": "3.1.2",
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-json": "^4.1.0",
@@ -85,11 +91,13 @@
     "luxon": "^2.0.2",
     "mockdate": "^3.0.4",
     "node-sass": "7.0.0",
+    "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "prettier-plugin-svelte": "^2.1.6",
     "pretty-quick": "3.0.0",
     "rollup": "2.40.0",
     "rollup-plugin-esbuild": "4.5.0",
+    "rollup-plugin-istanbul": "^3.0.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-postcss": "^3.1.6",
     "rollup-plugin-svelte": "^7.0.0",
@@ -110,6 +118,7 @@
   "dependencies": {
     "@nylas/components-agenda": "file:components/agenda",
     "@nylas/components-availability": "file:components/availability",
+    "@nylas/components-booking": "file:components/booking",
     "@nylas/components-composer": "file:components/composer",
     "@nylas/components-contact-list": "file:components/contact-list",
     "@nylas/components-conversation": "file:components/conversation",
@@ -117,7 +126,6 @@
     "@nylas/components-email": "file:components/email",
     "@nylas/components-mailbox": "file:components/mailbox",
     "@nylas/components-schedule-editor": "file:components/schedule-editor",
-    "@nylas/components-booking": "file:components/booking",
     "@nylas/components-theming": "file:components/theming",
     "concurrently": "6.0.0"
   }
