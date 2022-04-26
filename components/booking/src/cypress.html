@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <meta charset="UTF-8" />
+    <title>Cypress | Booking</title>
+    <script src="../index.js"></script>
+    <script src="../../availability/index.js"></script>
+    <script>
+      // Nylas Booking and Availability components work with two modes: Single event and Consecutive events.
+      // Mode is determined by length of the events array; if there are multiple, it will try to schedule
+      // them consecutively and show timeslots as either free or busy.
+      // Otherwise, with a single event, it will show you a scale of availability based on how many of the participantEmails'
+      // calendars are free.
+      const EVENTS = [
+        {
+          event_title: "My Intro Meeting",
+          event_description: "My test desc",
+          slot_size: 15,
+          participantEmails: ["arjun.k@nylas.com", "pooja.g@nylas.com"],
+        },
+        {
+          event_title: "My Follow-up Meeting",
+          event_description: "My other test desc",
+          slot_size: 15,
+          participantEmails: ["nylascypresstest@gmail.com"],
+        },
+      ];
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const availability = document.querySelector("nylas-availability");
+        const booking = document.querySelector("nylas-booking");
+
+        // availability.participants = ["nylascypresstest@gmail.com"];
+        availability.events = [EVENTS[0]];
+        availability.open_hours = [
+          {
+            startWeekday: 0,
+            startHour: 12,
+            startMinute: 30,
+            endWeekday: 0,
+            endHour: 16,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 1,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 1,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 2,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 2,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 3,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 3,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 4,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 4,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 5,
+            startHour: 9,
+            startMinute: 0,
+            endWeekday: 5,
+            endHour: 17,
+            endMinute: 0,
+          },
+          {
+            startWeekday: 6,
+            startHour: 11,
+            startMinute: 30,
+            endWeekday: 6,
+            endHour: 15,
+            endMinute: 0,
+          },
+        ];
+        availability.addEventListener("timeSlotChosen", (event) => {
+          console.log({ timeSlotChosen: event.detail.timeSlots });
+          booking.slots_to_book = event.detail.timeSlots;
+        });
+
+        booking.addEventListener("bookedEvents", () => {
+          availability.reload(true, true);
+        });
+
+        availability.addEventListener("eventOptionsReady", (event) => {
+          console.log({ eventOptionsReady: event.detail.slots });
+          booking.event_options = event.detail.slots;
+        });
+
+        booking.addEventListener("hoverOptionChange", (event) => {
+          console.log({ eventOptionSelected: event.detail.event });
+          availability.event_to_hover = event.detail.event;
+        });
+
+        booking.addEventListener("eventOptionSelected", (event) => {
+          console.log({ eventOptionSelected: event.detail.event });
+          availability.event_to_select = event.detail.event;
+        });
+
+        booking.recurrence_cadence = ["daily", "weekdays", "weekly"];
+
+        // Interactive controls
+        document.querySelectorAll('input[name="demo-type"]').forEach((elem) => {
+          elem.addEventListener("input", function (event) {
+            if (event.target.value === "consecutive") {
+              availability.events = EVENTS;
+            } else {
+              availability.events = [EVENTS[0]];
+            }
+          });
+        });
+      });
+    </script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        background: white;
+        color: black;
+      }
+
+      main {
+        width: 80vw;
+        margin-left: 10vw;
+        height: 80vh;
+        margin-top: 10vh;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: 100%;
+        gap: 1rem;
+      }
+
+      aside {
+        position: fixed;
+        z-index: 2;
+        top: 0;
+        right: 0;
+        width: 250px;
+        background: #333;
+        padding: 0.5rem;
+        color: white;
+        max-height: 100%;
+        overflow: auto;
+      }
+
+      aside label {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <aside class="controls">
+      <label>
+        Demo Type
+        <label>
+          <input checked type="radio" name="demo-type" value="single" />
+          Single
+        </label>
+        <label>
+          <input type="radio" name="demo-type" value="consecutive" />
+          Consecutive
+        </label>
+      </label>
+    </aside>
+    <main>
+      <nylas-availability
+        show_as_week="true"
+        allow_booking="true"
+        id="demo-availability"
+        slot_size="15"
+        start_hour="9"
+        end_hour="17"
+        show_hosts="show"
+        closed_color="#999">
+      </nylas-availability>
+      <nylas-booking id="demo-scheduler"> </nylas-booking>
+    </main>
+  </body>
+</html>

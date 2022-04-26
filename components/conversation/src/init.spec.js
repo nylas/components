@@ -1,6 +1,10 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "conversation/src/cypress.html"
+  : "/components/conversation/src/index.html";
+
 describe("Conversation Loading", () => {
   beforeEach(() => {
-    cy.visit("/components/conversation/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-conversation").should("exist").as("conversation");
 
     cy.get("header.mobile").as("mobile-header");
@@ -43,7 +47,7 @@ describe("Conversation Mobile/Tablet", () => {
       "https://web-components.nylas.com/middleware/neural/conversation",
     );
 
-    cy.visit("/components/conversation/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-conversation").should("exist").as("conversation");
 
     cy.get("header.mobile").as("mobile-header");
@@ -120,7 +124,7 @@ describe("Conversation Mobile/Tablet", () => {
       fixture: "conversation/sendMessageResponse.json",
     }).as("sendResponse");
 
-    cy.visit("/components/conversation/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-conversation").should("exist").as("conversation");
 
     cy.get("header.mobile").as("mobile-header");

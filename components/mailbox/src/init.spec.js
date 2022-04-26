@@ -1,3 +1,7 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "mailbox/src/cypress.html"
+  : "/components/mailbox/src/cypress.html";
+
 const EMPTY_THREAD = {
   account_id: "cou6r5tjgubx9rswikzvz9afb",
   drafts: [],
@@ -167,7 +171,7 @@ describe("Mailbox Display", () => {
       thread2 = f;
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -213,7 +217,7 @@ describe("Mailbox Display", () => {
       .should("have.text", "invite.ics US_Holidays.ics ");
   });
 
-  it.only("Does not show attachment button for unnamed .ics files attached with invites", () => {
+  it("Does not show attachment button for unnamed .ics files attached with invites", () => {
     cy.get("@mailbox").invoke(
       "prop",
       "all_threads",
@@ -257,7 +261,7 @@ describe("Mailbox Files/Images", () => {
       },
     );
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -303,7 +307,7 @@ describe("Mailbox Unread/Read", () => {
       thread2 = f;
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
   });
@@ -427,7 +431,7 @@ describe("Mailbox Props", () => {
       thread2 = f;
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -518,7 +522,7 @@ describe("Mailbox Interactions", () => {
       thread2 = f;
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -532,7 +536,7 @@ describe("Mailbox Interactions", () => {
     cy.get("@mailbox").find(".email-row.expanded").should("have.length", 1);
   });
 
-  it.only("Should expand a thread when clicked twice", () => {
+  it("Should expand a thread when clicked twice", () => {
     cy.get("@mailbox").find(".email-row.condensed").as("emailRow");
     cy.get("@mailbox").find(".email-row.expanded").should("not.exist");
 
@@ -604,7 +608,7 @@ describe("Mailbox Pagination: threads not intercepted", () => {
       fixture: "mailbox/labels.json",
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -669,7 +673,7 @@ describe("Mailbox: updating 'to' field correctly for reply and reply-all", () =>
         "mailbox/messages/idWithLastMessageFromSelf",
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -734,7 +738,7 @@ describe("Mailbox: updating cc fields correctly for reply and reply-all", () => 
       "https://web-components.nylas.com/middleware/messages/message-with-multiple-to-paticipants*":
         "mailbox/messages/idWithMultipleToParticipants",
     });
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -833,7 +837,7 @@ describe("Mailbox Bulk actions", () => {
       thread2 = f;
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -998,7 +1002,7 @@ describe("Mailbox Custom events", () => {
       thread2 = f;
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -1054,7 +1058,7 @@ describe("Mailbox Integration: Composer and Drafts", () => {
       "**/middleware/messages/*": "draftThread",
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -1175,7 +1179,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       fixture: "composer/files/fileResponse.json",
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -1443,7 +1447,7 @@ describe("Mailbox Integration: Save draft and update draft", () => {
       fixture: "mailbox/threads/draftMessage1.json",
     }).as("saveDraft");
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");
@@ -1512,7 +1516,7 @@ describe("Display Participants in thread row", () => {
       "**/middleware/labels": "mailbox/labels",
     });
 
-    cy.visit("/components/mailbox/src/cypress.html");
+    cy.visit(BASE_PATH);
 
     cy.get("nylas-mailbox").should("exist").as("mailbox");
     cy.get("@mailbox").find("nylas-email").as("email");

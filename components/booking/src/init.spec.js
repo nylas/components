@@ -1,9 +1,13 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "booking/src/cypress.html"
+  : "/components/booking/src/index.html";
+
 let bookingTestComponent;
 let availabilityTestComponent;
 const frozenDateTime = () => new Date(2021, 11, 15, 9, 0, 0);
 beforeEach(() => {
   cy.clock(frozenDateTime().getTime(), ["Date"]);
-  cy.visit("/components/booking/src/index.html");
+  cy.visit(BASE_PATH);
 
   // booking component
   cy.get("nylas-booking").should("exist");
@@ -168,7 +172,7 @@ describe("booking component", () => {
 
   describe("Consecutive Availability", () => {
     beforeEach(() => {
-      cy.visit("/components/booking/src/index.html");
+      cy.visit(BASE_PATH);
       cy.get('input[name="demo-type"]').check("consecutive");
     });
 
@@ -225,7 +229,7 @@ describe("booking component", () => {
         (req) =>
           req.reply({ ...COMPONENT_RESPONSE, response: CONSEC_RESPONSE }),
       );
-      cy.visit("/components/booking/src/index.html");
+      cy.visit(BASE_PATH);
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -270,7 +274,7 @@ describe("booking component", () => {
     xit("inherits event title from editor-manifest", () => {
       cy.document().then(($document) => {
         $document.getElementsByTagName("nylas-booking")[0].remove();
-        let newBooker = $document.createElement("nylas-booking");
+        const newBooker = $document.createElement("nylas-booking");
         newBooker.setAttribute("id", "test-scheduler");
         newBooker.slots_to_book = basic_slots_to_book;
         $document.body.getElementsByTagName("main")[0].append(newBooker);
@@ -280,7 +284,7 @@ describe("booking component", () => {
     it("inherits event title from passed-property if no event title", () => {
       cy.document().then(($document) => {
         $document.getElementsByTagName("nylas-booking")[0].remove();
-        let newBooker = $document.createElement("nylas-booking");
+        const newBooker = $document.createElement("nylas-booking");
         newBooker.setAttribute("id", "test-scheduler");
         newBooker.editor_id = "test-schedule-editor";
         newBooker.event_title = "Test-Passed Title";
@@ -292,7 +296,7 @@ describe("booking component", () => {
     it("inherits event title events array's object title", () => {
       cy.document().then(($document) => {
         $document.getElementsByTagName("nylas-booking")[0].remove();
-        let newBooker = $document.createElement("nylas-booking");
+        const newBooker = $document.createElement("nylas-booking");
         newBooker.id = "demo-scheduler";
         newBooker.editor_id = "demo-schedule-editor";
         newBooker.event_title = "Test-Passed Title";

@@ -1,3 +1,7 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "agenda/src/cypress.html"
+  : "/components/agenda/src/index.html";
+
 const AGENDA_EVENTS = [
   {
     title: "Static Event 1",
@@ -91,7 +95,7 @@ describe("Agenda minimal display", () => {
       },
     );
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
   });
 
@@ -150,7 +154,7 @@ describe("Agenda props", () => {
       },
     );
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
   });
 
@@ -339,7 +343,7 @@ describe("Agenda interactions", () => {
         "agenda/events",
     });
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
   });
 
@@ -369,7 +373,7 @@ describe("Agenda Custom Data", () => {
         "agenda/events",
     });
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
     cy.get("@agenda").invoke("attr", "timezone", "America/Toronto");
   });
@@ -395,7 +399,7 @@ describe("Agenda custom events", () => {
       "**/middleware/agenda/events?*": "agenda/events",
     });
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
   });
 
@@ -452,7 +456,7 @@ describe("Display events in different timezone is specified", () => {
       "**/middleware/agenda/events?*": "agenda/events",
     });
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
   });
 
@@ -483,7 +487,7 @@ describe("Display event metadata", () => {
       "**/middleware/agenda/events?*": "agenda/events",
     });
 
-    cy.visit("/components/agenda/src/cypress.html");
+    cy.visit(BASE_PATH);
     cy.get("nylas-agenda").should("exist").as("agenda");
   });
 

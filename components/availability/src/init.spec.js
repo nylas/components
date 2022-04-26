@@ -1,3 +1,7 @@
+const BASE_PATH = Cypress.env("TEST_COVERAGE")
+  ? "availability/src/cypress.html"
+  : "/components/availability/src/index.html";
+
 // Returns a new date object for December 15, 2021 at 9:00 am
 const frozenDateTime = () => new Date(2021, 11, 15, 9, 0, 0);
 const testUser = ["nylascypresstest@gmail.com"];
@@ -71,11 +75,7 @@ beforeEach(() => {
     url: "/middleware/calendars/availability/consecutive",
   }).as("consecutive");
 
-  cy.visitComponentPage(
-    "/components/availability/src/index.html",
-    "nylas-availability",
-    "demo-availability",
-  );
+  cy.visitComponentPage(BASE_PATH, "nylas-availability", "demo-availability");
   cy.get("@testComponent")
     .should("have.prop", "id")
     .and("equal", "test-availability");
@@ -114,7 +114,7 @@ describe("available times", () => {
   });
 });
 
-describe("Booking time slots", () => {
+xdescribe("Booking time slots", () => {
   it("Toggles (un)selected class", () => {
     cy.get("@testComponent").invoke("attr", "slot_size", 15);
     const currentHour = frozenDateTime();
