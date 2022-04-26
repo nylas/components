@@ -15,3 +15,5 @@ components/**/main.js.map
 components/**/styles.css
 coverage
 **/package-lock.json
+.nyc_output
+instrumented

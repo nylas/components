@@ -6,17 +6,19 @@ import livereload from "rollup-plugin-livereload";
 import replace from "@rollup/plugin-replace";
 import json from "@rollup/plugin-json";
 import alias from "@rollup/plugin-alias";
+import istanbul from "rollup-plugin-istanbul";
 import path from "path";
 import dotenv from "dotenv";
 import esbuild from "rollup-plugin-esbuild";
 const ROOT = "../..";
 dotenv.config({ path: path.resolve(ROOT, ".env") });
-const production =
+
+export const production =
   process.env.NODE_ENV !== "development" && !process.env.ROLLUP_WATCH;
 
 const config = {
   output: {
-    sourcemap: true,
+    sourcemap: "inline",
     format: "umd",
     name: "app",
     file: "index.js",
@@ -48,6 +50,15 @@ const config = {
     }),
     commonjs(),
     json(),
+    !production &&
+      istanbul({
+        extensions: [".js", ".svelte"],
+        include: ["components/**/*"],
+        exclude: ["**/*spec.js", "node_modules"],
+        sourceMap: true,
+        compact: false,
+        debug: true,
+      }),
   ],
   watch: {
     clearScreen: false,
