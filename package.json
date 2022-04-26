@@ -13,9 +13,10 @@
   },
   "scripts": {
     "build": "lerna run --parallel build",
-    "build:test": "yarn nyc instrument components instrumented && live-server instrumented --host=0.0.0.0 --port=8000",
-    "coverage:report": "yarn nyc report --reporter=lcov",
-    "cy:coverage": "TZ=America/Toronto CYPRESS_TEST_COVERAGE=true yarn cypress open",
+    "build:test": "yarn nyc instrument components instrumented && live-server --no-browser instrumented --host=0.0.0.0 --port=8000",
+    "coverage:report": "yarn nyc report --reporter=html",
+    "cy:coverage": "TZ=America/Toronto CYPRESS_TEST_COVERAGE=true yarn cypress run",
+    "view:coverage": "open coverage/index.html",
     "cy:open": "TZ=America/Toronto cypress open",
     "cy:run": "TZ=America/Toronto cypress run",
     "dev": "lerna run --parallel dev --concurrency 8",
