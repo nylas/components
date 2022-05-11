@@ -826,6 +826,11 @@ describe("Email: Displays threads and messages", () => {
     cy.get("@email").find(".subject").should("contain", "Test subject");
   });
 
+  it("Shows Email with only demo id by fetching manifest", () => {
+    cy.get("@email").find(".subject").should("exist");
+    cy.get("@email").find(".subject").should("contain", "Test subject");
+  });
+
   it("Shows Email with passed thread", () => {
     cy.get("@email").invoke("prop", "thread", SAMPLE_THREAD);
 

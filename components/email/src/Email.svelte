@@ -168,7 +168,10 @@
     })();
 
   async function transformPropertyValues() {
-    _this.thread_id = !thread && !message_id && !message ? _this.thread_id : "";
+    _this.thread_id =
+      !thread && !message_id && !message
+        ? _this.thread_id || manifest.thread_id
+        : "";
 
     if (id && !_this.thread_id && !_this.thread && _this.message_id) {
       fetchOneMessage();
