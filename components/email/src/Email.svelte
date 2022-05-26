@@ -408,16 +408,15 @@
     }
     loading = true;
     if (_this.click_action === "default" || _this.click_action === "mailbox") {
-      //#region read/unread
-      if (
-        activeThread &&
-        activeThread.unread &&
-        _this.click_action !== "mailbox"
-      ) {
-        activeThread.unread = !activeThread.unread;
-        await saveActiveThread();
+      // default click action
+      if (activeThread && _this.click_action === "default") {
+        // Setting read/unread status
+        if (activeThread.unread) {
+          activeThread.unread = !activeThread.unread;
+          await saveActiveThread();
+        }
+        activeThread.expanded = !activeThread.expanded;
       }
-      //#endregion read/unread
 
       if (!emailManuallyPassed && messageType !== MessageType.DRAFTS) {
         const { messages } = activeThread;
