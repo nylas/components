@@ -818,7 +818,6 @@
     #mailboxlist li {
       display: grid;
       grid-template-columns: auto 1fr;
-      gap: 0.5rem;
       align-items: center;
       justify-content: left;
       position: relative;
@@ -937,7 +936,7 @@
     main {
       #mailboxlist li {
         .checkbox-container.thread-checkbox {
-          padding: 0.6rem 0.5rem 0 $spacing-m;
+          padding: 0.6rem 0 0 $spacing-m;
           display: flex;
           min-height: 2rem;
           align-items: center;
