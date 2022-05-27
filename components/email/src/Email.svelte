@@ -1378,7 +1378,7 @@
       .from-message-count {
         align-items: center;
         display: grid;
-        grid-template-columns: repeat(3, auto);
+        grid-template-columns: repeat(2, auto);
         grid-gap: $spacing-m;
         justify-content: flex-start;
         max-width: 350px;
@@ -1554,7 +1554,7 @@
           }
         }
         &.condensed {
-          padding: $spacing-xs 0;
+          padding: $spacing-xs;
           justify-content: initial;
 
           div.starred {
