@@ -4,6 +4,8 @@
 
 ## New Features
 
+- Added the ability for Composer to consume [Nylas Contact](https://developer.nylas.com/docs/api#tag--Contacts) type into `to` `from`, `cc` and `bcc`. [#447](https://github.com/nylas/components/pull/447)
+
 ## Bug Fixes
 
 - Focus the HTML editor textbox when a formatting option is clicked [#342](https://github.com/nylas/components/pull/342)
