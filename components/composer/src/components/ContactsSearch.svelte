@@ -3,12 +3,14 @@
 <script lang="ts">
   import { debounce, isValidEmail } from "../lib/utils";
   import { tick } from "svelte";
+  import { cleanParticipants } from "@commons/methods/participants";
   import type { Participant } from "@commons/types/Nylas";
   import type {
     FetchContactsCallback,
     ChangeCallback,
     BlurOptions,
   } from "@commons/types/ContactsSearch";
+
   export let contacts: Participant[] | FetchContactsCallback;
 
   export let value: Participant[] = [];
@@ -28,14 +30,14 @@
   // Initial state setup
   const initialSetup = () => {
     if (Array.isArray(contacts)) {
-      contactsList = contacts;
+      contactsList = cleanParticipants(contacts);
     }
     if (Array.isArray(value)) {
       selectedContacts = value;
     }
   };
 
-  const nylasContacts = () => {
+  const nylasContacts = (): any[] => {
     return [];
   };
   const getContactsSetup = (term: string) => {
@@ -49,7 +51,10 @@
     const getContactsFunc =
       typeof contacts === "function" ? contacts : nylasContacts;
     try {
-      contactsList = await getContactsFunc(term);
+      const contactsResponse = await getContactsFunc(term);
+      if (Array.isArray(contactsResponse)) {
+        contactsList = cleanParticipants(contactsResponse);
+      }
 
       loading = false;
     } catch (error) {
@@ -316,8 +321,7 @@
             <button
               type="button"
               name="term"
-              on:click={() => removeContact(contact.email)}>&times;</button
-            >
+              on:click={() => removeContact(contact.email)}>&times;</button>
           </div>
         {/each}
       </div>
@@ -336,8 +340,7 @@
           on:blur={() => {
             blurSearch({ addContact: true });
           }}
-          bind:value={term}
-        />
+          bind:value={term} />
       </form>
     {/if}
   </div>
@@ -352,8 +355,7 @@
             class:active={currentContactIndex === i}
             class:selected={isSelected(contact.email)}
             on:mousedown={() => selectContact(contact)}
-            on:mouseenter={() => setActiveContact(i)}
-          >
+            on:mouseenter={() => setActiveContact(i)}>
             {#if contact.name}
               <div class="dropdown-item__name">{contact.name}</div>
               <div class="dropdown-item__email">{contact.email}</div>

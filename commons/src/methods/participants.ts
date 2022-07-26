@@ -59,3 +59,30 @@ export function buildParticipants({
 
   return { to, cc };
 }
+
+export const isValidParticipant = (participant: Participant): boolean => {
+  if ("email" in participant && "name" in participant) {
+    return true;
+  }
+  return false;
+};
+
+export const cleanParticipants = (contacts: any[]): Participant[] => {
+  const participants = contacts.reduce((result: Participant[], contact) => {
+    if (isValidParticipant(contact)) {
+      // If it is a valid Participant type
+      result.push(contact);
+    } else {
+      // If it is a Contact type, consumed /contacts api
+      if ("emails" in contact && contact.emails?.length > 0) {
+        result.push({
+          name: `${contact.given_name ?? ""} ${contact.surname ?? ""}`,
+          email: contact.emails[0].email,
+          contact,
+        });
+      }
+    }
+    return result;
+  }, []);
+  return participants;
+};

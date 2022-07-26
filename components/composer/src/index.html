@@ -6,8 +6,7 @@
     <link rel="shortcut icon" href="data:;base64,=" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"
-    />
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
 
     <script src="../index.js"></script>
     <script>
@@ -40,9 +39,29 @@
         composer.addEventListener("composerOpened", function (event) {
           console.log("Composer Opened", event.detail);
         });
+
+        // Consume different Contact structures
         composer.to = () =>
           new Promise((resolve) => {
-            resolve([{ name: "async", email: "async@test.com" }]);
+            resolve([
+              { name: "Async Contact", email: "async@test.com" },
+              { name: "Async Contact 2", email: "async2@test.com" },
+            ]);
+          });
+        composer.cc = () =>
+          new Promise((resolve) => {
+            resolve([
+              {
+                emails: [
+                  {
+                    email: "test@nylas.com",
+                    type: "work",
+                  },
+                ],
+                given_name: "Name",
+                surname: "Test",
+              },
+            ]);
           });
       });
     </script>

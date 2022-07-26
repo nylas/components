@@ -23,7 +23,10 @@
     downloadAttachedFile,
     getEventDispatcher,
   } from "@commons/methods/component";
-  import { buildParticipants, includesMyEmail } from "./methods/participants";
+  import {
+    buildParticipants,
+    includesMyEmail,
+  } from "@commons/methods/participants";
   import { addKeyValue } from "./methods/lib";
   import DropdownSymbol from "./assets/chevron-down.svg";
   import TrashIcon from "./assets/trash-alt.svg";
