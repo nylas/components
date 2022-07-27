@@ -152,6 +152,30 @@ describe("Composer `to` prop", () => {
 
     cy.contains("async@test.com");
   });
+
+  it("Replace to field with Nylas contact type", () => {
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+    cy.get("@composer")
+      .then((el) => {
+        const composer = el[0];
+        composer.to = () =>
+          Promise.resolve([
+            {
+              emails: [
+                {
+                  email: "contacttype@test.com",
+                  type: "work",
+                },
+              ],
+              given_name: "Contact",
+              surname: "Test",
+            },
+          ]);
+      })
+      .wait(500);
+    cy.get("[data-cy=contacts-search-field]").first().click().wait(500);
+    cy.contains("contacttype@test.com");
+  });
 });
 
 describe("Composer interactions", () => {
