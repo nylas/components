@@ -42,7 +42,7 @@ jobs:
           registry-url: "https://registry.yarnpkg.com/"
 
       - name: Install dependencies
-        run: yarn
+        run: npm install
 
       - name: Build Components
         run: yarn build
