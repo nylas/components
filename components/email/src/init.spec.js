@@ -1007,6 +1007,38 @@ describe("Email: Images and Files", () => {
       .nextAll()
       .should("not.include.text", "32yf13av2aiq6is5t1jov7ofd");
   });
+
+  it("Show PNG picture attachment correctly as attachmemnt file", () => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/threads/thread-with-image-attachment",
+      {
+        fixture: "email/threads/threadWithImageAttachment.json",
+      },
+    ).as("thread");
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/message-with-image-attachment",
+      {
+        fixture: "email/messages/messageWithImageAttachment",
+      },
+    ).as("message");
+
+    cy.get("@email").invoke(
+      "prop",
+      "thread_id",
+      "thread-with-image-attachment",
+    );
+    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", false);
+
+    cy.wait("@message");
+
+    cy.get("@email").find(".email-row.condensed .attachment").should("exist");
+    cy.get("@email")
+      .find(".email-row.condensed .attachment button")
+      .first()
+      .should("have.text", "Nylas test image.png");
+  });
 });
 
 describe("Email: Stars", () => {

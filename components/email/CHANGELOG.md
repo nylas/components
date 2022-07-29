@@ -2,6 +2,7 @@
 
 - [Email] Checks existing draft in thread when clicking on reply/forward, and opens composer with draft if exists. [#405](https://github.com/nylas/components/pull/405)
 - [Email] Highlights draft in thread when its opened with Composer. [#405](https://github.com/nylas/components/pull/405)
+- [Email] Optimized the logic of differentiating attachment files, now picture attachments can be corretly shown [#449](https://github.com/nylas/components/pull/449)
 
 ## Breaking
 
