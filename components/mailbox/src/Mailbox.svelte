@@ -519,7 +519,7 @@
     });
   }
 
-  function showConfirmDeleteModal(event: CustomEvent, type = "") {
+  function showConfirmDeleteModal(event: any, type = "") {
     confirmDeleteModal.isOpen = true;
     confirmDeleteModal.event = event;
     confirmDeleteModal.type = type;
