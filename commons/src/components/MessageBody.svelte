@@ -32,7 +32,7 @@
   onMount(() => {
     if (message && message.files.length > 0) {
       for (const [fileIndex, file] of message.files.entries()) {
-        if (isFileAnAttachment(message, file)) {
+        if (isFileAnAttachment(file)) {
           attachedFiles = [...attachedFiles, message.files[fileIndex]];
         }
       }
@@ -74,8 +74,7 @@
       {#if attachedFiles && Array.isArray(attachedFiles) && attachedFiles.length > 0}
         {#each attachedFiles as file}
           <button
-            on:click|stopPropagation={(e) => downloadSelectedFile(e, file)}
-          >
+            on:click|stopPropagation={(e) => downloadSelectedFile(e, file)}>
             {file.filename || file.id}
           </button>
         {/each}
