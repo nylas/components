@@ -235,7 +235,7 @@
       resetAttachments();
       for (const [_, file] of value.files.entries()) {
         file_ids.push(file.id);
-        if (isFileAnAttachment(value, file)) {
+        if (isFileAnAttachment(file)) {
           addAttachments({
             account_id: value.account_id,
             id: file.id,

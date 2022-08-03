@@ -874,7 +874,7 @@
     attachedFiles = activeThread[messageType]?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
-          if (isFileAnAttachment(message, file)) {
+          if (isFileAnAttachment(file)) {
             if (!files[message.id]) {
               files[message.id] = [];
             }
