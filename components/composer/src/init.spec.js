@@ -1425,3 +1425,29 @@ describe("Composer formatting", () => {
       .should("contain", "<b>hello, world!</b>");
   });
 });
+describe("Test GHA Flakiness", () => {
+  beforeEach(() => {
+    cy.visit(BASE_PATH);
+
+    cy.get("nylas-composer").should("exist").as("composer");
+    cy.get("nylas-composer").shadow().get(".nylas-composer").should("exist");
+  });
+
+  it("Must fail test", () => {
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .findByRole("button", { name: /Bold/i })
+      .focus()
+      .type("hello"); // focus leaves editor when grabbing .focused() element; use .type()'s implicit submission instead
+
+    cy.get("@composer")
+      .shadow()
+      .get("nylas-html-editor")
+      .shadow()
+      .get(".html-editor-content[contenteditable]")
+      .invoke("html")
+      .should("contain", "<b>hello not here</b>");
+  });
+});
