@@ -1,40 +1,23 @@
-import { writable } from "svelte/store";
+import type { Writable } from "svelte/store";
 import type { Attachment, AttachmentUpdate } from "@commons/types/Composer";
+import type { Participant } from "@commons/types/Nylas";
 
-const messageInitialState = {
-  from: <string[]>[],
-  to: <string[]>[],
-  cc: <string[]>[],
-  bcc: <string[]>[],
+export const messageInitialState = {
+  from: <Participant[]>[],
+  to: <Participant[]>[],
+  cc: <Participant[]>[],
+  bcc: <Participant[]>[],
   body: "",
   subject: "New Message",
   send_at: <Date>null,
   file_ids: <string[]>[],
 };
-export const message = writable(
-  JSON.parse(JSON.stringify(messageInitialState)),
-);
+export const attachmentsInitialState: Attachment[] = [];
 
-const attachmentsInitialState: Attachment[] = [];
-export const attachments = writable(
-  JSON.parse(JSON.stringify(attachmentsInitialState)),
-);
-
-export const subscribe = (val: unknown): unknown =>
-  message.subscribe((x) => {
-    val = x;
-    return val;
-  });
-
-export const update = (key: string, value: unknown): void => {
-  return message.update((s) => ({ ...s, [key]: value }));
-};
-
-export const mergeMessage = (update: Record<string, unknown>): void => {
-  return message.update((s) => ({ ...s, ...update }));
-};
-
-export const addAttachments = (update: Attachment): void => {
+export const addAttachments = (
+  attachments: Writable<Attachment[]>,
+  update: Attachment,
+): void => {
   return attachments.update((s: Attachment[]) => {
     if (!s.map((a: Attachment) => a.filename).includes(update.filename)) {
       return [...s, update];
@@ -42,11 +25,15 @@ export const addAttachments = (update: Attachment): void => {
     return s;
   });
 };
-export const updateAttachments = (update: Attachment): void => {
+export const updateAttachments = (
+  attachments: Writable<Attachment[]>,
+  update: Attachment,
+): void => {
   return attachments.update((s) => [...s, update]);
 };
 
 export const updateAttachment = (
+  attachments: Writable<Attachment[]>,
   filename: string,
   update: AttachmentUpdate,
 ): void => {
@@ -59,17 +46,15 @@ export const updateAttachment = (
   );
 };
 
-export const removeAttachments = (item: Attachment): void => {
+export const removeAttachments = (
+  attachments: Writable<Attachment[]>,
+  item: Attachment,
+): void => {
   return attachments.update((s: Attachment[]) => [
     ...s.filter((a) => a.filename !== item.filename),
   ]);
 };
 
-export const resetAttachments = (): void => {
-  attachments.set(JSON.parse(JSON.stringify(attachmentsInitialState)));
-};
-
-export const resetAfterSend = (from: string[]): void => {
-  message.set(JSON.parse(JSON.stringify({ ...messageInitialState, from })));
+export const resetAttachments = (attachments: Writable<Attachment[]>): void => {
   attachments.set(JSON.parse(JSON.stringify(attachmentsInitialState)));
 };

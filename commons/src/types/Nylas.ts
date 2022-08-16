@@ -129,6 +129,7 @@ export interface Message {
   reply_to_message_id?: string;
   folder_id?: string;
   label_ids?: string[];
+  file_ids: string[];
   account_id?: string;
   [key: string]: unknown;
 }
@@ -257,7 +258,7 @@ export interface ComposerProperties extends Manifest {
   theme: "auto" | "light" | "dark" | "light-2" | "dark-2";
   visible: boolean;
 
-  value: Partial<Message> | void;
+  value: Partial<Message> | null;
   to: ContactSearchCallback;
   from: ContactSearchCallback;
   cc: ContactSearchCallback;
