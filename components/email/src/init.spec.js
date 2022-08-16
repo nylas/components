@@ -1020,7 +1020,7 @@ describe("Email: Images and Files", () => {
       "GET",
       "https://web-components.nylas.com/middleware/messages/message-with-image-attachment",
       {
-        fixture: "email/messages/messageWithImageAttachment.json",
+        fixture: "email/messages/messageWithImageAttachment",
       },
     ).as("message");
 
