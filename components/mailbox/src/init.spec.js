@@ -1389,6 +1389,10 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
   });
 
   it("Close draft will update thread store and attachment", () => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/messages/draft_message_1",
+    ).as("draftResponse");
     cy.get("@mailbox").find(".email-row.condensed").should("have.length", 1);
     cy.get("@mailbox").find(".email-row.condensed").click();
 
@@ -1399,6 +1403,7 @@ describe("Mailbox Integration: Show draft message in Email thread", () => {
       .as("draft1");
     cy.get("@draft1").click();
 
+    cy.wait("@draftResponse");
     //Update message body and attach file to it
     cy.get("@composer")
       .find(".html-editor-content[contenteditable]")

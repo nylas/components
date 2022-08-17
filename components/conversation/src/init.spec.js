@@ -1,6 +1,6 @@
 const BASE_PATH = Cypress.env("TEST_COVERAGE")
   ? "conversation/src/cypress.html"
-  : "/components/conversation/src/index.html";
+  : "/components/conversation/src/cypress.html";
 
 describe("Conversation Loading", () => {
   beforeEach(() => {
@@ -108,7 +108,7 @@ describe("Conversation Mobile/Tablet", () => {
   });
 });
 
-describe("Conversation Mobile/Tablet", () => {
+describe("Send messages", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "conversation/manifest",
