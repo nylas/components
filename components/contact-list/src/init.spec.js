@@ -1,6 +1,6 @@
 const BASE_PATH = Cypress.env("TEST_COVERAGE")
   ? "contact-list/src/cypress.html"
-  : "/components/contact-list/src/index.html";
+  : "/components/contact-list/src/cypress.html";
 
 import { defaultPhoto } from "./default_photo.js";
 
@@ -281,7 +281,7 @@ describe("ContactList edge cases", () => {
     cy.get("@contactList").invoke(
       "prop",
       "id",
-      "75f0cbc5-6b15-4bf1-894e-11eeb198cc34",
+      "9796318f-fbeb-45a7-bffa-63c4d09f68e0",
     );
     cy.get("@contactList").invoke("prop", "sort_by", "name");
     cy.get("@contactList")

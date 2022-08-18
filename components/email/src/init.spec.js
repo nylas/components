@@ -952,6 +952,7 @@ describe("Email: Images and Files", () => {
       "**/middleware/files/b6113komjjjzsmhkphxf8nw8g/download*":
         "email/files/download",
     });
+    cy.intercept("**/middleware/threads/*").as("threads");
 
     cy.visit(BASE_PATH);
 
@@ -959,6 +960,7 @@ describe("Email: Images and Files", () => {
   });
 
   it("Renders inline file appropriately", () => {
+    cy.wait("@threads");
     cy.get("@email").invoke("prop", "thread_id", "c5xjcjlhzldqctpud8zeufa6t");
     cy.get("@email").invoke("prop", "click_action", "default");
     cy.get("@email").invoke("attr", "show_expanded_email_view_onload", true);
@@ -1009,9 +1011,10 @@ describe("Email: Images and Files", () => {
   });
 
   it("Show PNG picture attachment correctly as attachmemnt file", () => {
+    cy.wait("@threads");
     cy.intercept(
       "GET",
-      "https://web-components.nylas.com/middleware/threads/thread-with-image-attachment",
+      "https://web-components.nylas.com/middleware/threads/thread-with-image-attachment*",
       {
         fixture: "email/threads/threadWithImageAttachment.json",
       },
@@ -1037,7 +1040,7 @@ describe("Email: Images and Files", () => {
     cy.get("@email")
       .find(".email-row.condensed .attachment button")
       .first()
-      .should("have.text", "Nylas test image.png");
+      .should("contain", "Nylas test image.png");
   });
 });
 
@@ -1048,14 +1051,16 @@ describe("Email: Stars", () => {
       "**/middleware/account": "email/account",
       "**/middleware/labels": "email/labels",
       "**/middleware/messages/affxolvozy2pcqh4303w7pc9n": "email/messages/id",
-      "**/middleware/threads/b3z0fd5kbbwcxvf4q1ele5us6*": "email/threads/id",
+      "**/middleware/threads/b3z0fd5kbbwcxbvf4q1ele5us6*": "email/threads/id",
     });
+    cy.intercept("**/middleware/threads/*").as("threads");
 
     cy.visit(BASE_PATH);
 
     cy.get("nylas-email").as("email");
 
-    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxvf4q1ele5us6");
+    cy.get("@email").invoke("prop", "thread_id", "b3z0fd5kbbwcxbvf4q1ele5us6");
+    cy.wait("@threads");
   });
 
   it("Shows no stars when show_star=false", () => {
@@ -1084,7 +1089,9 @@ describe("Email: Stars", () => {
           const isStarred = $btn.hasClass("starred");
           cy.get("@email")
             .shadow()
-            .findByLabelText("Star button for thread b3z0fd5kbbwcxvf4q1ele5us6")
+            .findByLabelText(
+              "Star button for thread b3z0fd5kbbwcxbvf4q1ele5us6",
+            )
             .click();
           if (isStarred) {
             cy.wrap($btn).should("not.have.class", "starred");
@@ -1139,7 +1146,7 @@ describe("Email: Unread status", () => {
     });
 
     cy.get("@email").find(".unread").should("exist");
-    cy.get("@email").find(".email-row").click();
+    cy.get("@email").find(".email-row .subject").click();
     cy.get("@email").find(".unread").should("not.exist");
   });
 });

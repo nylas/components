@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const BASE_PATH = Cypress.env("TEST_COVERAGE")
   ? "composer/src/cypress.html"
-  : "/components/composer/src/index.html";
+  : "/components/composer/src/cypress.html";
 
 describe("Composer loading state", () => {
   it("displays loading screen", () => {
