@@ -212,7 +212,7 @@
         version: 1,
       };
       document.addEventListener("DOMContentLoaded", function () {
-        const email = document.getElementById("demo-email");
+        const email = document.getElementById("test-email");
         email.addEventListener("messageClicked", function (event) {
           console.log(event.detail);
         });
@@ -251,10 +251,9 @@
         Fetching a single thread of emails for the passed thread_id prop
       </p>
       <nylas-email
-        id="demo-email"
-        thread_id="b3z0fd5kbbwcxvf4q1ele5us6"
-        click_action="default"
-      >
+        id="test-email"
+        thread_id="96qbfi1ksxs7cydw3bo6o34oe"
+        click_action="default">
       </nylas-email>
     </div>
     <div class="demo">
@@ -264,7 +263,7 @@
         Fetching a manually passed thread of emails, that's being edited after 5
         seconds
       </p>
-      <nylas-email id="demo-email"></nylas-email>
+      <nylas-email id="test-email"></nylas-email>
     </div>
     <div class="demo">
       <p class="demo-index demo-head">Demo 3</p>
@@ -272,7 +271,7 @@
       <p class="demo-description demo-head">
         Fetching a single message for the passed message_id prop
       </p>
-      <nylas-email id="demo-email" message_id="affxolvozy2pcqh4303w7pc9n">
+      <nylas-email id="test-email" message_id="ddc8pr2orgim5lh4a82p35i5e">
       </nylas-email>
     </div>
 
@@ -282,7 +281,7 @@
       <p class="demo-description demo-head">
         Fetching a manually passed message, that's being edited after 5 seconds
       </p>
-      <nylas-email id="demo-email"></nylas-email>
+      <nylas-email id="test-email"></nylas-email>
     </div>
   </body>
 </html>

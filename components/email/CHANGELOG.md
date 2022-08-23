@@ -8,6 +8,7 @@
 
 ## New Features
 
+- [Email] Added events `threadLoaded` and `messageLoaded` to notify that thread message has been loaded [#454](https://github.com/nylas/components/pull/454)
 - [Email] Show CC participants when reply all button is clicked [#319](https://github.com/nylas/components/pull/319)
 - [Email] Added ability to forward email [#320](https://github.com/nylas/components/pull/320)
 - [Email] Show CC and BCC fields on expanded email [#361](https://github.com/nylas/components/pull/361)
