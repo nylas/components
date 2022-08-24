@@ -18,7 +18,7 @@
   }
 
   &:checked {
-    background: var(--blue);
+    background: var(--nylas-mailbox-checkedbox-active-color, var(--blue));
 
     &::before {
       content: " ";

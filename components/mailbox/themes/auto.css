@@ -1,0 +1,118 @@
+/* auto.css based on user selected system theme */
+@media (prefers-color-scheme: light) {
+  .nylas-mailbox {
+    /* Email variables */
+    --nylas-email-background: transparent;
+    --nylas-email-unread-background: transparent;
+    --nylas-email-body-background: #fff;
+    --nylas-email-header-background: #fff;
+    --nylas-email-border-style: none;
+    --nylas-email-border-style-expanded: #e1e1e1;
+
+    --nylas-email-snippet-color: #6e6e6e;
+    --nylas-email-subject-color: #4b4b4b;
+    --nylas-email-participant-color: #4b4b4b;
+    --nylas-email-thread-message-count-color: #2c2c2c;
+    --nylas-email-body-color: #2c2c2c;
+    --nylas-email-unread-subject-color: #2c2c2c;
+    --nylas-email-unread-thread-message-count-color: #4169e1;
+
+    --nylas-email-message-date-color: #8e8e8e;
+    --nylas-email-message-to-color: #8e8e8e;
+    --nylas-email-message-from-color: var(--nylas-email-body-color);
+    --nylas-email-draft-label-color: #cc4841;
+    --nylas-email-action-icons-color: #4b4b4b;
+    --nylas-email-button-hover-background: #e0e6f9;
+    --nylas-email-message-border-color: #eaeaea;
+
+    --nylas-email-star-button-inactive-color: #b3b3b3;
+    --nylas-email-star-button-disabled-color: #eaeaea;
+    --nylas-email-star-button-active-color: #ffc107;
+    --nylas-email-star-button-hover-color: #f7c90b;
+    --nylas-email-attachment-border-style: #cacaca;
+    --nylas-email-attachment-button-color: var(--nylas-email-snippet-color);
+    --nylas-email-attachment-button-bg: #fff;
+    --nylas-email-attachment-button-hover-bg: #f5f5f5;
+
+    /* Mailbox variables */
+    --nylas-mailbox-font-family: sans-serif;
+    --nylas-mailbox-border-color: #e1e1e1;
+    --nylas-mailbox-vertical-border-color: #e1e1e1;
+    --nylas-mailbox-horizontal-border-color: #e1e1e1;
+    --nylas-mailbox-hover-shadow-color: #cacaca;
+
+    --nylas-mailbox-header-background: #fff;
+    --nylas-mailbox-toolbar-background: #fff;
+    --nylas-mailbox-read-background: #f5f5f5;
+    --nylas-mailbox-unread-background: #fff;
+    --nylas-mailbox-checked-border-color: #4169e1;
+    --nylas-mailbox-checked-bg-color: #e0e6f9;
+    --nylas-mailbox-checkedbox-active-color: #4169e1;
+
+    --nylas-mailbox-pagination-button-color: #4b4b4b;
+    --nylas-mailbox-pagination-button-background: #fbfcfe;
+    --nylas-mailbox-pagination-button-background-disabled: #eaeaea;
+    --nylas-mailbox-pagination-button-border-color: #eaeaea;
+    --nylas-mailbox-pagination-button-hover-color: #eaeaea;
+    --nylas-mailbox-pagination-indicator-color: #2c2c2c;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .nylas-mailbox {
+    /* Email variables */
+    --nylas-email-background: transparent;
+    --nylas-email-unread-background: transparent;
+    --nylas-email-body-background: #f5f5f5;
+    --nylas-email-header-background: #2c2c2c;
+    --nylas-email-border-style: none;
+    --nylas-email-border-style-expanded: #cacaca;
+
+    --nylas-email-snippet-color: #b3b3b3;
+    --nylas-email-subject-color: #eaeaea;
+    --nylas-email-participant-color: #eaeaea;
+    --nylas-email-thread-message-count-color: #eaeaea;
+    --nylas-email-body-color: #2c2c2c;
+    --nylas-email-unread-subject-color: #fff;
+    --nylas-email-unread-thread-message-count-color: #bdccf9;
+
+    --nylas-email-message-date-color: #8e8e8e;
+    --nylas-email-message-to-color: #8e8e8e;
+    --nylas-email-message-from-color: var(--nylas-email-body-color);
+    --nylas-email-draft-label-color: #ff786a;
+    --nylas-email-action-icons-color: #eaeaea;
+    --nylas-email-button-hover-background: #4b4b4b;
+    --nylas-email-message-border-color: #eaeaea;
+
+    --nylas-email-star-button-inactive-color: #b3b3b3;
+    --nylas-email-star-button-disabled-color: #eaeaea;
+    --nylas-email-star-button-active-color: #ffc107;
+    --nylas-email-star-button-hover-color: #f7c90b;
+    --nylas-email-attachment-border-style: #cacaca;
+    --nylas-email-attachment-button-color: var(--nylas-email-snippet-color);
+    --nylas-email-attachment-button-bg: #4b4b4b;
+    --nylas-email-attachment-button-hover-bg: #2c2c2c;
+
+    /* Mailbox variables */
+    --nylas-mailbox-font-family: sans-serif;
+    --nylas-mailbox-border-color: #8e8e8e;
+    --nylas-mailbox-vertical-border-color: #8e8e8e;
+    --nylas-mailbox-horizontal-border-color: #8e8e8e;
+    --nylas-mailbox-hover-shadow-color: #cacaca;
+
+    --nylas-mailbox-header-background: #2c2c2c;
+    --nylas-mailbox-toolbar-background: #2c2c2c;
+    --nylas-mailbox-read-background: #2c2c2c;
+    --nylas-mailbox-unread-background: #4b4b4b;
+    --nylas-mailbox-checked-border-color: #314fa9;
+    --nylas-mailbox-checked-bg-color: #213571;
+    --nylas-mailbox-checkedbox-active-color: #0e6b60;
+
+    --nylas-mailbox-pagination-button-color: #fff;
+    --nylas-mailbox-pagination-button-background: #4b4b4b;
+    --nylas-mailbox-pagination-button-background-disabled: #8e8e8e;
+    --nylas-mailbox-pagination-button-border-color: #6e6e6e;
+    --nylas-mailbox-pagination-button-hover-color: #6e6e6e;
+    --nylas-mailbox-pagination-indicator-color: #2c2c2c;
+  }
+}

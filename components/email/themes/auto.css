@@ -1,0 +1,74 @@
+/* auto.css based on user selected system theme */
+@media (prefers-color-scheme: light) {
+  .nylas-email {
+    /* Email variables */
+    --nylas-email-background: #f5f5f5;
+    --nylas-email-unread-background: #fff;
+    --nylas-email-body-background: #fff;
+    --nylas-email-header-background: #fff;
+    --nylas-email-border-style: #dfe1e8;
+    --nylas-email-border-style-expanded: #e1e1e1;
+
+    --nylas-email-snippet-color: #6e6e6e;
+    --nylas-email-subject-color: #4b4b4b;
+    --nylas-email-participant-color: #4b4b4b;
+    --nylas-email-thread-message-count-color: #2c2c2c;
+    --nylas-email-body-color: #2c2c2c;
+    --nylas-email-unread-subject-color: #2c2c2c;
+    --nylas-email-unread-thread-message-count-color: #4169e1;
+
+    --nylas-email-message-date-color: #8e8e8e;
+    --nylas-email-message-to-color: #8e8e8e;
+    --nylas-email-message-from-color: var(--nylas-email-body-color);
+    --nylas-email-draft-label-color: #cc4841;
+    --nylas-email-action-icons-color: #4b4b4b;
+    --nylas-email-button-hover-background: #e0e6f9;
+    --nylas-email-message-border-color: #eaeaea;
+
+    --nylas-email-star-button-inactive-color: #b3b3b3;
+    --nylas-email-star-button-disabled-color: #eaeaea;
+    --nylas-email-star-button-active-color: #ffc107;
+    --nylas-email-star-button-hover-color: #f7c90b;
+    --nylas-email-attachment-border-style: #cacaca;
+    --nylas-email-attachment-button-color: var(--nylas-email-snippet-color);
+    --nylas-email-attachment-button-bg: #fff;
+    --nylas-email-attachment-button-hover-bg: #f5f5f5;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .nylas-email {
+    /* Email variables */
+    --nylas-email-background: #2c2c2c;
+    --nylas-email-unread-background: #4b4b4b;
+    --nylas-email-body-background: #f5f5f5;
+    --nylas-email-header-background: #2c2c2c;
+    --nylas-email-border-style: #8e8e8e;
+    --nylas-email-border-style-expanded: #cacaca;
+
+    --nylas-email-snippet-color: #b3b3b3;
+    --nylas-email-subject-color: #eaeaea;
+    --nylas-email-participant-color: #eaeaea;
+    --nylas-email-thread-message-count-color: #eaeaea;
+    --nylas-email-body-color: #2c2c2c;
+    --nylas-email-unread-subject-color: #fff;
+    --nylas-email-unread-thread-message-count-color: #bdccf9;
+
+    --nylas-email-message-date-color: #8e8e8e;
+    --nylas-email-message-to-color: #8e8e8e;
+    --nylas-email-message-from-color: var(--nylas-email-body-color);
+    --nylas-email-draft-label-color: #ff786a;
+    --nylas-email-action-icons-color: #eaeaea;
+    --nylas-email-button-hover-background: #4b4b4b;
+    --nylas-email-message-border-color: #eaeaea;
+
+    --nylas-email-star-button-inactive-color: #b3b3b3;
+    --nylas-email-star-button-disabled-color: #eaeaea;
+    --nylas-email-star-button-active-color: #ffc107;
+    --nylas-email-star-button-hover-color: #f7c90b;
+    --nylas-email-attachment-border-style: #cacaca;
+    --nylas-email-attachment-button-color: var(--nylas-email-snippet-color);
+    --nylas-email-attachment-button-bg: #4b4b4b;
+    --nylas-email-attachment-button-hover-bg: #2c2c2c;
+  }
+}
