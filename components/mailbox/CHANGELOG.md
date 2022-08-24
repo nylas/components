@@ -4,6 +4,7 @@
 
 ## New Features
 
+- [Mailbox][email] Added custom CSS options for Email and Mailbox components, with two pre-defined themes: `dark` and `light`. [#455](https://github.com/nylas/components/pull/455)
 - [Mailbox] Add pagination when `keyword_to_search` is used [#313](https://github.com/nylas/components/pull/313)
 - [Mailbox] Added ability to reply to email/thread [#311](https://github.com/nylas/components/pull/311)
 - Added dispatched event `replyAllClicked` with properties
