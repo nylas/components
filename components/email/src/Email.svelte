@@ -173,6 +173,7 @@
     })();
 
   async function transformPropertyValues() {
+    const previousPropsThreadId = previousProps.thread_id;
     previousProps = $$props;
     _this.thread_id =
       !thread && !message_id && !message
@@ -182,8 +183,7 @@
     if (id && !_this.thread_id && !_this.thread && _this.message_id) {
       fetchOneMessage();
     }
-
-    if (!activeThread || previousProps.thread_id !== _this.thread_id) {
+    if (!activeThread || previousPropsThreadId !== _this.thread_id) {
       await getThread();
     }
   }
@@ -276,7 +276,7 @@
   // #region thread intake and set
   let fetchingThreadPromise: Promise<Conversation>;
   async function getThread() {
-    if (id && _this.thread_id && !fetchingThreadPromise) {
+    if (id && _this.thread_id) {
       fetchingThreadPromise = <Promise<Conversation>>fetchThread({
         component_id: id,
         thread_id: _this.thread_id,

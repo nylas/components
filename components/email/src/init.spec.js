@@ -1165,10 +1165,9 @@ describe("Email: Reply, Reply-all, Forward", () => {
 
     cy.visit(BASE_PATH);
 
-    cy.get("nylas-email")
-      .as("email")
-      .invoke("prop", "thread_id", "83v13r9lj6kzh109c3l1yznnf");
+    cy.get("nylas-email").as("email");
     cy.get("@email").invoke("prop", "show_expanded_email_view_onload", true);
+    cy.get("@email").invoke("prop", "thread_id", "83v13r9lj6kzh109c3l1yznnf");
   });
 
   it("shows reply icon", () => {
