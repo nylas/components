@@ -798,7 +798,7 @@ const MULTIPLE_SENDER_THREAD = {
   version: 1,
 };
 
-xdescribe("Email: Displays threads and messages", () => {
+describe("Email: Displays threads and messages", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "email/manifest",
@@ -939,7 +939,7 @@ xdescribe("Email: Displays threads and messages", () => {
   });
 });
 
-xdescribe("Email: Images and Files", () => {
+describe("Email: Images and Files", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "email/manifest",
@@ -1044,7 +1044,7 @@ xdescribe("Email: Images and Files", () => {
   });
 });
 
-xdescribe("Email: Stars", () => {
+describe("Email: Stars", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "email/manifest",
@@ -1103,7 +1103,7 @@ xdescribe("Email: Stars", () => {
   });
 });
 
-xdescribe("Email: Unread status", () => {
+describe("Email: Unread status", () => {
   beforeEach(() => {
     cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
       fixture: "email/account.json",
@@ -1151,7 +1151,7 @@ xdescribe("Email: Unread status", () => {
   });
 });
 
-xdescribe("Email: Reply, Reply-all, Forward", () => {
+describe("Email: Reply, Reply-all, Forward", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "email/manifest",
@@ -1190,7 +1190,7 @@ xdescribe("Email: Reply, Reply-all, Forward", () => {
   });
 });
 
-xdescribe("Email: Toggle email of sender/recipient", () => {
+describe("Email: Toggle email of sender/recipient", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "email/manifest",
@@ -1353,7 +1353,7 @@ xdescribe("Email: Toggle email of sender/recipient", () => {
   });
 });
 
-xdescribe("Should Render Forward Button And Dispatch Event When Clicked", () => {
+describe("Should Render Forward Button And Dispatch Event When Clicked", () => {
   beforeEach(() => {
     cy.visit(BASE_PATH);
 
@@ -1476,7 +1476,7 @@ xdescribe("Should Render Forward Button And Dispatch Event When Clicked", () => 
   });
 });
 
-xdescribe("Should Render Reply Button And Dispatch Event When Clicked", () => {
+describe("Should Render Reply Button And Dispatch Event When Clicked", () => {
   beforeEach(() => {
     cy.visit(BASE_PATH);
 
@@ -1598,7 +1598,7 @@ xdescribe("Should Render Reply Button And Dispatch Event When Clicked", () => {
   });
 });
 
-xdescribe("Should Render Reply All Button And Respond To Clicks", () => {
+describe("Should Render Reply All Button And Respond To Clicks", () => {
   beforeEach(() => {
     cy.visit(BASE_PATH);
 
