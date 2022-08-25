@@ -8,6 +8,7 @@
 
 ## Bug Fixes
 
+- Fix the issue of can't having multiple Composers [#452](https://github.com/nylas/components/pull/452)
 - Focus the HTML editor textbox when a formatting option is clicked [#342](https://github.com/nylas/components/pull/342)
 - Header should reactively update with the change in the subject [#367](https://github.com/nylas/components/pull/367)
 - Fix bug where unable to tab into contenteditable area in Firefox [#400](https://github.com/nylas/components/pull/400)

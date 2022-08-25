@@ -26,6 +26,7 @@
   import { silence } from "@commons/methods/api";
   import { onMount, tick, get_current_component } from "svelte/internal";
   import pkg from "../package.json";
+  import { writable } from "svelte/store";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -35,13 +36,10 @@
   }
 
   import {
-    message,
-    update,
-    mergeMessage,
-    attachments,
+    messageInitialState,
+    attachmentsInitialState,
     addAttachments,
     removeAttachments,
-    resetAfterSend,
     updateAttachment,
     resetAttachments,
   } from "./lib/store";
@@ -143,6 +141,18 @@
     focus_body_onload: false,
   };
 
+  let message: Message = JSON.parse(JSON.stringify(messageInitialState));
+  const update = (key: string, value: unknown): void => {
+    message = { ...message, [key]: value };
+  };
+  const mergeMessage = (update: Record<string, unknown>): void => {
+    message = { ...message, ...update };
+  };
+
+  const attachments = writable(
+    JSON.parse(JSON.stringify(attachmentsInitialState)),
+  );
+
   // Callbacks
   export const open = (): void => {
     visible = true;
@@ -153,7 +163,7 @@
   };
 
   export const close = (): void => {
-    const msg = $message;
+    const msg = message;
     msg.active = false;
     visible = false;
     if (_this.reset_after_send || _this.reset_after_close) {
@@ -161,7 +171,8 @@
       saveSuccess = false;
     }
     if (_this.reset_after_close) {
-      resetAfterSend($message.from);
+      message = { ...message, ...messageInitialState };
+      resetAttachments(attachments);
     }
     // Update the snippet showing on the condensed draft message
     msg.snippet = cleanMessageForSnippet(msg.body);
@@ -177,8 +188,8 @@
   let showDatepicker = false;
   let themeLoaded = false;
   let visible = true;
-  let subject = _this.value?.subject ?? $message.subject;
-  $: subject = $message.subject;
+  let subject = _this.value?.subject ?? message.subject;
+  $: subject = message.subject;
 
   onMount(async () => {
     isLoading = true;
@@ -232,11 +243,11 @@
     mergeMessage(value);
     if (value.files?.length > 0) {
       let file_ids = [];
-      resetAttachments();
+      resetAttachments(attachments);
       for (const [_, file] of value.files.entries()) {
         file_ids.push(file.id);
         if (isFileAnAttachment(file)) {
-          addAttachments({
+          addAttachments(attachments, {
             account_id: value.account_id,
             id: file.id,
             filename: file.filename,
@@ -293,7 +304,7 @@
     const file = fileSelector.files[0];
 
     try {
-      addAttachments({
+      addAttachments(attachments, {
         filename: file.name,
         size: file.size,
         content_type: file.type,
@@ -311,20 +322,23 @@
         ? await uploadFile(file)
         : id && (await nylasUploadFile(id, file, access_token));
 
-      updateAttachment(file.name, { loading: false, id: result.id });
+      updateAttachment(attachments, file.name, {
+        loading: false,
+        id: result.id,
+      });
       if (result.id)
         // Update message store with new file_id and file
         // New added file is attachment, thus added content_disposition property
         mergeMessage({
-          file_ids: [...$message.file_ids, result.id],
+          file_ids: [...message.file_ids, result.id],
           files: [
-            ...($message.files || []),
+            ...(message.files || []),
             { ...result, content_disposition: "attachment" },
           ],
         });
       if (afterFileUploadSuccess) afterFileUploadSuccess(result);
     } catch (e) {
-      updateAttachment(file.name, {
+      updateAttachment(attachments, file.name, {
         loading: false,
         error: true,
         errorMessage: typeof e === "string" ? e : undefined,
@@ -335,15 +349,11 @@
 
   const handleRemoveFile = (attachment: Attachment) => {
     if (beforeFileRemove) beforeFileRemove(attachment);
-    removeAttachments(attachment);
+    removeAttachments(attachments, attachment);
     if (attachment.id) {
       mergeMessage({
-        file_ids: $message.file_ids.filter(
-          (id: string) => id !== attachment.id,
-        ),
-        files: $message.files?.filter(
-          (file: File) => file.id !== attachment.id,
-        ),
+        file_ids: message.file_ids.filter((id: string) => id !== attachment.id),
+        files: message.files?.filter((file: File) => file.id !== attachment.id),
       });
     }
     if (afterFileRemove) afterFileRemove(attachment);
@@ -368,10 +378,10 @@
     sendError = false;
     sendSuccess = false;
 
-    let msg = $message;
+    let msg = message;
     if (beforeSend) {
       // If beforeSend returns value, it will replace the message
-      const upd = beforeSend($message);
+      const upd = beforeSend(message);
       // @ts-ignore
       if (upd) msg = upd;
     }
@@ -385,7 +395,10 @@
         })
         .catch((err) => {
           if (afterSendError) afterSendError(err);
-          if (_this.reset_after_send) resetAfterSend($message.from);
+          if (_this.reset_after_send) {
+            message = { ...message, ...messageInitialState };
+            resetAttachments(attachments);
+          }
           isPending = false;
           sendError = true;
         });
@@ -403,7 +416,10 @@
       sendMessage(id, msg, access_token)
         .then((res) => {
           if (afterSendSuccess) afterSendSuccess(res);
-          if (_this.reset_after_send) resetAfterSend($message.from);
+          if (_this.reset_after_send) {
+            message = { ...message, ...messageInitialState };
+            resetAttachments(attachments);
+          }
           isPending = false;
           sendSuccess = true;
           dispatchEvent("messageSent", {
@@ -427,7 +443,7 @@
     saveError = false;
     saveSuccess = false;
 
-    let msg = $message;
+    let msg = message;
     try {
       if (save) {
         //Calling custom save callback
@@ -468,9 +484,9 @@
 
   // Listener for message changes
   // @ts-ignore
-  $: if ($message && change) change($message);
+  $: if (message && change) change(message);
   // @ts-ignore
-  $: datepickerTimestamp = $message.send_at * 1000;
+  $: datepickerTimestamp = message.send_at * 1000;
 
   let sendButtonText: string = "Send";
   $: if (isPending) {
@@ -485,8 +501,8 @@
     !isPending &&
     !isSaving &&
     (id || send) &&
-    $message.from.length &&
-    ($message.to.length || $message.cc.length || $message.bcc.length);
+    message.from.length &&
+    (message.to.length || message.cc.length || message.bcc.length);
 
   let themeUrl: string;
   $: if (!!_this.theme) {
@@ -875,12 +891,12 @@
                 <div class="contacts-results-inner">
                   <div class="contact-item" data-cy="from-field">
                     <span class="contact-item__name">
-                      {#if $message.from.length > 0}
-                        {#if $message.from[0].name}
-                          <strong>{$message.from[0].name}</strong>
-                          {`<${$message.from[0].email}>`}
+                      {#if message.from.length > 0}
+                        {#if message.from[0].name}
+                          <strong>{message.from[0].name}</strong>
+                          {`<${message.from[0].email}>`}
                         {:else}
-                          {$message.from[0].email}
+                          {message.from[0].email}
                         {/if}
                       {/if}
                     </span>
@@ -895,7 +911,7 @@
               placeholder="To:"
               change={handleContactsChange("to")}
               contacts={to}
-              value={$message.to} />
+              value={message.to} />
           {/if}
           <div class="addons">
             <button
@@ -927,7 +943,7 @@
               data-cy="cc-field"
               placeholder="CC:"
               contacts={cc}
-              value={$message.cc}
+              value={message.cc}
               change={handleContactsChange("cc")} />
             <button
               type="button"
@@ -948,7 +964,7 @@
               data-cy="bcc-field"
               placeholder="BCC:"
               contacts={bcc}
-              value={$message.bcc}
+              value={message.bcc}
               change={handleContactsChange("bcc")} />
             <button
               type="button"
@@ -981,7 +997,7 @@
         <!-- HTML Editor -->
         <nylas-html-editor
           data-cy="html-editor"
-          html={$message.body || template}
+          html={message.body || template}
           onchange={handleBodyChange}
           focus_body_onload={_this.focus_body_onload}
           replace_fields={_this.replace_fields}
@@ -1049,7 +1065,7 @@
         <nylas-composer-datepicker-modal close={datePickerClose} {schedule} />
       {/if}
       <!-- Datepicker Alert (if message is scheduled) -->
-      {#if $message.send_at && !sendError && !sendSuccess}
+      {#if message.send_at && !sendError && !sendSuccess}
         <nylas-composer-alert-bar
           type="info"
           dismissible={true}

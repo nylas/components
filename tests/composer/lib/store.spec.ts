@@ -1,9 +1,13 @@
 import {
-  attachments,
   addAttachments,
   removeAttachments,
+  attachmentsInitialState,
 } from "../../../components/composer/src/lib/store";
-import { get } from "svelte/store";
+import { get, writable } from "svelte/store";
+
+const attachments = writable(
+  JSON.parse(JSON.stringify(attachmentsInitialState)),
+);
 describe("Attachments store", () => {
   const ATTACHMENT = {
     filename: "Test attachment",
@@ -15,21 +19,21 @@ describe("Attachments store", () => {
   });
   it("Adds a new attachment", () => {
     expect(get(attachments).length).toBe(0);
-    addAttachments(ATTACHMENT);
+    addAttachments(attachments, ATTACHMENT);
     expect(get(attachments).length).toBe(1);
     expect(get(attachments)[0]).toBe(ATTACHMENT);
   });
   it("If attachment is already in the list do not add it", () => {
     expect(get(attachments).length).toBe(0);
-    addAttachments(ATTACHMENT);
-    addAttachments(ATTACHMENT);
+    addAttachments(attachments, ATTACHMENT);
+    addAttachments(attachments, ATTACHMENT);
     expect(get(attachments).length).toBe(1);
   });
   it("Removes a specified attachemnt", () => {
     expect(get(attachments).length).toBe(0);
-    addAttachments(ATTACHMENT);
+    addAttachments(attachments, ATTACHMENT);
     expect(get(attachments).length).toBe(1);
-    removeAttachments(ATTACHMENT);
+    removeAttachments(attachments, ATTACHMENT);
     expect(get(attachments).length).toBe(0);
   });
 });

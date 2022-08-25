@@ -3,7 +3,7 @@ const BASE_PATH = Cypress.env("TEST_COVERAGE")
   ? "composer/src/cypress.html"
   : "/components/composer/src/cypress.html";
 
-describe("Composer loading state", () => {
+xdescribe("Composer loading state", () => {
   it("displays loading screen", () => {
     cy.visit(BASE_PATH);
 
@@ -11,7 +11,7 @@ describe("Composer loading state", () => {
   });
 });
 
-describe("Composer dispatches events", () => {
+xdescribe("Composer dispatches events", () => {
   const eventsFired = {
     minimized: false,
     maximized: false,
@@ -99,7 +99,7 @@ describe("Composer dispatches events", () => {
   });
 });
 
-describe("Composer `to` prop", () => {
+xdescribe("Composer `to` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -178,7 +178,7 @@ describe("Composer `to` prop", () => {
   });
 });
 
-describe("Composer interactions", () => {
+xdescribe("Composer interactions", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -292,7 +292,7 @@ describe("Composer interactions", () => {
   });
 });
 
-describe("Composer customizations", () => {
+xdescribe("Composer customizations", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -589,7 +589,7 @@ describe("Composer customizations", () => {
   });
 });
 
-describe("Composer integration", () => {
+xdescribe("Composer integration", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -778,7 +778,7 @@ describe("Composer integration", () => {
   });
 });
 
-describe("Composer callbacks and options", () => {
+xdescribe("Composer callbacks and options", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -834,7 +834,7 @@ describe("Composer callbacks and options", () => {
   });
 });
 
-describe("Composer file upload", () => {
+xdescribe("Composer file upload", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -996,7 +996,7 @@ describe("Composer file upload", () => {
   });
 });
 
-describe("Composer subject", () => {
+xdescribe("Composer subject", () => {
   beforeEach(() => {
     cy.visitComponentPage(BASE_PATH, "nylas-composer", "demo-composer");
     cy.get("@testComponent")
@@ -1021,7 +1021,7 @@ describe("Composer subject", () => {
   });
 });
 
-describe("Save composer message as draft", () => {
+xdescribe("Save composer message as draft", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -1110,7 +1110,7 @@ describe("Save composer message as draft", () => {
   });
 });
 
-describe("Composer `value` prop", () => {
+xdescribe("Composer `value` prop", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -1299,7 +1299,7 @@ describe("Composer `value` prop", () => {
   });
 });
 
-describe("Composer formatting", () => {
+xdescribe("Composer formatting", () => {
   beforeEach(() => {
     cy.visit(BASE_PATH);
 
@@ -1423,5 +1423,86 @@ describe("Composer formatting", () => {
       .get(".html-editor-content[contenteditable]")
       .invoke("html")
       .should("contain", "<b>hello, world!</b>");
+  });
+});
+
+describe("Multiple Composer components", () => {
+  beforeEach(() => {
+    cy.intercept(
+      "GET",
+      "https://web-components.nylas.com/middleware/manifest",
+      { fixture: "composer/manifest.json" },
+    ).as("getMiddlewareManifest");
+
+    cy.intercept("GET", "https://web-components.nylas.com/middleware/account", {
+      fixture: "composer/manifest.json",
+    }).as("getMiddlewareAccount");
+
+    cy.intercept("GET", "/users", [
+      { name: "Test User", email: "tester@test.com" },
+      { name: "Secound Test User", email: "tester2@test.com" },
+    ]).as("getUsers");
+
+    cy.visit(BASE_PATH);
+    cy.wait(["@getMiddlewareManifest", "@getMiddlewareAccount"]);
+
+    cy.get("body").invoke(
+      "html",
+      '<nylas-composer id="test-composer" class="composer-one"></nylas-composer><nylas-composer id="test-composer" class="composer-one"></nylas-composer>',
+    );
+
+    cy.get("nylas-composer").eq(0).as("composerOne");
+    cy.get("nylas-composer").eq(1).as("composerTwo");
+    cy.wait("@getMiddlewareAccount");
+    cy.wait("@getMiddlewareAccount");
+  });
+
+  it("Type inbox in multiple composers", () => {
+    cy.get("@composerOne").within(() => {
+      cy.get(".html-editor-content").type("Hello One");
+    });
+    cy.get("@composerTwo").within(() => {
+      cy.get(".html-editor-content").type("Hello Two");
+    });
+    cy.get("@composerTwo").within(() => {
+      cy.get(".html-editor-content").should("not.contain", "Hello One");
+    });
+    cy.get("@composerTwo").within(() => {
+      cy.get(".html-editor-content").should("contain", "Hello Two");
+    });
+  });
+
+  it("Add attachment in multiple composers", () => {
+    const filePath = "composer/files/tiny_text_file.txt";
+    const uploadFile = (id, _file) => {
+      return Promise.resolve({ id });
+    };
+    cy.get("@composerOne").then((el) => {
+      const component = el[0];
+      component.value = {
+        from: [
+          {
+            name: "Luka Test",
+            email: "luka.b@test.com",
+          },
+        ],
+        to: [
+          {
+            name: "Dan Test",
+            email: "dan.r@test.com",
+          },
+        ],
+      };
+      component.uploadFile = uploadFile;
+    });
+    cy.get("input[type=file]").attachFile(filePath);
+    cy.get("@composerOne").within(() => {
+      cy.get("nylas-composer-attachment")
+        .contains("tiny_text_file.txt")
+        .should("be.visible");
+    });
+    cy.get("@composerTwo").within(() => {
+      cy.get("nylas-composer-attachment").should("not.exist");
+    });
   });
 });
