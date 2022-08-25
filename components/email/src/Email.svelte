@@ -118,6 +118,7 @@
   const PARTICIPANTS_TO_TRUNCATE = 3;
 
   let propsLoaded = false;
+  let manifestLoaded = false;
   onMount(async () => {
     await tick();
     propsLoaded = true;
@@ -125,6 +126,7 @@
     manifest = ((await $ManifestStore[
       JSON.stringify({ component_id: id, access_token })
     ]) || {}) as EmailProperties;
+    manifestLoaded = true;
 
     _this = buildInternalProps(
       $$props,
@@ -157,6 +159,7 @@
 
   let previousProps = $$props;
   $: propsLoaded &&
+    manifestLoaded &&
     (async () => {
       if (JSON.stringify(previousProps) !== JSON.stringify($$props)) {
         _this = buildInternalProps(
@@ -166,11 +169,12 @@
         ) as EmailProperties;
 
         await transformPropertyValues();
-        previousProps = $$props;
       }
     })();
 
   async function transformPropertyValues() {
+    const previousPropsThreadId = previousProps.thread_id;
+    previousProps = $$props;
     _this.thread_id =
       !thread && !message_id && !message
         ? _this.thread_id || manifest.thread_id
@@ -179,8 +183,7 @@
     if (id && !_this.thread_id && !_this.thread && _this.message_id) {
       fetchOneMessage();
     }
-
-    if (!activeThread || previousProps.thread_id !== _this.thread_id) {
+    if (!activeThread || previousPropsThreadId !== _this.thread_id) {
       await getThread();
     }
   }
@@ -273,7 +276,7 @@
   // #region thread intake and set
   let fetchingThreadPromise: Promise<Conversation>;
   async function getThread() {
-    if (id && _this.thread_id && !fetchingThreadPromise) {
+    if (id && _this.thread_id) {
       fetchingThreadPromise = <Promise<Conversation>>fetchThread({
         component_id: id,
         thread_id: _this.thread_id,
@@ -293,6 +296,7 @@
         thread.expanded =
           activeThread?.expanded ?? _this.show_expanded_email_view_onload;
         activeThread = thread;
+        dispatchEvent("threadLoaded", thread);
       }
     }
   }
@@ -685,8 +689,10 @@
       return fetchMessage(query, messageID).then(async (json) => {
         if (FilesStore.hasInlineFiles(json)) {
           const messageWithInlineFiles = await getMessageWithInlineFiles(json);
+          dispatchEvent("messageLoaded", messageWithInlineFiles);
           return messageWithInlineFiles;
         }
+        dispatchEvent("messageLoaded", json);
         return json;
       });
     }
@@ -709,6 +715,7 @@
         const message = await getMessageWithInlineFiles(_this.message);
         _this.message = message;
       }
+      dispatchEvent("messageLoaded", _this.message);
     });
   }
 

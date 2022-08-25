@@ -1165,10 +1165,9 @@ describe("Email: Reply, Reply-all, Forward", () => {
 
     cy.visit(BASE_PATH);
 
-    cy.get("nylas-email")
-      .as("email")
-      .invoke("prop", "thread_id", "83v13r9lj6kzh109c3l1yznnf");
+    cy.get("nylas-email").as("email");
     cy.get("@email").invoke("prop", "show_expanded_email_view_onload", true);
+    cy.get("@email").invoke("prop", "thread_id", "83v13r9lj6kzh109c3l1yznnf");
   });
 
   it("shows reply icon", () => {
@@ -1722,5 +1721,61 @@ describe("Should Render Reply All Button And Respond To Clicks", () => {
           );
         });
       });
+  });
+});
+
+describe("Email: threadLoaded and messageLoaded Events", () => {
+  beforeEach(() => {
+    cy.batchIntercept("GET", {
+      "**/middleware/manifest": "email/manifest",
+      "**/middleware/account": "email/account",
+      "**/middleware/labels": "email/labels",
+      "**/middleware/messages/affxolvozy2pcqh4303w7pc9n": "email/messages/id",
+      "**/middleware/threads/e2k5xktxejdok7d8x28ljf44d*": "email/threads/id",
+    });
+    cy.intercept("**/middleware/threads/*").as("threads");
+
+    cy.visit(BASE_PATH);
+    cy.wait("@threads");
+  });
+
+  it("Should dispatch threadLoaded and messageLoaded event", () => {
+    cy.get("nylas-email")
+      .as("email")
+      .invoke("prop", "thread_id", "e2k5xktxejdok7d8x28ljf44d");
+    cy.get("@email").invoke("prop", "show_expanded_email_view_onload", true);
+
+    const container = {};
+    const THREAD_EVENT = "threadLoaded";
+    const MESSAGE_EVENT = "messageLoaded";
+
+    cy.get("@email").then((elements) => {
+      const component = elements[0];
+      const listener = (EVENT_ID) => (event) => {
+        component.removeEventListener(EVENT_ID, listener);
+        container[EVENT_ID] = event;
+      };
+      component.addEventListener(THREAD_EVENT, listener(THREAD_EVENT));
+      component.addEventListener(MESSAGE_EVENT, listener(MESSAGE_EVENT));
+
+      cy.wrap(container).should(
+        (container) =>
+          expect(container[THREAD_EVENT].detail).not.to.be.undefined,
+        (container) =>
+          expect(container[MESSAGE_EVENT].detail).not.to.be.undefined,
+      );
+
+      cy.wrap(container).then((container) => {
+        expect(container[THREAD_EVENT].detail.object).to.equal("thread");
+        expect(container[THREAD_EVENT].detail.id).to.equal(
+          "e2k5xktxejdok7d8x28ljf44d",
+        );
+
+        expect(container[MESSAGE_EVENT].detail.object).to.equal("message");
+        expect(container[MESSAGE_EVENT].detail.id).to.equal(
+          "affxolvozy2pcqh4303w7pc9n",
+        );
+      });
+    });
   });
 });
