@@ -26,36 +26,59 @@
 
 <style lang="scss">
   .pagination-nav {
-    --disabled-text: ##454954;
+    --disabled-text: #454954;
     --font: -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     align-items: center;
 
     .page-indicator {
-      color: #454954;
+      color: var(--nylas-mailbox-pagination-indicator-color, #454954);
       height: 38px;
       margin: 2em 1em 0 1em;
     }
-  }
+    .paginate-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1em;
+      text-align: center;
+      min-width: 38px;
+      min-height: 38px;
+      margin-right: -1px;
+      font-family: var(--font);
+      cursor: pointer;
+      border: 1px solid
+        var(--nylas-mailbox-pagination-button-border-color, #e3e8ee);
+      background-color: var(
+        --nylas-mailbox-pagination-button-background,
+        #f7f7f8
+      );
+      color: var(--nylas-mailbox-pagination-button-color, #454954);
 
-  button {
-    margin-top: 1em;
-    text-align: center;
-    min-width: 38px;
-    min-height: 38px;
-    border: #e3e8ee solid 1px;
-    margin-right: -1px;
-    font-family: var(--font);
-    background-color: #f7f7f8;
-    color: #454954;
-    cursor: pointer;
+      * {
+        stroke: var(--nylas-mailbox-pagination-button-color, #454954);
+      }
 
-    &.current {
-      background-color: white;
-      color: #2c2e2e;
-    }
-    &:disabled {
-      cursor: default;
+      &:hover {
+        background-color: var(
+          --nylas-mailbox-pagination-button-hover-color,
+          #eaeaea
+        );
+      }
+
+      &.current {
+        background-color: white;
+        color: #2c2e2e;
+      }
+      &:disabled {
+        cursor: default;
+        background-color: var(
+          --nylas-mailbox-pagination-button-background-disabled,
+          #f7f7f8
+        );
+        border: 1px solid
+          var(--nylas-mailbox-pagination-button-background-disabled, #f7f7f8);
+      }
     }
   }
 
@@ -82,29 +105,25 @@
     <button
       class="paginate-btn first-btn"
       on:click={() => changePage(0)}
-      disabled={current_page === 0}
-    >
+      disabled={current_page === 0}>
       <FirstIcon style="width: 24px; height: 24px;" />
     </button>
     <button
       class="paginate-btn back-btn"
       on:click={() => changePage(current_page - 1)}
-      disabled={current_page === 0}
-    >
+      disabled={current_page === 0}>
       <BackIcon style="width: 24px; height: 24px;" />
     </button>
     <button
       class="paginate-btn next-btn"
       on:click={() => changePage(current_page + 1)}
-      disabled={current_page === num_pages - 1}
-    >
+      disabled={current_page === num_pages - 1}>
       <NextIcon style="height:24px;width:24px;" />
     </button>
     <button
       class="paginate-btn last-btn"
       on:click={() => changePage(num_pages - 1)}
-      disabled={current_page === num_pages - 1}
-    >
+      disabled={current_page === num_pages - 1}>
       <LastIcon style="height:24px;width:24px;" />
     </button>
   {/if}

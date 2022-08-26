@@ -62,6 +62,7 @@
   import ForwardIcon from "./assets/forward.svg";
   import { isFileAnAttachment } from "@commons/methods/isFileAnAttachment";
   import { updateMessage } from "@commons/connections/messages";
+  import pkg from "../package.json";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -102,7 +103,7 @@
     show_received_timestamp: true,
     show_star: false,
     show_thread_actions: false,
-    theme: "theme-1",
+    theme: "auto",
     thread_id: "",
     you: {},
     show_reply: false,
@@ -117,6 +118,7 @@
   $: userEmail = <string>_this.you?.email_address;
   const PARTICIPANTS_TO_TRUNCATE = 3;
 
+  let themeLoaded = false;
   let propsLoaded = false;
   let manifestLoaded = false;
   onMount(async () => {
@@ -1011,6 +1013,16 @@
       return aggregatedRecipients;
     }, "");
   }
+
+  let themeUrl: string;
+  $: if (!!_this.theme) {
+    if (_this.theme.startsWith(".") || _this.theme.startsWith("http")) {
+      // If custom url supplied
+      themeUrl = _this.theme;
+    } else if (_this.theme) {
+      themeUrl = `https://unpkg.com/@nylas/components-email@${pkg.version}/themes/${_this.theme}.css`;
+    }
+  }
 </script>
 
 <style lang="scss">
@@ -1042,7 +1054,7 @@
     );
     .email-row {
       background: var(--nylas-email-background, var(--grey-lightest));
-      border: var(--email-border-style, 1px solid var(--grey-lighter));
+      border: 1px solid var(--nylas-email-border-style, var(--grey-lighter));
 
       nylas-tooltip {
         position: relative;
@@ -1072,50 +1084,6 @@
         padding: $spacing-xs;
         padding-bottom: 0;
       }
-      &.condensed {
-        height: $mobile-collapsed-height;
-        padding: $spacing-xs;
-        flex-wrap: wrap;
-        overflow: hidden;
-        @include condensed-grid;
-        &.disable-click {
-          cursor: not-allowed;
-          display: grid;
-          align-items: flex-start;
-          background: var(--grey-lighter);
-        }
-
-        .from-star {
-          display: grid;
-          grid-template-columns: 25px auto;
-          column-gap: $spacing-xs;
-        }
-        .thread-message-count {
-          color: var(--nylas-email-thread-message-count-color, var(--black));
-          font-size: 12px;
-          text-align: left;
-        }
-        .date {
-          text-align: right;
-        }
-        &.unread {
-          background: var(--nylas-email-unread-background, white);
-
-          .from-message-count,
-          .date,
-          .subject {
-            font-weight: 600;
-            color: var(--nylas-email-subject-color, var(--black));
-
-            .thread-message-count {
-              color: var(
-                --nylas-email-unread-thread-message-count-color,
-                var(--blue)
-              );
-            }
-          }
-        }
-      }
       div.starred {
         position: relative;
         display: flex;
@@ -1129,14 +1097,14 @@
             content: "\2605";
             display: inline-block;
             font-size: 1.1em;
-            color: var(--nylas-email-unstarred-star-button-color, #8d94a5);
+            color: var(--nylas-email-star-button-inactive-color, #8d94a5);
             -webkit-user-select: none;
             -moz-user-select: none;
             user-select: none;
           }
 
           &.starred:before {
-            color: var(--nylas-email-star-button-color, #ffc107);
+            color: var(--nylas-email-star-button-active-color, #ffc107);
           }
           &:hover:before {
             color: var(--nylas-email-star-button-hover-color, #ffc107);
@@ -1146,6 +1114,9 @@
       &.expanded {
         background: var(--nylas-email-body-background, var(--white));
         padding: 0;
+        border: 1px solid
+          var(--nylas-email-border-style-expanded, var(--grey-lighter));
+        border-radius: 4px;
         $outline-style: 1px solid var(--grey-lighter);
         @mixin barStyle {
           outline: $outline-style;
@@ -1173,30 +1144,14 @@
           }
         }
 
-        header {
+        .subject-header {
           @include barStyle;
           border-radius: 4px 4px 0 0;
           font-weight: bold;
-        }
-
-        [role="toolbar"] {
-          @include barStyle;
-          padding: $spacing-s $spacing-m;
-          gap: $spacing-m;
-        }
-
-        .message-head [role="toolbar"] {
-          outline: none;
-        }
-
-        .message-head [role="toolbar"] button {
-          background: none;
-          outline: none;
-          cursor: pointer;
-        }
-
-        .subject-title {
+          display: flex;
           justify-content: space-between;
+          color: var(--nylas-email-subject-color, black);
+          background: var(--nylas-email-header-background, white);
           &.mailbox {
             cursor: default;
           }
@@ -1206,9 +1161,28 @@
             gap: $spacing-m;
 
             button {
-              background: none;
               display: flex;
+              background: none;
+              border: none;
+              outline: 0;
+              width: 32px;
+              height: 32px;
+              border-radius: 6px;
+              justify-content: center;
+              align-items: center;
               cursor: pointer;
+              &:hover {
+                background: var(
+                  --nylas-email-button-hover-background,
+                  var(--grey-lighter)
+                );
+              }
+              * {
+                width: 1em;
+                height: 1em;
+                fill: var(--nylas-email-subject-color, var(--grey-dark));
+                stroke: var(--nylas-email-subject-color, var(--grey-dark));
+              }
             }
           }
           [role="toolbar"] {
@@ -1220,6 +1194,32 @@
               }
             }
           }
+        }
+
+        [role="toolbar"] {
+          @include barStyle;
+          padding: $spacing-s $spacing-m;
+          gap: $spacing-m;
+          button {
+            background: none;
+            cursor: pointer;
+            display: flex;
+            * {
+              width: 1em;
+              height: 1em;
+              stroke: var(--nylas-email-body-color, var(--grey-dark));
+            }
+          }
+        }
+
+        .message-head [role="toolbar"] {
+          outline: none;
+        }
+
+        .message-head [role="toolbar"] button {
+          background: none;
+          outline: none;
+          cursor: pointer;
         }
 
         .icon-container,
@@ -1242,16 +1242,15 @@
             display: inline-flex;
             flex-direction: column;
             width: 100%;
+            color: var(--nylas-email-body-color, black);
             div.attachment {
               overflow-x: auto;
               button {
                 margin: $spacing-xs;
                 height: fit-content;
                 padding: 0.3rem 1rem;
-                border: var(
-                  --nylas-email-attachment-border-style,
-                  1px solid var(--grey)
-                );
+                border: 1px solid
+                  var(--nylas-email-attachment-border-style, var(--grey));
                 border-radius: 30px;
                 color: var(--nylas-email-attachment-button-color, inherit);
                 background: var(--nylas-email-attachment-button-bg, white);
@@ -1289,7 +1288,8 @@
             }
           }
           &:not(:last-of-type) {
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid
+              var(--nylas-email-border-style-expanded, var(--grey-lighter));
           }
           &:not(.last-message) {
             &.expanded {
@@ -1324,6 +1324,7 @@
           div.message-from {
             display: flex;
             align-items: center;
+            color: var(--nylas-email-message-from-color, black);
             span {
               &.name {
                 font-weight: 600;
@@ -1392,7 +1393,7 @@
         grid-gap: $spacing-m;
         justify-content: flex-start;
         max-width: 350px;
-
+        color: var(--nylas-email-participant-color, var(--grey-dark));
         .from-participants {
           display: grid;
           grid-template-columns: 1fr fit-content(60px);
@@ -1464,10 +1465,8 @@
 
           button {
             padding: 0.3rem 1rem;
-            border: var(
-              --nylas-email-attachment-border-style,
-              1px solid var(--grey)
-            );
+            border: 1px solid
+              var(--nylas-email-attachment-border-style, var(--grey));
             border-radius: 30px;
             color: var(--nylas-email-attachment-button-color, inherit);
             background: var(--nylas-email-attachment-button-bg, white);
@@ -1496,25 +1495,72 @@
             font-size: 14px;
             color: var(--nylas-email-message-date-color, var(--grey));
           }
-          &.action-icons {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            width: 100%;
-            gap: 1rem;
-            & > :last-child {
-              padding-right: 1rem;
-            }
-            button {
-              background: none;
-              cursor: pointer;
-              display: flex;
+        }
+      }
+      .date {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 100%;
+        gap: 1rem;
+        & > :last-child {
+          padding-right: 1rem;
+        }
+        button,
+        span {
+          background: none;
+          cursor: pointer;
+          display: flex;
 
-              * {
-                width: 1em;
-                height: 1em;
-              }
-            }
+          * {
+            width: 1em;
+            height: 1em;
+            fill: var(--nylas-email-action-icons-color, var(--grey-dark));
+          }
+        }
+      }
+
+      &.condensed {
+        height: $mobile-collapsed-height;
+        padding: $spacing-xs;
+        flex-wrap: wrap;
+        overflow: hidden;
+        @include condensed-grid;
+        &.disable-click {
+          cursor: not-allowed;
+          display: grid;
+          align-items: flex-start;
+          background: var(--grey-lighter);
+        }
+
+        .from-star {
+          display: grid;
+          grid-template-columns: 25px auto;
+          column-gap: $spacing-xs;
+        }
+        .thread-message-count {
+          color: var(--nylas-email-thread-message-count-color, var(--black));
+          font-size: 12px;
+          text-align: left;
+        }
+        .date {
+          text-align: right;
+        }
+        &.unread {
+          background: var(--nylas-email-unread-background, white);
+
+          .from-message-count,
+          .date,
+          .subject {
+            font-weight: 600;
+            color: var(--nylas-email-unread-subject-color, var(--black));
+          }
+
+          .thread-message-count {
+            color: var(
+              --nylas-email-unread-thread-message-count-color,
+              var(--blue)
+            );
           }
         }
       }
@@ -1674,7 +1720,15 @@
 </style>
 
 <nylas-error {id} />
+{#if themeUrl}
+  <link
+    rel="stylesheet"
+    href={themeUrl}
+    on:load={() => (themeLoaded = true)}
+    on:error={() => (themeLoaded = true)} />
+{/if}
 <main
+  class="nylas-email"
   data-cy="nylas-email"
   bind:this={main}
   on:click={handleThreadClick}
@@ -1692,9 +1746,9 @@
               ? 'expanded-mailbox-thread'
               : ''}">
             <header
-              class="subject-title"
+              class="subject-header"
               class:mailbox={_this.click_action === "mailbox"}>
-              <div>
+              <div class="subject-title">
                 {#if _this.click_action === "mailbox"}
                   <button
                     title={"Return to Mailbox"}

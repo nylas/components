@@ -206,7 +206,7 @@ export interface EmailProperties extends Manifest {
   show_received_timestamp: boolean;
   show_star: boolean;
   show_thread_actions: boolean;
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  theme: "auto" | "light" | "dark";
   thread_id: string;
   thread: Thread;
   you: Partial<Account>;
@@ -224,7 +224,7 @@ export interface MailboxProperties extends Manifest {
   query_string: string;
   show_star: boolean;
   show_thread_checkbox: boolean;
-  theme: "theme-1" | "theme-2" | "theme-3" | "theme-4" | "theme-5";
+  theme: "auto" | "light" | "dark";
   show_reply: boolean;
   show_reply_all: boolean;
   show_forward: boolean;

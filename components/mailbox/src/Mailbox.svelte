@@ -36,6 +36,7 @@
   import TrashIcon from "./assets/trash-alt.svg";
   import "./components/PaginationNav.svelte";
   import { FilesStore } from "@commons/store/files";
+  import pkg from "../package.json";
 
   const dispatchEvent = getEventDispatcher(get_current_component());
   $: dispatchEvent("manifestLoaded", manifest);
@@ -61,6 +62,7 @@
   export let show_reply: boolean;
   export let show_reply_all: boolean;
   export let show_forward: boolean;
+  export let theme: string;
   export let thread_click_action: MailboxThreadClickAction =
     MailboxThreadClickAction.DEFAULT;
 
@@ -73,6 +75,7 @@
     show_reply: false,
     show_reply_all: false,
     show_forward: false,
+    theme: "auto",
     thread_click_action: MailboxThreadClickAction.DEFAULT,
   };
 
@@ -91,6 +94,7 @@
   let _this = <MailboxProperties>buildInternalProps({}, {}, defaultValueMap);
 
   let currentlySelectedThread: Thread | null;
+  let themeLoaded = false;
   let hasComponentLoaded = false;
   let displayedThreadsPromise: Promise<Thread[]>;
 
@@ -685,6 +689,16 @@
       value,
     });
   }
+
+  let themeUrl: string;
+  $: if (!!_this.theme) {
+    if (_this.theme.startsWith(".") || _this.theme.startsWith("http")) {
+      // If custom url supplied
+      themeUrl = _this.theme;
+    } else if (_this.theme) {
+      themeUrl = `https://unpkg.com/@nylas/components-mailbox@${pkg.version}/themes/${_this.theme}.css`;
+    }
+  }
 </script>
 
 <style lang="scss">
@@ -707,13 +721,14 @@
     display: grid;
     grid-auto-rows: max-content;
     font-family: var(
-      --mailbox-font-family,
+      --nylas-mailbox-font-family,
       -apple-system,
       BlinkMacSystemFont,
       sans-serif
     );
 
-    $outline-style: 1px solid var(--mailbox-border-color, var(--grey-lighter));
+    $outline-style: 1px solid
+      var(--nylas-mailbox-border-color, var(--grey-lighter));
     @mixin barStyle {
       border: $outline-style;
       display: flex;
@@ -740,8 +755,11 @@
       border-bottom: none;
       border-radius: 4px 4px 0 0;
       font-weight: bold;
+      background: var(--nylas-mailbox-header-background, white);
+      color: var(--nylas-email-subject-color, black);
       button {
         svg {
+          fill: var(--nylas-email-subject-color, black);
           &.refreshing {
             animation: rotate 1s linear infinite;
           }
@@ -758,9 +776,11 @@
     [role="toolbar"] {
       @include barStyle;
       border-bottom: 0.5px solid
-        var(--mailbox-border-color, var(--grey-lighter));
+        var(--nylas-mailbox-border-color, var(--grey-lighter));
+      background: var(--nylas-mailbox-toolbar-background, white);
       padding: $spacing-s $spacing-m;
       gap: $spacing-m;
+      min-height: 24px;
 
       .thread-checkbox {
         display: flex;
@@ -771,7 +791,7 @@
           fill: var(--grey);
         }
         svg {
-          fill: var(--grey-dark);
+          fill: var(--nylas-email-action-icons-color, var(--grey-dark));
         }
       }
     }
@@ -798,7 +818,7 @@
           content: "\2605";
           display: inline-block;
           font-size: 1em;
-          color: var(--mailbox-starred-disabled-color, var(--grey));
+          color: var(--nylas-email-star-button-disabled-color, var(--grey));
           -webkit-user-select: none;
           -moz-user-select: none;
           user-select: none;
@@ -806,11 +826,11 @@
 
         &:not([disabled]):before,
         svg {
-          color: var(--mailbox-starred-unselected-color, #8d94a5);
+          color: var(--nylas-email-star-button-inactive-color, #8d94a5);
         }
 
         &:not([disabled]).starred:before {
-          color: var(--mailbox-starred-enabled-color, #ffc107);
+          color: var(--nylas-email-star-button-active-color, #ffc107);
         }
       }
     }
@@ -829,46 +849,49 @@
 
       &:hover {
         box-shadow: inset 1px 0 0
-            var(--mailbox-grey-warm-color, var(--grey-warm)),
-          inset -1px 0 0 var(--mailbox-grey-warm-color, var(--grey-warm)),
+            var(--nylas-mailbox-hover-shadow-color, var(--grey-warm)),
+          inset -1px 0 0 var(--nylas-mailbox-hover-shadow-color, var(--grey-warm)),
           0 1px 2px 0 rgb(44 46 46 / 20%), 0 1px 3px 1px rgb(44 46 46 / 5%);
-        border-color: var(--mailbox-grey-warm-color, var(--grey-warm));
+        border-color: var(--nylas-mailbox-hover-shadow-color, var(--grey-warm));
         cursor: pointer;
         z-index: 1;
       }
 
       // #region define border styles
-      --email-border-style: none;
-      border: 1px solid var(--grey-lighter);
-      border-top: var(
-        --mailbox-vertical-border-style,
-        0.5px solid var(--grey-lighter)
-      );
-      border-bottom: var(
-        --mailbox-vertical-border-style,
-        0.5px solid var(--grey-lighter)
-      );
-      border-left: var(
-        --mailbox-horizontal-border-style,
-        1px solid var(--grey-lighter)
-      );
-      border-right: var(
-        --mailbox-horizontal-border-style,
-        1px solid var(--grey-lighter)
-      );
+      --nylas-email-border-style: none !important;
+      border-top: 0.5px solid
+        var(
+          --nylas-mailbox-vertical-border-color,
+          var(--nylas-mailbox-border-color, var(--grey-lighter))
+        );
+      border-bottom: 0.5px solid
+        var(
+          --nylas-mailbox-vertical-border-color,
+          var(--nylas-mailbox-border-color, var(--grey-lighter))
+        );
+      border-left: 1px solid
+        var(
+          --nylas-mailbox-horizontal-border-color,
+          var(--nylas-mailbox-border-color, var(--grey-lighter))
+        );
+      border-right: 1px solid
+        var(
+          --nylas-mailbox-horizontal-border-color,
+          var(--nylas-mailbox-border-color, var(--grey-lighter))
+        );
 
       // #endregion define border styles
 
       // #region define background styles
+      // --nylas-email-border-left-width: 0px;
       --nylas-email-background: transparent;
-      --nylas-email-border-left-width: 0px;
       --nylas-email-unread-background: transparent;
 
       &:not(.unread) {
-        background: var(--mailbox-read-color, var(--grey-lightest));
+        background: var(--nylas-mailbox-read-background, var(--grey-lightest));
       }
       &.unread {
-        background: var(--mailbox-unread-color, var(--nylas-email-background));
+        background: var(--nylas-mailbox-unread-background, white);
       }
       &.no-messages {
         background: var(--grey-lighter);
@@ -882,8 +905,9 @@
 
       // #region define checked styles
       &.checked {
-        border-left: 4px solid var(--mailbox-checked-border-color, var(--blue));
-        background: var(--mailbox-checked-bg-color, var(--blue-lighter));
+        border-left: 4px solid
+          var(--nylas-mailbox-checked-border-color, var(--blue));
+        background: var(--nylas-mailbox-checked-bg-color, var(--blue-lighter));
 
         .checkbox-container.thread-checkbox {
           padding-left: 13px;
@@ -946,7 +970,7 @@
       div.starred {
         button {
           &:hover:before {
-            color: var(--mailbox-starred-enabled-color, #ffc107);
+            color: var(--nylas-email-star-button-active-color, #ffc107);
           }
         }
       }
@@ -954,7 +978,15 @@
   }
 </style>
 
+{#if themeUrl}
+  <link
+    rel="stylesheet"
+    href={themeUrl}
+    on:load={() => (themeLoaded = true)}
+    on:error={() => (themeLoaded = true)} />
+{/if}
 <main
+  class="nylas-mailbox"
   data-cy="nylas-mailbox"
   class:loading={!hasComponentLoaded}
   class:empty={!threads?.length && hasComponentLoaded}>
@@ -970,6 +1002,7 @@
           show_reply={_this.show_reply}
           show_reply_all={_this.show_reply_all}
           show_forward={_this.show_forward}
+          theme={themeUrl}
           on:messageClicked={messageClicked}
           on:draftClicked|stopPropagation={handleEmailDraftOpened}
           on:forwardClicked|stopPropagation={handleEmailDraftOpened}
@@ -1102,6 +1135,7 @@
                     show_reply={_this.show_reply}
                     show_reply_all={_this.show_reply_all}
                     show_forward={_this.show_forward}
+                    theme={themeUrl}
                     on:threadClicked={threadClicked}
                     on:messageClicked={messageClicked}
                     on:draftClicked|stopPropagation={handleEmailDraftOpened}
