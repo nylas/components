@@ -184,7 +184,7 @@
     <div class="toolbar">
       {#each toolbar as item}
         <button
-          on:click={handleAction(item)}
+          on:click|stopPropagation|capture={handleAction(item)}
           title={item.title}
           class={item.state && item.state() ? "active" : ""}>
           {#if item.icon}
