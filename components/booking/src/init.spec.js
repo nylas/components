@@ -176,7 +176,7 @@ describe("booking component", () => {
       cy.get('input[name="demo-type"]').check("consecutive");
     });
 
-    it("shows selectable consecutive options on load", () => {
+    xit("shows selectable consecutive options on load", () => {
       cy.get("nylas-availability")
         .as("availability")
         .then((element) => {
@@ -222,7 +222,7 @@ describe("booking component", () => {
   });
 
   describe("Choosing a slot from consecutive event list", () => {
-    it("selects a timeslot on availability when a booking item is clicked", () => {
+    xit("selects a timeslot on availability when a booking item is clicked", () => {
       cy.intercept(
         "POST",
         "/middleware/calendars/availability/consecutive",
