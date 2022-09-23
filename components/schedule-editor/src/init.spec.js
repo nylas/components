@@ -21,7 +21,7 @@ describe("schedule-editor component", () => {
       .and("equal", "test-schedule-editor");
   });
 
-  describe("Allows for multiple meetings", () => {
+  xdescribe("Allows for multiple meetings", () => {
     it("Allows the user to add consecutive meetings", () => {
       cy.get("button.add-event").click();
       cy.get(".basic-details fieldset").should("have.length", 3);
@@ -34,7 +34,7 @@ describe("schedule-editor component", () => {
   });
 });
 
-describe("Editable Sections", () => {
+xdescribe("Editable Sections", () => {
   it("Expands the first section by default", () => {
     cy.get(testScheduleEditor)
       .get("nylas-schedule-editor-section")
