@@ -1,4 +1,4 @@
-@use 'sass:list';
+@use "sass:list";
 
 /* TODO: Deprecate original vars and use theme vars instead in 2.0.0
 --primaryAndMainCalendar
@@ -100,6 +100,25 @@ $numberOfCalendarsToSupport: list.length($themeColours);
         border-color: $colour;
         color: $colour;
       }
+    }
+  }
+
+  .event:not(.event-detail.status-undefined) {
+    &:hover {
+      background-color: var(
+        --nylas-agenda-event-hover-bg-color,
+        var(
+          --nylas-agenda-calendar-1-bg-color,
+          var(--primaryAndMainCalendar, var(--theme-calendar-1-bg-color))
+        )
+      );
+      color: var(
+        --nylas-agenda-event-hover-color,
+        var(
+          --nylas-agenda-event-color,
+          var(--calendarEventText, var(--theme-event-color))
+        )
+      );
     }
   }
 }

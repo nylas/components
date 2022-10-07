@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Agenda] Added event hover variable for Agenda component: `--nylas-agenda-event-hover-bg-color` and `--nylas-agenda-event-hover-color` [#459](https://github.com/nylas/components/pull/459)
+
 ## Breaking
 
 ## New Features
