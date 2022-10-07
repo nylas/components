@@ -103,7 +103,28 @@
     });
   }
 
+  let focusing = false;
+
   const handleHtmlBodyFocus = () => {
+    console.log({ focusing });
+
+    if (focusing) {
+      focusing = false;
+    } else {
+      focusing = true;
+      setTimeout(() => {
+        container.blur();
+        container.focus();
+      }, 0);
+      return;
+    }
+    console.log("proceeding as normal");
+    // container.DOCUMENT_FRAGMENT_NODE.
+    // let shadowRoot = container.getRootNode();
+    // const selection = (shadowRoot as HTMLElement).getSelection();
+    // const range = selection.getRangeAt(0);
+    // console.log(range.toString())
+    //     console.log(.delgatesFocus);
     // if contenteditable area is empty we need to add something to add range
     if (container.innerHTML === "") {
       container.innerHTML = "\u00a0";
