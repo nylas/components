@@ -108,7 +108,7 @@ const DRAFT_THREAD = {
 
 const defaultSize = 13;
 
-xdescribe("Mailbox Display", () => {
+describe("Mailbox Display", () => {
   let thread1;
   let thread2;
   let THREAD_WITH_MESSAGE_THAT_DOES_NOT_HAVE_FROM_OR_TO_FIELDS;
@@ -231,7 +231,7 @@ xdescribe("Mailbox Display", () => {
   });
 });
 
-xdescribe("Mailbox Files/Images", () => {
+describe("Mailbox Files/Images", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -281,7 +281,7 @@ xdescribe("Mailbox Files/Images", () => {
   });
 });
 
-xdescribe("Mailbox Unread/Read", () => {
+describe("Mailbox Unread/Read", () => {
   let thread1;
   let thread2;
 
@@ -391,7 +391,7 @@ xdescribe("Mailbox Unread/Read", () => {
   });
 });
 
-xdescribe("Mailbox Props", () => {
+describe("Mailbox Props", () => {
   let thread1;
   let thread2;
 
@@ -496,7 +496,7 @@ xdescribe("Mailbox Props", () => {
   });
 });
 
-xdescribe("Mailbox Interactions", () => {
+describe("Mailbox Interactions", () => {
   let thread1;
   let thread2;
 
@@ -592,7 +592,7 @@ xdescribe("Mailbox Interactions", () => {
   });
 });
 
-xdescribe("Mailbox Pagination: threads not intercepted", () => {
+describe("Mailbox Pagination: threads not intercepted", () => {
   beforeEach(() => {
     cy.intercept(
       "GET",
@@ -660,7 +660,7 @@ xdescribe("Mailbox Pagination: threads not intercepted", () => {
   });
 });
 
-xdescribe("Mailbox: updating 'to' field correctly for reply and reply-all", () => {
+describe("Mailbox: updating 'to' field correctly for reply and reply-all", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "https://web-components.nylas.com/middleware/manifest":
@@ -726,7 +726,7 @@ xdescribe("Mailbox: updating 'to' field correctly for reply and reply-all", () =
   });
 });
 
-xdescribe("Mailbox: updating cc fields correctly for reply and reply-all", () => {
+describe("Mailbox: updating cc fields correctly for reply and reply-all", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "https://web-components.nylas.com/middleware/manifest":
@@ -797,7 +797,7 @@ xdescribe("Mailbox: updating cc fields correctly for reply and reply-all", () =>
   });
 });
 
-xdescribe("Mailbox Bulk actions", () => {
+describe("Mailbox Bulk actions", () => {
   let thread1;
   let thread2;
 
@@ -969,7 +969,7 @@ xdescribe("Mailbox Bulk actions", () => {
   });
 });
 
-xdescribe("Mailbox Custom events", () => {
+describe("Mailbox Custom events", () => {
   let thread1;
   let thread2;
 
@@ -1513,7 +1513,7 @@ describe("Mailbox Integration: Save draft and update draft", () => {
   });
 });
 
-xdescribe("Display Participants in thread row", () => {
+describe("Display Participants in thread row", () => {
   beforeEach(() => {
     cy.batchIntercept("GET", {
       "**/middleware/manifest": "mailbox/manifest",
