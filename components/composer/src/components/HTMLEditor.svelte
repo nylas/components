@@ -104,8 +104,9 @@
   }
 
   let focusing = false;
-
   const handleHtmlBodyFocus = () => {
+    // refocus editor to return cursor to editor - workaround for
+    // firefox selection API / shadow DOM issues)
     if (focusing) {
       focusing = false;
     } else {
