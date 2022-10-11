@@ -117,6 +117,7 @@
       }, 0);
     }
 
+    // if contenteditable area is empty we need to add something to add range
     if (container.innerHTML === "") {
       container.innerHTML = "\u00a0";
       const selection = window.getSelection();
