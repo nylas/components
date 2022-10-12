@@ -103,7 +103,20 @@
     });
   }
 
+  let focusing = false;
   const handleHtmlBodyFocus = () => {
+    // refocus editor to return cursor to editor - workaround for
+    // firefox selection API / shadow DOM issues)
+    if (focusing) {
+      focusing = false;
+    } else {
+      focusing = true;
+      setTimeout(() => {
+        container.blur();
+        container.focus();
+      }, 0);
+    }
+
     // if contenteditable area is empty we need to add something to add range
     if (container.innerHTML === "") {
       container.innerHTML = "\u00a0";
