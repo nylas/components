@@ -110,9 +110,13 @@
   onMount(async () => {
     await tick();
 
-    manifest = ((await $ManifestStore[
-      JSON.stringify({ component_id: id, access_token })
-    ]) || {}) as MailboxProperties;
+    // If using fake data, manifest isn't needed for anything and shouldn't be
+    // loaded
+    if (!$$props.all_threads) {
+      manifest = ((await $ManifestStore[
+        JSON.stringify({ component_id: id, access_token })
+      ]) || {}) as MailboxProperties;
+    }
 
     _this = buildInternalProps(
       $$props,
