@@ -1267,6 +1267,8 @@
           }
 
           &.condensed {
+            display: block;
+            width: 100%;
             div.snippet {
               text-overflow: ellipsis;
               overflow: hidden;
@@ -1295,6 +1297,18 @@
             &.expanded {
               div.message-head:hover {
                 cursor: n-resize;
+              }
+              div.message-to:hover {
+                cursor: auto;
+              }
+              div.message-from:hover {
+                cursor: auto;
+              }
+              div.message-date:hover {
+                cursor: auto;
+              }
+              div.message-body {
+                cursor: auto;
               }
             }
           }
@@ -1812,12 +1826,13 @@
                       ? "expanded"
                       : "condensed"
                   }`}
-                  bind:this={messageRefs[msgIndex]}
-                  on:click|stopPropagation={(e) =>
-                    handleEmailClick(e, msgIndex)}
-                  on:keypress={(e) => handleEmailKeypress(e, msgIndex)}>
+                  bind:this={messageRefs[msgIndex]}>
                   {#if message.expanded || msgIndex === activeThread.messages.length - 1}
-                    <div class="message-head">
+                    <div
+                      class="message-head"
+                      on:click|stopPropagation={(e) =>
+                        handleEmailClick(e, msgIndex)}
+                      on:keypress={(e) => handleEmailKeypress(e, msgIndex)}>
                       <div class="message-from-to">
                         <div class="avatar-info">
                           {#if _this.show_contact_avatar}
@@ -1827,7 +1842,7 @@
                                 contact={contacts[message?.from[0].email]} />
                             </div>
                           {/if}
-                          <div class="message-from">
+                          <div class="message-from" on:click|stopPropagation>
                             <span class="name">
                               {userEmail && message?.from[0].email === userEmail
                                 ? "me"
@@ -1843,7 +1858,7 @@
                               content={message?.from[0].email} />
                           </div>
                         </div>
-                        <div class="message-to">
+                        <div class="message-to" on:click|stopPropagation>
                           {#if message?.to}
                             {#await getAllRecipients( { to: message.to, cc: message.cc, bcc: message.bcc }, ) then allRecipients}
                               {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
@@ -1891,7 +1906,7 @@
                       </div>
                       <div class="">
                         {#if _this.show_received_timestamp}
-                          <div class="message-date">
+                          <div class="message-date" on:click|stopPropagation>
                             <span>
                               {formatExpandedDate(
                                 new Date(message.date * 1000),
@@ -1944,7 +1959,7 @@
                           {message}
                           body={message.body}
                           on:downloadClicked={handleDownloadFromMessage} />
-                        <!-- If a thread is being passed manually and there is no body, 
+                        <!-- If a thread is being passed manually and there is no body,
                           we will keep loading, so the below is our fallback -->
                       {:else if !!_this.thread && !_this.thread_id && click_action != "mailbox"}
                         {message.body ?? message.snippet}
@@ -1970,44 +1985,51 @@
                       {/if}
                     </div>
                   {:else}
-                    <div class="message-head">
-                      <div class="avatar-info">
-                        {#if _this.show_contact_avatar}
-                          <div class="default-avatar">
-                            <nylas-contact-image
-                              {contact_query}
-                              contact={contacts[message?.from[0].email]} />
+                    <div
+                      class="condensed-container"
+                      on:click|stopPropagation={(e) =>
+                        handleEmailClick(e, msgIndex)}
+                      on:keypress={(e) => handleEmailKeypress(e, msgIndex)}>
+                      <div class="message-head">
+                        <div class="avatar-info">
+                          {#if _this.show_contact_avatar}
+                            <div class="default-avatar">
+                              <nylas-contact-image
+                                {contact_query}
+                                contact={contacts[message?.from[0].email]} />
+                            </div>
+                          {/if}
+                          <div class="message-from">
+                            <span class="name"
+                              >{userEmail &&
+                              message?.from[0].email === userEmail
+                                ? "me"
+                                : message?.from[0].name ||
+                                  message?.from[0].email}</span>
+                            <!-- tooltip component -->
+                            <nylas-tooltip
+                              on:toggleTooltip={setTooltip}
+                              id={message?.id.slice(0, 3)}
+                              current_tooltip_id={currentTooltipId}
+                              icon={DropdownSymbol}
+                              content={message?.from[0].email} />
                           </div>
-                        {/if}
-                        <div class="message-from">
-                          <span class="name"
-                            >{userEmail && message?.from[0].email === userEmail
-                              ? "me"
-                              : message?.from[0].name ||
-                                message?.from[0].email}</span>
-                          <!-- tooltip component -->
-                          <nylas-tooltip
-                            on:toggleTooltip={setTooltip}
-                            id={message?.id.slice(0, 3)}
-                            current_tooltip_id={currentTooltipId}
-                            icon={DropdownSymbol}
-                            content={message?.from[0].email} />
                         </div>
+                        <section>
+                          {#if _this.show_received_timestamp}
+                            <div class="message-date">
+                              <span>
+                                {formatExpandedDate(
+                                  new Date(message.date * 1000),
+                                )}
+                              </span>
+                            </div>
+                          {/if}
+                        </section>
                       </div>
-                      <section>
-                        {#if _this.show_received_timestamp}
-                          <div class="message-date">
-                            <span>
-                              {formatExpandedDate(
-                                new Date(message.date * 1000),
-                              )}
-                            </span>
-                          </div>
-                        {/if}
-                      </section>
-                    </div>
-                    <div class="snippet">
-                      {message.snippet}
+                      <div class="snippet">
+                        {message.snippet}
+                      </div>
                     </div>
                   {/if}
                 </div>
@@ -2176,8 +2198,8 @@
                                 MAX_MOBILE_PARTICIPANTS}
                             </span>
                           {/if}
-                          <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2. 
-                        Note that this might not be exactly correct if the name of the first participant is too long 
+                          <!-- If it is desktop, we only show upto 2 participants (latest from message), hence -2.
+                        Note that this might not be exactly correct if the name of the first participant is too long
                         and occupies entire width -->
                           {#if activeThread.participants.length > 2}
                             <span class="show-on-desktop">
