@@ -650,8 +650,26 @@
     );
   }
 
+  // When highlighting text elements (e.g. 'to', 'from', or 'date') in our
+  // email header, we want to prevent the email from expanding/collapsing.
+  // Without this, a user cannot highlight text to copy/paste it.
+  let lastHighlightingDragTime = 0;
+
+  const handleHighlightSelectionMouseDown = () => {
+    lastHighlightingDragTime = Date.now();
+  };
+
   function handleEmailClick(event: MouseEvent, msgIndex: number) {
     event.stopImmediatePropagation();
+
+    // Prevent email from expanding/collapsing when highlighting text
+    if (
+      lastHighlightingDragTime !== 0 &&
+      Date.now() - lastHighlightingDragTime > 100
+    ) {
+      lastHighlightingDragTime = 0;
+      return;
+    }
 
     if (msgIndex === activeThread.messages.length - 1) {
       doNothing(event);
@@ -1741,13 +1759,7 @@
     on:load={() => (themeLoaded = true)}
     on:error={() => (themeLoaded = true)} />
 {/if}
-<main
-  class="nylas-email"
-  data-cy="nylas-email"
-  bind:this={main}
-  on:click={handleThreadClick}
-  tabindex="0"
-  on:keypress={handleThreadKeypress}>
+<main class="nylas-email" data-cy="nylas-email" bind:this={main}>
   {#if _this.thread || _this.thread_id}
     {#await activeThread}
       Loading...
@@ -1760,6 +1772,9 @@
               ? 'expanded-mailbox-thread'
               : ''}">
             <header
+              on:click={handleThreadClick}
+              tabindex="0"
+              on:keypress={handleThreadKeypress}
               class="subject-header"
               class:mailbox={_this.click_action === "mailbox"}>
               <div class="subject-title">
@@ -1842,7 +1857,9 @@
                                 contact={contacts[message?.from[0].email]} />
                             </div>
                           {/if}
-                          <div class="message-from" on:click|stopPropagation>
+                          <div
+                            class="message-from"
+                            on:mousedown={handleHighlightSelectionMouseDown}>
                             <span class="name">
                               {userEmail && message?.from[0].email === userEmail
                                 ? "me"
@@ -1858,7 +1875,9 @@
                               content={message?.from[0].email} />
                           </div>
                         </div>
-                        <div class="message-to" on:click|stopPropagation>
+                        <div
+                          class="message-to"
+                          on:mousedown={handleHighlightSelectionMouseDown}>
                           {#if message?.to}
                             {#await getAllRecipients( { to: message.to, cc: message.cc, bcc: message.bcc }, ) then allRecipients}
                               {#each allRecipients.slice(0, PARTICIPANTS_TO_TRUNCATE) as recipient, i}
@@ -1906,7 +1925,9 @@
                       </div>
                       <div class="">
                         {#if _this.show_received_timestamp}
-                          <div class="message-date" on:click|stopPropagation>
+                          <div
+                            class="message-date"
+                            on:mousedown={handleHighlightSelectionMouseDown}>
                             <span>
                               {formatExpandedDate(
                                 new Date(message.date * 1000),
@@ -2123,6 +2144,9 @@
         {:else}
           <!-- Condensed thread row -->
           <div
+            on:click={handleThreadClick}
+            tabindex="0"
+            on:keypress={handleThreadKeypress}
             class="email-row condensed"
             class:show_star={_this.show_star}
             class:unread={activeThread.unread}
