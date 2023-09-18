@@ -13,7 +13,7 @@
     "start": "echo 'Nothing to start'"
   },
   "main": "index.js",
-  "gitHead": "cca94159c114ecff613f41caa0a4468e0f698e2c",
+  "gitHead": "af9d39a405ae81a3564447fd13c2161628d2f2db",
   "devDependencies": {
     "@types/dompurify": "^2.3.1"
   },
