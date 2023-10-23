@@ -50,11 +50,14 @@ function initializeThreads() {
       const queryKey = JSON.stringify(query);
 
       if (!query.component_id && !query.access_token) {
+        // FIXME: This should alert the user
         return [];
       }
 
       if (totalItems === undefined || forceRefresh) {
-        const threadCount = await fetchThreadCount(query).catch(silence);
+        const threadCount = query.thread_ids
+          ? query.thread_ids.length
+          : await fetchThreadCount(query).catch(silence);
 
         if (threadCount) {
           totalItems = threadCount;
@@ -67,6 +70,7 @@ function initializeThreads() {
       }
 
       if (typeof threadsMap[queryKey][currentPage] === "undefined") {
+        // FIXME: Shouldn't this be an internal error?
         return [];
       } else if (!threadsMap[queryKey][currentPage].isLoaded) {
         const threads = await fetchThreads(
