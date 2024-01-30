@@ -1,3 +1,7 @@
+# Unreleased
+
+- Fix actions_bar display when checkboxes disabled [Pull Request](https://github.com/nylas/components/pull/463)
+
 # 2021-11-29
 
 ## 1.1.1
