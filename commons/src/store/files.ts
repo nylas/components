@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 import type { File, Message } from "@commons/types/Nylas";
-import { downloadFile } from "@commons/connections/files";
+import { downloadFile, streamDownloadFile } from "@commons/connections/files";
 import { InlineImageTypes } from "@commons/constants/attachment-content-types";
 function initializeFilesForMessage() {
   const { subscribe, set, update } = writable<
@@ -25,14 +25,26 @@ function initializeFilesForMessage() {
             !inlineFiles[file.id]
           ) {
             inlineFiles[file.id] = file;
-            inlineFiles[file.id].data = await downloadFile({
-              file_id: file.id,
-              component_id: query.component_id,
-              access_token: query.access_token,
-            });
+
+            if (file.size > 4194304) {
+              const blob = await streamDownloadFile({
+                file_id: file.id,
+                component_id: query.component_id,
+                access_token: query.access_token,
+              });
+
+              inlineFiles[file.id].data = blob;
+            } else {
+              inlineFiles[file.id].data = await downloadFile({
+                file_id: file.id,
+                component_id: query.component_id,
+                access_token: query.access_token,
+              });
+            }
           }
         }
         filesMap[incomingMessage.id] = inlineFiles;
+
         update((files) => {
           files[incomingMessage.id] = inlineFiles;
           return { ...files };
