@@ -56,7 +56,7 @@
   import { FolderStore } from "@commons/store/folders";
   import * as DOMPurify from "dompurify";
   import LoadingIcon from "./assets/loading.svg";
-  import { downloadFile } from "@commons/connections/files";
+  import { streamDownloadFile } from "@commons/connections/files";
   import ReplyIcon from "./assets/reply.svg";
   import ReplyAllIcon from "./assets/reply-all.svg";
   import ForwardIcon from "./assets/forward.svg";
@@ -91,6 +91,7 @@
   export let you: Partial<Account>;
   export let show_reply: boolean;
   export let show_reply_all: boolean;
+
   export let show_forward: boolean;
 
   const defaultValueMap: Partial<EmailProperties> = {
@@ -241,7 +242,7 @@
   }
 
   let main: Element;
-  let messageRefs: Element[] = [];
+  let messageRefs: HTMLElement[] = [];
   const MAX_DESKTOP_PARTICIPANTS = 2;
   const MAX_MOBILE_PARTICIPANTS = 1;
 
@@ -478,7 +479,7 @@
          * individual messages to trash folder as a workaround
          **/
         if (query.component_id && _this.thread_id) {
-          activeThread.messages.forEach(async (message, i) => {
+          activeThread.messages.forEach(async (message) => {
             await updateMessage(
               query.component_id,
               { ...message, folder_id: trashFolderID },
@@ -704,14 +705,18 @@
     }
   }
 
-  function fetchIndividualMessage(messageID: string): Promise<Message | null> {
+  async function fetchIndividualMessage(
+    messageID: string,
+  ): Promise<Message | null> {
     if (id) {
       return fetchMessage(query, messageID).then(async (json) => {
         if (FilesStore.hasInlineFiles(json)) {
           const messageWithInlineFiles = await getMessageWithInlineFiles(json);
+
           dispatchEvent("messageLoaded", messageWithInlineFiles);
           return messageWithInlineFiles;
         }
+
         dispatchEvent("messageLoaded", json);
         return json;
       });
@@ -898,6 +903,7 @@
 
   function initializeAttachedFiles() {
     const messageType = getMessageType(activeThread);
+
     attachedFiles = activeThread[messageType]?.reduce(
       (files: Record<string, File[]>, message) => {
         for (const [fileIndex, file] of message.files.entries()) {
@@ -905,6 +911,7 @@
             if (!files[message.id]) {
               files[message.id] = [];
             }
+
             files[message.id] = [
               ...files[message.id],
               message.files[fileIndex],
@@ -923,11 +930,31 @@
       access_token,
     });
     for (const file of Object.values(fetchedFiles)) {
-      if (message.body) {
-        message.body = message.body?.replaceAll(
-          `src="cid:${file.content_id}"`,
-          `src="data:${file.content_type};base64,${file.data}"`,
-        );
+      let dataUrl: string | null = null;
+
+      if (typeof file.data !== "string") {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          dataUrl = event.target.result as string;
+        };
+        reader.onloadend = function () {
+          const rawData = dataUrl.split("base64,")[1];
+
+          if (message.body) {
+            message.body = message.body?.replaceAll(
+              `src="cid:${file.content_id}"`,
+              `src="data:${file.content_type};base64,${rawData}"`,
+            );
+          }
+        };
+        reader.readAsDataURL(file.data);
+      } else if (typeof file.data === "string") {
+        if (message.body) {
+          message.body = message.body?.replaceAll(
+            `src="cid:${file.content_id}"`,
+            `src="data:${file.content_type};base64,${dataUrl ?? file.data}"`,
+          );
+        }
       }
     }
     return message;
@@ -936,7 +963,7 @@
   async function downloadSelectedFile(event: MouseEvent, file: File) {
     event.stopImmediatePropagation();
     if (id && ((activeThread && _this.thread_id) || _this.message_id)) {
-      const downloadedFileData = await downloadFile({
+      const downloadedFileData = await streamDownloadFile({
         file_id: file.id,
         component_id: id,
         access_token,
@@ -952,7 +979,20 @@
 
   async function handleDownloadFromMessage(event: MouseEvent) {
     const file = (<any>event.detail).file;
-    downloadSelectedFile(event, file);
+
+    if (file.data instanceof Blob) {
+      const url = URL.createObjectURL(file.data);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.filename; // Use the file name or 'download' if the name is not available
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      downloadSelectedFile(event, file);
+    }
   }
 
   function isThreadADraftEmail(currentThread: Thread): boolean {

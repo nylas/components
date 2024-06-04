@@ -148,7 +148,7 @@ export interface File {
   size: number;
   content_disposition: string;
   content_id?: string;
-  data?: string;
+  data?: string | Blob;
 }
 
 export interface MiddlewareResponse<T = unknown> {

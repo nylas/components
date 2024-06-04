@@ -120,10 +120,19 @@ export default function parseStringToArray(parseStr: string): string[] {
   return [parseStr.trim()];
 }
 
-export function downloadAttachedFile(fileData: string, file: File): void {
-  const buffer = Uint8Array.from(atob(fileData), (c) => c.charCodeAt(0));
-  const blob = new Blob([buffer], { type: file.content_type });
-  const blobFile = window.URL.createObjectURL(blob);
+export function downloadAttachedFile(
+  fileData: string | Blob,
+  file: File,
+): void {
+  let blobFile;
+
+  if (typeof fileData === "string") {
+    const buffer = Uint8Array.from(atob(fileData), (c) => c.charCodeAt(0));
+    const blob = new Blob([buffer], { type: file.content_type });
+    blobFile = window.URL.createObjectURL(blob);
+  } else if (typeof fileData !== "string") {
+    blobFile = window.URL.createObjectURL(fileData);
+  }
 
   const a = document.createElement("a");
   a.href = blobFile;

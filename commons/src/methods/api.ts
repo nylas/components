@@ -72,6 +72,26 @@ export function getMiddlewareApiUrl(id: string): string {
   return API_GATEWAY;
 }
 
+export function getDashboardApiUrl(id: string): string {
+  if (process.env.NODE_ENV === "development") {
+    return `http://localhost:4000`;
+  }
+
+  let region = "";
+  if (id.substring(3, 4) === "-") {
+    const code = id.substring(0, 3);
+    if (typeof REGION_MAPPING[code] !== "undefined") {
+      region = REGION_MAPPING[code];
+    }
+  }
+
+  const baseUrl = region.includes("ireland")
+    ? "https://dashboard-api-gateway.eu.nylas.com"
+    : "https://dashboard-api-gateway.us.nylas.com";
+
+  return baseUrl;
+}
+
 export function silence(error: Error) {}
 
 export function buildQueryParams(params: Record<string, any>): string {
