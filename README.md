@@ -2,6 +2,10 @@
 
 Nylas Components are a suite of UI building blocks that let you build user-facing email, calendar, and contacts functionality in minutes. Use Nylas Components with your Nylas account or by adding standard JSON data.
 
+## Compatibility
+- [Nylas API v2](https://developer.nylas.com/docs/api/v2/)
+- [Nylas API v3](https://developer.nylas.com/docs/api/v3) (Unsupported)
+
 ## Background
 
 Front-end UIs can often be time-consuming to build, even for simple functionality. The Nylas Components are designed to help developers more quickly add communications and scheduling functionality into their app.
