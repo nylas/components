@@ -134,9 +134,13 @@
     };
     // Initialize labels / folders
     if (you?.organization_unit === AccountOrganizationUnit.Label) {
-      labels = await LabelStore.getLabels(accountOrganizationUnitQuery);
+      LabelStore.getLabels(accountOrganizationUnitQuery).then(
+        (ls) => (labels = ls),
+      );
     } else if (you?.organization_unit === AccountOrganizationUnit.Folder) {
-      folders = await FolderStore.getFolders(accountOrganizationUnitQuery);
+      FolderStore.getFolders(accountOrganizationUnitQuery).then(
+        (fs) => (folders = fs),
+      );
     }
 
     await updateDisplayedThreads();
