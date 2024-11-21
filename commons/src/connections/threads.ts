@@ -17,6 +17,33 @@ export const fetchThreads = (
   limit: number,
   offset: number,
 ): Promise<Thread[]> => {
+  if (query.thread_ids) {
+    // &limit=${limit}&offset=${offset}
+    const page_of_ids = query.thread_ids.slice(offset, offset + limit);
+    return Promise.all(
+      page_of_ids.map(async (thread_id) => {
+        // Nylas API does not support fetching threads in bulk, so must fetch them one
+        // at a time :(
+        const queryString = `${getMiddlewareApiUrl(
+          query.component_id,
+        )}/threads/${thread_id}?view=expanded`;
+        // TODO: ideally this wouldn't replicate much of the code from below
+        return await fetch(queryString, getFetchConfig(query))
+          .then((response) =>
+            handleResponse<MiddlewareResponse<Thread>>(response),
+          )
+          .then((json) => json.response)
+          // TODO: Remove this ugly hack when we fix the API from returning ghost messages (e.g. w/o a from/to field)
+          .then((thread) => ({
+            ...thread,
+            messages: thread.messages.filter(
+              (message) => message.from.length !== 0 || message.to.length !== 0,
+            ),
+          }))
+          .catch((error) => handleError(query.component_id, error));
+      }),
+    );
+  }
   let queryString = `${getMiddlewareApiUrl(
     query.component_id,
   )}/threads?view=expanded&not_in=trash&limit=${limit}&offset=${offset}`;

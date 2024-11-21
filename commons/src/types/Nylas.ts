@@ -24,6 +24,7 @@ export interface ConversationQuery extends CommonQuery {
 
 export interface MailboxQuery extends CommonQuery {
   query: ThreadsQuery;
+  thread_ids?: string[];
   keywordToSearch?: string;
 }
 
@@ -218,6 +219,7 @@ export interface EmailProperties extends Manifest {
 export interface MailboxProperties extends Manifest {
   actions_bar: MailboxActions[];
   all_threads: Thread[];
+  thread_ids: string[];
   header: string;
   items_per_page: number;
   keyword_to_search: string;
