@@ -1030,12 +1030,12 @@
           <h1>{header}</h1>
         </header>
       {/if}
-      {#if _this.actions_bar.length}
+      {#if _this.show_thread_checkbox && _this.actions_bar.length}
         <div
           role="toolbar"
           aria-label="Bulk actions"
           aria-controls="mailboxlist">
-          {#if _this.show_thread_checkbox && _this.actions_bar.includes(MailboxActions.SELECTALL)}
+          {#if _this.actions_bar.includes(MailboxActions.SELECTALL)}
             <div class="thread-checkbox">
               {#each [areAllSelected ? "Deselect all" : "Select all"] as selectAllTitle}
                 <input
