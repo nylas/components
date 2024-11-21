@@ -737,12 +737,6 @@
       gap: 8px;
     }
 
-    &.loading {
-      grid-template-rows: minmax(
-        auto,
-        calc(100vh - 16px)
-      ); /** loading mailbox minus padding **/
-    }
     &.empty {
       grid-template-rows: 68px 33.5px minmax(auto, calc(100vh - 117.5px)); /** header, toolbar, empty mailbox (100vh) minus header, toolbar and padding **/
       ul {

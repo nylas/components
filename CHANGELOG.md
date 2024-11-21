@@ -1,3 +1,7 @@
+# Unreleased
+
+- Prevented the loader from taking up 100% of the height of the browser [Pull Request](https://github.com/nylas/components/pull/462)
+
 # 2021-11-29
 
 ## 1.1.1
