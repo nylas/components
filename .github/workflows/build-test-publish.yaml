@@ -48,7 +48,7 @@ jobs:
         run: yarn build
 
       - name: Cache build
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: cache-build
         id: cache-build
@@ -56,7 +56,7 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
       - name: Cache cypress
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         env:
           cache-name: cache-cypress
         id: cache-cypress
@@ -75,7 +75,7 @@ jobs:
         with:
           node-version: 14
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: restore-build
         with:
           path: ./*
@@ -94,7 +94,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "14"
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: restore-build
         with:
           path: ./*
@@ -112,7 +112,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "14"
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: restore-build
         with:
           path: ./*
@@ -128,12 +128,12 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7]
     needs: ["build", "prepare"]
     steps:
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: restore-build
         with:
           path: ./*
           key: ${{ github.sha }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: restore-cypress
         with:
           path: /home/runner/.cache/Cypress/*
@@ -168,7 +168,7 @@ jobs:
           node-version: 14
           registry-url: "https://registry.yarnpkg.com/"
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: restore-build
         with:
           path: ./*
