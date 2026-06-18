@@ -20,6 +20,7 @@
   import { onDestroy, onMount, tick } from "svelte";
   import timezones from "timezones-list";
   import { ErrorStore, ManifestStore } from "@commons";
+  import { invalidateManifestCache } from "@commons/store/manifest";
   import { getEventDispatcher } from "@commons/methods/component";
   import { saveManifest } from "@commons/connections/manifest";
   import "../../availability/src/Availability.svelte";
@@ -201,7 +202,7 @@
   }
   // #endregion mount and prop initialization
 
-  function saveProperties() {
+  async function saveProperties() {
     const cleanedProps = {
       ..._this,
       custom_fields: _this.custom_fields.map((field) => {
@@ -210,7 +211,13 @@
       }),
     };
 
-    saveManifest(id, cleanedProps, access_token);
+    await saveManifest(id, cleanedProps, access_token);
+
+    // Invalidate the ManifestStore cache and update the local manifest so
+    // that both re-mounts and in-session reads reflect the saved state.
+    // Fixes CUST-5442: deleted custom fields reappearing after save.
+    invalidateManifestCache(id, access_token);
+    manifest = { ...cleanedProps };
   }
 
   // #region unpersisted variables

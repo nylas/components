@@ -36,3 +36,18 @@ function initialize(): Writable<ManifestStore> {
 }
 
 export const ManifestStore = initialize();
+
+/**
+ * Invalidate a cached manifest entry so the next access triggers a fresh fetch.
+ * Call after saving a manifest to prevent stale data on re-mount.
+ */
+export function invalidateManifestCache(componentId: string, accessToken?: string): void {
+  const key = JSON.stringify({ component_id: componentId, access_token: accessToken });
+  ManifestStore.update((store) => {
+    // The store wraps a Proxy whose underlying target holds cached promises.
+    // Deleting the key from the store object causes the Proxy get-trap to
+    // re-fetch on the next access.
+    delete (store as Record<string, unknown>)[key];
+    return store;
+  });
+}
