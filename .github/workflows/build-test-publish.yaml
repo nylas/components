@@ -70,16 +70,20 @@ jobs:
       fail-fast: true
     needs: build
     steps:
+      # Check out + install rather than restoring the build job's workspace via
+      # actions/cache. That cross-job cache handoff (path: ./*) stopped working
+      # after the forced cache@v2 -> v4 migration, leaving these jobs with no
+      # package.json (npm ENOENT). Each job is now self-contained.
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: 14
 
-      - uses: actions/cache@v4
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+      - name: Install dependencies
+        run: npm install
 
       - name: Run linter
         run: npm run lint:ci
@@ -90,15 +94,14 @@ jobs:
       fail-fast: true
     needs: build
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: "14"
-      - uses: actions/cache@v4
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+      - name: Install dependencies
+        run: npm install
       - name: Run type-check
         run: npm run tsc
 
@@ -108,15 +111,14 @@ jobs:
       fail-fast: true
     needs: build
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: "14"
-      - uses: actions/cache@v4
-        id: restore-build
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+      - name: Install dependencies
+        run: npm install
       - name: Run unit tests
         run: npm run test
 
