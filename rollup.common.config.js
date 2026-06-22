@@ -45,7 +45,12 @@ const config = {
       ],
     }),
     esbuild({
-      include: [`${ROOT}/**/*.ts+(|x)`],
+      // Transpile every .ts/.tsx by extension, regardless of cwd. The previous
+      // glob `${ROOT}/**/*.ts+(|x)` relied on an extglob that newer picomatch
+      // (floated in via `npm install`, which ignores our yarn.lock) no longer
+      // matches — so esbuild silently stopped transpiling TS and every component
+      // build choked on raw TS in commons (e.g. define-component-patch.ts).
+      include: /\.tsx?$/,
       minify: !!production,
     }),
     commonjs(),
