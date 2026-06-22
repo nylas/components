@@ -68,7 +68,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-    needs: build
     steps:
       # Check out + install rather than restoring the build job's workspace via
       # actions/cache. That cross-job cache handoff (path: ./*) stopped working
@@ -92,7 +91,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-    needs: build
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -109,7 +107,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-    needs: build
     steps:
       - name: Checkout
         uses: actions/checkout@v4
