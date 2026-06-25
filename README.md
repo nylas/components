@@ -1,3 +1,8 @@
+> [!CAUTION]
+> 🛑 **Nylas Components are built for the Nylas v2 API and are no longer actively developed.**
+>
+> They are **not supported on the v3 API** and will not be updated to it. For new v3 projects, use the [Scheduler UI components](https://developer.nylas.com/docs/v3/scheduler/) and the current [SDKs](https://developer.nylas.com/docs/v3/sdks/). The v2 usage below remains for existing integrations.
+
 <div align="center">
   <a href="https://www.nylas.com/">
     <img width="100%" alt="Nylas" src="https://github.com/user-attachments/assets/137517ae-244d-47a5-8ca7-b12984971fc4" />
@@ -16,6 +21,8 @@
     <a href="https://github.com/orgs/nylas-samples/repositories">💡 Samples</a> ·
     <a href="https://forums.nylas.com">💬 Forum</a>
   </p>
+
+  <p><img src="https://img.shields.io/badge/Status-Deprecated%20(v2%20only)-critical?style=for-the-badge" alt="Status: Deprecated (v2 only)" /></p>
 </div>
 
 <br />
@@ -23,8 +30,6 @@
 Nylas Components are a suite of UI building blocks that let you build user-facing email, calendar, and contacts functionality in minutes. Use Nylas Components with your Nylas account or by adding standard JSON data.
 
 [Nylas](https://developer.nylas.com/) is the infrastructure that powers communications — integrate with Gmail, Microsoft, IMAP, Zoom, and 250+ providers in 5 minutes, or give your AI agent its own mailbox. The broader platform covers [Agent Accounts](https://developer.nylas.com/docs/v3/agent-accounts/), [Email](https://developer.nylas.com/docs/v3/email/), [Calendar](https://developer.nylas.com/docs/v3/calendar/), [Contacts](https://developer.nylas.com/docs/v3/email/contacts/), [Scheduler](https://developer.nylas.com/docs/v3/scheduler/), and [Notetaker](https://developer.nylas.com/docs/v3/notetaker/).
-
-> **Compatibility:** Nylas Components were built for the Nylas v2 API and are **not supported on the [v3 API](https://developer.nylas.com/docs/api/v3/)**. If you're starting a new v3 project, see the [Scheduler](https://developer.nylas.com/docs/v3/scheduler/) UI components and the current [SDKs](https://developer.nylas.com/docs/v3/sdks/) instead.
 
 ## Background
 
