@@ -1,10 +1,30 @@
-# Nylas Components
+<div align="center">
+  <a href="https://www.nylas.com/">
+    <img width="100%" alt="Nylas" src="https://github.com/user-attachments/assets/137517ae-244d-47a5-8ca7-b12984971fc4" />
+  </a>
+
+  <h1>Nylas Components</h1>
+
+  <p>
+    <strong>UI building blocks for email, calendar, and contacts — from Nylas, the infrastructure that powers communications</strong>
+  </p>
+
+  <p>
+    <a href="https://developer.nylas.com/">📖 Docs</a> ·
+    <a href="https://developer.nylas.com/docs/api/v3/">📚 API Reference</a> ·
+    <a href="https://dashboard-v3.nylas.com/register">🚀 Sign up</a> ·
+    <a href="https://github.com/orgs/nylas-samples/repositories">💡 Samples</a> ·
+    <a href="https://forums.nylas.com">💬 Forum</a>
+  </p>
+</div>
+
+<br />
 
 Nylas Components are a suite of UI building blocks that let you build user-facing email, calendar, and contacts functionality in minutes. Use Nylas Components with your Nylas account or by adding standard JSON data.
 
-## Compatibility
-- [Nylas API v2](https://developer.nylas.com/docs/api/v2/)
-- [Nylas API v3](https://developer.nylas.com/docs/api/v3) (Unsupported)
+[Nylas](https://developer.nylas.com/) is the infrastructure that powers communications — integrate with Gmail, Microsoft, IMAP, Zoom, and 250+ providers in 5 minutes, or give your AI agent its own mailbox. The broader platform covers [Agent Accounts](https://developer.nylas.com/docs/v3/agent-accounts/), [Email](https://developer.nylas.com/docs/v3/email/), [Calendar](https://developer.nylas.com/docs/v3/calendar/), [Contacts](https://developer.nylas.com/docs/v3/email/contacts/), [Scheduler](https://developer.nylas.com/docs/v3/scheduler/), and [Notetaker](https://developer.nylas.com/docs/v3/notetaker/).
+
+> **Compatibility:** Nylas Components were built for the Nylas v2 API and are **not supported on the [v3 API](https://developer.nylas.com/docs/api/v3/)**. If you're starting a new v3 project, see the [Scheduler](https://developer.nylas.com/docs/v3/scheduler/) UI components and the current [SDKs](https://developer.nylas.com/docs/v3/sdks/) instead.
 
 ## Background
 
@@ -19,7 +39,7 @@ The Nylas Components include:
 - [Contact List](./components/contact-list): Display a list of selectable contacts from a user’s contacts book.
 - [Composer](./components/composer): Draft and send emails.
 
-The Components repository is for people who want to modify the code and build it from the source. Visit our [documentation](https://developer.nylas.com/docs/user-experience/components/) if you are looking for the easiest way to get started with Nylas Components.
+The Components repository is for people who want to modify the code and build it from the source. Visit our [documentation](https://developer.nylas.com/) if you are looking for the easiest way to get started with Nylas Components.
 
 If you want to report a bug, create a feature request, or contribute code, take a look at the [Contributing Guidelines](CONTRIBUTING.md).
 
@@ -55,9 +75,9 @@ You can use `<script src="https://unpkg.com/@nylas/components-agenda"></script>`
 
 ## Usage
 
-Each Component can be used with a Nylas account or by passing in a JSON object. To get a component ID, create a [Nylas account](https://dashboard.nylas.com/register), then click Components. From there you'll be able to create a new component and get an ID.
+Each Component can be used with a Nylas account or by passing in a JSON object. To get a component ID, create a [Nylas account](https://dashboard-v3.nylas.com/register), then click Components. From there you'll be able to create a new component and get an ID.
 
-To see an example of each, check out the [documentation](https://developer.nylas.com/docs/user-experience/components/).
+To see an example of each, check out the [documentation](https://developer.nylas.com/).
 
 ### Agenda Nylas Account
 
